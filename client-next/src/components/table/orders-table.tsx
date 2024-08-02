@@ -1,0 +1,326 @@
+"use client";
+import { DataTable, DataTableTexts } from "@/components/table/data-table";
+import { ExtraTableProps } from "@/types/tables";
+import useList, { UseListProps } from "@/hoooks/useList";
+import { WithUser } from "@/lib/user";
+import { Link, useRouter } from "@/navigation";
+import { useFormatter } from "next-intl";
+import { CustomEntityModel, OrderDtoWithAddress } from "@/types/dto";
+import { Suspense, useCallback, useMemo, useState } from "react";
+import { ColumnDef } from "@tanstack/react-table";
+import { ColumnActionsTexts } from "@/texts/components/table";
+import { orderColumnActions } from "@/lib/constants";
+import { format, parseISO } from "date-fns";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+import { MoreHorizontal } from "lucide-react";
+import LoadingSpinner from "@/components/common/loading-spinner";
+import { notFound } from "next/navigation";
+
+export interface OrderTableColumnsTexts {
+  id: string;
+  date: string;
+  total: string;
+  plans: string;
+  address: string;
+  actions: ColumnActionsTexts<typeof orderColumnActions>;
+}
+
+export interface OrderTableTexts {
+  dataTableTexts: DataTableTexts;
+  orderTableColumnsTexts: OrderTableColumnsTexts;
+  search: string;
+  searchKeyLabel: Record<(typeof fieldKeys)[number], string>;
+}
+
+type Props = ExtraTableProps & OrderTableTexts & UseListProps & WithUser;
+
+const fieldKeys = ["country", "city", "state"] as const;
+export default function OrdersTable({
+  search,
+  orderTableColumnsTexts,
+  dataTableTexts,
+  path,
+  extraQueryParams,
+  extraArrayQueryParam,
+  extraUpdateSearchParams,
+  extraCriteria,
+  forWhom,
+  mainDashboard,
+  sortingOptions,
+  sizeOptions,
+  authUser,
+  searchKeyLabel,
+}: Props) {
+  const router = useRouter();
+  const isAdmin = authUser?.role === "ROLE_ADMIN";
+  const formatIntl = useFormatter();
+  const [searchKey, setSearchKey] =
+    useState<(typeof fieldKeys)[number]>("city");
+
+  const handleSearchKeyChange = useCallback((value: string) => {
+    setSearchKey(value as (typeof fieldKeys)[number]);
+  }, []);
+
+  const updateSearchKeyParams = useCallback(
+    (searchParams: URLSearchParams) => {
+      fieldKeys.forEach((key) => {
+        if (key !== searchKey) {
+          searchParams.delete(key);
+        }
+      });
+    },
+    [searchKey],
+  );
+
+  const searchKeyCriteria = useCallback(
+    (callback: () => void) => (
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant={"outline"} className="capitalize">
+            {`${search} ${searchKeyLabel[searchKey]}`}
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent>
+          <DropdownMenuRadioGroup
+            value={searchKey}
+            onValueChange={(e) => {
+              handleSearchKeyChange(e);
+              callback();
+            }}
+          >
+            {fieldKeys.map((key) => (
+              <DropdownMenuRadioItem
+                value={key}
+                key={key}
+                className="capitalize"
+              >
+                {`${search} ${searchKeyLabel[key]}`}
+              </DropdownMenuRadioItem>
+            ))}
+          </DropdownMenuRadioGroup>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    ),
+    [handleSearchKeyChange, searchKey],
+  );
+
+  const {
+    messages,
+    error,
+    setPageInfo,
+    refetch,
+    pageInfo,
+    filter,
+    setFilter,
+    debouncedFilter,
+    sort,
+    setSort,
+    sortValue,
+    setSortValue,
+    items,
+    updateSortState,
+    isFinished,
+    clearFilterValue,
+    resetCurrentPage,
+    updateFilterValue,
+    updateFilterValueFromString,
+    filterValue,
+  } = useList<CustomEntityModel<OrderDtoWithAddress>>({
+    path,
+    sizeOptions,
+    filterKey: searchKey,
+    sortingOptions,
+    extraUpdateSearchParams: updateSearchKeyParams,
+  });
+
+  console.log("TEXTS", orderTableColumnsTexts);
+
+  const data: OrderDtoWithAddress[] = useMemo(
+    () => items.map(({ content }) => content),
+    [items],
+  );
+
+  const columns: ColumnDef<OrderDtoWithAddress>[] = useMemo(
+    () => [
+      {
+        id: orderTableColumnsTexts.id,
+        accessorKey: "order.id",
+        header: () => (
+          <p className="font-bold text-lg text-left">
+            {orderTableColumnsTexts.id}
+          </p>
+        ),
+      },
+      {
+        id: orderTableColumnsTexts.date,
+        accessorKey: "order.createdAt",
+        header: () => (
+          <p className="font-bold text-lg text-left">
+            {orderTableColumnsTexts.date}
+          </p>
+        ),
+        cell: ({ row }) => (
+          <p>{format(parseISO(row.original.order.createdAt), "dd/MM/yyyy")}</p>
+        ),
+      },
+      {
+        id: orderTableColumnsTexts.total,
+        accessorKey: "order.total",
+        header: () => (
+          <p className="font-bold text-lg text-left">
+            {orderTableColumnsTexts.total}
+          </p>
+        ),
+        cell: ({ row }) => (
+          <div className="max-w-16 text-nowrap overflow-x-hidden">
+            <p>
+              {formatIntl.number(row.original.order.total, {
+                style: "currency",
+                currency: "EUR",
+                maximumFractionDigits: 2,
+              })}
+            </p>
+          </div>
+        ),
+      },
+      {
+        id: orderTableColumnsTexts.plans,
+        accessorKey: "order.planIds",
+        header: () => (
+          <p className="font-bold text-lg text-left">
+            {orderTableColumnsTexts.plans}
+          </p>
+        ),
+        cell: ({ row }) => <p>{row.original.order.planIds.length}</p>,
+      },
+      {
+        id: orderTableColumnsTexts.address,
+        accessorKey: "address",
+        header: () => (
+          <p className="font-bold text-lg text-left">
+            {orderTableColumnsTexts.address}
+          </p>
+        ),
+        cell: ({ row }) => (
+          <p>{`${row.original.address.country} ${row.original.address.city} ${row.original.address.state}`}</p>
+        ),
+      },
+      {
+        id: "actions",
+        cell: ({ row }) => {
+          const { label, button, view, viewOwner, viewOwnerItems } =
+            orderTableColumnsTexts.actions;
+          return (
+            <DropdownMenu modal>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  className="h-8 w-8 p-0 hover:bg-background"
+                >
+                  <span className="sr-only">{button}</span>
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel className="mb-3">{label}</DropdownMenuLabel>
+                <DropdownMenuItem
+                  className="cursor-pointer"
+                  onClick={() =>
+                    router.push(`/orders/single/${row.original.order.id}`)
+                  }
+                >
+                  {view}
+                </DropdownMenuItem>
+                {isAdmin && forWhom === "admin" && (
+                  <>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem asChild>
+                      <Link
+                        href={`/users/single/${row.original.order.userId}`}
+                        className="cursor-pointer"
+                      >
+                        {viewOwner}
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem asChild>
+                      <Link
+                        href={`/admin/users/${row.original.order.userId}/orders`}
+                        className="cursor-pointer"
+                      >
+                        {viewOwnerItems}
+                      </Link>
+                    </DropdownMenuItem>
+                  </>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          );
+        },
+      },
+    ],
+    [
+      forWhom,
+      formatIntl,
+      isAdmin,
+      orderTableColumnsTexts.actions,
+      orderTableColumnsTexts.address,
+      orderTableColumnsTexts.date,
+      orderTableColumnsTexts.id,
+      orderTableColumnsTexts.plans,
+      orderTableColumnsTexts.total,
+      router,
+    ],
+  );
+  if (error?.status) {
+    return notFound();
+  }
+
+  return (
+    <div className="px-1 pb-10 w-full  h-full space-y-8 lg:space-y-14">
+      <Suspense fallback={<LoadingSpinner />}>
+        <DataTable
+          sizeOptions={sizeOptions}
+          fileName={`orders`}
+          isFinished={isFinished}
+          columns={columns}
+          data={data || []}
+          pageInfo={pageInfo}
+          setPageInfo={setPageInfo}
+          {...dataTableTexts}
+          searchInputProps={{
+            value: filter[searchKey] || "",
+            searchInputTexts: {
+              placeholder: `${search} ${searchKeyLabel[searchKey]}...`,
+            },
+            onChange: updateFilterValue,
+            onClear: clearFilterValue,
+          }}
+          radioSortProps={{
+            setSort,
+            sort,
+            sortingOptions,
+            setSortValue,
+            sortValue,
+            callback: resetCurrentPage,
+          }}
+          extraCriteria={
+            <div className="order-[2]">
+              {searchKeyCriteria(resetCurrentPage)}
+            </div>
+          }
+        />
+      </Suspense>
+    </div>
+  );
+}

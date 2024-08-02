@@ -1,0 +1,58 @@
+package com.mocicarazvan.fileservice.config;
+
+
+import com.mongodb.ConnectionString;
+import com.mongodb.reactivestreams.client.MongoClient;
+import com.mongodb.reactivestreams.client.MongoClients;
+import com.mongodb.reactivestreams.client.MongoDatabase;
+import com.mongodb.reactivestreams.client.gridfs.GridFSBucket;
+import com.mongodb.reactivestreams.client.gridfs.GridFSBuckets;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.data.mongodb.ReactiveMongoDatabaseFactory;
+import org.springframework.data.mongodb.core.ReactiveMongoTemplate;
+import org.springframework.data.mongodb.core.SimpleReactiveMongoDatabaseFactory;
+import org.springframework.data.mongodb.core.convert.MappingMongoConverter;
+import org.springframework.data.mongodb.gridfs.ReactiveGridFsTemplate;
+
+@Configuration
+public class GridFsConfig {
+
+    @Value("${spring.data.mongodb.uri}")
+    private String mongoUri;
+
+    @Bean
+    public MongoClient reactiveMongoClient() {
+        return MongoClients.create(mongoUri);
+    }
+
+    @Bean
+    public MongoDatabase reactiveMongoDatabase(MongoClient mongoClient) {
+        String databaseName = new ConnectionString(mongoUri).getDatabase();
+        assert databaseName != null;
+        return mongoClient.getDatabase(databaseName);
+    }
+
+    @Bean
+    public GridFSBucket gridFSBucket(MongoDatabase reactiveMongoDatabase) {
+        return GridFSBuckets.create(reactiveMongoDatabase);
+    }
+
+    @Bean
+    public ReactiveMongoDatabaseFactory reactiveMongoDatabaseFactory(MongoClient mongoClient) {
+        String databaseName = new ConnectionString(mongoUri).getDatabase();
+        assert databaseName != null;
+        return new SimpleReactiveMongoDatabaseFactory(mongoClient, databaseName);
+    }
+
+    @Bean
+    public ReactiveMongoTemplate reactiveMongoTemplate(ReactiveMongoDatabaseFactory reactiveMongoDatabaseFactory) {
+        return new ReactiveMongoTemplate(reactiveMongoDatabaseFactory);
+    }
+
+    @Bean
+    public ReactiveGridFsTemplate reactiveGridFsTemplate(ReactiveMongoDatabaseFactory reactiveMongoDatabaseFactory, MappingMongoConverter mappingMongoConverter) {
+        return new ReactiveGridFsTemplate(reactiveMongoDatabaseFactory, mappingMongoConverter);
+    }
+}

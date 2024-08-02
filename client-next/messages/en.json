@@ -1,0 +1,1319 @@
+{
+  "Index": {
+    "title": "Hello world!"
+  },
+  "ErrorPage": {
+    "statusCode": "{statusCode}",
+    "title": "Page not found",
+    "description": "Sorry, the page you are looking for does not exist."
+  },
+  "zod": {
+    "EmailSchemaTexts": {
+      "email": "Invalid email address"
+    },
+    "ResetPasswordSchemaTexts": {
+      "minPassword": "Password must be at least 4 characters long",
+      "confirmPassword": "Passwords do not match"
+    },
+    "SignInSchemaTexts": {
+      "minPassword": "Password must be at least 4 characters long"
+    },
+    "UpdateProfileSchemaTexts": {
+      "minFirstName": "First name must be at least 2 characters",
+      "minLastName": "Last name must be at least 2 characters",
+      "invalidUrl": "URL is invalid"
+    },
+    "TitleBodySchemaTexts": {
+      "minTitle": "Title must be at least 2 characters",
+      "minBody": "Body must be at least 2 characters"
+    },
+    "PostSchemaTexts": {
+      "minTags": "At least one tag is required"
+    },
+    "IngredientSchemaTexts": {
+      "minName": "Name must be at least 2 characters",
+      "invalidDietType": "Diet type is invalid"
+    },
+    "NutritionalFactSchemaTexts": {
+      "totalGrams": "Totals of fat, carbohydrates, protein and salt must add to 100 but is ",
+      "fat": {
+        "positive": "Fat must be a positive number",
+        "nonnegative": "Fat must be a positive number",
+        "max": "Fat must be less or equal to 100"
+      },
+      "saturatedFat": {
+        "positive": "Saturated fat must be a positive number",
+        "nonnegative": "Saturated fat must be a positive number",
+        "max": "Saturated fat must be less than fat and less or equal to 100"
+      },
+      "carbohydrates": {
+        "positive": "Carbohydrates must be a positive number",
+        "nonnegative": "Carbohydrates must be a positive number",
+        "max": "Carbohydrates must be less or equal to 100"
+      },
+      "sugar": {
+        "positive": "Sugar must be a positive number",
+        "nonnegative": "Sugar must be a positive number",
+        "max": "Sugar must be less than carbohydrates and less or equal to 100"
+      },
+      "protein": {
+        "positive": "Protein must be a positive number",
+        "nonnegative": "Protein must be a positive number",
+        "max": "Protein must be less or equal to 100"
+      },
+      "salt": {
+        "positive": "Salt must be a positive number",
+        "nonnegative": "Salt must be a positive number",
+        "max": "Salt must be less or equal to 100"
+      },
+      "unit": "Unit is invalid",
+      "refineSaturatedFat": "Saturated fat must be less than fat",
+      "refineSugar": "Sugar must be less than carbohydrates"
+    },
+    "IngredientQuantitySchemaTexts": {
+      "minQuantity": "Quantity must be at least 1",
+      "requiredIngredient": "Please select an ingredient"
+    },
+    "RecipeSchemaTexts": {
+      "minIngredients": "At least one ingredient is required"
+    },
+    "PlanSchemaTexts": {
+      "minPrice": "Price must be at least 1",
+      "minRecipes": "At least one recipe is required"
+    },
+    "CheckoutSchemaTexts": {
+      "confirmPrice": "The confirmed amount must exactly match the total price of {price, number, currency}"
+    },
+    "AdminEmailSchemaTexts": {
+      "minSubject": "Subject must not be empty",
+      "minContent": "Content must not be empty",
+      "email": "Invalid email address"
+    },
+    "forms": {
+      "components": {
+        "InputFile": {
+          "errors": "At least one {type} is required",
+          "types": {
+            "image": "image",
+            "video": "video",
+            "images": "images",
+            "videos": "videos"
+          }
+        },
+        "FieldInputTexts": {
+          "title": "{type} files",
+          "showList": "{cnt, select, multiple {Show the {type} list} single {Show the {type}} other {Show the {type}}}",
+          "hideList": "{cnt, select, multiple {Hide the {type} list} single {Hide the {type}} other {Hide the {type}}}",
+          "draggingActive": "Drop the {type} here ...",
+          "draggingInactive": "Drag and drop {type} files here or click to select them",
+          "clearAll": "Clear all {type}",
+          "loadCount1": "{type, select, image {One image} video {One video} other {1 {type}}} loaded",
+          "loadCountMany": "{type, select, image { images} video { videos} other {1 {type}}} loaded",
+          "ItemTexts": {
+            "header": "{type, select, other {Header}}",
+            "tooltipContent": "This {type} will be displayed on the lists and as the first {type}"
+          }
+        },
+        "TitleBodyTexts": {
+          "title": "Title",
+          "body": "Body",
+          "titlePlaceholder": "Enter the title",
+          "bodyPlaceholder": "Enter the body"
+        },
+        "InputMultipleSelectorTexts": {
+          "label": "Select {type}",
+          "emptyIndicator": "No results were found",
+          "placeholder": "Select the {type}",
+          "type": {
+            "tags": "tags"
+          }
+        },
+        "ButtonSubmitTexts": {
+          "submitText": "Submit",
+          "loadingText": "Please wait"
+        },
+        "ChildInputMultipleSelectorTexts": {
+          "loading": "Loading {type}...",
+          "placeholder": "Start typing to search for {type}",
+          "noResults": "No results were found",
+          "type": {
+            "ingredients": "ingredients",
+            "recipes": "recipes"
+          }
+        }
+      },
+      "PostForm": {
+        "type": {
+          "create": "create",
+          "update": "update"
+        },
+        "BaseFormTexts": {
+          "header": "{type, select, create {Create a new post} update {Update the post} other {Post}}",
+          "altToast": "{type, select, create {Post created} update {Post updated} other {Post}} ",
+          "toastAction": "See the post",
+          "descriptionToast": "{type, select, create {The post was created successfully} update {The post was updated successfully} other {Post}} ",
+          "error": "The post could not be {type, select, create {created} update {updated} other {Post}} "
+        }
+      },
+      "CommentForm": {
+        "type": {
+          "create": "create",
+          "update": "update"
+        },
+        "BaseFormTexts": {
+          "header": "{type, select, create {Create a new comment} update {Update the comment} other {Comment}}",
+          "altToast": "{type, select, create {Comment created} update {Comment updated} other {Comment}} ",
+          "toastAction": "See the comment",
+          "descriptionToast": "{type, select, create {The comment was created successfully} update {The comment was updated successfully} other {Comment}} ",
+          "error": "The comment could not be {type, select, create {created} update {updated} other {Comment}} "
+        }
+      },
+      "IngredientForm": {
+        "type": {
+          "create": "create",
+          "update": "update"
+        },
+        "BaseFormTexts": {
+          "header": "{type, select, create {Create a new ingredient} update {Update the ingredient} other {Ingredient}}",
+          "altToast": "{type, select, create {Ingredient created} update {Ingredient updated} other {Ingredient}} ",
+          "toastAction": "See the ingredient",
+          "descriptionToast": "{type, select, create {The ingredient was created successfully} update {The ingredient was updated successfully} other {Ingredient}} ",
+          "error": "The ingredient could not be {type, select, create {created} update {updated} other {Ingredient}} "
+        }
+      },
+      "RecipeForm": {
+        "type": {
+          "create": "create",
+          "update": "update"
+        },
+        "BaseFormTexts": {
+          "header": "{type, select, create {Create a new recipe} update {Update the recipe} other {Recipe}}",
+          "altToast": "{type, select, create {Recipe created} update {Recipe updated} other {Recipe}} ",
+          "toastAction": "See the recipe",
+          "descriptionToast": "{type, select, create {The recipe was created successfully} update {The recipe was updated successfully} other {Recipe}} ",
+          "error": "The recipe could not be {type, select, create {created} update {updated} other {Recipe}} "
+        }
+      },
+      "PlanForm": {
+        "type": {
+          "create": "create",
+          "update": "update"
+        },
+        "BaseFormTexts": {
+          "header": "{type, select, create {Create a new plan} update {Update the plan} other {Plan}}",
+          "altToast": "{type, select, create {Plan created} update {Plan updated} other {Plan}} ",
+          "toastAction": "See the plan",
+          "descriptionToast": "{type, select, create {The plan was created successfully} update {The plan was updated successfully} other {Plan}} ",
+          "error": "The plan could not be {type, select, create {created} update {updated} other {Plan}} "
+        }
+      }
+    }
+  },
+  "auth": {
+    "ConfirmEmailPageText": {
+      "isLoadingHeader": "Confirming your email...",
+      "isFinishedErrorHeader": "Something went wrong, please repeat the process"
+    },
+    "ForgotPasswordPageText": {
+      "cardTitle": "Send Email Reset",
+      "emailLabel": "Email",
+      "submitButton": "Send Request",
+      "loadingButton": "Please wait",
+      "successMessage": "Email was sent, please verify your inbox!"
+    },
+    "ResetPasswordPageText": {
+      "cardTitle": "Reset Your Password",
+      "emailLabel": "Email",
+      "passwordLabel": "Password (Must be at least 4 characters)",
+      "confirmPasswordLabel": "Confirm Password",
+      "submitButton": "Reset",
+      "loadingButton": " Please wait",
+      "errorMessages": "The password could not be reset, please restart the process!"
+    },
+    "SignInPageText": {
+      "cardTitle": "Sign In",
+      "emailLabel": "Email",
+      "passwordLabel": "Password",
+      "submitButton": "Sign In",
+      "loadingButton": "Please wait",
+      "errorMessages": "Credentials Are Not Valid !",
+      "linkSignUp": "Don't have an account? Sign Up",
+      "linkForgotPassword": "Forgot your password?"
+    },
+    "SignUpPageText": {
+      "emailExistsError": "User with this email already exists",
+      "cardTitle": "Sign Up",
+      "firstNameLabel": "First Name",
+      "lastNameLabel": "Last Name",
+      "emailLabel": "Email",
+      "passwordLabel": " Password (Must be at least 4 characters)",
+      "confirmPasswordLabel": "Confirm Password",
+      "submitButton": "Sign Up",
+      "loadingButton": " Please wait",
+      "linkSignIn": "Already have an account? Sign In"
+    },
+    "SignOutPageText": {
+      "questionText": "Are you sure you want to sign out?",
+      "buttonSignOut": "Sign Out",
+      "buttonSignIn": "Sign In"
+    }
+  },
+  "components": {
+    "forms": {
+      "UpdateProfileForm": {
+        "error": "The profile could not be updated",
+        "firstName": "First Name",
+        "lastName": "Last Name"
+      },
+      "ChatMessageFormTexts": {
+        "errorText": "The message could not be sent"
+      },
+      "IngredientFormTexts": {
+        "titleTaken": "This ingredient already exists",
+        "disableTooltip": "Please select a unit type first",
+        "name": {
+          "label": "Name",
+          "placeholder": "Enter the name"
+        },
+        "dietType": {
+          "label": "Diet Type",
+          "placeholder": "Select the diet type"
+        },
+        "unitType": {
+          "label": "Measurement Unit",
+          "placeholder": "Select the measurement unit",
+          "description": "The macros will be calculated based on 100 of the selected unit"
+        },
+        "macrosTexts": {
+          "fat": {
+            "label": "Fat",
+            "placeholder": "Enter the fat"
+          },
+          "saturatedFat": {
+            "label": "Saturated Fat",
+            "placeholder": "Enter the saturated fat"
+          },
+          "carbohydrates": {
+            "label": "Carbohydrates",
+            "placeholder": "Enter the carbohydrates"
+          },
+          "sugar": {
+            "label": "Sugar",
+            "placeholder": "Enter the sugar"
+          },
+          "protein": {
+            "label": "Protein",
+            "placeholder": "Enter the protein"
+          },
+          "salt": {
+            "label": "Salt",
+            "placeholder": "Enter the salt"
+          }
+        }
+      },
+      "RecipeFormTexts": {
+        "error": "The recipe could not be {type, select, create {created} update {updated} other {created}}",
+        "ingredientChildLabel": "Select an ingredient",
+        "submitChild": "Add Ingredient",
+        "removeChild": "Remove Ingredient",
+        "clearChild": "Clear the inputs",
+        "ingredientsLabel": "Ingredients",
+        "addIngredient": "Add new line",
+        "quantityChildPlaceholder": "Enter the quantity",
+        "quantityChildLabel": "Quantity",
+        "dietType": "The diet is:"
+      },
+      "PlanFormTexts": {
+        "priceLabel": "Price",
+        "pricePlaceholder": "Enter the price",
+        "recipesLabel": "Recipes",
+        "recipesPlaceholder": "Select the recipes",
+        "dietMessage": "The plan will be for"
+      },
+      "CheckoutDrawerTexts": {
+        "error": "The order could not be completed",
+        "anchor": "Proceed To Checkout",
+        "title": "Checkout",
+        "header": "Please confirm your order and proceed to payment",
+        "label": "Confirm Price",
+        "description": "Please confirm the price of your order, to submit the payment",
+        "placeholder": "Enter the price"
+      },
+      "AdminEmailTexts": {
+        "preview": "Preview",
+        "error": "The email could not be sent",
+        "title": "Send email with company template",
+        "toastDescription": "The mail was sent to ",
+        "items": {
+          "email": {
+            "label": "Recipient",
+            "placeholder": "Enter the email"
+          },
+          "subject": {
+            "label": "Subject",
+            "placeholder": "Enter the subject"
+          },
+          "content": {
+            "label": "Content",
+            "placeholder": "Enter the content"
+          }
+        }
+      }
+    },
+    "nav": {
+      "ThemeSwitchTexts": {
+        "srButton": "Toggle dark mode",
+        "light": "Light mode",
+        "dark": "Dark mode",
+        "system": "System mode"
+      },
+      "PostsTexts": {
+        "approvedPosts": "Approved Posts",
+        "allPosts": "All Posts",
+        "yourPosts": "Your Posts",
+        "createPost": "Create Post"
+      },
+      "RecipesTexts": {
+        "allRecipes": "All Recipes",
+        "yourRecipes": "Your Recipes",
+        "createRecipe": "Create Recipe"
+      },
+      "PlansTexts": {
+        "allPlans": "All Plans",
+        "yourPlans": "Your Plans",
+        "createPlan": "Create Plan",
+        "approvedPlans": "Approved Plans",
+        "monthlyPlan": "Monthly Sales",
+        "dailyPlan": "Daily Sales"
+      },
+      "Links": {
+        "home": "Home",
+        "posts": "Posts",
+        "recipes": "Recipes",
+        "adminDashboard": "Admin Dashboard",
+        "chat": "Chat",
+        "ingredients": "Ingredients",
+        "plans": "Plans",
+        "subscriptions": "Bought Plans",
+        "orders": "Orders",
+        "kanban": "Kanban"
+      },
+      "ChatMessageNotificationContentTexts": {
+        "content": "{count, plural, one {You have {count} new message from {sender}} other {You have {count} new messages from {sender}}}"
+      },
+      "ApproveNotificationContentTexts": {
+        "type": {
+          "post": "post",
+          "recipe": "recipe",
+          "plan": "plan"
+        },
+        "approved": {
+          "approved": "approved",
+          "disapproved": "disapproved"
+        },
+        "title": "{type} <app>{approved}</app>",
+        "content": "{title} has ben {approved}"
+      },
+      "BoughtNotificationContentTexts": {
+        "title": "Plan bought",
+        "content": "The plan {title} was bought"
+      },
+      "NotificationPopTexts": {
+        "tooltip": "No new notifications",
+        "title": "Notifications",
+        "header": "You have {count, plural, one {# unread notification} other {# unread notifications}}",
+        "clearButton": "Clear all",
+        "openAllButton": "Open all",
+        "closeAllButton": "Close all",
+        "messages": "Messages",
+        "posts": "Posts",
+        "recipes": "Recipes",
+        "plans": "Plans",
+        "bought": "Sold Plans"
+      },
+      "CartPopsTexts": {
+        "undo": "Undo",
+        "total": "Total",
+        "checkout": "Checkout",
+        "toastDescription": "The product was removed from cart",
+        "emptyCart": "The cart is empty go to the plans page to add some"
+      }
+    },
+    "dialogs": {
+      "DeleteDialogTexts": {
+        "anchor": "Delete",
+        "title": "Are you absolutely sure?",
+        "description": "This action cannot be undone. This will delete <b>{title}</b> and it will be lost forever.",
+        "cancel": "Cancel",
+        "confirm": "Delete"
+      },
+      "AlertDialogApproveTexts": {
+        "anchor": "{approved, select, true {Disapprove} false {Approve} other {Approve}}",
+        "title": "Are you absolutely sure?",
+        "description": "This will {approved, select, true {disapprove} false {approve} other {approve}} <b>{title}</b>.",
+        "cancel": "Cancel",
+        "confirm": "{approved, select, true {Disapprove} false {Approve} other {Approve}}",
+        "toast": "<b>{title}</b> was {approved, select, true {disapproved} false {approved} other {approved}}"
+      },
+      "AlertDialogMakeTrainerTexts": {
+        "anchor": "Make Trainer",
+        "title": "Are you absolutely sure?",
+        "description": "This action cannot be undone. This will permanently make a potentially dangerous user a trainer.",
+        "cancel": "Cancel",
+        "confirm": "Make Trainer",
+        "toast": "<b>{email}</b> was made a trainer"
+      },
+      "AlertDialogToggleDisplayTexts": {
+        "anchor": "{display, select, true {Hide} false {Show} other {Show}}",
+        "title": "Are you absolutely sure?",
+        "description": "This will {display, select, true {hide} false {show} other {show}} from being available <b>{name}</b>.",
+        "cancel": "Cancel",
+        "confirm": "{display, select, true {Hide} false {Show} other {Show}}",
+        "toast": "<b>{name}</b> was {display, select, true {hidden} false {shown} other {shown}}"
+      },
+      "AddKanbanColumnTexts": {
+        "addColumn": "Add Column",
+        "title": "Add a new column to the board",
+        "description": "Enter the title of the new column",
+        "titleLabel": "Column Title",
+        "titlePlaceholder": "Enter the title",
+        "error": "The column could not be added"
+      },
+      "DeleteKanbanItemTexts": {
+        "type": {
+          "column": "column",
+          "task": "task"
+        },
+        "title": "Are you absolutely sure?",
+        "description": "This action cannot be undone. This will delete the <b>{type}</b> and it will be lost forever.",
+        "cancel": "Cancel",
+        "error": "The element could not be deleted",
+        "confirm": "Delete"
+      },
+      "DialogKanbanTaskTexts": {
+        "title": "{type, select, create {Create a new task} update {Update the task} other {Task}}",
+        "description": "{type, select, create { Enter the content and type of the new task} update {Adjust the content and type of the task} other {Task}}",
+        "addTask": "Add Task",
+        "error": "The task could not be {type, select, create {created} update {updated} other {created}}",
+        "inputs": {
+          "content": {
+            "label": "Content",
+            "placeholder": "Enter the content"
+          },
+          "type": {
+            "label": "Type",
+            "placeholder": "Enter the type"
+          }
+        },
+        "types": {
+          "LOW": "Low",
+          "NORMAL": "Normal",
+          "URGENT": "Urgent"
+        }
+      }
+    },
+    "common": {
+      "ElementHeaderTexts": {
+        "notApproved": "Not approved"
+      },
+      "RadioSortTexts": {
+        "noSort": "No sorting criteria"
+      },
+      "NutritionalTableTexts": {
+        "tableCaption": "Nutritional Information"
+      }
+    },
+    "posts": {
+      "PostCommentsTexts": {
+        "author": "Made by ",
+        "loadMore": "Load more comments",
+        "sortLabel": "Sort",
+        "newest": "Newest",
+        "oldest": "Oldest",
+        "edited": "Edited",
+        "editHeader": "Edit Comment"
+      },
+      "CommentAccordionTexts": {
+        "englishError": "The comment must be in English",
+        "toxicError": "The comment should not contain toxic language",
+        "englishHeading": "The comments must be written in English!"
+      }
+    },
+    "list": {
+      "ItemCardTexts": {
+        "author": "Made by:"
+      },
+      "GridListTexts": {
+        "noResults": "No results were found by the search criteria!",
+        "gettingMore": "Getting more items...",
+        "search": "Search in title...",
+        "noSort": "No sorting criteria"
+      },
+      "UseApprovedFilterTexts": {
+        "approved": "Approved",
+        "notApproved": "Not approved",
+        "all": "All by approval"
+      },
+      "UseProviderFilterDropdownTexts": {
+        "noFilterLabel": "All providers",
+        "labels": {
+          "GOOGLE": "Google",
+          "LOCAL": "Local",
+          "GITHUB": "GitHub"
+        }
+      },
+      "UseRoleFilterTexts": {
+        "noFilterLabel": "All roles",
+        "labels": {
+          "ROLE_ADMIN": "Admin",
+          "ROLE_USER": "User",
+          "ROLE_TRAINER": "Trainer"
+        }
+      },
+      "UseBinaryEmailVerifiedTexts": {
+        "trueText": "Verified",
+        "falseText": "Not verified",
+        "all": "All by email verification"
+      },
+      "UseTagsExtraCriteriaTexts": {
+        "tagsEmpty": "No tags",
+        "tagsPlaceholder": "Select tags to filter"
+      },
+      "UseDisplayFilterTexts": {
+        "trueText": "Displayed",
+        "falseText": "Not displayed",
+        "all": "All by display"
+      },
+      "UseDietDropdownTexts": {
+        "noFilterLabel": "All diets",
+        "labels": {
+          "VEGAN": "Vegan",
+          "VEGETARIAN": "Vegetarian",
+          "CARNIVORE": "Carnivore",
+          "OMNIVORE": "Omnivore"
+        }
+      }
+    },
+    "table": {
+      "DataTablePaginationTexts": {
+        "pageSize": "Page size",
+        "page": "Page ",
+        "of": " of ",
+        "firstPage": "Go to first page",
+        "previousPage": "Go to previous page",
+        "nextPage": "Go to next page",
+        "lastPage": "Go to last page"
+      },
+      "DataTableTexts": {
+        "columnsLabel": "Columns",
+        "noResults": "No results were found by the search criteria!",
+        "exportLabel": "Export"
+      },
+      "PostTableTexts": {
+        "search": "Search in title..."
+      },
+      "UserTableTexts": {
+        "search": "Search in email..."
+      },
+      "IngredientTableTexts": {
+        "search": "Search in name..."
+      },
+      "RecipeTableTexts": {
+        "search": "Search in title..."
+      },
+      "PlanTableTexts": {
+        "search": "Search in title..."
+      },
+      "OrderTableTexts": {
+        "search": "Search in ",
+        "searchKeyLabel": {
+          "country": "country",
+          "city": "city",
+          "state": "state"
+        }
+      },
+      "columns": {
+        "posts": {
+          "id": "ID",
+          "title": "Title",
+          "userLikes": "# of likes",
+          "userDislikes": "# of dislikes",
+          "createdAt": "Creation date",
+          "updatedAt": "Last update",
+          "approved": {
+            "header": "Approved",
+            "true": "Yes",
+            "false": "No"
+          },
+          "actions": {
+            "button": "Open Menu",
+            "label": "Actions",
+            "view": "View Post",
+            "viewOwner": "View Owner",
+            "viewOwnerItems": "View Owner's Posts",
+            "update": "Update Post",
+            "approve": "Approve Post",
+            "disapprove": "Disapprove Post"
+          }
+        },
+        "recipes": {
+          "id": "ID",
+          "title": "Title",
+          "userLikes": "# of likes",
+          "userDislikes": "# of dislikes",
+          "createdAt": "Creation date",
+          "updatedAt": "Last update",
+          "type": "Diet",
+          "count": "#uses",
+          "approved": {
+            "header": "Approved",
+            "true": "Yes",
+            "false": "No"
+          },
+          "actions": {
+            "button": "Open Menu",
+            "label": "Actions",
+            "view": "View Recipe",
+            "viewOwner": "View Owner",
+            "viewOwnerItems": "View Owner's Recipes",
+            "update": "Update Recipe",
+            "approve": "Approve Recipe",
+            "disapprove": "Disapprove Recipe"
+          }
+        },
+        "users": {
+          "id": "ID",
+          "email": "Email",
+          "firstName": "First Name",
+          "lastName": "Last Name",
+          "role": "Role",
+          "provider": "Provider",
+          "emailVerified": {
+            "header": "Email Verified",
+            "trueText": "Yes",
+            "falseText": "No"
+          },
+          "createdAt": "Creation date",
+          "actions": {
+            "button": "Open Menu",
+            "label": "Actions",
+            "copyEmail": "Copy Email",
+            "viewUser": "View User",
+            "viewOrders": "View User's Orders",
+            "viewPosts": "View User's Posts",
+            "viewRecipes": "View User's Recipes",
+            "viewPlans": "View User's Plans",
+            "startChat": "Start Chat",
+            "makeTrainer": "Make Trainer",
+            "viewMonthlySales": "View Monthly Sales",
+            "viewDailySales": "View Daily Sales"
+          }
+        },
+        "ingredients": {
+          "id": "ID",
+          "title": "Title",
+          "fat": "Fat",
+          "saturatedFat": "Saturated",
+          "carbohydrates": "Carbo.",
+          "sugar": "Sugar",
+          "protein": "Protein",
+          "salt": "Salt",
+          "unit": "Unit",
+          "createdAt": "Creation date",
+          "calories": "Calories",
+          "updatedAt": "Last update",
+          "name": "Name",
+          "type": "Diet",
+          "count": "#uses",
+          "display": {
+            "header": "Display",
+            "true": "Yes",
+            "false": "No"
+          },
+          "actions": {
+            "button": "Open Menu",
+            "label": "Actions",
+            "viewIngredient": "View Ingredient",
+            "updateIngredient": "Update Ingredient",
+            "deleteIngredient": "Delete Ingredient",
+            "toggleDisplay": "Toggle Display"
+          }
+        },
+        "plans": {
+          "id": "ID",
+          "title": "Title",
+          "userLikes": "# of likes",
+          "userDislikes": "# of dislikes",
+          "createdAt": "Creation date",
+          "updatedAt": "Last update",
+          "count": "#orders",
+          "type": "Diet",
+          "price": "Price",
+          "approved": {
+            "header": "Approved",
+            "true": "Yes",
+            "false": "No"
+          },
+          "display": {
+            "header": "Display",
+            "true": "Yes",
+            "false": "No"
+          },
+          "actions": {
+            "button": "Open Menu",
+            "label": "Actions",
+            "view": "View Plan",
+            "viewOwner": "View Owner",
+            "viewOwnerItems": "View Owner's Plans",
+            "update": "Update Plan",
+            "approve": "Approve Plan",
+            "disapprove": "Disapprove Post",
+            "display": "Display Plan",
+            "hide": "Hide Plan"
+          }
+        },
+        "orders": {
+          "id": "ID",
+          "date": "Date",
+          "plans": "#Plans",
+          "total": "Total",
+          "address": "Address",
+          "actions": {
+            "button": "Open Menu",
+            "label": "Actions",
+            "view": "View Order",
+            "viewOwner": "View Owner",
+            "viewOwnerItems": "View Owner's Orders"
+          }
+        }
+      }
+    },
+    "chat": {
+      "ConversationTexts": {
+        "userInTheSameChat": "User is currently in the same chat",
+        "loadMore": "Load more messages",
+        "loadMoreLoading": "Loading more messages...",
+        "errorLoading": "Error loading messages"
+      },
+      "MainContentTexts": {
+        "chatRoomsLabel": "Chat Rooms",
+        "noSelectedChatRoom": "No chat room selected"
+      },
+      "ChatMainContentWrapperTexts": {
+        "search": "Search by email...",
+        "errorLoading": "Error loading messages"
+      },
+      "ChatRoomTexts": {
+        "numberUnread": "Unread messages: "
+      }
+    },
+    "charts": {
+      "IngredientPieChartTexts": {
+        "macroLabel": "Calories",
+        "proteinLabel": "Protein",
+        "fatLabel": "Fat",
+        "carbohydratesLabel": "Carbohydrates",
+        "caloriesLabel": "Calories",
+        "saltLabel": "Salt"
+      },
+      "RelativeItemTexts": {
+        "type": {
+          "posts": "posts",
+          "recipes": "recipes",
+          "plans": "plans",
+          "comments": "comments",
+          "orders": "orders"
+        },
+        "description": "The {type} created on the platform this month and the previous one.",
+        "month": "month",
+        "increase": "Increase",
+        "decrease": "Decrease"
+      },
+      "RelativeItemsSummaryTexts": {
+        "items": "items",
+        "description": "Total created items on the platform for month: "
+      },
+      "TotalAmountCountOrdersTexts": {
+        "type": {
+          "orders": "orders",
+          "plans": "plans"
+        },
+        "countLabel": "10*Number of {type}",
+        "totalAmountLabel": "Total amount for {type}",
+        "bothLabel": "Both",
+        "averageTotalAmountLabel": "Average total amount for {type}",
+        "averageCountLabel": "Average number of {type}",
+        "showTrendLineLabel": "Show trend line",
+        "hideTrendLineLabel": "Hide trend line",
+        "trendLineLabel": "Trend line"
+      },
+      "GeographyChartTexts": {
+        "zoomInLabel": "Zoom in",
+        "zoomOutLabel": "Zoom out",
+        "resetLabel": "Reset Position",
+        "centerLabel": "Center Position",
+        "selectLabels": {
+          "count": "Number of orders",
+          "totalAmount": "Total amount"
+        }
+      }
+    },
+    "plans": {
+      "AddToCartBtnTexts": {
+        "successDescription": "The plan was added to the cart",
+        "toastAction": "Remove From Cart",
+        "addToCart": "Add To Cart",
+        "finishOrder": "Finish The Order",
+        "alreadyBought": "The plan is already bought"
+      }
+    },
+    "kanban": {
+      "KanbanTaskCardTexts": {
+        "types": {
+          "LOW": "Low",
+          "NORMAL": "Normal",
+          "URGENT": "Urgent"
+        }
+      },
+      "KanbanColumnContainerTexts": {
+        "tasksLabel": "Tasks"
+      }
+    },
+    "admin": {
+      "AdminLayout": {
+        "mainSite": "Main Site"
+      },
+      "AdminMenuTexts": {
+        "mainSite": "Main Site",
+        "groupLabels": {
+          "contents": "Contents",
+          "sales": "Sales",
+          "settings": "Settings",
+          "company": "Company"
+        },
+        "labels": {
+          "dashboard": "Dashboard",
+          "posts": "Posts",
+          "recipes": "Recipes",
+          "plans": "Plans",
+          "ingredients": "Ingredients",
+          "users": "Users",
+          "orders": "Orders",
+          "monthlySales": "Monthly Sales",
+          "dailySales": "Daily Sales",
+          "countries": "Countries",
+          "account": "Account",
+          "email": "Email",
+          "kanban": "Kanban"
+        },
+        "subLabels": {
+          "allIngredients": "All Ingredients",
+          "createIngredient": "Create Ingredient"
+        }
+      }
+    },
+    "ui": {
+      "DateRangePickerTexts": {
+        "compare": "Compare",
+        "cancel": "Cancel",
+        "update": "Update",
+        "presets": {
+          "today": "Today",
+          "yesterday": "Yesterday",
+          "last7": "Last 7 days",
+          "last14": "Last 14 days",
+          "last30": "Last 30 days",
+          "thisWeek": "This Week",
+          "lastWeek": "Last Week",
+          "thisMonth": "This Month",
+          "lastMonth": "Last Month",
+          "pastYear": "Past Year"
+        }
+      }
+    },
+    "home": {
+      "HomeHeaderTexts": {
+        "title": "Your path to a healthier life starts here !"
+      },
+      "HomeCardsText": {
+        "register": {
+          "title": "Register",
+          "description": "Register to get access to all the features of our platform, and become a part of our community."
+        },
+        "posts": {
+          "title": "Read Posts",
+          "description": "Read posts to gain knowledge and insights about different topics written by professionals."
+        },
+        "plans": {
+          "title": "Buy Plans",
+          "description": "Buy plans to improve yourself and get the full experience of our platform. We offer a wide range of plans according to your needs."
+        }
+      },
+      "HomeAboutTexts": {
+        "title": "Why to choose our platform?"
+      },
+      "HomeTimelineTexts": {
+        "be-aware": {
+          "date": "Prepare",
+          "title": "Be aware",
+          "text": "Realize your problems and target them. Don't be afraid to make changes that make you uncomfortable."
+        },
+        "be-afraid": {
+          "date": "",
+          "title": "Get comfortable with being afraid",
+          "text": "It's normal to feel overwhelmed and insecure about getting started. Don't let these feelings stop you."
+        },
+        "make-a-plan": {
+          "date": "",
+          "title": "Make a plan",
+          "text": "Plan ahead and be very structured. Make realistic targets and do things your way. Don't let others decide your journey."
+        },
+        "step-by-step": {
+          "date": "Start working",
+          "title": "Step by step",
+          "text": "Be patient and know that life is a marathon, not a sprint. Don't seek quick fixes; be happy with every little progress."
+        },
+        "work-hard": {
+          "date": "",
+          "title": "Work your ass off",
+          "text": "Working hard pays off. Every change requires sacrifices, so be prepared to make some. In the end, you'll thank yourself."
+        },
+        "comfortable": {
+          "date": "",
+          "title": "Become comfortable with your new life",
+          "text": "Over time, everything you thought was too hard will become trivial. When this happens, pat yourself on the back and see your progress."
+        },
+        "stay-consistent": {
+          "date": "Stay consistent",
+          "title": "Don't let the results slow you down",
+          "text": "Don't get too comfortable and think you can't lose what you've achieved. This is where the difference between the sprint and the marathon is made."
+        }
+      }
+    },
+    "footer": {
+      "FooterTexts": {
+        "home": "Home",
+        "title": "Your path to a healthier life starts here",
+        "plans": "Plans",
+        "posts": "Posts",
+        "signUp": "Sign Up",
+        "signIn": "Sign In",
+        "termsOfService": "Terms of Service",
+        "privacyPolicy": "Privacy Policy",
+        "disclaimer": "Disclaimer",
+        "rightsReserved": "Bro Meets Science Co. All rights reserved."
+      }
+    }
+  },
+  "pages": {
+    "users": {
+      "SortingOptions": {
+        "createdAt": {
+          "asc": "Oldest",
+          "desc": "Newest"
+        },
+        "email": {
+          "asc": "Alfabetic by email",
+          "desc": "Invers alfabetic by email"
+        },
+        "firstName": {
+          "asc": "Alfabetic by first name",
+          "desc": "Invers alfabetic by first name"
+        },
+        "lastName": {
+          "asc": "Alfabetic by last name",
+          "desc": "Invers alfabetic by last name"
+        }
+      },
+      "UserPageTexts": {
+        "ownerTitle": "Your Profile",
+        "visitorTitle": "User's Profile",
+        "firstNameLabel": "First Name:",
+        "lastNameLabel": "Last Name:",
+        "editProfile": "Edit Profile",
+        "verifyEmail": "Verify Your Email",
+        "changePassword": "Change Password",
+        "startChat": "Start Chat",
+        "errorText": "Something went wrong please try again",
+        "emailSent": "Email sent, please verify your inbox!"
+      }
+    },
+    "posts": {
+      "SinglePageTexts": {
+        "updateButton": "Update"
+      },
+      "SortingOptions": {
+        "createdAt": {
+          "asc": "Oldest",
+          "desc": "Newest"
+        },
+        "updatedAt": {
+          "asc": "Oldest update",
+          "desc": "Newest update"
+        },
+        "title": {
+          "asc": "Alfabetic by title",
+          "desc": "Invers alfabetic by title"
+        }
+      },
+      "ApprovedPostsTexts": {
+        "title": "Posts",
+        "header": "Made with love by our trainers and approved by our team."
+      },
+      "UserPostsPageContentTexts": {
+        "title": "Your Posts",
+        "header": "Here you can see and manage all the posts you have created."
+      }
+    },
+    "recipes": {
+      "SortingOptions": {
+        "createdAt": {
+          "asc": "Oldest",
+          "desc": "Newest"
+        },
+        "updatedAt": {
+          "asc": "Oldest update",
+          "desc": "Newest update"
+        },
+        "title": {
+          "asc": "Alfabetic by title",
+          "desc": "Invers alfabetic by title"
+        }
+      },
+      "UserRecipesPageContentTexts": {
+        "title": "Your Recipes",
+        "header": "Here you can see and manage all the recipes you have created."
+      },
+      "SingleRecipePageTexts": {
+        "showIngredients": "Show Ingredients"
+      }
+    },
+    "ingredients": {
+      "SortingOptions": {
+        "createdAt": {
+          "asc": "Oldest",
+          "desc": "Newest"
+        },
+        "name": {
+          "asc": "Alfabetic by name",
+          "desc": "Invers alfabetic by name"
+        },
+        "protein": {
+          "asc": "Lowest protein",
+          "desc": "Highest protein"
+        },
+        "fat": {
+          "asc": "Lowest fat",
+          "desc": "Highest fat"
+        },
+        "carbohydrates": {
+          "asc": "Lowest carbohydrates",
+          "desc": "Highest carbohydrates"
+        },
+        "sugar": {
+          "asc": "Lowest sugar",
+          "desc": "Highest sugar"
+        },
+        "salt": {
+          "asc": "Lowest salt",
+          "desc": "Highest salt"
+        },
+        "saturatedFat": {
+          "asc": "Lowest saturated fat",
+          "desc": "Highest saturated fat"
+        },
+        "calories": {
+          "asc": "Lowest calories",
+          "desc": "Highest calories"
+        }
+      },
+      "IngredientsPageTexts": {
+        "title": "Ingredients",
+        "header": "Here you can see all the available ingredients."
+      },
+      "SingleIngredientPageTexts": {
+        "tableCaption": "Nutritional Facts"
+      }
+    },
+    "plans": {
+      "SortingOptions": {
+        "createdAt": {
+          "asc": "Oldest",
+          "desc": "Newest"
+        },
+        "updatedAt": {
+          "asc": "Oldest update",
+          "desc": "Newest update"
+        },
+        "title": {
+          "asc": "Alfabetic by title",
+          "desc": "Invers alfabetic by title"
+        },
+        "price": {
+          "asc": "Lowest price",
+          "desc": "Highest price"
+        }
+      },
+      "UserPlansPageTexts": {
+        "title": "Your Plans",
+        "header": "Here you can see and manage all the plans you have created."
+      },
+      "SingleTrainerPlanPageTexts": {
+        "price": "Price",
+        "displayed": "Displayed",
+        "notDisplayed": "Not displayed"
+      },
+      "ApprovedPlansTexts": {
+        "title": "Plans",
+        "header": "Made with love by our trainers and approved by our team.",
+        "toastAction": "Remove From Cart",
+        "addToCart": "Add To Cart",
+        "finishOrder": "Finish The Order",
+        "buyableLabel": "Buyable"
+      },
+      "UserPlanPageContentTexts": {
+        "price": "Price"
+      },
+      "UserMonthlySalesPageTexts": {
+        "title": "Monthly Sales",
+        "header": "Here you can see the monthly sales."
+      },
+      "UserDailySalesPageTexts": {
+        "title": "Daily Sales",
+        "header": "Here you can see the daily sales."
+      }
+    },
+    "orders": {
+      "SortingOptions": {
+        "createdAt": {
+          "asc": "Oldest",
+          "desc": "Newest"
+        },
+        "total": {
+          "asc": "Lowest total price",
+          "desc": "Highest total price"
+        }
+      },
+      "UserOrdersPageTexts": {
+        "title": "Your Orders",
+        "header": "Here you can see all the orders you have made."
+      },
+      "SingleOrderPageContentTexts": {
+        "title": "Order from: ",
+        "total": "Total",
+        "seeInvoice": "See the invoice"
+      },
+      "OrderCompletePageTexts": {
+        "title": "Order has been completed successfully",
+        "ordersBtn": "View Orders",
+        "plansBtn": "Get More Plans"
+      }
+    },
+    "subscriptions": {
+      "SubscriptionsPageContentTexts": {
+        "title": "Your Bought Plans",
+        "header": "Here you can see all the plans you have bought."
+      }
+    },
+    "cart": {
+      "CartPageContentTexts": {
+        "emptyCart": "Your cart is empty",
+        "seeThePlans": "See the plans to add them to the cart",
+        "title": "Your Cart",
+        "subtotal": "Subtotal",
+        "toastRemovedTitle": "Plan removed",
+        "toastRemovedDescription": "The plan was removed from the cart",
+        "clearAll": "Clear all",
+        "toastUndo": "Undo",
+        "toastRemoveAllTitle": "All plans removed",
+        "toastRemoveAllDescription": "All the plans were removed from the cart"
+      }
+    },
+    "kanban": {
+      "KanbanPageTexts": {
+        "title": "Kanban Board",
+        "header": "Here you can see and manage the tasks you have created"
+      }
+    },
+    "admin": {
+      "AdminPostsPageTexts": {
+        "title": "All The Posts",
+        "header": "Here you can see and manage all the posts created by the users."
+      },
+      "AdminRecipesPageTexts": {
+        "title": "All The Recipes",
+        "header": "Here you can see and manage all the recipes created by the users."
+      },
+      "UserPostsAdminPageTexts": {
+        "title": "All The Posts for ",
+        "header": "Here you can see and manage all the posts created by "
+      },
+      "UserRecipesAdminPageTexts": {
+        "title": "All The Recipes for ",
+        "header": "Here you can see and manage all the recipes created by "
+      },
+      "UserPlansAdminPageTexts": {
+        "title": "All The Plans for ",
+        "header": "Here you can see and manage all the plans created by "
+      },
+      "UserOrdersAdminPageTexts": {
+        "title": "All The Orders for ",
+        "header": "Here you can see and manage all the orders created by "
+      },
+      "UserAdminMonthlySalesPageTexts": {
+        "title": "Monthly Sales for ",
+        "header": "Here you can see the monthly sales for "
+      },
+      "UserAdminDailySalesPageTexts": {
+        "title": "Daily Sales for ",
+        "header": "Here you can see the daily sales for "
+      },
+      "AdminUsersPageTexts": {
+        "title": "All The Users",
+        "header": "Here you can see and manage all the users."
+      },
+      "AdminIngredientsCreatePage": {
+        "title": "Create a new ingredient"
+      },
+      "AdminIngredientsPageTexts": {
+        "title": "All The Ingredients",
+        "header": "Here you can see and manage all the ingredients."
+      },
+      "AdminPageUpdateIngredientTexts": {
+        "title": "Update An Ingredient"
+      },
+      "AdminPlansPageTexts": {
+        "title": "All The Nutrition Plans",
+        "header": "Here you can see and manage all the nutrition plans."
+      },
+      "AdminOrdersPageTexts": {
+        "title": "All The Orders",
+        "header": "Here you can see and manage all the orders."
+      },
+      "AdminDashboardPageTexts": {
+        "title": "Dashboard",
+        "header": "Here you can see a summary of the platform."
+      },
+      "AdminMonthlySalesTexts": {
+        "title": "Monthly Sales",
+        "header": "Here you can see the monthly sales."
+      },
+      "AdminCountriesTexts": {
+        "title": "Orders by countries",
+        "header": "Here you can see the stats by countries for the orders."
+      },
+      "AdminDailySalesTexts": {
+        "title": "Daily Sales",
+        "header": "Here you can see the daily sales."
+      },
+      "AdminEmailPageTexts": {
+        "title": "Send Email From Company",
+        "header": "Here you can send an email from the company "
+      },
+      "AdminKanbanTexts": {
+        "title": "Kanban Board",
+        "header": "Here you can see and manage the tasks you have created"
+      }
+    }
+  }
+}

@@ -1,0 +1,20 @@
+package com.mocicarazvan.kanbanservice.repositories;
+
+import com.mocicarazvan.kanbanservice.models.KanbanTask;
+import com.mocicarazvan.templatemodule.repositories.ManyToOneUserRepository;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.r2dbc.repository.Query;
+import reactor.core.publisher.Flux;
+
+public interface KanbanTaskRepository extends ManyToOneUserRepository<KanbanTask> {
+    Flux<KanbanTask> findAllByColumnId(Long columnId, Sort sort);
+
+    @Query("""
+            SELECT * FROM kanban_task
+            WHERE EXTRACT(MONTH FROM created_at) = :month
+            AND EXTRACT(YEAR FROM created_at) = :year
+            ORDER BY created_at DESC
+            """)
+    Flux<KanbanTask> findModelByMonth(int month, int year);
+}

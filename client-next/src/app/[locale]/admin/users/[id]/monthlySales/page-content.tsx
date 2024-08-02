@@ -1,0 +1,54 @@
+"use client";
+import { UserAdminMonthlySalesPageTexts } from "@/app/[locale]/admin/users/[id]/monthlySales/page";
+import { WithUser } from "@/lib/user";
+import useGetUser from "@/hoooks/useGetUser";
+import AdminContentLayout from "@/components/admin/admin-content-layout";
+import LoadingSpinner from "@/components/common/loading-spinner";
+import Heading from "@/components/common/heading";
+import MonthlySales from "@/components/charts/monthly-sales";
+
+interface Props extends UserAdminMonthlySalesPageTexts, WithUser {
+  id: string;
+}
+
+export default function UserAdminMonthlySalesPageContent({
+  id,
+  monthlySalesTexts,
+  menuTexts,
+  themeSwitchTexts,
+  authUser,
+  header,
+  title,
+}: Props) {
+  const { user, messages, error, isFinished } = useGetUser(id);
+  return (
+    <AdminContentLayout
+      navbarProps={{
+        title: `${title} ${user?.email || ""}`,
+        authUser,
+        themeSwitchTexts,
+        menuTexts,
+      }}
+    >
+      <div className="w-full h-full bg-background">
+        {!isFinished ? (
+          <LoadingSpinner />
+        ) : (
+          <>
+            <Heading
+              title={`${title} ${user?.email}`}
+              header={`${header} ${user?.email}`}
+            />
+            <div className="mt-10 h-full">
+              <MonthlySales
+                path={`/orders/trainer/countAndAmount/${id}`}
+                {...monthlySalesTexts}
+                authUser={authUser}
+              />
+            </div>
+          </>
+        )}
+      </div>
+    </AdminContentLayout>
+  );
+}

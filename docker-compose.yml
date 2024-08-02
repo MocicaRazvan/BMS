@@ -1,0 +1,91 @@
+services:
+  postgres:
+    image: postgres:latest
+    container_name: postgres-container-bms
+    environment:
+      POSTGRES_DB: bms
+      POSTGRES_USER: myuser
+      POSTGRES_PASSWORD: mypassword
+    # todo put 2000 for production
+    command: ["postgres", "-c", "max_connections=250"]
+
+    ports:
+      - "5544:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - bms
+    restart: unless-stopped
+
+  postgres-messages:
+    image: postgres:latest
+    container_name: postgres-container-messages-bms
+    environment:
+      POSTGRES_DB: bms
+      POSTGRES_USER: myuser
+      POSTGRES_PASSWORD: mypassword
+
+    command: ["postgres", "-c", "max_connections=250"]
+
+    ports:
+      - "5546:5432"
+    volumes:
+      - postgres_data_messages:/var/lib/postgresql/data
+    networks:
+      - bms
+
+  mongo-fs:
+    image: mongo:latest
+    container_name: mongo-fs-container-bms
+    ports:
+      - 27777:27017
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - bms
+
+  # utilites
+  zipkin:
+    image: openzipkin/zipkin
+    container_name: zipkin-container-bms
+    ports:
+      - "9411:9411"
+    networks:
+      - bms
+    restart: unless-stopped
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq-container-bms
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - bms
+    restart: unless-stopped
+
+  stripe-cli:
+    image: stripe/stripe-cli:latest
+    container_name: stripe-cli-container-bms
+    environment:
+      STRIPE_API_KEY: ${STRIPE_API_KEY_ENV}
+    #     "http://orders:8080/webhook",
+
+    command:
+      [
+        "listen",
+        "--forward-to",
+        "http://host.docker.internal:8080/orders/webhook",
+      ]
+    network_mode: host
+
+volumes:
+  postgres_data:
+  postgres_data_messages:
+  mongo_data:
+networks:
+  bms:
+    driver: bridge

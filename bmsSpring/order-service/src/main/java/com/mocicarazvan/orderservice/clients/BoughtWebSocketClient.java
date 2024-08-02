@@ -1,0 +1,78 @@
+package com.mocicarazvan.orderservice.clients;
+
+
+import com.mocicarazvan.orderservice.dtos.PlanResponse;
+import com.mocicarazvan.orderservice.dtos.notifications.InternalBoughtBody;
+import com.mocicarazvan.templatemodule.clients.ClientBase;
+import com.mocicarazvan.templatemodule.dtos.response.PageableResponse;
+import com.mocicarazvan.templatemodule.dtos.response.ResponseWithUserDtoEntity;
+import com.mocicarazvan.templatemodule.exceptions.client.ThrowFallback;
+import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
+import io.github.resilience4j.ratelimiter.RateLimiterRegistry;
+import io.github.resilience4j.reactor.circuitbreaker.operator.CircuitBreakerOperator;
+import io.github.resilience4j.reactor.ratelimiter.operator.RateLimiterOperator;
+import io.github.resilience4j.reactor.retry.RetryOperator;
+import io.github.resilience4j.retry.RetryRegistry;
+import jakarta.annotation.PostConstruct;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.http.MediaType;
+import org.springframework.stereotype.Component;
+import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientRequestException;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
+@Component
+@Slf4j
+public class BoughtWebSocketClient extends ClientBase {
+    private static final String CLIENT_NAME = "websocketService";
+
+    @Value("${websocket-service.url}")
+    private String websocketServiceUrl;
+
+    public BoughtWebSocketClient(WebClient.Builder webClientBuilder, CircuitBreakerRegistry circuitBreakerRegistry, RetryRegistry retryRegistry, RateLimiterRegistry rateLimiterRegistry) {
+        super(CLIENT_NAME, webClientBuilder, circuitBreakerRegistry, retryRegistry, rateLimiterRegistry);
+    }
+
+    @Override
+    public WebClient getClient() {
+        return webClientBuilder.baseUrl(websocketServiceUrl + "/boughtNotification").build();
+    }
+
+    public Mono<Void> saveNotifications(InternalBoughtBody internalBoughtBody) {
+        if (serviceUrl == null) {
+            return Mono.error(new IllegalArgumentException("Service url is null"));
+        }
+        if (internalBoughtBody == null) {
+            return Mono.error(new IllegalArgumentException("InternalBoughtBody is null"));
+        }
+        if (internalBoughtBody.getPlans().isEmpty()) {
+            return Mono.error(new IllegalArgumentException("Plans list is empty"));
+        }
+        return getClient()
+                .patch()
+                .uri(uriBuilder -> uriBuilder.path("/internal/sendNotifications").build())
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(internalBoughtBody)
+                .retrieve()
+                .onStatus(HttpStatusCode::isError, response -> handleClientException(response, serviceUrl))
+                .bodyToMono(Void.class)
+                .transformDeferred(RetryOperator.of(retry))
+                .transformDeferred(CircuitBreakerOperator.of(circuitBreaker))
+                .transformDeferred(RateLimiterOperator.of(rateLimiter))
+                .onErrorResume(WebClientRequestException.class, this::handleWebRequestException)
+                .onErrorResume(ThrowFallback.class, e -> {
+                    log.error("Error occurred while sending notifications", e);
+                    return Mono.empty();
+                });
+    }
+
+    @PostConstruct
+    public void init() {
+        setServiceUrl(websocketServiceUrl);
+    }
+}

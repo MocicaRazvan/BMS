@@ -1,0 +1,29 @@
+package com.mocicarazvan.kanbanservice.models;
+
+import com.mocicarazvan.kanbanservice.enums.KanbanTaskType;
+import com.mocicarazvan.templatemodule.models.ManyToOneUser;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
+import org.springframework.data.relational.core.mapping.Column;
+import org.springframework.data.relational.core.mapping.Table;
+
+@EqualsAndHashCode(callSuper = true)
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@SuperBuilder
+@Table("kanban_task")
+public class KanbanTask extends ManyToOneUser {
+    private String content;
+
+    @Column("column_id")
+    private Long columnId;
+
+    private KanbanTaskType type;
+
+    @Column("order_index")
+    private int orderIndex;
+}

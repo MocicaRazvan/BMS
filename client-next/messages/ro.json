@@ -1,0 +1,1319 @@
+{
+  "Index": {
+    "title": "Salut frate!"
+  },
+  "ErrorPage": {
+    "statusCode": "{statusCode}",
+    "title": "Pagina nu a fost găsită",
+    "description": "Ne pare rău, dar pagina pe care o căutați nu există."
+  },
+  "zod": {
+    "EmailSchemaTexts": {
+      "email": "Adresă de email invalidă"
+    },
+    "ResetPasswordSchemaTexts": {
+      "minPassword": "Parola trebuie să aibă cel puțin 4 caractere",
+      "confirmPassword": "Parolele nu se potrivesc"
+    },
+    "SignInSchemaTexts": {
+      "minPassword": "Parola trebuie să aibă cel puțin 4 caractere"
+    },
+    "UpdateProfileSchemaTexts": {
+      "minFirstName": "Prenumele trebuie să aibă cel puțin 2 caractere",
+      "minLastName": "Numele de familie trebuie să aibă cel puțin 2 caractere",
+      "minImage": "URL-ul este invalid"
+    },
+    "TitleBodySchemaTexts": {
+      "minTitle": "Titlul trebuie să aibă cel puțin 2 caractere",
+      "minBody": "Conținutul trebuie să aibă cel puțin 2 caractere"
+    },
+    "PostSchemaTexts": {
+      "minTags": "Este necesar cel puțin un tag"
+    },
+    "IngredientSchemaTexts": {
+      "minName": "Numele trebuie să aibă cel puțin 2 caractere",
+      "invalidDietType": "Tipul de dietă este invalid"
+    },
+    "NutritionalFactSchemaTexts": {
+      "totalGrams": "Totalul pentru grăsimei, carbohidrații și proteine trebuie să fie 100 de unități dar este ",
+      "fat": {
+        "positive": "Grăsimea trebuie să fie un număr pozitiv",
+        "nonnegative": "Grăsimea trebuie să fie un număr pozitiv",
+        "max": "Grăsimea trebuie să fie mai mică sau egală cu 100"
+      },
+      "saturatedFat": {
+        "positive": "Grăsimea saturată trebuie să fie un număr pozitiv",
+        "nonnegative": "Grăsimea saturată trebuie să fie un număr pozitiv",
+        "max": "Grăsimea saturată trebuie să fie mai mică sau egală cu grăsimea și mai mică sau egală cu 100"
+      },
+      "carbohydrates": {
+        "positive": "Carbohidrații trebuie să fie un număr pozitiv",
+        "nonnegative": "Carbohidrații trebuie să fie un număr pozitiv",
+        "max": "Carbohidrații trebuie să fie mai mici sau egali cu 100"
+      },
+      "sugar": {
+        "positive": "Zahărul trebuie să fie un număr pozitiv",
+        "nonnegative": "Zahărul trebuie să fie un număr pozitiv",
+        "max": "Zahărul trebuie să fie mai mic sau egal cu carbohidrații și mai mic sau egal cu 100"
+      },
+      "protein": {
+        "positive": "Proteina trebuie să fie un număr pozitiv",
+        "nonnegative": "Proteina trebuie să fie un număr pozitiv",
+        "max": "Proteina trebuie să fie mai mică sau egală cu 100"
+      },
+      "salt": {
+        "positive": "Sarea trebuie să fie un număr pozitiv",
+        "nonnegative": "Sarea trebuie să fie un număr pozitiv",
+        "max": "Sarea trebuie să fie mai mică sau egală cu 100"
+      },
+      "unit": "Unitatea este invalidă",
+      "refineSaturatedFat": "Grăsimea saturată trebuie să fie mai mică decât grăsimea totală",
+      "refineSugar": "Zahărul trebuie să fie mai mic decât carbohidrații"
+    },
+    "IngredientQuantitySchemaTexts": {
+      "minQuantity": "Cantitatea trebuie să fie cel puțin 1",
+      "requiredIngredient": "Vă rugăm să selectați un ingredient"
+    },
+    "RecipeSchemaTexts": {
+      "minIngredients": "Este necesar cel puțin un ingredient"
+    },
+    "PlanSchemaTexts": {
+      "minPrice": "Prețul trebuie să fie cel puțin 1",
+      "minRecipes": "Este necesar cel puțin o rețetă"
+    },
+    "CheckoutSchemaTexts": {
+      "confirmPrice": "Suma confirmată trebuie să corespundă exact cu prețul total de {price, number, currency}"
+    },
+    "AdminEmailSchemaTexts": {
+      "minSubject": "Subiectul nu poate fi gol",
+      "minContent": "Conținutul nu poate fi gol",
+      "email": "Adresă de email invalidă"
+    },
+    "forms": {
+      "components": {
+        "InputFile": {
+          "errors": "Este necesară cel puțin o {type}",
+          "types": {
+            "image": "imagine",
+            "video": "videoclip",
+            "images": "imaginile",
+            "videos": "videoclipurile"
+          }
+        },
+        "FieldInputTexts": {
+          "title": "Fișiere de tip {type}",
+          "showList": "{cnt, select, multiple {Afișează lista cu {type}} single {Afișează cu {type}} other {Afișează {type}}}",
+          "hideList": "{cnt, select, multiple {Ascunde lista cu {type}} single {Ascunde cu {type}} other {Ascunde {type}}}",
+          "draggingActive": "Trageți {type} aici ...",
+          "draggingInactive": "Trageți și plasați fișierele {type} aici sau faceți clic pentru a le selecta",
+          "clearAll": "Ștergeți {type}",
+          "loadCount1": "{type, select, image {O imagine încărcată} video {Un videoclip încărcat} other {1 {type}}} ",
+          "loadCountMany": "{type, select, image { imagini} video { videoclipuri} other {{type}}} încărcate",
+          "ItemTexts": {
+            "header": "{type, select, image {Principală} video {Principal} other {Principal}}",
+            "tooltipContent": "{type, select, image {Această {type} va fi afișată în liste și ca prima imagine} video {Acest {type} va fi afișat în liste și ca primul videoclip} other {Acest {type} va fi afișat în liste și ca primul {type}}}"
+          }
+        },
+        "TitleBodyTexts": {
+          "title": "Titlu",
+          "body": "Conținut",
+          "titlePlaceholder": "Introduceți titlul",
+          "bodyPlaceholder": "Introduceți conținutul"
+        },
+        "InputMultipleSelectorTexts": {
+          "label": "Selectați {type}",
+          "emptyIndicator": "Nu s-au găsit rezultate",
+          "placeholder": "Selectați {type}",
+          "type": {
+            "tags": "etichete"
+          }
+        },
+        "ButtonSubmitTexts": {
+          "submitText": "Trimite",
+          "loadingText": "Vă rugăm să așteptați"
+        },
+        "ChildInputMultipleSelectorTexts": {
+          "loading": "Se încarcă {type}...",
+          "placeholder": "Începeți să tastați pentru a căuta {type}",
+          "noResults": "Nu s-au găsit rezultate",
+          "type": {
+            "ingredients": "ingrediente",
+            "recipes": "rețete"
+          }
+        }
+      },
+      "PostForm": {
+        "type": {
+          "create": "creați",
+          "update": "actualizați"
+        },
+        "BaseFormTexts": {
+          "header": "{type, select, create {Creează o postare} update {Actualizează postarea} other {Postarea}}",
+          "altToast": "{type, select, create {Postarea a fost creată} update {Postarea a fost actualizată} other {Postarea}}",
+          "toastAction": "Vezi postarea",
+          "descriptionToast": "{type, select, create {Postarea a fost creată cu succes} update {Postarea a fost actualizată cu succes} other {Postarea}}",
+          "error": "Postarea nu a putut fi {type, select, create {creat} update {actualizată} other {Postarea}}"
+        }
+      },
+      "CommentForm": {
+        "type": {
+          "create": "creați",
+          "update": "actualizați"
+        },
+        "BaseFormTexts": {
+          "header": "{type, select, create {Creează un comentariu} update {Actualizează comentariul} other {Comentariu}}",
+          "altToast": "{type, select, create {Comentariul a fost creat} update {Comentariul a fost actualizat} other {Comentariu}}",
+          "toastAction": "Vezi comentariul",
+          "descriptionToast": "{type, select, create {Comentariul a fost creat cu succes} update {Comentariul a fost actualizat cu succes} other {Comentariu}}",
+          "error": "Comentariul nu a putut fi {type, select, create {creat} update {actualizat} other {Comentariul}}"
+        }
+      },
+      "IngredientForm": {
+        "type": {
+          "create": "create",
+          "update": "update"
+        },
+        "BaseFormTexts": {
+          "header": "{type, select, create {Creează un ingredient} update {Actualizează ingredientul} other {Ingredient}}",
+          "altToast": "{type, select, create {Ingredientul a fost creat} update {Ingredientul a fost actualizat} other {Ingredient}}",
+          "toastAction": "Vezi ingredientul",
+          "descriptionToast": "{type, select, create {Ingredientul a fost creat cu succes} update {Ingredientul a fost actualizat cu succes} other {Ingredient}}",
+          "error": "Ingredientul nu a putut fi {type, select, create {creat} update {actualizat} other {Ingredient}}"
+        }
+      },
+      "RecipeForm": {
+        "type": {
+          "create": "create",
+          "update": "update"
+        },
+        "BaseFormTexts": {
+          "header": "{type, select, create {Creează o rețetă} update {Actualizează rețeta} other {Rețetă}}",
+          "altToast": "{type, select, create {Rețeta a fost creată} update {Rețeta a fost actualizată} other {Rețetă}}",
+          "toastAction": "Vezi rețeta",
+          "descriptionToast": "{type, select, create {Rețeta a fost creată cu succes} update {Rețeta a fost actualizată cu succes} other {Rețetă}}",
+          "error": "Rețeta nu a putut fi {type, select, create {creată} update {actualizată} other {Rețeta}}"
+        }
+      },
+      "PlanForm": {
+        "type": {
+          "create": "create",
+          "update": "update"
+        },
+        "BaseFormTexts": {
+          "header": "{type, select, create {Creează un plan} update {Actualizează planul} other {Plan}}",
+          "altToast": "{type, select, create {Planul a fost creat} update {Planul a fost actualizat} other {Plan}}",
+          "toastAction": "Vezi planul",
+          "descriptionToast": "{type, select, create {Planul a fost creat cu succes} update {Planul a fost actualizat cu succes} other {Plan}}",
+          "error": "Planul nu a putut fi {type, select, create {creat} update {actualizat} other {Plan}}"
+        }
+      }
+    }
+  },
+  "auth": {
+    "ConfirmEmailPageText": {
+      "isLoadingHeader": "Se confirmă emailul...",
+      "isFinishedErrorHeader": "Ceva a mers greșit, vă rugăm să repetați procesul"
+    },
+    "ForgotPasswordPageText": {
+      "cardTitle": "Trimite resetarea emailului",
+      "emailLabel": "Email",
+      "submitButton": "Trimite cererea",
+      "loadingButton": "Vă rugăm să așteptați",
+      "successMessage": "Emailul a fost trimis, vă rugăm să verificați căsuța poștală!"
+    },
+    "ResetPasswordPageText": {
+      "cardTitle": "Resetați parola",
+      "emailLabel": "Email",
+      "passwordLabel": "Parola (Trebuie să aibă cel puțin 4 caractere)",
+      "confirmPasswordLabel": "Confirmați parola",
+      "submitButton": "Resetează",
+      "loadingButton": "Vă rugăm să așteptați",
+      "errorMessages": "Parola nu a putut fi resetată, vă rugăm să reîncepeți procesul!"
+    },
+    "SignInPageText": {
+      "cardTitle": "Autentificare",
+      "emailLabel": "Email",
+      "passwordLabel": "Parolă",
+      "submitButton": "Autentificare",
+      "loadingButton": "Vă rugăm să așteptați",
+      "errorMessages": "Credențialele nu sunt valide!",
+      "linkSignUp": "Nu aveți un cont? Înregistrați-vă",
+      "linkForgotPassword": "Ați uitat parola?"
+    },
+    "SignUpPageText": {
+      "emailExistsError": "Un utilizator cu acest email există deja",
+      "cardTitle": "Înregistrare",
+      "firstNameLabel": "Prenume",
+      "lastNameLabel": "Nume",
+      "emailLabel": "Email",
+      "passwordLabel": "Parolă (Trebuie să aibă cel puțin 4 caractere)",
+      "confirmPasswordLabel": "Confirmați parola",
+      "submitButton": "Înregistrare",
+      "loadingButton": "Vă rugăm să așteptați",
+      "linkSignIn": "Aveți deja un cont? Autentificare"
+    },
+    "SignOutPageText": {
+      "questionText": "Sunteți sigur că doriți să vă deconectați?",
+      "buttonSignOut": "Sign Out",
+      "buttonSignIn": "Sign In"
+    }
+  },
+  "components": {
+    "forms": {
+      "UpdateProfileForm": {
+        "error": "Profilul nu a putut fi actualizat",
+        "firstName": "Prenume",
+        "lastName": "Nume"
+      },
+      "ChatMessageFormTexts": {
+        "errorText": "Mesajul nu a putut fi trimis"
+      },
+      "IngredientFormTexts": {
+        "titleTaken": "Acest ingredient există deja",
+        "disableTooltip": "Selectați o unitate de măsură mai întâi",
+        "name": {
+          "label": "Nume",
+          "placeholder": "Introduceți numele"
+        },
+        "dietType": {
+          "label": "Tipul de dietă",
+          "placeholder": "Selectați tipul de dietă"
+        },
+        "unitType": {
+          "label": "Tipul de unitate de măsură",
+          "placeholder": "Selectați tipul de unitate de măsură",
+          "description": "Macronutrienții vor fi calculați pe baza a 100 din unitatea selectată."
+        },
+        "macrosTexts": {
+          "fat": {
+            "label": "Grăsime",
+            "placeholder": "Introduceți grăsimea"
+          },
+          "saturatedFat": {
+            "label": "Grăsime saturată",
+            "placeholder": "Introduceți grăsimea saturată"
+          },
+          "carbohydrates": {
+            "label": "Carbohidrați",
+            "placeholder": "Introduceți carbohidrații"
+          },
+          "sugar": {
+            "label": "Zahăr",
+            "placeholder": "Introduceți zahărul"
+          },
+          "protein": {
+            "label": "Proteine",
+            "placeholder": "Introduceți proteinele"
+          },
+          "salt": {
+            "label": "Sare",
+            "placeholder": "Introduceți sarea"
+          }
+        }
+      },
+      "RecipeFormTexts": {
+        "error": "Rețeta nu a putut fi {type, select, create {creată} update {actualizată} other {Rețeta}}",
+        "ingredientChildLabel": "Selectați un ingredient",
+        "submitChild": "Adăugați ingredientul",
+        "removeChild": "Eliminați ingredientul",
+        "clearChild": "Curățați inputurile",
+        "ingredientsLabel": "Ingrediente",
+        "addIngredient": "Adăugați linie noua",
+        "quantityChildPlaceholder": "Introduceți cantitatea",
+        "quantityChildLabel": "Cantitate",
+        "dietType": "Rețeta este:"
+      },
+      "PlanFormTexts": {
+        "priceLabel": "Preț",
+        "pricePlaceholder": "Introduceți prețul",
+        "recipesLabel": "Rețete",
+        "recipesPlaceholder": "Selectați rețetele",
+        "dietMessage": "Planul va fi pentru"
+      },
+      "CheckoutDrawerTexts": {
+        "error": "Comanda nu a putut fi finalizată",
+        "anchor": "Continuă la plată",
+        "title": "Finalizare comandă",
+        "header": "Vă rugăm să confirmați comanda și să continuați la plată",
+        "label": "Confirmare preț",
+        "description": "Vă rugăm să confirmați prețul comenzii pentru a trimite plata",
+        "placeholder": "Introduceți prețul total"
+      },
+      "AdminEmailTexts": {
+        "preview": "Previzualizare",
+        "error": "Emailul nu a putut fi trimis",
+        "title": "Trimiteți un email cu templateul companiei",
+        "toastDescription": "Emailul a fost trimis cu succes către ",
+        "items": {
+          "email": {
+            "label": "Destinatar",
+            "placeholder": "Introduceți destinatarul"
+          },
+          "subject": {
+            "label": "Subiect",
+            "placeholder": "Introduceți subiectul"
+          },
+          "content": {
+            "label": "Conținut",
+            "placeholder": "Introduceți conținutul"
+          }
+        }
+      }
+    },
+    "nav": {
+      "ThemeSwitchTexts": {
+        "srButton": "Comutați modul întunecat",
+        "light": "Light mode",
+        "dark": "Dark mode",
+        "system": "System mode"
+      },
+      "PostsTexts": {
+        "title": "Postări",
+        "approvedPosts": "Postări verificate",
+        "allPosts": "Toate postările",
+        "yourPosts": "Postările tale",
+        "createPost": "Creează o postare"
+      },
+      "RecipesTexts": {
+        "allRecipes": "Toate rețetele",
+        "yourRecipes": "Rețetele tale",
+        "createRecipe": "Creează o rețetă"
+      },
+      "PlansTexts": {
+        "allPlans": "Toate planurile",
+        "yourPlans": "Planurile tale",
+        "createPlan": "Creează un plan",
+        "approvedPlans": "Planuri verificate",
+        "monthlyPlan": "Vânzări lunare",
+        "dailyPlan": "Vânzări zilnice"
+      },
+      "Links": {
+        "home": "Acasă",
+        "posts": "Postări",
+        "adminDashboard": "Panou de administrare",
+        "recipes": "Rețete",
+        "chat": "Chat",
+        "ingredients": "Ingrediente",
+        "plans": "Planuri",
+        "subscriptions": "Planuri cumpărate",
+        "orders": "Comenzi",
+        "kanban": "Kanban"
+      },
+      "ChatMessageNotificationContentTexts": {
+        "content": "{count, plural, one {Ai {count} mesaj nou de la {sender}} few {Ai {count} mesaje noi de la {sender}} other {Ai {count} de mesaje noi de la {sender}}}"
+      },
+      "ApproveNotificationContentTexts": {
+        "type": {
+          "post": "postare",
+          "recipe": "rețetă",
+          "plan": "plan"
+        },
+        "approved": {
+          "approved": "aprobat",
+          "disapproved": "dezaprobat"
+        },
+        "title": "{type, select, postare {postare <app>{approved}ă</app>} recipe {rețetă <app>{approved}ă</app>} other {{type} <app>{approved}</app>}}",
+        "content": "{title} a fost {approved}"
+      },
+      "BoughtNotificationContentTexts": {
+        "title": "Plan cumpărat",
+        "content": "Planul {title} a fost cumpărat."
+      },
+      "NotificationPopTexts": {
+        "tooltip": "Nicio notificare nouă",
+        "title": "Notificări",
+        "header": "Ai {count, plural, one {# notificare necitită} other {# notificări necitite}}",
+        "clearButton": "Șterge toate",
+        "openAllButton": "Deschide toate",
+        "closeAllButton": "Închide toate",
+        "messages": "Mesaje",
+        "posts": "Postări",
+        "recipes": "Rețete",
+        "plans": "Planuri",
+        "bought": "Planuri vândute"
+      },
+      "CartPopsTexts": {
+        "undo": "Anulează",
+        "total": "Total",
+        "checkout": "Comandă",
+        "toastDescription": "Produsul a fost eliminat din coș",
+        "emptyCart": "Coșul este go vizitați planurile pentru a adăuga produse"
+      }
+    },
+    "dialogs": {
+      "DeleteDialogTexts": {
+        "anchor": "Șterge",
+        "title": "Sunteți absolut sigur?",
+        "description": "Această acțiune nu poate fi anulată. Aceasta va șterge <b>{title}</b> permanent și nu va mai putea fi recuperată.",
+        "cancel": "Anulează",
+        "confirm": "Șterge"
+      },
+      "AlertDialogApproveTexts": {
+        "anchor": "{approved, select, true {Dezaprobă} false {Aprobă} other {Aprobă}}",
+        "title": "Sunteți absolut sigur?",
+        "description": "Aceasta va {approved, select, true {dezaproba} false {aproba} other {aproba}} <b>{title}</b>.",
+        "cancel": "Anulează",
+        "confirm": "{approved, select, true {Dezaprobă} false {Aprobă} other {Aprobă}}",
+        "toast": "<b>{title}</b> a fost {approved, select, true {dezaprobat} false {aprobat} other {aprobat}}"
+      },
+      "AlertDialogMakeTrainerTexts": {
+        "anchor": "Fă antrenor",
+        "title": "Ești absolut sigur?",
+        "description": "Această acțiune nu poate fi anulată. Acest lucru va face permanent un utilizator potențial periculos antrenor.",
+        "cancel": "Anulează",
+        "confirm": "Fă antrenor",
+        "toast": "<b>{email}</b> a fost făcut antrenor"
+      },
+      "AlertDialogToggleDisplayTexts": {
+        "anchor": "{display, select, true {Ascunde} false {Afișează} other {Afișează}}",
+        "title": "Ești absolut sigur?",
+        "description": "Aceasta va {display, select, true {ascunde} false {afișa} other {afișa}} din a fi disponibil <b>{name}</b>.",
+        "cancel": "Anulează",
+        "confirm": "{display, select, true {Ascunde} false {Afișează} other {Afișează}}",
+        "toast": "<b>{name}</b> a fost {display, select, true {ascuns} false {afișat} other {afișat}}"
+      },
+      "AddKanbanColumnTexts": {
+        "addColumn": "Adaugă coloană",
+        "title": "Adaugă o coloană nouă în tabloul",
+        "description": "Introduceți titlul coloanei",
+        "titleLabel": "Titlul coloanei",
+        "titlePlaceholder": "Introduceți titlul coloanei",
+        "error": "Coloana nu a putut fi adăugată"
+      },
+      "DeleteKanbanItemTexts": {
+        "type": {
+          "column": "coloana",
+          "task": "sarcina"
+        },
+        "title": "Ești absolut sigur?",
+        "description": "Această acțiune nu poate fi anulată. Aceasta va șterge permanent <b>{type}</b> și nu va mai putea fi recuperată.",
+        "cancel": "Anulează",
+        "error": "Elementul nu a putut fi șters",
+        "confirm": "Șterge"
+      },
+      "DialogKanbanTaskTexts": {
+        "title": "{type, select, create {Creează o sarcină} update {Actualizează sarcina} other {Sarcina}}",
+        "description": "{type, select, create { Introduceți conținutul și tipul sarcinii} update { Actualizați conținutul și tipul sarcinii} other {Sarcina}}",
+        "addTask": "Adaugă o sarcină",
+        "error": "Sarcina nu a putut fi {type, select, create {creată} update {actualizată} other {Sarcina}}",
+        "inputs": {
+          "content": {
+            "label": "Conținut",
+            "placeholder": "Introduceți conținutul"
+          },
+          "type": {
+            "label": "Tip",
+            "placeholder": "Selectați tipul"
+          }
+        },
+        "types": {
+          "LOW": "Scăzut",
+          "NORMAL": "Normal",
+          "URGENT": "Urgent"
+        }
+      }
+    },
+    "common": {
+      "ElementHeaderTexts": {
+        "notApproved": "Neaprobat"
+      },
+      "RadioSortTexts": {
+        "noSort": "Niciun criteriu de sortare"
+      },
+      "NutritionalTableTexts": {
+        "tableCaption": "Informații nutriționale"
+      }
+    },
+    "posts": {
+      "PostCommentsTexts": {
+        "author": "Creat de ",
+        "loadMore": "Încărcați mai multe comentarii",
+        "sortLabel": "Sortare",
+        "newest": "Cele mai noi",
+        "oldest": "Cele mai vechi",
+        "edited": "Editat",
+        "editHeader": "Editează comentariul"
+      },
+      "CommentAccordionTexts": {
+        "englishError": "Comentariul trebuie să fie scris în engleză",
+        "toxicError": "Comentariul conține un limbaj toxic",
+        "englishHeading": "Comentariile trebuie să fie scrise în engleză!"
+      }
+    },
+    "list": {
+      "ItemCardTexts": {
+        "author": "Creat de: "
+      },
+      "GridListTexts": {
+        "noResults": "Nu s-au găsit rezultate conform criteriilor de căutare!",
+        "gettingMore": "Se obțin mai multe elemente...",
+        "search": "Caută după titlu..."
+      },
+      "UseApprovedFilterTexts": {
+        "approved": "Aprobate",
+        "notApproved": "Neaprobate",
+        "all": "Toate după aprobare"
+      },
+      "UseProviderFilterDropdownTexts": {
+        "noFilterLabel": "Toți providerii",
+        "labels": {
+          "GOOGLE": "Google",
+          "LOCAL": "Local",
+          "GITHUB": "GitHub"
+        }
+      },
+      "UseRoleFilterTexts": {
+        "noFilterLabel": "Toate rolurile",
+        "labels": {
+          "ROLE_ADMIN": "Admin",
+          "ROLE_USER": "Utilizator",
+          "ROLE_TRAINER": "Antrenor"
+        }
+      },
+      "UseBinaryEmailVerifiedTexts": {
+        "trueText": "Verificat",
+        "falseText": "Neverificat",
+        "all": "Toate după verificarea emailului"
+      },
+      "UseTagsExtraCriteriaTexts": {
+        "tagsEmpty": "Nicio etichetă",
+        "tagsPlaceholder": "Introduceți etichetele pentru filtrare"
+      },
+      "UseDisplayFilterTexts": {
+        "trueText": "Afișate",
+        "falseText": "Neafișate",
+        "all": "Toate după afișare"
+      },
+      "UseDietDropdownTexts": {
+        "noFilterLabel": "Toate dietele",
+        "labels": {
+          "VEGAN": "Vegan",
+          "VEGETARIAN": "Vegetarian",
+          "CARNIVORE": "Carnivor",
+          "OMNIVORE": "Omnivor"
+        }
+      }
+    },
+    "table": {
+      "DataTablePaginationTexts": {
+        "pageSize": "Dimensiunea paginii",
+        "page": "Pagina ",
+        "of": " din ",
+        "firstPage": "Mergi la prima pagină",
+        "previousPage": "Mergi la pagina anterioară",
+        "nextPage": "Mergi la pagina următoare",
+        "lastPage": "Mergi la ultima pagină"
+      },
+      "DataTableTexts": {
+        "columnsLabel": "Coloane",
+        "noResults": "Nu s-au găsit rezultate conform criteriilor de căutare!",
+        "exportLabel": "Export"
+      },
+      "PostTableTexts": {
+        "search": "Caută în titlu..."
+      },
+      "UserTableTexts": {
+        "search": "Caută în email..."
+      },
+      "IngredientTableTexts": {
+        "search": "Caută în nume..."
+      },
+      "RecipeTableTexts": {
+        "search": "Caută în titlu..."
+      },
+      "PlanTableTexts": {
+        "search": "Caută în titlu..."
+      },
+      "OrderTableTexts": {
+        "search": "Caută în",
+        "searchKeyLabel": {
+          "country": "țară",
+          "city": "oraș",
+          "state": "municipiu"
+        }
+      },
+      "columns": {
+        "posts": {
+          "id": "ID",
+          "title": "Titlu",
+          "userLikes": "# de aprecieri",
+          "userDislikes": "# de dezaprobări",
+          "createdAt": "Data creării",
+          "updatedAt": "Ultima actualizare",
+          "approved": {
+            "header": "Aprobat",
+            "true": "Da",
+            "false": "Nu"
+          },
+          "actions": {
+            "button": "Acțiuni",
+            "label": "Acțiuni",
+            "view": "Vizualizează postarea",
+            "viewOwner": "Vizualizează autorul",
+            "viewOwnerItems": "Vizualizează postările autorului",
+            "update": "Actualizează postarea",
+            "approve": "Aprobă postarea",
+            "disapprove": "Dezaprobă postarea"
+          }
+        },
+        "recipes": {
+          "id": "ID",
+          "title": "Titlu",
+          "userLikes": "# de aprecieri",
+          "userDislikes": "# de dezaprobări",
+          "createdAt": "Data creării",
+          "updatedAt": "Ultima actualizare",
+          "type": "Dietă",
+          "count": "#folosiri",
+          "approved": {
+            "header": "Aprobat",
+            "true": "Da",
+            "false": "Nu"
+          },
+          "actions": {
+            "button": "Acțiuni",
+            "label": "Acțiuni",
+            "view": "Vizualizează rețeta",
+            "viewOwner": "Vizualizează autorul",
+            "viewOwnerItems": "Vizualizează rețetele autorului",
+            "update": "Actualizează rețeta",
+            "approve": "Aprobă rețeta",
+            "disapprove": "Dezaprobă rețeta"
+          }
+        },
+        "users": {
+          "id": "ID",
+          "email": "Email",
+          "firstName": "Prenume",
+          "lastName": "Nume",
+          "role": "Rol",
+          "provider": "Provider",
+          "emailVerified": {
+            "header": "Email verificat",
+            "trueText": "Da",
+            "falseText": "Nu"
+          },
+          "createdAt": "Data creării",
+          "actions": {
+            "button": "Acțiuni",
+            "label": "Acțiuni",
+            "copyEmail": "Copiază emailul",
+            "viewUser": "Vizualizează utilizatorul",
+            "viewOrders": "Vizualizează comenzile utilizatorului",
+            "viewPosts": "Vizualizează postările utilizatorului",
+            "viewRecipes": "Vizualizează rețetele utilizatorului",
+            "viewPlans": "Vizualizează planurile utilizatorului",
+            "startChat": "Începeți un chatul",
+            "makeTrainer": "Fă antrenor",
+            "viewMonthlySales": "Vezi Vânzările Lunare",
+            "viewDailySales": "Vezi Vânzările Zilnice"
+          }
+        },
+        "ingredients": {
+          "id": "ID",
+          "title": "Nume",
+          "fat": "Grăsime",
+          "saturatedFat": "Saturate",
+          "carbohydrates": "Carbo.",
+          "sugar": "Zahăr",
+          "protein": "Proteine",
+          "salt": "Sare",
+          "unit": "Unitate",
+          "createdAt": "Data creării",
+          "calories": "Calorii",
+          "updatedAt": "Ultima actualizare",
+          "name": "Nume",
+          "type": "Dietă",
+          "count": "#folosiri",
+          "display": {
+            "header": "Afișare",
+            "true": "Da",
+            "false": "Nu"
+          },
+          "actions": {
+            "button": "Acțiuni",
+            "label": "Acțiuni",
+            "viewIngredient": "Vezi Ingredientul",
+            "updateIngredient": "Actualizează Ingredient",
+            "deleteIngredient": "Șterge Ingredient",
+            "toggleDisplay": "Afișează/Ascunde Ingredient"
+          }
+        },
+        "plans": {
+          "id": "ID",
+          "title": "Titlu",
+          "userLikes": "# de aprecieri",
+          "userDislikes": "# de dezaprobări",
+          "createdAt": "Data creării",
+          "updatedAt": "Ultima actualizare",
+          "type": "Dietă",
+          "count": "#comenzi",
+          "price": "Preț",
+          "approved": {
+            "header": "Aprobat",
+            "true": "Da",
+            "false": "Nu"
+          },
+          "display": {
+            "header": "Afișare",
+            "true": "Da",
+            "false": "Nu"
+          },
+          "actions": {
+            "button": "Acțiuni",
+            "label": "Acțiuni",
+            "view": "Vizualizează planul",
+            "viewOwner": "Vizualizează autorul",
+            "viewOwnerItems": "Vizualizează planurile autorului",
+            "update": "Actualizează planul",
+            "approve": "Aprobă planul",
+            "disapprove": "Dezaprobă planul",
+            "display": "Afișează planul",
+            "hide": "Ascunde planul"
+          }
+        },
+        "orders": {
+          "id": "ID",
+          "date": "Data",
+          "plans": "#Planuri",
+          "total": "Total",
+          "address": "Adresă",
+          "actions": {
+            "button": "Acțiuni",
+            "label": "Acțiuni",
+            "view": "Vizualizează Comanda",
+            "viewOwner": "Vizualizează Utilizatorul",
+            "viewOwnerItems": "Vizualizează Comenzile Utilizatorului"
+          }
+        }
+      }
+    },
+    "chat": {
+      "ConversationTexts": {
+        "userInTheSameChat": "Utilizatorul este în același chat",
+        "loadMore": "Încarcă mai multe mesaje...",
+        "loadMoreLoading": "Se încarcă mai multe mesaje...",
+        "errorLoading": "Ceva nu a mers bine, vă rugăm să reîncercați"
+      },
+      "MainContentTexts": {
+        "chatRoomsLabel": "Camere de chat",
+        "noSelectedChatRoom": "Nicio cameră selectată"
+      },
+      "ChatMainContentWrapperTexts": {
+        "search": "Caută după email...",
+        "errorLoading": "Ceva nu a mers bine, vă rugăm să reîncercați"
+      },
+      "ChatRoomTexts": {
+        "numberUnread": "Mesaje necitite: "
+      }
+    },
+    "charts": {
+      "IngredientPieChartTexts": {
+        "macroLabel": "Calorii",
+        "proteinLabel": "Proteine",
+        "fatLabel": "Grăsimi",
+        "carbohydratesLabel": "Carbohidrați",
+        "caloriesLabel": "Calorii",
+        "saltLabel": "Sare"
+      },
+      "RelativeItemTexts": {
+        "type": {
+          "posts": "postări",
+          "recipes": "rețete",
+          "plans": "planuri",
+          "comments": "comentarii",
+          "orders": "comenzi"
+        },
+        "description": "Acesta este numărul de {type} create luna aceasta față de luna trecută.",
+        "month": "lună",
+        "increase": "Creștere",
+        "decrease": "Scădere"
+      },
+      "RelativeItemsSummaryTexts": {
+        "items": "elemente",
+        "description": "Totalul de elemente create luna aceasta: "
+      },
+      "TotalAmountCountOrdersTexts": {
+        "type": {
+          "orders": "comenzi",
+          "plans": "planuri"
+        },
+        "countLabel": "10*Numărul de {type}",
+        "totalAmountLabel": "Suma totală pentru {type}",
+        "bothLabel": "Ambele",
+        "averageTotalAmountLabel": "Suma medie petntru {type}",
+        "averageCountLabel": "Numărul mediu de {type}",
+        "showTrendLineLabel": "Afișează linia de trend",
+        "hideTrendLineLabel": "Ascunde linia de trend",
+        "trendLineLabel": "Linia de trend"
+      },
+      "GeographyChartTexts": {
+        "zoomInLabel": "Mărește",
+        "zoomOutLabel": "Micșorează",
+        "resetLabel": "Resetează poziția",
+        "centerLabel": "Centrare poziție",
+        "selectLabels": {
+          "count": "Numărul de comenzi",
+          "totalAmount": "Suma totală"
+        }
+      }
+    },
+    "plans": {
+      "AddToCartBtnTexts": {
+        "successDescription": "Planul a fost adăugat în coș",
+        "toastAction": "Elimină planul din coș",
+        "addToCart": "Adaugă în coș",
+        "finishOrder": "Termină comanda",
+        "alreadyBought": "Planul a fost deja cumpărat"
+      }
+    },
+    "kanban": {
+      "KanbanTaskCardTexts": {
+        "types": {
+          "LOW": "Scăzut",
+          "NORMAL": "Normal",
+          "URGENT": "Urgent"
+        }
+      },
+      "KanbanColumnContainerTexts": {
+        "tasksLabel": "Sarcini"
+      }
+    },
+    "admin": {
+      "AdminLayout": {
+        "mainSite": "Site principal"
+      },
+      "AdminMenuTexts": {
+        "mainSite": "Site principal",
+        "groupLabels": {
+          "contents": "Conținut",
+          "sales": "Vânzări",
+          "settings": "Setări",
+          "company": "Companie"
+        },
+        "labels": {
+          "dashboard": "Panou de administrare",
+          "posts": "Postări",
+          "recipes": "Rețete",
+          "plans": "Planuri",
+          "ingredients": "Ingrediente",
+          "users": "Utilizatori",
+          "orders": "Comenzi",
+          "monthlySales": "Vânzări lunare",
+          "dailySales": "Vânzări zilnice",
+          "countries": "Țări",
+          "account": "Cont",
+          "email": "Email",
+          "kanban": "Kanban"
+        },
+        "subLabels": {
+          "allIngredients": "Toate ingredientele",
+          "createIngredient": "Creează ingredient"
+        }
+      }
+    },
+    "home": {
+      "HomeHeaderTexts": {
+        "title": "Calea către o viață sănătoasă începe aici !"
+      },
+      "HomeCardsText": {
+        "register": {
+          "title": "Înregistrare",
+          "description": "Înregistrează-te pentru a avea acces la toate funcționalitățile platformei noastre și pentru a deveni parte a comunității noastre."
+        },
+        "posts": {
+          "title": "Citește postări",
+          "description": "Citește postări pentru a câștiga cunoștințe și perspective despre diferite subiecte scrise de profesioniști."
+        },
+        "plans": {
+          "title": "Cumpără planuri",
+          "description": "Cumpără planuri pentru a te îmbunătăți și a obține experiența completă a platformei noastre. Oferim o gamă largă de planuri în funcție de nevoile tale."
+        }
+      },
+      "HomeAboutTexts": {
+        "title": "De ce să alegi platforma noastră?"
+      },
+      "HomeTimelineTexts": {
+        "be-aware": {
+          "date": "Pregătire",
+          "title": "Fii conștient",
+          "text": "Realizează-ți problemele și țintește-le. Nu te teme să faci schimbări care te fac să te simți inconfortabil."
+        },
+        "be-afraid": {
+          "date": "",
+          "title": "Devino confortabil cu teama",
+          "text": "Este normal să te simți copleșit și nesigur în legătură cu începutul. Nu lăsa aceste sentimente să te oprească."
+        },
+        "make-a-plan": {
+          "date": "",
+          "title": "Fă un plan",
+          "text": "Planifică înainte și fii foarte structurat. Stabilește obiective realiste și urmează-ți propriul drum. Nu lăsa pe alții să-ți decidă călătoria."
+        },
+        "step-by-step": {
+          "date": "Începe să lucrezi",
+          "title": "Pas cu pas",
+          "text": "Fii răbdător și știi că viața este un maraton, nu un sprint. Nu căuta soluții rapide; bucură-te de fiecare progres mic."
+        },
+        "work-hard": {
+          "date": "",
+          "title": "Muncește din greu",
+          "text": "Munca grea dă roade. Fiecare schimbare necesită sacrificii, așa că fii pregătit să le faci. La final, îți vei mulțumi."
+        },
+        "comfortable": {
+          "date": "",
+          "title": "Devino confortabil cu noua ta viață",
+          "text": "În timp, tot ceea ce credeai că este prea greu va deveni trivial. Când se întâmplă acest lucru, bate-te pe spate și vezi progresul tău."
+        },
+        "stay-consistent": {
+          "date": "Rămâi constant",
+          "title": "Nu lăsa rezultatele să te încetinească",
+          "text": "Nu deveni prea confortabil și nu crede că nu poți pierde ceea ce ai realizat. Aici se face diferența dintre sprint și maraton."
+        }
+      }
+    },
+    "ui": {
+      "DateRangePickerTexts": {
+        "compare": "Compară",
+        "cancel": "Anulează",
+        "update": "Actualizează",
+        "presets": {
+          "today": "Astăzi",
+          "yesterday": "Ieri",
+          "last7": "Ultimele 7 zile",
+          "last14": "Ultimele 14 zile",
+          "last30": "Ultimele 30 zile",
+          "thisWeek": "Săptămâna aceasta",
+          "lastWeek": "Săptămâna trecută",
+          "thisMonth": "Luna aceasta",
+          "lastMonth": "Luna trecută",
+          "pastYear": "Ultimul an"
+        }
+      }
+    },
+    "footer": {
+      "FooterTexts": {
+        "home": "Acasă",
+        "title": "Drumul către o viață sănătoasă începe aici",
+        "plans": "Planuri",
+        "posts": "Postări",
+        "signUp": "Sign Up",
+        "signIn": "Sign In",
+        "termsOfService": "Termeni de utilizare",
+        "privacyPolicy": "Politica de confidențialitate",
+        "disclaimer": "Declarație de responsabilitate",
+        "rightsReserved": "Bro Meets Science Co. Toate drepturile rezervate"
+      }
+    }
+  },
+  "pages": {
+    "users": {
+      "SortingOptions": {
+        "createdAt": {
+          "asc": "Cele mai vechi",
+          "desc": "Cele mai noi"
+        },
+        "email": {
+          "asc": "Alfabetic după email",
+          "desc": "Invers alfabetic după email"
+        },
+        "firstName": {
+          "asc": "Alfabetic după prenume",
+          "desc": "Invers alfabetic după prenume"
+        },
+        "lastName": {
+          "asc": "Alfabetic după nume",
+          "desc": "Invers alfabetic după nume"
+        }
+      },
+      "UserPageTexts": {
+        "ownerTitle": "Profilul tău",
+        "visitorTitle": "Profilul utilizatorului",
+        "firstNameLabel": "Prenume:",
+        "lastNameLabel": "Nume:",
+        "editProfile": "Editează profilul",
+        "verifyEmail": "Verifică emailul",
+        "changePassword": "Schimbă parola",
+        "startChat": "Începeți un chatul",
+        "errorText": "Ceva nu a mers bine, vă rugăm să reîncercați",
+        "emailSent": "Emailul a fost trimis, vă rugăm să verificați inboxul!"
+      }
+    },
+    "posts": {
+      "SinglePageTexts": {
+        "updateButton": "Actualizează"
+      },
+      "SortingOptions": {
+        "createdAt": {
+          "asc": "Cele mai vechi",
+          "desc": "Cele mai noi"
+        },
+        "updatedAt": {
+          "asc": "Prima actualizare",
+          "desc": "Ultima actualizare"
+        },
+        "title": {
+          "asc": "Alfabetic după titlu",
+          "desc": "Invers alfabetic după titlu"
+        }
+      },
+      "ApprovedPostsTexts": {
+        "title": "Postări",
+        "header": "Realizate cu dragoste de antrenorii noștri și aprobat de echipa noastră."
+      },
+      "UserPostsPageContentTexts": {
+        "title": "Postările tale",
+        "header": "Aici poți vedea și gestiona toate postările tale."
+      }
+    },
+    "recipes": {
+      "SortingOptions": {
+        "createdAt": {
+          "asc": "Cele mai vechi",
+          "desc": "Cele mai noi"
+        },
+        "updatedAt": {
+          "asc": "Prima actualizare",
+          "desc": "Ultima actualizare"
+        },
+        "title": {
+          "asc": "Alfabetic după titlu",
+          "desc": "Invers alfabetic după titlu"
+        }
+      },
+      "UserRecipesPageContentTexts": {
+        "title": "Rețetele tale",
+        "header": "Aici poți vedea și gestiona toate rețetele tale."
+      },
+      "SingleRecipePageTexts": {
+        "showIngredients": "Afișează ingredientele"
+      }
+    },
+    "ingredients": {
+      "SortingOptions": {
+        "createdAt": {
+          "asc": "Cele mai vechi",
+          "desc": "Cele mai noi"
+        },
+        "name": {
+          "asc": "Alfabetic după nume",
+          "desc": "Invers alfabetic după nume"
+        },
+        "protein": {
+          "asc": "Cea mai mică proteină",
+          "desc": "Cea mai mare proteină"
+        },
+        "fat": {
+          "asc": "Cea mai mică grăsime",
+          "desc": "Cea mai mare grăsime"
+        },
+        "carbohydrates": {
+          "asc": "Cei mai puțini carbohidrați",
+          "desc": "Cei mai mulți carbohidrați"
+        },
+        "sugar": {
+          "asc": "Cei mai puțin zahăr",
+          "desc": "Cei mai mulți zahăr"
+        },
+        "salt": {
+          "asc": "Cea mai puțină sare",
+          "desc": "Cea mai multă sare"
+        },
+        "saturatedFat": {
+          "asc": "Cea mai puțină grăsime saturată",
+          "desc": "Cea mai multă grăsime saturată"
+        },
+        "calories": {
+          "asc": "Cele mai puține calorii",
+          "desc": "Cele mai multe calorii"
+        }
+      },
+      "IngredientsPageTexts": {
+        "title": "Toate ingredientele",
+        "header": "Aici poți vedea toate ingredientele de pe platformă."
+      },
+      "SingleIngredientPageTexts": {
+        "tableCaption": "Informații nutriționale"
+      }
+    },
+    "plans": {
+      "SortingOptions": {
+        "createdAt": {
+          "asc": "Cele mai vechi",
+          "desc": "Cele mai noi"
+        },
+        "updatedAt": {
+          "asc": "Prima actualizare",
+          "desc": "Ultima actualizare"
+        },
+        "title": {
+          "asc": "Alfabetic după titlu",
+          "desc": "Invers alfabetic după titlu"
+        },
+        "price": {
+          "asc": "Cel mai mic preț",
+          "desc": "Cel mai mare preț"
+        }
+      },
+      "UserPlansPageTexts": {
+        "title": "Planurile tale",
+        "header": "Aici poți vedea și gestiona toate planurile tale."
+      },
+      "SingleTrainerPlanPageTexts": {
+        "price": "Preț",
+        "displayed": "Afișat",
+        "notDisplayed": "Ascuns"
+      },
+      "ApprovedPlansTexts": {
+        "title": "Planuri nutriționale",
+        "header": "Realizate cu dragoste de antrenorii noștri și aprobat de echipa noastră.",
+        "toastAction": "Elimină din coș",
+        "addToCart": "Adaugă în coș",
+        "finishOrder": "Finalizează comanda",
+        "buyableLabel": "Cumpărabil"
+      },
+      "UserPlanPageContentTexts": {
+        "price": "Preț"
+      },
+      "UserMonthlySalesPageTexts": {
+        "title": "Vânzări lunare",
+        "header": "Aici poți vedea vânzările lunare."
+      },
+      "UserDailySalesPageTexts": {
+        "title": "Vânzări zilnice",
+        "header": "Aici poți vedea vânzările zilnice."
+      }
+    },
+    "orders": {
+      "SortingOptions": {
+        "createdAt": {
+          "asc": "Cele mai vechi",
+          "desc": "Cele mai noi"
+        },
+        "total": {
+          "asc": "Cel mai mic preț total",
+          "desc": "Cel mai mare preț total"
+        }
+      },
+      "UserOrdersPageTexts": {
+        "title": "Comezile Tale",
+        "header": "Aici poți vedea toate comenzile tale."
+      },
+      "SingleOrderPageContentTexts": {
+        "title": "Comanda din: ",
+        "total": "Total",
+        "seeInvoice": "Vezi factura"
+      },
+      "OrderCompletePageTexts": {
+        "title": "Comanda a fost finalizată cu succes",
+        "ordersBtn": "Vezi Comenzile",
+        "plansBtn": "Cumpără Mai Multe Planuri"
+      }
+    },
+    "subscriptions": {
+      "SubscriptionsPageContentTexts": {
+        "title": "Planurile Tale Cumpărate",
+        "header": "Aici poți vedea toate planurile pe care le-ai cumpărat."
+      }
+    },
+    "cart": {
+      "CartPageContentTexts": {
+        "emptyCart": "Coșul tău este gol",
+        "seeThePlans": "Vezi planurile disponibile aici",
+        "title": "Coșul tău",
+        "subtotal": "Subtotal",
+        "toastRemovedTitle": "Planul a fost eliminat",
+        "toastRemovedDescription": "Planul a fost eliminat din coș",
+        "clearAll": "Șterge toate",
+        "toastUndo": "Anulează",
+        "toastRemoveAllTitle": "Toate planurile au fost eliminate",
+        "toastRemoveAllDescription": "Toate planurile au fost eliminate din coș"
+      }
+    },
+    "kanban": {
+      "KanbanPageTexts": {
+        "title": "Tablou Kanban",
+        "header": "Aici poți vedea și gestiona toate sarcinile pe care le-ai creat"
+      }
+    },
+    "admin": {
+      "AdminPostsPageTexts": {
+        "title": "Toate postările",
+        "header": "Aici poți vedea și gestiona toate postările de pe platformă."
+      },
+      "AdminRecipesPageTexts": {
+        "title": "Toate rețetele",
+        "header": "Aici poți vedea și gestiona toate rețetele de pe platformă."
+      },
+      "UserPostsAdminPageTexts": {
+        "title": "Toate postările lui ",
+        "header": "Aici poți vedea și gestiona toate postările lui "
+      },
+      "UserRecipesAdminPageTexts": {
+        "title": "Toate rețetele lui ",
+        "header": "Aici poți vedea și gestiona toate rețetele lui "
+      },
+      "AdminUsersPageTexts": {
+        "title": "Toți utilizatorii",
+        "header": "Aici poți vedea și gestiona toți utilizatorii de pe platformă."
+      },
+      "UserOrdersAdminPageTexts": {
+        "title": "Toate comenzile lui ",
+        "header": "Aici poți vedea și gestiona toate comenzile lui "
+      },
+      "UserAdminMonthlySalesPageTexts": {
+        "title": "Vânzări lunare lui ",
+        "header": "Aici poți vedea vânzările lunare ale lui "
+      },
+      "UserAdminDailySalesPageTexts": {
+        "title": "Vânzări zilnice lui ",
+        "header": "Aici poți vedea vânzările zilnice ale lui "
+      },
+      "UserPlansAdminPageTexts": {
+        "title": "Toate planurile lui ",
+        "header": "Aici poți vedea și gestiona toate planurile lui "
+      },
+      "AdminIngredientsCreatePage": {
+        "title": "Creează un ingredient"
+      },
+      "AdminIngredientsPageTexts": {
+        "title": "Toate ingredientele",
+        "header": "Aici poți vedea și gestiona toate ingredientele de pe platformă."
+      },
+      "AdminPageUpdateIngredientTexts": {
+        "title": "Actualizează Un Ingredient"
+      },
+      "AdminPlansPageTexts": {
+        "title": "Toate planurile nutriționale",
+        "header": "Aici poți vedea și gestiona toate planurile nutriționale de pe platformă."
+      },
+      "AdminOrdersPageTexts": {
+        "title": "Toate comenzile",
+        "header": "Aici poți vedea și gestiona toate comenzile de pe platformă."
+      },
+      "AdminDashboardPageTexts": {
+        "title": "Panou de administrare",
+        "header": "Aici poți vedea un sumar al activității de pe platformă."
+      },
+      "AdminMonthlySalesTexts": {
+        "title": "Vânzări lunare",
+        "header": "Aici poți vedea vânzările lunare de pe platformă."
+      },
+      "AdminCountriesTexts": {
+        "title": "Comenzi pe țări",
+        "header": "Aici poți vedea statisticile pe țări ale comenzilor de pe platformă."
+      },
+      "AdminDailySalesTexts": {
+        "title": "Vânzări zilnice",
+        "header": "Aici poți vedea vânzările zilnice de pe platformă."
+      },
+      "AdminEmailPageTexts": {
+        "title": "Trimite un email din partea companiei",
+        "header": "Aici poți trimite un email din partea companiei "
+      },
+      "AdminKanbanTexts": {
+        "title": "Tablou Kanban",
+        "header": "Aici poți vedea și gestiona toate sarcinile pe care le-ai creat"
+      }
+    }
+  }
+}

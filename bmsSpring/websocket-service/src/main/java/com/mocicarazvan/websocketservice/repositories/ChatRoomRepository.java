@@ -1,0 +1,57 @@
+package com.mocicarazvan.websocketservice.repositories;
+
+import com.mocicarazvan.websocketservice.dtos.chatRoom.ChatRoomUserDto;
+import com.mocicarazvan.websocketservice.models.ChatRoom;
+import com.mocicarazvan.websocketservice.repositories.generic.IdGeneratedRepository;
+import jakarta.persistence.LockModeType;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.Lock;
+import org.springframework.data.jpa.repository.Query;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+
+public interface ChatRoomRepository extends IdGeneratedRepository<ChatRoom> {
+    @Query("""
+                select cr from ChatRoom cr
+                join cr.users u
+                where u.email in :userEmail
+                group by cr.id
+                having count(u.id) = :count and count(u.id) > 0
+            """)
+    List<ChatRoom> findByUsers(Set<String> userEmail, long count);
+
+    @Query("""
+            select new com.mocicarazvan.websocketservice.dtos.chatRoom.ChatRoomUserDto(cr.id,u.email)  from ChatRoom cr
+            join cr.users u
+            where u.email != :senderEmail
+            and cr.id in (
+                select cr2.id from ChatRoom cr2
+                join cr2.users u2
+                where u2.email = :senderEmail
+                )
+            """)
+    List<ChatRoomUserDto> findOthersEmailsBySenderEmail(String senderEmail);
+
+    @Query("SELECT cr FROM ChatRoom cr JOIN cr.users u WHERE u.email = :userEmail")
+    List<ChatRoom> findChatRoomsByUserEmail(String userEmail);
+
+    List<ChatRoom> findAllByUsersEmail(String email);
+
+    @Query("SELECT cr FROM ChatRoom cr JOIN cr.users u WHERE u.email IN :emails GROUP BY cr HAVING COUNT(DISTINCT u.email) = :emailCount")
+    List<ChatRoom> findAllByUserEmails(List<String> emails, long emailCount);
+
+    //    @Query("""
+//            SELECT DISTINCT cr FROM ChatRoom cr JOIN cr.users u
+//            WHERE LOWER( u.email) LIKE LOWER(CONCAT('%', :filterEmail, '%')) AND cr.id NOT IN (
+//            SELECT cr2.id FROM ChatRoom cr2 JOIN cr2.users u2 WHERE u2.email = :email)
+//            """)
+    //todo change, this works for 2 users in a room
+    @Query("""
+            SELECT DISTINCT cr FROM ChatRoom cr JOIN cr.users u
+            WHERE LOWER( u.email) LIKE LOWER(CONCAT('%', :filterEmail, '%')) AND LOWER( u.email) != LOWER(:email)
+            """)
+    Page<ChatRoom> findFilteredChatRooms(String email, String filterEmail, Pageable pageable);
+}

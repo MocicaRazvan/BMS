@@ -1,0 +1,202 @@
+"use client";
+
+import { zodResolver } from "@hookform/resolvers/zod";
+
+import { useCallback, useMemo, useState } from "react";
+import { useForm } from "react-hook-form";
+import { Form } from "@/components/ui/form";
+import {
+  Accordion,
+  AccordionTrigger,
+  AccordionContent,
+  AccordionItem,
+} from "@/components/ui/accordion";
+
+import DOMPurify from "dompurify";
+import useLoadingErrorState from "@/hoooks/useLoadingErrorState";
+import { getTitleBodySchema, TitleBodyType } from "@/types/forms";
+import { CommentFormTexts } from "@/texts/components/forms";
+import ErrorMessage from "@/components/forms/error-message";
+import ButtonSubmit from "@/components/forms/button-submit";
+import { TitleBodyForm } from "@/components/forms/title-body";
+import { getToxicity } from "@/actions/toxcity";
+import { fetchStream } from "@/hoooks/fetchStream";
+
+export interface CommentAccordionTexts {
+  commentFormTexts: CommentFormTexts;
+  englishError: string;
+  toxicError: string;
+  englishHeading: string;
+}
+
+interface Props extends CommentAccordionTexts {
+  title?: string;
+  body?: string;
+  postId: number;
+  token: string;
+  refetch: () => void;
+}
+
+export default function CommentAccordion({
+  title = "",
+  body = "",
+  postId,
+  token,
+  refetch,
+  commentFormTexts: {
+    titleBodySchemaTexts,
+    buttonSubmitTexts,
+    error,
+    descriptionToast,
+    toastAction,
+    altToast,
+    titleBodyTexts,
+    baseFormTextsUpdate,
+    header,
+  },
+  englishHeading,
+  englishError,
+  toxicError,
+}: Props) {
+  const [value, setValue] = useState("");
+  const schema = useMemo(
+    () => getTitleBodySchema(titleBodySchemaTexts),
+    [titleBodySchemaTexts],
+  );
+
+  const form = useForm<TitleBodyType>({
+    resolver: zodResolver(schema),
+    defaultValues: {
+      body,
+      title,
+    },
+  });
+  const { isLoading, setIsLoading, router, errorMsg, setErrorMsg } =
+    useLoadingErrorState();
+
+  const handleToxicResp = useCallback(
+    (
+      resp: Awaited<ReturnType<typeof getToxicity>>,
+      key: keyof TitleBodyType & string,
+    ) => {
+      if (!resp.failure) {
+        return;
+      }
+      if (resp.reason.toLowerCase() === "toxicity") {
+        form.setError(key, {
+          message: toxicError,
+        });
+      } else {
+        form.setError(key, {
+          message: englishError,
+        });
+      }
+    },
+    [englishError, form, toxicError],
+  );
+
+  const onSubmit = useCallback(
+    async (body: TitleBodyType) => {
+      if (!token) return;
+      setIsLoading(true);
+      const [titleRes, bodyRes] = await Promise.all([
+        getToxicity(
+          DOMPurify.sanitize(body.title, {
+            ALLOWED_TAGS: [],
+            ALLOWED_ATTR: [],
+          }),
+        ),
+        getToxicity(
+          DOMPurify.sanitize(body.body, { ALLOWED_TAGS: [], ALLOWED_ATTR: [] }),
+        ),
+      ]);
+      if (titleRes.failure || bodyRes.failure) {
+        handleToxicResp(titleRes, "title");
+        handleToxicResp(bodyRes, "body");
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        const {
+          messages,
+          error: fError,
+          isFinished,
+        } = await fetchStream({
+          path: `/comments/create/post/${postId}`,
+          method: "POST",
+          body,
+          token,
+        });
+        console.log("error", error);
+        if (fError) {
+          if (fError.message) {
+            setErrorMsg(fError.message);
+          }
+          setErrorMsg(error);
+        } else {
+          refetch();
+          // form.reset();
+          // setValue("");
+          setTimeout(() => {
+            setIsLoading(false);
+            form.reset();
+            setValue("");
+          }, 433);
+        }
+      } catch (e) {
+        console.log(e);
+        setIsLoading(false);
+      } finally {
+        // setIsLoading(false);
+      }
+    },
+    [
+      error,
+      form,
+      handleToxicResp,
+      postId,
+      refetch,
+      setErrorMsg,
+      setIsLoading,
+      token,
+    ],
+  );
+
+  return (
+    <Accordion
+      type="single"
+      collapsible
+      className="w-full"
+      value={value}
+      onValueChange={setValue}
+    >
+      <AccordionItem value="item-1">
+        <AccordionTrigger>{header}</AccordionTrigger>
+        <AccordionContent className=" w-full flex items-center justify-center mx-auto ">
+          <Form {...form}>
+            <form
+              onSubmit={form.handleSubmit(onSubmit)}
+              className="space-y-8 w-full px-10 pt-1 lg:space-y-12"
+            >
+              <h2 className="text-xl font-bold tracking-tighter mt-2">
+                {englishHeading}
+              </h2>
+              <TitleBodyForm<TitleBodyType>
+                control={form.control}
+                titleBodyTexts={titleBodyTexts}
+              />
+
+              <ErrorMessage message={error} show={!!errorMsg} />
+              <ButtonSubmit
+                isLoading={isLoading}
+                disable={false}
+                buttonSubmitTexts={buttonSubmitTexts}
+              />
+            </form>
+          </Form>
+        </AccordionContent>
+      </AccordionItem>
+    </Accordion>
+  );
+}
