@@ -303,6 +303,7 @@ export default function RecipeForm({
             <ToastAction
               altText={baseFormTexts.altToast}
               onClick={() =>
+                // todo fix, on click goes to home
                 router.push(`/trainer/recipes/single/${res.content.id}`)
               }
             >

@@ -22,7 +22,13 @@ export default async function UpdateRecipePage({
     getRecipeFormTexts("update"),
   ]);
   return (
-    <Suspense fallback={<Loader />}>
+    <Suspense
+      fallback={
+        <div className={"w-full flex items-center justify-center"}>
+          <Loader />
+        </div>
+      }
+    >
       <UpdateRecipePageContent
         id={id}
         authUser={user}

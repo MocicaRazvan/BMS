@@ -48,15 +48,29 @@ export default function useFilesBase64<T extends FieldValues>({
   getValues,
 }: Args<T>) {
   const [firstRun, setFirstRun] = useState(true);
+  const publicSpring = process.env.NEXT_PUBLIC_SPRING_CLIENT;
+
+  if (!publicSpring) {
+    throw new Error("Missing public spring client");
+  }
+
   if (!(fieldName in getValues())) {
     throw new Error(`Invalid field name: ${fieldName}`);
   }
   useEffect(() => {
     if (files.length > 0 && firstRun) {
-      fetchFilesBase64(files).then((fs) => {
+      const filesForFront = files.map((f) => {
+        const baseUrl = new URL(f).origin;
+        if (baseUrl !== publicSpring) {
+          return f.replace(baseUrl, publicSpring);
+        }
+        return f;
+      });
+
+      fetchFilesBase64(filesForFront).then((fs) => {
         setFirstRun(false);
         setValue(fieldName as Path<T>, fs as PathValue<T, Path<T>>);
       });
     }
-  }, [fieldName, files, firstRun, setValue]);
+  }, [fieldName, files, firstRun, publicSpring, setValue]);
 }
