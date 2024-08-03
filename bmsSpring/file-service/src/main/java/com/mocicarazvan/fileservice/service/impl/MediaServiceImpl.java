@@ -2,6 +2,7 @@ package com.mocicarazvan.fileservice.service.impl;
 
 import com.mocicarazvan.fileservice.dtos.FileUploadResponse;
 import com.mocicarazvan.fileservice.dtos.MetadataDto;
+import com.mocicarazvan.fileservice.enums.FileType;
 import com.mocicarazvan.fileservice.exceptions.FileNotFound;
 import com.mocicarazvan.fileservice.models.Media;
 import com.mocicarazvan.fileservice.models.MediaMetadata;
@@ -37,8 +38,11 @@ public class MediaServiceImpl implements MediaService {
     private final MediaRepository mediaRepository;
     private final MediaMetadataRepository mediaMetadataRepository;
 
-    @Value("${files.url}")
-    private String filesUrl;
+    @Value("${images.url}")
+    private String imagesUrl;
+
+    @Value("${videos.url}")
+    private String videosUrl;
 
     @Override
     public Mono<FileUploadResponse> uploadFiles(Flux<FilePart> files, MetadataDto metadataDto) {
@@ -60,7 +64,7 @@ public class MediaServiceImpl implements MediaService {
 
     private Mono<Tuple2<Long, String>> saveFileWithIndex(Long index, FilePart filePart, MetadataDto metadataDto) {
         return saveFile(filePart, metadataDto)
-                .map(media -> Tuples.of(index, generateFileUrl(media.getGridFsId())));
+                .map(media -> Tuples.of(index, generateFileUrl(media.getGridFsId(), metadataDto.getFileType())));
     }
 
     @Override
@@ -100,8 +104,10 @@ public class MediaServiceImpl implements MediaService {
                 .then();
     }
 
-    private String generateFileUrl(String id) {
-        return String.format("%s/download/%s", filesUrl, id);
+    private String generateFileUrl(String id, FileType fileType) {
+        return String.format("%s/download/%s",
+                fileType.equals(FileType.IMAGE) ? imagesUrl : videosUrl
+                , id);
     }
 
     private Mono<Media> saveFile(FilePart filePart, MetadataDto metadataDto) {

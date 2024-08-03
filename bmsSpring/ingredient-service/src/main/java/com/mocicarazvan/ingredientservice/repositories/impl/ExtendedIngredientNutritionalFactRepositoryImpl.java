@@ -21,7 +21,7 @@ public class ExtendedIngredientNutritionalFactRepositoryImpl implements Extended
     private final DatabaseClient databaseClient;
     private final IngredientNutritionalFactMapper ingredientNutritionalFactMapper;
     private final PageableUtilsCustom pageableUtilsCustom;
-    private final RepositoryUtils requestsUtils;
+    private final RepositoryUtils repositoryUtils;
 
     private static final String SELECT_ALL = """
             SELECT
@@ -77,7 +77,7 @@ public class ExtendedIngredientNutritionalFactRepositoryImpl implements Extended
 //            hasPreviousCriteria = true;
 //        }
 
-        requestsUtils.addStringField(name, queryBuilder, hasPreviousCriteria, " UPPER(ingredient.name) LIKE UPPER(:name)");
+        repositoryUtils.addStringField(name, queryBuilder, hasPreviousCriteria, " UPPER(ingredient.name) LIKE UPPER(:name)");
 
 //        if (display != null) {
 //            queryBuilder.append(hasPreviousCriteria ? " AND" : " WHERE");
@@ -85,38 +85,23 @@ public class ExtendedIngredientNutritionalFactRepositoryImpl implements Extended
 //            hasPreviousCriteria = true;
 //        }
 
-        requestsUtils.addNotNullField(display, queryBuilder, hasPreviousCriteria, " ingredient.display = :display");
+        repositoryUtils.addNotNullField(display, queryBuilder, hasPreviousCriteria, " ingredient.display = :display");
 
 //        if (type != null) {
 //            queryBuilder.append(hasPreviousCriteria ? " AND" : " WHERE");
 //            queryBuilder.append(" ingredient.type = :type");
 //        }
 
-        requestsUtils.addNotNullField(type, queryBuilder, hasPreviousCriteria, " ingredient.type = :type");
+        repositoryUtils.addNotNullField(type, queryBuilder, hasPreviousCriteria, " ingredient.type = :type");
 
     }
 
     private DatabaseClient.GenericExecuteSpec getGenericExecuteSpec(String name, Boolean display, DietType type, StringBuilder queryBuilder) {
         DatabaseClient.GenericExecuteSpec executeSpec = databaseClient.sql(queryBuilder.toString());
 
-//        if (name != null && !name.isEmpty()) {
-//            executeSpec = executeSpec.bind("name", "%" + name + "%");
-//        }
-
-        requestsUtils.bindStringSearchField(name, executeSpec, "name");
-
-//        if (display != null) {
-//            executeSpec = executeSpec.bind("display", display);
-//        }
-
-        requestsUtils.bindNotNullField(display, executeSpec, "display");
-
-//        if (type != null) {
-//            executeSpec = executeSpec.bind("type", type.name());
-//        }
-
-
-        requestsUtils.bindEnumField(type, executeSpec, "type");
+        executeSpec = repositoryUtils.bindStringSearchField(name, executeSpec, "name");
+        executeSpec = repositoryUtils.bindNotNullField(display, executeSpec, "display");
+        executeSpec = repositoryUtils.bindEnumField(type, executeSpec, "type");
 
         return executeSpec;
     }
