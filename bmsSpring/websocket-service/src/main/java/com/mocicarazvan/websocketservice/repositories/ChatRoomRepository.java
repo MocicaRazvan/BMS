@@ -49,9 +49,21 @@ public interface ChatRoomRepository extends IdGeneratedRepository<ChatRoom> {
 //            SELECT cr2.id FROM ChatRoom cr2 JOIN cr2.users u2 WHERE u2.email = :email)
 //            """)
     //todo change, this works for 2 users in a room
+//    @Query("""
+//            SELECT DISTINCT cr FROM ChatRoom cr JOIN cr.users u
+//            WHERE LOWER( u.email) LIKE LOWER(CONCAT('%', :filterEmail, '%')) AND LOWER( u.email) != LOWER(:email)
+//            """)
     @Query("""
-            SELECT DISTINCT cr FROM ChatRoom cr JOIN cr.users u
-            WHERE LOWER( u.email) LIKE LOWER(CONCAT('%', :filterEmail, '%')) AND LOWER( u.email) != LOWER(:email)
+                SELECT cr FROM ChatRoom cr
+                WHERE cr.id IN (
+                    SELECT cr_inner.id
+                    FROM ChatRoom cr_inner
+                    JOIN cr_inner.users u_inner
+                    GROUP BY cr_inner.id
+                    HAVING COUNT(DISTINCT u_inner.id) = 2
+                      AND SUM(CASE WHEN LOWER(u_inner.email) = LOWER(:email) THEN 1 ELSE 0 END) > 0
+                      AND SUM(CASE WHEN LOWER(u_inner.email) LIKE LOWER(CONCAT('%', :filterEmail, '%')) THEN 1 ELSE 0 END) > 0
+                )
             """)
     Page<ChatRoom> findFilteredChatRooms(String email, String filterEmail, Pageable pageable);
 }

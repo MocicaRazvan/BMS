@@ -8,10 +8,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import noImg from "../../../public/noImage.jpg";
 import { Link, useRouter } from "@/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import noImg from "../../../public/noImage.jpg";
 
 interface Props extends WithUser {}
 
@@ -39,7 +39,7 @@ export default function NavProfile({ authUser }: Props) {
             <div className="flex items-center justify-center w-full gap-3">
               <Avatar className="w-14 h-14 rounded-full">
                 <AvatarImage
-                  src={authUser?.image || noImg.src}
+                  src={authUser?.image || noImg}
                   alt={authUser?.email}
                 />
               </Avatar>

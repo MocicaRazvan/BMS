@@ -6,8 +6,7 @@ services:
       POSTGRES_DB: bms
       POSTGRES_USER: myuser
       POSTGRES_PASSWORD: mypassword
-    # todo put 2000 for production
-    command: ["postgres", "-c", "max_connections=250"]
+    command: [ "postgres", "-c", "max_connections=2500" ]
 
     ports:
       - "5544:5432"
@@ -16,23 +15,23 @@ services:
     networks:
       - bms
     restart: unless-stopped
-
-  postgres-messages:
-    image: postgres:latest
-    container_name: postgres-container-messages-bms
-    environment:
-      POSTGRES_DB: bms
-      POSTGRES_USER: myuser
-      POSTGRES_PASSWORD: mypassword
-
-    command: ["postgres", "-c", "max_connections=250"]
-
-    ports:
-      - "5546:5432"
-    volumes:
-      - postgres_data_messages:/var/lib/postgresql/data
-    networks:
-      - bms
+  
+  #  postgres-messages:
+  #    image: postgres:latest
+  #    container_name: postgres-container-messages-bms
+  #    environment:
+  #      POSTGRES_DB: bms
+  #      POSTGRES_USER: myuser
+  #      POSTGRES_PASSWORD: mypassword
+  #
+  #    command: ["postgres", "-c", "max_connections=250"]
+  #
+  #    ports:
+  #      - "5546:5432"
+  #    volumes:
+  #      - postgres_data_messages:/var/lib/postgresql/data
+  #    networks:
+  #      - bms
 
   mongo-fs:
     image: mongo:latest
@@ -53,19 +52,19 @@ services:
     networks:
       - bms
     restart: unless-stopped
-
-  rabbitmq:
-    image: rabbitmq:3-management
-    container_name: rabbitmq-container-bms
-    environment:
-      RABBITMQ_DEFAULT_USER: guest
-      RABBITMQ_DEFAULT_PASS: guest
-    ports:
-      - "5672:5672"
-      - "15672:15672"
-    networks:
-      - bms
-    restart: unless-stopped
+  
+  #  rabbitmq:
+  #    image: rabbitmq:3-management
+  #    container_name: rabbitmq-container-bms
+  #    environment:
+  #      RABBITMQ_DEFAULT_USER: guest
+  #      RABBITMQ_DEFAULT_PASS: guest
+  #    ports:
+  #      - "5672:5672"
+  #      - "15672:15672"
+  #    networks:
+  #      - bms
+  #    restart: unless-stopped
 
   stripe-cli:
     image: stripe/stripe-cli:latest
@@ -81,6 +80,279 @@ services:
         "http://host.docker.internal:8080/orders/webhook",
       ]
     network_mode: host
+    restart: unless-stopped
+
+  stripe-cli-docker:
+    image: stripe/stripe-cli:latest
+    container_name: stripe-cli-docker-container-bms
+    environment:
+      STRIPE_API_KEY: ${STRIPE_API_KEY_ENV}
+    command:
+      [
+        "listen",
+        "--forward-to",
+        "http://gateway-service:8080/orders/webhook"
+      ]
+    networks:
+      - bms
+    restart: unless-stopped
+  
+  
+  
+  # SPRING SERVICES
+  config-server:
+    container_name: config-server-container-bms
+    build:
+      context: ./bmsSpring/config-server
+      dockerfile: Dockerfile
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_CLOUD_CONFIG_SERVER_GIT_PASSWORD: ${SPRING_CLOUD_CONFIG_SERVER_GIT_PASSWORD}
+    networks:
+      - bms
+    restart: unless-stopped
+
+  service-registry:
+    container_name: service-registry-container-bms
+    build:
+      context: ./bmsSpring/service-registry
+      dockerfile: Dockerfile
+    ports:
+      - "8761:8761"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+    networks:
+      - bms
+    restart: unless-stopped
+    depends_on:
+      - config-server
+
+  user-service:
+    container_name: user-service-container-bms
+    build:
+      context: ./bmsSpring
+      dockerfile: user-service/Dockerfile
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      ENCODING_SECRET: ${ENCODING_SECRET}
+      ENCODING_SPRING_MAIL_PASSWORD: ${ENCODING_SPRING_MAIL_PASSWORD}
+
+      GIT_CLIENT_SECRET: ${GIT_CLIENT_SECRET}
+      GIT_CLIENT_ID: ${GIT_CLIENT_ID}
+
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+    networks:
+      - bms
+    restart: unless-stopped
+    depends_on:
+      - config-server
+      - service-registry
+      - postgres
+      - zipkin
+
+  comment-service:
+    container_name: comment-service-container-bms
+    build:
+      context: ./bmsSpring
+      dockerfile: comment-service/Dockerfile
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+    networks:
+      - bms
+    restart: unless-stopped
+    depends_on:
+      - config-server
+      - service-registry
+      - postgres
+      - zipkin
+
+  file-service:
+    container_name: file-service-container-bms
+    build:
+      context: ./bmsSpring/file-service
+      dockerfile: Dockerfile
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+    networks:
+      - bms
+    restart: unless-stopped
+    depends_on:
+      - config-server
+      - service-registry
+      - mongo-fs
+      - zipkin
+
+  gateway-service:
+    container_name: gateway-service-container-bms
+    build:
+      context: ./bmsSpring/gateway-service
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+    networks:
+      - bms
+    restart: unless-stopped
+    depends_on:
+      - config-server
+      - service-registry
+      - zipkin
+
+  ingredient-service:
+    container_name: ingredient-service-container-bms
+    build:
+      context: ./bmsSpring
+      dockerfile: ingredient-service/Dockerfile
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+    networks:
+      - bms
+    restart: unless-stopped
+    depends_on:
+      - config-server
+      - service-registry
+      - postgres
+      - zipkin
+
+  kanban-service:
+    container_name: kanban-service-container-bms
+    build:
+      context: ./bmsSpring
+      dockerfile: kanban-service/Dockerfile
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+    networks:
+      - bms
+    restart: unless-stopped
+    depends_on:
+      - config-server
+      - service-registry
+      - postgres
+      - zipkin
+
+  order-service:
+    container_name: order-service-container-bms
+    build:
+      context: ./bmsSpring
+      dockerfile: order-service/Dockerfile
+    ports:
+      - "8086:8086"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      STRIPE_API_KEY: ${STRIPE_API_KEY_ENV}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET}
+
+      ENCODING_SECRET: ${ENCODING_SECRET}
+      ENCODING_SPRING_MAIL_PASSWORD: ${ENCODING_SPRING_MAIL_PASSWORD}
+    networks:
+      - bms
+    restart: unless-stopped
+    depends_on:
+      - config-server
+      - service-registry
+      - postgres
+      - zipkin
+      - stripe-cli-docker
+
+  plan-service:
+    container_name: plan-service-container-bms
+    build:
+      context: ./bmsSpring
+      dockerfile: plan-service/Dockerfile
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+    networks:
+      - bms
+    restart: unless-stopped
+    depends_on:
+      - config-server
+      - service-registry
+      - postgres
+      - zipkin
+
+  post-service:
+    container_name: post-service-container-bms
+    build:
+      context: ./bmsSpring
+      dockerfile: post-service/Dockerfile
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+    networks:
+      - bms
+    restart: unless-stopped
+    depends_on:
+      - config-server
+      - service-registry
+      - postgres
+      - zipkin
+
+  recipe-service:
+    container_name: recipe-service-container-bms
+    build:
+      context: ./bmsSpring
+      dockerfile: recipe-service/Dockerfile
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+    networks:
+      - bms
+    restart: unless-stopped
+    depends_on:
+      - config-server
+      - service-registry
+      - postgres
+      - zipkin
+
+  websocket-service:
+    container_name: websocket-service-container-bms
+    build:
+      context: ./bmsSpring/websocket-service
+      dockerfile: Dockerfile
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+    networks:
+      - bms
+    restart: unless-stopped
+    depends_on:
+      - config-server
+      - service-registry
+      - postgres
+      - zipkin
+
+  next-js:
+    container_name: next-js-container-bms
+    build:
+      context: ./client-next
+      dockerfile: Dockerfile
+      args:
+        NEXTAUTH_URL: ${NEXTAUTH_URL}
+        NEXTAUTH_SECRET: ${NEXTAUTH_SECRET}
+        NEXTAUTH_URL_INTERNAL: ${NEXTAUTH_URL_INTERNAL}
+        NEXT_PUBLIC_SPRING: ${NEXT_PUBLIC_SPRING}
+        NEXT_PUBLIC_SPRING_CLIENT: ${NEXT_PUBLIC_SPRING_CLIENT}
+        GITHUB_CLIENT_SECRET: ${GIT_CLIENT_SECRET}
+        GITHUB_CLIENT_ID: ${GIT_CLIENT_ID}
+        GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+        GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+    environment:
+      NEXTAUTH_URL: ${NEXTAUTH_URL}
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET}
+      NEXTAUTH_URL_INTERNAL: ${NEXTAUTH_URL_INTERNAL}
+      NEXT_PUBLIC_SPRING: ${NEXT_PUBLIC_SPRING}
+      NEXT_PUBLIC_SPRING_CLIENT: ${NEXT_PUBLIC_SPRING_CLIENT}
+      GITHUB_CLIENT_SECRET: ${GIT_CLIENT_SECRET}
+      GITHUB_CLIENT_ID: ${GIT_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+
+    ports:
+      - "3000:3000"
+    networks:
+      - bms
+    restart: unless-stopped
+    depends_on:
+      - gateway-service
 
 volumes:
   postgres_data:

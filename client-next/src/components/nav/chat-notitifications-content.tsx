@@ -96,7 +96,7 @@ function ChatNotificationItem({
           <div className="flex items-start justify-between">
             <h4 className="text-sm font-semibold">{sender}</h4>
           </div>
-          <p className="text-sm text-muted-foreground">{texts.content}</p>
+          <p className="text-sm text-muted-foreground">{texts?.content}</p>
           <p className="text-xs text-muted-foreground text-wrap text-end w-full min-h-6">
             {formatDistanceToNow(parseISO(notif.at(-1)?.timestamp || ""), {
               addSuffix: true,

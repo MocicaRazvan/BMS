@@ -1,8 +1,8 @@
 import { ConversationTexts } from "@/components/chat/conversation";
 import { getChatMessageFormTexts } from "@/texts/components/forms";
 import { getTranslations } from "next-intl/server";
-import { MainContentTexts } from "@/app/[locale]/(main)/chat/main-content";
-import { ChatMainContentWrapperTexts } from "@/app/[locale]/(main)/chat/main-content-wrapper";
+import { MainContentTexts } from "@/app/[locale]/(main)/(user)/chat/main-content";
+import { ChatMainContentWrapperTexts } from "@/app/[locale]/(main)/(user)/chat/main-content-wrapper";
 import { getDataTablePaginationTexts } from "@/texts/components/table";
 import { ChatRoomTexts } from "@/components/chat/chat-room";
 

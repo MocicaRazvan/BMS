@@ -11,6 +11,9 @@ import Conversation, {
 } from "@/components/chat/conversation";
 import LoadingSpinner from "@/components/common/loading-spinner";
 import { useSession } from "next-auth/react";
+import { redirect, useRouter } from "@/navigation";
+import { Dispatch, SetStateAction } from "react";
+import { useLocale } from "next-intl";
 
 interface ConversationWrapperProps extends ConversationTexts {
   chatRoomId: number;
@@ -25,6 +28,7 @@ export default function ConversationWrapper({
   ...props
 }: ConversationWrapperProps) {
   const session = useSession();
+  const locale = useLocale();
   const { messages, error, isFinished } = useFetchStream<
     PageableResponse<ChatMessageResponse[]>
   >({
@@ -37,6 +41,10 @@ export default function ConversationWrapper({
       limit: "10",
     },
   });
+
+  // if (!sender) {
+  //   window.location.replace(`/${locale}/chat`);
+  // }
 
   if (isFinished && error) {
     console.error("Error fetching messages:", error);

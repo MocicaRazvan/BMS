@@ -29,11 +29,11 @@ export default function BoughtNotificationContent({
   const locale = useLocale();
   const stompClient = useStompClient();
   return items.map((item, i) => {
-    const content = JSON.parse(item.content);
+    const content = JSON.parse(item?.content);
     return (
       <div
         className="grid gap-4 cursor-pointer hover:bg-accent p-2 rounded transition-all hover:shadow-lg hover:scale-[1.02] mb-3"
-        key={item.id + i}
+        key={item?.id + i}
         onClick={() => {
           // if (stompClient && stompClient?.connected) {
           //   deleteCallback(item.id, stompClient);
@@ -55,7 +55,7 @@ export default function BoughtNotificationContent({
           <div className="flex-1 space-y-1">
             <div className="flex items-center justify-between">
               <h4 className="text-sm font-semibold">
-                {itemsText[item.id]?.title || ""}
+                {itemsText?.[item.id]?.title || ""}
               </h4>
               <p className="text-xs text-muted-foreground">
                 {formatDistanceToNow(parseISO(item?.timestamp || ""), {
@@ -65,7 +65,7 @@ export default function BoughtNotificationContent({
               </p>
             </div>
             <p className="text-sm text-muted-foreground flex items-center justify-start gap-1">
-              {itemsText[item.id]?.content || ""}
+              {itemsText?.[item.id]?.content || ""}
             </p>
           </div>
         </div>

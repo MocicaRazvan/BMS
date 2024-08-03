@@ -36,14 +36,14 @@ export default function ApproveNotificationContent<
   const locale = useLocale();
   const stompClient = useStompClient();
   return items.map((item, i) => {
-    const content = JSON.parse(item.content);
+    const content = JSON.parse(item?.content);
     return (
       <div
         className="grid gap-4 cursor-pointer hover:bg-accent p-2 rounded transition-all hover:shadow-lg hover:scale-[1.02] mb-3"
         key={item?.reference?.appId + i}
         onClick={() => {
           if (stompClient && stompClient?.connected) {
-            deleteCallback(item.reference.appId, stompClient);
+            deleteCallback(item?.reference?.appId, stompClient);
             if (item?.extraLink) {
               router.push(item.extraLink);
             }
@@ -63,7 +63,7 @@ export default function ApproveNotificationContent<
           <div className="flex-1 space-y-1">
             <div className="flex items-center justify-between">
               <h4 className="text-sm font-semibold">
-                {itemsText[item.id]?.title || ""}
+                {itemsText?.[item.id]?.title || ""}
               </h4>
               <p className="text-xs text-muted-foreground">
                 {formatDistanceToNow(parseISO(item?.timestamp || ""), {
@@ -73,7 +73,7 @@ export default function ApproveNotificationContent<
               </p>
             </div>
             <p className="text-sm text-muted-foreground flex items-center justify-start gap-1">
-              {itemsText[item.id]?.content || ""}
+              {itemsText?.[item.id]?.content || ""}
             </p>
           </div>
         </div>

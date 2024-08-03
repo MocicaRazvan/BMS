@@ -89,7 +89,10 @@ public class MediaServiceImpl implements MediaService {
 
     @Override
     public Mono<Void> deleteFiles(List<String> gridIds) {
-        return Flux.fromIterable(gridIds)
+        return Flux.fromIterable(gridIds
+                        .stream().filter(ObjectId::isValid)
+                        .toList()
+                )
                 .flatMap(id -> gridFsTemplate.delete(new Query(Criteria.where("_id").is(new ObjectId(id)))))
                 .then(mediaRepository.findAllByGridFsIdIn(gridIds)
                         .flatMap(media -> mediaMetadataRepository.deleteAllByMediaId(media.getId()))

@@ -163,7 +163,7 @@ export default function UserPageContent({
         </h1>
         <div className="flex items-center justify-center gap-4">
           <Avatar className="w-16 h-16">
-            <AvatarImage src={user?.image || noImg.src} alt={user?.email} />
+            <AvatarImage src={user?.image || noImg} alt={user?.email} />
             {/* <AvatarFallback>{stateUser?.email}</AvatarFallback> */}
           </Avatar>
 

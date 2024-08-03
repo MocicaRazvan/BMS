@@ -9,7 +9,15 @@ const nextConfig = {
         remotePatterns: [
             {
                 hostname: "localhost",
-            },
+            },{
+                hostname: "im51.go.ro"
+            },{
+                 hostname:"avatars.githubusercontent.com"
+            },{
+             hostname:"lh3.googleusercontent.com"
+        },{
+            hostname:"gateway-service"
+            }
         ],
     },
 

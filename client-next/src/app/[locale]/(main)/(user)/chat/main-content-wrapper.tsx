@@ -13,7 +13,7 @@ import useFetchStream from "@/hoooks/useFetchStream";
 import { WithUser } from "@/lib/user";
 import ChatMainContent, {
   MainContentTexts,
-} from "@/app/[locale]/(main)/chat/main-content";
+} from "@/app/[locale]/(main)/(user)/chat/main-content";
 import { Link } from "@/navigation";
 import useList from "@/hoooks/useList";
 import { useSearchParams } from "next/navigation";

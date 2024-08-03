@@ -1,9 +1,10 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import * as AvatarPrimitive from "@radix-ui/react-avatar"
+import * as React from "react";
+import * as AvatarPrimitive from "@radix-ui/react-avatar";
+import Image, { StaticImageData } from "next/image";
 
-import { cn } from "@/lib/utils"
+import { cn } from "@/lib/utils";
 
 const Avatar = React.forwardRef<
   React.ElementRef<typeof AvatarPrimitive.Root>,
@@ -13,24 +14,83 @@ const Avatar = React.forwardRef<
     ref={ref}
     className={cn(
       "relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full",
-      className
+      className,
     )}
     {...props}
   />
-))
-Avatar.displayName = AvatarPrimitive.Root.displayName
+));
+Avatar.displayName = AvatarPrimitive.Root.displayName;
+
+// const AvatarImage = React.forwardRef<
+//   React.ElementRef<typeof AvatarPrimitive.Image>,
+//   React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Image>
+// >(({ className, ...props }, ref) => (
+//   <AvatarPrimitive.Image
+//     ref={ref}
+//     className={cn("aspect-square h-full w-full", className)}
+//     {...props}
+//   />
+// ));
+
+// const AvatarImage = React.forwardRef<
+//   React.ImgHTMLAttributes<HTMLImageElement>,
+//   React.ImgHTMLAttributes<HTMLImageElement>
+// >(({ className, src = DEFAULT_IMAGE_URL, alt = "Avatar", ...props }, ref) => (
+//   <div className={cn("relative aspect-square h-full w-full", className)}>
+//     <Image
+//       ref={ref}
+//       src={src}
+//       alt={alt}
+//       layout="fill"
+//       objectFit="cover"
+//       className={cn("rounded-full", className)}
+//       {...props}
+//     />
+//   </div>
+// ));
 
 const AvatarImage = React.forwardRef<
-  React.ElementRef<typeof AvatarPrimitive.Image>,
-  React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Image>
->(({ className, ...props }, ref) => (
-  <AvatarPrimitive.Image
-    ref={ref}
-    className={cn("aspect-square h-full w-full", className)}
-    {...props}
-  />
-))
-AvatarImage.displayName = AvatarPrimitive.Image.displayName
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement> & {
+    src?: string | StaticImageData;
+    alt?: string;
+  }
+>(({ className, src, alt = "Avatar", ...props }, ref) => {
+  const [imageError, setImageError] = React.useState(false);
+
+  React.useEffect(() => {
+    setImageError(false);
+  }, [src]);
+
+  return (
+    <div
+      ref={ref}
+      className={cn("relative aspect-square h-full w-full", className)}
+      {...props}
+    >
+      {src && !imageError ? (
+        <Image
+          src={src}
+          alt={alt}
+          layout="fill"
+          objectFit="cover"
+          className="rounded-full"
+          onError={() => setImageError(true)}
+        />
+      ) : (
+        <div
+          className={cn(
+            "flex h-full w-full items-center justify-center bg-muted",
+            className,
+          )}
+        >
+          {alt}
+        </div>
+      )}
+    </div>
+  );
+});
+AvatarImage.displayName = "AvatarImage";
 
 const AvatarFallback = React.forwardRef<
   React.ElementRef<typeof AvatarPrimitive.Fallback>,
@@ -40,11 +100,11 @@ const AvatarFallback = React.forwardRef<
     ref={ref}
     className={cn(
       "flex h-full w-full items-center justify-center rounded-full bg-muted",
-      className
+      className,
     )}
     {...props}
   />
-))
-AvatarFallback.displayName = AvatarPrimitive.Fallback.displayName
+));
+AvatarFallback.displayName = AvatarPrimitive.Fallback.displayName;
 
-export { Avatar, AvatarImage, AvatarFallback }
+export { Avatar, AvatarImage, AvatarFallback };

@@ -65,6 +65,11 @@ export default function ChatMainContent({
   const [initialChatId, setInitialChatId] = useState<number | null>(null);
   console.log("chatIdSINIT", initialChatId);
   console.log("chatIdSROOM", activeRoom);
+  console.log("chatIdSROOMSender", authUser.email);
+  console.log(
+    "chatIdSROOMUsers",
+    activeRoom?.users.map((user) => user.email),
+  );
 
   useEffect(() => {
     if (email) {
@@ -117,7 +122,7 @@ export default function ChatMainContent({
 
         console.log(
           "rue",
-          room.users.map((user) => user.connectedChatRoom?.id),
+          room.users.map((user) => user?.connectedChatRoom?.id),
         );
         setActiveRoom({ ...room, users });
       } else {
@@ -168,7 +173,7 @@ export default function ChatMainContent({
       const validId = initialChatRooms.find(
         (room) => room.id === initialChatId,
       );
-
+      setInitialChatId(null);
       if (validId) {
         stompClient.publish({
           destination: "/app/changeRoom",

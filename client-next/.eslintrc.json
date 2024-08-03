@@ -9,7 +9,15 @@
   ],
   "rules": {
     "@typescript-eslint/no-empty-interface": "off",
-    "react/jsx-no-literals": "error",
+    "@typescript-eslint/no-empty-function": [
+      "error",
+      {
+        "allow": [
+          "arrowFunctions"
+        ]
+      }
+    ],
+    "react/jsx-no-literals": "warn",
     "no-restricted-imports": [
       "error",
       {

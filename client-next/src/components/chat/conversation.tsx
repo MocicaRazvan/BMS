@@ -74,9 +74,9 @@ export default function Conversation({
   const observerRef = useRef<IntersectionObserver | null>(null);
 
   const areInTheSameChat =
-    sender.connectedChatRoom?.id &&
-    receiver.connectedChatRoom?.id &&
-    sender.connectedChatRoom?.id === receiver.connectedChatRoom?.id;
+    sender?.connectedChatRoom?.id &&
+    receiver?.connectedChatRoom?.id &&
+    sender?.connectedChatRoom?.id === receiver?.connectedChatRoom?.id;
 
   // console.log("Same chat", areInTheSameChat);
   // console.log("Same chat rec", receiver.connectedChatRoom?.id);

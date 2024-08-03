@@ -127,7 +127,7 @@ export default function UpdateProfile({
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="space-y-8 lg:space-y-12 w-full"
+          className="space-y-8 lg:space-y-12 w-full px-10 lg:px-20"
         >
           <FormField
             control={form.control}

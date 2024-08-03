@@ -22,6 +22,7 @@ import jakarta.validation.Validator;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
@@ -52,7 +53,7 @@ public class BeanConfig {
     }
 
     @Bean
-//    @LoadBalanced
+    @Primary
     public WebClient.Builder webClient() {
         return WebClient.builder();
     }
@@ -94,10 +95,16 @@ public class BeanConfig {
     }
 
     @Bean
+    @LoadBalanced
+    public WebClient.Builder loadBalancedWebClient() {
+        return WebClient.builder();
+    }
+
+    @Bean
     public FileClient fileClient(
             CircuitBreakerRegistry circuitBreakerRegistry, RetryRegistry retryRegistry, RateLimiterRegistry rateLimiterRegistry
     ) {
-        return new FileClient("fileService", webClient(), circuitBreakerRegistry, retryRegistry, rateLimiterRegistry);
+        return new FileClient("fileService", loadBalancedWebClient(), circuitBreakerRegistry, retryRegistry, rateLimiterRegistry);
     }
 
 }
