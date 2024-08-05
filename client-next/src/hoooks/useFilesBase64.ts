@@ -60,11 +60,16 @@ export default function useFilesBase64<T extends FieldValues>({
   useEffect(() => {
     if (files.length > 0 && firstRun) {
       const filesForFront = files.map((f) => {
-        const baseUrl = new URL(f).origin;
-        if (baseUrl !== publicSpring) {
-          return f.replace(baseUrl, publicSpring);
-        }
-        return f;
+        // const baseUrl = new URL(f).origin;
+        // if (baseUrl !== publicSpring) {
+        //   return f.replace(baseUrl, publicSpring);
+        // }
+        // return f;
+        const url = new URL(f);
+        const newUrl = new URL(
+          publicSpring + url.pathname + url.search + url.hash,
+        );
+        return newUrl.toString();
       });
 
       fetchFilesBase64(filesForFront).then((fs) => {

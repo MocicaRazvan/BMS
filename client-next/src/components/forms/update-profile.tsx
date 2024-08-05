@@ -29,9 +29,10 @@ import { useSession } from "next-auth/react";
 import { fetchWithFiles } from "@/hoooks/fetchWithFiles";
 import { CustomEntityModel, UserBody, UserDto } from "@/types/dto";
 import { BaseError } from "@/types/responses";
+import { Session } from "next-auth";
 
 interface Props extends WithUser, UpdateProfileTexts {
-  successCallback: () => void;
+  successCallback: (img: string) => void;
 }
 
 export default function UpdateProfile({
@@ -97,7 +98,7 @@ export default function UpdateProfile({
             },
           },
         });
-        successCallback();
+        successCallback(res.content.image);
       } catch (e) {
         handleBaseError(e, setErrorMsg, errorText);
       } finally {

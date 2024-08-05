@@ -15,6 +15,7 @@ import RecipeMacros from "@/components/recipes/recipe-macros";
 import { fetchStream } from "@/hoooks/fetchStream";
 import { CustomEntityModel, PostResponse, RecipeResponse } from "@/types/dto";
 import LikesDislikes from "@/components/common/likes-dislikes";
+import LoadingSpinner from "@/components/common/loading-spinner";
 
 interface Props extends WithUser {
   recipeIds: number[];
@@ -140,6 +141,13 @@ export const RecipePlanItem = memo(
       [authUser.token, recipeId, setRecipeState],
     );
 
+    if (!IQIsFinished) {
+      return (
+        <section className="w-full min-h-[30vh] flex items-center justify-center transition-all">
+          <LoadingSpinner />
+        </section>
+      );
+    }
     const colorMap = {
       VEGAN: "success",
       OMNIVORE: "secondary",

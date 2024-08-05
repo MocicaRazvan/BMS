@@ -24,10 +24,20 @@ export const StompProvider = ({
       connectionTimeout={conRec}
       reconnectDelay={conRec}
       logRawCommunication={true}
-      debug={(str) => console.log(str)}
-      onStompError={(err) => {
-        console.log("Stomp error");
-        console.error(err);
+      debug={(str) => console.log(`STOMP debug: ${str}`)}
+      onConnect={() => {
+        console.log("Connected to STOMP broker with url " + url);
+      }}
+      onDisconnect={() => {
+        console.log("Disconnected from STOMP broker");
+      }}
+      onStompError={(frame) => {
+        console.log("STOMP error: ", frame.headers["message"]);
+        // console.error("Detailed STOMP error: ", frame.body);
+      }}
+      onWebSocketError={(err) => {
+        console.log("STOMP error WebSocket error: ", err.message);
+        // console.error("Detailed WebSocket error: ", err);
       }}
     >
       {children}

@@ -4,8 +4,8 @@ import {
 } from "@/types/dto";
 import { CheckCheck, MessageCircleIcon, ThumbsUpIcon, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
-import { useRouter } from "@/navigation";
+import { cn, fromDistanceToNowUtc } from "@/lib/utils";
+import { Locale, useRouter } from "@/navigation";
 import { Client } from "@stomp/stompjs";
 import { useStompClient } from "react-stomp-hooks";
 import { formatDistanceToNow, parseISO } from "date-fns";
@@ -66,10 +66,11 @@ export default function ApproveNotificationContent<
                 {itemsText?.[item.id]?.title || ""}
               </h4>
               <p className="text-xs text-muted-foreground">
-                {formatDistanceToNow(parseISO(item?.timestamp || ""), {
-                  addSuffix: true,
-                  locale: locale === "ro" ? ro : enUS,
-                })}
+                {fromDistanceToNowUtc(
+                  parseISO(item?.timestamp || ""),
+                  Intl.DateTimeFormat().resolvedOptions().timeZone,
+                  locale as Locale,
+                )}
               </p>
             </div>
             <p className="text-sm text-muted-foreground flex items-center justify-start gap-1">

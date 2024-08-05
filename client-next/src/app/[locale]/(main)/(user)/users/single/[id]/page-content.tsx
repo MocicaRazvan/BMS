@@ -61,6 +61,7 @@ export default function UserPageContent({
 }: Props) {
   const router = useRouter();
   const stompClient = useStompClient();
+  const [userState, setUserState] = useState<typeof authUser>(authUser);
 
   const { messages, error, refetch, isFinished } = useFetchStream<
     CustomEntityModel<UserDto>,
@@ -208,7 +209,10 @@ export default function UserPageContent({
             <AlertDialogMakeTrainer
               user={user}
               authUser={authUser}
-              successCallback={refetch}
+              successCallback={() => {
+                refetch();
+                router.refresh();
+              }}
             />
           </div>
         )}
@@ -223,9 +227,13 @@ export default function UserPageContent({
               <AccordionTrigger>{editProfile}</AccordionTrigger>
               <AccordionContent>
                 <UpdateProfile
-                  authUser={authUser}
+                  authUser={userState}
                   {...updateProfileTexts}
-                  successCallback={refetch}
+                  successCallback={(image) => {
+                    refetch();
+                    setUserState((prev) => ({ ...prev, image }));
+                    router.refresh();
+                  }}
                 />
               </AccordionContent>
             </AccordionItem>

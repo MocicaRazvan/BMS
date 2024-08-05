@@ -6,6 +6,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import reactor.core.publisher.Hooks;
 
+import java.util.TimeZone;
+
 @SpringBootApplication
 @EnableDiscoveryClient
 public class FileServiceApplication {
@@ -17,5 +19,7 @@ public class FileServiceApplication {
     @PostConstruct
     public void init() {
         Hooks.enableAutomaticContextPropagation();
+        TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
+
     }
 }

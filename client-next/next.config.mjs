@@ -17,6 +17,8 @@ const nextConfig = {
              hostname:"lh3.googleusercontent.com"
         },{
             hostname:"gateway-service"
+            },{
+            hostname:'nginx-gateway'
             }
         ],
     },

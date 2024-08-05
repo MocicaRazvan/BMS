@@ -7,10 +7,12 @@ import {
   PageableResponse,
 } from "@/types/dto";
 import { memo, useCallback, useEffect, useRef, useState } from "react";
-import { isDeepEqual } from "@/lib/utils";
+import { formatFromUtc, isDeepEqual } from "@/lib/utils";
 import { useStompClient, useSubscription } from "react-stomp-hooks";
-import { compareAsc, format, parseISO } from "date-fns";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { compareAsc, parseISO } from "date-fns";
+import { format } from "date-fns";
+import { toZonedTime, getTimezoneOffset } from "date-fns-tz";
+
 import ChatMessageForm, {
   ChatMessageFormTexts,
 } from "@/components/forms/chat-message-form";
@@ -266,8 +268,12 @@ interface ChatMessageProps {
 const ChatMessageItem = memo(
   ({ chatMessage, sender, receiver }: ChatMessageProps) => {
     const isSender = chatMessage.sender?.email === sender.email;
-    const formatDate = (d: string) => format(parseISO(d), "dd-MM-yy HH:mm:ss");
-
+    const formatDate = (d: string) => {
+      const utcDate = parseISO(d);
+      const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      const adjustedDate = formatFromUtc(utcDate, userTimeZone);
+      return format(adjustedDate, "dd-MM-yy HH:mm:ss");
+    };
     return isSender ? (
       <div className="flex flex-row-reverse gap-2 items-end">
         <div className="rounded-lg bg-gray-100 dark:bg-gray-900 p-4 max-w-[75%] backdrop-blur">

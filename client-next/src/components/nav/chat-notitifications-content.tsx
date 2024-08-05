@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { useCallback, useEffect, useState } from "react";
 import { useStompClient } from "react-stomp-hooks";
 import { getChatMessageNotificationContentTexts } from "@/texts/components/nav";
+import { fromDistanceToNowUtc } from "@/lib/utils";
 
 export interface ChatMessageNotificationContentTexts {
   content: string;
@@ -98,10 +99,11 @@ function ChatNotificationItem({
           </div>
           <p className="text-sm text-muted-foreground">{texts?.content}</p>
           <p className="text-xs text-muted-foreground text-wrap text-end w-full min-h-6">
-            {formatDistanceToNow(parseISO(notif.at(-1)?.timestamp || ""), {
-              addSuffix: true,
-              locale: locale === "ro" ? ro : enUS,
-            })}
+            {fromDistanceToNowUtc(
+              parseISO(notif.at(-1)?.timestamp || ""),
+              Intl.DateTimeFormat().resolvedOptions().timeZone,
+              locale,
+            )}
           </p>
         </div>
       </div>

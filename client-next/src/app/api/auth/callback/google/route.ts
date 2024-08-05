@@ -9,6 +9,7 @@ export async function GET(req: NextRequest) {
   for (const [key, value] of searchParams.entries()) {
     console.log(`${key}: ${value}`);
   }
+  console.log("GOOGLE AUTH");
   console.log(cookies().getAll());
   console.log(cookies().get("googleState"));
 

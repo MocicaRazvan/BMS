@@ -6,6 +6,10 @@ import { ApproveDto, DietType, WithUserDto } from "@/types/dto";
 import { notFound } from "next/navigation";
 import { SortingOption } from "@/components/list/grid-list";
 import { Dispatch, SetStateAction } from "react";
+import { getTimezoneOffset, toZonedTime } from "date-fns-tz";
+import { formatDistanceToNow, parseISO } from "date-fns";
+import { enUS, ro } from "date-fns/locale";
+import { Locale } from "@/navigation";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -337,4 +341,21 @@ export function generateUniqueNumber() {
   const timestamp = Date.now();
   const randomNum = Math.floor(Math.random() * 10000);
   return timestamp * 10000 + randomNum;
+}
+
+export function formatFromUtc(utcDate: Date, userTimeZone: string) {
+  const zonedDate = toZonedTime(utcDate, userTimeZone);
+  const offset = getTimezoneOffset(userTimeZone, zonedDate);
+  return new Date(zonedDate.getTime() + offset);
+}
+
+export function fromDistanceToNowUtc(
+  utcDate: Date,
+  userTimeZone: string,
+  locale: Locale,
+) {
+  return formatDistanceToNow(formatFromUtc(utcDate, userTimeZone), {
+    addSuffix: true,
+    locale: locale === "ro" ? ro : enUS,
+  });
 }

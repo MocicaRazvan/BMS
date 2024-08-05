@@ -1,6 +1,6 @@
 import { BoughtNotificationResponse } from "@/types/dto";
 import { Client } from "@stomp/stompjs";
-import { useRouter } from "@/navigation";
+import { Locale, useRouter } from "@/navigation";
 import { useLocale } from "next-intl";
 import { useStompClient } from "react-stomp-hooks";
 import { Button } from "@/components/ui/button";
@@ -8,6 +8,7 @@ import { BadgeEuro, CheckCheck, X } from "lucide-react";
 import { formatDistanceToNow, parseISO } from "date-fns";
 import { enUS, ro } from "date-fns/locale";
 import { BoughtPayloadStomp } from "@/context/bought-notification-context";
+import { fromDistanceToNowUtc } from "@/lib/utils";
 
 export interface BoughtNotificationContentTexts {
   title: string;
@@ -58,10 +59,11 @@ export default function BoughtNotificationContent({
                 {itemsText?.[item.id]?.title || ""}
               </h4>
               <p className="text-xs text-muted-foreground">
-                {formatDistanceToNow(parseISO(item?.timestamp || ""), {
-                  addSuffix: true,
-                  locale: locale === "ro" ? ro : enUS,
-                })}
+                {fromDistanceToNowUtc(
+                  parseISO(item?.timestamp || ""),
+                  Intl.DateTimeFormat().resolvedOptions().timeZone,
+                  locale as Locale,
+                )}
               </p>
             </div>
             <p className="text-sm text-muted-foreground flex items-center justify-start gap-1">
