@@ -137,9 +137,11 @@ export default function ChatMainContentWrapper({
     );
   }
 
+  // return null;
+
   return (
     <Suspense fallback={<LoadingSpinner />}>
-      <div className="mb-20 flex flex-col w-full mx-auto max-w-7xl items-center justify-center mt-10 ">
+      <div className="mb-20 md:px-6 flex flex-col w-full mx-auto max-w-7xl items-center justify-center mt-10 ">
         <div
           className={cn(
             "w-full flex flex-col items-center md:items-start justify-start ",

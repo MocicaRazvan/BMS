@@ -366,7 +366,7 @@ services:
       HTTPS_PORT: 8443
     ports:
       - "8080:80"
-      - "8443:443"
+    #      - "8443:443"
     volumes:
       - ./nginx/gateway.conf.template:/etc/nginx/nginx.conf.template
       - ./nginx/certs:/etc/nginx/ssl
@@ -391,7 +391,7 @@ services:
       HTTPS_PORT: 3443
     ports:
       - "3000:81"
-      - "3443:444"
+    #      - "3443:444"
     volumes:
       - ./nginx/nextjs.conf.template:/etc/nginx/nginx.conf.template
       - ./nginx/certs:/etc/nginx/ssl

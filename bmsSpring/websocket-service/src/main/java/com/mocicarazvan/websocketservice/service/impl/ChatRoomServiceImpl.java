@@ -118,6 +118,15 @@ public class ChatRoomServiceImpl implements ChatRoomService {
 
     @Override
     public PageableResponse<List<ChatRoomResponse>> getChatRoomsFiltered(String email, String filterEmail, PageableBody pageableBody) {
+
+        //todo remove
+        var v = chatRoomRepository.findFilteredChatRooms(email, filterEmail,
+                pageableUtilsCustom.createPageRequest(pageableBody));
+
+        log.error("Email: {}", email);
+        log.error("Filter email: {}", filterEmail);
+        log.error("Chat rooms {} , {}", v.getTotalElements(), v.getContent());
+
         return
                 pageableUtilsCustom.createPageableResponse(
                         chatRoomRepository.findFilteredChatRooms(email, filterEmail,

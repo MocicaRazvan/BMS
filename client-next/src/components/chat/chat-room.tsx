@@ -82,7 +82,7 @@ export const ChatRoom = memo(
 
     // console.log("chat rooms", chatRooms);
     return (
-      <ScrollArea className="w-full h-[350px] md:h-[calc(1000px-4rem-105px)]  space-y-4">
+      <ScrollArea className="w-full h-[350px] min-w-[200px] md:h-[calc(1000px-4rem-105px)]  space-y-4">
         <div className="w-full h-full space-y-4 pr-4 pb-6 ">
           {/*<Button*/}
           {/*  onClick={() => {*/}

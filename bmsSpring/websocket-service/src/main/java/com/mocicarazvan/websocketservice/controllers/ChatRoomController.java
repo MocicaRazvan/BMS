@@ -8,6 +8,7 @@ import com.mocicarazvan.websocketservice.dtos.chatRoom.DeleteChatRoomRequest;
 import com.mocicarazvan.websocketservice.service.ChatRoomService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
@@ -19,6 +20,7 @@ import java.util.List;
 //@Controller
 @RestController
 @RequiredArgsConstructor
+@Slf4j
 public class ChatRoomController {
     // todo sort order users and conversation like project sem1
 

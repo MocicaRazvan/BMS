@@ -5,6 +5,7 @@ import React, {
   useContext,
   ReactNode,
   useEffect,
+  useCallback,
 } from "react";
 import { useSearchParams } from "next/navigation";
 import { useStompClient } from "react-stomp-hooks";
@@ -34,6 +35,18 @@ export const ChatProvider: React.FC<{
   const [activeChatId, setActiveChatId] = useState<number | null>(null);
   const [oldPathname, setOldPathname] = useState<string>(pathname);
 
+  const handleDisconnect = useCallback(() => {
+    if (!stompClient || !stompClient?.connected || !authUser?.email) return;
+    console.log("USE CC: Disconnecting user:", authUser.email);
+    stompClient.publish({
+      destination: `/app/disconnectUser/${authUser.email}`,
+      body: JSON.stringify({
+        email: authUser.email,
+      }),
+    });
+    setActiveChatId(null);
+  }, [authUser?.email, stompClient?.connected]);
+
   // disconnect user when leaving chat page
   useEffect(() => {
     console.log("USE CC: handleBeforeUnload called");
@@ -44,18 +57,55 @@ export const ChatProvider: React.FC<{
       stompClient?.connected &&
       authUser?.email
     ) {
-      console.log("USE CC: Disconnecting user:", authUser.email);
-      stompClient.publish({
-        destination: `/app/disconnectUser/${authUser.email}`,
-        body: JSON.stringify({
-          email: authUser.email,
-        }),
-      });
-      setActiveChatId(null);
+      // console.log("USE CC: Disconnecting user:", authUser.email);
+      // stompClient.publish({
+      //   destination: `/app/disconnectUser/${authUser.email}`,
+      //   body: JSON.stringify({
+      //     email: authUser.email,
+      //   }),
+      // });
+      // setActiveChatId(null);
+      handleDisconnect();
     }
 
     setOldPathname(pathname);
-  }, [authUser?.email, oldPathname, pathname, stompClient?.connected]);
+
+    // return () => {
+    //   handleDisconnect();
+    // };
+  }, [
+    authUser?.email,
+    oldPathname,
+    pathname,
+    stompClient?.connected,
+    handleDisconnect,
+  ]);
+
+  useEffect(() => {
+    console.log("USE CC: handleBeforeUnload called");
+
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      if (pathname === "/chat" && stompClient?.connected && authUser?.email) {
+        handleDisconnect();
+      }
+      event.preventDefault();
+
+      return;
+    };
+
+    window.addEventListener("pagehide", handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener("pagehide", handleBeforeUnload);
+      handleDisconnect();
+    };
+  }, [
+    authUser?.email,
+    oldPathname,
+    pathname,
+    stompClient?.connected,
+    handleDisconnect,
+  ]);
 
   return (
     <ChatContext.Provider value={{ activeChatId, setActiveChatId }}>
