@@ -179,7 +179,7 @@ export default function SingeRecipePageContent({
   };
 
   return (
-    <section className="w-full max-w-[1500px] min-h-[calc(100vh-4rem)] flex-col items-center justify-center transition-all px-6 py-10 relative ">
+    <section className="w-full mx-auto max-w-[1500px] min-h-[calc(100vh-4rem)] flex-col items-center justify-center transition-all px-6 py-10 relative ">
       {/*<ElementHeader*/}
       {/*  elementState={recipeState}*/}
       {/*  react={react}*/}

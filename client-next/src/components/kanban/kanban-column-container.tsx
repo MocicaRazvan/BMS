@@ -65,6 +65,7 @@ function KanbanColumnContainer({
 }: Props) {
   const [editMode, setEditMode] = useState(false);
   const initialTitle = useRef(column.title);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const taskIds = useMemo(() => tasks.map((task) => task.id), [tasks]);
 
@@ -83,7 +84,7 @@ function KanbanColumnContainer({
       type: "Column",
       column,
     },
-    disabled: editMode,
+    disabled: editMode || isDialogOpen,
   });
 
   const style = {
@@ -180,6 +181,7 @@ function KanbanColumnContainer({
             successCallback={() => deleteColumn(column)}
             trashIconClassName={"h-6 w-6"}
             {...deleteKanbanItemTexts}
+            setIsDialogOpen={setIsDialogOpen}
           />
         </div>
       </CardHeader>

@@ -13,7 +13,7 @@ import { Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import useLoadingErrorState from "@/hoooks/useLoadingErrorState";
-import { ReactNode, useCallback } from "react";
+import { ReactNode, useCallback, useState } from "react";
 import ButtonSubmit, {
   ButtonSubmitTexts,
 } from "@/components/forms/button-submit";
@@ -30,6 +30,7 @@ export interface DeleteKanbanItemTexts {
 interface Props extends DeleteKanbanItemTexts {
   successCallback: () => Promise<void>;
   trashIconClassName?: string;
+  setIsDialogOpen: (isOpen: boolean) => void;
 }
 
 export default function DeleteKanbanItem({
@@ -41,6 +42,7 @@ export default function DeleteKanbanItem({
   buttonSubmitTexts,
   cancel,
   confirm,
+  setIsDialogOpen,
 }: Props) {
   const { setErrorMsg, errorMsg, router, isLoading, setIsLoading } =
     useLoadingErrorState();
@@ -57,7 +59,7 @@ export default function DeleteKanbanItem({
   }, [error, setErrorMsg, setIsLoading, successCallback]);
 
   return (
-    <Dialog>
+    <Dialog onOpenChange={setIsDialogOpen}>
       <DialogTrigger asChild>
         <Button
           size={"icon"}
@@ -69,7 +71,12 @@ export default function DeleteKanbanItem({
           <Trash2 className={cn("h-4 w-4", trashIconClassName)} />
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent
+        className="sm:max-w-md"
+        onMouseMove={(e) => {
+          e.stopPropagation();
+        }}
+      >
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>{description}</DialogDescription>

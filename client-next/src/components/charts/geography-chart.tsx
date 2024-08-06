@@ -37,6 +37,8 @@ import { useLocale } from "next-intl";
 import getCountryISO2 from "country-iso-3-to-2";
 import { Skeleton } from "@/components/ui/skeleton";
 
+const LEGEND_STEPS = 9;
+
 export interface GeographyChartTexts {
   zoomInLabel: string;
   zoomOutLabel: string;
@@ -55,13 +57,18 @@ export default function GeographyChart({
 }: Props) {
   const locale = useLocale();
 
-  const nrFormater = new Intl.NumberFormat(locale, {
-    notation: "compact",
-    maximumFractionDigits: 1,
-  });
   const regionNames = new Intl.DisplayNames([locale], { type: "region" });
   const [radioOption, setRadioOption] = useState<CountrySummaryType>(
     CountrySummaryType.COUNT,
+  );
+
+  const nrFormater = useMemo(
+    () =>
+      new Intl.NumberFormat(locale, {
+        notation: "compact",
+        maximumFractionDigits: radioOption === "TOTAL_AMOUNT" ? 1 : 0,
+      }),
+    [locale, radioOption],
   );
 
   const { messages, error, isFinished } = useFetchStream<CountryOrderSummary>({
@@ -105,17 +112,17 @@ export default function GeographyChart({
   const colorScale = scaleSequential(interpolateBlues).domain(domain);
 
   const legendItems = useMemo(() => {
-    const steps = 9;
+    const steps = LEGEND_STEPS;
     const stepValue = (domain[1] - domain[0]) / steps;
     return Array.from({ length: steps }, (_, i) => {
       const startValue = domain[0] + stepValue * i;
       const endValue = domain[0] + stepValue * (i + 1);
       return {
-        startValue: startValue,
-        endValue: endValue,
+        startValue,
+        endValue,
         color: colorScale(startValue),
       };
-    });
+    }).filter(({ startValue, endValue }) => startValue < endValue);
   }, [domain, colorScale]);
 
   return (

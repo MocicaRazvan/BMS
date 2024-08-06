@@ -75,7 +75,7 @@ export default function SingleTrainerPlanPageContent({
 
   const { isOwner, isAdmin } = checkOwnerOrAdmin(authUser, plan);
   return (
-    <section className="w-full max-w-[1500px] min-h-[calc(100vh-4rem)] flex-col items-center justify-center transition-all px-6 py-10 relative ">
+    <section className="w-full mx-auto max-w-[1500px] min-h-[calc(100vh-4rem)] flex-col items-center justify-center transition-all px-6 py-10 relative ">
       <div
         className="sticky top-[4rem] z-10 shadow-sm p-4 w-[130px] rounded-xl
       bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 overflow-hidden

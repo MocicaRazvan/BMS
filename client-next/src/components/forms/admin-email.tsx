@@ -144,7 +144,7 @@ export default function AdminEmail({
         form.reset();
         setEditorKey(Math.random());
         toast({
-          description: toastDescription,
+          description: `${toastDescription} ${data.email} `,
           variant: "success",
         });
         if (res?.error?.status) {

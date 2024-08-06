@@ -69,6 +69,12 @@ function DialogKanbanTask({
   const { setErrorMsg, errorMsg, router, isLoading, setIsLoading } =
     useLoadingErrorState();
 
+  const handleCleanup = useCallback(() => {
+    if (task?.id) return;
+    setTaskContent("");
+    setTaskType("LOW");
+  }, [task?.id]);
+
   const handleSubmit = useCallback(
     (content: string) => {
       setErrorMsg("");
@@ -78,13 +84,19 @@ function DialogKanbanTask({
         .then(() => {
           setErrorMsg("");
           setIsOpen(false);
-          setTaskContent("");
-          setTaskType("LOW");
+          handleCleanup();
         })
         .catch(() => setErrorMsg(error))
         .finally(() => setIsLoading(false));
     },
-    [error, setErrorMsg, setIsLoading, successCallback, taskType],
+    [
+      error,
+      handleCleanup,
+      setErrorMsg,
+      setIsLoading,
+      successCallback,
+      taskType,
+    ],
   );
 
   useEffect(() => {

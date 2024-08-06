@@ -104,7 +104,7 @@ export default function SingleOrderPageContent({
   checkOwnerOrAdmin(authUser, ordersAddress[0].content.order);
   return (
     <section className="w-full  min-h-[calc(100vh-4rem)] flex-col items-center justify-center transition-all px-6 py-10 relative pb-14 max-w-[1000px] mx-auto ">
-      <div className="flex w-full items-center justify-center gap-5 my-10">
+      <div className="flex w-full items-end justify-center gap-5 my-10">
         <h1 className="font-bold tracking-tighter text-3xl md:text-5xl  text-center">
           {title}
         </h1>

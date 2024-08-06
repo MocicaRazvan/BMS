@@ -1,4 +1,4 @@
-import { memo } from "react";
+import { memo, useState } from "react";
 
 import { KanbanTask } from "@/components/kanban/kanban-board";
 import { useSortable } from "@dnd-kit/sortable";
@@ -46,6 +46,8 @@ function KanbanTaskCard({
   deleteKanbanItemTexts,
   types,
 }: Props) {
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
   const {
     setNodeRef,
     attributes,
@@ -59,6 +61,7 @@ function KanbanTaskCard({
       type: "Task",
       task,
     },
+    disabled: isDialogOpen,
   });
   const style = {
     transition,
@@ -118,6 +121,7 @@ function KanbanTaskCard({
           <DeleteKanbanItem
             successCallback={() => deleteTask(task)}
             {...deleteKanbanItemTexts}
+            setIsDialogOpen={setIsDialogOpen}
           />
         </div>
       </div>
