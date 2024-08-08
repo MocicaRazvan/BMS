@@ -48,13 +48,24 @@ export default async function handleOauthCall(
 
       const nextAuthUrl = process.env.NEXTAUTH_URL;
       const url = nextAuthUrl ? new URL(nextAuthUrl) : new URL("/");
+      const secure =
+        process.env.NODE_ENV === "production" && url.protocol === "https:";
+
+      console.log("Redirect Oauth URL:", url);
+
+      console.log("Secure:", secure);
+
+      const nextAuthCookieName = secure
+        ? "__Secure-next-auth.session-token"
+        : "next-auth.session-token";
 
       const res = NextResponse.redirect(url, { status: 302 });
-      res.cookies.set("next-auth.session-token", newToken, {
+      res.cookies.set(nextAuthCookieName, newToken, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        // secure: false,
+        // secure: process.env.NODE_ENV === "production",
+        secure,
         path: "/",
+        sameSite: "lax",
       });
 
       return res;

@@ -94,7 +94,7 @@ export default function SingIn({
       }
     } catch (error) {
       console.error("Unexpected error during sign-in:", error);
-      await logError("Unexpected error during sign-in", error);
+      // await logError("Unexpected error during sign-in", error);
       setErrorMsg("An unexpected error occurred. Please try again later.");
       setIsLoading(false);
     }

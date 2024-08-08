@@ -94,6 +94,7 @@ services:
         "--forward-to",
         #        "http://gateway-service:8080/orders/webhook"
         "http://nginx-gateway:80/orders/webhook",
+        #        "https://nginx-gateway:443/orders/webhook",
       ]
     networks:
       - bms
@@ -108,7 +109,8 @@ services:
       context: ./bmsSpring/config-server
       dockerfile: Dockerfile
     environment:
-      SPRING_PROFILES_ACTIVE: docker
+      #      SPRING_PROFILES_ACTIVE: docker
+      SPRING_PROFILES_ACTIVE: server
       SPRING_CLOUD_CONFIG_SERVER_GIT_PASSWORD: ${SPRING_CLOUD_CONFIG_SERVER_GIT_PASSWORD}
     networks:
       - bms
@@ -122,7 +124,8 @@ services:
     ports:
       - "8761:8761"
     environment:
-      SPRING_PROFILES_ACTIVE: docker
+      #      SPRING_PROFILES_ACTIVE: docker
+      SPRING_PROFILES_ACTIVE: server
     networks:
       - bms
     restart: unless-stopped
@@ -135,7 +138,8 @@ services:
       context: ./bmsSpring
       dockerfile: user-service/Dockerfile
     environment:
-      SPRING_PROFILES_ACTIVE: docker
+      #      SPRING_PROFILES_ACTIVE: docker
+      SPRING_PROFILES_ACTIVE: server
       ENCODING_SECRET: ${ENCODING_SECRET}
       ENCODING_SPRING_MAIL_PASSWORD: ${ENCODING_SPRING_MAIL_PASSWORD}
 
@@ -159,7 +163,8 @@ services:
       context: ./bmsSpring
       dockerfile: comment-service/Dockerfile
     environment:
-      SPRING_PROFILES_ACTIVE: docker
+      #      SPRING_PROFILES_ACTIVE: docker
+      SPRING_PROFILES_ACTIVE: server
     networks:
       - bms
     restart: unless-stopped
@@ -175,7 +180,8 @@ services:
       context: ./bmsSpring/file-service
       dockerfile: Dockerfile
     environment:
-      SPRING_PROFILES_ACTIVE: docker
+      #      SPRING_PROFILES_ACTIVE: docker
+      SPRING_PROFILES_ACTIVE: server
     networks:
       - bms
     restart: unless-stopped
@@ -193,7 +199,8 @@ services:
     #    ports:
     #      - "8080:8080"
     environment:
-      SPRING_PROFILES_ACTIVE: docker
+      #      SPRING_PROFILES_ACTIVE: docker
+      SPRING_PROFILES_ACTIVE: server
     networks:
       - bms
     restart: unless-stopped
@@ -208,7 +215,8 @@ services:
       context: ./bmsSpring
       dockerfile: ingredient-service/Dockerfile
     environment:
-      SPRING_PROFILES_ACTIVE: docker
+      #      SPRING_PROFILES_ACTIVE: docker
+      SPRING_PROFILES_ACTIVE: server
     networks:
       - bms
     restart: unless-stopped
@@ -224,7 +232,8 @@ services:
       context: ./bmsSpring
       dockerfile: kanban-service/Dockerfile
     environment:
-      SPRING_PROFILES_ACTIVE: docker
+      #      SPRING_PROFILES_ACTIVE: docker
+      SPRING_PROFILES_ACTIVE: server
     networks:
       - bms
     restart: unless-stopped
@@ -242,7 +251,8 @@ services:
     ports:
       - "8086:8086"
     environment:
-      SPRING_PROFILES_ACTIVE: docker
+      #      SPRING_PROFILES_ACTIVE: docker
+      SPRING_PROFILES_ACTIVE: server
       STRIPE_API_KEY: ${STRIPE_API_KEY_ENV}
       STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET}
 
@@ -264,7 +274,8 @@ services:
       context: ./bmsSpring
       dockerfile: plan-service/Dockerfile
     environment:
-      SPRING_PROFILES_ACTIVE: docker
+      #      SPRING_PROFILES_ACTIVE: docker
+      SPRING_PROFILES_ACTIVE: server
     networks:
       - bms
     restart: unless-stopped
@@ -280,7 +291,8 @@ services:
       context: ./bmsSpring
       dockerfile: post-service/Dockerfile
     environment:
-      SPRING_PROFILES_ACTIVE: docker
+      #      SPRING_PROFILES_ACTIVE: docker
+      SPRING_PROFILES_ACTIVE: server
     networks:
       - bms
     restart: unless-stopped
@@ -296,7 +308,8 @@ services:
       context: ./bmsSpring
       dockerfile: recipe-service/Dockerfile
     environment:
-      SPRING_PROFILES_ACTIVE: docker
+      #      SPRING_PROFILES_ACTIVE: docker
+      SPRING_PROFILES_ACTIVE: server
     networks:
       - bms
     restart: unless-stopped
@@ -312,7 +325,8 @@ services:
       context: ./bmsSpring/websocket-service
       dockerfile: Dockerfile
     environment:
-      SPRING_PROFILES_ACTIVE: docker
+      #      SPRING_PROFILES_ACTIVE: docker
+      SPRING_PROFILES_ACTIVE: server
     networks:
       - bms
     restart: unless-stopped
@@ -366,14 +380,14 @@ services:
       HTTPS_PORT: 8443
     ports:
       - "8080:80"
-    #      - "8443:443"
+      - "8443:443"
     volumes:
       - ./nginx/gateway.conf.template:/etc/nginx/nginx.conf.template
       - ./nginx/certs:/etc/nginx/ssl
     command: >
       /bin/sh -c "
         if [ ! -f /etc/nginx/ssl/selfsigned.crt ]; then
-          openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/nginx/ssl/selfsigned.key -out /etc/nginx/ssl/selfsigned.crt -subj '/CN=localhost';
+          openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/nginx/ssl/selfsigned.key -out /etc/nginx/ssl/selfsigned.crt -subj '/CN=im51.go.ro';
         fi &&
         envsubst '\$${HTTP_PORT} \$${HTTPS_PORT}' < /etc/nginx/nginx.conf.template > /etc/nginx/nginx.conf &&
         nginx -g 'daemon off;'"
@@ -391,7 +405,7 @@ services:
       HTTPS_PORT: 3443
     ports:
       - "3000:81"
-    #      - "3443:444"
+      - "3443:444"
     volumes:
       - ./nginx/nextjs.conf.template:/etc/nginx/nginx.conf.template
       - ./nginx/certs:/etc/nginx/ssl
@@ -402,7 +416,7 @@ services:
     command: >
       /bin/sh -c "
         if [ ! -f /etc/nginx/ssl/selfsigned.crt ]; then
-          openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/nginx/ssl/selfsigned.key -out /etc/nginx/ssl/selfsigned.crt -subj '/CN=localhost';
+          openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/nginx/ssl/selfsigned.key -out /etc/nginx/ssl/selfsigned.crt -subj '/CN=im51.go.ro';
         fi &&
         envsubst '\$${HTTP_PORT} \$${HTTPS_PORT}' < /etc/nginx/nginx.conf.template > /etc/nginx/nginx.conf &&
         nginx -g 'daemon off;'"

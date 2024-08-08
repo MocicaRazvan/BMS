@@ -6,6 +6,7 @@ import { CustomGoogleProvider } from "@/app/api/auth/[...nextauth]/custom-google
 export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
+      id: "credentials",
       name: "Credentials",
       credentials: {
         email: {
@@ -83,5 +84,8 @@ export const authOptions: NextAuthOptions = {
   pages: {
     signIn: "/auth/signin",
     signOut: "/auth/signout",
+  },
+  session: {
+    strategy: "jwt",
   },
 };
