@@ -95,3 +95,9 @@ fabric.properties
 *.vsix
 
 nginx/certs/*
+
+db
+
+create-images.ps1
+
+export-dbs.ps1
