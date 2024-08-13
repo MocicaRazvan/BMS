@@ -19,19 +19,8 @@ import NavProfile from "@/components/nav/nav-profile";
 import { DashboardIcon } from "@radix-ui/react-icons";
 import NotificationPop from "@/components/nav/notification-pop";
 import CartPop from "@/components/nav/cart-pop";
-import AnimatedShinyText from "@/components/magicui/animated-shiny-text";
 import Logo from "@/components/logo/logo";
-// import {
-//   createExercisesLinks,
-//   createOrdersLinks,
-//   createPostsLinks,
-//   createTrainingsLinks,
-//   linkFactory,
-// } from "@/components/nav/links";
-// import { MenuBarMenuNav } from "@/components/nav/menu-bar-menu-nav";
-// import { BurgerNav } from "@/components/nav/burger-nav";
-// import { NavProfile } from "@/components/nav/nav-profile.tsx";
-// import NotificationPop from "@/components/nav/notification-pop";
+
 export interface NavTexts {
   themeSwitchTexts: ThemeSwitchTexts;
   postsTexts: Record<string, string>;

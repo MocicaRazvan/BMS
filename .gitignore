@@ -101,3 +101,7 @@ db
 create-images.ps1
 
 export-dbs.ps1
+
+ollama_models
+
+nginx/certs

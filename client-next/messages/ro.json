@@ -1003,6 +1003,15 @@
         "disclaimer": "Declarație de responsabilitate",
         "rightsReserved": "Bro Meets Science Co. Toate drepturile rezervate"
       }
+    },
+    "ai-chat": {
+      "AiChatBoxTexts": {
+        "loadingContent": "Gătesc răspunsul...",
+        "errorContent": "Ceva nu a mers bine, vă rugăm să încercați din nou mai târziu",
+        "emptyHeader": "Trimiteți un mesaj pentru a începe conversația cu AI!",
+        "emptyContent": "Întrebați orice doriți să știți despre sănătate și nutriție, iar noi vom face tot posibilul să vă oferim răspunsul corect. Întotdeauna consultați un profesionist înainte de a face modificări în dieta sau stilul dvs. de viață.",
+        "inputPlaceholder": "Întrebați ceva..."
+      }
     }
   },
   "pages": {

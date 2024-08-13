@@ -335,7 +335,35 @@ services:
       - service-registry
       - postgres
       - zipkin
-
+  
+  
+  
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama-container-bms
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - capabilities: [ gpu ]
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=all
+      - OLLAMA_KEEP_ALIVE=-1m
+    ports:
+      - "11434:11434"
+    # command: ollama run yi:v1.5
+    # ollama run yi:34b
+    # ollama run yi:9b
+    # ollama run mistral-nemo
+    # ollama run mistral-nemo --keepalive -1m
+    volumes:
+      - ./ollama_models:/root/.ollama
+    networks:
+      - bms
+    restart: unless-stopped
+  
+  
   next-js:
     container_name: next-js-container-bms
     build:
@@ -363,7 +391,10 @@ services:
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
       NODE_TLS_REJECT_UNAUTHORIZED: ${NODE_TLS_REJECT_UNAUTHORIZED}
-
+      OLLAMA_MODEL: ${OLLAMA_MODEL}
+      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL}
+      OLLAMA_EMBEDDING: ${OLLAMA_EMBEDDING}
+    
     #    ports:
     #      - "3000:3000"
     networks:
@@ -371,6 +402,8 @@ services:
     restart: unless-stopped
     depends_on:
       - gateway-service
+      - ollama
+
 
   nginx-gateway:
     image: nginx:latest
@@ -396,6 +429,8 @@ services:
     restart: unless-stopped
     depends_on:
       - gateway-service
+
+
 
   nginx-nextjs:
     image: nginx:latest

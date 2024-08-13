@@ -1,0 +1,238 @@
+import { OllamaEmbeddings } from "@langchain/ollama";
+import { MemoryVectorStore } from "langchain/vectorstores/memory";
+import { DirectoryLoader } from "langchain/document_loaders/fs/directory";
+import { TextLoader } from "langchain/document_loaders/fs/text";
+import { DocumentInterface } from "@langchain/core/documents";
+import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
+import { JSONLocaleLoader } from "./json-splitter";
+import { EmbeddingsFilter } from "langchain/retrievers/document_compressors/embeddings_filter";
+
+const ollamaBaseUrl = process.env.OLLAMA_BASE_URL;
+const embeddingModel = process.env.OLLAMA_EMBEDDING;
+
+if (!ollamaBaseUrl || !embeddingModel) {
+  throw new Error(
+    "OLLAMA_BASE_URL and OLLAMA_EMBEDDING must be set in the environment",
+  );
+}
+
+export class VectorStoreSingleton {
+  private vectorStore: MemoryVectorStore | undefined;
+  private embeddings: OllamaEmbeddings | undefined;
+  private filter: EmbeddingsFilter | undefined;
+  private isInitialized = false;
+
+  constructor() {
+    //
+  }
+
+  public async initialize(reset = false) {
+    if (reset || !this.isInitialized) {
+      console.log("Initializing or reinitializing vector store and embeddings");
+
+      if (!this.embeddings) {
+        this.embeddings = new OllamaEmbeddings({
+          model: embeddingModel,
+          baseUrl: ollamaBaseUrl,
+          keepAlive: "-1m",
+        });
+      }
+
+      if (!this.vectorStore || reset) {
+        const splitDocs = await VectorStoreSingleton.generateEmbeddings();
+        this.vectorStore = await MemoryVectorStore.fromDocuments(
+          splitDocs,
+          this.embeddings,
+        );
+      }
+
+      if (!this.filter || reset) {
+        this.filter = new EmbeddingsFilter({
+          embeddings: this.embeddings,
+          similarityThreshold: 0.5,
+          k: 25,
+        });
+      }
+
+      this.isInitialized = true;
+      console.log("Vector store and embeddings initialized");
+
+      // vectorStoreInstance = this;
+      //   if (process.env.NODE_ENV !== "production")
+      globalThis.vectorStoreGlobal = this;
+      vectorStoreInstance = globalThis.vectorStoreGlobal;
+    }
+  }
+
+  public async getFilter(): Promise<EmbeddingsFilter | undefined> {
+    if (!this.isInitialized) {
+      await this.initialize();
+    }
+    return this.filter;
+  }
+
+  public async getVectorStore(): Promise<MemoryVectorStore | undefined> {
+    if (!this.isInitialized) {
+      await this.initialize();
+    }
+    return this.vectorStore;
+  }
+
+  public async getEmbeddings(): Promise<OllamaEmbeddings | undefined> {
+    if (!this.isInitialized) {
+      await this.initialize();
+    }
+    return this.embeddings;
+  }
+
+  public static async generateEmbeddings() {
+    const [tsxDocs, jsonDocs] = await Promise.all([
+      VectorStoreSingleton.generateTSXEmbeddings(),
+      VectorStoreSingleton.generateJSONEmbeddings(),
+    ]);
+    // console.log(tsxDocs.length, jsonDocs.length);
+    // // console.log(tsxDocs[0], jsonDocs[0]);
+    // const tokenizeJSON = await VectorStoreSingleton.tokenizeDocuments(jsonDocs);
+    // console.log(tokenizeJSON.length);
+    // console.log(
+    //   JSON.stringify(jsonDocs).length,
+    //   JSON.stringify(tokenizeJSON).length,
+    //);
+    // return [...tsxDocs, ...jsonDocs];
+    return tsxDocs;
+  }
+
+  public static async gar(m = 512) {
+    return await VectorStoreSingleton.generateJSONEmbeddings().then((e) =>
+      this.tokenizeDocuments(e, m),
+    );
+  }
+
+  private static async tokenizeDocuments(
+    docs: DocumentInterface[],
+    maxTokensPerChunk = 512,
+  ): Promise<DocumentInterface[]> {
+    const splitter = new RecursiveCharacterTextSplitter({
+      chunkSize: maxTokensPerChunk,
+    });
+
+    return await docs.reduce(
+      async (accPromise, doc) => {
+        const acc = await accPromise;
+        const chunks = await splitter.splitText(doc.pageContent);
+
+        const combinedChunks: string[] = [];
+        let currentChunk = "";
+
+        chunks.forEach((chunk) => {
+          if (currentChunk.length + chunk.length <= maxTokensPerChunk) {
+            currentChunk += ` ${chunk}`.trim();
+          } else {
+            combinedChunks.push(currentChunk);
+            currentChunk = chunk;
+          }
+        });
+
+        if (currentChunk) {
+          combinedChunks.push(currentChunk);
+        }
+
+        const chunkedDocs = combinedChunks.map((chunk, index) => ({
+          ...doc,
+          pageContent: chunk,
+          id: `${doc.id}_${index}`,
+        }));
+
+        return acc.concat(chunkedDocs);
+      },
+      Promise.resolve([] as DocumentInterface[]),
+    );
+  }
+
+  public static async generateJSONEmbeddings() {
+    const [enDocs, roDocs] = await Promise.all([
+      new JSONLocaleLoader("messages/en.json").load(),
+      new JSONLocaleLoader("messages/ro.json").load(),
+    ]);
+
+    console.log(enDocs);
+
+    return [...enDocs, ...roDocs].map(
+      (doc, i): DocumentInterface => ({
+        pageContent: doc.pageContent,
+        metadata: {
+          scope: `Page texts with with key ${doc.metadata.key} and for language with locale ${doc.metadata.locale}. These are texts never reference them directly.`,
+        },
+        id: i.toString() + "_" + doc.metadata.key + "_" + doc.metadata.locale,
+      }),
+    );
+  }
+
+  private static async generateTSXEmbeddings() {
+    const loader = new DirectoryLoader(
+      "src/app/[locale]/(main)",
+      //`${process.cwd()}/src/app/`,
+      //   "../app/",
+      {
+        ".tsx": (path) => new TextLoader(path),
+        // ".json": (path) => new JSONLoader(path),
+      },
+      true,
+    );
+
+    const docs = (await loader.load())
+      .filter((doc) => doc.metadata.source.endsWith("page.tsx"))
+      .map((doc, i): DocumentInterface => {
+        const url =
+          doc.metadata.source
+            .replace(/\\/g, "/")
+            .split("/src/app/[locale]")[1]
+            .split("/page.")[0]
+            .replace(/\([^)]*\)/g, "")
+            .replace(/\/+/g, "/") || "/";
+
+        const pageContentTrimmed = doc.pageContent
+          .replace(/^import.*$/gm, "") // Remove all import statements
+          .replace(/ className=(["']).*?\1| className={.*?}/g, "") // Remove all className props
+          .replace(/^\s*[\r]/gm, "") // remove empty lines
+          .trim();
+
+        return {
+          pageContent: pageContentTrimmed,
+          metadata: {
+            scope:
+              "Page URL: " +
+              url +
+              " . Where you see URL parts in [] , for example: [id] ,  ask the user for more info about these parameters. Never put them in the sentence directly.",
+          },
+        };
+      });
+
+    const splitter = RecursiveCharacterTextSplitter.fromLanguage("html");
+
+    const splitDocs = (await splitter.splitDocuments(docs)).map((doc, i) => ({
+      ...doc,
+      id: i.toString() + "_" + doc.metadata.scope,
+    }));
+
+    console.log(splitDocs.map((d) => d.id));
+
+    console.log("Embeddings generated");
+
+    return splitDocs;
+  }
+}
+const vectorStoreSingleton = () => {
+  return new VectorStoreSingleton();
+};
+
+declare const globalThis: {
+  vectorStoreGlobal: VectorStoreSingleton | undefined;
+} & typeof global;
+
+let vectorStoreInstance =
+  globalThis.vectorStoreGlobal ?? vectorStoreSingleton();
+
+// if (process.env.NODE_ENV !== "production")
+globalThis.vectorStoreGlobal = vectorStoreInstance;
+export { vectorStoreInstance };

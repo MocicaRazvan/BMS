@@ -1,0 +1,244 @@
+"use client";
+import { motion } from "framer-motion";
+import { cn } from "@/lib/utils";
+import { useState } from "react";
+import { Bot, Minus, SendHorizontal, StopCircle, Trash } from "lucide-react";
+import { Message, useChat } from "ai/react";
+import { useEffect, useRef } from "react";
+import ReactMarkdown from "react-markdown";
+import { Link } from "@/navigation";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import ShineBorder from "@/components/magicui/shine-border";
+import Logo from "@/components/logo/logo";
+
+export interface AiChatBoxTexts {
+  loadingContent: string;
+  errorContent: string;
+  emptyHeader: string;
+  emptyContent: string;
+  inputPlaceholder: string;
+}
+export default function AiChatBox({
+  emptyHeader,
+  inputPlaceholder,
+  loadingContent,
+  errorContent,
+  emptyContent,
+}: AiChatBoxTexts) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [showBot, setShowBot] = useState(true);
+  const {
+    messages,
+    input,
+    handleInputChange,
+    handleSubmit,
+    isLoading,
+    error,
+    stop,
+    setMessages,
+  } = useChat({
+    api: "/api/chat",
+  });
+  const inputRef = useRef<HTMLInputElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [messages?.length]);
+
+  useEffect(() => {
+    if (isOpen) {
+      inputRef.current?.focus();
+    }
+  }, [isOpen]);
+
+  const lastMessageIsUser = messages[messages.length - 1]?.role === "user";
+
+  return (
+    <aside className="z-20 fixed bottom-6 right-4 ">
+      <motion.div
+        className={cn(
+          `w-20 h-20 bg-background shadow-lg cursor-pointer flex items-center justify-center`,
+          isOpen && " h-[34rem] cursor-default w-[85vw] max-w-xl ",
+        )}
+        layout
+        animate={{
+          borderRadius: isOpen ? 15 : 50,
+        }}
+        initial={{ borderRadius: 50 }}
+        whileHover={{ scale: isOpen ? 1 : 1.1 }}
+        onClick={() => {
+          if (!isOpen) {
+            setIsOpen(true);
+            setShowBot(false);
+          }
+        }}
+        onAnimationComplete={() => {
+          if (!isOpen) {
+            setShowBot(true);
+          }
+        }}
+      >
+        {showBot && <Bot size={36} />}
+        {isOpen && (
+          <div className="w-full h-full flex flex-col items-center justify-center gap-2">
+            <div className="p-5 border-b flex items-center justify-between w-full px-10">
+              <div className="flex items-center justify-center gap-2 ">
+                <Bot size={30} />
+                <h2 className="text-xl font-semibold tracking-tighter">
+                  {"Shaormel"}
+                </h2>
+              </div>
+              <Button
+                type="button"
+                size="icon"
+                variant="ghost"
+                className="fllex w-10 flex-none items-center justify-center"
+              >
+                <Minus size={30} onClick={() => setIsOpen(false)} />
+              </Button>
+            </div>
+            <div
+              className="flex-1 h-full w-full overflow-y-auto px-5"
+              ref={scrollRef}
+            >
+              {messages.map((messages) => (
+                <ChatMessage message={messages} key={messages.id} />
+              ))}
+              {isLoading && lastMessageIsUser && (
+                // TODO INTL
+                <ChatMessage
+                  message={{
+                    id: "loading",
+                    role: "assistant",
+                    content: loadingContent,
+                  }}
+                />
+              )}
+              {error && (
+                <ChatMessage
+                  message={{
+                    id: "error",
+                    role: "assistant",
+                    content: errorContent,
+                  }}
+                />
+              )}
+
+              {!error && messages.length === 0 && (
+                <ShineBorder
+                  className="mx-8 flex h-full flex-col items-center justify-center gap-3 text-center p-10 bg-background/95"
+                  color={["#A07CFE", "#FE8FB5", "#FFBE7B"]}
+                  borderWidth={2}
+                >
+                  <Logo width={60} height={60} />
+                  <p className="text-xl font-semibold tracking-tight">
+                    {emptyHeader}
+                  </p>
+                  <p className={"font-medium"}>{emptyContent}</p>
+                </ShineBorder>
+              )}
+            </div>
+            <form onSubmit={handleSubmit} className="m-3 flex gap-1 w-full p-1">
+              <Button
+                type="button"
+                size="icon"
+                variant="ghost"
+                className="fllex w-10 flex-none items-center justify-center"
+                onClick={() => setMessages([])}
+              >
+                <Trash size={24} />
+              </Button>
+              <Button
+                type="button"
+                size="icon"
+                variant="ghost"
+                className="fllex w-10 flex-none items-center justify-center"
+                onClick={() => stop()}
+              >
+                <StopCircle size={24} />
+              </Button>
+              <Input
+                ref={inputRef}
+                value={input}
+                onChange={handleInputChange}
+                placeholder={inputPlaceholder}
+                className="grow mx-1"
+              />
+              <Button
+                type="submit"
+                size="icon"
+                className="flex w-10 flex-none items-center justify-center disabled:opacity-50"
+                disabled={input.length === 0}
+              >
+                <SendHorizontal size={24} />
+              </Button>
+            </form>
+          </div>
+        )}
+      </motion.div>
+    </aside>
+  );
+}
+
+interface ChatMessageProps {
+  message: Message;
+}
+
+function ChatMessage({ message: { role, content } }: ChatMessageProps) {
+  const appUrl = process.env.NEXTAUTH_URL!;
+
+  const isAiMessage = role === "assistant";
+
+  return (
+    <div
+      className={cn(
+        "mb-3 flex items-start overflow-y-auto",
+        isAiMessage ? "me-10 justify-start" : "ms-10 justify-end",
+      )}
+    >
+      {isAiMessage && (
+        <div className="items-start me-2 flex h-full flex-none flex-col">
+          <Bot />
+        </div>
+      )}
+      <div
+        className={cn(
+          "rounded-md border px-3 py-2",
+          isAiMessage ? "bg-background" : "bg-foreground text-background",
+        )}
+      >
+        <ReactMarkdown
+          components={{
+            a: ({ node, ref, ...props }) => (
+              // todo see if its internal link else open in new tab
+              <Link
+                {...props}
+                href={props.href ?? ""}
+                className="text-primary hover:underline"
+                target={props.href?.startsWith(appUrl) ? "_self" : "_blank"}
+              >
+                {props.children}
+              </Link>
+            ),
+            p: ({ node, ...props }) => (
+              <p {...props} className="mt-3 first:mt-0" />
+            ),
+            ul: ({ node, ...props }) => (
+              <ul
+                {...props}
+                className="mt-3 list-inside list-disc first:mt-0"
+              />
+            ),
+            li: ({ node, ...props }) => <li {...props} className="mt-1" />,
+          }}
+        >
+          {content}
+        </ReactMarkdown>
+      </div>
+    </div>
+  );
+}

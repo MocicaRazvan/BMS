@@ -19,21 +19,25 @@ import { SubscriptionProvider } from "@/context/subscriptions-context";
 import { BoughtNotificationProvider } from "@/context/bought-notification-context";
 import ScrollTopProvider from "@/providers/scroll-top";
 import type { Metadata } from "next";
+import { loadGlobalModel } from "@/actions/toxcity";
+import AiChatBox from "@/components/ai-chat/ai-chat-box";
+import { vectorStoreInstance } from "@/lib/langchain";
+import { getAiChatBoxTexts } from "@/texts/components/ai-chat";
 
 const fontSans = FontSans({
   subsets: ["latin"],
   variable: "--font-sans",
 });
-export const metadata: Metadata = {
-  icons: {
-    icon: [
-      {
-        url: "/images/logo-light.svg", // /public path
-        href: "/images/logo-light.svg", // /public path
-      },
-    ],
-  },
-};
+// export const metadata: Metadata = {
+//   icons: {
+//     icon: [
+//       {
+//         url: "/images/logo-light.svg", // /public path
+//         href: "/images/logo-light.svg", // /public path
+//       },
+//     ],
+//   },
+// };
 interface Props {
   children: React.ReactNode;
   params: { locale: Locale };
@@ -48,7 +52,12 @@ export default async function BaseLayout({
   params: { locale },
 }: Props) {
   const spring = process.env.NEXT_PUBLIC_SPRING_CLIENT!;
-  const session = await getServerSession(authOptions);
+  const [session, tf, lg, aiTexts] = await Promise.all([
+    getServerSession(authOptions),
+    loadGlobalModel(),
+    vectorStoreInstance.initialize(),
+    getAiChatBoxTexts(),
+  ]);
 
   return (
     <html lang={locale} suppressHydrationWarning>
@@ -91,7 +100,10 @@ export default async function BaseLayout({
                             >
                               <CartProvider>
                                 <SubscriptionProvider authUser={session?.user}>
-                                  {children}
+                                  <>
+                                    {children}
+                                    <AiChatBox {...aiTexts} />
+                                  </>
                                 </SubscriptionProvider>
                               </CartProvider>
                             </BoughtNotificationProvider>

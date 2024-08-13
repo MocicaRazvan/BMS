@@ -1003,6 +1003,15 @@
         "disclaimer": "Disclaimer",
         "rightsReserved": "Bro Meets Science Co. All rights reserved."
       }
+    },
+    "ai-chat": {
+      "AiChatBoxTexts": {
+        "loadingContent": "Cooking up some answers...",
+        "errorContent": "Something went wrong, please try again later",
+        "emptyHeader": "Send a message to start the AI chat!",
+        "emptyContent": "Ask anything you want to know about health and nutrition, and we will do our best to provide you with the right answer. Always check with a professional before making any changes to your diet or lifestyle.",
+        "inputPlaceholder": "Say something..."
+      }
     }
   },
   "pages": {
