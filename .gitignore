@@ -105,3 +105,5 @@ export-dbs.ps1
 ollama_models
 
 nginx/certs
+
+scrape

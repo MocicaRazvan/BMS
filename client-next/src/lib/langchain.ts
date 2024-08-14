@@ -9,10 +9,11 @@ import { EmbeddingsFilter } from "langchain/retrievers/document_compressors/embe
 
 const ollamaBaseUrl = process.env.OLLAMA_BASE_URL;
 const embeddingModel = process.env.OLLAMA_EMBEDDING;
+const siteUrl = process.env.NEXTAUTH_URL;
 
-if (!ollamaBaseUrl || !embeddingModel) {
+if (!ollamaBaseUrl || !embeddingModel || !siteUrl) {
   throw new Error(
-    "OLLAMA_BASE_URL and OLLAMA_EMBEDDING must be set in the environment",
+    "OLLAMA_BASE_URL, OLLAMA_EMBEDDING and NEXTAUTH_URL must be set in the environment",
   );
 }
 
@@ -35,6 +36,10 @@ export class VectorStoreSingleton {
           model: embeddingModel,
           baseUrl: ollamaBaseUrl,
           keepAlive: "-1m",
+          requestOptions: {
+            keepAlive: "-1m",
+            // numCtx: 2048,
+          },
         });
       }
 
@@ -86,9 +91,12 @@ export class VectorStoreSingleton {
   }
 
   public static async generateEmbeddings() {
-    const [tsxDocs, jsonDocs] = await Promise.all([
+    const [
+      tsxDocs,
+      // , jsonDocs
+    ] = await Promise.all([
       VectorStoreSingleton.generateTSXEmbeddings(),
-      VectorStoreSingleton.generateJSONEmbeddings(),
+      // VectorStoreSingleton.generateJSONEmbeddings(),
     ]);
     // console.log(tsxDocs.length, jsonDocs.length);
     // // console.log(tsxDocs[0], jsonDocs[0]);
@@ -103,9 +111,10 @@ export class VectorStoreSingleton {
   }
 
   public static async gar(m = 512) {
-    return await VectorStoreSingleton.generateJSONEmbeddings().then((e) =>
-      this.tokenizeDocuments(e, m),
-    );
+    // return await VectorStoreSingleton.generateJSONEmbeddings().then((e) =>
+    //   this.tokenizeDocuments(e, m),
+    // );
+    return [1];
   }
 
   private static async tokenizeDocuments(
@@ -150,63 +159,85 @@ export class VectorStoreSingleton {
   }
 
   public static async generateJSONEmbeddings() {
-    const [enDocs, roDocs] = await Promise.all([
-      new JSONLocaleLoader("messages/en.json").load(),
-      new JSONLocaleLoader("messages/ro.json").load(),
-    ]);
-
-    console.log(enDocs);
-
-    return [...enDocs, ...roDocs].map(
-      (doc, i): DocumentInterface => ({
-        pageContent: doc.pageContent,
-        metadata: {
-          scope: `Page texts with with key ${doc.metadata.key} and for language with locale ${doc.metadata.locale}. These are texts never reference them directly.`,
-        },
-        id: i.toString() + "_" + doc.metadata.key + "_" + doc.metadata.locale,
-      }),
-    );
+    return null;
+    //   const [enDocs, roDocs] = await Promise.all([
+    //     new JSONLocaleLoader("messages/en.json").load(),
+    //     new JSONLocaleLoader("messages/ro.json").load(),
+    //   ]);
+    //
+    //   console.log(enDocs);
+    //
+    //   return [...enDocs, ...roDocs].map(
+    //     (doc, i): DocumentInterface => ({
+    //       pageContent: doc.pageContent,
+    //       metadata: {
+    //         scope: `Page texts with with key ${doc.metadata.key} and for language with locale ${doc.metadata.locale}. These are texts never reference them directly.`,
+    //       },
+    //       id: i.toString() + "_" + doc.metadata.key + "_" + doc.metadata.locale,
+    //     }),
+    //   );
   }
 
   private static async generateTSXEmbeddings() {
     const loader = new DirectoryLoader(
-      "src/app/[locale]/(main)",
+      // "src/app/[locale]/(main)",
       //`${process.cwd()}/src/app/`,
       //   "../app/",
+      "scrape/",
       {
-        ".tsx": (path) => new TextLoader(path),
+        // ".tsx": (path) => new TextLoader(path),
         // ".json": (path) => new JSONLoader(path),
+        ".html": (path) => new TextLoader(path),
       },
       true,
     );
 
-    const docs = (await loader.load())
-      .filter((doc) => doc.metadata.source.endsWith("page.tsx"))
-      .map((doc, i): DocumentInterface => {
-        const url =
-          doc.metadata.source
-            .replace(/\\/g, "/")
-            .split("/src/app/[locale]")[1]
-            .split("/page.")[0]
-            .replace(/\([^)]*\)/g, "")
-            .replace(/\/+/g, "/") || "/";
+    // const docs = (await loader.load())
+    //   .filter((doc) => doc.metadata.source.endsWith("page.tsx"))
+    //   .map((doc, i): DocumentInterface => {
+    //     const url =
+    //       doc.metadata.source
+    //         .replace(/\\/g, "/")
+    //         .split("/src/app/[locale]")[1]
+    //         .split("/page.")[0]
+    //         .replace(/\([^)]*\)/g, "")
+    //         .replace(/\/+/g, "/") || "/";
+    //
+    //     const pageContentTrimmed = doc.pageContent
+    //       .replace(/^import.*$/gm, "") // Remove all import statements
+    //       .replace(/ className=(["']).*?\1| className={.*?}/g, "") // Remove all className props
+    //       .replace(/^\s*[\r]/gm, "") // remove empty lines
+    //       .trim();
+    //
+    //     return {
+    //       pageContent: pageContentTrimmed,
+    //       metadata: {
+    //         scope:
+    //           "Page URL: " +
+    //           url +
+    //           " . Where you see URL parts in [] , for example: [id] ,  ask the user for more info about these parameters. Never put them in the sentence directly.",
+    //       },
+    //     };
+    //   });
 
-        const pageContentTrimmed = doc.pageContent
-          .replace(/^import.*$/gm, "") // Remove all import statements
-          .replace(/ className=(["']).*?\1| className={.*?}/g, "") // Remove all className props
-          .replace(/^\s*[\r]/gm, "") // remove empty lines
-          .trim();
+    const docs = (await loader.load()).map((doc, i) => {
+      const url =
+        doc.metadata.source
+          .replace(/\\/g, "/")
+          .split("/scrape")[1]
+          .split("/page.")[0]
+          .replace(/\([^)]*\)/g, "")
+          .replace(/\/+/g, "/") || "/";
 
-        return {
-          pageContent: pageContentTrimmed,
-          metadata: {
-            scope:
-              "Page URL: " +
-              url +
-              " . Where you see URL parts in [] , for example: [id] ,  ask the user for more info about these parameters. Never put them in the sentence directly.",
-          },
-        };
-      });
+      const fullUrl = siteUrl + url;
+
+      return {
+        pageContent: doc.pageContent,
+        metadata: {
+          scope: "Page URL: " + fullUrl,
+        },
+      };
+    });
 
     const splitter = RecursiveCharacterTextSplitter.fromLanguage("html");
 

@@ -235,6 +235,7 @@ function ChatMessage({ message: { role, content } }: ChatMessageProps) {
             ),
             li: ({ node, ...props }) => <li {...props} className="mt-1" />,
           }}
+          disallowedElements={["div", "span", "style", "iframe", "script"]}
         >
           {content}
         </ReactMarkdown>

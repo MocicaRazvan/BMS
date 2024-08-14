@@ -66,6 +66,10 @@ RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
 COPY --from=builder /app/public ./public
+# FOR LANGCHAIN DOC LOADER
+COPY --from=builder /app/src ./src
+COPY --from=builder /app/scrape ./scrape
+
 
 # Set the correct permission for prerender cache
 RUN mkdir .next
