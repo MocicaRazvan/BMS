@@ -103,6 +103,9 @@ export default function AiChatBox({
             </div>
             <div
               className="flex-1 h-full w-full overflow-y-auto px-5"
+              onScroll={(e) => {
+                e.stopPropagation();
+              }}
               ref={scrollRef}
             >
               {messages.map((messages) => (
@@ -235,7 +238,6 @@ function ChatMessage({ message: { role, content } }: ChatMessageProps) {
             ),
             li: ({ node, ...props }) => <li {...props} className="mt-1" />,
           }}
-          disallowedElements={["div", "span", "style", "iframe", "script"]}
         >
           {content}
         </ReactMarkdown>

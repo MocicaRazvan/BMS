@@ -1,15 +1,15 @@
-import { OllamaEmbeddings } from "@langchain/ollama";
 import { MemoryVectorStore } from "langchain/vectorstores/memory";
 import { DirectoryLoader } from "langchain/document_loaders/fs/directory";
 import { TextLoader } from "langchain/document_loaders/fs/text";
 import { DocumentInterface } from "@langchain/core/documents";
 import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
-import { JSONLocaleLoader } from "./json-splitter";
 import { EmbeddingsFilter } from "langchain/retrievers/document_compressors/embeddings_filter";
+import { CustomOllamaEmbeddings } from "@/lib/custom-ollama-embeddings";
 
 const ollamaBaseUrl = process.env.OLLAMA_BASE_URL;
 const embeddingModel = process.env.OLLAMA_EMBEDDING;
 const siteUrl = process.env.NEXTAUTH_URL;
+const keepAlive = "-1m";
 
 if (!ollamaBaseUrl || !embeddingModel || !siteUrl) {
   throw new Error(
@@ -19,7 +19,7 @@ if (!ollamaBaseUrl || !embeddingModel || !siteUrl) {
 
 export class VectorStoreSingleton {
   private vectorStore: MemoryVectorStore | undefined;
-  private embeddings: OllamaEmbeddings | undefined;
+  private embeddings: CustomOllamaEmbeddings | undefined;
   private filter: EmbeddingsFilter | undefined;
   private isInitialized = false;
 
@@ -32,12 +32,13 @@ export class VectorStoreSingleton {
       console.log("Initializing or reinitializing vector store and embeddings");
 
       if (!this.embeddings) {
-        this.embeddings = new OllamaEmbeddings({
+        this.embeddings = new CustomOllamaEmbeddings({
           model: embeddingModel,
           baseUrl: ollamaBaseUrl,
-          keepAlive: "-1m",
+          keepAlive,
           requestOptions: {
-            keepAlive: "-1m",
+            keepAlive,
+
             // numCtx: 2048,
           },
         });
@@ -54,8 +55,8 @@ export class VectorStoreSingleton {
       if (!this.filter || reset) {
         this.filter = new EmbeddingsFilter({
           embeddings: this.embeddings,
-          similarityThreshold: 0.5,
-          k: 25,
+          similarityThreshold: 0.7,
+          // k: 25,
         });
       }
 
@@ -83,7 +84,7 @@ export class VectorStoreSingleton {
     return this.vectorStore;
   }
 
-  public async getEmbeddings(): Promise<OllamaEmbeddings | undefined> {
+  public async getEmbeddings(): Promise<CustomOllamaEmbeddings | undefined> {
     if (!this.isInitialized) {
       await this.initialize();
     }
@@ -239,7 +240,10 @@ export class VectorStoreSingleton {
       };
     });
 
-    const splitter = RecursiveCharacterTextSplitter.fromLanguage("html");
+    const splitter = RecursiveCharacterTextSplitter.fromLanguage("html", {
+      chunkSize: 1000,
+      chunkOverlap: 200,
+    });
 
     const splitDocs = (await splitter.splitDocuments(docs)).map((doc, i) => ({
       ...doc,
