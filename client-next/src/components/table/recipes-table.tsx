@@ -37,7 +37,7 @@ import { MoreHorizontal } from "lucide-react";
 import AlertDialogApprovePost from "@/components/dialogs/posts/approve-post";
 import LoadingSpinner from "@/components/common/loading-spinner";
 import AlertDialogApproveRecipes from "@/components/dialogs/recipes/approve-recipe";
-import { notFound } from "next/navigation";
+import useClientNotFound from "@/hoooks/useClientNotFound";
 
 export interface RecipeTableColumnsTexts {
   id: string;
@@ -111,6 +111,8 @@ export default function RecipeTable({
     fieldKey: "type",
     noFilterLabel: dietDropdownTexts.noFilterLabel,
   });
+
+  const { navigateToNotFound } = useClientNotFound();
 
   const router = useRouter();
   const isAdmin = authUser?.role === "ROLE_ADMIN";
@@ -422,7 +424,7 @@ export default function RecipeTable({
   );
 
   if (error?.status) {
-    return notFound();
+    return navigateToNotFound();
   }
 
   return (

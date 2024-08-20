@@ -30,7 +30,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 @Configuration
 public class BeanConfig {
 
-
+    
     @Bean
     public ObjectMapper customObjectMapper(final Jackson2ObjectMapperBuilder builder) {
         return new CustomObjectMapper(builder).customObjectMapper();

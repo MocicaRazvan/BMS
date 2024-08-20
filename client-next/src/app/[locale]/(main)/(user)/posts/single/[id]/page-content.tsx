@@ -2,12 +2,11 @@
 
 import { WithUser } from "@/lib/user";
 import { useGetPost } from "@/hoooks/posts/useGetPost";
-import { Suspense, useCallback } from "react";
+import React, { Suspense, useCallback } from "react";
 import { fetchStream } from "@/hoooks/fetchStream";
 import { CustomEntityModel, PostResponse } from "@/types/dto";
-import { notFound } from "next/navigation";
 import LoadingSpinner from "@/components/common/loading-spinner";
-import { checkApprovePrivilege } from "@/lib/utils";
+import { checkApprovePrivilege, isSuccessCheckReturn } from "@/lib/utils";
 import ElementHeader, {
   ElementHeaderTexts,
 } from "@/components/common/element-header";
@@ -20,6 +19,7 @@ import Loader from "@/components/ui/spinner";
 import { PostCommentsTexts } from "@/texts/components/posts";
 import PostComments from "@/components/posts/post-comments";
 import { useGetTitleBodyUser } from "@/hoooks/useGetTitleBodyUser";
+import useClientNotFound from "@/hoooks/useClientNotFound";
 
 export interface SinglePostPageTexts {
   elementHeaderTexts: ElementHeaderTexts;
@@ -54,6 +54,8 @@ export default function SinglePostPageContent({
     basePath: `/posts/withUser`,
   });
 
+  const { navigateToNotFound } = useClientNotFound();
+
   const react = useCallback(
     async (type: "like" | "dislike") => {
       if (!id || !authUser.token) return;
@@ -81,7 +83,7 @@ export default function SinglePostPageContent({
     [authUser.token, id, setPostState],
   );
   if (error?.status) {
-    notFound();
+    return navigateToNotFound();
   }
 
   if (!isFinished || !postState) {
@@ -93,10 +95,21 @@ export default function SinglePostPageContent({
     );
   }
 
-  const { isOwnerOrAdmin, isAdmin, isOwner } = checkApprovePrivilege(
+  const privilegeReturn = checkApprovePrivilege(
     authUser,
     postState,
+    navigateToNotFound,
   );
+
+  if (React.isValidElement(privilegeReturn)) {
+    return privilegeReturn;
+  }
+
+  if (!isSuccessCheckReturn(privilegeReturn)) {
+    return navigateToNotFound();
+  }
+
+  const { isOwnerOrAdmin, isAdmin, isOwner } = privilegeReturn;
 
   return (
     <section className="w-full mx-auto max-w-[1500px] min-h-[calc(100vh-4rem)] flex-col items-center justify-center transition-all px-6 py-10 relative ">

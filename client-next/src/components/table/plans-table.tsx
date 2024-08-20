@@ -39,7 +39,7 @@ import ToggleDisplayPlan from "@/components/dialogs/plans/plan-toggle-display";
 import AlertDialogDeletePlan from "@/components/dialogs/plans/delete-plan";
 import LoadingSpinner from "@/components/common/loading-spinner";
 import { useFormatter } from "next-intl";
-import { notFound } from "next/navigation";
+import useClientNotFound from "@/hoooks/useClientNotFound";
 
 export interface PlanTableColumnsTexts {
   id: string;
@@ -103,7 +103,7 @@ export default function PlansTable({
   const router = useRouter();
   const isAdmin = authUser?.role === "ROLE_ADMIN";
   const formatIntl = useFormatter();
-
+  const { navigateToNotFound } = useClientNotFound();
   const {
     field: displayField,
     updateFieldSearch: updateDisplay,
@@ -527,7 +527,7 @@ export default function PlansTable({
   );
 
   if (error?.status) {
-    return notFound();
+    return navigateToNotFound();
   }
 
   return (

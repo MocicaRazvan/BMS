@@ -76,8 +76,8 @@ export default function Nav({
     w-full border-border/40 bg-background/95 backdrop-blur
      supports-[backdrop-filter]:bg-background/60 flex-wrap 2xl:border-l 2xl:border-r"
     >
-      <div className="hidden lg:flex items-center justify-between w-full">
-        <div className="flex items-center justify-center gap-4 flex-wrap">
+      <div className="hidden xl:flex items-center justify-between w-full">
+        <div className="flex items-center justify-center gap-4 me-3">
           <div className="mr-8 flex items-center justify-start gap-3">
             <Link
               href="/"
@@ -85,7 +85,6 @@ export default function Nav({
            px-3
               "
             >
-              {/*<Home />*/}
               <Logo />
               {links.home}
             </Link>
@@ -95,93 +94,95 @@ export default function Nav({
                 className="font-bold hover:underline flex items-center justify-center gap-2 hover:scale-[1.03] transition-all
               px-3"
               >
-                <DashboardIcon className="w-6 h-6" /> {links.adminDashboard}
+                <DashboardIcon className="w-6 h-6" />
+                <p className="text-center">{links.adminDashboard}</p>
               </Link>
             )}
+          </div>{" "}
+          <div className="flex items-center  justify-center gap-3 flex-wrap">
+            {authUser && (
+              <>
+                <Link
+                  href="/subscriptions"
+                  className="font-bold hover:underline hover:scale-[1.03] transition-all"
+                >
+                  {links.subscriptions}
+                </Link>
+                <Link
+                  href="/orders"
+                  className="font-bold hover:underline hover:scale-[1.03] transition-all"
+                >
+                  {links.orders}
+                </Link>
+              </>
+            )}
+            {isUser && (
+              <>
+                <Link
+                  href="/posts/approved"
+                  className="font-bold hover:underline hover:scale-[1.03] transition-all"
+                >
+                  {links.posts}
+                </Link>
+                <Link
+                  href="/plans/approved"
+                  className="font-bold hover:underline hover:scale-[1.03] transition-all"
+                >
+                  {links.plans}
+                </Link>{" "}
+              </>
+            )}
+
+            <MenuBarMenuNav
+              title={links.posts}
+              render={!isUser}
+              links={postsLinks}
+              authUser={authUser}
+            />
+            <MenuBarMenuNav
+              title={links.recipes}
+              render={!isUser}
+              links={recipesLinks}
+              authUser={authUser}
+            />
+            <MenuBarMenuNav
+              title={links.plans}
+              render={!isUser}
+              links={plansLinks}
+              authUser={authUser}
+            />
+            {isAdminOrTrainer && (
+              <Link
+                href="/trainer/ingredients"
+                className="font-bold hover:underline hover:scale-[1.03] transition-all"
+              >
+                {links.ingredients}
+              </Link>
+            )}
+            {authUser && (
+              <>
+                <Link
+                  href="/chat"
+                  className="font-bold hover:underline hover:scale-[1.03] transition-all"
+                >
+                  {links.chat}
+                </Link>
+                <Link
+                  href="/kanban"
+                  className="font-bold hover:underline hover:scale-[1.03] transition-all"
+                >
+                  {links.kanban}
+                </Link>
+              </>
+            )}
+            {/*<Link href={"/auth/confirm-email"}>Confirm email</Link>*/}
+            {/*<Link href={"/auth/forgot-password"}>Forgot passowrd</Link>*/}
+            {/*<Link href={"/auth/reset-password"}>Reset passowrd</Link>*/}
+            {/*<Link href={"/auth/signin"}>Signin</Link>*/}
+            {/*<Link href={"/auth/signout"}>Signout</Link>*/}
+            {/*<Link href={"/auth/signup"}>Signup</Link>*/}
           </div>
-          {authUser && (
-            <>
-              <Link
-                href="/subscriptions"
-                className="font-bold hover:underline hover:scale-[1.03] transition-all"
-              >
-                {links.subscriptions}
-              </Link>
-              <Link
-                href="/orders"
-                className="font-bold hover:underline hover:scale-[1.03] transition-all"
-              >
-                {links.orders}
-              </Link>
-            </>
-          )}
-          {isUser && (
-            <>
-              <Link
-                href="/posts/approved"
-                className="font-bold hover:underline hover:scale-[1.03] transition-all"
-              >
-                {links.posts}
-              </Link>
-              <Link
-                href="/plans/approved"
-                className="font-bold hover:underline hover:scale-[1.03] transition-all"
-              >
-                {links.plans}
-              </Link>{" "}
-            </>
-          )}
-
-          <MenuBarMenuNav
-            title={links.posts}
-            render={!isUser}
-            links={postsLinks}
-            authUser={authUser}
-          />
-          <MenuBarMenuNav
-            title={links.recipes}
-            render={!isUser}
-            links={recipesLinks}
-            authUser={authUser}
-          />
-          <MenuBarMenuNav
-            title={links.plans}
-            render={!isUser}
-            links={plansLinks}
-            authUser={authUser}
-          />
-          {isAdminOrTrainer && (
-            <Link
-              href="/trainer/ingredients"
-              className="font-bold hover:underline hover:scale-[1.03] transition-all"
-            >
-              {links.ingredients}
-            </Link>
-          )}
-          {authUser && (
-            <>
-              <Link
-                href="/chat"
-                className="font-bold hover:underline hover:scale-[1.03] transition-all"
-              >
-                {links.chat}
-              </Link>
-              <Link
-                href="/kanban"
-                className="font-bold hover:underline hover:scale-[1.03] transition-all"
-              >
-                {links.kanban}
-              </Link>
-            </>
-          )}
-          {/*<Link href={"/auth/confirm-email"}>Confirm email</Link>*/}
-          {/*<Link href={"/auth/forgot-password"}>Forgot passowrd</Link>*/}
-          {/*<Link href={"/auth/reset-password"}>Reset passowrd</Link>*/}
-          {/*<Link href={"/auth/signin"}>Signin</Link>*/}
-          {/*<Link href={"/auth/signout"}>Signout</Link>*/}
-          {/*<Link href={"/auth/signup"}>Signup</Link>*/}
         </div>
-
         <div
           className="mx-auto md:ml-auto md:mr-1 flex items-center justify-center gap-6
       mt-2 sm:mt-0
@@ -206,7 +207,7 @@ export default function Nav({
           <ModeToggle {...themeSwitchTexts} />
         </div>
       </div>
-      <div className="lg:hidden w-full flex items-center justify-between">
+      <div className="xl:hidden w-full flex items-center justify-between">
         <BurgerNav
           authUser={authUser}
           postsLinks={postsLinks}

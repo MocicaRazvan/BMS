@@ -3,9 +3,8 @@
 import { WithUser } from "@/lib/user";
 import { useGetTitleBodyUser } from "@/hoooks/useGetTitleBodyUser";
 import { PlanResponse } from "@/types/dto";
-import { notFound } from "next/navigation";
 import LoadingSpinner from "@/components/common/loading-spinner";
-import { checkOwnerOrAdmin, cn } from "@/lib/utils";
+import { checkOwnerOrAdmin, cn, isSuccessCheckReturn } from "@/lib/utils";
 import { ElementHeaderTexts } from "@/components/common/element-header";
 import { NutritionalTableTexts } from "@/components/common/nutritional-table";
 import { IngredientPieChartTexts } from "@/components/charts/ingredient-macros-pie-chart";
@@ -14,6 +13,8 @@ import ProseText from "@/components/common/prose-text";
 import AuthorProfile from "@/components/common/author-profile";
 import { useFormatter } from "next-intl";
 import { RecipePlanList } from "@/components/plans/plan-recipes";
+import useClientNotFound from "@/hoooks/useClientNotFound";
+import React from "react";
 
 export interface SingleTrainerPlanPageTexts {
   elementHeaderTexts: ElementHeaderTexts;
@@ -53,10 +54,11 @@ export default function SingleTrainerPlanPageContent({
     authUser,
     basePath: `/plans/withUser`,
   });
+  const { navigateToNotFound } = useClientNotFound();
   const formatIntl = useFormatter();
 
   if (error?.status) {
-    notFound();
+    return navigateToNotFound();
   }
 
   if (!isFinished || !planState) {
@@ -73,7 +75,18 @@ export default function SingleTrainerPlanPageContent({
     VEGETARIAN: "accent",
   };
 
-  const { isOwner, isAdmin } = checkOwnerOrAdmin(authUser, plan);
+  const ownerReturn = checkOwnerOrAdmin(authUser, plan, navigateToNotFound);
+
+  if (React.isValidElement(ownerReturn)) {
+    return ownerReturn;
+  }
+
+  if (!isSuccessCheckReturn(ownerReturn)) {
+    return navigateToNotFound();
+  }
+
+  const { isOwnerOrAdmin, isAdmin, isOwner } = ownerReturn;
+
   return (
     <section className="w-full mx-auto max-w-[1500px] min-h-[calc(100vh-4rem)] flex-col items-center justify-center transition-all px-6 py-10 relative ">
       <div

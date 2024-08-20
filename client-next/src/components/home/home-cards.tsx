@@ -80,13 +80,13 @@ export function HomeCard({ index, title, description, icon, href }: Props) {
     <motion.div
       key={index}
       variants={slideInAnimationVariants}
-      className="h-[400px] w-[300px]   "
+      className="h-[400px] max-w-[300px] w-full  "
       initial="initial"
       whileInView="animate"
       custom={index}
       viewport={{
         once: true,
-        amount: 0.5,
+        amount: 0.2,
       }}
     >
       <MagicCard
@@ -103,7 +103,7 @@ export function HomeCard({ index, title, description, icon, href }: Props) {
           >
             <AnimatedShinyText
               className="text-3xl tracking-tighter font-bold text-center
-            
+
 
             "
             >

@@ -4,7 +4,19 @@ import { LocaleProps } from "@/navigation";
 import ResetPasswordPage from "@/app/[locale]/(main)/auth/reset-password/page-content";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/auth-options";
-
+import { Metadata } from "next";
+import { getIntlMetadata } from "@/texts/metadata";
+export async function generateMetadata({
+  params: { locale },
+}: LocaleProps): Promise<Metadata> {
+  return {
+    ...(await getIntlMetadata(
+      "auth.ResetPassword",
+      "/auth/reset-password",
+      locale,
+    )),
+  };
+}
 export default async function ResetPasswordWrapper({
   params: { locale },
 }: LocaleProps) {

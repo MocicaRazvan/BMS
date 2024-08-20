@@ -11,6 +11,7 @@ import Heading from "@/components/common/heading";
 import { Suspense } from "react";
 import PlansTable from "@/components/table/plans-table";
 import { useSidebarToggle } from "@/context/sidebar-toggle";
+import useClientNotFound from "@/hoooks/useClientNotFound";
 
 interface Props extends UserPlansAdminPageTexts, WithUser, UseListProps {
   id: string;
@@ -29,7 +30,10 @@ export default function UserPlansAdminPageContent({
 }: Props) {
   const { isOpen } = useSidebarToggle();
   const { user, messages, error, isFinished } = useGetUser(id);
-
+  const { navigateToNotFound } = useClientNotFound();
+  if (isFinished && error?.status) {
+    return navigateToNotFound();
+  }
   return (
     <AdminContentLayout
       navbarProps={{

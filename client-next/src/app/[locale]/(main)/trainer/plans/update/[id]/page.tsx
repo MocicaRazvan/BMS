@@ -5,11 +5,25 @@ import { getPlanFormTexts } from "@/texts/components/forms";
 import Loader from "@/components/ui/spinner";
 import { Suspense } from "react";
 import UpdatePlanPageContent from "@/app/[locale]/(main)/trainer/plans/update/[id]/page-content";
+import { Metadata } from "next";
+import { getIntlMetadata } from "@/texts/metadata";
 
 interface Props {
   params: {
     locale: Locale;
     id: string;
+  };
+}
+
+export async function generateMetadata({
+  params: { locale, id },
+}: Props): Promise<Metadata> {
+  return {
+    ...(await getIntlMetadata(
+      "trainer.UpdatePlan",
+      "/trainer/plans/update/" + id,
+      locale,
+    )),
   };
 }
 

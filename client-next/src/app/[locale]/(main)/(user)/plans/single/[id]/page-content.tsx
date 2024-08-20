@@ -4,8 +4,7 @@ import { WithUser } from "@/lib/user";
 import { useGetTitleBodyUser } from "@/hoooks/useGetTitleBodyUser";
 import { PlanResponse } from "@/types/dto";
 import { useFormatter } from "next-intl";
-import { notFound } from "next/navigation";
-import { checkApprovePrivilege, cn } from "@/lib/utils";
+import { checkApprovePrivilege, cn, isSuccessCheckReturn } from "@/lib/utils";
 import ElementHeader, {
   ElementHeaderTexts,
 } from "@/components/common/element-header";
@@ -18,6 +17,8 @@ import { useToast } from "@/components/ui/use-toast";
 import AddToCartBtn, {
   AddToCartBtnTexts,
 } from "@/components/plans/add-to-cart-btn";
+import useClientNotFound from "@/hoooks/useClientNotFound";
+import React from "react";
 export interface UserPlanPageContentTexts {
   elementHeaderTexts: ElementHeaderTexts;
   addToCartBtnTexts: AddToCartBtnTexts;
@@ -31,6 +32,7 @@ export default function UserPlanPageContent({
   price,
   addToCartBtnTexts,
 }: Props) {
+  const { navigateToNotFound } = useClientNotFound();
   const {
     itemState: planState,
     setItemState: setPlanState,
@@ -51,7 +53,7 @@ export default function UserPlanPageContent({
   const { toast } = useToast();
   const formatIntl = useFormatter();
   if (error?.status) {
-    notFound();
+    return navigateToNotFound();
   }
 
   if (!isFinished || !planState) {
@@ -63,10 +65,22 @@ export default function UserPlanPageContent({
     );
   }
 
-  const { isOwnerOrAdmin, isAdmin, isOwner } = checkApprovePrivilege(
+  const privilegeReturn = checkApprovePrivilege(
     authUser,
     planState,
+    navigateToNotFound,
   );
+
+  if (React.isValidElement(privilegeReturn)) {
+    return privilegeReturn;
+  }
+
+  if (!isSuccessCheckReturn(privilegeReturn)) {
+    return navigateToNotFound();
+  }
+
+  const { isOwnerOrAdmin, isAdmin, isOwner } = privilegeReturn;
+
   const colorMap = {
     VEGAN: "success",
     OMNIVORE: "secondary",

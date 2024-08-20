@@ -32,7 +32,7 @@ import { BaseError } from "@/types/responses";
 import { Session } from "next-auth";
 
 interface Props extends WithUser, UpdateProfileTexts {
-  successCallback: (img: string) => void;
+  successCallback: (userDto: UserDto) => void;
 }
 
 export default function UpdateProfile({
@@ -98,7 +98,7 @@ export default function UpdateProfile({
             },
           },
         });
-        successCallback(res.content.image);
+        successCallback(res.content);
       } catch (e) {
         handleBaseError(e, setErrorMsg, errorText);
       } finally {

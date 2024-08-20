@@ -2,7 +2,15 @@ import { getTranslations, unstable_setRequestLocale } from "next-intl/server";
 import { getRegistrationSchemaTexts } from "@/types/forms";
 import { LocaleProps } from "@/navigation";
 import SignUp from "@/app/[locale]/(main)/auth/signup/page-content";
-
+import { Metadata } from "next";
+import { getIntlMetadata } from "@/texts/metadata";
+export async function generateMetadata({
+  params: { locale },
+}: LocaleProps): Promise<Metadata> {
+  return {
+    ...(await getIntlMetadata("auth.SignUp", "/auth/signup", locale)),
+  };
+}
 export default async function SignUpPageWrapper({
   params: { locale },
 }: LocaleProps) {

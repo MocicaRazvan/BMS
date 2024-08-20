@@ -24,11 +24,10 @@ import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { fetchStream } from "@/hoooks/fetchStream";
 import { useRouter } from "@/navigation";
-import { dezerialize } from "zodex";
 import { Session } from "next-auth";
 import { signIn, useSession } from "next-auth/react";
-import { BaseError } from "@/types/responses";
 import { logError } from "@/app/[locale]/(main)/auth/signin/actions";
+import useClientNotFound from "@/hoooks/useClientNotFound";
 
 export interface ResetPasswordPageText {
   cardTitle: string;
@@ -57,14 +56,10 @@ export default function ResetPasswordPage({
   user,
 }: ResetPasswordPageProps) {
   const session = useSession();
-
+  const { navigateToNotFound } = useClientNotFound();
   const searchParams = useSearchParams();
-  const token = searchParams.get("token");
-  const email = searchParams.get("email");
-
-  if (!token || !email) {
-    notFound();
-  }
+  const token = searchParams.get("token") || "";
+  const email = searchParams.get("email") || "";
 
   const schema = useMemo(
     () => getResetPasswordSchema(resetPasswordSchemaTexts),
@@ -143,6 +138,10 @@ export default function ResetPasswordPage({
 
     console.log({ messages, error });
   };
+
+  if (!token || !email) {
+    return navigateToNotFound();
+  }
 
   return (
     <main className="w-full min-h-[calc(100vh-4rem)] flex items-center justify-center transition-all">

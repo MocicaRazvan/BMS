@@ -10,11 +10,23 @@ import { sortingIngredientsSortingOptionsKeys } from "@/texts/components/list";
 import Heading from "@/components/common/heading";
 import LoadingSpinner from "@/components/common/loading-spinner";
 import { Suspense } from "react";
+import { Metadata } from "next";
+import { getIntlMetadata } from "@/texts/metadata";
 
 interface Props {
   params: { locale: Locale };
 }
-
+export async function generateMetadata({
+  params: { locale },
+}: Props): Promise<Metadata> {
+  return {
+    ...(await getIntlMetadata(
+      "trainer.Ingredients",
+      "/trainer/ingredients",
+      locale,
+    )),
+  };
+}
 export interface IngredientsPageTexts {
   ingredientTableTexts: IngredientTableTexts;
   sortingIngredientsSortingOptions: SortingOptionsTexts;

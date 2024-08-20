@@ -42,7 +42,7 @@ import { useRouter } from "@/navigation";
 import { ColumnActionsTexts } from "@/texts/components/table";
 import ToggleDisplayIngredient from "@/components/dialogs/ingredients/ingredient-toggle-display";
 import AlertDialogDeleteIngredient from "@/components/dialogs/ingredients/delete-ingredient";
-import { notFound } from "next/navigation";
+import useClientNotFound from "@/hoooks/useClientNotFound";
 
 export interface IngredientTableColumnTexts {
   id: string;
@@ -107,7 +107,7 @@ export default function IngredientsTable({
     ...displayFilterTexts,
   });
 
-  console.log("INGC", ingredientTableColumnTexts.count);
+  const { navigateToNotFound } = useClientNotFound();
 
   const {
     value: dietType,
@@ -531,7 +531,7 @@ export default function IngredientsTable({
   ]);
 
   if (error?.status) {
-    return notFound();
+    return navigateToNotFound();
   }
 
   return (

@@ -35,7 +35,7 @@ import {
 } from "@/texts/components/table";
 import useBinaryFilter from "@/components/list/useBinaryFilter";
 import { postColumnActions } from "@/lib/constants";
-import { notFound } from "next/navigation";
+import useClientNotFound from "@/hoooks/useClientNotFound";
 
 export interface PostTableColumnsTexts {
   id: string;
@@ -92,6 +92,8 @@ export default function PostsTable({
       falseText: useApprovedFilterTexts.notApproved,
       all: useApprovedFilterTexts.all,
     });
+
+  const { navigateToNotFound } = useClientNotFound();
 
   const router = useRouter();
   const isAdmin = authUser?.role === "ROLE_ADMIN";
@@ -333,7 +335,7 @@ export default function PostsTable({
   );
 
   if (error?.status) {
-    return notFound();
+    return navigateToNotFound();
   }
 
   return (

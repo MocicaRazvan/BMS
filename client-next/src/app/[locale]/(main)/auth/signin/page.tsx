@@ -2,6 +2,16 @@ import { getTranslations, unstable_setRequestLocale } from "next-intl/server";
 import { getSignInSchemaTexts } from "@/types/forms";
 import SingIn from "./page-content";
 import { LocaleProps } from "@/navigation";
+import { getIntlMetadata } from "@/texts/metadata";
+import { Metadata } from "next";
+
+export async function generateMetadata({
+  params: { locale },
+}: LocaleProps): Promise<Metadata> {
+  return {
+    ...(await getIntlMetadata("auth.SignIn", "/auth/signin", locale)),
+  };
+}
 
 export default async function SignInPageWrapper({
   params: { locale },

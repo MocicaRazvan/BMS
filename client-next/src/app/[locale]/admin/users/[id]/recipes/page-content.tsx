@@ -13,6 +13,7 @@ import Heading from "@/components/common/heading";
 import { Suspense } from "react";
 import RecipeTable from "@/components/table/recipes-table";
 import useGetUser from "@/hoooks/useGetUser";
+import useClientNotFound from "@/hoooks/useClientNotFound";
 
 interface Props extends UserRecipesAdminPageTexts, WithUser, UseListProps {
   id: string;
@@ -40,7 +41,10 @@ export default function UserRecipesAdminPageContent({
   //   useAbortController: false,
   // });
   const { user, messages, error, isFinished } = useGetUser(id);
-
+  const { navigateToNotFound } = useClientNotFound();
+  if (isFinished && error?.status) {
+    return navigateToNotFound();
+  }
   // if (isFinished && error) {
   //   notFound();
   //

@@ -658,6 +658,122 @@ export const getAdminEmailSchemaTexts =
       email: t("email"),
     };
   };
+export const activities = {
+  // BMR: 1,
+  Sedentary: 1.2,
+  Light: 1.375,
+  Moderate: 1.455,
+  Active: 1.55,
+  VeryActive: 1.725,
+} as const;
+
+export type ActivitiesTexts = Record<keyof typeof activities, string>;
+
+export async function getActivitiesTexts(): Promise<ActivitiesTexts> {
+  const t = await getTranslations("zod.ActivitiesTexts");
+  return {
+    // BMR: t("BMR"),
+    Sedentary: t("Sedentary"),
+    Light: t("Light"),
+    Moderate: t("Moderate"),
+    Active: t("Active"),
+    VeryActive: t("VeryActive"),
+  };
+}
+export const genders = ["male", "female"] as const;
+
+export type GenderText = Record<(typeof genders)[number], string>;
+
+export async function getGenderTexts(): Promise<GenderText> {
+  const t = await getTranslations("zod.GenderTexts");
+  return {
+    female: t("female"),
+    male: t("male"),
+  };
+}
+
+export interface CalculatorSchemaTexts {
+  minAge: string;
+  maxAge: string;
+  validGender: string;
+  minHeight: string;
+  maxHeight: string;
+  minWeight: string;
+  maxWeight: string;
+  validActivity: string;
+  validIntake: string;
+}
+
+export async function getCalculatorSchemaTexts(): Promise<CalculatorSchemaTexts> {
+  const t = await getTranslations("zod.CalculatorSchemaTexts");
+  return {
+    minAge: t("minAge"),
+    maxAge: t("maxAge"),
+    validGender: t("validGender"),
+    minHeight: t("minHeight"),
+    maxHeight: t("maxHeight"),
+    minWeight: t("minWeight"),
+    maxWeight: t("maxWeight"),
+    validActivity: t("validActivity"),
+    validIntake: t("validIntake"),
+  };
+}
+
+export const getCalculatorSchema = ({
+  minAge,
+  maxAge,
+  validGender,
+  minHeight,
+  maxHeight,
+  minWeight,
+  maxWeight,
+  validActivity,
+  validIntake,
+}: CalculatorSchemaTexts) =>
+  z.object({
+    age: z.coerce
+      .number({ invalid_type_error: minAge })
+      .min(15, minAge)
+      .max(85, maxAge),
+    height: z.coerce
+      .number({ invalid_type_error: minHeight })
+      .min(0.01, minHeight),
+    weight: z.coerce
+      .number({ invalid_type_error: minWeight })
+      .min(0.01, minWeight),
+    gender: z.enum(genders, { errorMap: () => ({ message: validGender }) }),
+    activity: z.enum(
+      [
+        // "BMR",
+        "Sedentary",
+        "Light",
+        "Moderate",
+        "Active",
+        "VeryActive",
+      ],
+      {
+        errorMap: () => ({ message: validActivity }),
+      },
+    ),
+    intake: z.enum(
+      [
+        "Maintain weight",
+        "Mild weight loss",
+        "Weight loss",
+        "Extreme weight loss",
+        "Mild weight gain",
+        "Weight gain",
+        "Fast Weight gain",
+      ],
+      {
+        errorMap: () => ({ message: validIntake }),
+      },
+    ),
+  });
+
+export type CalculatorSchemaType = z.infer<
+  ReturnType<typeof getCalculatorSchema>
+>;
 
 export type AdminEmailSchemaType = z.infer<
   ReturnType<typeof getAdminEmailSchema>

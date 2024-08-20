@@ -28,16 +28,22 @@ const fontSans = FontSans({
   subsets: ["latin"],
   variable: "--font-sans",
 });
-// export const metadata: Metadata = {
-//   icons: {
-//     icon: [
-//       {
-//         url: "/images/logo-light.svg", // /public path
-//         href: "/images/logo-light.svg", // /public path
-//       },
-//     ],
-//   },
-// };
+
+// export async function generateMetadata(): Promise<Metadata> {
+//   const url = process.env.NEXTAUTH_URL;
+//   if (!url) {
+//     throw new Error("NEXTAUTH_URL must be set in the environment");
+//   }
+//   const languages = locales.reduce((acc, l) => ({ ...acc, [l]: `/${l}` }), {});
+//   return {
+//     alternates: {
+//       // canonical: "/",
+//       languages,
+//     },
+//     metadataBase: new URL(url),
+//   };
+// }
+
 interface Props {
   children: React.ReactNode;
   params: { locale: Locale };
@@ -52,12 +58,27 @@ export default async function BaseLayout({
   params: { locale },
 }: Props) {
   const spring = process.env.NEXT_PUBLIC_SPRING_CLIENT!;
-  const [session, tf, lg, aiTexts] = await Promise.all([
-    getServerSession(authOptions),
-    loadGlobalModel(),
-    vectorStoreInstance.initialize(),
-    getAiChatBoxTexts(),
-  ]);
+
+  let session;
+  let aiTexts;
+
+  if (process.env.NODE_ENV === "production") {
+    const [sessionP, tf, lg, aiTextsP] = await Promise.all([
+      getServerSession(authOptions),
+      loadGlobalModel(),
+      vectorStoreInstance.initialize(false, false),
+      getAiChatBoxTexts(),
+    ]);
+    session = sessionP;
+    aiTexts = aiTextsP;
+  } else {
+    const [sessionP, aiTextsP] = await Promise.all([
+      getServerSession(authOptions),
+      getAiChatBoxTexts(),
+    ]);
+    session = sessionP;
+    aiTexts = aiTextsP;
+  }
 
   return (
     <html lang={locale} suppressHydrationWarning>

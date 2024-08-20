@@ -6,10 +6,10 @@ import useFetchStream from "@/hoooks/useFetchStream";
 import { CustomEntityModel, PostResponse } from "@/types/dto";
 import { BaseError } from "@/types/responses";
 import LoadingSpinner from "@/components/common/loading-spinner";
-import { notFound } from "next/navigation";
 import { checkOwner } from "@/lib/utils";
 import { Option } from "@/components/ui/multiple-selector";
-import { Suspense } from "react";
+import React, { Suspense } from "react";
+import useClientNotFound from "@/hoooks/useClientNotFound";
 
 interface Props extends WithUser, PostFormProps {
   postId: string;
@@ -30,17 +30,23 @@ export default function UpdatePostPageContent({
     useAbortController: false,
   });
 
+  const { navigateToNotFound } = useClientNotFound();
+
   if (!isFinished) return <LoadingSpinner />;
 
   console.log("HERE", isFinished, messages, error);
 
   if (error || !messages[0]?.content) {
     console.log("HERE");
-    return notFound();
+    return navigateToNotFound();
   }
 
   const post = messages[0].content;
-  checkOwner(authUser, post);
+  const ownerReturn = checkOwner(authUser, post, navigateToNotFound);
+
+  if (React.isValidElement(ownerReturn)) {
+    return ownerReturn;
+  }
 
   const tags: Option[] = post.tags.map((tag) => ({ label: tag, value: tag }));
 

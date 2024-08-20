@@ -11,12 +11,12 @@ import {
 } from "@/types/dto";
 import { BaseError } from "@/types/responses";
 import LoadingSpinner from "@/components/common/loading-spinner";
-import { notFound } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { fetchStream } from "@/hoooks/fetchStream";
 import { checkOwner } from "@/lib/utils";
 import { Option } from "@/components/ui/multiple-selector";
 import RecipeForm from "@/components/forms/recipe-form";
+import useClientNotFound from "@/hoooks/useClientNotFound";
 
 interface Props extends PlanFormProps {
   id: string;
@@ -49,6 +49,8 @@ export default function UpdatePlanPageContent({
     useAbortController: false,
   });
 
+  const { navigateToNotFound } = useClientNotFound();
+
   const initialOptions: (Option & { type: DietType })[] = useMemo(
     () =>
       recipes.length == 0
@@ -64,20 +66,24 @@ export default function UpdatePlanPageContent({
   if (!planFinished || !recipeFinished) return <LoadingSpinner />;
 
   if (planError || recipeError) {
-    return notFound();
+    return navigateToNotFound();
   }
 
   if (planFinished && !plan[0]?.content) {
-    return notFound();
+    return navigateToNotFound();
   }
 
   if (recipeFinished && !(recipes.length > 0)) {
-    return notFound();
+    return navigateToNotFound();
   }
 
   const planResponse = plan[0].content;
 
-  checkOwner(authUser, planResponse);
+  const ownerReturn = checkOwner(authUser, planResponse, navigateToNotFound);
+
+  if (React.isValidElement(ownerReturn)) {
+    return ownerReturn;
+  }
 
   console.log("plans", plan);
   console.log("recipes", recipes);

@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  ChatRoomResponse,
-  ConversationUserResponse,
-  PageableResponse,
-  PageInfo,
-} from "@/types/dto";
-import { Session } from "next-auth";
+import { ChatRoomResponse, PageableResponse, PageInfo } from "@/types/dto";
 import { ChangeEvent, Suspense, useCallback, useEffect, useState } from "react";
 import LoadingSpinner from "@/components/common/loading-spinner";
 import useFetchStream from "@/hoooks/useFetchStream";
@@ -14,8 +8,6 @@ import { WithUser } from "@/lib/user";
 import ChatMainContent, {
   MainContentTexts,
 } from "@/app/[locale]/(main)/(user)/chat/main-content";
-import { Link } from "@/navigation";
-import useList from "@/hoooks/useList";
 import { useSearchParams } from "next/navigation";
 import SearchInput from "@/components/forms/input-serach";
 import { useDebounce } from "@/components/ui/multiple-selector";

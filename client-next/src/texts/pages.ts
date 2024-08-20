@@ -64,7 +64,12 @@ import { UserPlansPageTexts } from "@/app/[locale]/(main)/trainer/user/[id]/plan
 import { UserPlansAdminPageTexts } from "@/app/[locale]/admin/users/[id]/plans/page";
 import { SingleTrainerPlanPageTexts } from "@/app/[locale]/(main)/trainer/plans/single/[id]/page-content";
 import { ApprovedPlansTexts } from "@/app/[locale]/(main)/(user)/plans/approved/page-content";
-import { dietTypes } from "@/types/forms";
+import {
+  dietTypes,
+  getActivitiesTexts,
+  getCalculatorSchemaTexts,
+  getGenderTexts,
+} from "@/types/forms";
 import { getAddToCartBtnTexts } from "@/texts/components/plans";
 import { UserPlanPageContentTexts } from "@/app/[locale]/(main)/(user)/plans/single/[id]/page-content";
 import { CartPageContentTexts } from "@/app/[locale]/(main)/(user)/cart/page-content";
@@ -96,6 +101,11 @@ import { AdminEmailPageTexts } from "@/app/[locale]/admin/email/page";
 import { AdminKanbanTexts } from "@/app/[locale]/admin/kanban/page";
 import { getKanbanBoardTexts } from "@/texts/components/kanban";
 import { KanbanPageTexts } from "@/app/[locale]/(main)/(user)/kanban/page";
+import {
+  CalculatorPageTexts,
+  IntakeTitle,
+  ItemTexts,
+} from "@/app/[locale]/(main)/(user)/calculator/page";
 
 export async function getSinglePostPageTexts(): Promise<SinglePostPageTexts> {
   const [elementHeaderTexts, t, postCommentsTexts] = await Promise.all([
@@ -862,5 +872,70 @@ export async function getKanbanPageTexts(): Promise<KanbanPageTexts> {
     title: t("title"),
     kanbanBoardTexts,
     header: t("header"),
+  };
+}
+export async function getErrorPageTexts() {
+  const t = await getTranslations("ErrorPage");
+  return {
+    description: t("description"),
+    statusCode: t("statusCode", { statusCode: 404 }),
+    title: t("title"),
+  };
+}
+export const intakeTitles = [
+  "Maintain weight",
+  "Mild weight loss",
+  "Weight loss",
+  "Extreme weight loss",
+  "Mild weight gain",
+  "Weight gain",
+  "Fast Weight gain",
+] as const;
+export async function getCalculatorPageTexts(): Promise<CalculatorPageTexts> {
+  const [activitiesTexts, genderText, calculatorSchemaTexts, t] =
+    await Promise.all([
+      getActivitiesTexts(),
+      getGenderTexts(),
+      getCalculatorSchemaTexts(),
+      getTranslations("pages.calculator.CalculatorPageTexts"),
+    ]);
+
+  return {
+    activitiesTexts,
+    genderText,
+    calculatorSchemaTexts,
+    imperial: t("imperial"),
+    metric: t("metric"),
+    header: t("header"),
+    title: t("title"),
+    button: t("button"),
+    message1: t("message1"),
+    message2: t("message2"),
+    itemsTexts: {
+      age: {
+        label: t(`itemsTexts.age.label`),
+        placeholder: t(`itemsTexts.age.placeholder`),
+        description: t(`itemsTexts.age.description`),
+      },
+      ...["gender", "activity", "height", "weight", "intake"].reduce(
+        (acc, key) => ({
+          ...acc,
+          [key]: {
+            label: t(`itemsTexts.${key}.label`),
+            placeholder: t(`itemsTexts.${key}.placeholder`),
+            description: t(`itemsTexts.${key}.description`),
+          },
+        }),
+        {} as Record<
+          "activity" | "gender" | "height" | "weight" | "intake",
+          ItemTexts
+        >,
+      ),
+    },
+    week: t("week"),
+    intakeTitles: intakeTitles.reduce(
+      (acc, title) => ({ ...acc, [title]: t(`intakeTitles.${title}`) }),
+      {} as IntakeTitle,
+    ),
   };
 }

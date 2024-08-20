@@ -48,10 +48,15 @@ export default function useFilesBase64<T extends FieldValues>({
   getValues,
 }: Args<T>) {
   const [firstRun, setFirstRun] = useState(true);
-  const publicSpring = process.env.NEXT_PUBLIC_SPRING_CLIENT;
+  const springClient = process.env.NEXT_PUBLIC_SPRING_CLIENT;
+  const springServer = process.env.NEXT_PUBLIC_SPRING;
 
-  if (!publicSpring) {
-    throw new Error("Missing public spring client");
+  if (!springClient) {
+    throw new Error("Missing environment variable NEXT_PUBLIC_SPRING_CLIENT");
+  }
+
+  if (!springServer) {
+    throw new Error("Missing environment variable NEXT_PUBLIC_SPRING");
   }
 
   if (!(fieldName in getValues())) {
@@ -61,13 +66,18 @@ export default function useFilesBase64<T extends FieldValues>({
     if (files.length > 0 && firstRun) {
       const filesForFront = files.map((f) => {
         // const baseUrl = new URL(f).origin;
-        // if (baseUrl !== publicSpring) {
-        //   return f.replace(baseUrl, publicSpring);
+        // if (baseUrl !== springClient) {
+        //   return f.replace(baseUrl, springClient);
         // }
         // return f;
+
+        if (!f.startsWith(springServer)) {
+          return f;
+        }
+
         const url = new URL(f);
         const newUrl = new URL(
-          publicSpring + url.pathname + url.search + url.hash,
+          springClient + url.pathname + url.search + url.hash,
         );
         return newUrl.toString();
       });
@@ -77,5 +87,5 @@ export default function useFilesBase64<T extends FieldValues>({
         setValue(fieldName as Path<T>, fs as PathValue<T, Path<T>>);
       });
     }
-  }, [fieldName, files, firstRun, publicSpring, setValue]);
+  }, [fieldName, files, firstRun, springClient, setValue, springServer]);
 }

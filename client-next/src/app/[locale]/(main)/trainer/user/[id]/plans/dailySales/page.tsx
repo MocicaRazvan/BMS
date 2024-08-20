@@ -4,6 +4,8 @@ import { unstable_setRequestLocale } from "next-intl/server";
 import { getUserDailySalesPageTexts } from "@/texts/pages";
 import { getTheSameUserOrAdmin } from "@/lib/user";
 import Heading from "@/components/common/heading";
+import { Metadata } from "next";
+import { getIntlMetadata } from "@/texts/metadata";
 
 export interface UserDailySalesPageTexts {
   dailySalesTexts: DailySalesTexts;
@@ -12,6 +14,18 @@ export interface UserDailySalesPageTexts {
 }
 interface Props {
   params: { locale: Locale; id: string };
+}
+
+export async function generateMetadata({
+  params: { locale, id },
+}: Props): Promise<Metadata> {
+  return {
+    ...(await getIntlMetadata(
+      "trainer.DailySales",
+      "/trainer/user/" + id + "/plans/dailySales",
+      locale,
+    )),
+  };
 }
 
 export default async function UsersDailySalesPage({

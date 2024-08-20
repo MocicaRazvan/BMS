@@ -8,11 +8,15 @@ import {
   RecipeResponse,
 } from "@/types/dto";
 import LoadingSpinner from "@/components/common/loading-spinner";
-import { notFound } from "next/navigation";
-import { checkOwner } from "@/lib/utils";
-import { Suspense, useMemo } from "react";
+import {
+  checkOwner,
+  checkOwnerOrAdmin,
+  isSuccessCheckReturn,
+} from "@/lib/utils";
+import React, { Suspense, useMemo } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { Option } from "@/components/ui/multiple-selector";
+import useClientNotFound from "@/hoooks/useClientNotFound";
 interface Props extends RecipeFormProps {
   id: string;
 }
@@ -42,6 +46,8 @@ export default function UpdateRecipePageContent({
     authToken: true,
     useAbortController: false,
   });
+
+  const { navigateToNotFound } = useClientNotFound();
 
   console.log("HERE", recipeIsFinished, recipeMessage, recipeError);
   console.log("HEREIQ", IQIsFinished, IQMessage, IQError, IQMessage.length);
@@ -109,18 +115,22 @@ export default function UpdateRecipePageContent({
   if (!recipeIsFinished || !IQIsFinished) return <LoadingSpinner />;
 
   if (recipeError || IQError) {
-    notFound();
+    return navigateToNotFound();
   }
   if (recipeIsFinished && !recipeMessage[0]) {
-    notFound();
+    return navigateToNotFound();
   }
   if (IQIsFinished && !(IQMessage.length > 0)) {
-    notFound();
+    return navigateToNotFound();
   }
 
   const recipe = recipeMessage[0].content;
 
-  checkOwner(authUser, recipe);
+  const ownerReturn = checkOwner(authUser, recipe, navigateToNotFound);
+
+  if (React.isValidElement(ownerReturn)) {
+    return ownerReturn;
+  }
 
   return (
     <main className="flex items-center justify-center px-6 py-10">

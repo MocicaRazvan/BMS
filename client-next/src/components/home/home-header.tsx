@@ -145,13 +145,17 @@ export default function HomeHeader({ title }: HomeHeaderTexts) {
                       transition={{ duration: 0.5 }}
                       // style={{ fontSize: `${fontSize} !important` }}
                     >
-                      <div className="flex items-center justify-center ">
+                      <div className=" items-center justify-center hidden md:flex">
                         <Logo width={60} height={60} applyShadow />
                       </div>
                       <WordPullUp
                         words={title}
-                        className="text-sm lg:text-xl z-2 tracking-tighter font-bold [text-shadow:_1px_5px_1px_rgb(0_0_0_/_50%)]"
+                        className="hidden md:block md:text-sm lg:text-xl z-2 tracking-tighter font-bold [text-shadow:_1px_5px_1px_rgb(0_0_0_/_50%)]"
                       />
+
+                      <p className="md:hidden text-xs text-center font-bold mt-[30%] [text-shadow:_1px_5px_1px_rgb(0_0_0_/_50%)]">
+                        {title}
+                      </p>
                     </motion.div>
                   )}
                 </AnimatePresence>

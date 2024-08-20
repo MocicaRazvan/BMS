@@ -6,6 +6,8 @@ import { getUserPlansPageTexts } from "@/texts/pages";
 import { getTheSameUserOrAdmin } from "@/lib/user";
 import { sortingPlansSortingOptionsKeys } from "@/texts/components/list";
 import Heading from "@/components/common/heading";
+import { Metadata } from "next";
+import { getIntlMetadata } from "@/texts/metadata";
 
 export interface UserPlansPageTexts {
   planTableTexts: PlanTableTexts;
@@ -15,6 +17,18 @@ export interface UserPlansPageTexts {
 }
 interface Props {
   params: { locale: Locale; id: string };
+}
+
+export async function generateMetadata({
+  params: { locale, id },
+}: Props): Promise<Metadata> {
+  return {
+    ...(await getIntlMetadata(
+      "trainer.TrainerPlans",
+      "/trainer/user/" + id + "/plans",
+      locale,
+    )),
+  };
 }
 
 export default async function UsersPlansPage({

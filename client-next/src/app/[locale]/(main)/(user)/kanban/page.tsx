@@ -7,11 +7,19 @@ import Heading from "@/components/common/heading";
 import { Suspense } from "react";
 import LoadingSpinner from "@/components/common/loading-spinner";
 import KanbanBoardWrapper from "@/components/kanban/kanban-board-wrapper";
+import { Metadata } from "next";
+import { getIntlMetadata } from "@/texts/metadata";
 
 interface Props {
   params: { locale: Locale };
 }
-
+export async function generateMetadata({
+  params: { locale },
+}: Props): Promise<Metadata> {
+  return {
+    ...(await getIntlMetadata("user.Kanban", "/kanban", locale)),
+  };
+}
 export interface KanbanPageTexts {
   title: string;
   header: string;

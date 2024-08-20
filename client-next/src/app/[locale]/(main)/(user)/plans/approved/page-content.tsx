@@ -18,8 +18,6 @@ import { useRouter } from "@/navigation";
 import { useCallback, useState } from "react";
 import { useFormatter } from "next-intl";
 import { cn } from "@/lib/utils";
-import { useCartForUser } from "@/context/cart-context";
-import { useToast } from "@/components/ui/use-toast";
 import AddToCartBtn, {
   AddToCartBtnTexts,
 } from "@/components/plans/add-to-cart-btn";

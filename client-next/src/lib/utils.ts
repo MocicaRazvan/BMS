@@ -3,9 +3,8 @@ import { twMerge } from "tailwind-merge";
 import { SortDirection, sortDirections } from "@/types/fetch-utils";
 import { Session } from "next-auth";
 import { ApproveDto, DietType, WithUserDto } from "@/types/dto";
-import { notFound } from "next/navigation";
 import { SortingOption } from "@/components/list/grid-list";
-import { Dispatch, SetStateAction } from "react";
+import { Dispatch, ReactNode, SetStateAction } from "react";
 import { getTimezoneOffset, toZonedTime } from "date-fns-tz";
 import { formatDistanceToNow, parseISO } from "date-fns";
 import { enUS, ro } from "date-fns/locale";
@@ -225,17 +224,35 @@ export function addOnlyUnique<T>(
   }
   return arr;
 }
+type SuccessCheckReturn = {
+  isAdmin: boolean;
+  isOwner: boolean;
+  isOwnerOrAdmin: boolean;
+};
+type CheckReturn = SuccessCheckReturn | ReactNode;
 
+export function isSuccessCheckReturn(
+  privilegeReturn: CheckReturn,
+): privilegeReturn is SuccessCheckReturn {
+  return (
+    typeof privilegeReturn === "object" &&
+    privilegeReturn !== null &&
+    "isOwnerOrAdmin" in privilegeReturn &&
+    "isAdmin" in privilegeReturn &&
+    "isOwner" in privilegeReturn
+  );
+}
 export function checkApprovePrivilege(
   authUser: NonNullable<Session["user"]>,
   entity: ApproveDto,
-) {
+  errorCallback: () => ReactNode,
+): CheckReturn {
   const isAdmin = authUser.role === "ROLE_ADMIN";
   const isOwner = entity?.userId === parseInt(authUser.id);
   const isOwnerOrAdmin = isOwner || isAdmin;
 
   if (!entity.approved && !isOwnerOrAdmin) {
-    notFound();
+    return errorCallback();
   }
   return {
     isAdmin,
@@ -247,12 +264,14 @@ export function checkApprovePrivilege(
 export function checkOwnerOrAdmin(
   authUser: NonNullable<Session["user"]>,
   entity: WithUserDto,
-) {
+  errorCallback: () => ReactNode,
+): CheckReturn {
   if (
     entity.userId !== parseInt(authUser.id) &&
     authUser.role !== "ROLE_ADMIN"
   ) {
-    notFound();
+    // notFound();
+    return errorCallback();
   }
   const isAdmin = authUser.role === "ROLE_ADMIN";
   const isOwner = entity.userId === parseInt(authUser.id);
@@ -260,16 +279,25 @@ export function checkOwnerOrAdmin(
   return {
     isAdmin,
     isOwner,
+    isOwnerOrAdmin: isOwner || isAdmin,
   };
 }
 
 export function checkOwner(
   authUser: NonNullable<Session["user"]>,
   entity: ApproveDto,
-) {
+  errorCallback: () => ReactNode,
+):
+  | {
+      success: boolean;
+    }
+  | ReactNode {
   if (entity.userId !== parseInt(authUser.id)) {
-    notFound();
+    return errorCallback();
   }
+  return {
+    success: true,
+  };
 }
 
 export function handleBaseError(

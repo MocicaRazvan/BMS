@@ -4,7 +4,6 @@ import {
   RecipeResponse,
 } from "@/types/dto";
 import useFetchStream from "@/hoooks/useFetchStream";
-import { notFound } from "next/navigation";
 import { Session } from "next-auth";
 
 export default function useGetRecipeWithIngredients(
@@ -42,10 +41,6 @@ export default function useGetRecipeWithIngredients(
   });
 
   console.log("IQError", IQError);
-
-  if (recipeError || IQError) {
-    notFound();
-  }
 
   return {
     recipeState,

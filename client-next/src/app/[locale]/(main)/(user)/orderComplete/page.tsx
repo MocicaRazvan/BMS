@@ -3,6 +3,8 @@ import { Link, Locale } from "@/navigation";
 import { Button } from "@/components/ui/button";
 import { unstable_setRequestLocale } from "next-intl/server";
 import { getOrderCompletePageTexts } from "@/texts/pages";
+import { Metadata } from "next";
+import { getIntlMetadata } from "@/texts/metadata";
 
 export interface OrderCompletePageTexts {
   title: string;
@@ -11,6 +13,14 @@ export interface OrderCompletePageTexts {
 }
 interface Props {
   params: { locale: Locale };
+}
+
+export async function generateMetadata({
+  params: { locale },
+}: Props): Promise<Metadata> {
+  return {
+    ...(await getIntlMetadata("user.OrderComplete", "/orderComplete", locale)),
+  };
 }
 
 export default async function OrderCompletePage({ params: { locale } }: Props) {

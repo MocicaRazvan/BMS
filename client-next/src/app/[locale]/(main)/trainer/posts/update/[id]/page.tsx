@@ -5,11 +5,25 @@ import { getPostFormTexts } from "@/texts/components/forms";
 import { Suspense } from "react";
 import LoadingSpinner from "@/components/common/loading-spinner";
 import UpdatePostPageContent from "@/app/[locale]/(main)/trainer/posts/update/[id]/page-content";
+import { Metadata } from "next";
+import { getIntlMetadata } from "@/texts/metadata";
 
 interface Props {
   params: {
     locale: Locale;
     id: string;
+  };
+}
+
+export async function generateMetadata({
+  params: { locale, id },
+}: Props): Promise<Metadata> {
+  return {
+    ...(await getIntlMetadata(
+      "trainer.UpdatePost",
+      "/trainer/posts/update/" + id,
+      locale,
+    )),
   };
 }
 

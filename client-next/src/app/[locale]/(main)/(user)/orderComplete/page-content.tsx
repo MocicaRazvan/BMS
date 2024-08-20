@@ -2,7 +2,6 @@
 import { useEffect, useRef } from "react";
 import confetti from "canvas-confetti";
 
-import { Confetti, ConfettiRef } from "@/components/magicui/confetti";
 import Lottie from "react-lottie-player";
 import orderCompleted from "../../../../../../public/lottie/orderCompleted.json";
 import * as React from "react";

@@ -1,15 +1,21 @@
-import { Locale } from "@/navigation";
+import { Locale, LocaleProps } from "@/navigation";
 import { unstable_setRequestLocale } from "next-intl/server";
 import { getUser } from "@/lib/user";
 import LoadingSpinner from "@/components/common/loading-spinner";
 import { Suspense } from "react";
 import CartPageContent from "@/app/[locale]/(main)/(user)/cart/page-content";
 import { getCartPageContentTexts } from "@/texts/pages";
+import { Metadata } from "next";
+import { getIntlMetadata } from "@/texts/metadata";
 
-interface Props {
-  params: { locale: Locale };
+export async function generateMetadata({
+  params: { locale },
+}: LocaleProps): Promise<Metadata> {
+  return {
+    ...(await getIntlMetadata("user.Cart", "/cart", locale)),
+  };
 }
-export default async function CartPage({ params: { locale } }: Props) {
+export default async function CartPage({ params: { locale } }: LocaleProps) {
   unstable_setRequestLocale(locale);
   const [user, texts] = await Promise.all([
     getUser(),

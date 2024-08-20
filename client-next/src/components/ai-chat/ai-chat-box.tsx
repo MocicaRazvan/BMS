@@ -137,7 +137,12 @@ export default function AiChatBox({
                   color={["#A07CFE", "#FE8FB5", "#FFBE7B"]}
                   borderWidth={2}
                 >
-                  <Logo width={60} height={60} />
+                  <div className="hidden md:block">
+                    <Logo width={60} height={60} />
+                  </div>
+                  <div className="block md:hidden">
+                    <Logo width={40} height={40} />
+                  </div>
                   <p className="text-xl font-semibold tracking-tight">
                     {emptyHeader}
                   </p>

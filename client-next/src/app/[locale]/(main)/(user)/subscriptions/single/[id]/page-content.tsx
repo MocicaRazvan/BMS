@@ -9,7 +9,6 @@ import { WithUser } from "@/lib/user";
 import { useGetTitleBodyUser } from "@/hoooks/useGetTitleBodyUser";
 import { CustomEntityModel, PlanResponse } from "@/types/dto";
 import { useFormatter } from "next-intl";
-import { notFound } from "next/navigation";
 import LoadingSpinner from "@/components/common/loading-spinner";
 import { useCallback } from "react";
 import { fetchStream } from "@/hoooks/fetchStream";
@@ -17,6 +16,7 @@ import CustomImageCarousel from "@/components/common/custom-image-crousel";
 import ProseText from "@/components/common/prose-text";
 import AuthorProfile from "@/components/common/author-profile";
 import { RecipePlanList } from "@/components/plans/plan-recipes";
+import useClientNotFound from "@/hoooks/useClientNotFound";
 
 export interface SingleSubscriptionTexts {
   elementHeaderTexts: ElementHeaderTexts;
@@ -50,6 +50,9 @@ export default function SingleSubscriptionPageContent({
     authUser,
     basePath: `/orders/subscriptions`,
   });
+
+  const { navigateToNotFound } = useClientNotFound();
+
   const formatIntl = useFormatter();
   const react = useCallback(
     async (type: "like" | "dislike") => {
@@ -79,7 +82,7 @@ export default function SingleSubscriptionPageContent({
   );
 
   if (error?.status) {
-    notFound();
+    return navigateToNotFound();
   }
   if (!isFinished || !planState) {
     console.log("loading main");

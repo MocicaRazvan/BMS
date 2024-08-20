@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/date-range-picker";
 import useFetchStream from "@/hoooks/useFetchStream";
 import { DailyOrderSummary } from "@/types/dto";
-import { notFound } from "next/navigation";
+import useClientNotFound from "@/hoooks/useClientNotFound";
 
 export interface DailySalesTexts {
   totalAmountCountOrdersTexts: TotalAmountCountOrdersTexts;
@@ -41,6 +41,8 @@ export default function DailySales({
   totalAmountCountOrdersTexts,
   path,
 }: Props) {
+  const { navigateToNotFound } = useClientNotFound();
+
   const locale = useLocale();
 
   const [showOrdersTrendLine, setShowOrdersTrendLine] = useState(true);
@@ -89,7 +91,7 @@ export default function DailySales({
   );
 
   if (error?.status) {
-    return notFound();
+    return navigateToNotFound();
   }
 
   return (

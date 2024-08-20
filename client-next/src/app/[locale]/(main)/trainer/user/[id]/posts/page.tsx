@@ -8,9 +8,23 @@ import { Suspense } from "react";
 import LoadingSpinner from "@/components/common/loading-spinner";
 import { getTheSameUserOrAdmin } from "@/lib/user";
 import Heading from "@/components/common/heading";
+import { Metadata } from "next";
+import { getIntlMetadata } from "@/texts/metadata";
 
 interface Props {
   params: { locale: Locale; id: string };
+}
+
+export async function generateMetadata({
+  params: { locale, id },
+}: Props): Promise<Metadata> {
+  return {
+    ...(await getIntlMetadata(
+      "trainer.TrainerPosts",
+      "/trainer/user/" + id + "/posts",
+      locale,
+    )),
+  };
 }
 
 export default async function UsersPostsPage({

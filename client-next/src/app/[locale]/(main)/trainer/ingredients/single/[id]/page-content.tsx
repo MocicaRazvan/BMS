@@ -8,7 +8,6 @@ import {
   NutritionalFactResponse,
 } from "@/types/dto";
 import LoadingSpinner from "@/components/common/loading-spinner";
-import { notFound } from "next/navigation";
 
 import { cn } from "@/lib/utils";
 
@@ -22,6 +21,7 @@ import { useDebounce } from "@/components/ui/multiple-selector";
 import NutritionalTable, {
   NutritionalTableTexts,
 } from "@/components/common/nutritional-table";
+import useClientNotFound from "@/hoooks/useClientNotFound";
 const tableColsKeys: (keyof NutritionalFactResponse &
   keyof IngredientTableColumnTexts)[] = [
   "fat",
@@ -61,6 +61,7 @@ export default function SingleIngredientPageContent({
     authToken: true,
     useAbortController: false,
   });
+  const { navigateToNotFound } = useClientNotFound();
 
   const debouncedFinish = useDebounce(isFinished, 700);
 
@@ -81,7 +82,8 @@ export default function SingleIngredientPageContent({
   }, [JSON.stringify(messages)]);
 
   if (!isFinished) return <LoadingSpinner />;
-  if (isFinished && messages.length == 0 && error?.status) return notFound();
+  if (isFinished && messages.length == 0 && error?.status)
+    return navigateToNotFound();
 
   const isAdmin = authUser?.role === "ROLE_ADMIN";
   const ing = messages[0].content;
@@ -89,7 +91,7 @@ export default function SingleIngredientPageContent({
   const ingredient = ing.ingredient;
   const nutritionalFact = ing.nutritionalFact;
 
-  if (!ingredient.display && !isAdmin) return notFound();
+  if (!ingredient.display && !isAdmin) return navigateToNotFound();
 
   const colorMap = {
     CARNIVORE: "destructive",

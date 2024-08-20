@@ -5,9 +5,23 @@ import { Suspense } from "react";
 import LoadingSpinner from "@/components/common/loading-spinner";
 import PostForm from "@/components/forms/post-form";
 import { getUserWithMinRole } from "@/lib/user";
+import { Metadata } from "next";
+import { getIntlMetadata } from "@/texts/metadata";
 
 interface Props {
   params: { locale: Locale };
+}
+
+export async function generateMetadata({
+  params: { locale },
+}: Props): Promise<Metadata> {
+  return {
+    ...(await getIntlMetadata(
+      "trainer.CreatePost",
+      "/trainer/posts/create",
+      locale,
+    )),
+  };
 }
 
 export default async function CreatePostPage({ params: { locale } }: Props) {

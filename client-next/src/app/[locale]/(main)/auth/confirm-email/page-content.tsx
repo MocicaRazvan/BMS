@@ -3,6 +3,7 @@ import Loader from "@/components/ui/spinner";
 import { notFound, useSearchParams } from "next/navigation";
 import useFetchStream from "@/hoooks/useFetchStream";
 import { useRouter } from "@/navigation";
+import useClientNotFound from "@/hoooks/useClientNotFound";
 
 export interface ConfirmEmailPageText {
   isLoadingHeader: string;
@@ -14,13 +15,12 @@ export default function ConfirmEmailPage({
   isFinishedErrorHeader,
 }: ConfirmEmailPageText) {
   const searchParams = useSearchParams();
-  const token = searchParams.get("token");
-  const email = searchParams.get("email");
+  const token = searchParams.get("token") || "";
+  const email = searchParams.get("email") || "";
   const userId = searchParams.get("userId");
+  const { navigateToNotFound } = useClientNotFound();
   const router = useRouter();
-  if (!token || !email || !userId) {
-    notFound();
-  }
+
   const { messages, isFinished, error } = useFetchStream({
     path: "/auth/confirmEmail",
     method: "POST",
@@ -29,6 +29,10 @@ export default function ConfirmEmailPage({
   });
 
   console.log(messages, isFinished, error);
+
+  if (!token || !email || !userId) {
+    return navigateToNotFound();
+  }
 
   if (isFinished && !error) {
     router.replace(`/users/single/${userId}`);

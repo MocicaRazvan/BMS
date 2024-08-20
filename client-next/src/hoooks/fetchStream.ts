@@ -13,6 +13,7 @@ export interface FetchStreamProps<T> {
   cache?: RequestCache;
   aboveController?: AbortController;
   successCallback?: (data: T) => void;
+  errorCallback?: (error: BaseError) => void;
   acceptHeader?: AcceptHeader;
 }
 
@@ -27,6 +28,7 @@ export async function fetchStream<T = any, E extends BaseError = BaseError>({
   cache = "default",
   aboveController,
   successCallback,
+  errorCallback,
   acceptHeader = "application/x-ndjson",
 }: FetchStreamProps<T>) {
   let messages: T[] = [];
@@ -91,6 +93,7 @@ export async function fetchStream<T = any, E extends BaseError = BaseError>({
       }
       if (!res.ok) {
         error = value as E;
+        errorCallback?.(value as E);
       } else {
         messages = [...messages, value as T];
         successCallback?.(value as T);

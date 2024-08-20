@@ -3,8 +3,13 @@
 import { WithUser } from "@/lib/user";
 import { CustomEntityModel, RecipeResponse } from "@/types/dto";
 import LoadingSpinner from "@/components/common/loading-spinner";
-import { checkOwnerOrAdmin, cn } from "@/lib/utils";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  checkApprovePrivilege,
+  checkOwnerOrAdmin,
+  cn,
+  isSuccessCheckReturn,
+} from "@/lib/utils";
+import React, { useCallback } from "react";
 import ElementHeader, {
   ElementHeaderTexts,
 } from "@/components/common/element-header";
@@ -18,9 +23,7 @@ import NutritionalTable, {
 } from "@/components/common/nutritional-table";
 import IngredientMacrosPieChart, {
   IngredientPieChartTexts,
-  MacroChartElement,
 } from "@/components/charts/ingredient-macros-pie-chart";
-import { useDebounce } from "@/components/ui/multiple-selector";
 import {
   Accordion,
   AccordionContent,
@@ -30,6 +33,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import useGetRecipeWithIngredients from "@/hoooks/recipes/useGetRecipeWithIngredients";
 import RecipeMacros from "@/components/recipes/recipe-macros";
+import useClientNotFound from "@/hoooks/useClientNotFound";
 
 export interface SingleRecipePageTexts {
   elementHeaderTexts: ElementHeaderTexts;
@@ -101,6 +105,8 @@ export default function SingeRecipePageContent({
     IQIsFinished,
   } = useGetRecipeWithIngredients(id, authUser);
 
+  const { navigateToNotFound } = useClientNotFound();
+
   // const aggegatedNF: NutritionalFactResponse | null = useMemo(
   //   () =>
   //     IQMessage.length === 0
@@ -155,28 +161,31 @@ export default function SingeRecipePageContent({
       </section>
     );
 
-  // if (recipeError || IQError) {
-  //   notFound();
-  // }
+  if (recipeError || IQError) {
+    return navigateToNotFound();
+  }
 
   if (!recipeState) return null;
 
-  // if (IQIsFinished && !(IQMessage.length > 0)) {
-  //   notFound();
-  // }
-
-  // const recipe = messages[0].model.content;
-  // const { isOwnerOrAdmin, isAdmin, isOwner } = checkApprovePrivilege(
-  //   authUser,
-  //   recipeState,
-  // );
-
-  const { isOwner, isAdmin } = checkOwnerOrAdmin(authUser, recipeState);
   const colorMap = {
     VEGAN: "success",
     OMNIVORE: "default",
     VEGETARIAN: "accent",
   };
+
+  const ownerReturn = checkOwnerOrAdmin(
+    authUser,
+    recipeState,
+    navigateToNotFound,
+  );
+
+  if (React.isValidElement(ownerReturn)) {
+    return ownerReturn;
+  }
+
+  if (!isSuccessCheckReturn(ownerReturn)) {
+    return navigateToNotFound();
+  }
 
   return (
     <section className="w-full mx-auto max-w-[1500px] min-h-[calc(100vh-4rem)] flex-col items-center justify-center transition-all px-6 py-10 relative ">

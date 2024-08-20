@@ -1,17 +1,14 @@
 "use client";
 import { UserPostsAdminPageTexts } from "@/app/[locale]/admin/users/[id]/posts/page";
 import { WithUser } from "@/lib/user";
-import useFetchStream from "@/hoooks/useFetchStream";
-import { CustomEntityModel, UserDto } from "@/types/dto";
-import { BaseError } from "@/types/responses";
 import AdminContentLayout from "@/components/admin/admin-content-layout";
 import Heading from "@/components/common/heading";
 import { Suspense } from "react";
 import LoadingSpinner from "@/components/common/loading-spinner";
 import PostsTable from "@/components/table/posts-table";
 import { UseListProps } from "@/hoooks/useList";
-import { notFound } from "next/navigation";
 import useGetUser from "@/hoooks/useGetUser";
+import useClientNotFound from "@/hoooks/useClientNotFound";
 
 interface Props extends UserPostsAdminPageTexts, WithUser, UseListProps {
   id: string;
@@ -40,6 +37,10 @@ export default function UserPostsAdminPageContent({
   // });
 
   const { user, messages, error, isFinished } = useGetUser(id);
+  const { navigateToNotFound } = useClientNotFound();
+  if (isFinished && error?.status) {
+    return navigateToNotFound();
+  }
   //
   // if (isFinished && error) {
   //   notFound();

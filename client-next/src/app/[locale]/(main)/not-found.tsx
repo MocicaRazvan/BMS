@@ -1,4 +1,3 @@
-import { useMessages } from "next-intl";
 import { getTranslations } from "next-intl/server";
 
 export default async function NotFoundPage() {
@@ -13,3 +12,12 @@ export default async function NotFoundPage() {
     </div>
   );
 }
+
+// "use client";
+// export default function NotFoundPage() {
+//   return (
+//     <div className="w-full min-h-[calc(100vh-21rem)] flex flex-col items-center justify-center transition-all gap-10">
+//       <h1 className="text-5xl font-bold">404 Not Found</h1>
+//     </div>
+//   );
+// }

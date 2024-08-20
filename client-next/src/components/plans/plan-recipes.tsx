@@ -16,6 +16,7 @@ import { fetchStream } from "@/hoooks/fetchStream";
 import { CustomEntityModel, PostResponse, RecipeResponse } from "@/types/dto";
 import LikesDislikes from "@/components/common/likes-dislikes";
 import LoadingSpinner from "@/components/common/loading-spinner";
+import useClientNotFound from "@/hoooks/useClientNotFound";
 
 interface Props extends WithUser {
   recipeIds: number[];
@@ -114,6 +115,7 @@ export const RecipePlanItem = memo(
     } = useGetRecipeWithIngredients(recipeId, authUser, recipeBasePath);
 
     console.log(`Rendering RecipePlanItem for recipeId: ${recipeId}`);
+    const { navigateToNotFound } = useClientNotFound();
 
     const react = useCallback(
       async (type: "like" | "dislike") => {
@@ -154,6 +156,11 @@ export const RecipePlanItem = memo(
       VEGETARIAN: "accent",
     };
     if (!recipe || !recipeState) return null;
+
+    if (recipeError || IQError) {
+      return navigateToNotFound();
+    }
+
     return (
       <div className="w-full px-5">
         <div className=" gap-5 md:gap-0 flex flex-col md:flex-row items-center justify-between w-full max-w-screen-lg mx-auto">

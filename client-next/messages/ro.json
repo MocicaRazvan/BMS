@@ -89,6 +89,29 @@
       "minContent": "Conținutul nu poate fi gol",
       "email": "Adresă de email invalidă"
     },
+    "ActivitiesTexts": {
+      "BMR": "Rata Metabolică Bazală",
+      "Sedentary": "Sedentar: puțin sau deloc exercițiu",
+      "Light": "Ușor: exerciții de 1-3 ori/săptămână",
+      "Moderate": "Moderat: exerciții de 3-5 ori/săptămână",
+      "Active": "Activ: exerciții zilnice",
+      "VeryActive": "Foarte Activ: exerciții zilnice și muncă fizică"
+    },
+    "GenderTexts": {
+      "male": "masculin",
+      "female": "feminin"
+    },
+    "CalculatorSchemaTexts": {
+      "minAge": "Vârsta trebuie să fie de cel puțin 15 ani",
+      "maxAge": "Vârsta trebuie să fie de cel mult 85 de ani",
+      "validGender": "Vă rugăm să selectați un gen valid",
+      "minHeight": "Înălțimea trebuie să fie mai mare de 0",
+      "maxHeight": "Înălțimea trebuie să fie de cel mult 250 cm",
+      "minWeight": "Greutatea trebuie să fie mai mare de 0",
+      "maxWeight": "Greutatea trebuie să fie de cel mult 200 kg",
+      "validActivity": "Vă rugăm să selectați un nivel de activitate valid",
+      "validIntake": "Vă rugăm să selectați un obiectiv valid"
+    },
     "forms": {
       "components": {
         "InputFile": {
@@ -1244,6 +1267,54 @@
         "header": "Aici poți vedea și gestiona toate sarcinile pe care le-ai creat"
       }
     },
+    "calculator": {
+      "CalculatorPageTexts": {
+        "week": "week",
+        "imperial": "Imperial",
+        "metric": "Metric",
+        "title": "Calculator de Aport Caloric",
+        "header": "Completează doar câmpurile și află câte calorii ai nevoie în câteva secunde!",
+        "message1": "Trebuie să consumi",
+        "message2": "calorii pe zi pentru a",
+        "button": "Calculează",
+        "intakeTitles": {
+          "Maintain weight": "Menține greutatea",
+          "Mild weight loss": "Pierdere ușoară în greutate",
+          "Weight loss": "Pierdere în greutate",
+          "Extreme weight loss": "Pierdere extremă în greutate",
+          "Mild weight gain": "Câștig ușor în greutate",
+          "Weight gain": "Câștig în greutate",
+          "Fast Weight gain": "Câștig rapid în greutate"
+        },
+        "itemsTexts": {
+          "age": {
+            "label": "Vârstă",
+            "placeholder": "Introduceți vârsta",
+            "description": "Vârsta trebuie să fie între 15 și 80 de ani"
+          },
+          "gender": {
+            "label": "Gen la naștere",
+            "placeholder": "Selectați genul la naștere"
+          },
+          "activity": {
+            "label": "Nivel de activitate",
+            "placeholder": "Selectați nivelul de activitate"
+          },
+          "height": {
+            "label": "Înălțime",
+            "placeholder": "Introduceți înălțimea"
+          },
+          "weight": {
+            "label": "Greutate",
+            "placeholder": "Introduceți greutatea"
+          },
+          "intake": {
+            "label": "Aport",
+            "placeholder": "Selectați aportul"
+          }
+        }
+      }
+    },
     "admin": {
       "AdminPostsPageTexts": {
         "title": "Toate postările",
@@ -1322,6 +1393,194 @@
       "AdminKanbanTexts": {
         "title": "Tablou Kanban",
         "header": "Aici poți vedea și gestiona toate sarcinile pe care le-ai creat"
+      }
+    }
+  },
+  "metadata": {
+    "LocaleLayout": {
+      "title": "Bro Meets Science",
+      "description": "Bro Meets Science este o platformă care oferă o gamă largă de planuri, rețete și postări pentru a te ajuta să îți îmbunătățești sănătatea și stilul de viață. Alătură-te nouă și începe călătoria către o viață mai sănătoasă!",
+      "keywords": "sănătate, nutriție, rețete, planuri, postări, stil de viață, fitness, dietă, alimente, ingrediente, platformă, comunitate, antrenori, profesioniști, cunoștințe, perspective, călătorie, progres, îmbunătățire, viață, experiență, companie, știință, bro, mese, gătit, alimentație, obiceiuri, obiective, realizări, succes, motivație, inspirație, sprijin, comunitate, platformă, companie, antrenori, profesioniști, cunoștințe, perspective, călătorie, progres, îmbunătățire, viață, experiență, companie, știință, bro, mese, gătit, alimentație, obiceiuri, obiective, realizări, succes, motivație, inspirație, sprijin, comunitate"
+    },
+    "auth": {
+      "SignIn": {
+        "title": "Sign In",
+        "description": "Conectează-te la Bro Meets Science pentru a avea acces la toate funcțiile platformei noastre și pentru a deveni parte din comunitatea noastră.",
+        "keywords": "conectare, autentificare, google, github, email, parolă, cont, platformă, comunitate, funcții, acces, bro meets science, sănătate, nutriție, rețete, planuri, postări, stil de viață, fitness, dietă, alimente, ingrediente, platformă, comunitate, antrenori, profesioniști, cunoștințe, perspective, călătorie, progres, îmbunătățire, viață, experiență, companie, știință, bro, mese, gătit, alimentație, obiceiuri, obiective, realizări, succes, motivație, inspirație, sprijin, comunitate"
+      },
+      "SignUp": {
+        "title": "Înregistrare",
+        "description": "Înregistrează-te la Bro Meets Science pentru a avea acces la toate funcțiile platformei noastre și pentru a deveni parte din comunitatea noastră.",
+        "keywords": "înregistrare, cont nou, email, parolă, cont, platformă, comunitate, funcții, acces, bro meets science, sănătate, nutriție, rețete, planuri, postări, stil de viață, fitness, dietă, alimente, ingrediente, platformă, comunitate, antrenori, profesioniști, cunoștințe, perspective, călătorie, progres, îmbunătățire, viață, experiență, companie, știință, bro, mese, gătit, alimentație, obiceiuri, obiective, realizări, succes, motivație, inspirație, sprijin, comunitate"
+      },
+      "ConfirmEmail": {
+        "title": "Confirmă Emailul",
+        "description": "Confirmă adresa ta de email",
+        "keywords": "confirmă email, email, cont, platformă, comunitate, funcții, acces, bro meets science, sănătate, nutriție, rețete, planuri, postări, stil de viață, fitness, dietă, alimente, ingrediente, platformă, comunitate, antrenori, profesioniști, cunoștințe, perspective, călătorie, progres, îmbunătățire, viață, experiență, companie, știință, bro, mese, gătit, alimentație, obiceiuri, obiective, realizări, succes, motivație, inspirație, sprijin, comunitate"
+      },
+      "ForgotPassword": {
+        "title": "Parolă Uitata",
+        "description": "Ai uitat parola? Nu-ți face griji, te vom ajuta să o resetezi.",
+        "keywords": "parolă uitată, email, cont, platformă, comunitate, funcții, acces, bro meets science, sănătate, nutriție, rețete, planuri, postări, stil de viață, fitness, dietă, alimente, ingrediente, platformă, comunitate, antrenori, profesioniști, cunoștințe, perspective, călătorie, progres, îmbunătățire, viață, experiență, companie, știință, bro, mese, gătit, alimentație, obiceiuri, obiective, realizări, succes, motivație, inspirație, sprijin, comunitate"
+      },
+      "ResetPassword": {
+        "title": "Resetează Parola",
+        "description": "Resetează parola contului tău",
+        "keywords": "resetează parola, email, cont, platformă, comunitate, funcții, acces, bro meets science, sănătate, nutriție, rețete, planuri, postări, stil de viață, fitness, dietă, alimente, ingrediente, platformă, comunitate, antrenori, profesioniști, cunoștințe, perspective, călătorie, progres, îmbunătățire, viață, experiență, companie, știință, bro, mese, gătit, alimentație, obiceiuri, obiective, realizări, succes, motivație, inspirație, sprijin, comunitate"
+      },
+      "SignOut": {
+        "title": "Sign Out",
+        "description": "Deconectează-te de la Bro Meets Science",
+        "keywords": "deconectare, sign out, cont, platformă, comunitate, funcții, acces, bro meets science, sănătate, nutriție, rețete, planuri, postări, stil de viață, fitness, dietă, alimente, ingrediente, platformă, comunitate, antrenori, profesioniști, cunoștințe, perspective, călătorie, progres, îmbunătățire, viață, experiență, companie, știință, bro, mese, gătit, alimentație, obiceiuri, obiective, realizări, succes, motivație, inspirație, sprijin, comunitate"
+      }
+    },
+    "user": {
+      "Cart": {
+        "title": "Coșul Tău",
+        "description": "Aici poți vedea și gestiona toate planurile pe care le-ai adăugat în coș.",
+        "keywords": "coș, planuri, cumpărături, adăugare, eliminare, gestiune, coșul tău, platformă, comunitate, funcții, acces, bro meets science, sănătate, nutriție, rețete, planuri, postări, stil de viață, fitness, dietă, alimente, ingrediente, platformă, comunitate, antrenori, profesioniști, cunoștințe, perspective, călătorie, progres, îmbunătățire, viață, experiență, companie, știință, bro, mese, gătit, alimentație, obiceiuri, obiective, realizări, succes, motivație, inspirație, sprijin, comunitate"
+      },
+      "Chat": {
+        "title": "Chat",
+        "description": "Discută cu alți utilizatori pe Bro Meets Science",
+        "keywords": "chat, mesaje, conversație, camere de chat, utilizatori, chat, mesaje, conversație, camere de chat, utilizatori, chat, mesaje, conversație, camere de chat, utilizatori, chat, mesaje, conversație, camere de chat, utilizatori"
+      },
+      "Kanban": {
+        "title": "Tablou Kanban",
+        "description": "Vezi si gestioneaza toate sarcinile pe care le-ai creat",
+        "keywords": "tablou kanban, sarcini, gestionare, creare, editare, ștergere, tablou kanban, sarcini, gestionare, creare, editare, ștergere, tablou kanban, sarcini, gestionare, creare, editare, ștergere, tablou kanban, sarcini, gestionare, creare, editare, ștergere"
+      },
+      "OrderComplete": {
+        "title": "Comanda Finalizata",
+        "description": "Comanda a fost finalizata cu succes",
+        "keywords": "comanda finalizata, succes, comanda"
+      },
+      "Orders": {
+        "title": "Comenzile Tale",
+        "description": "Aici poți vedea toate comenzile tale.",
+        "keywords": "comenzi, comenzile tale, gestionare, vizualizare, detalii, comenzi, comenzile tale"
+      },
+      "SingleOrder": {
+        "title": "Comanda",
+        "description": "Aici poți vedea detalii despre comanda ta.",
+        "keywords": "comanda, detalii, comanda ta"
+      },
+      "ApprovedPlans": {
+        "title": "Planuri Nutriționale",
+        "description": "Cumpără planuri nutriționale pentru a te îmbunătăți și pentru a beneficia de întreaga experiență a platformei noastre. Oferim o gamă largă de planuri în funcție de nevoile tale.",
+        "keywords": "planuri, aprobate, cumpără, adaugă, coș, finalizează, comandă"
+      },
+      "SinglePlan": {
+        "title": "Plan Nutrițional",
+        "description": "Plan unic pe Bro Meets Science",
+        "keywords": "plan, nutriție, cumpără, adaugă, coș, finalizează, comandă"
+      },
+      "ApprovedPosts": {
+        "title": "Posts",
+        "description": "Read posts to gain knowledge and insights about different nutritional topics written by professionals.",
+        "keywords": "posts, read, knowledge, insights, topics, professionals, free, platform"
+      },
+      "SinglePost": {
+        "title": "Postare",
+        "description": "Postare unică pe Bro Meets Science",
+        "keywords": "postare, citește, cunoștințe, perspective, subiecte, profesioniști, gratuit, platformă"
+      },
+      "Subscriptions": {
+        "title": "Planuri Cumpărate",
+        "description": "Planurile tale cumpărate pe Bro Meets Science",
+        "keywords": "planuri, cumpărate, vizualizează"
+      },
+      "SingleSubscription": {
+        "title": "Plan Cumpărat",
+        "description": "Planul tău cumpărat pe Bro Meets Science",
+        "keywords": "plan, cumpărat, vizualizează"
+      },
+      "UserProfile": {
+        "title": "Profil",
+        "description": "Profil utilizator pe Bro Meets Science",
+        "keywords": "profil, utilizator, gestionare, vizualizare, editare, ștergere"
+      },
+      "Calculator": {
+        "title": "Calculator de Calorii",
+        "description": "Calculează-ți aportul zilnic de calorii",
+        "keywords": "calorii, calculator, zilnic, aport, calculează, nutriție"
+      }
+    },
+    "trainer": {
+      "Ingredients": {
+        "title": "Ingrediente",
+        "description": "Toate ingredientele pe Bro Meets Science",
+        "keywords": "ingrediente, nutriție, informații, calorii, grăsimi, proteine, carbohidrați, zahăr, sare, afișează"
+      },
+      "SingleIngredient": {
+        "title": "Ingredient",
+        "description": "Ingredient unic pe Bro Meets Science",
+        "keywords": "ingredient, nutriție, informații, calorii, grăsimi, proteine, carbohidrați, zahăr, sare, afișează"
+      },
+      "CreatePlan": {
+        "title": "Creează un Plan Nutrițional",
+        "description": "Creează un plan nutrițional pe Bro Meets Science",
+        "keywords": "creează, plan, nutriție, informații, calorii, grăsimi, proteine, carbohidrați, zahăr, sare, afișează"
+      },
+      "SinglePlan": {
+        "title": "Vizualizează Planul Tău",
+        "description": "Vizualizează planul tău pe Bro Meets Science",
+        "keywords": "vizualizează, plan, nutriție, informații, calorii, grăsimi, proteine, carbohidrați, zahăr, sare, afișează"
+      },
+      "UpdatePlan": {
+        "title": "Actualizează Planul Tău",
+        "description": "Actualizează planul tău pe Bro Meets Science",
+        "keywords": "actualizează, plan, nutriție, informații, calorii, grăsimi, proteine, carbohidrați, zahăr, sare, afișează"
+      },
+      "CreatePost": {
+        "title": "Creează o Postare",
+        "description": "Creează o postare pe Bro Meets Science",
+        "keywords": "creează, postare, nutriție, informații, calorii, grăsimi, proteine, carbohidrați, zahăr, sare, afișează, comută"
+      },
+      "UpdatePost": {
+        "title": "Actualizează Postarea Ta",
+        "description": "Actualizează postarea pe Bro Meets Science",
+        "keywords": "actualizează, postare, nutriție, informații, calorii, grăsimi, proteine, carbohidrați, zahăr, sare, afișează, comută"
+      },
+      "CreateRecipe": {
+        "title": "Creează o Rețetă",
+        "description": "Creează o rețetă pe Bro Meets Science",
+        "keywords": "creează, rețetă, nutriție, informații, calorii, grăsimi, proteine, carbohidrați, zahăr, sare, afișează, comută"
+      },
+      "SingleRecipe": {
+        "title": "Vizualizează Rețeta Ta",
+        "description": "Vizualizează rețeta ta pe Bro Meets Science",
+        "keywords": "vizualizează, rețetă, nutriție, informații, calorii, grăsimi, proteine, carbohidrați, zahăr, sare, afișează, comută"
+      },
+      "UpdateRecipe": {
+        "title": "Actualizează Rețeta Ta",
+        "description": "Actualizează rețeta ta pe Bro Meets Science",
+        "keywords": "actualizează, rețetă, nutriție, informații, calorii, grăsimi, proteine, carbohidrați, zahăr, sare, afișează, comută"
+      },
+      "TrainerPlans": {
+        "title": "Planurile Tale de Nutriție",
+        "description": "Planurile tale de nutriție pe Bro Meets Science",
+        "keywords": "vizualizează, planuri, nutriție, informații, calorii, grăsimi, proteine, carbohidrați, zahăr, sare, afișează, comută"
+      },
+      "DailySales": {
+        "title": "Vânzările Tale Zilnice",
+        "description": "Vânzările tale zilnice pe Bro Meets Science",
+        "keywords": "zilnic, vânzări, vizualizează, platformă, comunitate, funcții, acces, bro meets science, sănătate, nutriție, rețete, planuri, postări, stil de viață, fitness, dietă, alimente, ingrediente, platformă, comunitate, antrenori, profesioniști, cunoștințe, perspective, călătorie, progres, îmbunătățire, viață, experiență, companie, știință, bro, mese, gătit, alimentație, obiceiuri, obiective, realizări, succes, motivație, inspirație, sprijin, comunitate"
+      },
+      "MonthlySales": {
+        "title": "Vânzările Tale Lunare",
+        "description": "Vânzările tale lunare pe Bro Meets Science",
+        "keywords": "lunar, vânzări, vizualizează, platformă, comunitate, funcții, acces, bro meets science, sănătate, nutriție, rețete, planuri, postări, stil de viață, fitness, dietă, alimente, ingrediente, platformă, comunitate, antrenori, profesioniști, cunoștințe, perspective, călătorie, progres, îmbunătățire, viață, experiență, companie, știință, bro, mese, gătit, alimentație, obiceiuri, obiective, realizări, succes, motivație, inspirație, sprijin, comunitate"
+      },
+      "TrainerPosts": {
+        "title": "Postările Tale",
+        "description": "Postările tale pe Bro Meets Science",
+        "keywords": "postări, nutriție, informații, calorii, grăsimi, proteine, carbohidrați, zahăr, sare, afișează"
+      },
+      "TrainerRecipes": {
+        "title": "Rețetele Tale",
+        "description": "Rețetele tale pe Bro Meets Science",
+        "keywords": "rețete, nutriție, informații, calorii, grăsimi, proteine, carbohidrați, zahăr, sare, afișează"
       }
     }
   }

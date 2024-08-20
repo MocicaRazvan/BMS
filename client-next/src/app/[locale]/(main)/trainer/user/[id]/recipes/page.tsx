@@ -10,6 +10,8 @@ import { sortingRecipesSortingOptionsKeys } from "@/texts/components/list";
 import Heading from "@/components/common/heading";
 import { Suspense } from "react";
 import LoadingSpinner from "@/components/common/loading-spinner";
+import { Metadata } from "next";
+import { getIntlMetadata } from "@/texts/metadata";
 
 export interface UserRecipesPageTexts {
   recipesTableTexts: RecipeTableTexts;
@@ -19,6 +21,18 @@ export interface UserRecipesPageTexts {
 }
 interface Props {
   params: { locale: Locale; id: string };
+}
+
+export async function generateMetadata({
+  params: { locale, id },
+}: Props): Promise<Metadata> {
+  return {
+    ...(await getIntlMetadata(
+      "trainer.TrainerRecipes",
+      "/trainer/user/" + id + "/recipes",
+      locale,
+    )),
+  };
 }
 
 export default async function UsersRecipesPage({

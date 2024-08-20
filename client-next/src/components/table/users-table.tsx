@@ -29,7 +29,7 @@ import { ColumnActionsTexts } from "@/texts/components/table";
 import { userColumnActions } from "@/lib/constants";
 import { useStompClient } from "react-stomp-hooks";
 import { AlertDialogMakeTrainer } from "@/components/dialogs/user/make-trainer-alert";
-import { notFound } from "next/navigation";
+import useClientNotFound from "@/hoooks/useClientNotFound";
 
 export interface UserTableColumnsTexts {
   id: string;
@@ -79,6 +79,8 @@ export default function UsersTable({
   const stompClient = useStompClient();
   const router = useRouter();
   const isAdmin = authUser?.role === "ROLE_ADMIN";
+
+  const { navigateToNotFound } = useClientNotFound();
 
   const { fieldCriteria, field, updateFieldSearch, fieldCriteriaCallBack } =
     useBinaryFilter({
@@ -433,7 +435,7 @@ export default function UsersTable({
   );
 
   if (error?.status) {
-    return notFound();
+    return navigateToNotFound();
   }
 
   return (

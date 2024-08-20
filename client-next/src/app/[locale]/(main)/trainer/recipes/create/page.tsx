@@ -5,9 +5,22 @@ import { getUserWithMinRole } from "@/lib/user";
 import LoadingSpinner from "@/components/common/loading-spinner";
 import { Suspense } from "react";
 import RecipeForm from "@/components/forms/recipe-form";
+import { Metadata } from "next";
+import { getIntlMetadata } from "@/texts/metadata";
 
 interface Props {
   params: { locale: Locale };
+}
+export async function generateMetadata({
+  params: { locale },
+}: Props): Promise<Metadata> {
+  return {
+    ...(await getIntlMetadata(
+      "trainer.CreateRecipe",
+      "/trainer/recipes/create",
+      locale,
+    )),
+  };
 }
 
 export default async function CreateRecipePage({ params: { locale } }: Props) {

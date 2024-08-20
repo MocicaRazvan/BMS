@@ -7,9 +7,23 @@ import ChatMainContentWrapper, {
 } from "@/app/[locale]/(main)/(user)/chat/main-content-wrapper";
 import { getUser } from "@/lib/user";
 import { getChatMainContentWrapperTexts } from "@/texts/components/chat";
+import { Locale, LocaleProps } from "@/navigation";
+import { Metadata } from "next";
+import { getIntlMetadata } from "@/texts/metadata";
 
 interface Props {
   searchParams: any;
+  params: {
+    locale: Locale;
+  };
+}
+
+export async function generateMetadata({
+  params: { locale },
+}: Props): Promise<Metadata> {
+  return {
+    ...(await getIntlMetadata("user.Chat", "/chat", locale)),
+  };
 }
 
 export default async function ChatPage({ searchParams }: Props) {

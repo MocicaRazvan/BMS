@@ -21,7 +21,7 @@ import {
 import useFetchStream from "@/hoooks/useFetchStream";
 import { MonthlyOrderSummary } from "@/types/dto";
 import { ro } from "date-fns/locale";
-import { notFound } from "next/navigation";
+import useClientNotFound from "@/hoooks/useClientNotFound";
 const now = new Date();
 const oneMonthAgo = subDays(now, 30);
 const oneYearAgo = subYears(now, 1);
@@ -45,6 +45,8 @@ export default function MonthlySales({
   path,
 }: Props) {
   const locale = useLocale();
+
+  const { navigateToNotFound } = useClientNotFound();
 
   const [showTrendLine, setShowTrendLine] = useState(true);
 
@@ -123,7 +125,7 @@ export default function MonthlySales({
     [areaRadioOption, showTrendLine, totalAmountCountOrdersTexts],
   );
   if (error?.status) {
-    return notFound();
+    return navigateToNotFound();
   }
 
   return (

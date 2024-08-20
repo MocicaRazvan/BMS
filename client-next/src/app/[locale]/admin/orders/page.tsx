@@ -67,7 +67,7 @@ export default async function AdminOrdersPage({ params: { locale } }: Props) {
               sortingOptions={orderOptions}
               {...orderTableTexts}
               authUser={authUser}
-              sizeOptions={[1, 10, 20, 30, 40]}
+              sizeOptions={[10, 20, 30, 40]}
             />
           </div>
         </Suspense>

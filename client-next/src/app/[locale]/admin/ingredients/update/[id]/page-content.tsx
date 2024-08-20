@@ -7,10 +7,10 @@ import {
   IngredientNutritionalFactResponse,
 } from "@/types/dto";
 import LoadingSpinner from "@/components/common/loading-spinner";
-import { notFound } from "next/navigation";
 import IngredientForm, {
   IngredientFormTexts,
 } from "@/components/forms/ingredient-form";
+import useClientNotFound from "@/hoooks/useClientNotFound";
 
 interface Props extends WithUser {
   id: string;
@@ -31,11 +31,14 @@ export default function AdminIngredientsPageContent({
     authToken: true,
     useAbortController: false,
   });
+
+  const { navigateToNotFound } = useClientNotFound();
+
   if (!isFinished) return <LoadingSpinner />;
 
   if (error || !messages[0]?.content) {
     console.log("HERE");
-    return notFound();
+    return navigateToNotFound();
   }
   console.log("MESSAGES", messages);
 

@@ -3,9 +3,22 @@ import SingleSubscriptionPageContent from "@/app/[locale]/(main)/(user)/subscrip
 import { unstable_setRequestLocale } from "next-intl/server";
 import { getSingleSubscriptionTexts } from "@/texts/pages";
 import { getUser } from "@/lib/user";
+import { Metadata } from "next";
+import { getIntlMetadata } from "@/texts/metadata";
 
 interface Props {
   params: { locale: Locale; id: string };
+}
+export async function generateMetadata({
+  params: { locale, id },
+}: Props): Promise<Metadata> {
+  return {
+    ...(await getIntlMetadata(
+      "user.SingleSubscription",
+      "/subscriptions/single/" + id,
+      locale,
+    )),
+  };
 }
 
 export default async function SingleSubscriptionPage({

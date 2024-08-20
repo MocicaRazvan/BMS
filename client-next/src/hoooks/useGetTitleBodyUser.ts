@@ -1,13 +1,6 @@
 import { useEffect, useState } from "react";
-import {
-  PostResponse,
-  ResponseWithUserDtoEntity,
-  TitleBodyDto,
-  TitleBodyImagesDto,
-  TitleBodyUserDto,
-} from "@/types/dto";
+import { ResponseWithUserDtoEntity, TitleBodyUserDto } from "@/types/dto";
 import { useParams } from "next/navigation";
-import { useSession } from "next-auth/react";
 import useFetchStream from "@/hoooks/useFetchStream";
 import { BaseError } from "@/types/responses";
 import { useRouter } from "@/navigation";

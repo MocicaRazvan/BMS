@@ -5,9 +5,19 @@ import { getSubscriptionsPageContentTexts } from "@/texts/pages";
 import { getUser } from "@/lib/user";
 import { getSortingOptions } from "@/lib/constants";
 import { sortingPlansSortingOptionsKeys } from "@/texts/components/list";
+import { Metadata } from "next";
+import { getIntlMetadata } from "@/texts/metadata";
 
 interface Props {
   params: { locale: Locale };
+}
+
+export async function generateMetadata({
+  params: { locale },
+}: Props): Promise<Metadata> {
+  return {
+    ...(await getIntlMetadata("user.Subscriptions", "/subscriptions", locale)),
+  };
 }
 
 export default async function SubscriptionsPage({ params: { locale } }: Props) {

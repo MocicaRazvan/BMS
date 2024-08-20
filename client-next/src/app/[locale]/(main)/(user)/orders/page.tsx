@@ -6,6 +6,8 @@ import { getUserOrdersPageTexts } from "@/texts/pages";
 import { getUser } from "@/lib/user";
 import { sortingOrdersSortingOptionsKeys } from "@/texts/components/list";
 import Heading from "@/components/common/heading";
+import { Metadata } from "next";
+import { getIntlMetadata } from "@/texts/metadata";
 
 export interface UserOrdersPageTexts {
   orderTableTexts: OrderTableTexts;
@@ -17,6 +19,14 @@ export interface UserOrdersPageTexts {
 interface Props {
   params: { locale: Locale };
 }
+export async function generateMetadata({
+  params: { locale },
+}: Props): Promise<Metadata> {
+  return {
+    ...(await getIntlMetadata("user.Orders", "/orders", locale)),
+  };
+}
+
 export default async function UserOrdersPage({ params: { locale } }: Props) {
   unstable_setRequestLocale(locale);
   const [texts, user] = await Promise.all([

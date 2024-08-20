@@ -12,17 +12,18 @@ import {
 } from "@/types/dto";
 import { checkOwnerOrAdmin } from "@/lib/utils";
 import LoadingSpinner from "@/components/common/loading-spinner";
-import { notFound } from "next/navigation";
 import { useEffect, useState } from "react";
 import { fetchStream } from "@/hoooks/fetchStream";
 import Image from "next/image";
-import { Link } from "@/navigation";
+import { Link, useRouter } from "@/navigation";
 import { Button } from "@/components/ui/button";
 
 import { Card } from "@/components/ui/card";
 
 import { useFormatter } from "next-intl";
 import { format } from "date-fns";
+import useClientNotFound from "@/hoooks/useClientNotFound";
+import { motion } from "framer-motion";
 
 export interface SingleOrderPageContentTexts {
   title: string;
@@ -42,6 +43,8 @@ export default function SingleOrderPageContent({
   const [invoice, setInvoice] = useState<CustomInvoiceDto | null>(null);
   const [isMounted, setIsMounted] = useState(false);
   const formatIntl = useFormatter();
+  const router = useRouter();
+  const { navigateToNotFound } = useClientNotFound();
 
   useEffect(() => {
     setIsMounted(true);
@@ -57,6 +60,7 @@ export default function SingleOrderPageContent({
     authToken: true,
     useAbortController: false,
   });
+  console.log("HOOKS After useFetchStream for orders");
 
   const {
     messages: plans,
@@ -69,6 +73,8 @@ export default function SingleOrderPageContent({
       authToken: true,
     },
   );
+  console.log("HOOKS After useFetchStream for plans");
+  console.log("HOOKS Before useEffect for invoice fetching");
 
   useEffect(() => {
     if (ordersAddress.length > 0) {
@@ -76,14 +82,17 @@ export default function SingleOrderPageContent({
         path: `/orders/invoices/${ordersAddress[0].content.order.stripeInvoiceId}`,
         method: "GET",
         token: authUser.token,
-        successCallback: (data) => setInvoice(data),
-      }).catch(() => notFound());
+        successCallback: (data) => {
+          setInvoice(data);
+        },
+      }).catch(() => navigateToNotFound());
     }
   }, [authUser.token, JSON.stringify(ordersAddress)]);
+  console.log("HOOKS After useEffect for invoice fetching");
 
   if (!isMounted) return null;
 
-  if (!orderFinished || !plansIsFinished || !invoice)
+  if (!orderFinished || !plansIsFinished)
     return (
       <section className="w-full min-h-[calc(100vh-4rem)] flex items-center justify-center transition-all">
         <LoadingSpinner />
@@ -96,12 +105,14 @@ export default function SingleOrderPageContent({
     plansError?.status ||
     plans.length === 0
   ) {
-    notFound();
+    return navigateToNotFound();
   }
 
-  console.log("plansError", plansError);
-
-  checkOwnerOrAdmin(authUser, ordersAddress[0].content.order);
+  checkOwnerOrAdmin(
+    authUser,
+    ordersAddress?.[0]?.content?.order,
+    navigateToNotFound,
+  );
   return (
     <section className="w-full  min-h-[calc(100vh-4rem)] flex-col items-center justify-center transition-all px-6 py-10 relative pb-14 max-w-[1000px] mx-auto ">
       <div className="flex w-full items-end justify-center gap-5 my-10">
@@ -178,11 +189,19 @@ export default function SingleOrderPageContent({
                       </h3>
                     </div>
                   </div>
-                  <Button asChild>
-                    <a href={invoice.url} target={"_blank"}>
-                      {seeInvoice}
-                    </a>
-                  </Button>
+                  {invoice && (
+                    <Button asChild>
+                      <motion.a
+                        initial={{ scale: 0, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        transition={{ duration: 0.5 }}
+                        href={invoice.url}
+                        target={"_blank"}
+                      >
+                        {seeInvoice}
+                      </motion.a>
+                    </Button>
+                  )}
                 </div>
               </div>
             </Card>

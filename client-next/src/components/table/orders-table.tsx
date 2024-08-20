@@ -24,7 +24,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { MoreHorizontal } from "lucide-react";
 import LoadingSpinner from "@/components/common/loading-spinner";
-import { notFound } from "next/navigation";
+import useClientNotFound from "@/hoooks/useClientNotFound";
 
 export interface OrderTableColumnsTexts {
   id: string;
@@ -66,6 +66,8 @@ export default function OrdersTable({
   const formatIntl = useFormatter();
   const [searchKey, setSearchKey] =
     useState<(typeof fieldKeys)[number]>("city");
+
+  const { navigateToNotFound } = useClientNotFound();
 
   const handleSearchKeyChange = useCallback((value: string) => {
     setSearchKey(value as (typeof fieldKeys)[number]);
@@ -283,7 +285,7 @@ export default function OrdersTable({
     ],
   );
   if (error?.status) {
-    return notFound();
+    return navigateToNotFound();
   }
 
   return (

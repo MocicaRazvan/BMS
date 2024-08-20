@@ -5,11 +5,25 @@ import { getRecipeFormTexts } from "@/texts/components/forms";
 import { Suspense } from "react";
 import Loader from "@/components/ui/spinner";
 import UpdateRecipePageContent from "@/app/[locale]/(main)/trainer/recipes/update/[id]/page-content";
+import { Metadata } from "next";
+import { getIntlMetadata } from "@/texts/metadata";
 
 interface Props {
   params: {
     locale: Locale;
     id: string;
+  };
+}
+
+export async function generateMetadata({
+  params: { locale, id },
+}: Props): Promise<Metadata> {
+  return {
+    ...(await getIntlMetadata(
+      "trainer.UpdateRecipe",
+      "/trainer/recipes/update/" + id,
+      locale,
+    )),
   };
 }
 

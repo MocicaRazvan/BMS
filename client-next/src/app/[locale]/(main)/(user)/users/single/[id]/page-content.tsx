@@ -10,7 +10,6 @@ import noImg from "@/../public/noImage.jpg";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { AlertDialogMakeTrainer } from "@/components/dialogs/user/make-trainer-alert";
-import { notFound } from "next/navigation";
 import {
   Accordion,
   AccordionContent,
@@ -25,6 +24,7 @@ import { fetchStream } from "@/hoooks/fetchStream";
 import { useRouter } from "@/navigation";
 import { UpdateProfileTexts } from "@/texts/components/forms";
 import { useStompClient } from "react-stomp-hooks";
+import useClientNotFound from "@/hoooks/useClientNotFound";
 
 export interface UserPageTexts {
   updateProfileTexts: UpdateProfileTexts;
@@ -62,7 +62,8 @@ export default function UserPageContent({
   const router = useRouter();
   const stompClient = useStompClient();
   const [userState, setUserState] = useState<typeof authUser>(authUser);
-
+  //todo peste tot schimbi notFound cu asta
+  const { navigateToNotFound } = useClientNotFound();
   const { messages, error, refetch, isFinished } = useFetchStream<
     CustomEntityModel<UserDto>,
     BaseError
@@ -149,7 +150,8 @@ export default function UserPageContent({
   );
 
   if (!isFinished) return <LoadingSpinner />;
-  if (isFinished && messages.length === 0 && error?.status) return notFound();
+  if (isFinished && messages.length === 0 && error?.status)
+    return navigateToNotFound();
   const user = messages[0].content;
 
   const isOwner = authUser.email === user.email;
@@ -229,9 +231,22 @@ export default function UserPageContent({
                 <UpdateProfile
                   authUser={userState}
                   {...updateProfileTexts}
-                  successCallback={(image) => {
+                  successCallback={({
+                    lastName,
+                    firstName,
+                    emailVerified,
+                    role,
+                    image,
+                  }) => {
                     refetch();
-                    setUserState((prev) => ({ ...prev, image }));
+                    setUserState((prev) => ({
+                      ...prev,
+                      image,
+                      lastName,
+                      firstName,
+                      emailVerified,
+                      role,
+                    }));
                     router.refresh();
                   }}
                 />

@@ -5,11 +5,23 @@ import { getPlanFormTexts } from "@/texts/components/forms";
 import { Suspense } from "react";
 import LoadingSpinner from "@/components/common/loading-spinner";
 import PlanForm from "@/components/forms/plan-form";
+import { Metadata } from "next";
+import { getIntlMetadata } from "@/texts/metadata";
 
 interface Props {
   params: { locale: Locale };
 }
-
+export async function generateMetadata({
+  params: { locale },
+}: Props): Promise<Metadata> {
+  return {
+    ...(await getIntlMetadata(
+      "trainer.CreatePlan",
+      "/trainer/plans/create",
+      locale,
+    )),
+  };
+}
 export default async function CreatePlanPage({ params: { locale } }: Props) {
   unstable_setRequestLocale(locale);
   const [user, planFormTexts] = await Promise.all([

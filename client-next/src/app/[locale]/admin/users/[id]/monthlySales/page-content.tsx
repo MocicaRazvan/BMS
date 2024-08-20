@@ -6,6 +6,7 @@ import AdminContentLayout from "@/components/admin/admin-content-layout";
 import LoadingSpinner from "@/components/common/loading-spinner";
 import Heading from "@/components/common/heading";
 import MonthlySales from "@/components/charts/monthly-sales";
+import useClientNotFound from "@/hoooks/useClientNotFound";
 
 interface Props extends UserAdminMonthlySalesPageTexts, WithUser {
   id: string;
@@ -21,6 +22,10 @@ export default function UserAdminMonthlySalesPageContent({
   title,
 }: Props) {
   const { user, messages, error, isFinished } = useGetUser(id);
+  const { navigateToNotFound } = useClientNotFound();
+  if (isFinished && error?.status) {
+    return navigateToNotFound();
+  }
   return (
     <AdminContentLayout
       navbarProps={{

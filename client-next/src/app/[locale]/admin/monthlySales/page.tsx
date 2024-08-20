@@ -1,6 +1,4 @@
 import { Locale } from "@/navigation";
-import { TotalAmountCountOrdersTexts } from "@/components/charts/totalAmount-count-ordres";
-import { DateRangePickerTexts } from "@/components/ui/date-range-picker";
 import { ThemeSwitchTexts } from "@/texts/components/nav";
 import { getAdminMonthlySalesTexts } from "@/texts/pages";
 import { getUserWithMinRole } from "@/lib/user";

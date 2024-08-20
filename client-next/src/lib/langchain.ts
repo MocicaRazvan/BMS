@@ -5,11 +5,35 @@ import { DocumentInterface } from "@langchain/core/documents";
 import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
 import { EmbeddingsFilter } from "langchain/retrievers/document_compressors/embeddings_filter";
 import { CustomOllamaEmbeddings } from "@/lib/custom-ollama-embeddings";
+import { PoolConfig } from "pg";
+import {
+  PGVectorStore,
+  DistanceStrategy,
+} from "@langchain/community/vectorstores/pgvector";
 
 const ollamaBaseUrl = process.env.OLLAMA_BASE_URL;
 const embeddingModel = process.env.OLLAMA_EMBEDDING;
 const siteUrl = process.env.NEXTAUTH_URL;
 const keepAlive = "-1m";
+
+const pgConfig = {
+  postgresConnectionOptions: {
+    type: "postgres",
+    host: process.env.POSTGRES_HOST,
+    port: parseInt(process.env.POSTGRES_PORT || "5432"),
+    user: process.env.POSTGRES_USER,
+    password: process.env.POSTGRES_PASSWORD,
+    database: process.env.POSTGRES_DB,
+  } as PoolConfig,
+  tableName: "langchain_vector_store",
+  columns: {
+    idColumnName: "id",
+    vectorColumnName: "vector",
+    contentColumnName: "content",
+    metadataColumnName: "metadata",
+  },
+  distanceStrategy: "cosine" as DistanceStrategy,
+};
 
 if (!ollamaBaseUrl || !embeddingModel || !siteUrl) {
   throw new Error(
@@ -22,12 +46,13 @@ export class VectorStoreSingleton {
   private embeddings: CustomOllamaEmbeddings | undefined;
   private filter: EmbeddingsFilter | undefined;
   private isInitialized = false;
+  private pgVectorStore: PGVectorStore | undefined;
 
   constructor() {
     //
   }
 
-  public async initialize(reset = false) {
+  public async initialize(reset = false, memory = true) {
     if (reset || !this.isInitialized) {
       console.log("Initializing or reinitializing vector store and embeddings");
 
@@ -44,7 +69,7 @@ export class VectorStoreSingleton {
         });
       }
 
-      if (!this.vectorStore || reset) {
+      if (memory && (!this.vectorStore || reset)) {
         const splitDocs = await VectorStoreSingleton.generateEmbeddings();
         this.vectorStore = await MemoryVectorStore.fromDocuments(
           splitDocs,
@@ -52,10 +77,18 @@ export class VectorStoreSingleton {
         );
       }
 
+      if (!memory && (!this.pgVectorStore || reset)) {
+        this.pgVectorStore = await PGVectorStore.initialize(
+          this.embeddings,
+          pgConfig,
+        );
+      }
+
       if (!this.filter || reset) {
         this.filter = new EmbeddingsFilter({
           embeddings: this.embeddings,
-          similarityThreshold: 0.7,
+          // todo put in env
+          similarityThreshold: 0.9,
           // k: 25,
         });
       }
@@ -68,6 +101,22 @@ export class VectorStoreSingleton {
       globalThis.vectorStoreGlobal = this;
       vectorStoreInstance = globalThis.vectorStoreGlobal;
     }
+  }
+
+  public async addToPGVectorStore() {
+    if (!this.isInitialized) {
+      await this.initialize(false, false);
+    }
+    await this.pgVectorStore?.addDocuments(
+      await VectorStoreSingleton.generateEmbeddings(),
+    );
+  }
+
+  public async getPGVectorStore(): Promise<PGVectorStore | undefined> {
+    if (!this.isInitialized) {
+      await this.initialize();
+    }
+    return this.pgVectorStore;
   }
 
   public async getFilter(): Promise<EmbeddingsFilter | undefined> {
@@ -230,12 +279,13 @@ export class VectorStoreSingleton {
           .replace(/\([^)]*\)/g, "")
           .replace(/\/+/g, "/") || "/";
 
-      const fullUrl = siteUrl + url;
+      const fullUrl = siteUrl + "/en" + url;
 
       return {
         pageContent: doc.pageContent,
         metadata: {
-          scope: "Page URL: " + fullUrl,
+          scope: "HTML page of the website",
+          source: doc.metadata.source,
         },
       };
     });
@@ -247,7 +297,7 @@ export class VectorStoreSingleton {
 
     const splitDocs = (await splitter.splitDocuments(docs)).map((doc, i) => ({
       ...doc,
-      id: i.toString() + "_" + doc.metadata.scope,
+      id: i.toString() + "_" + doc.metadata.scope + "_" + doc.metadata.source,
     }));
 
     console.log(splitDocs.map((d) => d.id));
