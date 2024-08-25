@@ -7,11 +7,13 @@ import {
   getAdminIngredientsCreatePageTexts,
   getAdminPageUpdateIngredientTexts,
 } from "@/texts/pages";
-import AdminContentLayout from "@/components/admin/admin-content-layout";
+import SidebarContentLayout from "@/components/sidebar/sidebar-content-layout";
 import { Suspense } from "react";
 import { IngredientFormTexts } from "@/components/forms/ingredient-form";
 import AdminIngredientsPageContent from "@/app/[locale]/admin/ingredients/update/[id]/page-content";
-import { AdminMenuTexts } from "@/components/admin/menu-list";
+import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
+import { Metadata } from "next";
+import { getIntlMetadata } from "@/texts/metadata";
 
 interface Props {
   params: {
@@ -24,7 +26,16 @@ export interface AdminPageUpdateIngredientTexts {
   themeSwitchTexts: ThemeSwitchTexts;
   ingredientFormTexts: IngredientFormTexts;
   title: string;
-  menuTexts: AdminMenuTexts;
+  menuTexts: SidebarMenuTexts;
+}
+export async function generateMetadata({
+  params: { locale, id },
+}: Props): Promise<Metadata> {
+  return await getIntlMetadata(
+    "admin.UpdateIngredient",
+    "/admin/ingredients/update/" + id,
+    locale,
+  );
 }
 
 export default async function AdminPageUpdateIngredient({
@@ -36,12 +47,13 @@ export default async function AdminPageUpdateIngredient({
     getAdminPageUpdateIngredientTexts(),
   ]);
   return (
-    <AdminContentLayout
+    <SidebarContentLayout
       navbarProps={{
         title: texts.title,
         themeSwitchTexts: texts.themeSwitchTexts,
         authUser,
         menuTexts: texts.menuTexts,
+        mappingKey: "admin",
       }}
     >
       <Suspense fallback={<LoadingSpinner />}>
@@ -51,6 +63,6 @@ export default async function AdminPageUpdateIngredient({
           ingredientFormTexts={texts.ingredientFormTexts}
         />
       </Suspense>
-    </AdminContentLayout>
+    </SidebarContentLayout>
   );
 }

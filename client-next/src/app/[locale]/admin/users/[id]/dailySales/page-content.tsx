@@ -3,7 +3,7 @@
 import { UserAdminDailySalesPageTexts } from "@/app/[locale]/admin/users/[id]/dailySales/page";
 import { WithUser } from "@/lib/user";
 import useGetUser from "@/hoooks/useGetUser";
-import AdminContentLayout from "@/components/admin/admin-content-layout";
+import SidebarContentLayout from "@/components/sidebar/sidebar-content-layout";
 import LoadingSpinner from "@/components/common/loading-spinner";
 import Heading from "@/components/common/heading";
 import DailySales from "@/components/charts/daily-sales";
@@ -28,12 +28,13 @@ export default function UserAdminDailySalesPageContent({
     return navigateToNotFound();
   }
   return (
-    <AdminContentLayout
+    <SidebarContentLayout
       navbarProps={{
         title: `${title} ${user?.email || ""}`,
         authUser,
         themeSwitchTexts,
         menuTexts,
+        mappingKey: "admin",
       }}
     >
       <div className="w-full h-full bg-background">
@@ -55,6 +56,6 @@ export default function UserAdminDailySalesPageContent({
           </>
         )}
       </div>
-    </AdminContentLayout>
+    </SidebarContentLayout>
   );
 }

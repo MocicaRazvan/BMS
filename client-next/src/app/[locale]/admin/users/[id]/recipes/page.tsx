@@ -8,7 +8,9 @@ import { getUserWithMinRole } from "@/lib/user";
 import { sortingRecipesSortingOptionsKeys } from "@/texts/components/list";
 import UserRecipesAdminPageContent from "@/app/[locale]/admin/users/[id]/recipes/page-content";
 import { notFound } from "next/navigation";
-import { AdminMenuTexts } from "@/components/admin/menu-list";
+import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
+import { Metadata } from "next";
+import { getIntlMetadata } from "@/texts/metadata";
 
 export interface UserRecipesAdminPageTexts {
   recipesTableTexts: RecipeTableTexts;
@@ -16,11 +18,22 @@ export interface UserRecipesAdminPageTexts {
   themeSwitchTexts: ThemeSwitchTexts;
   title: string;
   header: string;
-  menuTexts: AdminMenuTexts;
+  menuTexts: SidebarMenuTexts;
 }
 interface Props {
   params: { locale: Locale; id: string };
 }
+
+export async function generateMetadata({
+  params: { locale, id },
+}: Props): Promise<Metadata> {
+  return await getIntlMetadata(
+    "admin.UserRecipes",
+    "/admin/users/" + id + "/recipes",
+    locale,
+  );
+}
+
 export default async function UserRecipesAdminPage({
   params: { locale, id },
 }: Props) {

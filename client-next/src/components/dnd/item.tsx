@@ -1,4 +1,10 @@
-import { CSSProperties, forwardRef, HTMLAttributes } from "react";
+import {
+  CSSProperties,
+  forwardRef,
+  HTMLAttributes,
+  useEffect,
+  useState,
+} from "react";
 import { SortableItem, SortableListType } from "@/components/dnd/sortable-list";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
@@ -46,6 +52,14 @@ const Item = forwardRef<HTMLDivElement, Props>(
     },
     ref,
   ) => {
+    const [videoSrc, setVideoSrc] = useState<string | null>(null);
+
+    useEffect(() => {
+      if (type === "VIDEO" && item.src) {
+        setVideoSrc(item.src);
+      }
+    }, [item.src, type]);
+
     const isListMoreThenOne = !itemCount || itemCount > 1;
     const styles: CSSProperties = {
       opacity: isOpacityEnabled ? "0.4" : "1",
@@ -79,15 +93,21 @@ const Item = forwardRef<HTMLDivElement, Props>(
               width={0}
             />
           ) : (
-            <video
-              src={item.src}
-              controls={!preview}
-              preload={"auto"}
-              className={cn(
-                "rounded-lg max-w-100 object-cover w-full  h-[250px]",
-                isDragging ? "shadow-none" : "shadow-md",
-              )}
-            />
+            videoSrc && (
+              <video
+                src={videoSrc}
+                controls={!preview}
+                preload="metadata"
+                // typeof={"blob"}
+                className={cn(
+                  "rounded-lg max-w-100 object-cover w-full  h-[250px]",
+                  isDragging ? "shadow-none" : "shadow-md",
+                )}
+                onError={() => {
+                  console.error(`Failed to load video: ${item.src}`);
+                }}
+              />
+            )
           )}
           {index === 0 && multiple && type === "IMAGE" && (
             <div className="absolute top-1 left-2 transition-all text-4xl">

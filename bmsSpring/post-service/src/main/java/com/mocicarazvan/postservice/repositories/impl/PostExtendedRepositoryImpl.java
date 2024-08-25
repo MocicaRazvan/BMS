@@ -28,14 +28,21 @@ public class PostExtendedRepositoryImpl implements PostExtendedRepository {
     private static final String SELECT_ALL = "SELECT * FROM post";
     private static final String COUNT_ALL = "SELECT COUNT(*) FROM post";
 
-    public Flux<Post> getPostsFiltered(String title, Boolean approved, List<String> tags, PageRequest pageRequest) {
+
+    @Override
+    public Flux<Post> getPostsFiltered(String title, Boolean approved, List<String> tags, Long likedUserId, PageRequest pageRequest) {
         StringBuilder queryBuilder = new StringBuilder(SELECT_ALL);
 
         appendWhereClause(queryBuilder, title, approved, tags);
 
+        repositoryUtils.addNotNullField(likedUserId, queryBuilder, new RepositoryUtils.MutableBoolean(queryBuilder.length() > SELECT_ALL.length()),
+                " :user_like_id = ANY(user_likes) ");
+
         queryBuilder.append(pageableUtils.createPageRequestQuery(pageRequest));
 
         DatabaseClient.GenericExecuteSpec executeSpec = getGenericExecuteSpec(title, approved, tags, queryBuilder);
+
+        executeSpec = repositoryUtils.bindNotNullField(likedUserId, executeSpec, "user_like_id");
 
         return executeSpec.map((row, metadata) -> modelMapper.fromRowToModel(row)).all();
     }
@@ -46,12 +53,6 @@ public class PostExtendedRepositoryImpl implements PostExtendedRepository {
 
         appendWhereClause(queryBuilder, title, approved, tags);
 
-//        if (queryBuilder.length() > SELECT_ALL.length()) {
-//            queryBuilder.append(" AND");
-//        } else {
-//            queryBuilder.append(" WHERE");
-//        }
-//        queryBuilder.append(" user_id = :trainerId");
 
         repositoryUtils.addNotNullField(trainerId, queryBuilder, new RepositoryUtils.MutableBoolean(queryBuilder.length() > SELECT_ALL.length()),
                 " user_id = :trainerId");
@@ -69,12 +70,19 @@ public class PostExtendedRepositoryImpl implements PostExtendedRepository {
     }
 
 
-    public Mono<Long> countPostsFiltered(String title, Boolean approved, List<String> tags) {
+    @Override
+    public Mono<Long> countPostsFiltered(String title, Boolean approved, List<String> tags, Long likedUserId) {
         StringBuilder queryBuilder = new StringBuilder(COUNT_ALL);
 
         appendWhereClause(queryBuilder, title, approved, tags);
 
+        repositoryUtils.addNotNullField(likedUserId, queryBuilder, new RepositoryUtils.MutableBoolean(queryBuilder.length() > COUNT_ALL.length()),
+                " :user_like_id = ANY(user_likes) ");
+
         DatabaseClient.GenericExecuteSpec executeSpec = getGenericExecuteSpec(title, approved, tags, queryBuilder);
+
+        executeSpec = repositoryUtils.bindNotNullField(likedUserId, executeSpec, "user_like_id");
+
 
         return executeSpec.map((row, metadata) -> row.get(0, Long.class)).first();
     }
@@ -85,19 +93,12 @@ public class PostExtendedRepositoryImpl implements PostExtendedRepository {
 
         appendWhereClause(queryBuilder, title, approved, tags);
 
-//        if (queryBuilder.length() > COUNT_ALL.length()) {
-//            queryBuilder.append(" AND");
-//        } else {
-//            queryBuilder.append(" WHERE");
-//        }
-//        queryBuilder.append(" user_id = :trainerId");
 
         repositoryUtils.addNotNullField(trainerId, queryBuilder, new RepositoryUtils.MutableBoolean(queryBuilder.length() > COUNT_ALL.length()),
                 " user_id = :trainerId");
 
         DatabaseClient.GenericExecuteSpec executeSpec = getGenericExecuteSpec(title, approved, tags, queryBuilder);
 
-//        executeSpec = executeSpec.bind("trainerId", trainerId);
 
         executeSpec = repositoryUtils.bindNotNullField(trainerId, executeSpec, "trainerId");
 
@@ -108,20 +109,7 @@ public class PostExtendedRepositoryImpl implements PostExtendedRepository {
     private DatabaseClient.GenericExecuteSpec getGenericExecuteSpec(String title, Boolean approved, List<String> tags, StringBuilder queryBuilder) {
         DatabaseClient.GenericExecuteSpec executeSpec = databaseClient.sql(queryBuilder.toString());
 
-//        if (approved != null) {
-//            executeSpec = executeSpec.bind("approved", approved);
-//        }
-//
-//        if (title != null && !title.isEmpty()) {
-//            executeSpec = executeSpec.bind("title", "%" + title + "%");
-//        }
-//
-//        if (tags != null && !tags.isEmpty()) {
-//            for (int i = 0; i < tags.size(); i++) {
-//                executeSpec = executeSpec.bind("tag" + i, tags.get(i));
-//            }
-//        }
-//        return executeSpec;
+
         executeSpec = repositoryUtils.bindNotNullField(approved, executeSpec, "approved");
         executeSpec = repositoryUtils.bindStringSearchField(title, executeSpec, "title");
 
@@ -136,34 +124,7 @@ public class PostExtendedRepositoryImpl implements PostExtendedRepository {
 
 
     private void appendWhereClause(StringBuilder queryBuilder, String title, Boolean approved, List<String> tags) {
-//        boolean hasPreviousCriteria = false;
-//
-//        if (approved != null) {
-//            queryBuilder.append(" WHERE approved = :approved");
-//            hasPreviousCriteria = true;
-//        }
-//
-//        if (title != null && !title.isEmpty()) {
-//            if (hasPreviousCriteria) {
-//                queryBuilder.append(" AND");
-//            } else {
-//                queryBuilder.append(" WHERE");
-//            }
-//            queryBuilder.append(" UPPER(title) LIKE UPPER(:title)");
-//            hasPreviousCriteria = true;
-//        }
-//
-//        if (tags != null && !tags.isEmpty()) {
-//            for (int i = 0; i < tags.size(); i++) {
-//                if (hasPreviousCriteria) {
-//                    queryBuilder.append(" AND");
-//                } else {
-//                    queryBuilder.append(" WHERE");
-//                }
-//                queryBuilder.append(" :tag").append(i).append(" = ANY(tags)");
-//                hasPreviousCriteria = true;
-//            }
-//        }
+
         RepositoryUtils.MutableBoolean hasPreviousCriteria = new RepositoryUtils.MutableBoolean(false);
 
         repositoryUtils.addNotNullField(approved, queryBuilder, hasPreviousCriteria, "approved = :approved");

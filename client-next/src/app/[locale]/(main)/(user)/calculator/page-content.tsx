@@ -158,7 +158,7 @@ export default function CalculatorPageContent({
 
   return (
     <Card className="w-full p-4 ">
-      <CardTitle className="font-bold text-2xl lg:text-5xl text-center capitalize">
+      <CardTitle className="font-bold text-2xl lg:text-4xl text-center capitalize">
         {title}
       </CardTitle>
       <CardHeader className="text-center lg:text-lg font-semibold my-5">

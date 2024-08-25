@@ -2,13 +2,15 @@ import { Locale } from "@/navigation";
 import { unstable_setRequestLocale } from "next-intl/server";
 import AdminEmail, { AdminEmailTexts } from "@/components/forms/admin-email";
 import { ThemeSwitchTexts } from "@/texts/components/nav";
-import { AdminMenuTexts } from "@/components/admin/menu-list";
+import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
 import { getUserWithMinRole } from "@/lib/user";
 import { getAdminEmailPageTexts } from "@/texts/pages";
 import Heading from "@/components/common/heading";
 import LoadingSpinner from "@/components/common/loading-spinner";
-import AdminContentLayout from "@/components/admin/admin-content-layout";
+import SidebarContentLayout from "@/components/sidebar/sidebar-content-layout";
 import { Suspense } from "react";
+import { Metadata } from "next";
+import { getIntlMetadata } from "@/texts/metadata";
 
 interface Props {
   params: { locale: Locale };
@@ -19,7 +21,12 @@ export interface AdminEmailPageTexts {
   themeSwitchTexts: ThemeSwitchTexts;
   title: string;
   header: string;
-  menuTexts: AdminMenuTexts;
+  menuTexts: SidebarMenuTexts;
+}
+export async function generateMetadata({
+  params: { locale },
+}: Props): Promise<Metadata> {
+  return await getIntlMetadata("admin.Email", "/admin/email", locale);
 }
 
 export default async function AdminEmailPage({ params: { locale } }: Props) {
@@ -29,10 +36,11 @@ export default async function AdminEmailPage({ params: { locale } }: Props) {
     getAdminEmailPageTexts(),
   ]);
   return (
-    <AdminContentLayout
+    <SidebarContentLayout
       navbarProps={{
         authUser,
         ...texts,
+        mappingKey: "admin",
       }}
     >
       <div className="w-full h-full bg-background">
@@ -43,6 +51,6 @@ export default async function AdminEmailPage({ params: { locale } }: Props) {
           </div>
         </Suspense>
       </div>
-    </AdminContentLayout>
+    </SidebarContentLayout>
   );
 }

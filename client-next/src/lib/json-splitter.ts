@@ -28,7 +28,7 @@ export class JSONLocaleLoader implements DocumentLoader {
           const newPath = path ? `${path}.${key}` : key;
           const value = obj[key];
 
-          if (newPath.toLowerCase().includes("admin")) {
+          if (newPath.toLowerCase().includes("sidebar")) {
             continue;
           }
 

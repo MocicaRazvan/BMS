@@ -70,7 +70,7 @@ export default function useTagsExtraCriteria({
     (callback: () => void) => (
       <div className="flex-1">
         <MultipleSelector
-          className="w-full h-full"
+          className="w-full h-full max-w-[400px] overflow-y-auto"
           value={tags}
           onChange={(e) => {
             setTags(e);

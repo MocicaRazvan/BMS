@@ -1,7 +1,7 @@
 "use client";
 import { UserPostsAdminPageTexts } from "@/app/[locale]/admin/users/[id]/posts/page";
 import { WithUser } from "@/lib/user";
-import AdminContentLayout from "@/components/admin/admin-content-layout";
+import SidebarContentLayout from "@/components/sidebar/sidebar-content-layout";
 import Heading from "@/components/common/heading";
 import { Suspense } from "react";
 import LoadingSpinner from "@/components/common/loading-spinner";
@@ -48,12 +48,13 @@ export default function UserPostsAdminPageContent({
   // const user = messages[0]?.content;
 
   return (
-    <AdminContentLayout
+    <SidebarContentLayout
       navbarProps={{
         title: `${title} ${user?.email || ""}`,
         authUser,
         themeSwitchTexts,
         menuTexts,
+        mappingKey: "admin",
       }}
     >
       <div className="w-full h-full bg-background">
@@ -74,12 +75,13 @@ export default function UserPostsAdminPageContent({
                   sortingOptions={sortingOptions}
                   sizeOptions={[10, 20, 30, 40]}
                   authUser={authUser}
+                  mainDashboard={true}
                 />
               </div>
             </Suspense>
           </>
         )}
       </div>
-    </AdminContentLayout>
+    </SidebarContentLayout>
   );
 }

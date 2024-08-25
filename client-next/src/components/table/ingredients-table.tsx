@@ -416,7 +416,7 @@ export default function IngredientsTable({
                       className="cursor-pointer"
                       onClick={() =>
                         router.push(
-                          `/trainer/ingredients/single/${ing.ingredient.id}`,
+                          `/admin/ingredients/single/${ing.ingredient.id}`,
                         )
                       }
                     >

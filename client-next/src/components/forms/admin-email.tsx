@@ -136,7 +136,7 @@ export default function AdminEmail({
       const body: EmailRequest = { ...data, recipientEmail: data.email };
       try {
         const res = await fetchStream({
-          path: "/users/admin/email",
+          path: "/users/sidebar/email",
           method: "POST",
           token: authUser.token,
           body,

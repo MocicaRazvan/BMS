@@ -66,6 +66,16 @@ public class ReactiveResponseBuilder<RESPONSE, C> {
 
     }
 
+    public <CHILD> Mono<ResponseWithChildListEntity<RESPONSE, CHILD>> toModelWithChildListEntity(ResponseWithChildList<RESPONSE, CHILD> response, Class<C> clazz) {
+        return toModel(response.getEntity(), clazz)
+                .map(model -> {
+                    ResponseWithChildListEntity<RESPONSE, CHILD> entity = new ResponseWithChildListEntity<>();
+                    entity.setEntity(model);
+                    entity.setChildren(response.getChildren());
+                    return entity;
+                });
+    }
+
     public Mono<ResponseWithEntityCount<CustomEntityModel<RESPONSE>>> toModelWithEntityCount(ResponseWithEntityCount<RESPONSE> response, Class<C> clazz) {
         return toModel(response.getModel(), clazz)
                 .map(model -> {

@@ -80,7 +80,8 @@
     },
     "PlanSchemaTexts": {
       "minPrice": "Price must be at least 1",
-      "minRecipes": "At least one recipe is required"
+      "minDays": "At least one day is required",
+      "objective": "Please select a valid objective"
     },
     "CheckoutSchemaTexts": {
       "confirmPrice": "The confirmed amount must exactly match the total price of {price, number, currency}"
@@ -90,10 +91,17 @@
       "minContent": "Content must not be empty",
       "email": "Invalid email address"
     },
+    "MealSchemaTexts": {
+      "hourPeriod": "Hour period must be between 0 and 23",
+      "minutePeriod": "Minute period must be between 0 and 59",
+      "minRecipes": "At least one recipe is required",
+      "periodUsed": "Period is already used"
+    },
     "forms": {
       "components": {
         "InputFile": {
           "errors": "At least one {type} is required",
+          "loading": "Loading {type}...",
           "types": {
             "image": "image",
             "video": "video",
@@ -139,7 +147,9 @@
           "noResults": "No results were found",
           "type": {
             "ingredients": "ingredients",
-            "recipes": "recipes"
+            "recipes": "recipes",
+            "meals": "meals",
+            "days": "days"
           }
         }
       },
@@ -207,6 +217,19 @@
           "descriptionToast": "{type, select, create {The plan was created successfully} update {The plan was updated successfully} other {Plan}} ",
           "error": "The plan could not be {type, select, create {created} update {updated} other {Plan}} "
         }
+      },
+      "DayForm": {
+        "type": {
+          "create": "create",
+          "update": "update"
+        },
+        "BaseFormTexts": {
+          "header": "{type, select, create {Create a new day} update {Update the day} other {Day}}",
+          "altToast": "{type, select, create {Day created} update {Day updated} other {Day}} ",
+          "toastAction": "See the day",
+          "descriptionToast": "{type, select, create {The day was created successfully} update {The day was updated successfully} other {Day}} ",
+          "error": "The day could not be {type, select, create {created} update {updated} other {Day}} "
+        }
       }
     },
     "ActivitiesTexts": {
@@ -231,6 +254,12 @@
       "maxWeight": "Weight must be at most 200 kg",
       "validActivity": "Please select a valid activity level",
       "validIntake": "Please select a valid intake level"
+    },
+    "DaySchemaTexts": {
+      "type": "Please select a valid type",
+      "minMeals": "Please select at least one meal",
+      "period": "Please enter a period",
+      "minRecipes": "Please select at least one recipe"
     }
   },
   "auth": {
@@ -350,9 +379,17 @@
       "PlanFormTexts": {
         "priceLabel": "Price",
         "pricePlaceholder": "Enter the price",
-        "recipesLabel": "Recipes",
-        "recipesPlaceholder": "Select the recipes",
-        "dietMessage": "The plan will be for"
+        "daysLabel": "Days",
+        "daysPlaceholder": "Select the days",
+        "dietMessage": "The plan will be for",
+        "objectiveLabel": "Objective",
+        "objectivePlaceholder": "Select the objective",
+        "dayIndex": "Day number: ",
+        "objectives": {
+          "GAIN_MASS": "Gain mass",
+          "LOSE_WEIGHT": "Lose weight",
+          "MAINTAIN_WEIGHT": "Maintain weight"
+        }
       },
       "CheckoutDrawerTexts": {
         "error": "The order could not be completed",
@@ -382,6 +419,24 @@
             "placeholder": "Enter the content"
           }
         }
+      },
+      "DayFormTexts": {
+        "typeLabel": "Type",
+        "typePlaceholder": "Select the type",
+        "mealsLabel": "Meals",
+        "addMeal": "Add Meal",
+        "hourLabel": "Hour",
+        "hourPlaceholder": "Enter the hour",
+        "hourDescription": "The hour must be between 0 and 23",
+        "minuteLabel": "Minute",
+        "minutePlaceholder": "Enter the minute",
+        "minuteDescription": "The minute must be between 0 and 59",
+        "recipesLabel": "Recipes",
+        "submitMeal": "Save Meal",
+        "editMeal": "Edit Meal",
+        "removeMeal": "Remove Meal",
+        "mealType": "The meal will be for: ",
+        "dayDietType": "The day will be for: "
       }
     },
     "nav": {
@@ -420,7 +475,9 @@
         "plans": "Plans",
         "subscriptions": "Bought Plans",
         "orders": "Orders",
-        "kanban": "Kanban"
+        "kanban": "Kanban",
+        "trainerDashboard": "Your Dashboard",
+        "calculator": "Calculator"
       },
       "ChatMessageNotificationContentTexts": {
         "content": "{count, plural, one {You have {count} new message from {sender}} other {You have {count} new messages from {sender}}}"
@@ -538,7 +595,8 @@
     },
     "common": {
       "ElementHeaderTexts": {
-        "notApproved": "Not approved"
+        "notApproved": "Not approved",
+        "approved": "Approved"
       },
       "RadioSortTexts": {
         "noSort": "No sorting criteria"
@@ -616,6 +674,25 @@
           "CARNIVORE": "Carnivore",
           "OMNIVORE": "Omnivore"
         }
+      },
+      "UseObjectiveDropdownTexts": {
+        "noFilterLabel": "All objectives",
+        "labels": {
+          "GAIN_MASS": "Gain mass",
+          "LOSE_WEIGHT": "Lose weight",
+          "MAINTAIN_WEIGHT": "Maintain weight"
+        }
+      },
+      "UseTypeDropdownTexts": {
+        "noFilterLabel": "All types",
+        "labels": {
+          "LOW_CARB": "Low carbs",
+          "HIGH_CARB": "High carbs",
+          "HIGH_PROTEIN": "High protein",
+          "LOW_FAT": "Low fat",
+          "HIGH_FAT": "High fat",
+          "LOW_PROTEIN": "Low protein"
+        }
       }
     },
     "table": {
@@ -655,6 +732,9 @@
           "city": "city",
           "state": "state"
         }
+      },
+      "DayTableTexts": {
+        "search": "Search in title..."
       },
       "columns": {
         "posts": {
@@ -773,6 +853,7 @@
           "count": "#orders",
           "type": "Diet",
           "price": "Price",
+          "objective": "Objective",
           "approved": {
             "header": "Approved",
             "true": "Yes",
@@ -794,6 +875,22 @@
             "disapprove": "Disapprove Post",
             "display": "Display Plan",
             "hide": "Hide Plan"
+          }
+        },
+        "days": {
+          "id": "ID",
+          "title": "Title",
+          "count": "#plans",
+          "userLikes": "# of likes",
+          "userDislikes": "# of dislikes",
+          "createdAt": "Creation date",
+          "updatedAt": "Last update",
+          "type": "Type",
+          "actions": {
+            "button": "Open Menu",
+            "label": "Actions",
+            "view": "View Day",
+            "update": "Update Day"
           }
         },
         "orders": {
@@ -903,36 +1000,72 @@
         "tasksLabel": "Tasks"
       }
     },
-    "admin": {
-      "AdminLayout": {
-        "mainSite": "Main Site"
+    "sidebar": {
+      "admin": {
+        "SidebarLayoutTexts": {
+          "mainSite": "Main Site"
+        },
+        "SidebarMenuTexts": {
+          "mainSite": "Main Site",
+          "groupLabels": {
+            "contents": "Contents",
+            "sales": "Sales",
+            "settings": "Settings",
+            "company": "Company"
+          },
+          "labels": {
+            "dashboard": "Dashboard",
+            "posts": "Posts",
+            "recipes": "Recipes",
+            "plans": "Plans",
+            "ingredients": "Ingredients",
+            "users": "Users",
+            "orders": "Orders",
+            "monthlySales": "Monthly Sales",
+            "dailySales": "Daily Sales",
+            "countries": "Countries",
+            "account": "Account",
+            "email": "Email",
+            "kanban": "Kanban"
+          },
+          "subLabels": {
+            "allIngredients": "All Ingredients",
+            "createIngredient": "Create Ingredient"
+          }
+        }
       },
-      "AdminMenuTexts": {
-        "mainSite": "Main Site",
-        "groupLabels": {
-          "contents": "Contents",
-          "sales": "Sales",
-          "settings": "Settings",
-          "company": "Company"
+      "trainer": {
+        "SidebarLayoutTexts": {
+          "mainSite": "Main Site"
         },
-        "labels": {
-          "dashboard": "Dashboard",
-          "posts": "Posts",
-          "recipes": "Recipes",
-          "plans": "Plans",
-          "ingredients": "Ingredients",
-          "users": "Users",
-          "orders": "Orders",
-          "monthlySales": "Monthly Sales",
-          "dailySales": "Daily Sales",
-          "countries": "Countries",
-          "account": "Account",
-          "email": "Email",
-          "kanban": "Kanban"
-        },
-        "subLabels": {
-          "allIngredients": "All Ingredients",
-          "createIngredient": "Create Ingredient"
+        "SidebarMenuTexts": {
+          "mainSite": "Main Site",
+          "groupLabels": {
+            "contents": "Contents",
+            "sales": "Sales"
+          },
+          "labels": {
+            "dashboard": "Dashboard",
+            "posts": "Posts",
+            "recipes": "Recipes",
+            "plans": "Plans",
+            "ingredients": "Ingredients",
+            "orders": "Your Orders",
+            "monthlySales": "Monthly Sales",
+            "dailySales": "Daily Sales",
+            "kanban": "Kanban",
+            "days": "Days"
+          },
+          "subLabels": {
+            "yourPosts": "Your Posts",
+            "createPost": "Create Post",
+            "yourRecipes": "Your Recipes",
+            "createRecipe": "Create Recipe",
+            "yourPlans": "Your Plans",
+            "createPlan": "Create Plan",
+            "yourDays": "Your Days",
+            "createDay": "Create Day"
+          }
         }
       }
     },
@@ -1036,6 +1169,11 @@
         "emptyContent": "Ask anything you want to know about health and nutrition, and we will do our best to provide you with the right answer. Always check with a professional before making any changes to your diet or lifestyle.",
         "inputPlaceholder": "Say something..."
       }
+    },
+    "days": {
+      "SingleDayTexts": {
+        "meals": "Meals"
+      }
     }
   },
   "pages": {
@@ -1091,7 +1229,8 @@
       },
       "ApprovedPostsTexts": {
         "title": "Posts",
-        "header": "Made with love by our trainers and approved by our team."
+        "header": "Made with love by our trainers and approved by our team.",
+        "likedLabel": "Show only liked posts"
       },
       "UserPostsPageContentTexts": {
         "title": "Your Posts",
@@ -1168,6 +1307,26 @@
         "tableCaption": "Nutritional Facts"
       }
     },
+    "days": {
+      "SortingOptions": {
+        "createdAt": {
+          "asc": "Oldest",
+          "desc": "Newest"
+        },
+        "updatedAt": {
+          "asc": "Oldest update",
+          "desc": "Newest update"
+        },
+        "title": {
+          "asc": "Alfabetic by title",
+          "desc": "Invers alfabetic by title"
+        }
+      },
+      "UserDaysPageTexts": {
+        "title": "Your Days",
+        "header": "Here you can see and manage all the days you have created."
+      }
+    },
     "plans": {
       "SortingOptions": {
         "createdAt": {
@@ -1205,7 +1364,9 @@
         "buyableLabel": "Buyable"
       },
       "UserPlanPageContentTexts": {
-        "price": "Price"
+        "price": "Price: ",
+        "buyPrompt": "Buy to see the full plan!",
+        "numberDays": "Number of days: "
       },
       "UserMonthlySalesPageTexts": {
         "title": "Monthly Sales",
@@ -1353,6 +1514,30 @@
         "title": "All The Users",
         "header": "Here you can see and manage all the users."
       },
+      "AdminUserPageTexts": {
+        "title": "User Profile for ",
+        "header": "Here you can see the user profile."
+      },
+      "AdminPostPageTexts": {
+        "title": "Single Post",
+        "header": "Manage the post."
+      },
+      "AdminRecipePageTexts": {
+        "title": "Single Recipe",
+        "header": "Manage the recipe."
+      },
+      "AdminPlanPageTexts": {
+        "title": "Single Plan",
+        "header": "Manage the plan."
+      },
+      "AdminIngredientPageTexts": {
+        "title": "Single Ingredient",
+        "header": "Manage the ingredient."
+      },
+      "AdminOrderPageTexts": {
+        "title": "Single Order",
+        "header": "Manage the order."
+      },
       "AdminIngredientsCreatePage": {
         "title": "Create a new ingredient"
       },
@@ -1392,6 +1577,27 @@
         "header": "Here you can send an email from the company "
       },
       "AdminKanbanTexts": {
+        "title": "Kanban Board",
+        "header": "Here you can see and manage the tasks you have created"
+      }
+    },
+    "trainer": {
+      "TrainerSingleIngredientPageTexts": {
+        "title": "Single Ingredient"
+      },
+      "TrainerPostPageTexts": {
+        "title": "Single Post"
+      },
+      "TrainerSingleRecipePageTexts": {
+        "title": "Single Recipe"
+      },
+      "SingleDayTrainerPageTexts": {
+        "title": "Single Day"
+      },
+      "TrainerPlanPageTexts": {
+        "title": "Single Plan"
+      },
+      "TrainerKanbanPageTexts": {
         "title": "Kanban Board",
         "header": "Here you can see and manage the tasks you have created"
       }
@@ -1492,7 +1698,7 @@
         "keywords": "plans, bought, view"
       },
       "SingleSubscription": {
-        "title": "Single Plan",
+        "title": "Bought Plan",
         "description": "Single plan on Bro Meets Science",
         "keywords": "plan, bought, view"
       },
@@ -1582,6 +1788,163 @@
         "title": "Your Recipes",
         "description": "Your recipes on Bro Meets Science",
         "keywords": "view, recipes, write, knowledge, insights, topics, professionals, free, platform"
+      },
+      "CreateDay": {
+        "title": "Create Day",
+        "description": "Create a new day on Bro Meets Science",
+        "keywords": "create, day, write, knowledge, insights, topics, professionals, free, platform"
+      },
+      "UpdateDay": {
+        "title": "Update Your Day",
+        "description": "Update your day on Bro Meets Science",
+        "keywords": "update, day, write, knowledge, insights, topics, professionals, free, platform"
+      },
+      "SingleDay": {
+        "title": "Your Day",
+        "description": "Your day on Bro Meets Science",
+        "keywords": "view, day, write, knowledge, insights, topics, professionals, free, platform"
+      },
+      "Kanban": {
+        "title": "Kanban",
+        "description": "See and manage the tasks you have created",
+        "keywords": "kanban, tasks, board, columns"
+      },
+      "SinglePost": {
+        "title": "Your Post",
+        "description": "Your post on Bro Meets Science",
+        "keywords": "view, post, write, knowledge, insights, topics, professionals, free, platform"
+      },
+      "TrainerDays": {
+        "title": "Your Days",
+        "description": "Your days on Bro Meets Science",
+        "keywords": "view, days, write, knowledge, insights, topics, professionals, free, platform"
+      }
+    },
+    "admin": {
+      "Countries": {
+        "title": "Orders by countries",
+        "description": "Stats by countries for the orders on Bro Meets Science",
+        "keywords": "countries, stats, orders, platform"
+      },
+      "DailySales": {
+        "title": "Daily Sales",
+        "description": "Daily sales on Bro Meets Science",
+        "keywords": "daily, sales, view, platform, community, features, access"
+      },
+      "Dashboard": {
+        "title": "Dashboard",
+        "description": "Summary of the platform on Bro Meets Science",
+        "keywords": "summary, platform, community, features, access"
+      },
+      "Email": {
+        "title": "Send Email",
+        "description": "Send an email from the company on Bro Meets Science",
+        "keywords": "send, email, company, platform, community, features, access"
+      },
+      "CreateIngredient": {
+        "title": "Create Ingredient",
+        "description": "Create a new ingredient on Bro Meets Science",
+        "keywords": "create, ingredient, nutrition, facts, calories, fat, protein, carbohydrates, sugar, salt, display"
+      },
+      "UpdateIngredient": {
+        "title": "Update Ingredient",
+        "description": "Update an ingredient on Bro Meets Science",
+        "keywords": "update, ingredient, nutrition, facts, calories, fat, protein, carbohydrates, sugar, salt, display"
+      },
+      "SingleIngredient": {
+        "title": "Ingredient",
+        "description": "Single ingredient on Bro Meets Science",
+        "keywords": "ingredient, nutrition, facts, calories, fat, protein, carbohydrates, sugar, salt, display"
+      },
+      "Ingredients": {
+        "title": "Ingredients",
+        "description": "Manage the ingredients on Bro Meets Science",
+        "keywords": "ingredients, nutrition, facts, calories, fat, protein, carbohydrates, sugar, salt, display"
+      },
+      "Kanban": {
+        "title": "Kanban",
+        "description": "See and manage the tasks you have created",
+        "keywords": "kanban, tasks, board, columns"
+      },
+      "MonthlySales": {
+        "title": "Monthly Sales",
+        "description": "Monthly sales on Bro Meets Science",
+        "keywords": "monthly, sales, view, platform, community, features, access"
+      },
+      "Orders": {
+        "title": "Orders",
+        "description": "All the orders on Bro Meets Science",
+        "keywords": "orders, plans, bought, view, invoice"
+      },
+      "SingleOrder": {
+        "title": "Single Order",
+        "description": "Single order on Bro Meets Science",
+        "keywords": "order, plans, bought, view, invoice"
+      },
+      "Plans": {
+        "title": "Nutritional Plans",
+        "description": "Manage all the nutritional plans on Bro Meets Science",
+        "keywords": "plans, nutrition, facts, calories, fat, protein, carbohydrates, sugar, salt, display"
+      },
+      "SinglePlan": {
+        "title": "Nutritional Plan",
+        "description": "Single plan on Bro Meets Science",
+        "keywords": "plan, nutrition, facts, calories, fat, protein, carbohydrates, sugar, salt, display"
+      },
+      "Posts": {
+        "title": "Posts",
+        "description": "Manage all the posts on Bro Meets Science",
+        "keywords": "posts, read, knowledge, insights, topics, professionals, free, platform"
+      },
+      "SinglePost": {
+        "title": "Post",
+        "description": "Single post on Bro Meets Science",
+        "keywords": "post, read, knowledge, insights, topics, professionals, free, platform"
+      },
+      "Recipes": {
+        "title": "Recipes",
+        "description": "Manage all the recipes on Bro Meets Science",
+        "keywords": "recipes, read, knowledge, insights, topics, professionals, free, platform"
+      },
+      "SingleRecipe": {
+        "title": "Recipe",
+        "description": "Single recipe on Bro Meets Science",
+        "keywords": "recipe, read, knowledge, insights, topics, professionals, free, platform"
+      },
+      "Users": {
+        "title": "Users",
+        "description": "Manage all the users on Bro Meets Science",
+        "keywords": "users, manage, view, edit, delete"
+      },
+      "UserDailySales": {
+        "title": "Daily Sales For User",
+        "description": "Daily sales for the user on Bro Meets Science",
+        "keywords": "daily, sales, view, platform, community, features, access"
+      },
+      "UserMonthlySales": {
+        "title": "Monthly Sales For User",
+        "description": "Monthly sales for the user on Bro Meets Science",
+        "keywords": "monthly, sales, view, platform, community, features, access"
+      },
+      "UserOrders": {
+        "title": "Orders For User",
+        "description": "Orders for the user on Bro Meets Science",
+        "keywords": "orders, plans, bought, view, invoice"
+      },
+      "UserPlans": {
+        "title": "Nutritional Plans For User",
+        "description": "Nutritional plans for the user on Bro Meets Science",
+        "keywords": "plans, nutrition, facts, calories, fat, protein, carbohydrates, sugar, salt, display"
+      },
+      "UserPosts": {
+        "title": "Posts For User",
+        "description": "Posts for the user on Bro Meets Science",
+        "keywords": "posts, read, knowledge, insights, topics, professionals, free, platform"
+      },
+      "UserRecipes": {
+        "title": "Recipes For User",
+        "description": "Recipes for the user on Bro Meets Science",
+        "keywords": "recipes, read, knowledge, insights, topics, professionals, free, platform"
       }
     }
   }

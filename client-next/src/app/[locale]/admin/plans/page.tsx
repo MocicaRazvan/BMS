@@ -6,12 +6,14 @@ import { ThemeSwitchTexts } from "@/texts/components/nav";
 import { getAdminPlansPageTexts } from "@/texts/pages";
 import { getUserWithMinRole } from "@/lib/user";
 import { sortingPlansSortingOptionsKeys } from "@/texts/components/list";
-import AdminContentLayout from "@/components/admin/admin-content-layout";
+import SidebarContentLayout from "@/components/sidebar/sidebar-content-layout";
 import Heading from "@/components/common/heading";
 import LoadingSpinner from "@/components/common/loading-spinner";
 import { Suspense } from "react";
 import AdminPlansPageContent from "@/app/[locale]/admin/plans/page-content";
-import { AdminMenuTexts } from "@/components/admin/menu-list";
+import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
+import { Metadata } from "next";
+import { getIntlMetadata } from "@/texts/metadata";
 
 interface Props {
   params: { locale: Locale };
@@ -23,7 +25,13 @@ export interface AdminPlansPageTexts {
   themeSwitchTexts: ThemeSwitchTexts;
   title: string;
   header: string;
-  menuTexts: AdminMenuTexts;
+  menuTexts: SidebarMenuTexts;
+}
+
+export async function generateMetadata({
+  params: { locale },
+}: Props): Promise<Metadata> {
+  return await getIntlMetadata("admin.Plans", "/admin/plans", locale);
 }
 
 export default async function AdminPlansPage({ params: { locale } }: Props) {
@@ -49,12 +57,13 @@ export default async function AdminPlansPage({ params: { locale } }: Props) {
   );
 
   return (
-    <AdminContentLayout
+    <SidebarContentLayout
       navbarProps={{
         title,
         themeSwitchTexts,
         authUser,
         menuTexts,
+        mappingKey: "admin",
       }}
     >
       <div className="w-full h-full bg-background">
@@ -73,6 +82,6 @@ export default async function AdminPlansPage({ params: { locale } }: Props) {
           </div>
         </Suspense>
       </div>
-    </AdminContentLayout>
+    </SidebarContentLayout>
   );
 }

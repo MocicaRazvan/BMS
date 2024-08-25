@@ -4,7 +4,7 @@ import { WithUser } from "@/lib/user";
 import IngredientForm, {
   IngredientFormTexts,
 } from "@/components/forms/ingredient-form";
-import { AdminMenuTexts } from "@/components/admin/menu-list";
+import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
 
 interface Props extends WithUser {
   texts: IngredientFormTexts;

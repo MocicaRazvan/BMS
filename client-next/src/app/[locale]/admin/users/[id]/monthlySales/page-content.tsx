@@ -2,7 +2,7 @@
 import { UserAdminMonthlySalesPageTexts } from "@/app/[locale]/admin/users/[id]/monthlySales/page";
 import { WithUser } from "@/lib/user";
 import useGetUser from "@/hoooks/useGetUser";
-import AdminContentLayout from "@/components/admin/admin-content-layout";
+import SidebarContentLayout from "@/components/sidebar/sidebar-content-layout";
 import LoadingSpinner from "@/components/common/loading-spinner";
 import Heading from "@/components/common/heading";
 import MonthlySales from "@/components/charts/monthly-sales";
@@ -27,12 +27,13 @@ export default function UserAdminMonthlySalesPageContent({
     return navigateToNotFound();
   }
   return (
-    <AdminContentLayout
+    <SidebarContentLayout
       navbarProps={{
         title: `${title} ${user?.email || ""}`,
         authUser,
         themeSwitchTexts,
         menuTexts,
+        mappingKey: "admin",
       }}
     >
       <div className="w-full h-full bg-background">
@@ -54,6 +55,6 @@ export default function UserAdminMonthlySalesPageContent({
           </>
         )}
       </div>
-    </AdminContentLayout>
+    </SidebarContentLayout>
   );
 }

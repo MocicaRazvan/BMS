@@ -3,7 +3,7 @@ package com.mocicarazvan.recipeservice.services.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mocicarazvan.recipeservice.clients.IngredientClient;
-import com.mocicarazvan.recipeservice.clients.PlanClient;
+import com.mocicarazvan.recipeservice.clients.DayClient;
 import com.mocicarazvan.recipeservice.dtos.ingredients.IngredientResponse;
 import com.mocicarazvan.recipeservice.dtos.RecipeBody;
 import com.mocicarazvan.recipeservice.dtos.RecipeResponse;
@@ -47,14 +47,14 @@ public class RecipeServiceImpl extends ApprovedServiceImpl<Recipe, RecipeBody, R
     private final IngredientQuantityService ingredientQuantityService;
 
 
-    private final PlanClient planClient;
+    private final DayClient dayClient;
 
-    public RecipeServiceImpl(RecipeRepository modelRepository, RecipeMapper modelMapper, PageableUtilsCustom pageableUtils, UserClient userClient, EntitiesUtils entitiesUtils, FileClient fileClient, ObjectMapper objectMapper, RecipeExtendedRepository recipeExtendedRepository, IngredientClient ingredientClient, IngredientQuantityService ingredientQuantityService, PlanClient planClient) {
+    public RecipeServiceImpl(RecipeRepository modelRepository, RecipeMapper modelMapper, PageableUtilsCustom pageableUtils, UserClient userClient, EntitiesUtils entitiesUtils, FileClient fileClient, ObjectMapper objectMapper, RecipeExtendedRepository recipeExtendedRepository, IngredientClient ingredientClient, IngredientQuantityService ingredientQuantityService, DayClient dayClient) {
         super(modelRepository, modelMapper, pageableUtils, userClient, "recipe", List.of("id", "userId", "type", "title", "createdAt", "updatedAt", "approved"), entitiesUtils, fileClient, objectMapper);
         this.recipeExtendedRepository = recipeExtendedRepository;
         this.ingredientClient = ingredientClient;
         this.ingredientQuantityService = ingredientQuantityService;
-        this.planClient = planClient;
+        this.dayClient = dayClient;
     }
 
 
@@ -77,7 +77,7 @@ public class RecipeServiceImpl extends ApprovedServiceImpl<Recipe, RecipeBody, R
     @Override
     public Flux<PageableResponse<ResponseWithEntityCount<RecipeResponse>>> getRecipesFilteredWithCount(String title, DietType dietType, PageableBody pageableBody, String userId, Boolean approved) {
         return getRecipesFiltered(title, dietType, pageableBody, userId, approved)
-                .concatMap(pr -> toResponseWithCount(userId, planClient, pr)
+                .concatMap(pr -> toResponseWithCount(userId, dayClient, pr)
                 );
 
     }
@@ -168,7 +168,7 @@ public class RecipeServiceImpl extends ApprovedServiceImpl<Recipe, RecipeBody, R
     @Override
     public Flux<PageableResponse<ResponseWithEntityCount<RecipeResponse>>> getRecipesFilteredTrainerWithCount(String title, DietType type, Long trainerId, PageableBody pageableBody, String userId, Boolean approved) {
         return getRecipesFilteredTrainer(title, type, trainerId, pageableBody, userId, approved)
-                .concatMap(pr -> toResponseWithCount(userId, planClient, pr)
+                .concatMap(pr -> toResponseWithCount(userId, dayClient, pr)
                 );
     }
 
@@ -197,7 +197,7 @@ public class RecipeServiceImpl extends ApprovedServiceImpl<Recipe, RecipeBody, R
                 userClient.getUser("", userId)
                         .flatMap(authUser -> getModel(id)
                                 .flatMap(model ->
-                                        planClient.getCountInParent(id, userId)
+                                        dayClient.getCountInParent(id, userId)
                                                 .flatMap(count -> {
                                                     if (count.getCount() > 0) {
                                                         return Mono.error(new SubEntityUsed("recipe", id));
@@ -267,5 +267,10 @@ public class RecipeServiceImpl extends ApprovedServiceImpl<Recipe, RecipeBody, R
                 .filter(Boolean::booleanValue)
                 .switchIfEmpty(Mono.error(new IllegalActionException(modelName + " " + ids.toString() + " are not valid")))
                 .then();
+    }
+
+    @Override
+    public Mono<DietType> determineMostRestrictiveDietType(List<Long> recipeIds) {
+        return recipeExtendedRepository.determineMostRestrictiveDietType(recipeIds);
     }
 }

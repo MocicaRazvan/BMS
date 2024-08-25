@@ -6,8 +6,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mocicarazvan.orderservice.clients.BoughtWebSocketClient;
 import com.mocicarazvan.orderservice.clients.PlanClient;
 import com.mocicarazvan.orderservice.dtos.*;
+import com.mocicarazvan.orderservice.dtos.clients.DayResponse;
+import com.mocicarazvan.orderservice.dtos.clients.MealResponse;
+import com.mocicarazvan.orderservice.dtos.clients.PlanResponse;
+import com.mocicarazvan.orderservice.dtos.clients.RecipeResponse;
+import com.mocicarazvan.orderservice.dtos.clients.collect.FullDayResponse;
 import com.mocicarazvan.orderservice.dtos.notifications.InternalBoughtBody;
-import com.mocicarazvan.orderservice.dtos.summaries.CountAmount;
 import com.mocicarazvan.orderservice.dtos.summaries.CountryOrderSummary;
 import com.mocicarazvan.orderservice.dtos.summaries.DailyOrderSummary;
 import com.mocicarazvan.orderservice.dtos.summaries.MonthlyOrderSummary;
@@ -15,9 +19,9 @@ import com.mocicarazvan.orderservice.dtos.summaries.trainer.MonthlyTrainerOrderS
 import com.mocicarazvan.orderservice.email.EmailTemplates;
 import com.mocicarazvan.orderservice.enums.CountrySummaryType;
 import com.mocicarazvan.orderservice.enums.DietType;
+import com.mocicarazvan.orderservice.enums.ObjectiveType;
 import com.mocicarazvan.orderservice.mappers.OrderMapper;
 import com.mocicarazvan.orderservice.models.Order;
-import com.mocicarazvan.orderservice.repositories.ExtendedOrderWithAddressRepository;
 import com.mocicarazvan.orderservice.repositories.OrderRepository;
 import com.mocicarazvan.orderservice.services.CustomAddressService;
 import com.mocicarazvan.orderservice.services.OrderService;
@@ -34,6 +38,7 @@ import com.mocicarazvan.templatemodule.enums.Role;
 import com.mocicarazvan.templatemodule.exceptions.action.IllegalActionException;
 import com.mocicarazvan.templatemodule.exceptions.action.PrivateRouteException;
 import com.mocicarazvan.templatemodule.exceptions.notFound.NotFoundEntity;
+import com.mocicarazvan.templatemodule.hateos.CustomEntityModel;
 import com.mocicarazvan.templatemodule.utils.EntitiesUtils;
 import com.stripe.Stripe;
 import com.stripe.exception.SignatureVerificationException;
@@ -48,7 +53,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.util.Pair;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -56,7 +60,6 @@ import reactor.core.publisher.Mono;
 import java.math.BigDecimal;
 import java.time.*;
 import java.util.*;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 
 @Service
@@ -237,10 +240,10 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public Flux<PageableResponse<ResponseWithUserDtoEntity<PlanResponse>>> getPlansForUser(String title, DietType dietType, PageableBody pageableBody, String userId) {
+    public Flux<PageableResponse<ResponseWithUserDtoEntity<PlanResponse>>> getPlansForUser(String title, DietType dietType, ObjectiveType objective, PageableBody pageableBody, String userId) {
         return orderRepository.findUserPlanIds(Long.valueOf(userId))
                 .collectList()
-                .flatMapMany(planIds -> planClient.getPlansForUser(title, dietType, planIds, pageableBody, userId));
+                .flatMapMany(planIds -> planClient.getPlansForUser(title, dietType, objective, planIds, pageableBody, userId));
     }
 
     @Override
@@ -248,7 +251,7 @@ public class OrderServiceImpl implements OrderService {
         return userClient.getUser("", userId)
                 .flatMapMany(userDto -> getOrderById(orderId)
                         .flatMapMany(order -> entitiesUtils.checkEntityOwnerOrAdmin(order, userDto)
-                                .thenMany(planClient.getPlansForUser("", null, order.getPlanIds(), PageableBody.builder()
+                                .thenMany(planClient.getPlansForUser("", null, null, order.getPlanIds(), PageableBody.builder()
                                         .page(0)
                                         .size(order.getPlanIds().size())
                                         .sortingCriteria(Map.of())
@@ -352,13 +355,46 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public Mono<ResponseWithUserDtoEntity<RecipeResponse>> getRecipeByPlanForUser(Long id, Long recipeId, String userId) {
+    public Mono<ResponseWithUserDtoEntity<RecipeResponse>> getRecipeByIdWithUser(Long planId, Long dayId, Long recipeId, String userId) {
+        return orderRepository.existsByUserIdAndPlanId(Long.valueOf(userId), planId)
+                .flatMap(exists -> {
+                    if (!exists) {
+                        return Mono.error(new IllegalActionException("User does not own the plan"));
+                    }
+                    return planClient.getRecipeByIdWithUser(planId.toString(), dayId.toString(), recipeId.toString(), userId);
+                });
+    }
+
+    @Override
+    public Mono<ResponseWithUserDtoEntity<DayResponse>> getDayByIdWithUser(Long planId, Long dayId, String userId) {
+        return orderRepository.existsByUserIdAndPlanId(Long.valueOf(userId), planId)
+                .flatMap(exists -> {
+                    if (!exists) {
+                        return Mono.error(new IllegalActionException("User does not own the plan"));
+                    }
+                    return planClient.getDayByIdWithUser(planId.toString(), dayId.toString(), userId);
+                });
+    }
+
+    @Override
+    public Flux<CustomEntityModel<MealResponse>> getMealsByDayInternal(Long planId, Long dayId, String userId) {
+        return orderRepository.existsByUserIdAndPlanId(Long.valueOf(userId), planId)
+                .flatMapMany(exists -> {
+                    if (!exists) {
+                        return Flux.error(new IllegalActionException("User does not own the plan"));
+                    }
+                    return planClient.getMealsByDayEntity(planId.toString(), dayId.toString(), userId);
+                });
+    }
+
+    @Override
+    public Mono<FullDayResponse> getDayByPlanForUser(Long id, Long dayId, String userId) {
         return orderRepository.existsByUserIdAndPlanId(Long.valueOf(userId), id)
                 .flatMap(exists -> {
                     if (!exists) {
                         return Mono.error(new IllegalActionException("User does not own the plan"));
                     }
-                    return planClient.getRecipeByPlanForUser(id.toString(), recipeId.toString(), userId);
+                    return planClient.getFullDayByPlanForUser(id.toString(), dayId.toString(), userId);
                 });
     }
 

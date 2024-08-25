@@ -10,9 +10,9 @@ import {
   PlanResponse,
   ResponseWithUserDtoEntity,
 } from "@/types/dto";
-import { checkOwnerOrAdmin } from "@/lib/utils";
+import { checkOwnerOrAdmin, isSuccessCheckReturn } from "@/lib/utils";
 import LoadingSpinner from "@/components/common/loading-spinner";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { fetchStream } from "@/hoooks/fetchStream";
 import Image from "next/image";
 import { Link, useRouter } from "@/navigation";
@@ -99,20 +99,24 @@ export default function SingleOrderPageContent({
       </section>
     );
 
-  if (
-    orderError?.status ||
-    ordersAddress.length === 0 ||
-    plansError?.status ||
-    plans.length === 0
-  ) {
+  if (orderError?.status || plansError?.status) {
     return navigateToNotFound();
   }
 
-  checkOwnerOrAdmin(
+  const ownerReturn = checkOwnerOrAdmin(
     authUser,
     ordersAddress?.[0]?.content?.order,
     navigateToNotFound,
   );
+
+  if (React.isValidElement(ownerReturn)) {
+    return ownerReturn;
+  }
+
+  if (!isSuccessCheckReturn(ownerReturn)) {
+    return navigateToNotFound();
+  }
+
   return (
     <section className="w-full  min-h-[calc(100vh-4rem)] flex-col items-center justify-center transition-all px-6 py-10 relative pb-14 max-w-[1000px] mx-auto ">
       <div className="flex w-full items-end justify-center gap-5 my-10">

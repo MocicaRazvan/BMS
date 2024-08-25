@@ -12,7 +12,7 @@ import RelativeItem, {
 import { ThemeSwitchTexts } from "@/texts/components/nav";
 import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { AdminMenuTexts } from "@/components/admin/menu-list";
+import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
 
 export interface AdminDashboardPageTexts {
   title: string;
@@ -20,7 +20,7 @@ export interface AdminDashboardPageTexts {
   themeSwitchTexts: ThemeSwitchTexts;
   relativeItemTexts: Record<RelativeItems, RelativeItemTexts>;
   relativeItemsSummaryTexts: RelativeItemsSummaryTexts;
-  menuTexts: AdminMenuTexts;
+  menuTexts: SidebarMenuTexts;
 }
 
 interface Props extends WithUser, AdminDashboardPageTexts {}

@@ -19,6 +19,8 @@ import { ContextualCompressionRetriever } from "langchain/retrievers/contextual_
 import { EmbeddingsFilter } from "langchain/retrievers/document_compressors/embeddings_filter";
 import { VectorStore } from "@langchain/core/vectorstores";
 import { cookies } from "next/headers";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/auth-options";
 
 const modelName = process.env.OLLAMA_MODEL;
 const ollamaBaseUrl = process.env.OLLAMA_BASE_URL;
@@ -32,6 +34,15 @@ if (!modelName || !ollamaBaseUrl) {
 
 export async function POST(req: NextRequest) {
   try {
+    const session = await getServerSession(authOptions);
+
+    const currentUserRole =
+      !session?.user?.role || session?.user?.role === "ROLE_USER"
+        ? "user"
+        : session?.user?.role === "ROLE_TRAINER"
+          ? "trainer"
+          : "admin";
+
     const [vectorStore, vectorFilter, body] = await Promise.all([
       vectorStoreInstance.getPGVectorStore(),
       vectorStoreInstance.getFilter(),
@@ -117,7 +128,7 @@ export async function POST(req: NextRequest) {
     // const combineDocsChain = await createDocsChain(handlers);
     const [historyAwareRetrieverChain, combineDocsChain] = await Promise.all([
       createHistroyChain(vectorStore, vectorFilter),
-      createDocsChain(handlers),
+      createDocsChain(handlers, currentUserRole),
     ]);
 
     // const prompt = ChatPromptTemplate.fromMessages([
@@ -226,6 +237,7 @@ async function createHistroyChain(
 
 async function createDocsChain(
   handlers: ReturnType<typeof LangChainStream>["handlers"],
+  currentUserRole: string,
 ) {
   const chatModel = new ChatOllama({
     model: modelName,
@@ -256,10 +268,13 @@ async function createDocsChain(
         locale +
         "' locale.\n\n" +
         "Here are the key sections of the site with the appropriate localized URLs:\n" +
+        "- Caloric intake calculator: /" +
+        locale +
+        "/calculator\n" +
         "- Nutrition posts: /" +
         locale +
         "/posts/approved\n" +
-        "- Meal plans: /" +
+        "- Meal plans page where the user can buy new plans: /" +
         locale +
         "/plans/approved\n" +
         "- Account login/registration: /" +
@@ -268,13 +283,20 @@ async function createDocsChain(
         "- View orders: /" +
         locale +
         "/orders\n" +
-        "- Manage purchased meal plans: /" +
+        "- Manage already purchased meal plans: /" +
         locale +
         "/subscriptions\n\n" +
         "If the user communicates in a language other than English or Romanian, respond in English unless the user specifies otherwise. " +
         "If the user's language preference is unclear, default to English but try to maintain the user's initial language if possible. " +
         "Always format your messages in markdown to improve readability and user experience.\n\n" +
-        "**Key guidelines**:\n" +
+        "**Key guidelines based on user roles**:\n" +
+        (currentUserRole === "user"
+          ? "As a 'user', only provide information relevant to general users. Do not share details related to trainer or admin features.\n"
+          : currentUserRole === "trainer"
+            ? "As a 'trainer', provide information relevant to both general users and trainers. However, do not share details related to admin features.\n"
+            : "As an 'admin', provide information relevant to users, trainers, and admins as necessary.") +
+        "\n\n" +
+        +"**Key guidelines for interaction**:\n" +
         "1. Focus on user experience, health, and well-being.\n" +
         "2. Keep the conversation engaging, informative, and fun.\n" +
         "3. Never provide HTML/JS code or discuss technical details with the user.\n\n" +

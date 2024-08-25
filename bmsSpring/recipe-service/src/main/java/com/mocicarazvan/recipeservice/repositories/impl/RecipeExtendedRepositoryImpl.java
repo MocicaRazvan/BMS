@@ -14,6 +14,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
+import java.util.Objects;
 
 @Repository
 @RequiredArgsConstructor
@@ -101,28 +102,51 @@ public class RecipeExtendedRepositoryImpl implements RecipeExtendedRepository {
 
 
         executeSpec = repositoryUtils.bindNotNullField(trainerId, executeSpec, "trainerId");
-        
+
         return executeSpec.map((row, metadata) -> row.get(0, Long.class)).first();
+    }
+
+    @Override
+    public Mono<DietType> determineMostRestrictiveDietType(List<Long> recipeIds) {
+        String DETERMINE_MOST_RESTRICTIVE_DIET_QUERY = """
+                 WITH DietPriority AS (
+                     SELECT
+                         id,
+                         CASE
+                             WHEN type = 'OMNIVORE' THEN 3
+                             WHEN type = 'VEGETARIAN' THEN 2
+                             WHEN type = 'VEGAN' THEN 1
+                             ELSE 0
+                         END AS diet_priority
+                     FROM recipe
+                     WHERE id = ANY(:ids)
+                 )
+                 SELECT
+                     CASE
+                         WHEN MAX(diet_priority) = 3 THEN 'OMNIVORE'
+                         WHEN MAX(diet_priority) = 2 THEN 'VEGETARIAN'
+                         WHEN MAX(diet_priority) = 1 THEN 'VEGAN'
+                         ELSE NULL
+                     END AS most_restrictive_diet
+                 FROM DietPriority;
+                """;
+
+        DatabaseClient.GenericExecuteSpec executeSpec = databaseClient.sql(DETERMINE_MOST_RESTRICTIVE_DIET_QUERY);
+
+        executeSpec = repositoryUtils.bindArrayField(recipeIds, executeSpec, "ids", Long.class);
+        return executeSpec.map((row, metadata) -> DietType.valueOf(
+                Objects.requireNonNull(row.get("most_restrictive_diet", String.class)).toUpperCase()
+        )).first();
     }
 
     private DatabaseClient.GenericExecuteSpec getGenericExecuteSpec(String title, Boolean approved, DietType type, StringBuilder queryBuilder) {
         DatabaseClient.GenericExecuteSpec executeSpec = databaseClient.sql(queryBuilder.toString());
 
-//        if (approved != null) {
-//            executeSpec = executeSpec.bind("approved", approved);
-//        }
 
         executeSpec = repositoryUtils.bindNotNullField(approved, executeSpec, "approved");
 
-//        if (title != null && !title.isEmpty()) {
-//            executeSpec = executeSpec.bind("title", "%" + title + "%");
-//        }
-
         executeSpec = repositoryUtils.bindStringSearchField(title, executeSpec, "title");
 
-//        if (type != null) {
-//            executeSpec = executeSpec.bind("type", type.name());
-//        }
 
         executeSpec = repositoryUtils.bindEnumField(type, executeSpec, "type");
 
@@ -130,37 +154,15 @@ public class RecipeExtendedRepositoryImpl implements RecipeExtendedRepository {
     }
 
     private void appendWhereClause(StringBuilder queryBuilder, String title, Boolean approved, DietType type) {
-//        boolean hasPreviousCriteria = false;
 
         RepositoryUtils.MutableBoolean hasPreviousCriteria = new RepositoryUtils.MutableBoolean(false);
 
-//        if (approved != null) {
-//            queryBuilder.append(" WHERE approved = :approved");
-//            hasPreviousCriteria = true;
-//        }
 
         repositoryUtils.addNotNullField(approved, queryBuilder, hasPreviousCriteria, " approved = :approved");
 
-//        if (title != null && !title.isEmpty()) {
-//            if (hasPreviousCriteria) {
-//                queryBuilder.append(" AND");
-//            } else {
-//                queryBuilder.append(" WHERE");
-//            }
-//            queryBuilder.append(" UPPER(title) LIKE UPPER(:title)");
-//            hasPreviousCriteria = true;
-//        }
 
         repositoryUtils.addStringField(title, queryBuilder, hasPreviousCriteria, " UPPER(title) LIKE UPPER(:title)");
 
-//        if (type != null) {
-//            if (hasPreviousCriteria) {
-//                queryBuilder.append(" AND");
-//            } else {
-//                queryBuilder.append(" WHERE");
-//            }
-//            queryBuilder.append(" type = :type");
-//        }
 
         repositoryUtils.addNotNullField(type, queryBuilder, hasPreviousCriteria, " type = :type");
     }

@@ -8,6 +8,7 @@ export async function getElementHeaderTexts(): Promise<ElementHeaderTexts> {
   const t = await getTranslations("components.common.ElementHeaderTexts");
   return {
     notApproved: t("notApproved"),
+    approved: t("approved"),
   };
 }
 

@@ -4,8 +4,10 @@ import { TitleBodyTexts } from "@/components/forms/title-body";
 import { InputMultipleSelectorTexts } from "@/components/forms/input-multiselector";
 import {
   getAdminEmailSchemaTexts,
+  getDaySchemaTexts,
   getIngredientNutritionalFactSchemaTexts,
   getIngredientQuantitySchemaTexts,
+  getMealSchemaTexts,
   getPlanSchemaTexts,
   getPostSchemaTexts,
   getRecipeSchemaTexts,
@@ -31,6 +33,8 @@ import { RecipeFormTexts } from "@/components/forms/recipe-form";
 import { PlanFormTexts } from "@/components/forms/plan-form";
 import { CheckoutDrawerTexts } from "@/components/forms/checkout-drawer";
 import { AdminEmailTexts } from "@/components/forms/admin-email";
+import { DayFromTexts } from "@/components/forms/day-form";
+import { planObjectives } from "@/types/dto";
 
 export type FormType = "create" | "update";
 
@@ -54,6 +58,7 @@ export async function getInputFileText(
       type: cnt === "multiple" ? plural : singular,
       cnt,
     }),
+    loading: t("loading", { type: cnt === "multiple" ? plural : singular }),
     draggingActive: t1("draggingActive", { type: plural }),
     draggingInactive: t1("draggingInactive", { type: singular }),
     clearAll: t1("clearAll", { type: plural }),
@@ -274,7 +279,7 @@ export async function getIngredientFormTexts(
 }
 
 export async function getChildInputMultipleSelectorTexts(
-  type: "ingredients" | "recipes",
+  type: "ingredients" | "recipes" | "meals" | "days",
 ): Promise<ChildInputMultipleSelectorTexts> {
   const t = await getTranslations(
     "zod.forms.components.ChildInputMultipleSelectorTexts",
@@ -337,6 +342,54 @@ export async function getRecipeFormTexts(
   };
 }
 
+export async function getDayFromTexts(type: FormType): Promise<DayFromTexts> {
+  const [
+    titleBodyTexts,
+    mealsChildInputMultipleSelectorTexts,
+    recipesChildInputMultipleSelectorTexts,
+    buttonSubmitTexts,
+    baseFormTexts,
+    daySchemaTexts,
+    mealSchemaTexts,
+    t,
+  ] = await Promise.all([
+    getTitleBodyText(),
+    getChildInputMultipleSelectorTexts("meals"),
+    getChildInputMultipleSelectorTexts("recipes"),
+    getButtonSubmitTexts(),
+    getBaseFormTexts("DayForm", type),
+    getDaySchemaTexts(),
+    getMealSchemaTexts(),
+    getTranslations("components.forms.DayFormTexts"),
+  ]);
+
+  return {
+    titleBodyTexts,
+    mealsChildInputMultipleSelectorTexts,
+    recipesChildInputMultipleSelectorTexts,
+    buttonSubmitTexts,
+    baseFormTexts,
+    daySchemaTexts,
+    mealSchemaTexts,
+    typeLabel: t("typeLabel"),
+    typePlaceholder: t("typePlaceholder"),
+    mealsLabel: t("mealsLabel"),
+    addMeal: t("addMeal"),
+    hourLabel: t("hourLabel"),
+    hourPlaceholder: t("hourPlaceholder"),
+    hourDescription: t("hourDescription"),
+    minuteLabel: t("minuteLabel"),
+    minutePlaceholder: t("minutePlaceholder"),
+    minuteDescription: t("minuteDescription"),
+    recipesLabel: t("recipesLabel"),
+    submitMeal: t("submitMeal"),
+    editMeal: t("editMeal"),
+    removeMeal: t("removeMeal"),
+    mealType: t("mealType"),
+    dayDietType: t("dayDietType"),
+  };
+}
+
 export async function getPlanFormTexts(type: FormType): Promise<PlanFormTexts> {
   const [
     titleBodyTexts,
@@ -348,7 +401,7 @@ export async function getPlanFormTexts(type: FormType): Promise<PlanFormTexts> {
     t,
   ] = await Promise.all([
     getTitleBodyText(),
-    getChildInputMultipleSelectorTexts("recipes"),
+    getChildInputMultipleSelectorTexts("days"),
     getInputFileText("image"),
     getButtonSubmitTexts(),
     getPlanSchemaTexts(),
@@ -366,8 +419,15 @@ export async function getPlanFormTexts(type: FormType): Promise<PlanFormTexts> {
     pricePlaceholder: t("pricePlaceholder"),
     priceLabel: t("priceLabel"),
     dietMessage: t("dietMessage"),
-    recipesLabel: t("recipesLabel"),
-    recipePlaceholder: t("recipePlaceholder"),
+    daysLabel: t("daysLabel"),
+    daysPlaceholder: t("daysPlaceholder"),
+    objectiveLabel: t("objectiveLabel"),
+    objectivePlaceholder: t("objectivePlaceholder"),
+    dayIndex: t("dayIndex"),
+    objectives: planObjectives.reduce(
+      (acc, k) => ({ ...acc, [k]: t(`objectives.${k}`) }),
+      {} as Record<(typeof planObjectives)[number], string>,
+    ),
   };
 }
 

@@ -10,18 +10,24 @@ import { useGetTitleBodyUser } from "@/hoooks/useGetTitleBodyUser";
 import { CustomEntityModel, PlanResponse } from "@/types/dto";
 import { useFormatter } from "next-intl";
 import LoadingSpinner from "@/components/common/loading-spinner";
-import { useCallback } from "react";
+import React, { useCallback } from "react";
 import { fetchStream } from "@/hoooks/fetchStream";
 import CustomImageCarousel from "@/components/common/custom-image-crousel";
 import ProseText from "@/components/common/prose-text";
 import AuthorProfile from "@/components/common/author-profile";
-import { RecipePlanList } from "@/components/plans/plan-recipes";
+import { MealRecipeList } from "@/components/days/meal-recipes";
 import useClientNotFound from "@/hoooks/useClientNotFound";
+import LikesDislikes from "@/components/common/likes-dislikes";
+import { cn } from "@/lib/utils";
+import DietBadge from "@/components/common/diet-badge";
+import DaysList from "@/components/days/days-list";
+import { SingleDayTexts } from "@/components/days/single-day";
 
 export interface SingleSubscriptionTexts {
   elementHeaderTexts: ElementHeaderTexts;
   nutritionalTableTexts: NutritionalTableTexts;
   ingredientPieChartTexts: IngredientPieChartTexts;
+  singleDayTexts: SingleDayTexts;
 }
 
 interface Props extends WithUser, SingleSubscriptionTexts {
@@ -32,8 +38,7 @@ export default function SingleSubscriptionPageContent({
   id,
   authUser,
   elementHeaderTexts,
-  nutritionalTableTexts,
-  ingredientPieChartTexts,
+  singleDayTexts,
 }: Props) {
   const {
     itemState: planState,
@@ -53,7 +58,6 @@ export default function SingleSubscriptionPageContent({
 
   const { navigateToNotFound } = useClientNotFound();
 
-  const formatIntl = useFormatter();
   const react = useCallback(
     async (type: "like" | "dislike") => {
       if (!planState?.approved) return;
@@ -63,7 +67,6 @@ export default function SingleSubscriptionPageContent({
           method: "PATCH",
           token: authUser.token,
         });
-        console.log(resp);
         const newPlan = resp.messages[0]?.content;
         setPlanState((prev) =>
           !prev
@@ -85,28 +88,41 @@ export default function SingleSubscriptionPageContent({
     return navigateToNotFound();
   }
   if (!isFinished || !planState) {
-    console.log("loading main");
     return (
       <section className="w-full min-h-[calc(100vh-4rem)] flex items-center justify-center transition-all">
         <LoadingSpinner />
       </section>
     );
   }
-  const colorMap = {
-    VEGAN: "success",
-    OMNIVORE: "secondary",
-    VEGETARIAN: "accent",
-  };
+
   return (
     <section className="w-full mx-auto max-w-[1500px] min-h-[calc(100vh-4rem)] flex-col items-center justify-center transition-all px-6 py-10 relative ">
-      <ElementHeader
-        elementState={planState}
-        react={react}
-        isLiked={isLiked}
-        isDisliked={isDisliked}
-        likesDisabled={!planState.approved}
-        {...elementHeaderTexts}
-      />{" "}
+      <div className="w-3/4 mx-auto flex flex-col md:flex-row items-center justify-between gap-10 md:gap-20 mb-2 ">
+        <div className="order-1 flex items-center justify-center gap-3">
+          <div className="flex flex-row md:flex-col items-center justify-center gap-4 flex-1">
+            <div className="flex items-center justify-center gap-4">
+              <LikesDislikes
+                likes={planState.userLikes}
+                dislikes={planState.userDislikes}
+                isLiked={isLiked || false}
+                isDisliked={isDisliked || false}
+                react={react}
+              />
+            </div>
+          </div>
+        </div>
+        <div className=" flex items-center justify-center order-0 md:order-1 flex-1 ">
+          <h1
+            className={cn("text-5xl tracking-tighter font-bold text-center  ")}
+          >
+            {planState.title}
+          </h1>
+        </div>
+        <div className="order-3">
+          <DietBadge dietType={planState.type} />
+        </div>
+      </div>
+
       {plan?.images.length > 0 && (
         <div className="mt-10">
           <CustomImageCarousel images={plan?.images} />
@@ -117,13 +133,14 @@ export default function SingleSubscriptionPageContent({
         <AuthorProfile author={user} />
       </div>
       <div className={"mt-20"}>
-        <RecipePlanList
+        <DaysList
           authUser={authUser}
-          recipeIds={planState.recipes}
-          ingredientPieChartTexts={ingredientPieChartTexts}
-          nutritionalTableTexts={nutritionalTableTexts}
-          recipeBasePath={`/orders/subscriptions/recipes/${planState.id}`}
-          showLikes
+          dayIds={planState.days}
+          texts={singleDayTexts}
+          dayBasePath={`/orders/subscriptions/days/${id}`}
+          mealsBasePath={`/orders/subscriptions/days/meals/${id}`}
+          recipeBasePath={`/orders/subscriptions/recipe/${id}`}
+          disableLikes={false}
         />
       </div>
     </section>

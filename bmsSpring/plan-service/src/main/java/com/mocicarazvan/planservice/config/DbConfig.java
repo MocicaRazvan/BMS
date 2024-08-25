@@ -2,6 +2,8 @@ package com.mocicarazvan.planservice.config;
 
 import com.mocicarazvan.planservice.convertors.DietTypeReadingConvertor;
 import com.mocicarazvan.planservice.convertors.DietTypeWritingConvertor;
+import com.mocicarazvan.planservice.convertors.ObjectiveTypeReadingConvertor;
+import com.mocicarazvan.planservice.convertors.ObjectiveTypeWritingConvertor;
 import io.r2dbc.spi.ConnectionFactories;
 import io.r2dbc.spi.ConnectionFactory;
 import lombok.RequiredArgsConstructor;
@@ -29,8 +31,9 @@ public class DbConfig extends AbstractR2dbcConfiguration {
     protected List<Object> getCustomConverters() {
         return Arrays.asList(
                 new DietTypeReadingConvertor(),
-                new DietTypeWritingConvertor()
-
+                new DietTypeWritingConvertor(),
+                new ObjectiveTypeReadingConvertor(),
+                new ObjectiveTypeWritingConvertor()
         );
     }
 

@@ -1,0 +1,66 @@
+import { Locale } from "@/navigation";
+import { unstable_setRequestLocale } from "next-intl/server";
+import { getUserWithMinRole } from "@/lib/user";
+import { getDayFromTexts } from "@/texts/components/forms";
+import { Suspense } from "react";
+import Loader from "@/components/ui/spinner";
+import UpdateDayPageContent from "@/app/[locale]/trainer/days/update/[id]/page-content";
+import LoadingSpinner from "@/components/common/loading-spinner";
+import { DayFromTexts } from "@/components/forms/day-form";
+import { ThemeSwitchTexts } from "@/texts/components/nav";
+import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
+import { getUpdateDayPageTexts } from "@/texts/pages";
+import SidebarContentLayout from "@/components/sidebar/sidebar-content-layout";
+import { Metadata } from "next";
+import { getIntlMetadata } from "@/texts/metadata";
+
+interface Props {
+  params: {
+    locale: Locale;
+    id: string;
+  };
+}
+export async function generateMetadata({
+  params: { locale },
+}: Props): Promise<Metadata> {
+  return await getIntlMetadata(
+    "trainer.UpdateDay",
+    "/trainer/days/update",
+    locale,
+  );
+}
+
+export interface UpdateDayPageTexts {
+  dayFormTexts: DayFromTexts;
+  themeSwitchTexts: ThemeSwitchTexts;
+  menuTexts: SidebarMenuTexts;
+}
+
+export default async function UpdateDayPage({ params: { locale, id } }: Props) {
+  unstable_setRequestLocale(locale);
+  const [authUser, { dayFormTexts, ...rest }] = await Promise.all([
+    getUserWithMinRole("ROLE_TRAINER"),
+    getUpdateDayPageTexts(),
+  ]);
+  return (
+    <SidebarContentLayout
+      navbarProps={{
+        title: dayFormTexts.baseFormTexts.header,
+        ...rest,
+        authUser,
+        mappingKey: "trainer",
+      }}
+    >
+      <main className="flex items-center justify-center px-6 py-10">
+        <Suspense fallback={<LoadingSpinner />}>
+          <UpdateDayPageContent
+            id={id}
+            authUser={authUser}
+            {...dayFormTexts}
+            path={`/days/update/meals/${id}`}
+          />
+        </Suspense>
+      </main>
+    </SidebarContentLayout>
+  );
+}

@@ -16,9 +16,7 @@ interface Props {
 export async function generateMetadata({
   params: { locale },
 }: Props): Promise<Metadata> {
-  return {
-    ...(await getIntlMetadata("user.Calculator", "/calculator", locale)),
-  };
+  return await getIntlMetadata("user.Calculator", "/calculator", locale);
 }
 
 export type IntakeTitle = Record<(typeof intakeTitles)[number], string>;

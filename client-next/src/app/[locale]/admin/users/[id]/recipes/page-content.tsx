@@ -7,7 +7,7 @@ import useFetchStream from "@/hoooks/useFetchStream";
 import { CustomEntityModel, UserDto } from "@/types/dto";
 import { BaseError } from "@/types/responses";
 import { notFound } from "next/navigation";
-import AdminContentLayout from "@/components/admin/admin-content-layout";
+import SidebarContentLayout from "@/components/sidebar/sidebar-content-layout";
 import LoadingSpinner from "@/components/common/loading-spinner";
 import Heading from "@/components/common/heading";
 import { Suspense } from "react";
@@ -52,12 +52,13 @@ export default function UserRecipesAdminPageContent({
   // const user = messages[0]?.content;
 
   return (
-    <AdminContentLayout
+    <SidebarContentLayout
       navbarProps={{
         title: `${title} ${user?.email || ""}`,
         authUser,
         themeSwitchTexts,
         menuTexts,
+        mappingKey: "admin",
       }}
     >
       <div className="w-full h-full bg-background">
@@ -78,12 +79,13 @@ export default function UserRecipesAdminPageContent({
                   {...recipesTableTexts}
                   authUser={authUser}
                   sizeOptions={[10, 20, 30, 40]}
+                  mainDashboard={true}
                 />
               </div>
             </Suspense>
           </>
         )}
       </div>
-    </AdminContentLayout>
+    </SidebarContentLayout>
   );
 }

@@ -8,11 +8,13 @@ import { unstable_setRequestLocale } from "next-intl/server";
 import { getAdminRecipesPageTexts } from "@/texts/pages";
 import { getUserWithMinRole } from "@/lib/user";
 import { sortingRecipesSortingOptionsKeys } from "@/texts/components/list";
-import AdminContentLayout from "@/components/admin/admin-content-layout";
+import SidebarContentLayout from "@/components/sidebar/sidebar-content-layout";
 import Heading from "@/components/common/heading";
 import { Suspense } from "react";
 import LoadingSpinner from "@/components/common/loading-spinner";
-import { AdminMenuTexts } from "@/components/admin/menu-list";
+import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
+import { Metadata } from "next";
+import { getIntlMetadata } from "@/texts/metadata";
 
 interface Props {
   params: { locale: Locale };
@@ -24,9 +26,13 @@ export interface AdminRecipesPageTexts {
   themeSwitchTexts: ThemeSwitchTexts;
   title: string;
   header: string;
-  menuTexts: AdminMenuTexts;
+  menuTexts: SidebarMenuTexts;
 }
-
+export async function generateMetadata({
+  params: { locale },
+}: Props): Promise<Metadata> {
+  return await getIntlMetadata("admin.Recipes", "/admin/recipes", locale);
+}
 export default async function AdminRecipesPage({ params: { locale } }: Props) {
   unstable_setRequestLocale(locale);
   const [
@@ -49,12 +55,13 @@ export default async function AdminRecipesPage({ params: { locale } }: Props) {
     sortingRecipesSortingOptions,
   );
   return (
-    <AdminContentLayout
+    <SidebarContentLayout
       navbarProps={{
         title,
         themeSwitchTexts,
         authUser,
         menuTexts,
+        mappingKey: "admin",
       }}
     >
       <div className="w-full h-full bg-background">
@@ -63,15 +70,16 @@ export default async function AdminRecipesPage({ params: { locale } }: Props) {
           <div className="mt-10 h-full">
             <RecipeTable
               path={`/recipes/filteredWithCount`}
-              forWhom="trainer"
+              forWhom="admin"
               sortingOptions={recipesOptions}
               {...recipeTableTexts}
               authUser={authUser}
               sizeOptions={[10, 20, 30, 40]}
+              mainDashboard={true}
             />
           </div>
         </Suspense>
       </div>
-    </AdminContentLayout>
+    </SidebarContentLayout>
   );
 }

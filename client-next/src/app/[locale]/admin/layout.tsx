@@ -2,12 +2,15 @@ import { Locale } from "@/navigation";
 import { ReactNode } from "react";
 import { unstable_setRequestLocale } from "next-intl/server";
 import { getUserWithMinRole } from "@/lib/user";
-import AdminPanelLayout from "@/components/admin/admin-panel-layout";
+import SidebarPanelLayout from "@/components/sidebar/sidebar-panel-layout";
 import { SidebarToggleProvider } from "@/context/sidebar-toggle";
+import { getSidebarLayoutTexts } from "@/texts/components/sidebar";
+
 import {
-  getAdminLayoutTexts,
-  getAdminMenuTexts,
-} from "@/texts/components/admin";
+  adminGroupLabels,
+  adminLabels,
+  adminSubLabels,
+} from "@/components/sidebar/menu-list";
 
 interface Props {
   params: { locale: Locale };
@@ -21,11 +24,18 @@ export default async function AdminLayout({
   unstable_setRequestLocale(locale);
   const [user, texts] = await Promise.all([
     getUserWithMinRole("ROLE_ADMIN"),
-    getAdminLayoutTexts(),
+    getSidebarLayoutTexts(
+      "admin",
+      adminGroupLabels,
+      adminLabels,
+      adminSubLabels,
+    ),
   ]);
   return (
     <SidebarToggleProvider>
-      <AdminPanelLayout {...texts}>{children}</AdminPanelLayout>
+      <SidebarPanelLayout {...texts} mappingKey={"admin"} authUser={user}>
+        {children}
+      </SidebarPanelLayout>
     </SidebarToggleProvider>
   );
 }

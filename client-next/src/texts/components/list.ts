@@ -38,6 +38,12 @@ export const sortingIngredientsSortingOptionsKeys = [
   "saturatedFat",
   "calories",
 ] as const;
+
+export const sortingDaysSortingOptionsKeys = [
+  "title",
+  "createdAt",
+  "updatedAt",
+] as const;
 export const sortingPlansSortingOptionsKeys = [
   "title",
   "createdAt",

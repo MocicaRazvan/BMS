@@ -13,7 +13,11 @@ import { SortingOptionsTexts } from "@/lib/constants";
 import { WithUser } from "@/lib/user";
 import { dietTypes } from "@/types/forms";
 import Heading from "@/components/common/heading";
-import { PlanResponse, ResponseWithUserDtoEntity } from "@/types/dto";
+import {
+  planObjectives,
+  PlanResponse,
+  ResponseWithUserDtoEntity,
+} from "@/types/dto";
 import { useRouter } from "@/navigation";
 import { useCallback, useState } from "react";
 import { useFormatter } from "next-intl";
@@ -24,12 +28,18 @@ import AddToCartBtn, {
 import { useSubscription } from "@/context/subscriptions-context";
 import { useSearchParams } from "next/navigation";
 import { Checkbox } from "@/components/ui/checkbox";
+import {
+  PlanExtraContent,
+  PlanExtraHeader,
+  PlanImageOverlay,
+} from "@/components/plans/plan-list-extra";
 
 export interface ApprovedPlansTexts {
   gridListTexts: GridListTexts;
   useApprovedFilterTexts: UseApprovedFilterTexts;
   displayFilterTexts: UseBinaryTexts;
   dietDropdownTexts: UseFilterDropdownTexts;
+  objectiveDropDownTexts: UseFilterDropdownTexts;
   sortingPlansSortingOptions: SortingOptionsTexts;
   title: string;
   header: string;
@@ -53,6 +63,7 @@ export default function PlanApprovedPageContent({
   authUser,
   addToCartBtnTexts,
   buyableLabel,
+  objectiveDropDownTexts,
 }: Props) {
   const router = useRouter();
   const formatIntl = useFormatter();
@@ -76,56 +87,95 @@ export default function PlanApprovedPageContent({
     noFilterLabel: dietDropdownTexts.noFilterLabel,
   });
 
+  const {
+    value: objectiveType,
+    updateFieldDropdownFilter: updateObjectiveType,
+    filedFilterCriteriaCallback: objectiveTypeCriteriaCallback,
+  } = useFilterDropdown({
+    items: planObjectives.map((value) => ({
+      value,
+      label: objectiveDropDownTexts.labels[value],
+    })),
+    fieldKey: "objective",
+    noFilterLabel: objectiveDropDownTexts.noFilterLabel,
+  });
+
+  // const extraContent = useCallback(
+  //   ({ model: { content } }: ResponseWithUserDtoEntity<PlanResponse>) => (
+  //     <div className="mt-10">
+  //       <AddToCartBtn
+  //         authUser={authUser}
+  //         plan={content}
+  //         {...addToCartBtnTexts}
+  //       />
+  //     </div>
+  //   ),
+  //   [authUser, addToCartBtnTexts],
+  // );
+
   const extraContent = useCallback(
-    ({ model: { content } }: ResponseWithUserDtoEntity<PlanResponse>) => (
-      <div className="mt-10">
-        <AddToCartBtn
-          authUser={authUser}
-          plan={content}
-          {...addToCartBtnTexts}
-        />
-      </div>
-    ),
-    [authUser, addToCartBtnTexts],
+    (item: ResponseWithUserDtoEntity<PlanResponse>) =>
+      PlanExtraContent(item, authUser, addToCartBtnTexts),
+    [addToCartBtnTexts, authUser],
   );
+
+  // const extraHeader = useCallback(
+  //   ({
+  //     model: {
+  //       content: { price },
+  //     },
+  //   }: ResponseWithUserDtoEntity<PlanResponse>) => (
+  //     <span className="font-bold">
+  //       {formatIntl.number(price, {
+  //         style: "currency",
+  //         currency: "EUR",
+  //         maximumFractionDigits: 2,
+  //       })}
+  //     </span>
+  //   ),
+  //   [formatIntl],
+  // );
 
   const extraHeader = useCallback(
-    ({
-      model: {
-        content: { price },
-      },
-    }: ResponseWithUserDtoEntity<PlanResponse>) => (
-      <span className="font-bold">
-        {formatIntl.number(price, {
-          style: "currency",
-          currency: "EUR",
-          maximumFractionDigits: 2,
-        })}
-      </span>
-    ),
-    [formatIntl],
+    (item: ResponseWithUserDtoEntity<PlanResponse>) =>
+      PlanExtraHeader(item, formatIntl.number),
+    [formatIntl.number],
   );
 
+  // const imageOverlay = useCallback(
+  //   (item: ResponseWithUserDtoEntity<PlanResponse>) => {
+  //     const colorMap = {
+  //       VEGAN: "success",
+  //       OMNIVORE: "secondary",
+  //       VEGETARIAN: "accent",
+  //     };
+  //     return (
+  //       <div className="absolute top-2 w-full flex items-center justify-between  px-3 py-1 flex-wrap">
+  //         <div className="text-lg font-bold bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/70 p-1 rounded-md">
+  //           {objectiveDropDownTexts.labels[item.model.content.objective]}
+  //         </div>
+  //         <div
+  //           className={cn(
+  //             ` bg-${colorMap[item.model.content.type]} text-${colorMap[item.model.content.type]}-foreground rounded-full font-bold w-fit text-lg
+  //           p-1
+  //           `,
+  //           )}
+  //         >
+  //           {item.model.content.type}
+  //         </div>
+  //       </div>
+  //     );
+  //   },
+  //   [objectiveDropDownTexts.labels],
+  // );
+
   const imageOverlay = useCallback(
-    (item: ResponseWithUserDtoEntity<PlanResponse>) => {
-      const colorMap = {
-        VEGAN: "success",
-        OMNIVORE: "secondary",
-        VEGETARIAN: "accent",
-      };
-      return (
-        <div
-          className={cn(
-            ` absolute top-2 right-2 px-3 py-1 bg-${colorMap[item.model.content.type]} text-${colorMap[item.model.content.type]}-foreground rounded-full font-bold w-fit text-lg
-            
-            `,
-          )}
-        >
-          {item.model.content.type}
-        </div>
-      );
-    },
-    [],
+    (item: ResponseWithUserDtoEntity<PlanResponse>) =>
+      PlanImageOverlay(
+        item,
+        objectiveDropDownTexts.labels[item.model.content.objective],
+      ),
+    [objectiveDropDownTexts.labels],
   );
   return (
     <section className="w-full min-h-[calc(100vh-4rem)] transition-all py-5 px-4 max-w-[1300px] mx-auto ">
@@ -148,12 +198,14 @@ export default function PlanApprovedPageContent({
             p.delete("buyable");
           }
           updateDietType(p);
+          updateObjectiveType(p);
         }}
         // extraCriteria={extraCriteria}
         extraQueryParams={{
           approved: "true",
           display: "true",
           ...(dietType ? { type: dietType } : {}),
+          ...(objectiveType ? { objective: objectiveType } : {}),
         }}
         extraArrayQueryParam={{
           ...(buyable
@@ -167,9 +219,11 @@ export default function PlanApprovedPageContent({
           return (
             <div className="flex items-center justify-center flex-wrap gap-10">
               {dietTypeCriteriaCallback(callback)}
+              {objectiveTypeCriteriaCallback(callback)}
               <div className="flex items-center space-x-2">
                 <Checkbox
                   id="buyable"
+                  checked={buyable}
                   onCheckedChange={(checked) => {
                     setBuyable(checked === true);
                     callback();

@@ -17,6 +17,7 @@ import { Link, useRouter } from "@/navigation";
 import { dietTypes } from "@/types/forms";
 import {
   CustomEntityModel,
+  planObjectives,
   PlanResponse,
   ResponseWithEntityCount,
 } from "@/types/dto";
@@ -51,6 +52,7 @@ export interface PlanTableColumnsTexts {
   createdAt: string;
   updatedAt: string;
   price: string;
+  objective: string;
   approved: {
     header: string;
     true: string;
@@ -69,6 +71,7 @@ export interface PlanTableTexts {
   useApprovedFilterTexts: UseApprovedFilterTexts;
   displayFilterTexts: UseBinaryTexts;
   dietDropdownTexts: UseFilterDropdownTexts;
+  objectiveDropDownTexts: UseFilterDropdownTexts;
   planTableColumnsTexts: PlanTableColumnsTexts;
   search: string;
 }
@@ -98,6 +101,7 @@ export default function PlansTable({
   extraArrayQueryParam,
   extraUpdateSearchParams,
   extraCriteria,
+  objectiveDropDownTexts,
   forWhom,
 }: PlanTableProps) {
   const router = useRouter();
@@ -135,6 +139,18 @@ export default function PlansTable({
     fieldKey: "type",
     noFilterLabel: dietDropdownTexts.noFilterLabel,
   });
+  const {
+    value: objectiveType,
+    updateFieldDropdownFilter: updateObjectiveType,
+    filedFilterCriteriaCallback: objectiveTypeCriteriaCallback,
+  } = useFilterDropdown({
+    items: planObjectives.map((value) => ({
+      value,
+      label: objectiveDropDownTexts.labels[value],
+    })),
+    fieldKey: "objective",
+    noFilterLabel: objectiveDropDownTexts.noFilterLabel,
+  });
 
   const {
     messages,
@@ -162,6 +178,7 @@ export default function PlansTable({
       ...(dietType && { type: dietType }),
       ...(approvedField && { approved: approvedField.toString() }),
       ...(displayField && { display: displayField.toString() }),
+      ...(objectiveType && { objective: objectiveType }),
     },
     extraArrayQueryParam,
     extraUpdateSearchParams: (p) => {
@@ -169,6 +186,7 @@ export default function PlansTable({
       updateDisplay(p);
       updateApproved(p);
       updateDietType(p);
+      updateObjectiveType(p);
     },
     sizeOptions,
     sortingOptions,
@@ -245,6 +263,20 @@ export default function PlansTable({
             </Badge>
           );
         },
+      },
+      {
+        id: planTableColumnsTexts.objective,
+        accessorKey: "objective",
+        header: () => (
+          <p className="font-bold text-lg text-left">
+            {planTableColumnsTexts.objective}
+          </p>
+        ),
+        cell: ({ row }) => (
+          <div className="max-w-28 text-sm font-bold text-nowrap overflow-x-hidden">
+            <p>{row.original.model.objective}</p>
+          </div>
+        ),
       },
       {
         id: planTableColumnsTexts.display.header,
@@ -392,7 +424,9 @@ export default function PlansTable({
                   className="cursor-pointer"
                   onClick={() =>
                     router.push(
-                      `/trainer/plans/single/${row.original.model.id}`,
+                      forWhom === "trainer"
+                        ? `/trainer/plans/single/${row.original.model.id}`
+                        : `/admin/plans/single/${row.original.model.id}`,
                     )
                   }
                 >
@@ -403,7 +437,11 @@ export default function PlansTable({
                   <>
                     <DropdownMenuItem asChild>
                       <Link
-                        href={`/users/single/${row.original.model.userId}`}
+                        href={
+                          mainDashboard
+                            ? `/admin/users/${row.original.model.userId}`
+                            : `/users/single/${row.original.model.userId}`
+                        }
                         className="cursor-pointer"
                       >
                         {viewOwner}
@@ -511,6 +549,7 @@ export default function PlansTable({
       planTableColumnsTexts.display.header,
       planTableColumnsTexts.display.true,
       planTableColumnsTexts.id,
+      planTableColumnsTexts.objective,
       planTableColumnsTexts.price,
       planTableColumnsTexts.title,
       planTableColumnsTexts.type,
@@ -522,7 +561,7 @@ export default function PlansTable({
     ],
   );
   const finalCols = useMemo(
-    () => (!isSidebarOpen ? columns : columns.slice(0, -4)),
+    () => (!isSidebarOpen ? columns : columns.slice(0, -5)),
     [isSidebarOpen, columns],
   );
 
@@ -532,6 +571,7 @@ export default function PlansTable({
 
   return (
     <div className="px-1 pb-10 w-full  h-full space-y-8 lg:space-y-14">
+      {planTableColumnsTexts.objective}
       <Suspense fallback={<LoadingSpinner />}>
         <DataTable
           sizeOptions={sizeOptions}
@@ -559,6 +599,7 @@ export default function PlansTable({
           extraCriteria={
             <div className="flex items-start justify-center gap-8 flex-1 flex-wrap">
               {dietTypeCriteriaCallback(resetCurrentPage)}
+              {objectiveTypeCriteriaCallback(resetCurrentPage)}
               {displayCriteriaCallBack(resetCurrentPage)}
               {approvedCriteriaCallBack(resetCurrentPage)}
             </div>

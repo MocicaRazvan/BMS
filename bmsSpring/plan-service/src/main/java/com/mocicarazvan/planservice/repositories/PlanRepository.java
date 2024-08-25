@@ -14,7 +14,7 @@ public interface PlanRepository extends ApprovedRepository<Plan>, CountInParent,
 
     @Query("""
                     select count(*) from plan p
-                    where :childId = any (p.recipes)
+                    where :childId = any (p.days)
             """)
     Mono<Long> countInParent(Long childId);
 
@@ -28,7 +28,7 @@ public interface PlanRepository extends ApprovedRepository<Plan>, CountInParent,
     Flux<Plan> findAllByIdInAndApprovedTrue(List<Long> ids);
 
     @Query("""
-            SELECT * FROM comment
+            SELECT * FROM plan
             WHERE EXTRACT(MONTH FROM created_at) = :month
             AND EXTRACT(YEAR FROM created_at) = :year
             ORDER BY created_at DESC

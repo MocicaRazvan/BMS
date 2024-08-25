@@ -18,13 +18,14 @@ public class PlansReactiveLinkBuilder extends ApproveReactiveLinkBuilder<
     @Override
     public List<WebFluxLinkBuilder.WebFluxLink> createModelLinks(PlanResponse planResponse, Class<PlanController> c) {
         List<WebFluxLinkBuilder.WebFluxLink> links = super.createModelLinks(planResponse, c);
-        links.add(WebFluxLinkBuilder.linkTo(WebFluxLinkBuilder.methodOn(c).getAllPlansFiltered(null, null, null, null, null, null, null)).withRel("getPlansFiltered"));
-        links.add(WebFluxLinkBuilder.linkTo(WebFluxLinkBuilder.methodOn(c).getAllPlansFilteredWithCount(null, null, null, null, null, null, null)).withRel("getPlansFilteredWithCount"));
-        links.add(WebFluxLinkBuilder.linkTo(WebFluxLinkBuilder.methodOn(c).getAllPlansFilteredWithUser(null, null, null, null, null, null, null)).withRel("getPlansFilteredWithUser"));
-        links.add(WebFluxLinkBuilder.linkTo(WebFluxLinkBuilder.methodOn(c).getAllPlansFilteredTrainer(null, null, null, null, null, null, null)).withRel("getPlansFilteredTrainer"));
-        links.add(WebFluxLinkBuilder.linkTo(WebFluxLinkBuilder.methodOn(c).getAllPlansFilteredTrainerWithCount(null, null, null, null, null, null, null)).withRel("getPlansFilteredTrainerWithCount"));
+        links.add(WebFluxLinkBuilder.linkTo(WebFluxLinkBuilder.methodOn(c).getAllPlansFiltered(null, null, null, null, null, null, null, null)).withRel("getPlansFiltered"));
+        links.add(WebFluxLinkBuilder.linkTo(WebFluxLinkBuilder.methodOn(c).getAllPlansFilteredWithCount(null, null, null, null, null, null, null, null)).withRel("getPlansFilteredWithCount"));
+        links.add(WebFluxLinkBuilder.linkTo(WebFluxLinkBuilder.methodOn(c).getAllPlansFilteredWithUser(null, null, null, null, null, null, null, null)).withRel("getPlansFilteredWithUser"));
+        links.add(WebFluxLinkBuilder.linkTo(WebFluxLinkBuilder.methodOn(c).getAllPlansFilteredTrainer(null, null, null, null, null, null, null, null)).withRel("getPlansFilteredTrainer"));
+        links.add(WebFluxLinkBuilder.linkTo(WebFluxLinkBuilder.methodOn(c).getAllPlansFilteredTrainerWithCount(null, null, null, null, null, null, null, null)).withRel("getPlansFilteredTrainerWithCount"));
         links.add(WebFluxLinkBuilder.linkTo(WebFluxLinkBuilder.methodOn(c).toggleDisplay(null, false, null)).withRel("toggleDisplay"));
-        links.add(WebFluxLinkBuilder.linkTo(WebFluxLinkBuilder.methodOn(c).getRecipesByPlan(null, null)).withRel("getRecipesByPlan"));
+        links.add(WebFluxLinkBuilder.linkTo(WebFluxLinkBuilder.methodOn(c).getDaysByPlan(null, null)).withRel("getRecipesByPlan"));
+        links.add(WebFluxLinkBuilder.linkTo(WebFluxLinkBuilder.methodOn(c).getDayByPlan(null, null, null)).withRel("getDayByPlan"));
         return links;
     }
 }

@@ -269,10 +269,60 @@ export interface IngredientNutritionalFactResponseWithCount
   count: number;
 }
 
+export interface ComposeMealBody {
+  recipes: number[];
+  period: string;
+}
+
+export interface MealBody extends ComposeMealBody {
+  dayId: number;
+}
+
+export interface MealResponse extends MealBody, IdGenerateDto {}
+
+export type DayType =
+  | "LOW_CARB"
+  | "HIGH_CARB"
+  | "HIGH_PROTEIN"
+  | "LOW_FAT"
+  | "HIGH_FAT"
+  | "LOW_PROTEIN";
+
+export const dayTypes: DayType[] = [
+  "LOW_CARB",
+  "HIGH_CARB",
+  "HIGH_PROTEIN",
+  "LOW_FAT",
+  "HIGH_FAT",
+  "LOW_PROTEIN",
+] as const;
+
+export interface DayBody extends TitleBodyDto {
+  type: DayType;
+}
+
+export interface DayResponse extends TitleBodyImagesUserDto {
+  type: DayType;
+}
+
+export interface DayBodyWithMeals extends DayBody {
+  meals: ComposeMealBody[];
+}
+
+//todo change to new Plan data type
+
+export type ObjectiveType = "GAIN_MASS" | "LOSE_WEIGHT" | "MAINTAIN_WEIGHT";
+
+export const planObjectives: ObjectiveType[] = [
+  "GAIN_MASS",
+  "LOSE_WEIGHT",
+  "MAINTAIN_WEIGHT",
+] as const;
 export interface PlanBody extends TitleBodyDto {
   type: DietType;
+  objective: ObjectiveType;
   price: number;
-  recipes: number[];
+  days: number[];
 }
 
 export interface PlanResponse extends PlanBody, ApproveDto {

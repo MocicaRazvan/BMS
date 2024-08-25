@@ -8,7 +8,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { Home, Menu } from "lucide-react";
+import { Home, LockKeyhole, Menu } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Session } from "next-auth";
 import { ComponentMenuLink, LinkNav, linksEqual } from "@/components/nav/links";
@@ -16,11 +16,12 @@ import { MenuBarMenuNav } from "@/components/nav/menu-bar-menu-nav";
 import { isDeepEqual } from "@/lib/utils";
 import { AvatarImage } from "@radix-ui/react-avatar";
 import { Avatar } from "@/components/ui/avatar";
-import { Link } from "@/navigation";
+import { Link, usePathname } from "@/navigation";
 import { AccordionBarMenuNav } from "@/components/nav/accordion-bar-menu-nav";
 import { NavTexts } from "@/components/nav/nav";
 import { DashboardIcon } from "@radix-ui/react-icons";
 import NavProfile from "@/components/nav/nav-profile";
+import ActiveLink from "@/components/nav/active-link";
 
 interface Props {
   authUser: Session["user"];
@@ -47,7 +48,7 @@ const BurgerNav = memo<Props>(
     plansLinks,
   }: Props) => {
     const [sheetOpen, setSheetOpen] = useState(false);
-
+    const pathName = usePathname();
     return (
       <Sheet open={sheetOpen} onOpenChange={setSheetOpen} modal={true}>
         <SheetTrigger asChild>
@@ -71,94 +72,77 @@ const BurgerNav = memo<Props>(
                 </SheetClose>
               </Link>
             </div>
-            {isUser && (
-              <div>
-                <Link
-                  href="/posts/approved"
-                  className="font-bold hover:underline text-lg transition-all hover:scale-[1.02]"
-                >
-                  {texts.links.posts}
-                </Link>
-              </div>
-            )}
-            <AccordionBarMenuNav
-              title={texts.links.posts}
-              render={!isUser}
-              links={postsLinks}
-              authUser={authUser}
-              setSheetOpen={setSheetOpen}
-            />
-            <AccordionBarMenuNav
-              title={texts.links.recipes}
-              render={!isUser}
-              links={recipesLinks}
-              authUser={authUser}
-              setSheetOpen={setSheetOpen}
-            />{" "}
-            <AccordionBarMenuNav
-              title={texts.links.plans}
-              render={!isUser}
-              links={plansLinks}
-              authUser={authUser}
-              setSheetOpen={setSheetOpen}
-            />
+
+            {/*/>*/}
             {authUser && (
               <>
                 <div className="mt-5 transition-all ps-2 hover:scale-[1.02] text-lg">
-                  <Link
-                    href="/subscriptions"
-                    className="font-bold hover:underline hover:scale-[1.02] transition-all"
+                  <ActiveLink
+                    isActive={pathName === "/subscriptions"}
+                    href={"/subscriptions"}
                   >
                     {texts.links.subscriptions}
-                  </Link>
-                </div>{" "}
+                  </ActiveLink>
+                </div>
                 <div className="mt-5 transition-all ps-2 hover:scale-[1.02] text-lg">
-                  <Link
-                    href="/subscriptions"
-                    className="font-bold hover:underline hover:scale-[1.02] transition-all"
-                  >
+                  <ActiveLink href="/orders" isActive={pathName === "/orders"}>
                     {texts.links.orders}
-                  </Link>
+                  </ActiveLink>
+                </div>
+                <div className="mt-5 transition-all ps-2 hover:scale-[1.02] text-lg">
+                  <ActiveLink
+                    href="/posts/approved"
+                    isActive={pathName === "/posts/approved"}
+                  >
+                    {texts.links.posts}
+                  </ActiveLink>
+                </div>
+                <div className="mt-5 transition-all ps-2 hover:scale-[1.02] text-lg">
+                  <ActiveLink
+                    href="/plans/approved"
+                    isActive={pathName === "/plans/approved"}
+                  >
+                    {texts.links.plans}
+                  </ActiveLink>
+                </div>
+                <div className="mt-5 ps-2 transition-all hover:scale-[1.02] text-lg">
+                  <ActiveLink href="/chat" isActive={pathName === "/chat"}>
+                    {texts.links.chat}
+                  </ActiveLink>
+                </div>
+                <div className="mt-5 ps-2 transition-all hover:scale-[1.02] text-lg">
+                  <ActiveLink href="/kanban" isActive={pathName === "/kanban"}>
+                    {texts.links.kanban}
+                  </ActiveLink>
+                </div>
+                <div className="mt-5 ps-2 transition-all hover:scale-[1.02] text-lg">
+                  <ActiveLink
+                    href="/calculator"
+                    isActive={pathName === "/calculator"}
+                  >
+                    {texts.links.calculator}
+                  </ActiveLink>
                 </div>
               </>
             )}
-            {isAdminOrTrainer && (
-              <div className="mt-5 transition-all ps-2 hover:scale-[1.02] text-lg">
-                <Link
-                  href="/trainer/ingredients"
-                  className="font-bold hover:underline transition-all hover:scale-[1.02]"
-                >
-                  {texts.links.ingredients}
-                </Link>{" "}
-              </div>
-            )}
-            {authUser && (
-              <div className="mt-5 ps-2 transition-all hover:scale-[1.02] text-lg">
-                <Link
-                  href="/chat"
-                  className="font-bold hover:underline transition-all hover:scale-[1.02]"
-                >
-                  {texts.links.chat}
-                </Link>
-              </div>
-            )}{" "}
-            {authUser && (
-              <div className="mt-5 ps-2 transition-all hover:scale-[1.02] text-lg">
-                <Link
-                  href="/kanban"
-                  className="font-bold hover:underline transition-all hover:scale-[1.02]"
-                >
-                  {texts.links.kanban}
-                </Link>
-              </div>
-            )}
+            <hr className="border my-5" />
             {isAdmin && (
               <div className="mt-5 ps-2 ">
                 <Link
                   href="/admin/dashboard"
                   className="font-bold hover:underline flex items-center justify-start gap-2 transition-all hover:scale-[1.02]"
                 >
-                  <DashboardIcon /> {texts.links.adminDashboard}
+                  <LockKeyhole /> {texts.links.adminDashboard}
+                </Link>
+              </div>
+            )}
+            {isAdminOrTrainer && (
+              <div className="mt-5 ps-2 ">
+                <Link
+                  href={`/trainer/user/${authUser?.id}/posts`}
+                  className="font-bold hover:underline flex items-center justify-start gap-2 transition-all hover:scale-[1.02]"
+                >
+                  <DashboardIcon /> {texts.links.trainerDashboard}
                 </Link>
               </div>
             )}

@@ -31,7 +31,7 @@ export async function getTheSameUser(
   userId: string,
 ): Promise<NonNullable<Session["user"]>> {
   const user = await getUser();
-  if (user.id?.toString() !== userId?.toString()) return notFound();
+  if (user.id?.toString() !== userId) return notFound();
   return user;
 }
 
@@ -39,9 +39,17 @@ export async function getTheSameUserOrAdmin(
   userId: string,
 ): Promise<NonNullable<Session["user"]>> {
   const user = await getUser();
-  console.log("IDS", user.id === userId);
+  console.log(
+    "IDS",
+    user.id,
+    typeof user.id,
+    userId,
+    typeof userId,
+    user.id?.toString() === userId,
+  );
+
   if (user.role === "ROLE_ADMIN") return user;
-  if (user.id?.toString() === userId?.toString()) return user;
+  if (user.id?.toString() === userId) return user;
   return notFound();
 }
 

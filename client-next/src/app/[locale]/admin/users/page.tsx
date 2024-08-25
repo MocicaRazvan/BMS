@@ -3,14 +3,16 @@ import { unstable_setRequestLocale } from "next-intl/server";
 import UsersTable, { UserTableTexts } from "@/components/table/users-table";
 import { getAdminUsersPageTexts } from "@/texts/pages";
 import { getUserWithMinRole } from "@/lib/user";
-import AdminContentLayout from "@/components/admin/admin-content-layout";
+import SidebarContentLayout from "@/components/sidebar/sidebar-content-layout";
 import Heading from "@/components/common/heading";
 import { Suspense } from "react";
 import LoadingSpinner from "@/components/common/loading-spinner";
 import { ThemeSwitchTexts } from "@/texts/components/nav";
 import { getSortingOptions, SortingOptionsTexts } from "@/lib/constants";
 import { sortingUsersSortingOptionsKeys } from "@/texts/components/list";
-import { AdminMenuTexts } from "@/components/admin/menu-list";
+import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
+import { Metadata } from "next";
+import { getIntlMetadata } from "@/texts/metadata";
 
 interface Props {
   params: { locale: Locale };
@@ -22,7 +24,12 @@ export interface AdminUsersPageTexts {
   userSortingOptionsTexts: SortingOptionsTexts;
   header: string;
   title: string;
-  menuTexts: AdminMenuTexts;
+  menuTexts: SidebarMenuTexts;
+}
+export async function generateMetadata({
+  params: { locale },
+}: Props): Promise<Metadata> {
+  return await getIntlMetadata("admin.Users", "/admin/users", locale);
 }
 
 export default async function AdminUsersPage({ params: { locale } }: Props) {
@@ -48,12 +55,13 @@ export default async function AdminUsersPage({ params: { locale } }: Props) {
   );
 
   return (
-    <AdminContentLayout
+    <SidebarContentLayout
       navbarProps={{
         title,
         themeSwitchTexts,
         authUser,
         menuTexts,
+        mappingKey: "admin",
       }}
     >
       <div className="w-full bg-background">
@@ -71,6 +79,6 @@ export default async function AdminUsersPage({ params: { locale } }: Props) {
           </div>
         </Suspense>
       </div>
-    </AdminContentLayout>
+    </SidebarContentLayout>
   );
 }

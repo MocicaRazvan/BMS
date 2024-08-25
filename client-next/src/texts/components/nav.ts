@@ -87,6 +87,8 @@ export async function getNavTexts(): Promise<NavTexts> {
       subscriptions: links("subscriptions"),
       orders: links("orders"),
       kanban: links("kanban"),
+      trainerDashboard: links("trainerDashboard"),
+      calculator: links("calculator"),
     },
   };
 }

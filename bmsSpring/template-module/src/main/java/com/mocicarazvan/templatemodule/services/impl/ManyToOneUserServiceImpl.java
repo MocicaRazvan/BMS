@@ -1,12 +1,14 @@
 package com.mocicarazvan.templatemodule.services.impl;
 
 
+import com.mocicarazvan.templatemodule.clients.CountInParentClient;
 import com.mocicarazvan.templatemodule.clients.UserClient;
 import com.mocicarazvan.templatemodule.dtos.PageableBody;
 import com.mocicarazvan.templatemodule.dtos.UserDto;
 import com.mocicarazvan.templatemodule.dtos.generic.WithUserDto;
 import com.mocicarazvan.templatemodule.dtos.response.MonthlyEntityGroup;
 import com.mocicarazvan.templatemodule.dtos.response.PageableResponse;
+import com.mocicarazvan.templatemodule.dtos.response.ResponseWithEntityCount;
 import com.mocicarazvan.templatemodule.dtos.response.ResponseWithUserDto;
 import com.mocicarazvan.templatemodule.enums.Role;
 import com.mocicarazvan.templatemodule.exceptions.action.PrivateRouteException;
@@ -62,6 +64,28 @@ public abstract class ManyToOneUserServiceImpl<MODEL extends ManyToOneUser, BODY
                             );
                 });
     }
+
+    public Mono<PageableResponse<ResponseWithUserDto<RESPONSE>>> getPageableWithUser(PageableResponse<RESPONSE> pr) {
+        return userClient.getUser("", String.valueOf(pr.getContent().getUserId()))
+                .map(userDto -> ResponseWithUserDto.<RESPONSE>builder()
+                        .model(pr.getContent())
+                        .user(userDto)
+                        .build())
+                .map(ru -> PageableResponse.<ResponseWithUserDto<RESPONSE>>builder()
+                        .content(ru)
+                        .pageInfo(pr.getPageInfo())
+                        .build());
+    }
+
+    protected Mono<PageableResponse<ResponseWithEntityCount<RESPONSE>>> toResponseWithCount(String userId, CountInParentClient client, PageableResponse<RESPONSE> pr) {
+        return client.getCountInParent(pr.getContent().getId(), userId)
+                .map(entityCount -> PageableResponse.<ResponseWithEntityCount<RESPONSE>>builder()
+                        .content(ResponseWithEntityCount.of(pr.getContent(), entityCount))
+                        .pageInfo(pr.getPageInfo())
+                        .links(pr.getLinks())
+                        .build());
+    }
+
 
     @Override
     public Mono<RESPONSE> deleteModel(Long id, String userId) {

@@ -72,12 +72,13 @@ public class PostController implements ApproveController
     public Flux<PageableResponse<ResponseWithUserDtoEntity<PostResponse>>> getPostsFilteredWithUser(@RequestParam(required = false) String title,
                                                                                                     @RequestParam(name = "approved", required = false) Boolean approved,
                                                                                                     @RequestParam(required = false) List<String> tags,
+                                                                                                    @RequestParam(required = false) Boolean liked,
                                                                                                     @Valid @RequestBody PageableBody pageableBody,
                                                                                                     ServerWebExchange exchange) {
 
         log.error("approved: " + approved);
         return postService.
-                getPostsFilteredWithUser(title, pageableBody, requestsUtils.extractAuthUser(exchange), approved, tags)
+                getPostsFilteredWithUser(title, pageableBody, requestsUtils.extractAuthUser(exchange), approved, tags, liked)
 //                .delayElements(Duration.ofSeconds(3))
                 .concatMap(m -> postReactiveResponseBuilder.toModelWithUserPageable(m, PostController.class));
     }
@@ -87,12 +88,13 @@ public class PostController implements ApproveController
     public Flux<PageableResponse<CustomEntityModel<PostResponse>>> getPostsFiltered(@RequestParam(required = false) String title,
                                                                                     @RequestParam(name = "approved", required = false) Boolean approved,
                                                                                     @RequestParam(required = false) List<String> tags,
+                                                                                    @RequestParam(required = false) Boolean liked,
                                                                                     @Valid @RequestBody PageableBody pageableBody,
                                                                                     ServerWebExchange exchange) {
 
         log.error("approved: " + approved);
         return postService.
-                getPostsFiltered(title, pageableBody, requestsUtils.extractAuthUser(exchange), approved, tags)
+                getPostsFiltered(title, pageableBody, requestsUtils.extractAuthUser(exchange), approved, tags, liked)
 //                .delayElements(Duration.ofSeconds(3))
                 .flatMap(m -> postReactiveResponseBuilder.toModelPageable(m, PostController.class));
     }

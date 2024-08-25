@@ -238,7 +238,12 @@ export default function OrdersTable({
                 <DropdownMenuItem
                   className="cursor-pointer"
                   onClick={() =>
-                    router.push(`/orders/single/${row.original.order.id}`)
+                    router.push(
+                      //todo make for trainer_ also
+                      forWhom === "admin"
+                        ? `/admin/orders/single/${row.original.order.id}`
+                        : `/orders/single/${row.original.order.id}`,
+                    )
                   }
                 >
                   {view}
@@ -248,7 +253,11 @@ export default function OrdersTable({
                     <DropdownMenuSeparator />
                     <DropdownMenuItem asChild>
                       <Link
-                        href={`/users/single/${row.original.order.userId}`}
+                        href={
+                          mainDashboard
+                            ? `/admin/users/${row.original.order.userId}`
+                            : `/users/single/${row.original.order.userId}`
+                        }
                         className="cursor-pointer"
                       >
                         {viewOwner}

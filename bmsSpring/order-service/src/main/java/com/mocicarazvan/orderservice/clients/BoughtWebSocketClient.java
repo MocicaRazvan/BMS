@@ -1,11 +1,8 @@
 package com.mocicarazvan.orderservice.clients;
 
 
-import com.mocicarazvan.orderservice.dtos.PlanResponse;
 import com.mocicarazvan.orderservice.dtos.notifications.InternalBoughtBody;
 import com.mocicarazvan.templatemodule.clients.ClientBase;
-import com.mocicarazvan.templatemodule.dtos.response.PageableResponse;
-import com.mocicarazvan.templatemodule.dtos.response.ResponseWithUserDtoEntity;
 import com.mocicarazvan.templatemodule.exceptions.client.ThrowFallback;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 import io.github.resilience4j.ratelimiter.RateLimiterRegistry;
@@ -16,13 +13,11 @@ import io.github.resilience4j.retry.RetryRegistry;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientRequestException;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Component

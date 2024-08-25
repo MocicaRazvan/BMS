@@ -3,14 +3,16 @@ import { ThemeSwitchTexts } from "@/texts/components/nav";
 import { getAdminMonthlySalesTexts } from "@/texts/pages";
 import { getUserWithMinRole } from "@/lib/user";
 import { unstable_setRequestLocale } from "next-intl/server";
-import AdminContentLayout from "@/components/admin/admin-content-layout";
+import SidebarContentLayout from "@/components/sidebar/sidebar-content-layout";
 import Heading from "@/components/common/heading";
 import LoadingSpinner from "@/components/common/loading-spinner";
 import { Suspense } from "react";
 import MonthlySales, {
   MonthlySalesTexts,
 } from "@/components/charts/monthly-sales";
-import { AdminMenuTexts } from "@/components/admin/menu-list";
+import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
+import { Metadata } from "next";
+import { getIntlMetadata } from "@/texts/metadata";
 
 interface Props {
   params: { locale: Locale };
@@ -20,7 +22,17 @@ export interface AdminMonthlySalesTexts {
   header: string;
   monthlySalesTexts: MonthlySalesTexts;
   themeSwitchTexts: ThemeSwitchTexts;
-  menuTexts: AdminMenuTexts;
+  menuTexts: SidebarMenuTexts;
+}
+
+export async function generateMetadata({
+  params: { locale },
+}: Props): Promise<Metadata> {
+  return await getIntlMetadata(
+    "admin.MonthlySales",
+    "/admin/monthlySales",
+    locale,
+  );
 }
 
 export default async function AdminMonthlySales({ params: { locale } }: Props) {
@@ -30,12 +42,13 @@ export default async function AdminMonthlySales({ params: { locale } }: Props) {
     getUserWithMinRole("ROLE_ADMIN"),
   ]);
   return (
-    <AdminContentLayout
+    <SidebarContentLayout
       navbarProps={{
         title: texts.title,
         themeSwitchTexts: texts.themeSwitchTexts,
         authUser,
         menuTexts: texts.menuTexts,
+        mappingKey: "admin",
       }}
     >
       <div className="w-full h-full bg-background">
@@ -50,6 +63,6 @@ export default async function AdminMonthlySales({ params: { locale } }: Props) {
           </div>
         </Suspense>
       </div>
-    </AdminContentLayout>
+    </SidebarContentLayout>
   );
 }

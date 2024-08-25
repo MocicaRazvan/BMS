@@ -94,6 +94,19 @@ export const ingredientTableColumns = [
   "display",
   "actions",
 ] as const;
+
+export const dayTableColumns = [
+  "id",
+  "title",
+  "count",
+  "type",
+  "userLikes",
+  "userDislikes",
+  "createdAt",
+  "updatedAt",
+  "actions",
+] as const;
+
 export const planTableColumns = [
   "id",
   "title",
@@ -104,6 +117,7 @@ export const planTableColumns = [
   "type",
   "count",
   "price",
+  "objective",
   "display",
   "approved",
   "actions",
@@ -166,6 +180,9 @@ export const ingredientColumnActions = [
   "deleteIngredient",
   "toggleDisplay",
 ] as const;
+
+export const dayColumnActions = ["button", "label", "view", "update"] as const;
+
 export const planColumnActions = [
   "button",
   "label",

@@ -24,6 +24,7 @@ interface Props<R> extends WithUser, ChildInputMultipleSelectorTexts {
   valueKey: string;
   maxSelected?: number;
   giveUnselectedValue?: boolean;
+  allowDuplicates?: boolean;
 }
 
 export default function ChildInputMultipleSelector<R>({
@@ -41,6 +42,7 @@ export default function ChildInputMultipleSelector<R>({
   valueKey,
   maxSelected,
   giveUnselectedValue = true,
+  allowDuplicates = false,
 }: Props<R>) {
   const fetchData = useCallback(
     async (value: string): Promise<Option[]> => {
@@ -59,7 +61,7 @@ export default function ChildInputMultipleSelector<R>({
         },
         acceptHeader: "application/x-ndjson",
       });
-      console.log("RES", res);
+      // console.log("RES", res);
       return res.messages.map(mapping);
     },
     [
@@ -86,6 +88,7 @@ export default function ChildInputMultipleSelector<R>({
         giveUnselected={giveUnselectedValue}
         maxSelected={maxSelected}
         placeholder={placeholder}
+        allowDuplicates={allowDuplicates}
         loadingIndicator={
           <p className="py-2 text-center text-lg leading-10 text-muted-foreground">
             {loading}

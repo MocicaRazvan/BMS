@@ -83,17 +83,17 @@ public abstract class ApprovedServiceImpl<MODEL extends Approve, BODY extends Ti
                 .concatMap(this::getPageableWithUser);
     }
 
-    public Mono<PageableResponse<ResponseWithUserDto<RESPONSE>>> getPageableWithUser(PageableResponse<RESPONSE> pr) {
-        return userClient.getUser("", String.valueOf(pr.getContent().getUserId()))
-                .map(userDto -> ResponseWithUserDto.<RESPONSE>builder()
-                        .model(pr.getContent())
-                        .user(userDto)
-                        .build())
-                .map(ru -> PageableResponse.<ResponseWithUserDto<RESPONSE>>builder()
-                        .content(ru)
-                        .pageInfo(pr.getPageInfo())
-                        .build());
-    }
+//    public Mono<PageableResponse<ResponseWithUserDto<RESPONSE>>> getPageableWithUser(PageableResponse<RESPONSE> pr) {
+//        return userClient.getUser("", String.valueOf(pr.getContent().getUserId()))
+//                .map(userDto -> ResponseWithUserDto.<RESPONSE>builder()
+//                        .model(pr.getContent())
+//                        .user(userDto)
+//                        .build())
+//                .map(ru -> PageableResponse.<ResponseWithUserDto<RESPONSE>>builder()
+//                        .content(ru)
+//                        .pageInfo(pr.getPageInfo())
+//                        .build());
+//    }
 
     @Override
     public Flux<PageableResponse<RESPONSE>> getAllModels(String title, PageableBody pageableBody, String userId) {
@@ -212,12 +212,12 @@ public abstract class ApprovedServiceImpl<MODEL extends Approve, BODY extends Ti
 
     }
 
-    protected Mono<PageableResponse<ResponseWithEntityCount<RESPONSE>>> toResponseWithCount(String userId, CountInParentClient client, PageableResponse<RESPONSE> pr) {
-        return client.getCountInParent(pr.getContent().getId(), userId)
-                .map(entityCount -> PageableResponse.<ResponseWithEntityCount<RESPONSE>>builder()
-                        .content(ResponseWithEntityCount.of(pr.getContent(), entityCount))
-                        .pageInfo(pr.getPageInfo())
-                        .links(pr.getLinks())
-                        .build());
-    }
+//    protected Mono<PageableResponse<ResponseWithEntityCount<RESPONSE>>> toResponseWithCount(String userId, CountInParentClient client, PageableResponse<RESPONSE> pr) {
+//        return client.getCountInParent(pr.getContent().getId(), userId)
+//                .map(entityCount -> PageableResponse.<ResponseWithEntityCount<RESPONSE>>builder()
+//                        .content(ResponseWithEntityCount.of(pr.getContent(), entityCount))
+//                        .pageInfo(pr.getPageInfo())
+//                        .links(pr.getLinks())
+//                        .build());
+//    }
 }

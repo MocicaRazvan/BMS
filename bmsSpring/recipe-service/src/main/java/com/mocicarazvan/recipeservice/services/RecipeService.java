@@ -39,6 +39,7 @@ public interface RecipeService extends ApprovedService<Recipe, RecipeBody, Recip
 
     Mono<Void> validIds(List<Long> ids, String userId);
 
+    Mono<DietType> determineMostRestrictiveDietType(List<Long> recipeIds);
 
 //    Mono<ResponseWithChildList<ResponseWithUserDto<RecipeResponse>, IngredientQuantityDto>> getRecipeWithIngredients(Long id, String userId);
 }

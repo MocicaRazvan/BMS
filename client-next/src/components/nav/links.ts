@@ -16,7 +16,7 @@ export const createPostsLinks: createLinks = ({ id }): LinkNav[] => [
     id: "approvedPosts",
   },
   // {
-  //   href: "/admin/posts",
+  //   href: "/sidebar/posts",
   //   role: "ROLE_ADMIN",
   //   id: "allPosts",
   // },
@@ -33,7 +33,7 @@ export const createPostsLinks: createLinks = ({ id }): LinkNav[] => [
 ];
 export const createRecipesLinks: createLinks = ({ id }): LinkNav[] => [
   // {
-  //   href: "/admin/recipes",
+  //   href: "/sidebar/recipes",
   //   role: "ROLE_ADMIN",
   //   id: "allRecipes",
   // },
@@ -55,7 +55,7 @@ export const createPlansLinks: createLinks = ({ id }): LinkNav[] => [
     id: "approvedPlans",
   },
   // {
-  //   href: "/admin/plans",
+  //   href: "/sidebar/plans",
   //   role: "ROLE_ADMIN",
   //   id: "allPlans",
   // },
@@ -88,7 +88,7 @@ export const createOrdersLinks: createLinks = ({ id }): LinkNav[] => [
     id: "yourOrders",
   },
   {
-    href: "/admin/orders",
+    href: "/sidebar/orders",
     role: "ROLE_ADMIN",
     id: "allOrders",
   },

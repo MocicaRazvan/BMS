@@ -1,9 +1,8 @@
 "use client";
 
 import { useSession } from "next-auth/react";
-import { useMemo, useState } from "react";
-// import CartPop from "./cart-pop";
-import { Link } from "@/navigation";
+
+import { Link, usePathname } from "@/navigation";
 import { ModeToggle } from "@/components/nav/theme-switch";
 import { LocaleSwitcher } from "@/components/i18n/LocaleSwitcher";
 import { ThemeSwitchTexts } from "@/texts/components/nav";
@@ -13,13 +12,15 @@ import {
   createRecipesLinks,
   linkFactory,
 } from "@/components/nav/links";
-import { MenuBarMenuNav } from "@/components/nav/menu-bar-menu-nav";
 import { BurgerNav } from "@/components/nav/burger-nav";
 import NavProfile from "@/components/nav/nav-profile";
 import { DashboardIcon } from "@radix-ui/react-icons";
 import NotificationPop from "@/components/nav/notification-pop";
 import CartPop from "@/components/nav/cart-pop";
 import Logo from "@/components/logo/logo";
+import { LockKeyhole } from "lucide-react";
+import ActiveLink from "@/components/nav/active-link";
+import { useMemo } from "react";
 
 export interface NavTexts {
   themeSwitchTexts: ThemeSwitchTexts;
@@ -37,6 +38,8 @@ export interface NavTexts {
     subscriptions: string;
     orders: string;
     kanban: string;
+    trainerDashboard: string;
+    calculator: string;
   };
 }
 
@@ -48,9 +51,9 @@ export default function Nav({
   plansTexts,
 }: NavTexts) {
   const session = useSession();
-  const [showProfile, setShowProfile] = useState(false);
 
   const authUser = session?.data?.user;
+  const pathName = usePathname();
 
   const isUser = authUser?.role === "ROLE_USER";
   const isTrainer = authUser?.role === "ROLE_TRAINER";
@@ -77,8 +80,8 @@ export default function Nav({
      supports-[backdrop-filter]:bg-background/60 flex-wrap 2xl:border-l 2xl:border-r"
     >
       <div className="hidden xl:flex items-center justify-between w-full">
-        <div className="flex items-center justify-center gap-4 me-3">
-          <div className="mr-8 flex items-center justify-start gap-3">
+        <div className="flex items-center justify-center gap-3 me-3">
+          <div className="mr-8 flex items-center justify-start gap-1">
             <Link
               href="/"
               className="font-bold hover:underline flex items-center justify-center gap-2 hover:scale-[1.03] transition-all
@@ -92,96 +95,59 @@ export default function Nav({
               <Link
                 href="/admin/dashboard"
                 className="font-bold hover:underline flex items-center justify-center gap-2 hover:scale-[1.03] transition-all
-              px-3"
+              px-1"
               >
-                <DashboardIcon className="w-6 h-6" />
+                <LockKeyhole className="w-6 h-6" />
                 <p className="text-center">{links.adminDashboard}</p>
               </Link>
             )}
-          </div>{" "}
-          <div className="flex items-center  justify-center gap-3 flex-wrap">
-            {authUser && (
-              <>
-                <Link
-                  href="/subscriptions"
-                  className="font-bold hover:underline hover:scale-[1.03] transition-all"
-                >
-                  {links.subscriptions}
-                </Link>
-                <Link
-                  href="/orders"
-                  className="font-bold hover:underline hover:scale-[1.03] transition-all"
-                >
-                  {links.orders}
-                </Link>
-              </>
-            )}
-            {isUser && (
-              <>
-                <Link
-                  href="/posts/approved"
-                  className="font-bold hover:underline hover:scale-[1.03] transition-all"
-                >
-                  {links.posts}
-                </Link>
-                <Link
-                  href="/plans/approved"
-                  className="font-bold hover:underline hover:scale-[1.03] transition-all"
-                >
-                  {links.plans}
-                </Link>{" "}
-              </>
-            )}
-
-            <MenuBarMenuNav
-              title={links.posts}
-              render={!isUser}
-              links={postsLinks}
-              authUser={authUser}
-            />
-            <MenuBarMenuNav
-              title={links.recipes}
-              render={!isUser}
-              links={recipesLinks}
-              authUser={authUser}
-            />
-            <MenuBarMenuNav
-              title={links.plans}
-              render={!isUser}
-              links={plansLinks}
-              authUser={authUser}
-            />
             {isAdminOrTrainer && (
               <Link
-                href="/trainer/ingredients"
-                className="font-bold hover:underline hover:scale-[1.03] transition-all"
+                href={`/trainer/user/${authUser?.id}/posts`}
+                className="font-bold hover:underline flex items-center justify-center gap-2 hover:scale-[1.03] transition-all px-1"
               >
-                {links.ingredients}
+                <DashboardIcon className="w-6 h-6" />
+                {links.trainerDashboard}
               </Link>
             )}
-            {authUser && (
-              <>
-                <Link
-                  href="/chat"
-                  className="font-bold hover:underline hover:scale-[1.03] transition-all"
-                >
-                  {links.chat}
-                </Link>
-                <Link
-                  href="/kanban"
-                  className="font-bold hover:underline hover:scale-[1.03] transition-all"
-                >
-                  {links.kanban}
-                </Link>
-              </>
-            )}
-            {/*<Link href={"/auth/confirm-email"}>Confirm email</Link>*/}
-            {/*<Link href={"/auth/forgot-password"}>Forgot passowrd</Link>*/}
-            {/*<Link href={"/auth/reset-password"}>Reset passowrd</Link>*/}
-            {/*<Link href={"/auth/signin"}>Signin</Link>*/}
-            {/*<Link href={"/auth/signout"}>Signout</Link>*/}
-            {/*<Link href={"/auth/signup"}>Signup</Link>*/}
           </div>
+          {authUser && (
+            <div className="flex items-center text-lg  justify-center gap-4 flex-wrap">
+              <ActiveLink
+                isActive={pathName === "/subscriptions"}
+                href={"/subscriptions"}
+              >
+                {links.subscriptions}
+              </ActiveLink>
+              <ActiveLink href="/orders" isActive={pathName === "/orders"}>
+                {links.orders}
+              </ActiveLink>
+              <ActiveLink
+                href="/posts/approved"
+                isActive={pathName === "/posts/approved"}
+              >
+                {links.posts}
+              </ActiveLink>
+              <ActiveLink
+                href="/plans/approved"
+                isActive={pathName === "/plans/approved"}
+              >
+                {links.plans}
+              </ActiveLink>
+              <ActiveLink href="/chat" isActive={pathName === "/chat"}>
+                {links.chat}
+              </ActiveLink>
+              <ActiveLink href="/kanban" isActive={pathName === "/kanban"}>
+                {links.kanban}
+              </ActiveLink>
+              <ActiveLink
+                href="/calculator"
+                isActive={pathName === "/calculator"}
+              >
+                {links.calculator}
+              </ActiveLink>
+            </div>
+          )}
         </div>
         <div
           className="mx-auto md:ml-auto md:mr-1 flex items-center justify-center gap-6

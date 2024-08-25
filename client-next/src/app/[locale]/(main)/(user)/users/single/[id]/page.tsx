@@ -15,7 +15,7 @@ export async function generateMetadata({
   return {
     ...(await getIntlMetadata(
       "user.UserProfile",
-      "/subscriptions/single/" + id,
+      "/users/single/" + id,
       locale,
     )),
   };

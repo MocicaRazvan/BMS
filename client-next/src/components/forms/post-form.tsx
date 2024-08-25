@@ -14,7 +14,7 @@ import InputMultipleSelector, {
 import ButtonSubmit, {
   ButtonSubmitTexts,
 } from "@/components/forms/button-submit";
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
@@ -29,7 +29,7 @@ import ErrorMessage from "@/components/forms/error-message";
 import useLoadingErrorState from "@/hoooks/useLoadingErrorState";
 import { toast } from "@/components/ui/use-toast";
 import { ToastAction } from "@/components/ui/toast";
-import useFilesBase64 from "@/hoooks/useFilesBase64";
+import useFilesBase64 from "@/hoooks/useFilesObjectURL";
 import { handleBaseError } from "@/lib/utils";
 
 export interface PostFormProps
@@ -83,12 +83,17 @@ export default function PostForm({
       title,
     },
   });
-  useFilesBase64({
+  const { fileCleanup } = useFilesBase64({
     files: images,
     fieldName: "images",
     setValue: form.setValue,
     getValues: form.getValues,
   });
+  useEffect(() => {
+    return () => {
+      fileCleanup();
+    };
+  }, [fileCleanup]);
 
   const onSubmit = useCallback(
     async (data: PostType) => {
@@ -171,6 +176,7 @@ export default function PostForm({
               control={form.control}
               fieldName={"images"}
               fieldTexts={fieldTexts}
+              initialLength={images?.length || 0}
             />
             <ErrorMessage message={error} show={!!errorMsg} />
             <ButtonSubmit

@@ -2,23 +2,33 @@ import { Locale } from "@/navigation";
 import { unstable_setRequestLocale } from "next-intl/server";
 import { getThemeSwitchTexts } from "@/texts/components/nav";
 import { getUserWithMinRole } from "@/lib/user";
-import AdminContentLayout from "@/components/admin/admin-content-layout";
+import SidebarContentLayout from "@/components/sidebar/sidebar-content-layout";
 import AdminIngredientsCreatePageContent from "@/app/[locale]/admin/ingredients/create/page-content";
 import { IngredientFormTexts } from "@/components/forms/ingredient-form";
 import { getAdminIngredientsCreatePageTexts } from "@/texts/pages";
 import { Suspense } from "react";
 import LoadingSpinner from "@/components/common/loading-spinner";
-import { AdminMenuTexts } from "@/components/admin/menu-list";
+import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
+import { Metadata } from "next";
+import { getIntlMetadata } from "@/texts/metadata";
 
 export interface AdminIngredientsCreatePageTexts {
   ingredientForm: IngredientFormTexts;
   title: string;
-  menuTexts: AdminMenuTexts;
+  menuTexts: SidebarMenuTexts;
 }
 interface Props {
   params: { locale: Locale };
 }
-
+export async function generateMetadata({
+  params: { locale },
+}: Props): Promise<Metadata> {
+  return await getIntlMetadata(
+    "admin.CreateIngredient",
+    "/admin/ingredients/create",
+    locale,
+  );
+}
 export default async function AdminIngredientsCreatePage({
   params: { locale },
 }: Props) {
@@ -31,12 +41,13 @@ export default async function AdminIngredientsCreatePage({
   ]);
   unstable_setRequestLocale(locale);
   return (
-    <AdminContentLayout
+    <SidebarContentLayout
       navbarProps={{
         title: texts.title,
         themeSwitchTexts,
         authUser,
         menuTexts: texts.menuTexts,
+        mappingKey: "admin",
       }}
     >
       <Suspense fallback={<LoadingSpinner />}>
@@ -45,6 +56,6 @@ export default async function AdminIngredientsCreatePage({
           texts={texts.ingredientForm}
         />
       </Suspense>
-    </AdminContentLayout>
+    </SidebarContentLayout>
   );
 }

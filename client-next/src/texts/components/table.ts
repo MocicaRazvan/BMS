@@ -18,6 +18,8 @@ import {
 } from "@/texts/components/list";
 import { getRadioSortTexts } from "@/texts/components/common";
 import {
+  dayColumnActions,
+  dayTableColumns,
   ingredientColumnActions,
   ingredientTableColumns,
   orderColumnActions,
@@ -53,6 +55,11 @@ import {
   OrderTableColumnsTexts,
   OrderTableTexts,
 } from "@/components/table/orders-table";
+import {
+  DayTableColumnsTexts,
+  DayTableTexts,
+} from "@/components/table/day-table";
+import { dayTypes, planObjectives } from "@/types/dto";
 
 export async function getDataTablePaginationTexts(): Promise<DataTablePaginationTexts> {
   const t = await getTranslations("components.table.DataTablePaginationTexts");
@@ -169,6 +176,23 @@ export async function getIngredientTableColumnTexts(): Promise<IngredientTableCo
   };
 }
 
+export async function getDayTableColumnsTexts(): Promise<DayTableColumnsTexts> {
+  const [t, actions] = await Promise.all([
+    getTranslations("components.table.columns.days"),
+    getColumnActionsTexts<typeof dayColumnActions>("days", dayColumnActions),
+  ]);
+  return {
+    ...dayTableColumns.slice(0, -1).reduce(
+      (acc, cur) => ({
+        ...acc,
+        [cur]: t(cur),
+      }),
+      {} as Omit<DayTableColumnsTexts, "actions">,
+    ),
+    actions,
+  };
+}
+
 export async function getPlanTableColumnsTexts(): Promise<PlanTableColumnsTexts> {
   const [t, actions] = await Promise.all([
     getTranslations("components.table.columns.plans"),
@@ -180,7 +204,7 @@ export async function getPlanTableColumnsTexts(): Promise<PlanTableColumnsTexts>
         ...acc,
         [cur]: t(cur),
       }),
-      {} as Omit<PlanTableColumnsTexts, "actions">,
+      {} as Omit<PlanTableColumnsTexts, "actions" | "display" | "approved">,
     ),
     actions,
     display: {
@@ -323,12 +347,33 @@ export async function getRecipeTableTexts(): Promise<RecipeTableTexts> {
   };
 }
 
+export async function getDayTableTexts(): Promise<DayTableTexts> {
+  const [dataTableTexts, dayTableColumnTexts, typeDropdownTexts, t] =
+    await Promise.all([
+      getDataTableTexts(),
+      getDayTableColumnsTexts(),
+      getUseFilterDropdownTexts(
+        "UseTypeDropdownTexts",
+        dayTypes as unknown as string[],
+      ),
+      getTranslations("components.table.DayTableTexts"),
+    ]);
+
+  return {
+    dataTableTexts,
+    dayTableColumnTexts,
+    typeDropdownTexts,
+    search: t("search"),
+  };
+}
+
 export async function getPlanTableTexts(): Promise<PlanTableTexts> {
   const [
     dataTableTexts,
     useApprovedFilterTexts,
     displayFilterTexts,
     dietDropdownTexts,
+    objectiveDropDownTexts,
     planTableColumnsTexts,
     t,
   ] = await Promise.all([
@@ -338,6 +383,10 @@ export async function getPlanTableTexts(): Promise<PlanTableTexts> {
     getUseFilterDropdownTexts(
       "UseDietDropdownTexts",
       dietTypes as unknown as string[],
+    ),
+    getUseFilterDropdownTexts(
+      "UseObjectiveDropdownTexts",
+      planObjectives as unknown as string[],
     ),
     getPlanTableColumnsTexts(),
     getTranslations("components.table.PlanTableTexts"),
@@ -349,6 +398,7 @@ export async function getPlanTableTexts(): Promise<PlanTableTexts> {
     displayFilterTexts,
     dietDropdownTexts,
     planTableColumnsTexts,
+    objectiveDropDownTexts,
     search: t("search"),
   };
 }

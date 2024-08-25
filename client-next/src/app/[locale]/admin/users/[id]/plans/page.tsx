@@ -8,7 +8,9 @@ import { getUserWithMinRole } from "@/lib/user";
 import { sortingPlansSortingOptionsKeys } from "@/texts/components/list";
 import { notFound } from "next/navigation";
 import UserPlansAdminPageContent from "@/app/[locale]/admin/users/[id]/plans/page-content";
-import { AdminMenuTexts } from "@/components/admin/menu-list";
+import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
+import { Metadata } from "next";
+import { getIntlMetadata } from "@/texts/metadata";
 
 export interface UserPlansAdminPageTexts {
   plansTableTexts: PlanTableTexts;
@@ -16,10 +18,19 @@ export interface UserPlansAdminPageTexts {
   themeSwitchTexts: ThemeSwitchTexts;
   title: string;
   header: string;
-  menuTexts: AdminMenuTexts;
+  menuTexts: SidebarMenuTexts;
 }
 interface Props {
   params: { locale: Locale; id: string };
+}
+export async function generateMetadata({
+  params: { locale, id },
+}: Props): Promise<Metadata> {
+  return await getIntlMetadata(
+    "admin.UserPlans",
+    "/admin/users/" + id + "/plans",
+    locale,
+  );
 }
 
 export default async function UserPlansAdminPage({

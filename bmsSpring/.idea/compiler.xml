@@ -21,6 +21,7 @@
         <module name="order-service" />
         <module name="service-registry" />
         <module name="websocket-service" />
+        <module name="day-service" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
@@ -31,6 +32,7 @@
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="comment-service" options="-parameters" />
       <module name="config-server" options="-parameters" />
+      <module name="day-service" options="-parameters" />
       <module name="demo" options="-parameters" />
       <module name="file-service" options="-parameters" />
       <module name="gateway-service" options="-parameters" />

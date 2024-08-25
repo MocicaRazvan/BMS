@@ -285,7 +285,7 @@ export function checkOwnerOrAdmin(
 
 export function checkOwner(
   authUser: NonNullable<Session["user"]>,
-  entity: ApproveDto,
+  entity: WithUserDto,
   errorCallback: () => ReactNode,
 ):
   | {
@@ -336,26 +336,7 @@ export function parseStringToBoolean(
 export function determineMostRestrictiveDiet(
   dietTypes: DietType[],
 ): DietType | null {
-  // if (dietTypes.length === 0) {
-  //   return "OMNIVORE";
-  // }
-  //
-  // const dietHierarchy: Record<DietType, number> = {
-  //   VEGAN: 1,
-  //   VEGETARIAN: 2,
-  //   // CARNIVORE: 3,
-  //   OMNIVORE: 4,
-  // };
-  //
-  // let mostRestrictiveDiet: DietType = "OMNIVORE";
-  //
-  // dietTypes.forEach((diet) => {
-  //   if (dietHierarchy[diet] < dietHierarchy[mostRestrictiveDiet]) {
-  //     mostRestrictiveDiet = diet;
-  //   }
-  // });
-  //
-  // return mostRestrictiveDiet;
+  if (dietTypes.length === 0) return null;
   if (dietTypes.includes("OMNIVORE")) {
     return "OMNIVORE";
   } else if (dietTypes.includes("VEGETARIAN")) {

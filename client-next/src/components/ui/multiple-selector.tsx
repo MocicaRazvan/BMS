@@ -75,6 +75,7 @@ interface MultipleSelectorProps {
     "value" | "placeholder" | "disabled"
   >;
   giveUnselected?: boolean;
+  allowDuplicates?: boolean;
 }
 
 export interface MultipleSelectorRef {
@@ -183,6 +184,7 @@ const MultipleSelector = React.forwardRef<
       commandProps,
       inputProps,
       giveUnselected = false,
+      allowDuplicates = false,
     }: MultipleSelectorProps,
     ref: React.Ref<MultipleSelectorRef>,
   ) => {
@@ -207,8 +209,15 @@ const MultipleSelector = React.forwardRef<
     );
 
     const handleUnselect = React.useCallback(
-      (option: Option) => {
-        const newOptions = selected.filter((s) => s.value !== option.value);
+      (option: Option, index?: number) => {
+        let newOptions;
+
+        if (allowDuplicates && typeof index === "number") {
+          newOptions = [...selected];
+          newOptions.splice(index, 1);
+        } else {
+          newOptions = selected.filter((s) => s.value !== option.value);
+        }
         setSelected(newOptions);
         if (giveUnselected) {
           onChange?.([option]);
@@ -330,8 +339,8 @@ const MultipleSelector = React.forwardRef<
     }, [creatable, emptyIndicator, onSearch, options]);
 
     const selectables = React.useMemo<GroupOption>(
-      () => removePickedOption(options, selected),
-      [options, selected],
+      () => (allowDuplicates ? options : removePickedOption(options, selected)),
+      [allowDuplicates, options, selected],
     );
 
     /** Avoid Creatable Selector freezing or lagging when paste a long string. */
@@ -374,10 +383,10 @@ const MultipleSelector = React.forwardRef<
           )}
         >
           <div className="flex flex-wrap gap-1">
-            {selected.map((option) => {
+            {selected.map((option, index) => {
               return (
                 <Badge
-                  key={option.value}
+                  key={option.value + "_" + index}
                   className={cn(
                     "data-[disabled]:bg-muted-foreground data-[disabled]:text-muted data-[disabled]:hover:bg-muted-foreground",
                     "data-[fixed]:bg-muted-foreground data-[fixed]:text-muted data-[fixed]:hover:bg-muted-foreground",
@@ -388,6 +397,7 @@ const MultipleSelector = React.forwardRef<
                 >
                   {option.label}
                   <button
+                    type="button"
                     className={cn(
                       "ml-1 rounded-full outline-none ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2",
                       (disabled || option.fixed) && "hidden",
@@ -401,7 +411,11 @@ const MultipleSelector = React.forwardRef<
                       e.preventDefault();
                       e.stopPropagation();
                     }}
-                    onClick={() => handleUnselect(option)}
+                    onClick={() =>
+                      allowDuplicates
+                        ? handleUnselect(option, index)
+                        : handleUnselect(option)
+                    }
                   >
                     <X className="h-3 w-3 text-muted-foreground hover:text-foreground" />
                   </button>

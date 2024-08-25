@@ -1,15 +1,22 @@
 package com.mocicarazvan.orderservice.services;
 
 import com.mocicarazvan.orderservice.dtos.*;
+import com.mocicarazvan.orderservice.dtos.clients.DayResponse;
+import com.mocicarazvan.orderservice.dtos.clients.MealResponse;
+import com.mocicarazvan.orderservice.dtos.clients.PlanResponse;
+import com.mocicarazvan.orderservice.dtos.clients.RecipeResponse;
+import com.mocicarazvan.orderservice.dtos.clients.collect.FullDayResponse;
 import com.mocicarazvan.orderservice.dtos.summaries.CountryOrderSummary;
 import com.mocicarazvan.orderservice.dtos.summaries.DailyOrderSummary;
 import com.mocicarazvan.orderservice.dtos.summaries.MonthlyOrderSummary;
 import com.mocicarazvan.orderservice.enums.CountrySummaryType;
 import com.mocicarazvan.orderservice.enums.DietType;
+import com.mocicarazvan.orderservice.enums.ObjectiveType;
 import com.mocicarazvan.templatemodule.dtos.PageableBody;
 import com.mocicarazvan.templatemodule.dtos.response.MonthlyEntityGroup;
 import com.mocicarazvan.templatemodule.dtos.response.PageableResponse;
 import com.mocicarazvan.templatemodule.dtos.response.ResponseWithUserDtoEntity;
+import com.mocicarazvan.templatemodule.hateos.CustomEntityModel;
 import com.mocicarazvan.templatemodule.services.CountInParentService;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -26,9 +33,9 @@ public interface OrderService extends CountInParentService {
 
     Flux<UserSubscriptionDto> getSubscriptions(String userId);
 
-    Flux<PageableResponse<ResponseWithUserDtoEntity<PlanResponse>>> getPlansForUser(String title, DietType dietType, PageableBody pageableBody, String userId);
+    Flux<PageableResponse<ResponseWithUserDtoEntity<PlanResponse>>> getPlansForUser(String title, DietType dietType, ObjectiveType objective, PageableBody pageableBody, String userId);
 
-    Mono<ResponseWithUserDtoEntity<RecipeResponse>> getRecipeByPlanForUser(Long id, Long recipeId, String userId);
+    Mono<FullDayResponse> getDayByPlanForUser(Long id, Long dayId, String userId);
 
     Mono<ResponseWithUserDtoEntity<PlanResponse>> getPlanByIdForUser(Long id, String userId);
 
@@ -48,4 +55,9 @@ public interface OrderService extends CountInParentService {
 
     Flux<CountryOrderSummary> getOrdersSummaryByCountry(CountrySummaryType type);
 
+    Mono<ResponseWithUserDtoEntity<RecipeResponse>> getRecipeByIdWithUser(Long planId, Long dayId, Long recipeId, String userId);
+
+    Mono<ResponseWithUserDtoEntity<DayResponse>> getDayByIdWithUser(Long planId, Long dayId, String userId);
+
+    Flux<CustomEntityModel<MealResponse>> getMealsByDayInternal(Long planId, Long dayId, String userId);
 }

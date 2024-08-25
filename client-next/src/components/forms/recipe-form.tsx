@@ -64,7 +64,7 @@ import { fetchWithFilesMultipleFiles } from "@/hoooks/fetchWithFiles";
 import { toast } from "@/components/ui/use-toast";
 import { ToastAction } from "@/components/ui/toast";
 import { BaseError } from "@/types/responses";
-import useFilesBase64 from "@/hoooks/useFilesBase64";
+import useFilesBase64 from "@/hoooks/useFilesObjectURL";
 
 export interface RecipeFormTexts extends SingleChildFormTexts {
   ingredientQuantitySchemaTexts: IngredientQuantitySchemaTexts;
@@ -144,13 +144,13 @@ export default function RecipeForm({
     },
   });
 
-  useFilesBase64({
+  const { fileCleanup: imagesCleanup } = useFilesBase64({
     files: images,
     fieldName: "images",
     setValue: form.setValue,
     getValues: form.getValues,
   });
-  useFilesBase64({
+  const { fileCleanup: videosCleanup } = useFilesBase64({
     files: videos,
     fieldName: "videos",
     setValue: form.setValue,
@@ -320,18 +320,26 @@ export default function RecipeForm({
       }
     },
     [
-      authUser.token,
-      baseFormTexts.altToast,
-      baseFormTexts.descriptionToast,
-      baseFormTexts.toastAction,
-      error,
-      path,
-      selectedOptions,
-      setErrorMsg,
       setIsLoading,
+      setErrorMsg,
+      selectedOptions,
+      path,
+      authUser.token,
+      baseFormTexts.descriptionToast,
+      baseFormTexts.altToast,
+      baseFormTexts.toastAction,
       router,
+      error,
     ],
   );
+
+  useEffect(() => {
+    return () => {
+      console.log("cleaning files");
+      imagesCleanup();
+      videosCleanup();
+    };
+  }, [imagesCleanup, videosCleanup]);
 
   return (
     <Card className="max-w-7xl w-full sm:px-2 md:px-5 py-6">
@@ -374,34 +382,33 @@ export default function RecipeForm({
                     <div className="w-full">
                       <AnimatePresence>
                         {children.map((childId, i) => (
-                          <div key={childId} className="w-full">
-                            <SingleChildForm
-                              childId={childId}
-                              disableCallback={disableCallback}
-                              onChange={handleOnChange}
-                              onRemove={handleRemove}
-                              onSubmitCallback={submitCallback}
-                              authUser={authUser}
-                              onClear={handleClear}
-                              // index={i}
-                              childrenNumber={children.length}
-                              ingredientQuantitySchemaTexts={
-                                ingredientQuantitySchemaTexts
-                              }
-                              childInputMultipleSelectorTexts={
-                                childInputMultipleSelectorTexts
-                              }
-                              clearChild={clearChild}
-                              ingredientChildLabel={ingredientChildLabel}
-                              removeChild={removeChild}
-                              submitChild={submitChild}
-                              quantityChildPlaceholder={
-                                quantityChildPlaceholder
-                              }
-                              quantityChildLabel={quantityChildLabel}
-                              initialValue={initialChildren[childId]}
-                            />
-                          </div>
+                          // <div key={childId} className="w-full">
+                          <SingleChildForm
+                            key={childId}
+                            childId={childId}
+                            disableCallback={disableCallback}
+                            onChange={handleOnChange}
+                            onRemove={handleRemove}
+                            onSubmitCallback={submitCallback}
+                            authUser={authUser}
+                            onClear={handleClear}
+                            // index={i}
+                            childrenNumber={children.length}
+                            ingredientQuantitySchemaTexts={
+                              ingredientQuantitySchemaTexts
+                            }
+                            childInputMultipleSelectorTexts={
+                              childInputMultipleSelectorTexts
+                            }
+                            clearChild={clearChild}
+                            ingredientChildLabel={ingredientChildLabel}
+                            removeChild={removeChild}
+                            submitChild={submitChild}
+                            quantityChildPlaceholder={quantityChildPlaceholder}
+                            quantityChildLabel={quantityChildLabel}
+                            initialValue={initialChildren[childId]}
+                          />
+                          // </div>
                         ))}
                       </AnimatePresence>
                     </div>
@@ -443,11 +450,13 @@ export default function RecipeForm({
               control={form.control}
               fieldName={"images"}
               fieldTexts={imagesText}
+              initialLength={images?.length || 0}
             />
             <InputFile<RecipeSchemaType>
               control={form.control}
               fieldName={"videos"}
               fieldTexts={videosText}
+              initialLength={videos?.length || 0}
             />
             <ButtonSubmit
               isLoading={isLoading}

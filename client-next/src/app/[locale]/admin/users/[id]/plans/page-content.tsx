@@ -1,11 +1,11 @@
 "use client";
 
-import { UserPlansPageTexts } from "@/app/[locale]/(main)/trainer/user/[id]/plans/page";
+import { UserPlansPageTexts } from "@/app/[locale]/trainer/user/[id]/plans/page";
 import { WithUser } from "@/lib/user";
 import { UseListProps } from "@/hoooks/useList";
 import { UserPlansAdminPageTexts } from "@/app/[locale]/admin/users/[id]/plans/page";
 import useGetUser from "@/hoooks/useGetUser";
-import AdminContentLayout from "@/components/admin/admin-content-layout";
+import SidebarContentLayout from "@/components/sidebar/sidebar-content-layout";
 import LoadingSpinner from "@/components/common/loading-spinner";
 import Heading from "@/components/common/heading";
 import { Suspense } from "react";
@@ -35,12 +35,13 @@ export default function UserPlansAdminPageContent({
     return navigateToNotFound();
   }
   return (
-    <AdminContentLayout
+    <SidebarContentLayout
       navbarProps={{
         title: `${title} ${user?.email || ""}`,
         authUser,
         themeSwitchTexts,
         menuTexts,
+        mappingKey: "admin",
       }}
     >
       <div className="w-full h-full bg-background">
@@ -62,12 +63,13 @@ export default function UserPlansAdminPageContent({
                   authUser={authUser}
                   sizeOptions={[10, 20, 30, 40]}
                   isSidebarOpen={isOpen}
+                  mainDashboard={true}
                 />
               </div>
             </Suspense>
           </>
         )}
       </div>
-    </AdminContentLayout>
+    </SidebarContentLayout>
   );
 }

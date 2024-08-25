@@ -327,7 +327,9 @@ export default function RecipeTable({
                   className="cursor-pointer"
                   onClick={() =>
                     router.push(
-                      `/trainer/recipes/single/${row.original.model.id}`,
+                      forWhom === "trainer"
+                        ? `/trainer/recipes/single/${row.original.model.id}`
+                        : `/admin/recipes/single/${row.original.model.id}`,
                     )
                   }
                 >
@@ -338,7 +340,11 @@ export default function RecipeTable({
                   <>
                     <DropdownMenuItem asChild>
                       <Link
-                        href={`/users/single/${row.original.model.userId}`}
+                        href={
+                          mainDashboard
+                            ? `/admin/users/${row.original.model.userId}`
+                            : `/users/single/${row.original.model.userId}`
+                        }
                         className="cursor-pointer"
                       >
                         {viewOwner}

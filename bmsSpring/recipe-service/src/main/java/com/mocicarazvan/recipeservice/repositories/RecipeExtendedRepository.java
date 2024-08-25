@@ -16,4 +16,6 @@ public interface RecipeExtendedRepository {
     Mono<Long> countRecipesFiltered(String title, Boolean approved, DietType type);
 
     Mono<Long> countRecipesFilteredTrainer(String title, Boolean approved, Long trainerId, DietType type);
+
+    Mono<DietType> determineMostRestrictiveDietType(List<Long> recipeIds);
 }

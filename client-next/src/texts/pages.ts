@@ -13,6 +13,7 @@ import {
   getUseBinaryTexts,
   getUseFilterDropdownTexts,
   getUseTagsExtraCriteriaTexts,
+  sortingDaysSortingOptionsKeys,
   sortingIngredientsSortingOptionsKeys,
   sortingOrdersSortingOptionsKeys,
   sortingPlansSortingOptionsKeys,
@@ -23,11 +24,16 @@ import {
 import {
   getAdminEmailTexts,
   getCheckoutDrawerTexts,
+  getDayFromTexts,
   getIngredientFormTexts,
+  getPlanFormTexts,
+  getPostFormTexts,
+  getRecipeFormTexts,
   getUpdateProfileTexts,
 } from "@/texts/components/forms";
-import { UserPostsPageContentTexts } from "@/app/[locale]/(main)/trainer/user/[id]/posts/page-content";
+import { UserPostsPageContentTexts } from "@/app/[locale]/trainer/user/[id]/posts/page-content";
 import {
+  getDayTableTexts,
   getIngredientTableColumnTexts,
   getIngredientTableTexts,
   getOrderTableTexts,
@@ -44,8 +50,8 @@ import { UserPageTexts } from "@/app/[locale]/(main)/(user)/users/single/[id]/pa
 import { AdminIngredientsCreatePageTexts } from "@/app/[locale]/admin/ingredients/create/page";
 import { AdminIngredientsPageTexts } from "@/app/[locale]/admin/ingredients/page";
 import { AdminPageUpdateIngredientTexts } from "@/app/[locale]/admin/ingredients/update/[id]/page";
-import { IngredientsPageTexts } from "@/app/[locale]/(main)/trainer/ingredients/page";
-import { SingleIngredientPageTexts } from "@/app/[locale]/(main)/trainer/ingredients/single/[id]/page-content";
+import { IngredientsPageTexts } from "@/app/[locale]/trainer/ingredients/page";
+import { SingleIngredientPageTexts } from "@/app/[locale]/trainer/ingredients/single/[id]/page-content";
 import {
   getAllRelativeItemTexts,
   getDailySalesTexts,
@@ -55,14 +61,14 @@ import {
   getRelativeItemsSummaryTexts,
   getTotalAmountCountOrdersTexts,
 } from "@/texts/components/charts";
-import { UserRecipesPageTexts } from "@/app/[locale]/(main)/trainer/user/[id]/recipes/page";
+import { UserRecipesPageTexts } from "@/app/[locale]/trainer/user/[id]/recipes/page";
 import { AdminRecipesPageTexts } from "@/app/[locale]/admin/recipes/page";
 import { UserRecipesAdminPageTexts } from "@/app/[locale]/admin/users/[id]/recipes/page";
-import { SingleRecipePageTexts } from "@/app/[locale]/(main)/trainer/recipes/single/[id]/page-content";
+import { SingleRecipePageTexts } from "@/app/[locale]/trainer/recipes/single/[id]/page-content";
 import { AdminPlansPageTexts } from "@/app/[locale]/admin/plans/page";
-import { UserPlansPageTexts } from "@/app/[locale]/(main)/trainer/user/[id]/plans/page";
+import { UserPlansPageTexts } from "@/app/[locale]/trainer/user/[id]/plans/page";
 import { UserPlansAdminPageTexts } from "@/app/[locale]/admin/users/[id]/plans/page";
-import { SingleTrainerPlanPageTexts } from "@/app/[locale]/(main)/trainer/plans/single/[id]/page-content";
+import { SingleTrainerPlanPageTexts } from "@/app/[locale]/trainer/plans/single/[id]/page-content";
 import { ApprovedPlansTexts } from "@/app/[locale]/(main)/(user)/plans/approved/page-content";
 import {
   dietTypes,
@@ -84,9 +90,8 @@ import { AdminMonthlySalesTexts } from "@/app/[locale]/admin/monthlySales/page";
 import { getDateRangePickerTexts } from "@/texts/components/ui";
 import { AdminCountriesTexts } from "@/app/[locale]/admin/countries/page";
 import { AdminDailySalesTexts } from "@/app/[locale]/admin/dailySales/page";
-import { UserMonthlySalesPageTexts } from "@/app/[locale]/(main)/trainer/user/[id]/plans/monthlySales/page";
-import { UserDailySalesPageTexts } from "@/app/[locale]/(main)/trainer/user/[id]/plans/dailySales/page";
-import { getAdminMenuTexts } from "@/texts/components/admin";
+import { UserMonthlySalesPageTexts } from "@/app/[locale]/trainer/user/[id]/plans/monthlySales/page";
+import { UserDailySalesPageTexts } from "@/app/[locale]/trainer/user/[id]/plans/dailySales/page";
 import { UserAdminMonthlySalesPageTexts } from "@/app/[locale]/admin/users/[id]/monthlySales/page";
 import { UserAdminDailySalesPageTexts } from "@/app/[locale]/admin/users/[id]/dailySales/page";
 import { OrderCompletePageTexts } from "@/app/[locale]/(main)/(user)/orderComplete/page";
@@ -106,6 +111,40 @@ import {
   IntakeTitle,
   ItemTexts,
 } from "@/app/[locale]/(main)/(user)/calculator/page";
+import { UserDaysPageTexts } from "@/app/[locale]/trainer/user/[id]/days/page";
+import { SingleDayPageTexts } from "@/app/[locale]/trainer/days/single/[id]/page-content";
+import { getSingleDayTexts } from "@/texts/components/days";
+import { planObjectives } from "@/types/dto";
+import { getSidebarMenuTexts } from "@/texts/components/sidebar";
+import { AdminUserPageTexts } from "@/app/[locale]/admin/users/[id]/page";
+import { AdminPostPageTexts } from "@/app/[locale]/admin/posts/single/[id]/page";
+import { AdminRecipePageTexts } from "@/app/[locale]/admin/recipes/single/[id]/page";
+import { AdminPlanPageTexts } from "@/app/[locale]/admin/plans/single/[id]/page";
+import { AdminIngredientPageTexts } from "@/app/[locale]/admin/ingredients/single/[id]/page";
+import { AdminOrderPageTexts } from "@/app/[locale]/admin/orders/single/[id]/page";
+import {
+  adminGroupLabels,
+  adminLabels,
+  adminSubLabels,
+  trainerGroupLabels,
+  trainerLabels,
+  trainerSubLabels,
+} from "@/components/sidebar/menu-list";
+import { UserPostsPageTexts } from "@/app/[locale]/trainer/user/[id]/posts/page";
+import { CreatePostPageTexts } from "@/app/[locale]/trainer/posts/create/page";
+import { UpdatePostPageTexts } from "@/app/[locale]/trainer/posts/update/[id]/page";
+import { TrainerSingleIngredientPageTexts } from "@/app/[locale]/trainer/ingredients/single/[id]/page";
+import { TrainerPostPageTexts } from "@/app/[locale]/trainer/posts/single/[id]/page";
+import { CreateRecipePageTexts } from "@/app/[locale]/trainer/recipes/create/page";
+import { UpdateRecipePageTexts } from "@/app/[locale]/trainer/recipes/update/[id]/page";
+import { TrainerSingleRecipePageTexts } from "@/app/[locale]/trainer/recipes/single/[id]/page";
+import { CreateDayPageTexts } from "@/app/[locale]/trainer/days/create/page";
+import { UpdateDayPageTexts } from "@/app/[locale]/trainer/days/update/[id]/page";
+import { SingleDayTrainerPageTexts } from "@/app/[locale]/trainer/days/single/[id]/page";
+import { CreatePlanPageTexts } from "@/app/[locale]/trainer/plans/create/page";
+import { UpdatePlanPageTexts } from "@/app/[locale]/trainer/plans/update/[id]/page";
+import { TrainerPlanPageTexts } from "@/app/[locale]/trainer/plans/single/[id]/page";
+import { TrainerKanbanPageTexts } from "@/app/[locale]/trainer/kanban/page";
 
 export async function getSinglePostPageTexts(): Promise<SinglePostPageTexts> {
   const [elementHeaderTexts, t, postCommentsTexts] = await Promise.all([
@@ -133,6 +172,7 @@ export async function getApprovedPostsPageTexts(): Promise<ApprovedPostsTexts> {
     gridListTexts,
     title: t("title"),
     header: t("header"),
+    likedLabel: t("likedLabel"),
     sortingPostsSortingOptions,
     tagsCriteriaTexts,
   };
@@ -151,6 +191,207 @@ export async function getUserPostsPageContentTexts(): Promise<UserPostsPageConte
     title: t("title"),
   };
 }
+export async function getUserPostsPageTexts(): Promise<UserPostsPageTexts> {
+  const [userPostsPageContentTexts, themeSwitchTexts, menuTexts] =
+    await Promise.all([
+      getUserPostsPageContentTexts(),
+      getThemeSwitchTexts(),
+      getSidebarMenuTexts(
+        "trainer",
+        trainerGroupLabels,
+        trainerLabels,
+        trainerSubLabels,
+      ),
+    ]);
+  return {
+    userPostsPageContentTexts,
+    themeSwitchTexts,
+    menuTexts,
+  };
+}
+
+export async function getCreatePostPageTexts(): Promise<CreatePostPageTexts> {
+  const [postFormTexts, themeSwitchTexts, menuTexts] = await Promise.all([
+    getPostFormTexts("create"),
+    getThemeSwitchTexts(),
+    getSidebarMenuTexts(
+      "trainer",
+      trainerGroupLabels,
+      trainerLabels,
+      trainerSubLabels,
+    ),
+  ]);
+  return {
+    postFormTexts,
+    themeSwitchTexts,
+    menuTexts,
+  };
+}
+
+export async function getCreatePlanPageTexts(): Promise<CreatePlanPageTexts> {
+  const [planFormTexts, themeSwitchTexts, menuTexts] = await Promise.all([
+    getPlanFormTexts("create"),
+    getThemeSwitchTexts(),
+    getSidebarMenuTexts(
+      "trainer",
+      trainerGroupLabels,
+      trainerLabels,
+      trainerSubLabels,
+    ),
+  ]);
+  return {
+    planFormTexts,
+    themeSwitchTexts,
+    menuTexts,
+  };
+}
+
+export async function getCreateDayPageTexts(): Promise<CreateDayPageTexts> {
+  const [dayFormTexts, themeSwitchTexts, menuTexts] = await Promise.all([
+    getDayFromTexts("create"),
+    getThemeSwitchTexts(),
+    getSidebarMenuTexts(
+      "trainer",
+      trainerGroupLabels,
+      trainerLabels,
+      trainerSubLabels,
+    ),
+  ]);
+  return {
+    dayFormTexts,
+    themeSwitchTexts,
+    menuTexts,
+  };
+}
+
+export async function getSingleRecipePageTexts(): Promise<SingleRecipePageTexts> {
+  const [
+    elementHeaderTexts,
+    nutritionalTableTexts,
+    ingredientPieChartTexts,
+    t,
+  ] = await Promise.all([
+    getElementHeaderTexts(),
+    getNutritionalTableTexts(),
+    getIngredientPieChartTexts(),
+    getTranslations("pages.recipes.SingleRecipePageTexts"),
+  ]);
+  return {
+    elementHeaderTexts,
+    nutritionalTableTexts,
+    ingredientPieChartTexts,
+    showIngredients: t("showIngredients"),
+  };
+}
+export async function getCreateRecipePageTexts(): Promise<CreateRecipePageTexts> {
+  const [recipeFormTexts, themeSwitchTexts, menuTexts] = await Promise.all([
+    getRecipeFormTexts("create"),
+    getThemeSwitchTexts(),
+    getSidebarMenuTexts(
+      "trainer",
+      trainerGroupLabels,
+      trainerLabels,
+      trainerSubLabels,
+    ),
+  ]);
+  return {
+    recipeFormTexts,
+    themeSwitchTexts,
+    menuTexts,
+  };
+}
+export async function getUpdatePostPageTexts(): Promise<UpdatePostPageTexts> {
+  const [postFormTexts, themeSwitchTexts, menuTexts] = await Promise.all([
+    getPostFormTexts("update"),
+    getThemeSwitchTexts(),
+    getSidebarMenuTexts(
+      "trainer",
+      trainerGroupLabels,
+      trainerLabels,
+      trainerSubLabels,
+    ),
+  ]);
+  return {
+    postFormTexts,
+    themeSwitchTexts,
+    menuTexts,
+  };
+}
+
+export async function getUpdatePlanPageTexts() {
+  const [planFormTexts, themeSwitchTexts, menuTexts] = await Promise.all([
+    getPlanFormTexts("update"),
+    getThemeSwitchTexts(),
+    getSidebarMenuTexts(
+      "trainer",
+      trainerGroupLabels,
+      trainerLabels,
+      trainerSubLabels,
+    ),
+  ]);
+  return {
+    planFormTexts,
+    themeSwitchTexts,
+    menuTexts,
+  };
+}
+
+export async function getUpdateDayPageTexts(): Promise<UpdateDayPageTexts> {
+  const [dayFormTexts, themeSwitchTexts, menuTexts] = await Promise.all([
+    getDayFromTexts("update"),
+    getThemeSwitchTexts(),
+    getSidebarMenuTexts(
+      "trainer",
+      trainerGroupLabels,
+      trainerLabels,
+      trainerSubLabels,
+    ),
+  ]);
+  return {
+    dayFormTexts,
+    themeSwitchTexts,
+    menuTexts,
+  };
+}
+
+export async function getUpdateRecipePageTexts(): Promise<UpdateRecipePageTexts> {
+  const [recipeFormTexts, themeSwitchTexts, menuTexts] = await Promise.all([
+    getRecipeFormTexts("update"),
+    getThemeSwitchTexts(),
+    getSidebarMenuTexts(
+      "trainer",
+      trainerGroupLabels,
+      trainerLabels,
+      trainerSubLabels,
+    ),
+  ]);
+  return {
+    recipeFormTexts,
+    themeSwitchTexts,
+    menuTexts,
+  };
+}
+
+export async function getTrainerSingleRecipePageTexts(): Promise<TrainerSingleRecipePageTexts> {
+  const [singleRecipePageTexts, themeSwitchTexts, menuTexts, t] =
+    await Promise.all([
+      getSingleRecipePageTexts(),
+      getThemeSwitchTexts(),
+      getSidebarMenuTexts(
+        "trainer",
+        trainerGroupLabels,
+        trainerLabels,
+        trainerSubLabels,
+      ),
+      getTranslations("pages.trainer.TrainerSingleRecipePageTexts"),
+    ]);
+  return {
+    singleRecipePageTexts,
+    themeSwitchTexts,
+    menuTexts,
+    title: t("title"),
+  };
+}
 
 export async function getAdminPostsPageTexts(): Promise<AdminPostsPageTexts> {
   const [
@@ -164,7 +405,7 @@ export async function getAdminPostsPageTexts(): Promise<AdminPostsPageTexts> {
     getPostTableTexts(),
     getSortingItemSortingOptions("posts", sortingPostsSortingOptionsKeys),
     getThemeSwitchTexts(),
-    getAdminMenuTexts(),
+    getSidebarMenuTexts("admin", adminGroupLabels, adminLabels, adminSubLabels),
   ]);
 
   return {
@@ -188,7 +429,7 @@ export async function getAdminRecipesPageTexts(): Promise<AdminRecipesPageTexts>
     getRecipeTableTexts(),
     getSortingItemSortingOptions("recipes", sortingRecipesSortingOptionsKeys),
     getThemeSwitchTexts(),
-    getAdminMenuTexts(),
+    getSidebarMenuTexts("admin", adminGroupLabels, adminLabels, adminSubLabels),
   ]);
 
   return {
@@ -213,7 +454,7 @@ export async function getUserPostsAdminPageTexts(): Promise<UserPostsAdminPageTe
     getPostTableTexts(),
     getSortingItemSortingOptions("posts", sortingPostsSortingOptionsKeys),
     getThemeSwitchTexts(),
-    getAdminMenuTexts(),
+    getSidebarMenuTexts("admin", adminGroupLabels, adminLabels, adminSubLabels),
   ]);
 
   return {
@@ -238,7 +479,7 @@ export async function getAdminUsersPageTexts(): Promise<AdminUsersPageTexts> {
     getThemeSwitchTexts(),
     getSortingItemSortingOptions("users", sortingUsersSortingOptionsKeys),
     getTranslations("pages.admin.AdminUsersPageTexts"),
-    getAdminMenuTexts(),
+    getSidebarMenuTexts("admin", adminGroupLabels, adminLabels, adminSubLabels),
   ]);
   return {
     userTableTexts,
@@ -250,6 +491,213 @@ export async function getAdminUsersPageTexts(): Promise<AdminUsersPageTexts> {
   };
 }
 
+export async function getAdminUserPageTexts(): Promise<AdminUserPageTexts> {
+  const [userPageTexts, themeSwitchTexts, t, menuTexts] = await Promise.all([
+    getUserPageTexts(),
+    getThemeSwitchTexts(),
+    getTranslations("pages.admin.AdminUserPageTexts"),
+    getSidebarMenuTexts("admin", adminGroupLabels, adminLabels, adminSubLabels),
+  ]);
+  return {
+    userPageTexts,
+    themeSwitchTexts,
+    header: t("header"),
+    title: t("title"),
+    menuTexts,
+  };
+}
+
+export async function getAdminPostPageTexts(): Promise<AdminPostPageTexts> {
+  const [t, themeSwitchTexts, menuTexts, singlePostPageTexts] =
+    await Promise.all([
+      getTranslations("pages.admin.AdminPostPageTexts"),
+      getThemeSwitchTexts(),
+      getSidebarMenuTexts(
+        "admin",
+        adminGroupLabels,
+        adminLabels,
+        adminSubLabels,
+      ),
+      getSinglePostPageTexts(),
+    ]);
+  return {
+    themeSwitchTexts,
+    header: t("header"),
+    title: t("title"),
+    menuTexts,
+    singlePostPageTexts,
+  };
+}
+
+export async function getTrainerPostPageTexts(): Promise<TrainerPostPageTexts> {
+  const [themeSwitchTexts, t, menuTexts, singlePostPageTexts] =
+    await Promise.all([
+      getThemeSwitchTexts(),
+      getTranslations("pages.trainer.TrainerPostPageTexts"),
+      getSidebarMenuTexts(
+        "admin",
+        adminGroupLabels,
+        adminLabels,
+        adminSubLabels,
+      ),
+      getSinglePostPageTexts(),
+    ]);
+  return {
+    themeSwitchTexts,
+    title: t("title"),
+    menuTexts,
+    singlePostPageTexts,
+  };
+}
+
+export async function getTrainerPlanPageTexts(): Promise<TrainerPlanPageTexts> {
+  const [singleTrainerPlanPageTexts, t, menuTexts, themeSwitchTexts] =
+    await Promise.all([
+      getSingleTrainerPlanPageTexts(),
+      getTranslations("pages.trainer.TrainerPlanPageTexts"),
+      getSidebarMenuTexts(
+        "admin",
+        adminGroupLabels,
+        adminLabels,
+        adminSubLabels,
+      ),
+      getThemeSwitchTexts(),
+    ]);
+  return {
+    singleTrainerPlanPageTexts,
+    title: t("title"),
+    menuTexts,
+    themeSwitchTexts,
+  };
+}
+
+export async function getSingleDayTrainerPageTexts(): Promise<SingleDayTrainerPageTexts> {
+  const [singleDayTexts, t, menuTexts, themeSwitchTexts] = await Promise.all([
+    getSingleDayTexts(),
+    getTranslations("pages.trainer.SingleDayPageTexts"),
+    getSidebarMenuTexts(
+      "trainer",
+      trainerGroupLabels,
+      trainerLabels,
+      trainerSubLabels,
+    ),
+    getThemeSwitchTexts(),
+  ]);
+  return {
+    singleDayTexts,
+    title: t("title"),
+    menuTexts,
+    themeSwitchTexts,
+  };
+}
+
+export async function getAdminIngredientPageTexts(): Promise<AdminIngredientPageTexts> {
+  const [themeSwitchTexts, t, menuTexts, singleIngredientPageTexts] =
+    await Promise.all([
+      getThemeSwitchTexts(),
+      getTranslations("pages.admin.AdminIngredientPageTexts"),
+      getSidebarMenuTexts(
+        "admin",
+        adminGroupLabels,
+        adminLabels,
+        adminSubLabels,
+      ),
+      getSingleIngredientPageTexts(),
+    ]);
+  return {
+    themeSwitchTexts,
+    header: t("header"),
+    title: t("title"),
+    menuTexts,
+    singleIngredientPageTexts,
+  };
+}
+export async function getTrainerSingleIngredientPageTexts(): Promise<TrainerSingleIngredientPageTexts> {
+  const [themeSwitchTexts, t, menuTexts, singleIngredientPageTexts] =
+    await Promise.all([
+      getThemeSwitchTexts(),
+      getTranslations("pages.trainer.TrainerSingleIngredientPageTexts"),
+      getSidebarMenuTexts(
+        "admin",
+        adminGroupLabels,
+        adminLabels,
+        adminSubLabels,
+      ),
+      getSingleIngredientPageTexts(),
+    ]);
+  return {
+    themeSwitchTexts,
+    title: t("title"),
+    menuTexts,
+    singleIngredientPageTexts,
+  };
+}
+
+export async function getAdminPlanPageTexts(): Promise<AdminPlanPageTexts> {
+  const [t, themeSwitchTexts, menuTexts, singleTrainerPlanPageTexts] =
+    await Promise.all([
+      getTranslations("pages.admin.AdminPlanPageTexts"),
+      getThemeSwitchTexts(),
+      getSidebarMenuTexts(
+        "admin",
+        adminGroupLabels,
+        adminLabels,
+        adminSubLabels,
+      ),
+      getSingleTrainerPlanPageTexts(),
+    ]);
+  return {
+    themeSwitchTexts,
+    header: t("header"),
+    title: t("title"),
+    menuTexts,
+    singleTrainerPlanPageTexts,
+  };
+}
+
+export async function getAdminRecipePageTexts(): Promise<AdminRecipePageTexts> {
+  const [themeSwitchTexts, t, menuTexts, singleRecipePageTexts] =
+    await Promise.all([
+      getThemeSwitchTexts(),
+      getTranslations("pages.admin.AdminRecipePageTexts"),
+      getSidebarMenuTexts(
+        "admin",
+        adminGroupLabels,
+        adminLabels,
+        adminSubLabels,
+      ),
+      getSingleRecipePageTexts(),
+    ]);
+  return {
+    themeSwitchTexts,
+    header: t("header"),
+    title: t("title"),
+    menuTexts,
+    singleRecipePageTexts,
+  };
+}
+
+export async function getAdminOrderPageTexts(): Promise<AdminOrderPageTexts> {
+  const [themeSwitchTexts, t, menuTexts, singleOrderPageContentTexts] =
+    await Promise.all([
+      getThemeSwitchTexts(),
+      getTranslations("pages.admin.AdminOrderPageTexts"),
+      getSidebarMenuTexts(
+        "admin",
+        adminGroupLabels,
+        adminLabels,
+        adminSubLabels,
+      ),
+      getSingleOrderPageContentTexts(),
+    ]);
+  return {
+    themeSwitchTexts,
+    header: t("header"),
+    title: t("title"),
+    menuTexts,
+    singleOrderPageContentTexts,
+  };
+}
 export const getUserPageTexts: () => Promise<UserPageTexts> = async () => {
   const [updateProfileTexts, t] = await Promise.all([
     getUpdateProfileTexts(),
@@ -274,7 +722,7 @@ export async function getAdminIngredientsCreatePageTexts(): Promise<AdminIngredi
   const [ingredientForm, t, menuTexts] = await Promise.all([
     getIngredientFormTexts("create"),
     getTranslations("pages.admin.AdminIngredientsCreatePage"),
-    getAdminMenuTexts(),
+    getSidebarMenuTexts("admin", adminGroupLabels, adminLabels, adminSubLabels),
   ]);
 
   return {
@@ -290,7 +738,12 @@ export async function getAdminPageUpdateIngredientTexts(): Promise<AdminPageUpda
       getThemeSwitchTexts(),
       getIngredientFormTexts("update"),
       getTranslations("pages.admin.AdminPageUpdateIngredientTexts"),
-      getAdminMenuTexts(),
+      getSidebarMenuTexts(
+        "admin",
+        adminGroupLabels,
+        adminLabels,
+        adminSubLabels,
+      ),
     ]);
   return {
     themeSwitchTexts,
@@ -315,7 +768,7 @@ export async function getAdminIngredientsPageTexts(): Promise<AdminIngredientsPa
     ),
     getThemeSwitchTexts(),
     getTranslations("pages.admin.AdminIngredientsPageTexts"),
-    getAdminMenuTexts(),
+    getSidebarMenuTexts("admin", adminGroupLabels, adminLabels, adminSubLabels),
   ]);
 
   return {
@@ -328,19 +781,33 @@ export async function getAdminIngredientsPageTexts(): Promise<AdminIngredientsPa
   };
 }
 export async function getIngredientsPageTexts(): Promise<IngredientsPageTexts> {
-  const [ingredientTableTexts, sortingIngredientsSortingOptions, t] =
-    await Promise.all([
-      getIngredientTableTexts(),
-      getSortingItemSortingOptions(
-        "ingredients",
-        sortingIngredientsSortingOptionsKeys,
-      ),
-      getTranslations("pages.ingredients.IngredientsPageTexts"),
-    ]);
+  const [
+    ingredientTableTexts,
+    sortingIngredientsSortingOptions,
+    themeSwitchTexts,
+    menuTexts,
+    t,
+  ] = await Promise.all([
+    getIngredientTableTexts(),
+    getSortingItemSortingOptions(
+      "ingredients",
+      sortingIngredientsSortingOptionsKeys,
+    ),
+    getThemeSwitchTexts(),
+    getSidebarMenuTexts(
+      "trainer",
+      trainerGroupLabels,
+      trainerLabels,
+      trainerSubLabels,
+    ),
+    getTranslations("pages.ingredients.IngredientsPageTexts"),
+  ]);
 
   return {
     ingredientTableTexts,
     sortingIngredientsSortingOptions,
+    themeSwitchTexts,
+    menuTexts,
     title: t("title"),
     header: t("header"),
   };
@@ -364,17 +831,31 @@ export async function getSingleIngredientPageTexts(): Promise<SingleIngredientPa
   };
 }
 export async function getUserRecipesPageContentTexts(): Promise<UserRecipesPageTexts> {
-  const [recipesTableTexts, sortingRecipesSortingOptions, t] =
-    await Promise.all([
-      getRecipeTableTexts(),
-      getSortingItemSortingOptions("recipes", sortingRecipesSortingOptionsKeys),
-      getTranslations("pages.recipes.UserRecipesPageContentTexts"),
-    ]);
+  const [
+    recipesTableTexts,
+    sortingRecipesSortingOptions,
+    t,
+    themeSwitchTexts,
+    menuTexts,
+  ] = await Promise.all([
+    getRecipeTableTexts(),
+    getSortingItemSortingOptions("recipes", sortingRecipesSortingOptionsKeys),
+    getTranslations("pages.recipes.UserRecipesPageContentTexts"),
+    getThemeSwitchTexts(),
+    getSidebarMenuTexts(
+      "trainer",
+      trainerGroupLabels,
+      trainerLabels,
+      trainerSubLabels,
+    ),
+  ]);
   return {
     recipesTableTexts,
     sortingRecipesSortingOptions,
     header: t("header"),
     title: t("title"),
+    themeSwitchTexts,
+    menuTexts,
   };
 }
 // getTranslations("pages.admin.UserRecipesAdminPageTexts"),
@@ -390,7 +871,7 @@ export async function getUserRecipesAdminPageTexts(): Promise<UserRecipesAdminPa
     getSortingItemSortingOptions("recipes", sortingRecipesSortingOptionsKeys),
     getThemeSwitchTexts(),
     getTranslations("pages.admin.UserRecipesAdminPageTexts"),
-    getAdminMenuTexts(),
+    getSidebarMenuTexts("admin", adminGroupLabels, adminLabels, adminSubLabels),
   ]);
   return {
     recipesTableTexts,
@@ -414,7 +895,7 @@ export async function getUserPlansAdminPageTexts(): Promise<UserPlansAdminPageTe
     getSortingItemSortingOptions("plans", sortingPlansSortingOptionsKeys),
     getThemeSwitchTexts(),
     getTranslations("pages.admin.UserPlansAdminPageTexts"),
-    getAdminMenuTexts(),
+    getSidebarMenuTexts("admin", adminGroupLabels, adminLabels, adminSubLabels),
   ]);
   return {
     plansTableTexts,
@@ -437,7 +918,7 @@ export async function getUserOrdersAdminPageTexts(): Promise<UserOrdersAdminPage
     getSortingItemSortingOptions("orders", sortingOrdersSortingOptionsKeys),
     getThemeSwitchTexts(),
     getTranslations("pages.admin.UserOrdersAdminPageTexts"),
-    getAdminMenuTexts(),
+    getSidebarMenuTexts("admin", adminGroupLabels, adminLabels, adminSubLabels),
   ]);
   return {
     orderTableTexts,
@@ -446,25 +927,6 @@ export async function getUserOrdersAdminPageTexts(): Promise<UserOrdersAdminPage
     title: t("title"),
     header: t("header"),
     menuTexts,
-  };
-}
-export async function getSingleRecipePageTexts(): Promise<SingleRecipePageTexts> {
-  const [
-    elementHeaderTexts,
-    nutritionalTableTexts,
-    ingredientPieChartTexts,
-    t,
-  ] = await Promise.all([
-    getElementHeaderTexts(),
-    getNutritionalTableTexts(),
-    getIngredientPieChartTexts(),
-    getTranslations("pages.recipes.SingleRecipePageTexts"),
-  ]);
-  return {
-    elementHeaderTexts,
-    nutritionalTableTexts,
-    ingredientPieChartTexts,
-    showIngredients: t("showIngredients"),
   };
 }
 
@@ -480,7 +942,7 @@ export async function getAdminPlansPageTexts(): Promise<AdminPlansPageTexts> {
     getPlanTableTexts(),
     getSortingItemSortingOptions("plans", sortingPlansSortingOptionsKeys),
     getThemeSwitchTexts(),
-    getAdminMenuTexts(),
+    getSidebarMenuTexts("admin", adminGroupLabels, adminLabels, adminSubLabels),
   ]);
 
   return {
@@ -493,17 +955,61 @@ export async function getAdminPlansPageTexts(): Promise<AdminPlansPageTexts> {
   };
 }
 
+export async function getUserDaysPageTexts(): Promise<UserDaysPageTexts> {
+  const [
+    dayTableTexts,
+    sortingDaysSortingOptions,
+    t,
+    themeSwitchTexts,
+    menuTexts,
+  ] = await Promise.all([
+    getDayTableTexts(),
+    getSortingItemSortingOptions("days", sortingDaysSortingOptionsKeys),
+    getTranslations("pages.days.UserDaysPageTexts"),
+    getThemeSwitchTexts(),
+    getSidebarMenuTexts(
+      "trainer",
+      trainerGroupLabels,
+      trainerLabels,
+      trainerSubLabels,
+    ),
+  ]);
+  return {
+    dayTableTexts,
+    sortingDaysSortingOptions,
+    header: t("header"),
+    title: t("title"),
+    menuTexts,
+    themeSwitchTexts,
+  };
+}
+
 export async function getUserPlansPageTexts(): Promise<UserPlansPageTexts> {
-  const [planTableTexts, sortingPlansSortingOptions, t] = await Promise.all([
+  const [
+    planTableTexts,
+    sortingPlansSortingOptions,
+    t,
+    themeSwitchTexts,
+    menuTexts,
+  ] = await Promise.all([
     getPlanTableTexts(),
     getSortingItemSortingOptions("plans", sortingPlansSortingOptionsKeys),
     getTranslations("pages.plans.UserPlansPageTexts"),
+    getThemeSwitchTexts(),
+    getSidebarMenuTexts(
+      "trainer",
+      trainerGroupLabels,
+      trainerLabels,
+      trainerSubLabels,
+    ),
   ]);
   return {
     planTableTexts,
     sortingPlansSortingOptions,
     header: t("header"),
     title: t("title"),
+    themeSwitchTexts,
+    menuTexts,
   };
 }
 export async function getSingleTrainerPlanPageTexts(): Promise<SingleTrainerPlanPageTexts> {
@@ -511,11 +1017,13 @@ export async function getSingleTrainerPlanPageTexts(): Promise<SingleTrainerPlan
     elementHeaderTexts,
     nutritionalTableTexts,
     ingredientPieChartTexts,
+    singleDayTexts,
     t,
   ] = await Promise.all([
     getElementHeaderTexts(),
     getNutritionalTableTexts(),
     getIngredientPieChartTexts(),
+    getSingleDayTexts(),
     getTranslations("pages.plans.SingleTrainerPlanPageTexts"),
   ]);
 
@@ -523,6 +1031,7 @@ export async function getSingleTrainerPlanPageTexts(): Promise<SingleTrainerPlan
     elementHeaderTexts,
     nutritionalTableTexts,
     ingredientPieChartTexts,
+    singleDayTexts,
     displayed: t("displayed"),
     notDisplayed: t("notDisplayed"),
     price: t("price"),
@@ -537,6 +1046,7 @@ export async function getApprovedPlansTexts(): Promise<ApprovedPlansTexts> {
     displayFilterTexts,
     sortingPlansSortingOptions,
     addToCartBtnTexts,
+    objectiveDropDownTexts,
     t,
   ] = await Promise.all([
     getGridListTexts(),
@@ -548,6 +1058,10 @@ export async function getApprovedPlansTexts(): Promise<ApprovedPlansTexts> {
     getUseBinaryTexts("UseDisplayFilterTexts"),
     getSortingItemSortingOptions("plans", sortingPlansSortingOptionsKeys),
     getAddToCartBtnTexts(),
+    getUseFilterDropdownTexts(
+      "UseObjectiveDropdownTexts",
+      planObjectives as unknown as string[],
+    ),
     getTranslations("pages.plans.ApprovedPlansTexts"),
   ]);
   return {
@@ -555,6 +1069,7 @@ export async function getApprovedPlansTexts(): Promise<ApprovedPlansTexts> {
     dietDropdownTexts,
     useApprovedFilterTexts,
     displayFilterTexts,
+    objectiveDropDownTexts,
     title: t("title"),
     header: t("header"),
     buyableLabel: t("buyableLabel"),
@@ -573,6 +1088,8 @@ export async function getUserPlanPageContentTexts(): Promise<UserPlanPageContent
     elementHeaderTexts,
     addToCartBtnTexts,
     price: t("price"),
+    buyPrompt: t("buyPrompt"),
+    numberDays: t("numberDays"),
   };
 }
 
@@ -597,34 +1114,54 @@ export async function getCartPageContentTexts(): Promise<CartPageContentTexts> {
 }
 
 export async function getSubscriptionsPageContentTexts(): Promise<SubscriptionsPageContentTexts> {
-  const [gridListTexts, sortingPlansSortingOptions, dietDropdownTexts, t] =
-    await Promise.all([
-      getGridListTexts(),
-      getSortingItemSortingOptions("plans", sortingPlansSortingOptionsKeys),
-      getUseFilterDropdownTexts(
-        "UseDietDropdownTexts",
-        dietTypes as unknown as string[],
-      ),
-      getTranslations("pages.subscriptions.SubscriptionsPageContentTexts"),
-    ]);
+  const [
+    gridListTexts,
+    sortingPlansSortingOptions,
+    dietDropdownTexts,
+    objectiveDropDownTexts,
+    t,
+  ] = await Promise.all([
+    getGridListTexts(),
+    getSortingItemSortingOptions("plans", sortingPlansSortingOptionsKeys),
+    getUseFilterDropdownTexts(
+      "UseDietDropdownTexts",
+      dietTypes as unknown as string[],
+    ),
+    getUseFilterDropdownTexts(
+      "UseObjectiveDropdownTexts",
+      planObjectives as unknown as string[],
+    ),
+    getTranslations("pages.subscriptions.SubscriptionsPageContentTexts"),
+  ]);
   return {
     gridListTexts,
     sortingPlansSortingOptions,
     dietDropdownTexts,
+    objectiveDropDownTexts,
     title: t("title"),
     header: t("header"),
   };
 }
 
 export async function getSingleSubscriptionTexts(): Promise<SingleSubscriptionTexts> {
-  const [elementHeaderTexts, nutritionalTableTexts, ingredientPieChartTexts] =
-    await Promise.all([
-      getElementHeaderTexts(),
-      getNutritionalTableTexts(),
-      getIngredientPieChartTexts(),
-    ]);
+  const [
+    elementHeaderTexts,
+    nutritionalTableTexts,
+    ingredientPieChartTexts,
+    singleDayTexts,
+  ] = await Promise.all([
+    getElementHeaderTexts(),
+    getNutritionalTableTexts(),
+    getIngredientPieChartTexts(),
+    getSingleDayTexts(),
+  ]);
 
-  return { elementHeaderTexts, nutritionalTableTexts, ingredientPieChartTexts };
+  return {
+    elementHeaderTexts,
+    nutritionalTableTexts,
+    ingredientPieChartTexts,
+    singleDayTexts,
+  };
 }
 
 export async function getAdminOrdersPageTexts(): Promise<AdminOrdersPageTexts> {
@@ -639,7 +1176,7 @@ export async function getAdminOrdersPageTexts(): Promise<AdminOrdersPageTexts> {
     getOrderTableTexts(),
     getSortingItemSortingOptions("orders", sortingOrdersSortingOptionsKeys),
     getThemeSwitchTexts(),
-    getAdminMenuTexts(),
+    getSidebarMenuTexts("admin", adminGroupLabels, adminLabels, adminSubLabels),
   ]);
 
   return {
@@ -686,7 +1223,7 @@ export async function getAdminDashboardPageTexts(): Promise<AdminDashboardPageTe
     getAllRelativeItemTexts(),
     getThemeSwitchTexts(),
     getRelativeItemsSummaryTexts(),
-    getAdminMenuTexts(),
+    getSidebarMenuTexts("admin", adminGroupLabels, adminLabels, adminSubLabels),
   ]);
 
   return {
@@ -704,7 +1241,12 @@ export async function getAdminMonthlySalesTexts(): Promise<AdminMonthlySalesText
       getTranslations("pages.admin.AdminMonthlySalesTexts"),
       getMonthlySalesTexts("orders"),
       getThemeSwitchTexts(),
-      getAdminMenuTexts(),
+      getSidebarMenuTexts(
+        "admin",
+        adminGroupLabels,
+        adminLabels,
+        adminSubLabels,
+      ),
     ],
   );
   return {
@@ -721,7 +1263,12 @@ export async function getAdminCountriesTexts(): Promise<AdminCountriesTexts> {
       getTranslations("pages.admin.AdminCountriesTexts"),
       getThemeSwitchTexts(),
       getGeographyChartTexts(),
-      getAdminMenuTexts(),
+      getSidebarMenuTexts(
+        "admin",
+        adminGroupLabels,
+        adminLabels,
+        adminSubLabels,
+      ),
     ]);
   return {
     title: t("title"),
@@ -737,7 +1284,7 @@ export async function getAdminDailySalesTexts(): Promise<AdminDailySalesTexts> {
     getTranslations("pages.admin.AdminDailySalesTexts"),
     getDailySalesTexts("orders"),
     getThemeSwitchTexts(),
-    getAdminMenuTexts(),
+    getSidebarMenuTexts("admin", adminGroupLabels, adminLabels, adminSubLabels),
   ]);
   return {
     title: t("title"),
@@ -748,26 +1295,46 @@ export async function getAdminDailySalesTexts(): Promise<AdminDailySalesTexts> {
   };
 }
 export async function getUserMonthlySalesPageTexts(): Promise<UserMonthlySalesPageTexts> {
-  const [t, monthlySalesTexts] = await Promise.all([
-    getTranslations("pages.plans.UserMonthlySalesPageTexts"),
-    getMonthlySalesTexts("plans"),
-  ]);
+  const [t, monthlySalesTexts, themeSwitchTexts, menuTexts] = await Promise.all(
+    [
+      getTranslations("pages.plans.UserMonthlySalesPageTexts"),
+      getMonthlySalesTexts("plans"),
+      getThemeSwitchTexts(),
+      getSidebarMenuTexts(
+        "trainer",
+        trainerGroupLabels,
+        trainerLabels,
+        trainerSubLabels,
+      ),
+    ],
+  );
   return {
     title: t("title"),
     header: t("header"),
     monthlySalesTexts,
+    themeSwitchTexts,
+    menuTexts,
   };
 }
 
 export async function getUserDailySalesPageTexts(): Promise<UserDailySalesPageTexts> {
-  const [t, dailySalesTexts] = await Promise.all([
+  const [t, dailySalesTexts, themeSwitchTexts, menuTexts] = await Promise.all([
     getTranslations("pages.plans.UserDailySalesPageTexts"),
     getDailySalesTexts("plans"),
+    getThemeSwitchTexts(),
+    getSidebarMenuTexts(
+      "trainer",
+      trainerGroupLabels,
+      trainerLabels,
+      trainerSubLabels,
+    ),
   ]);
   return {
     title: t("title"),
     header: t("header"),
     dailySalesTexts,
+    themeSwitchTexts,
+    menuTexts,
   };
 }
 
@@ -776,7 +1343,12 @@ export async function getUserAdminMonthlySalesPageTexts(): Promise<UserAdminMont
     [
       getTranslations("pages.admin.UserAdminMonthlySalesPageTexts"),
       getMonthlySalesTexts("plans"),
-      getAdminMenuTexts(),
+      getSidebarMenuTexts(
+        "admin",
+        adminGroupLabels,
+        adminLabels,
+        adminSubLabels,
+      ),
       getThemeSwitchTexts(),
     ],
   );
@@ -793,7 +1365,7 @@ export async function getUserAdminDailySalesPageTexts(): Promise<UserAdminDailyS
   const [t, dailySalesTexts, menuTexts, themeSwitchTexts] = await Promise.all([
     getTranslations("pages.admin.UserAdminDailySalesPageTexts"),
     getDailySalesTexts("plans"),
-    getAdminMenuTexts(),
+    getSidebarMenuTexts("admin", adminGroupLabels, adminLabels, adminSubLabels),
     getThemeSwitchTexts(),
   ]);
   return {
@@ -835,7 +1407,7 @@ export async function getAdminEmailPageTexts(): Promise<AdminEmailPageTexts> {
   const [adminEmail, themeSwitchTexts, menuTexts, t] = await Promise.all([
     getAdminEmailTexts(),
     getThemeSwitchTexts(),
-    getAdminMenuTexts(),
+    getSidebarMenuTexts("admin", adminGroupLabels, adminLabels, adminSubLabels),
     getTranslations("pages.admin.AdminEmailPageTexts"),
   ]);
 
@@ -852,7 +1424,7 @@ export async function getAdminKanbanTexts(): Promise<AdminKanbanTexts> {
   const [t, themeSwitchTexts, menuTexts, kanbanBoardTexts] = await Promise.all([
     getTranslations("pages.admin.AdminKanbanTexts"),
     getThemeSwitchTexts(),
-    getAdminMenuTexts(),
+    getSidebarMenuTexts("admin", adminGroupLabels, adminLabels, adminSubLabels),
     getKanbanBoardTexts(),
   ]);
   return {
@@ -863,6 +1435,28 @@ export async function getAdminKanbanTexts(): Promise<AdminKanbanTexts> {
     kanbanBoardTexts,
   };
 }
+
+export async function getTrainerKanbanPageTexts(): Promise<TrainerKanbanPageTexts> {
+  const [t, themeSwitchTexts, menuTexts, kanbanBoardTexts] = await Promise.all([
+    getTranslations("pages.trainer.TrainerKanbanPageTexts"),
+    getThemeSwitchTexts(),
+    getSidebarMenuTexts(
+      "trainer",
+      trainerGroupLabels,
+      trainerLabels,
+      trainerSubLabels,
+    ),
+    getKanbanBoardTexts(),
+  ]);
+  return {
+    title: t("title"),
+    header: t("header"),
+    themeSwitchTexts,
+    menuTexts,
+    kanbanBoardTexts,
+  };
+}
+
 export async function getKanbanPageTexts(): Promise<KanbanPageTexts> {
   const [t, kanbanBoardTexts] = await Promise.all([
     getTranslations("pages.kanban.KanbanPageTexts"),

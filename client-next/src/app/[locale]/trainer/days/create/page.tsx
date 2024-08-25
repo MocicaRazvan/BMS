@@ -1,0 +1,60 @@
+import { getUser } from "@/lib/user";
+import { getDayFromTexts } from "@/texts/components/forms";
+import { Suspense } from "react";
+import LoadingSpinner from "@/components/common/loading-spinner";
+import DayForm, { DayFromTexts } from "@/components/forms/day-form";
+import { ThemeSwitchTexts } from "@/texts/components/nav";
+import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
+import { getCreateDayPageTexts } from "@/texts/pages";
+import SidebarContentLayout from "@/components/sidebar/sidebar-content-layout";
+import { Locale } from "@/navigation";
+import { Metadata } from "next";
+import { getIntlMetadata } from "@/texts/metadata";
+import { unstable_setRequestLocale } from "next-intl/server";
+interface Props {
+  params: { locale: Locale };
+}
+
+export async function generateMetadata({
+  params: { locale },
+}: Props): Promise<Metadata> {
+  return await getIntlMetadata(
+    "trainer.CreateDay",
+    "/trainer/days/create",
+    locale,
+  );
+}
+export interface CreateDayPageTexts {
+  dayFormTexts: DayFromTexts;
+  themeSwitchTexts: ThemeSwitchTexts;
+  menuTexts: SidebarMenuTexts;
+}
+
+export default async function CreateDayPage({ params: { locale } }: Props) {
+  unstable_setRequestLocale(locale);
+  const [authUser, { dayFormTexts, ...rest }] = await Promise.all([
+    getUser(),
+    getCreateDayPageTexts(),
+  ]);
+
+  return (
+    <SidebarContentLayout
+      navbarProps={{
+        title: dayFormTexts.baseFormTexts.header,
+        ...rest,
+        authUser,
+        mappingKey: "trainer",
+      }}
+    >
+      <main className="flex items-center justify-center px-6 py-10">
+        <Suspense fallback={<LoadingSpinner />}>
+          <DayForm
+            {...dayFormTexts}
+            authUser={authUser}
+            path={"/days/create/meals"}
+          />
+        </Suspense>
+      </main>
+    </SidebarContentLayout>
+  );
+}

@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { getTranslations } from "next-intl/server";
 import { FormType } from "@/texts/components/forms";
+import { dayTypes, planObjectives } from "@/types/dto";
 
 export const fileItemSchema = z.object({
   id: z.union([z.string(), z.number()]),
@@ -589,7 +590,8 @@ export interface PlanSchemaTexts
   extends TitleBodySchemaTexts,
     ImageSchemaTexts {
   minPrice: string;
-  minRecipes: string;
+  minDays: string;
+  objective: string;
 }
 
 export async function getPlanSchemaTexts(): Promise<PlanSchemaTexts> {
@@ -603,20 +605,93 @@ export async function getPlanSchemaTexts(): Promise<PlanSchemaTexts> {
     ...titleBodyTexts,
     ...imageSchemaTexts,
     minPrice: t("minPrice"),
-    minRecipes: t("minRecipes"),
+    minDays: t("minDays"),
+    objective: t("objective"),
   };
 }
 
 export const getPlanSchema = (texts: PlanSchemaTexts) =>
   z
     .object({
-      recipes: z
-        .array(z.coerce.number({ invalid_type_error: texts.minPrice }))
-        .min(1, texts.minPrice),
-      price: z.coerce.number().min(1, texts.minRecipes),
+      days: z
+        .array(z.coerce.number({ invalid_type_error: texts.minDays }))
+        .min(1, texts.minDays),
+      price: z.coerce.number().min(1, texts.minPrice),
+      objective: z.enum(planObjectives as [string, ...string[]], {
+        invalid_type_error: texts.objective,
+      }),
     })
     .and(getTitleBodySchema(texts))
     .and(getImageSchema(texts));
+
+export interface MealSchemaTexts {
+  hourPeriod: string;
+  minutePeriod: string;
+  minRecipes: string;
+  periodUsed: string;
+}
+
+export async function getMealSchemaTexts(): Promise<MealSchemaTexts> {
+  const t = await getTranslations("zod.MealSchemaTexts");
+  return {
+    hourPeriod: t("hourPeriod"),
+    minutePeriod: t("minutePeriod"),
+    minRecipes: t("minRecipes"),
+    periodUsed: t("periodUsed"),
+  };
+}
+
+export const getMealSchema = (texts: MealSchemaTexts) =>
+  z.object({
+    period: z.object({
+      hour: z.coerce
+        .number({ invalid_type_error: texts.hourPeriod })
+        .min(0, texts.hourPeriod)
+        .max(23, texts.hourPeriod),
+      minute: z.coerce
+        .number({ invalid_type_error: texts.minutePeriod })
+        .min(0, texts.minutePeriod)
+        .max(59, texts.minutePeriod),
+    }),
+    recipes: z
+      .array(z.coerce.number({ invalid_type_error: texts.minRecipes }))
+      .min(1, texts.minRecipes),
+  });
+
+export interface DaySchemaTexts extends TitleBodySchemaTexts {
+  type: string;
+  minMeals: string;
+  period: string;
+  minRecipes: string;
+  meals: MealSchemaTexts;
+}
+
+export async function getDaySchemaTexts(): Promise<DaySchemaTexts> {
+  const [titleBodyTexts, meals, t] = await Promise.all([
+    getTitleBodySchemaTexts(),
+    getMealSchemaTexts(),
+    getTranslations("zod.DaySchemaTexts"),
+  ]);
+
+  return {
+    ...titleBodyTexts,
+    meals,
+    type: t("type"),
+    minMeals: t("minMeals"),
+    period: t("period"),
+    minRecipes: t("minRecipes"),
+  };
+}
+
+export const getDaySchema = (texts: DaySchemaTexts) =>
+  z
+    .object({
+      type: z.enum(dayTypes as [string, ...string[]], {
+        invalid_type_error: texts.type,
+      }),
+      meals: z.array(getMealSchema(texts.meals)).min(1, texts.minMeals),
+    })
+    .and(getTitleBodySchema(texts));
 
 export interface CheckoutSchemaTexts {
   confirmPrice: string;
@@ -814,6 +889,9 @@ export type RegisterType = z.infer<ReturnType<typeof getRegistrationSchema>>;
 export type UpdateProfileType = z.infer<
   ReturnType<typeof getUpdateProfileSchema>
 >;
+
+export type MealSchemaType = z.infer<ReturnType<typeof getMealSchema>>;
+export type DaySchemaType = z.infer<ReturnType<typeof getDaySchema>>;
 
 // export interface BasePropsForm {
 //   schema: SzType;

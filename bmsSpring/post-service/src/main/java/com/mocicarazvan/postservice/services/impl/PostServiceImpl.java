@@ -80,22 +80,23 @@ public class PostServiceImpl extends ApprovedServiceImpl<Post, PostBody, PostRes
 
 
     @Override
-    public Flux<PageableResponse<ResponseWithUserDto<PostResponse>>> getPostsFilteredWithUser(String title, PageableBody pageableBody, String userId, Boolean approved, List<String> tags) {
+    public Flux<PageableResponse<ResponseWithUserDto<PostResponse>>> getPostsFilteredWithUser(String title, PageableBody pageableBody, String userId, Boolean approved, List<String> tags, Boolean liked) {
 
-        return getPostsFiltered(title, pageableBody, userId, approved, tags).concatMap(this::getPageableWithUser);
+        return getPostsFiltered(title, pageableBody, userId, approved, tags, liked).concatMap(this::getPageableWithUser);
     }
 
     @Override
-    public Flux<PageableResponse<PostResponse>> getPostsFiltered(String title, PageableBody pageableBody, String userId, Boolean approved, List<String> tags) {
+    public Flux<PageableResponse<PostResponse>> getPostsFiltered(String title, PageableBody pageableBody, String userId, Boolean approved, List<String> tags, Boolean liked) {
         final String finalTitle = title == null ? "" : title;
+        final Long likedUserId = (liked != null && liked) ? Long.valueOf(userId) : null;
 
         final boolean approvedNotNull = approved != null;
         return protectRoute(approvedNotNull, pageableBody, userId)
                 .flatMapMany(pr -> pageableUtils.createPageableResponse(
-                        postExtendedRepository.getPostsFiltered(finalTitle, approved, tags, pr)
+                        postExtendedRepository.getPostsFiltered(finalTitle, approved, tags, likedUserId, pr)
                                 .doOnNext(post -> log.error("post: " + post))
                                 .map(modelMapper::fromModelToResponse),
-                        postExtendedRepository.countPostsFiltered(finalTitle, approved, tags)
+                        postExtendedRepository.countPostsFiltered(finalTitle, approved, tags, likedUserId)
                                 .doOnNext(count -> log.error("count: " + count))
                         , pr
                 ));

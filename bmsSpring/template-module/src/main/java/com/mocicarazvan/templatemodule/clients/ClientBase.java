@@ -28,9 +28,11 @@ import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientRequestException;
+import org.springframework.web.util.UriBuilder;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.net.URI;
 import java.util.List;
 import java.util.function.Function;
 
@@ -56,45 +58,52 @@ public abstract class ClientBase {
 
     }
 
+    public <T> Flux<T> getBaseFlux(WebClient webClient, String userId, Function<UriBuilder, URI> uriFunction, ParameterizedTypeReference<T> typeRef, Function<ThrowFallback, Flux<? extends T>> fallback) {
+        if (serviceUrl == null) {
+            return Flux.error(new IllegalArgumentException("Service url is null"));
+        }
+        return webClient
+                .get()
+                .uri(uriFunction)
+                .accept(MediaType.APPLICATION_NDJSON)
+                .header(RequestsUtils.AUTH_HEADER, userId)
+                .retrieve()
+                .onStatus(HttpStatusCode::isError, response -> handleClientException(response, serviceUrl))
+                .bodyToFlux(typeRef)
+                .transformDeferred(RetryOperator.of(retry))
+                .transformDeferred(CircuitBreakerOperator.of(circuitBreaker))
+                .transformDeferred(RateLimiterOperator.of(rateLimiter))
+                .onErrorResume(WebClientRequestException.class, this::handleWebRequestException)
+                .onErrorResume(ThrowFallback.class, fallback);
+    }
+
+    public <T> Mono<T> getBaseMono(WebClient webClient, String userId, Function<UriBuilder, URI> uriFunction, ParameterizedTypeReference<T> typeRef, Function<ThrowFallback, Mono<? extends T>> fallback) {
+        if (serviceUrl == null) {
+            return Mono.error(new IllegalArgumentException("Service url is null"));
+        }
+        return webClient
+                .get()
+                .uri(uriFunction)
+                .accept(MediaType.APPLICATION_NDJSON)
+                .header(RequestsUtils.AUTH_HEADER, userId)
+                .retrieve()
+                .onStatus(HttpStatusCode::isError, response -> handleClientException(response, serviceUrl))
+                .bodyToMono(typeRef)
+                .transformDeferred(RetryOperator.of(retry))
+                .transformDeferred(CircuitBreakerOperator.of(circuitBreaker))
+                .transformDeferred(RateLimiterOperator.of(rateLimiter))
+                .onErrorResume(WebClientRequestException.class, this::handleWebRequestException)
+                .onErrorResume(ThrowFallback.class, fallback);
+    }
+
     public <T> Mono<T> getItemById(String id, String userId, Class<T> clazz, Function<ThrowFallback, Mono<? extends T>> fallback) {
-//        if (serviceUrl == null) {
-//            return Mono.error(new IllegalArgumentException("Service url is null"));
-//        }
-//        return getClient()
-//                .get()
-//                .uri(uriBuilder -> uriBuilder.path("/{id}").build(id))
-//                .accept(MediaType.APPLICATION_NDJSON)
-//                .header(RequestsUtils.AUTH_HEADER, userId)
-//                .retrieve()
-//                .onStatus(HttpStatusCode::isError, response -> handleClientException(response, serviceUrl))
-//                .bodyToMono(clazz)
-//                .transformDeferred(RetryOperator.of(retry))
-//                .transformDeferred(CircuitBreakerOperator.of(circuitBreaker))
-//                .transformDeferred(RateLimiterOperator.of(rateLimiter))
-//                .onErrorResume(WebClientRequestException.class, this::handleWebRequestException)
-//                .onErrorResume(ThrowFallback.class, fallback);
+
 
         return getItemById(id, userId, clazz, "", fallback);
     }
 
     public <T> Mono<T> getItemById(String id, String userId, Class<T> clazz, String path, Function<ThrowFallback, Mono<? extends T>> fallback) {
-//        if (serviceUrl == null) {
-//            return Mono.error(new IllegalArgumentException("Service url is null"));
-//        }
-//
-//        return getClient()
-//                .get()
-//                .uri(uriBuilder -> uriBuilder.path(path + "/{id}").build(id))
-//                .accept(MediaType.APPLICATION_NDJSON)
-//                .header(RequestsUtils.AUTH_HEADER, userId)
-//                .retrieve()
-//                .onStatus(HttpStatusCode::isError, response -> handleClientException(response, serviceUrl))
-//                .bodyToMono(clazz)
-//                .transformDeferred(RetryOperator.of(retry))
-//                .transformDeferred(CircuitBreakerOperator.of(circuitBreaker))
-//                .transformDeferred(RateLimiterOperator.of(rateLimiter))
-//                .onErrorResume(WebClientRequestException.class, this::handleWebRequestException)
-//                .onErrorResume(ThrowFallback.class, fallback);
+
         return getItemById(id, userId, ParameterizedTypeReference.forType(clazz), path, fallback);
 
     }

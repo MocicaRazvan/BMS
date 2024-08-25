@@ -79,7 +79,8 @@
     },
     "PlanSchemaTexts": {
       "minPrice": "Prețul trebuie să fie cel puțin 1",
-      "minRecipes": "Este necesar cel puțin o rețetă"
+      "minDays": "Este necesar cel puțin o zi",
+      "objective": "Vă rugăm să selectați un obiectiv valid"
     },
     "CheckoutSchemaTexts": {
       "confirmPrice": "Suma confirmată trebuie să corespundă exact cu prețul total de {price, number, currency}"
@@ -112,10 +113,23 @@
       "validActivity": "Vă rugăm să selectați un nivel de activitate valid",
       "validIntake": "Vă rugăm să selectați un obiectiv valid"
     },
+    "MealSchemaTexts": {
+      "hourPeriod": "Ora trebuie să fie între 0 și 23",
+      "minutePeriod": "Minutul trebuie să fie între 0 și 59",
+      "minRecipes": "Este necesar cel puțin o rețetă",
+      "periodUsed": "Intervalul de timp este deja folosit"
+    },
+    "DaySchemaTexts": {
+      "type": "Vă rugăm să selectați un tip",
+      "minMeals": "Este necesară cel puțin o masă",
+      "period": "Vă rugăm să selectați un interval de timp",
+      "minRecipes": "Este necesar cel puțin o rețetă"
+    },
     "forms": {
       "components": {
         "InputFile": {
           "errors": "Este necesară cel puțin o {type}",
+          "loading": "Se încarcă {type}...",
           "types": {
             "image": "imagine",
             "video": "videoclip",
@@ -161,7 +175,9 @@
           "noResults": "Nu s-au găsit rezultate",
           "type": {
             "ingredients": "ingrediente",
-            "recipes": "rețete"
+            "recipes": "rețete",
+            "meals": "mese",
+            "days": "zile"
           }
         }
       },
@@ -228,6 +244,19 @@
           "toastAction": "Vezi planul",
           "descriptionToast": "{type, select, create {Planul a fost creat cu succes} update {Planul a fost actualizat cu succes} other {Plan}}",
           "error": "Planul nu a putut fi {type, select, create {creat} update {actualizat} other {Plan}}"
+        }
+      },
+      "DayForm": {
+        "type": {
+          "create": "create",
+          "update": "update"
+        },
+        "BaseFormTexts": {
+          "header": "{type, select, create {Creează o zi} update {Actualizează ziua} other {Zi}}",
+          "altToast": "{type, select, create {Ziua a fost creată} update {Ziua a fost actualizată} other {Zi}}",
+          "toastAction": "Vezi ziua",
+          "descriptionToast": "{type, select, create {Ziua a fost creată cu succes} update {Ziua a fost actualizată cu succes} other {Zi}}",
+          "error": "Ziua nu a putut fi {type, select, create {creat} update {actualizat} other {Zi}}"
         }
       }
     }
@@ -349,9 +378,17 @@
       "PlanFormTexts": {
         "priceLabel": "Preț",
         "pricePlaceholder": "Introduceți prețul",
-        "recipesLabel": "Rețete",
-        "recipesPlaceholder": "Selectați rețetele",
-        "dietMessage": "Planul va fi pentru"
+        "daysLabel": "Zile",
+        "daysPlaceholder": "Selectați zilele",
+        "dietMessage": "Planul va fi pentru",
+        "objectiveLabel": "Obiectiv",
+        "objectivePlaceholder": "Selectați obiectivul",
+        "dayIndex": "Ziua cu numărul: ",
+        "objectives": {
+          "GAIN_MASS": "Câștig masă",
+          "LOSE_WEIGHT": "Pierde greutate",
+          "MAINTAIN_WEIGHT": "Menține greutatea"
+        }
       },
       "CheckoutDrawerTexts": {
         "error": "Comanda nu a putut fi finalizată",
@@ -381,6 +418,24 @@
             "placeholder": "Introduceți conținutul"
           }
         }
+      },
+      "DayFormTexts": {
+        "typeLabel": "Tip",
+        "typePlaceholder": "Selectați tipul",
+        "mealsLabel": "Mese",
+        "addMeal": "Adăugați o masă",
+        "hourLabel": "Oră",
+        "hourPlaceholder": "Introduceți ora",
+        "hourDescription": "Ora trebuie să fie între 0 și 23",
+        "minuteLabel": "Minut",
+        "minutePlaceholder": "Introduceți minutul",
+        "minuteDescription": "Minutul trebuie să fie între 0 și 59",
+        "recipesLabel": "Rețete",
+        "submitMeal": "Salvați masa",
+        "editMeal": "Editați rețeta",
+        "removeMeal": "Eliminați rețeta",
+        "mealType": "Masa va fi pentru: ",
+        "dayDietType": "Ziua va fi pentru: "
       }
     },
     "nav": {
@@ -420,7 +475,9 @@
         "plans": "Planuri",
         "subscriptions": "Planuri cumpărate",
         "orders": "Comenzi",
-        "kanban": "Kanban"
+        "kanban": "Kanban",
+        "trainerDashboard": "Panoul tău",
+        "calculator": "Calculator"
       },
       "ChatMessageNotificationContentTexts": {
         "content": "{count, plural, one {Ai {count} mesaj nou de la {sender}} few {Ai {count} mesaje noi de la {sender}} other {Ai {count} de mesaje noi de la {sender}}}"
@@ -538,7 +595,8 @@
     },
     "common": {
       "ElementHeaderTexts": {
-        "notApproved": "Neaprobat"
+        "notApproved": "Neaprobat",
+        "approved": "Aprobat"
       },
       "RadioSortTexts": {
         "noSort": "Niciun criteriu de sortare"
@@ -615,6 +673,25 @@
           "CARNIVORE": "Carnivor",
           "OMNIVORE": "Omnivor"
         }
+      },
+      "UseObjectiveDropdownTexts": {
+        "noFilterLabel": "Toate obiectivele",
+        "labels": {
+          "GAIN_MASS": "Câștigă masă",
+          "LOSE_WEIGHT": "Pierde greutate",
+          "MAINTAIN_WEIGHT": "Menține greutatea"
+        }
+      },
+      "UseTypeDropdownTexts": {
+        "noFilterLabel": "Toate tipurile",
+        "labels": {
+          "LOW_CARB": "Carbohidrați scăzuți",
+          "HIGH_CARB": "Carbohidrați mari",
+          "HIGH_PROTEIN": "Proteine mari",
+          "LOW_FAT": "Grăsime scăzută",
+          "HIGH_FAT": "Grăsime mare",
+          "LOW_PROTEIN": "Proteine scăzute"
+        }
       }
     },
     "table": {
@@ -654,6 +731,9 @@
           "city": "oraș",
           "state": "municipiu"
         }
+      },
+      "DayTableTexts": {
+        "search": "Caută în titlu..."
       },
       "columns": {
         "posts": {
@@ -772,6 +852,7 @@
           "type": "Dietă",
           "count": "#comenzi",
           "price": "Preț",
+          "objective": "Obiectiv",
           "approved": {
             "header": "Aprobat",
             "true": "Da",
@@ -793,6 +874,22 @@
             "disapprove": "Dezaprobă planul",
             "display": "Afișează planul",
             "hide": "Ascunde planul"
+          }
+        },
+        "days": {
+          "id": "ID",
+          "title": "Titlu",
+          "count": "#planuri",
+          "userLikes": "# de aprecieri",
+          "userDislikes": "# de dezaprobări",
+          "createdAt": "Data creării",
+          "updatedAt": "Ultima actualizare",
+          "type": "Tip",
+          "actions": {
+            "button": "Acțiuni",
+            "label": "Acțiuni",
+            "view": "Vizualizează ziua",
+            "update": "Actualizează ziua"
           }
         },
         "orders": {
@@ -902,36 +999,72 @@
         "tasksLabel": "Sarcini"
       }
     },
-    "admin": {
-      "AdminLayout": {
-        "mainSite": "Site principal"
+    "sidebar": {
+      "admin": {
+        "SidebarLayoutTexts": {
+          "mainSite": "Site principal"
+        },
+        "SidebarMenuTexts": {
+          "mainSite": "Site principal",
+          "groupLabels": {
+            "contents": "Conținut",
+            "sales": "Vânzări",
+            "settings": "Setări",
+            "company": "Companie"
+          },
+          "labels": {
+            "dashboard": "Panou de administrare",
+            "posts": "Postări",
+            "recipes": "Rețete",
+            "plans": "Planuri",
+            "ingredients": "Ingrediente",
+            "users": "Utilizatori",
+            "orders": "Comenzi",
+            "monthlySales": "Vânzări lunare",
+            "dailySales": "Vânzări zilnice",
+            "countries": "Țări",
+            "account": "Cont",
+            "email": "Email",
+            "kanban": "Kanban"
+          },
+          "subLabels": {
+            "allIngredients": "Toate ingredientele",
+            "createIngredient": "Creează ingredient"
+          }
+        }
       },
-      "AdminMenuTexts": {
-        "mainSite": "Site principal",
-        "groupLabels": {
-          "contents": "Conținut",
-          "sales": "Vânzări",
-          "settings": "Setări",
-          "company": "Companie"
+      "trainer": {
+        "SidebarLayoutTexts": {
+          "mainSite": "Site principal"
         },
-        "labels": {
-          "dashboard": "Panou de administrare",
-          "posts": "Postări",
-          "recipes": "Rețete",
-          "plans": "Planuri",
-          "ingredients": "Ingrediente",
-          "users": "Utilizatori",
-          "orders": "Comenzi",
-          "monthlySales": "Vânzări lunare",
-          "dailySales": "Vânzări zilnice",
-          "countries": "Țări",
-          "account": "Cont",
-          "email": "Email",
-          "kanban": "Kanban"
-        },
-        "subLabels": {
-          "allIngredients": "Toate ingredientele",
-          "createIngredient": "Creează ingredient"
+        "SidebarMenuTexts": {
+          "mainSite": "Site principal",
+          "groupLabels": {
+            "contents": "Conținut",
+            "sales": "Vânzări"
+          },
+          "labels": {
+            "dashboard": "Tablou de bord",
+            "posts": "Postări",
+            "recipes": "Rețete",
+            "plans": "Planuri",
+            "ingredients": "Ingrediente",
+            "orders": "Comenzile tale",
+            "monthlySales": "Vânzări lunare",
+            "dailySales": "Vânzări zilnice",
+            "kanban": "Kanban",
+            "days": "Zile"
+          },
+          "subLabels": {
+            "yourPosts": "Postările tale",
+            "createPost": "Creează postare",
+            "yourRecipes": "Rețetele tale",
+            "createRecipe": "Creează rețetă",
+            "yourPlans": "Planurile tale",
+            "createPlan": "Creează plan",
+            "yourDays": "Zilele tale",
+            "createDay": "Creează zi"
+          }
         }
       }
     },
@@ -1035,6 +1168,11 @@
         "emptyContent": "Întrebați orice doriți să știți despre sănătate și nutriție, iar noi vom face tot posibilul să vă oferim răspunsul corect. Întotdeauna consultați un profesionist înainte de a face modificări în dieta sau stilul dvs. de viață.",
         "inputPlaceholder": "Întrebați ceva..."
       }
+    },
+    "days": {
+      "SingleDayTexts": {
+        "meals": "Mese"
+      }
     }
   },
   "pages": {
@@ -1090,7 +1228,8 @@
       },
       "ApprovedPostsTexts": {
         "title": "Postări",
-        "header": "Realizate cu dragoste de antrenorii noștri și aprobat de echipa noastră."
+        "header": "Realizate cu dragoste de antrenorii noștri și aprobat de echipa noastră.",
+        "likedLabel": "Arată doar postările apreciate"
       },
       "UserPostsPageContentTexts": {
         "title": "Postările tale",
@@ -1167,6 +1306,26 @@
         "tableCaption": "Informații nutriționale"
       }
     },
+    "days": {
+      "SortingOptions": {
+        "createdAt": {
+          "asc": "Cele mai vechi",
+          "desc": "Cele mai noi"
+        },
+        "updatedAt": {
+          "asc": "Prima actualizare",
+          "desc": "Ultima actualizare"
+        },
+        "title": {
+          "asc": "Alfabetic după titlu",
+          "desc": "Invers alfabetic după titlu"
+        }
+      },
+      "UserDaysPageTexts": {
+        "title": "Zilele tale",
+        "header": "Aici poți vedea și gestiona toate zilele tale."
+      }
+    },
     "plans": {
       "SortingOptions": {
         "createdAt": {
@@ -1204,7 +1363,9 @@
         "buyableLabel": "Cumpărabil"
       },
       "UserPlanPageContentTexts": {
-        "price": "Preț"
+        "price": "Preț: ",
+        "buyPrompt": "Cumpără planul pentru a-l vedea complet!",
+        "numberDays": "Numărul de zile: "
       },
       "UserMonthlySalesPageTexts": {
         "title": "Vânzări lunare",
@@ -1336,6 +1497,30 @@
         "title": "Toți utilizatorii",
         "header": "Aici poți vedea și gestiona toți utilizatorii de pe platformă."
       },
+      "AdminUserPageTexts": {
+        "title": "Profilul utilizatorului ",
+        "header": "Aici poți vedea profilul utilizatorului. "
+      },
+      "AdminPostPageTexts": {
+        "title": "Postare",
+        "header": "Aici poți vedea și gestiona postarea. "
+      },
+      "AdminRecipePageTexts": {
+        "title": "Rețetă",
+        "header": "Aici poți vedea și gestiona rețeta. "
+      },
+      "AdminPlanPageTexts": {
+        "title": "Plan nutrițional",
+        "header": "Aici poți vedea și gestiona planul nutrițional. "
+      },
+      "AdminIngredientPageTexts": {
+        "title": "Ingredient",
+        "header": "Aici poți vedea și gestiona ingredientul. "
+      },
+      "AdminOrderPageTexts": {
+        "title": "Comandă",
+        "header": "Aici poți vedea și gestiona comanda. "
+      },
       "UserOrdersAdminPageTexts": {
         "title": "Toate comenzile lui ",
         "header": "Aici poți vedea și gestiona toate comenzile lui "
@@ -1391,6 +1576,27 @@
         "header": "Aici poți trimite un email din partea companiei "
       },
       "AdminKanbanTexts": {
+        "title": "Tablou Kanban",
+        "header": "Aici poți vedea și gestiona toate sarcinile pe care le-ai creat"
+      }
+    },
+    "trainer": {
+      "TrainerSingleIngredientPageTexts": {
+        "title": "Ingredient"
+      },
+      "TrainerPostPageTexts": {
+        "title": "Postare"
+      },
+      "TrainerSingleRecipePageTexts": {
+        "title": "Rețetă"
+      },
+      "SingleDayTrainerPageTexts": {
+        "title": "Zi"
+      },
+      "TrainerPlanPageTexts": {
+        "title": "Plan nutrițional"
+      },
+      "TrainerKanbanPageTexts": {
         "title": "Tablou Kanban",
         "header": "Aici poți vedea și gestiona toate sarcinile pe care le-ai creat"
       }
@@ -1581,6 +1787,163 @@
         "title": "Rețetele Tale",
         "description": "Rețetele tale pe Bro Meets Science",
         "keywords": "rețete, nutriție, informații, calorii, grăsimi, proteine, carbohidrați, zahăr, sare, afișează"
+      },
+      "CreateDay": {
+        "title": "Creează o zi",
+        "description": "Creează o zi nouă pe Bro Meets Science",
+        "keywords": "creează, zi, scrie, cunoștințe, informații, subiecte, profesioniști, gratuit, platformă"
+      },
+      "UpdateDay": {
+        "title": "Actualizează-ți ziua",
+        "description": "Actualizează-ți ziua pe Bro Meets Science",
+        "keywords": "actualizează, zi, scrie, cunoștințe, informații, subiecte, profesioniști, gratuit, platformă"
+      },
+      "SingleDay": {
+        "title": "Ziua ta",
+        "description": "Ziua ta pe Bro Meets Science",
+        "keywords": "vizualizare, zi, scrie, cunoștințe, informații, subiecte, profesioniști, gratuit, platformă"
+      },
+      "Kanban": {
+        "title": "Tablou Kanban",
+        "description": "Vezi și gestionează toate sarcinile pe care le-ai creat",
+        "keywords": "tablou kanban, sarcini, gestionare, creare, editare, ștergere, tablou kanban, sarcini, gestionare, creare, editare, ștergere, tablou kanban, sarcini"
+      },
+      "SinglePost": {
+        "title": "Postarea ta",
+        "description": "Postarea ta pe Bro Meets Science",
+        "keywords": "vizualizare, postare, scrie, cunoștințe, informații, subiecte, profesioniști, gratuit, platformă"
+      },
+      "TrainerDays": {
+        "title": "Zilele tale",
+        "description": "Zilele tale pe Bro Meets Science",
+        "keywords": "vizualizare, zile, scrie, cunoștințe, informații, subiecte, profesioniști, gratuit, platformă"
+      }
+    },
+    "admin": {
+      "Countries": {
+        "title": "Comenzi pe țări",
+        "description": "Statistici pe țări pentru comenzile de pe Bro Meets Science",
+        "keywords": "țări, statistici, comenzi, platformă"
+      },
+      "DailySales": {
+        "title": "Vânzări zilnice",
+        "description": "Vânzări zilnice pe Bro Meets Science",
+        "keywords": "zilnic, vânzări, vizualizare, platformă, comunitate, caracteristici, acces"
+      },
+      "Dashboard": {
+        "title": "Tablou de bord",
+        "description": "Rezumatul platformei pe Bro Meets Science",
+        "keywords": "rezumat, platformă, comunitate, caracteristici, acces"
+      },
+      "Email": {
+        "title": "Trimite email",
+        "description": "Trimite un email din partea companiei pe Bro Meets Science",
+        "keywords": "trimite, email, companie, platformă, comunitate, caracteristici, acces"
+      },
+      "CreateIngredient": {
+        "title": "Creează ingredient",
+        "description": "Creează un nou ingredient pe Bro Meets Science",
+        "keywords": "creează, ingredient, nutriție, informații, calorii, grăsimi, proteine, carbohidrați, zahăr, sare, afișare"
+      },
+      "UpdateIngredient": {
+        "title": "Actualizează ingredient",
+        "description": "Actualizează un ingredient pe Bro Meets Science",
+        "keywords": "actualizează, ingredient, nutriție, informații, calorii, grăsimi, proteine, carbohidrați, zahăr, sare, afișare"
+      },
+      "SingleIngredient": {
+        "title": "Ingredient",
+        "description": "Ingredient unic pe Bro Meets Science",
+        "keywords": "ingredient, nutriție, informații, calorii, grăsimi, proteine, carbohidrați, zahăr, sare, afișare"
+      },
+      "Ingredients": {
+        "title": "Ingrediente",
+        "description": "Gestionează ingredientele pe Bro Meets Science",
+        "keywords": "ingrediente, nutriție, informații, calorii, grăsimi, proteine, carbohidrați, zahăr, sare, afișare"
+      },
+      "Kanban": {
+        "title": "Tablou Kanban",
+        "description": "Vezi și gestionează toate sarcinile pe care le-ai creat",
+        "keywords": "tablou kanban, sarcini, gestionare, creare, editare, ștergere, tablou kanban, sarcini, gestionare, creare, editare, ștergere, tablou kanban, sarcini"
+      },
+      "MonthlySales": {
+        "title": "Vânzări lunare",
+        "description": "Vânzări lunare pe Bro Meets Science",
+        "keywords": "lunar, vânzări, vizualizare, platformă, comunitate, caracteristici, acces"
+      },
+      "Orders": {
+        "title": "Comenzi",
+        "description": "Toate comenzile pe Bro Meets Science",
+        "keywords": "comenzi, planuri, achiziționat, vizualizare, factură"
+      },
+      "SingleOrder": {
+        "title": "Comanda",
+        "description": "Comanda pe Bro Meets Science",
+        "keywords": "comanda, vizualizare, detalii"
+      },
+      "Plans": {
+        "title": "Planuri nutriționale",
+        "description": "Gestionează toate planurile nutriționale pe Bro Meets Science",
+        "keywords": "planuri, nutriție, informații, calorii, grăsimi, proteine, carbohidrați, zahăr, sare, afișare"
+      },
+      "SinglePlan": {
+        "title": "Plan nutrițional",
+        "description": "Plan nutrițional unic pe Bro Meets Science",
+        "keywords": "plan, nutriție, informații, calorii, grăsimi, proteine, carbohidrați, zahăr, sare, afișare"
+      },
+      "Posts": {
+        "title": "Postări",
+        "description": "Gestionează toate postările pe Bro Meets Science",
+        "keywords": "postări, nutriție, informații, calorii, grăsimi, proteine, carbohidrați, zahăr, sare, afișare"
+      },
+      "SinglePost": {
+        "title": "Postare",
+        "description": "Postare unică pe Bro Meets Science",
+        "keywords": "postare, nutriție, informații, calorii, grăsimi, proteine, carbohidrați, zahăr, sare, afișare"
+      },
+      "Recipes": {
+        "title": "Rețete",
+        "description": "Gestionează toate rețetele pe Bro Meets Science",
+        "keywords": "rețete, nutriție, informații, calorii, grăsimi, proteine, carbohidrați, zahăr, sare, afișare"
+      },
+      "SingleRecipe": {
+        "title": "Rețetă",
+        "description": "Rețetă unică pe Bro Meets Science",
+        "keywords": "rețetă, nutriție, informații, calorii, grăsimi, proteine, carbohidrați, zahăr, sare, afișare"
+      },
+      "Users": {
+        "title": "Utilizatori",
+        "description": "Gestionează toți utilizatorii pe Bro Meets Science",
+        "keywords": "utilizatori, platformă, comunitate, caracteristici, acces"
+      },
+      "UserDailySales": {
+        "title": "Vânzări zilnice pentru utilizator",
+        "description": "Vânzări zilnice pentru utilizator pe Bro Meets Science",
+        "keywords": "zilnic, vânzări, vizualizare, platformă, comunitate, caracteristici, acces"
+      },
+      "UserMonthlySales": {
+        "title": "Vânzări lunare pentru utilizator",
+        "description": "Vânzări lunare pentru utilizator pe Bro Meets Science",
+        "keywords": "lunar, vânzări, vizualizare, platformă, comunitate, caracteristici, acces"
+      },
+      "UserOrders": {
+        "title": "Comenzile utilizatorului",
+        "description": "Comenzile utilizatorului pe Bro Meets Science",
+        "keywords": "comenzi, utilizator, vizualizare, detalii"
+      },
+      "UserPlans": {
+        "title": "Planurile utilizatorului",
+        "description": "Planurile utilizatorului pe Bro Meets Science",
+        "keywords": "planuri, utilizator, vizualizare, detalii"
+      },
+      "UserPosts": {
+        "title": "Postările utilizatorului",
+        "description": "Postările utilizatorului pe Bro Meets Science",
+        "keywords": "postări, utilizator, vizualizare, detalii"
+      },
+      "UserRecipes": {
+        "title": "Rețetele utilizatorului",
+        "description": "Rețetele utilizatorului pe Bro Meets Science",
+        "keywords": "rețete, utilizator, vizualizare, detalii"
       }
     }
   }

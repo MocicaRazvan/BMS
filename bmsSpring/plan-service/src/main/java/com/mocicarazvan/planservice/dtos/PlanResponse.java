@@ -1,6 +1,7 @@
 package com.mocicarazvan.planservice.dtos;
 
 import com.mocicarazvan.planservice.enums.DietType;
+import com.mocicarazvan.planservice.enums.ObjectiveType;
 import com.mocicarazvan.templatemodule.dtos.generic.ApproveDto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -19,5 +20,6 @@ public class PlanResponse extends ApproveDto {
     private double price;
     private DietType type;
     private boolean display;
-    private List<Long> recipes;
+    private List<Long> days;
+    private ObjectiveType objective;
 }

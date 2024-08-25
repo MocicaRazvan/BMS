@@ -6,6 +6,7 @@ import LikesDislikes from "@/components/common/likes-dislikes";
 
 export interface ElementHeaderTexts {
   notApproved: string;
+  approved: string;
 }
 
 interface Props<T extends ApproveDto> extends ElementHeaderTexts {

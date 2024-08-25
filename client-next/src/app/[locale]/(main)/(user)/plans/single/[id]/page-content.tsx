@@ -23,6 +23,8 @@ export interface UserPlanPageContentTexts {
   elementHeaderTexts: ElementHeaderTexts;
   addToCartBtnTexts: AddToCartBtnTexts;
   price: string;
+  numberDays: string;
+  buyPrompt: string;
 }
 interface Props extends WithUser, UserPlanPageContentTexts {}
 
@@ -31,6 +33,8 @@ export default function UserPlanPageContent({
   elementHeaderTexts,
   price,
   addToCartBtnTexts,
+  buyPrompt,
+  numberDays,
 }: Props) {
   const { navigateToNotFound } = useClientNotFound();
   const {
@@ -87,9 +91,9 @@ export default function UserPlanPageContent({
     VEGETARIAN: "accent",
   };
   return (
-    <section className="w-full mx-auto max-w-[1500px] min-h-[calc(100vh-4rem)] flex-col items-center justify-center transition-all px-6 py-10 relative ">
+    <section className="w-full mx-auto max-w-[1500px] min-h-[calc(100vh-4rem)] flex-col items-center justify-center transition-all px-6 py-5 relative ">
       <div
-        className="sticky top-[4rem] z-10 shadow-sm p-4 w-[160px] rounded-xl
+        className="sticky top-[4rem] z-10 shadow-sm p-4 w-[200px] rounded-xl
       bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 overflow-hidden
        shadow-foreground/30 transition-all hover:scale-105
       "
@@ -104,6 +108,10 @@ export default function UserPlanPageContent({
               maximumFractionDigits: 2,
             })}
           </span>
+        </div>
+        <div className="mt-5 flex justify-center items-center w-full gap-2">
+          {numberDays}
+          <span className="font-bold">{planState.days.length}</span>
         </div>
         <div className="mt-6">
           <p
@@ -131,7 +139,12 @@ export default function UserPlanPageContent({
         <ProseText html={plan?.body} />
         <AuthorProfile author={user} />
       </div>
-      <div className="sticky bottom-0 mt-10  w-fit mx-auto  bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/70 p-2 rounded-md">
+      <div className={"w-full flex items-center justify-center mt-20 "}>
+        <h2 className="text-3xl md:text-4xl font-bold tracking-tighter">
+          {buyPrompt}
+        </h2>
+      </div>
+      <div className="sticky bottom-0 mt-4  w-fit mx-auto  bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/70 p-2 rounded-md">
         <AddToCartBtn authUser={authUser} plan={plan} {...addToCartBtnTexts} />
       </div>
     </section>

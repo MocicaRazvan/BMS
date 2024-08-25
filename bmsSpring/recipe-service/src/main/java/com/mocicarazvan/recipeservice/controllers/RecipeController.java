@@ -305,6 +305,12 @@ public class RecipeController implements ApproveController<Recipe, RecipeBody, R
                 .then(Mono.just(ResponseEntity.noContent().build()));
     }
 
+    @GetMapping(value = "/dietType", produces = {MediaType.APPLICATION_NDJSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
+    public Mono<ResponseEntity<DietType>> determineMostRestrictiveDietType(@RequestParam List<Long> ids) {
+        return recipeService.determineMostRestrictiveDietType(ids)
+                .map(ResponseEntity::ok);
+    }
+
     @Override
     @PutMapping
     public Mono<ResponseEntity<Void>> validIds(List<Long> ids) {

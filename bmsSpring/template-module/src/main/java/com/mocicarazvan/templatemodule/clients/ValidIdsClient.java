@@ -35,7 +35,7 @@ public abstract class ValidIdsClient<R extends WithUserDto> extends ClientBase {
         }
         return getClient()
                 .get()
-                .uri(uriBuilder -> uriBuilder.path("/internal/validIds").queryParam("ids", ids).build())
+                .uri(uriBuilder -> uriBuilder.path("/internal/validIds").queryParam("ids", ids.stream().distinct().toList()).build())
                 .accept(MediaType.APPLICATION_NDJSON)
                 .header(RequestsUtils.AUTH_HEADER, userId)
                 .retrieve()

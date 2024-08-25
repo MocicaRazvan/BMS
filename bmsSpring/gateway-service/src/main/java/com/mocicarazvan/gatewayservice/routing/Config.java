@@ -56,7 +56,9 @@ public class Config {
                                 "/recipes/internal/**",
                                 "/plans/internal/**",
                                 "/orders/internal/**",
-                                "/kanban/internal/**"
+                                "/kanban/internal/**",
+                                "/days/internal/**",
+                                "/meals/internal/**"
                         )
                         .filters(f -> f.filter(((exchange, chain) -> {
                             exchange.getResponse().setStatusCode(HttpStatus.NOT_FOUND);
@@ -107,6 +109,9 @@ public class Config {
                 .route("kanban-service", r -> r.path("/kanban/**")
                         .filters(f -> f.filter(authFilter))
                         .uri("lb://kanban-service"))
+                .route("day-service", r -> r.path("/days/**", "/meals/**")
+                        .filters(f -> f.filter(authFilter))
+                        .uri("lb://day-service"))
 
 
                 .route("user-openapi", r -> r.path("/user-service/v3/api-docs")
@@ -131,6 +136,8 @@ public class Config {
                         .uri("lb://order-service"))
                 .route("kanban-openapi", r -> r.path("/kanban-service/v3/api-docs")
                         .uri("lb://kanban-service"))
+                .route("day-openapi", r -> r.path("/day-service/v3/api-docs")
+                        .uri("lb://day-service"))
 
 
                 .build();

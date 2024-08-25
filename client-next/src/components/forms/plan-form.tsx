@@ -16,7 +16,16 @@ import { z } from "zod";
 import { WithUser } from "@/lib/user";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import React, { useCallback, useMemo, useState } from "react";
+import React, {
+  CSSProperties,
+  forwardRef,
+  HTMLAttributes,
+  memo,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { Option } from "@/components/ui/multiple-selector";
 import { MacroChartElement } from "@/components/charts/ingredient-macros-pie-chart";
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
@@ -35,17 +44,21 @@ import ChildInputMultipleSelector, {
 } from "@/components/forms/child-input-multipleselector";
 import {
   CustomEntityModel,
+  DayResponse,
+  dayTypes,
   DietType,
   IngredientNutritionalFactResponse,
+  ObjectiveType,
   PageableResponse,
   PlanBody,
+  planObjectives,
   PlanResponse,
   RecipeResponse,
 } from "@/types/dto";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import InputFile, { FieldInputTexts } from "@/components/forms/input-file";
-import { determineMostRestrictiveDiet, handleBaseError } from "@/lib/utils";
+import { cn, determineMostRestrictiveDiet, handleBaseError } from "@/lib/utils";
 import ButtonSubmit, {
   ButtonSubmitTexts,
 } from "@/components/forms/button-submit";
@@ -56,7 +69,38 @@ import { BaseError } from "@/types/responses";
 import { toast } from "@/components/ui/use-toast";
 import { ToastAction } from "@/components/ui/toast";
 import { BaseFormTexts } from "@/texts/components/forms";
-import useFilesBase64 from "@/hoooks/useFilesBase64";
+import useFilesBase64 from "@/hoooks/useFilesObjectURL";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { fetchStream } from "@/hoooks/fetchStream";
+import { SortableListType } from "@/components/dnd/sortable-list";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import { Grip, Trash2 } from "lucide-react";
+import {
+  closestCenter,
+  DndContext,
+  DragEndEvent,
+  DraggableAttributes,
+  DragOverlay,
+  DragStartEvent,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import { AnimatePresence, motion } from "framer-motion";
+import { SyntheticListenerMap } from "@dnd-kit/core/dist/hooks/utilities";
 
 export interface PlanFormTexts {
   titleBodyTexts: TitleBodyTexts;
@@ -67,9 +111,13 @@ export interface PlanFormTexts {
   baseFormTexts: BaseFormTexts;
   priceLabel: string;
   pricePlaceholder: string;
-  recipesLabel: string;
-  recipePlaceholder: string;
+  daysLabel: string;
+  daysPlaceholder: string;
+  objectiveLabel: string;
+  objectivePlaceholder: string;
   dietMessage: string;
+  dayIndex: string;
+  objectives: Record<(typeof planObjectives)[number], string>;
 }
 export interface PlanFormProps
   extends WithUser,
@@ -77,16 +125,9 @@ export interface PlanFormProps
     BaseFormProps,
     Partial<Omit<PlanSchemaType, "images">> {
   images?: string[];
-  initialOptions?: (Option & { type: DietType })[];
+  initialOptions?: (Option & { dragId: string })[];
 }
 
-// const childSchema = z.object({
-//   ids: z.array(
-//     z.coerce
-//       .number({ invalid_type_error: "PUT NR" })
-//       .min(1, "Enter at least 1 recipe"),
-//   ),
-// });
 export default function PlanForm({
   titleBodyTexts,
   authUser,
@@ -97,16 +138,21 @@ export default function PlanForm({
   baseFormTexts: { descriptionToast, toastAction, altToast, header, error },
   priceLabel,
   pricePlaceholder,
-  recipePlaceholder,
-  recipesLabel,
+  objectiveLabel,
+  objectivePlaceholder,
+  daysLabel,
+  daysPlaceholder,
   dietMessage,
   path,
   price = 0,
   title = "",
   body = "",
-  recipes = [],
+  days = [],
+  objective = "",
   images = [],
   initialOptions = [],
+  dayIndex,
+  objectives,
 }: PlanFormProps) {
   const planSchema = useMemo(
     () => getPlanSchema(planSchemaTexts),
@@ -115,36 +161,99 @@ export default function PlanForm({
 
   const { isLoading, setIsLoading, router, errorMsg, setErrorMsg } =
     useLoadingErrorState();
-  const [selectedOptions, setSelectedOptions] =
-    useState<Option[]>(initialOptions);
+  const [selectedOptions, setSelectedOptions] = useState<
+    (Option & { dragId: string })[]
+  >(initialOptions || []);
+  const [dietType, setDietType] = useState<DietType | null>();
 
   const form = useForm<PlanSchemaType>({
     resolver: zodResolver(planSchema),
     defaultValues: {
       price,
       title,
-      recipes,
+      days,
+      objective,
       body,
       images: [],
     },
   });
 
-  useFilesBase64({
+  const daysWatch = form.watch("days");
+
+  useEffect(() => {
+    if (daysWatch.length) {
+      fetchStream<DietType>({
+        path: "/meals/day/dietType",
+        method: "GET",
+        token: authUser.token,
+        arrayQueryParam: {
+          ids: daysWatch.map((d) => d.toString()),
+        },
+        successCallback: (diet) => {
+          setDietType(diet);
+        },
+      });
+    }
+  }, [JSON.stringify(daysWatch)]);
+
+  console.log("DAYS", form.getValues("days"));
+
+  const { fileCleanup } = useFilesBase64({
     files: images,
     fieldName: "images",
     setValue: form.setValue,
     getValues: form.getValues,
   });
 
+  useEffect(() => {
+    return () => {
+      fileCleanup();
+    };
+  }, [fileCleanup]);
+
+  const moveDays = useCallback(
+    (
+      items: (Option & { dragId: string })[],
+      activeIndex: number,
+      overIndex: number,
+    ) => {
+      const newItems = arrayMove<Option & { dragId: string }>(
+        items,
+        activeIndex,
+        overIndex,
+      );
+      setSelectedOptions(newItems);
+      form.setValue(
+        "days",
+        newItems.map((o) => parseInt(o.value)),
+      );
+    },
+    [form],
+  );
+
+  const deleteDay = useCallback(
+    (item: Option & { dragId: string }) => {
+      const newOptions = selectedOptions.filter(
+        (o) => o.dragId !== item.dragId,
+      );
+      setSelectedOptions(newOptions);
+      form.setValue(
+        "days",
+        newOptions.map((o) => parseInt(o.value)),
+      );
+    },
+    [selectedOptions, form],
+  );
+
   const onSubmit = useCallback(
     async (data: PlanSchemaType) => {
+      if (!dietType) return;
       setIsLoading(true);
       setErrorMsg("");
       const body: PlanBody = {
         ...data,
-        type: determineMostRestrictiveDiet(
-          selectedOptions.map((o) => o.type as DietType),
-        ) as DietType,
+        objective: data.objective as ObjectiveType,
+        type: dietType,
       };
       const files = data.images.map((image) => image.file);
       try {
@@ -185,13 +294,14 @@ export default function PlanForm({
       authUser.token,
       descriptionToast,
       error,
-      selectedOptions,
       setErrorMsg,
       setIsLoading,
       toastAction,
       path,
+      dietType,
     ],
   );
+
   console.log("selectedOptions", selectedOptions);
   return (
     <Card className="max-w-7xl w-full sm:px-2 md:px-5 py-6">
@@ -209,36 +319,75 @@ export default function PlanForm({
               control={form.control}
               titleBodyTexts={titleBodyTexts}
             />
+
             <FormField
               control={form.control}
-              name={"recipes"}
+              name="objective"
+              render={({ field }) => (
+                <FormItem className="flex-1 w-full">
+                  <FormLabel className="capitalize">{objectiveLabel}</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder={objectivePlaceholder} />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {planObjectives.map((value) => (
+                        <SelectItem
+                          key={value}
+                          value={value}
+                          className="cursor-pointer"
+                        >
+                          {objectives[value]}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>{" "}
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name={"days"}
               render={() => (
                 <FormItem>
-                  <FormLabel className={"capitalize"}>{recipesLabel}</FormLabel>
+                  <FormLabel className={"capitalize"}>{daysLabel}</FormLabel>
                   <FormControl>
                     <ChildInputMultipleSelector<
-                      PageableResponse<CustomEntityModel<RecipeResponse>>
+                      PageableResponse<CustomEntityModel<DayResponse>>
                     >
                       disabled={false}
-                      path={`/recipes//trainer/filtered/${authUser.id}`}
+                      allowDuplicates={true}
+                      path={`/days/trainer/filtered/${authUser.id}`}
                       sortingCriteria={{ title: "asc" }}
-                      extraQueryParams={{ approved: "true" }}
+                      // extraQueryParams={{ approved: "true" }}
                       valueKey={"title"}
                       mapping={(r) => ({
                         value: r.content.content.id.toString(),
                         label: r.content.content.title,
-                        type: r.content.content.type,
+                        // type: r.content.content.type,
                       })}
                       giveUnselectedValue={false}
                       value={selectedOptions}
                       onChange={(options) => {
                         console.log("options", options);
                         if (options.length > 0) {
-                          form.clearErrors("recipes");
+                          form.clearErrors("days");
                         }
-                        setSelectedOptions(options);
+                        setSelectedOptions(
+                          options.map((o, i) => ({
+                            ...o,
+                            dragId: o.value + "_" + i,
+                          })),
+                        );
                         form.setValue(
-                          "recipes",
+                          "days",
                           options.map((o) => parseInt(o.value)),
                         );
                       }}
@@ -246,20 +395,25 @@ export default function PlanForm({
                       {...childInputMultipleSelectorTexts}
                     />
                   </FormControl>{" "}
+                  {selectedOptions.length > 0 && <div></div>}
                   <FormMessage />
-                  {selectedOptions.length > 0 && (
+                  {selectedOptions.length > 0 && dietType && (
                     <FormDescription className="tex-lg">
                       {/*The diet will be for{" "}*/}
                       {dietMessage}
                       <span className="text-xl font-semibold ms-2">
-                        {determineMostRestrictiveDiet(
-                          selectedOptions.map((o) => o.type as DietType),
-                        )}
+                        {dietType}
                       </span>
                     </FormDescription>
                   )}
                 </FormItem>
               )}
+            />
+            <DaySortableList
+              items={selectedOptions}
+              moveItems={moveDays}
+              deleteItem={deleteDay}
+              dayIndex={dayIndex}
             />
             {/*{selectedOptions.length > 0 && (*/}
             {/*  <span className="text-2xl font-semibold ms-2">*/}
@@ -292,6 +446,7 @@ export default function PlanForm({
               control={form.control}
               fieldName={"images"}
               fieldTexts={imagesText}
+              initialLength={images?.length || 0}
             />
             <ErrorMessage message={error} show={!!errorMsg} />
             <ButtonSubmit
@@ -305,3 +460,254 @@ export default function PlanForm({
     </Card>
   );
 }
+//todo delete day from here also and make desing
+interface DaySortableListProps {
+  items: (Option & { dragId: string })[];
+  moveItems: (
+    items: (Option & { dragId: string })[],
+    activeIndex: number,
+    overIndex: number,
+  ) => void;
+  deleteItem: (item: Option & { dragId: string }) => void;
+  dayIndex: string;
+}
+function DaySortableList({
+  items,
+  moveItems,
+  deleteItem,
+  dayIndex,
+}: DaySortableListProps) {
+  const [activeItem, setActiveItem] = useState<Option & { dragId: string }>();
+  const itemIds = useMemo(() => items.map((item) => item.dragId), [items]);
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 10,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    }),
+  );
+
+  const handleDragStart = useCallback(
+    (event: DragStartEvent) => {
+      if (event.active.data.current?.type === "SortableDay") {
+        setActiveItem(items.find((item) => item.dragId === event.active.id));
+      }
+    },
+    [items],
+  );
+
+  const handleDragEnd = useCallback(
+    (event: DragEndEvent) => {
+      const { active, over } = event;
+      if (!over) return;
+
+      const activeItem = items.find((item) => item.dragId === active.id);
+      const overItem = items.find((item) => item.dragId === over.id);
+
+      if (!activeItem || !overItem) {
+        return;
+      }
+
+      const activeIndex = items.findIndex((item) => item.dragId === active.id);
+      const overIndex = items.findIndex((item) => item.dragId === over.id);
+
+      if (activeIndex !== overIndex) {
+        // setItems((prev) =>
+        //   arrayMove<SortableItem>(prev, activeIndex, overIndex),
+        // );
+        moveItems(items, activeIndex, overIndex);
+      }
+      setActiveItem(undefined);
+    },
+    [items, moveItems],
+  );
+  const handleDragCancel = useCallback(() => {
+    setActiveItem(undefined);
+  }, []);
+
+  if (items.length === 0) return null;
+
+  return (
+    <AnimatePresence>
+      <motion.div
+        initial={{
+          height: 0,
+          opacity: 0,
+        }}
+        animate={{
+          height: "auto",
+          opacity: 1,
+        }}
+        exit={{
+          height: 0,
+          opacity: 0,
+        }}
+        transition={{ duration: 0.5 }}
+        className="overflow-hidden w-full "
+      >
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragStart={handleDragStart}
+          onDragEnd={handleDragEnd}
+          onDragCancel={handleDragCancel}
+        >
+          <SortableContext items={itemIds}>
+            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 w-full max-w-[1200px] mx-auto mt-4 p-2 py-4 ">
+              {items.map((item, i) => (
+                <SortableDayItem
+                  key={item.dragId}
+                  item={item}
+                  itemCount={items.length}
+                  index={i}
+                  deleteItem={deleteItem}
+                  dayIndex={dayIndex}
+                />
+              ))}
+            </div>
+          </SortableContext>
+          <DragOverlay adjustScale style={{ transformOrigin: "0 0 " }}>
+            {activeItem ? <DayItem item={activeItem} isDragging /> : null}
+          </DragOverlay>
+        </DndContext>
+      </motion.div>
+    </AnimatePresence>
+  );
+}
+
+interface SortableDayItemProps extends HTMLAttributes<HTMLDivElement> {
+  item: Option & { dragId: string };
+  itemCount: number | undefined;
+  preview?: boolean;
+  index: number;
+  deleteItem: (item: Option & { dragId: string }) => void;
+  dayIndex: string;
+}
+const SortableDayItem = memo(
+  ({ itemCount, item, ...props }: SortableDayItemProps) => {
+    const {
+      attributes,
+      isDragging,
+      listeners,
+      setNodeRef,
+      transform,
+      transition,
+    } = useSortable({
+      id: item.dragId,
+      data: {
+        type: "SortableDay",
+      },
+      disabled: itemCount === 1,
+    });
+
+    const styles = {
+      transform: CSS.Transform.toString(transform),
+      transition: transition,
+    };
+
+    return (
+      // <div ref={setNodeRef} style={styles} {...props}>
+      //   <div {...attributes} {...listeners}>
+      //     <Grip />
+      //   </div>
+      //   Day Item
+      // </div>
+
+      <DayItem
+        item={item}
+        ref={setNodeRef}
+        style={styles}
+        {...props}
+        isOpacityEnabled={isDragging}
+        attributes={attributes}
+        listeners={listeners}
+        itemCount={itemCount}
+      />
+    );
+  },
+);
+SortableDayItem.displayName = "SortableDayItem";
+interface DayItemProps extends HTMLAttributes<HTMLDivElement> {
+  isOpacityEnabled?: boolean;
+  isDragging?: boolean;
+  itemCount?: number;
+  index?: number;
+  item: Option & { dragId: string };
+  deleteItem?: (item: Option & { dragId: string }) => void;
+  attributes?: DraggableAttributes;
+  listeners?: SyntheticListenerMap | undefined;
+  dayIndex?: string;
+}
+
+const DayItem = forwardRef<HTMLDivElement, DayItemProps>(
+  (
+    {
+      deleteItem,
+      index,
+      itemCount,
+      isDragging,
+      isOpacityEnabled,
+      style,
+      item,
+      listeners,
+      attributes,
+      dayIndex,
+      ...props
+    },
+    ref,
+  ) => {
+    const isListMoreThenOne = !itemCount || itemCount > 1;
+    const styles: CSSProperties = {
+      opacity: isOpacityEnabled ? "0.4" : "1",
+      cursor: isListMoreThenOne
+        ? isDragging
+          ? "grabbing"
+          : "default"
+        : "default",
+      lineHeight: "0.5",
+      // transform: isDragging ? "scale(1.05)" : "scale(1)",
+      ...style,
+    };
+
+    return (
+      <div
+        ref={ref}
+        style={styles}
+        {...props}
+        className={cn(
+          "relative  h-[170px] w-full flex flex-col border-2 rounded-xl bg-background/60",
+        )}
+      >
+        <div className={"flex items-center justify-between w-full p-2"}>
+          {listeners && attributes && (
+            <div {...listeners} {...attributes}>
+              <Grip />
+            </div>
+          )}
+          {deleteItem && (
+            <Button
+              size={"icon"}
+              variant={"destructive"}
+              onClick={() => deleteItem(item)}
+            >
+              <Trash2 />
+            </Button>
+          )}
+        </div>
+        <div className="flex-1 flex flex-col items-center justify-between p-4">
+          {index !== undefined && dayIndex && (
+            <p className="font-semibold">
+              {dayIndex} {index}
+            </p>
+          )}
+          <p className="text-lg font-bold">{item.label}</p>
+        </div>
+      </div>
+    );
+  },
+);
+
+DayItem.displayName = "DayItem";

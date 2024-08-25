@@ -7,13 +7,20 @@ import { getAdminOrdersPageTexts } from "@/texts/pages";
 import { getUserWithMinRole } from "@/lib/user";
 import { sortingOrdersSortingOptionsKeys } from "@/texts/components/list";
 import Heading from "@/components/common/heading";
-import AdminContentLayout from "@/components/admin/admin-content-layout";
+import SidebarContentLayout from "@/components/sidebar/sidebar-content-layout";
 import { Suspense } from "react";
 import LoadingSpinner from "@/components/common/loading-spinner";
-import { AdminMenuTexts } from "@/components/admin/menu-list";
+import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
+import { Metadata } from "next";
+import { getIntlMetadata } from "@/texts/metadata";
 
 interface Props {
   params: { locale: Locale };
+}
+export async function generateMetadata({
+  params: { locale },
+}: Props): Promise<Metadata> {
+  return await getIntlMetadata("admin.Orders", "/admin/orders", locale);
 }
 
 export interface AdminOrdersPageTexts {
@@ -22,7 +29,7 @@ export interface AdminOrdersPageTexts {
   themeSwitchTexts: ThemeSwitchTexts;
   title: string;
   header: string;
-  menuTexts: AdminMenuTexts;
+  menuTexts: SidebarMenuTexts;
 }
 
 export default async function AdminOrdersPage({ params: { locale } }: Props) {
@@ -49,12 +56,13 @@ export default async function AdminOrdersPage({ params: { locale } }: Props) {
   );
 
   return (
-    <AdminContentLayout
+    <SidebarContentLayout
       navbarProps={{
         title,
         themeSwitchTexts,
         authUser,
         menuTexts,
+        mappingKey: "admin",
       }}
     >
       <div className="w-full h-full bg-background">
@@ -65,6 +73,7 @@ export default async function AdminOrdersPage({ params: { locale } }: Props) {
               path={`/orders/admin/filtered`}
               forWhom="admin"
               sortingOptions={orderOptions}
+              mainDashboard={true}
               {...orderTableTexts}
               authUser={authUser}
               sizeOptions={[10, 20, 30, 40]}
@@ -72,6 +81,6 @@ export default async function AdminOrdersPage({ params: { locale } }: Props) {
           </div>
         </Suspense>
       </div>
-    </AdminContentLayout>
+    </SidebarContentLayout>
   );
 }

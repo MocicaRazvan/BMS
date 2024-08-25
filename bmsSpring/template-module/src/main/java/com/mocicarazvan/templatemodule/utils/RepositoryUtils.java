@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.r2dbc.core.DatabaseClient;
 
+import java.lang.reflect.Array;
 import java.util.List;
 
 public class RepositoryUtils {
@@ -72,6 +73,14 @@ public class RepositoryUtils {
     public DatabaseClient.GenericExecuteSpec bindListField(List<?> field, DatabaseClient.GenericExecuteSpec executeSpec, String name) {
         if (field != null && !field.isEmpty()) {
             return bindNotNullField(field, executeSpec, name);
+        }
+        return executeSpec;
+    }
+
+    public <T> DatabaseClient.GenericExecuteSpec bindArrayField(List<?> field, DatabaseClient.GenericExecuteSpec executeSpec, String name, Class<T> arrayClass) {
+        if (field != null && !field.isEmpty()) {
+            T[] array = field.toArray((T[]) Array.newInstance(arrayClass, field.size()));
+            return executeSpec.bind(name, array);
         }
         return executeSpec;
     }

@@ -4,7 +4,7 @@ import { UserOrdersAdminPageTexts } from "@/app/[locale]/admin/users/[id]/orders
 import { WithUser } from "@/lib/user";
 import { UseListProps } from "@/hoooks/useList";
 import useGetUser from "@/hoooks/useGetUser";
-import AdminContentLayout from "@/components/admin/admin-content-layout";
+import SidebarContentLayout from "@/components/sidebar/sidebar-content-layout";
 import Heading from "@/components/common/heading";
 import LoadingSpinner from "@/components/common/loading-spinner";
 import { Suspense } from "react";
@@ -33,12 +33,13 @@ export default function UserOrdersAdminPageContent({
     return navigateToNotFound();
   }
   return (
-    <AdminContentLayout
+    <SidebarContentLayout
       navbarProps={{
         title: `${title} ${user?.email || ""}`,
         authUser,
         themeSwitchTexts,
         menuTexts,
+        mappingKey: "admin",
       }}
     >
       <div className="w-full h-full bg-background">
@@ -56,10 +57,11 @@ export default function UserOrdersAdminPageContent({
               {...orderTableTexts}
               authUser={authUser}
               sizeOptions={[1, 10, 20, 30, 40]}
+              mainDashboard={true}
             />
           </div>
         </Suspense>
       </div>
-    </AdminContentLayout>
+    </SidebarContentLayout>
   );
 }

@@ -312,7 +312,13 @@ export default function UsersTable({
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   className="cursor-pointer"
-                  onClick={() => router.push(`/users/single/${user.id}`)}
+                  onClick={() =>
+                    router.push(
+                      forWhom === "admin"
+                        ? `/admin/users/${user.id}`
+                        : `/users/single/${user.id}`,
+                    )
+                  }
                 >
                   {viewUser}
                 </DropdownMenuItem>

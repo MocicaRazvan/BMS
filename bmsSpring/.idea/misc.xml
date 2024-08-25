@@ -22,6 +22,7 @@
         <option value="$PROJECT_DIR$/plan-service/pom.xml" />
         <option value="$PROJECT_DIR$/order-service/pom.xml" />
         <option value="$PROJECT_DIR$/kanban-service/pom.xml" />
+        <option value="$PROJECT_DIR$/day-service/pom.xml" />
       </list>
     </option>
     <option name="ignoredFiles">

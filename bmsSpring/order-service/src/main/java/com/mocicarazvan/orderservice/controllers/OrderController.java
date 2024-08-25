@@ -1,11 +1,17 @@
 package com.mocicarazvan.orderservice.controllers;
 
 import com.mocicarazvan.orderservice.dtos.*;
+import com.mocicarazvan.orderservice.dtos.clients.DayResponse;
+import com.mocicarazvan.orderservice.dtos.clients.MealResponse;
+import com.mocicarazvan.orderservice.dtos.clients.PlanResponse;
+import com.mocicarazvan.orderservice.dtos.clients.RecipeResponse;
+import com.mocicarazvan.orderservice.dtos.clients.collect.FullDayResponse;
 import com.mocicarazvan.orderservice.dtos.summaries.CountryOrderSummary;
 import com.mocicarazvan.orderservice.dtos.summaries.DailyOrderSummary;
 import com.mocicarazvan.orderservice.dtos.summaries.MonthlyOrderSummary;
 import com.mocicarazvan.orderservice.enums.CountrySummaryType;
 import com.mocicarazvan.orderservice.enums.DietType;
+import com.mocicarazvan.orderservice.enums.ObjectiveType;
 import com.mocicarazvan.orderservice.services.OrderService;
 import com.mocicarazvan.templatemodule.controllers.CountInParentController;
 import com.mocicarazvan.templatemodule.dtos.PageableBody;
@@ -13,6 +19,7 @@ import com.mocicarazvan.templatemodule.dtos.response.EntityCount;
 import com.mocicarazvan.templatemodule.dtos.response.MonthlyEntityGroup;
 import com.mocicarazvan.templatemodule.dtos.response.PageableResponse;
 import com.mocicarazvan.templatemodule.dtos.response.ResponseWithUserDtoEntity;
+import com.mocicarazvan.templatemodule.hateos.CustomEntityModel;
 import com.mocicarazvan.templatemodule.utils.RequestsUtils;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -76,10 +83,11 @@ public class OrderController implements CountInParentController {
     public Flux<PageableResponse<ResponseWithUserDtoEntity<PlanResponse>>> getAllPlansFilteredWithUserByIds(
             @RequestParam(required = false) String title,
             @RequestParam(required = false) DietType type,
+            @RequestParam(required = false) ObjectiveType objective,
             @Valid @RequestBody PageableBody pageableBody,
             ServerWebExchange exchange
     ) {
-        return orderService.getPlansForUser(title, type, pageableBody, requestsUtils.extractAuthUser(exchange));
+        return orderService.getPlansForUser(title, type, objective, pageableBody, requestsUtils.extractAuthUser(exchange));
     }
 
     @GetMapping(value = "/subscriptionsByOrder/{orderId}", produces = {MediaType.APPLICATION_NDJSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
@@ -97,11 +105,34 @@ public class OrderController implements CountInParentController {
                 .map(ResponseEntity::ok);
     }
 
-    @GetMapping(value = "/subscriptions/recipes/{id}/{recipeId}", produces = {MediaType.APPLICATION_NDJSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
-    public Mono<ResponseEntity<ResponseWithUserDtoEntity<RecipeResponse>>> getRecipeByPlanInternal(@PathVariable Long id,
-                                                                                                   @PathVariable Long recipeId,
-                                                                                                   ServerWebExchange exchange) {
-        return orderService.getRecipeByPlanForUser(id, recipeId, requestsUtils.extractAuthUser(exchange))
+
+    @GetMapping(value = "/subscriptions/recipe/{planId}/{dayId}/{recipeId}", produces = {MediaType.APPLICATION_NDJSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
+    Mono<ResponseEntity<ResponseWithUserDtoEntity<RecipeResponse>>> getRecipeByIdWithUserInternal(@PathVariable Long planId, @PathVariable Long dayId,
+                                                                                                  @PathVariable Long recipeId, ServerWebExchange exchange) {
+        return orderService.getRecipeByIdWithUser(planId, dayId, recipeId, requestsUtils.extractAuthUser(exchange))
+                .map(ResponseEntity::ok);
+    }
+
+    @GetMapping(value = "/subscriptions/days/{planId}/{dayId}", produces = {MediaType.APPLICATION_NDJSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
+    Mono<ResponseEntity<ResponseWithUserDtoEntity<DayResponse>>> getDayByIdWithUserInternal(@PathVariable Long planId, @PathVariable Long dayId,
+                                                                                            ServerWebExchange exchange) {
+        return orderService.getDayByIdWithUser(planId, dayId, requestsUtils.extractAuthUser(exchange))
+                .map(ResponseEntity::ok);
+    }
+
+    @GetMapping(value = "/subscriptions/days/meals/{planId}/{dayId}", produces = {MediaType.APPLICATION_NDJSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
+    @ResponseStatus(HttpStatus.OK)
+    Flux<CustomEntityModel<MealResponse>> getMealsByDayInternal(@PathVariable Long planId, @PathVariable Long dayId,
+                                                                ServerWebExchange exchange) {
+        return orderService.getMealsByDayInternal(planId, dayId, requestsUtils.extractAuthUser(exchange));
+    }
+
+    // id=planId
+    @GetMapping(value = "/subscriptions/days/full/{id}/{dayId}", produces = {MediaType.APPLICATION_NDJSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
+    public Mono<ResponseEntity<FullDayResponse>> getRecipeByPlanInternal(@PathVariable Long id,
+                                                                         @PathVariable Long dayId,
+                                                                         ServerWebExchange exchange) {
+        return orderService.getDayByPlanForUser(id, dayId, requestsUtils.extractAuthUser(exchange))
                 .map(ResponseEntity::ok);
     }
 

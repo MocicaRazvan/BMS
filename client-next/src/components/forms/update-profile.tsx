@@ -5,12 +5,12 @@ import {
   UpdateProfileSchemaTexts,
   UpdateProfileType,
 } from "@/types/forms";
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import useLoadingErrorState from "@/hoooks/useLoadingErrorState";
 import { WithUser } from "@/lib/user";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import useFilesBase64 from "@/hoooks/useFilesBase64";
+import useFilesBase64 from "@/hoooks/useFilesObjectURL";
 import {
   Form,
   FormControl,
@@ -116,12 +116,18 @@ export default function UpdateProfile({
     ],
   );
 
-  useFilesBase64({
+  const { fileCleanup } = useFilesBase64({
     files: authUser.image ? [authUser.image] : [],
     fieldName: "image",
     setValue: form.setValue,
     getValues: form.getValues,
   });
+
+  useEffect(() => {
+    return () => {
+      fileCleanup();
+    };
+  }, [fileCleanup]);
 
   return (
     <div>
@@ -173,6 +179,7 @@ export default function UpdateProfile({
             fieldName={"image"}
             fieldTexts={fieldTexts}
             multiple={false}
+            initialLength={authUser.image ? 1 : 0}
           />
           <ErrorMessage message={errorText} show={!!errorMsg} />
           <ButtonSubmit

@@ -246,7 +246,11 @@ export default function PostsTable({
                 <DropdownMenuItem
                   className="cursor-pointer"
                   onClick={() =>
-                    router.push(`/posts/single/${row.original.id}`)
+                    router.push(
+                      forWhom === "trainer"
+                        ? `/trainer/posts/single/${row.original.id}`
+                        : `/admin/posts/single/${row.original.id}`,
+                    )
                   }
                 >
                   {view}
@@ -256,7 +260,11 @@ export default function PostsTable({
                   <>
                     <DropdownMenuItem asChild>
                       <Link
-                        href={`/users/single/${row.original.userId}`}
+                        href={
+                          mainDashboard
+                            ? `/admin/users/${row.original.userId}`
+                            : `/users/single/${row.original.userId}`
+                        }
                         className="cursor-pointer"
                       >
                         {viewOwner}

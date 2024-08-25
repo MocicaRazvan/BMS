@@ -1,6 +1,7 @@
 package com.mocicarazvan.planservice.models;
 
 import com.mocicarazvan.planservice.enums.DietType;
+import com.mocicarazvan.planservice.enums.ObjectiveType;
 import com.mocicarazvan.templatemodule.models.Approve;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -21,9 +22,11 @@ import java.util.List;
 public class Plan extends Approve {
     private double price;
 
-    private List<Long> recipes;
+    private List<Long> days;
 
     private DietType type;
 
     private boolean display;
+
+    private ObjectiveType objective;
 }

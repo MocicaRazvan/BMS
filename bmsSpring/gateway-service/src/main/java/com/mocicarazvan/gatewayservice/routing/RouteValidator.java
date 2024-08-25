@@ -65,6 +65,22 @@ public class RouteValidator {
             "/plans/update/**",
             "/plans/trainer/**",
             "/plans/delete/**",
+            "/plans/createWithImages",
+            "/plans/createWithImages/**",
+            "/plans/createWithImagesAndVideos",
+            "/plans/createWithImagesAndVideos/**",
+
+            "/days/create",
+            "/days/update/**",
+            "/days/trainer/**",
+            "/days/delete/**",
+
+
+            "/meals/create",
+            "/meals/update/**",
+            "/meals/trainer/**",
+            "/meals/delete/**",
+
 
             "/orders/create",
             "/orders/trainer/**");
@@ -84,7 +100,11 @@ public class RouteValidator {
             "/ingredients/create/**",
             "/ingredients/alterDisplay/**",
 
-            "/kanban/admin/**"
+            "/kanban/admin/**",
+
+            "/days/admin/**",
+            "/meals/admin/**"
+
 
     );
 

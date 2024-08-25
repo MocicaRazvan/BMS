@@ -48,8 +48,8 @@
 //     >
 //       <div className="w-full ">
 //         <PostsTable
-//           path={`/posts/trainer/tags/1`}
-//           forWhom="trainer"
+//           path={`/posts/trainer_/tags/1`}
+//           forWhom="trainer_"
 //           {...postTableTexts}
 //           sortingOptions={sortingOptions}
 //           sizeOptions={[5, 10, 20, 30, 40]}

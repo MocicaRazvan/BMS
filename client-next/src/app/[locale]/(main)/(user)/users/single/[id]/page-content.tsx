@@ -62,7 +62,6 @@ export default function UserPageContent({
   const router = useRouter();
   const stompClient = useStompClient();
   const [userState, setUserState] = useState<typeof authUser>(authUser);
-  //todo peste tot schimbi notFound cu asta
   const { navigateToNotFound } = useClientNotFound();
   const { messages, error, refetch, isFinished } = useFetchStream<
     CustomEntityModel<UserDto>,

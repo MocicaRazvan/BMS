@@ -9,7 +9,9 @@ import { notFound } from "next/navigation";
 import UserPageContent from "@/app/[locale]/(main)/(user)/users/single/[id]/page-content";
 import UserPostsAdminPageContent from "@/app/[locale]/admin/users/[id]/posts/page-content";
 import { sortingPostsSortingOptionsKeys } from "@/texts/components/list";
-import { AdminMenuTexts } from "@/components/admin/menu-list";
+import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
+import { Metadata } from "next";
+import { getIntlMetadata } from "@/texts/metadata";
 
 export interface UserPostsAdminPageTexts {
   postTableTexts: PostTableTexts;
@@ -17,11 +19,20 @@ export interface UserPostsAdminPageTexts {
   themeSwitchTexts: ThemeSwitchTexts;
   title: string;
   header: string;
-  menuTexts: AdminMenuTexts;
+  menuTexts: SidebarMenuTexts;
 }
 
 interface Props {
   params: { locale: Locale; id: string };
+}
+export async function generateMetadata({
+  params: { locale, id },
+}: Props): Promise<Metadata> {
+  return await getIntlMetadata(
+    "admin.UserPosts",
+    "/admin/users/" + id + "/posts",
+    locale,
+  );
 }
 
 export default async function UserPostsAdminPage({

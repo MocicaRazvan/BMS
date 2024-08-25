@@ -1,6 +1,7 @@
 package com.mocicarazvan.planservice.repositories;
 
 import com.mocicarazvan.planservice.enums.DietType;
+import com.mocicarazvan.planservice.enums.ObjectiveType;
 import com.mocicarazvan.planservice.models.Plan;
 import org.springframework.data.domain.PageRequest;
 import reactor.core.publisher.Flux;
@@ -10,16 +11,16 @@ import java.util.List;
 
 public interface ExtendedPlanRepository {
 
-    Flux<Plan> getPlansFiltered(String title, Boolean approved, Boolean display, DietType type, PageRequest pageRequest, List<Long> excludeIds);
+    Flux<Plan> getPlansFiltered(String title, Boolean approved, Boolean display, DietType type, ObjectiveType objective, PageRequest pageRequest, List<Long> excludeIds);
 
-    Flux<Plan> getPlansFilteredTrainer(String title, Boolean approved, Boolean display, DietType type, Long trainerId, PageRequest pageRequest);
+    Flux<Plan> getPlansFilteredTrainer(String title, Boolean approved, Boolean display, DietType type, ObjectiveType objective, Long trainerId, PageRequest pageRequest);
 
-    Mono<Long> countPlansFiltered(String title, Boolean approved, Boolean display, DietType type, List<Long> excludeIds);
+    Mono<Long> countPlansFiltered(String title, Boolean approved, Boolean display, DietType type, ObjectiveType objective, List<Long> excludeIds);
 
-    Mono<Long> countPlansFilteredTrainer(String title, Boolean approved, Boolean display, Long trainerId, DietType type);
+    Mono<Long> countPlansFilteredTrainer(String title, Boolean approved, Boolean display, Long trainerId, DietType type, ObjectiveType objective);
 
-    Flux<Plan> getPlansFilteredByIds(String title, Boolean approved, Boolean display, DietType type, List<Long> ids, PageRequest pageRequest);
+    Flux<Plan> getPlansFilteredByIds(String title, Boolean approved, Boolean display, DietType type, ObjectiveType objective, List<Long> ids, PageRequest pageRequest);
 
-    Mono<Long> countPlansFilteredByIds(String title, Boolean approved, Boolean display, DietType type, List<Long> ids);
+    Mono<Long> countPlansFilteredByIds(String title, Boolean approved, Boolean display, DietType type, ObjectiveType objective, List<Long> ids);
 
 }

@@ -10,6 +10,7 @@ export async function GET(req: NextRequest) {
   }
   try {
     const pgVectorStore = await vectorStoreInstance.getPGVectorStore();
+    console.log("pgVectorStore", pgVectorStore);
     if (!pgVectorStore) {
       return NextResponse.json(
         { error: "Error getting pgVectorStore" },

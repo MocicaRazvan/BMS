@@ -9,6 +9,7 @@ import {
 } from "../ui/carousel";
 import { useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface Media {
   type: "image" | "video";
@@ -54,7 +55,8 @@ export default function CustomMediaCarousel({ media }: Props) {
                   <video
                     src={item.src}
                     controls
-                    className="w-full max-w-[1000px] object-cover h-full"
+                    className="w-full max-w-[1000px] object-cover h-full "
+                    preload="auto"
                   />
                 )}
               </div>

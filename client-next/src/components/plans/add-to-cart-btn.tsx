@@ -9,6 +9,7 @@ import { PlusSquareIcon } from "lucide-react";
 import { useRouter } from "@/navigation";
 import { PlanResponse } from "@/types/dto";
 import { useSubscription } from "@/context/subscriptions-context";
+import ShineBorder from "@/components/magicui/shine-border";
 
 export interface AddToCartBtnTexts {
   successDescription: string;
@@ -40,7 +41,13 @@ export default function AddToCartBtn({
     <div className="flex items-center justify-center px-2 ">
       {!isPlanInSubscription(plan.id) ? (
         !isInCartForUser({ id: plan.id }) ? (
+          // <ShineBorder
+          //   className="p-5 m-0 bg-transparent min-h-fit min-w-fit"
+          //   color={["#A07CFE", "#FE8FB5", "#FFBE7B"]}
+          //   borderWidth={4}
+          // >
           <Button
+            size="lg"
             onClick={() => {
               addToCartForUser(plan);
               toast({
@@ -61,6 +68,7 @@ export default function AddToCartBtn({
             <PlusSquareIcon className="mr-2" /> {addToCart}
           </Button>
         ) : (
+          // </ShineBorder>
           <Button onClick={() => router.push("/cart")}>{finishOrder}</Button>
         )
       ) : (

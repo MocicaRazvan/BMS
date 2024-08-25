@@ -4,8 +4,12 @@ package com.mocicarazvan.planservice.controllers;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mocicarazvan.planservice.dtos.PlanBody;
 import com.mocicarazvan.planservice.dtos.PlanResponse;
-import com.mocicarazvan.planservice.dtos.recipe.RecipeResponse;
+import com.mocicarazvan.planservice.dtos.dayClient.DayResponse;
+import com.mocicarazvan.planservice.dtos.dayClient.MealResponse;
+import com.mocicarazvan.planservice.dtos.dayClient.RecipeResponse;
+import com.mocicarazvan.planservice.dtos.dayClient.collect.FullDayResponse;
 import com.mocicarazvan.planservice.enums.DietType;
+import com.mocicarazvan.planservice.enums.ObjectiveType;
 import com.mocicarazvan.planservice.hateos.PlansReactiveResponseBuilder;
 import com.mocicarazvan.planservice.mappers.PlanMapper;
 import com.mocicarazvan.planservice.models.Plan;
@@ -231,11 +235,12 @@ public class PlanController implements ApproveController<Plan, PlanBody, PlanRes
             @RequestParam(required = false) Boolean approved,
             @RequestParam(required = false) Boolean display,
             @RequestParam(required = false) DietType type,
+            @RequestParam(required = false) ObjectiveType objective,
             @RequestParam(required = false) List<Long> excludeIds,
             @Valid @RequestBody PageableBody pageableBody,
             ServerWebExchange exchange
     ) {
-        return planService.getPlansFiltered(title, approved, display, type, excludeIds, pageableBody, requestsUtils.extractAuthUser(exchange))
+        return planService.getPlansFiltered(title, approved, display, type, objective, excludeIds, pageableBody, requestsUtils.extractAuthUser(exchange))
                 .flatMap(m -> plansReactiveResponseBuilder.toModelPageable(m, PlanController.class));
     }
 
@@ -247,10 +252,11 @@ public class PlanController implements ApproveController<Plan, PlanBody, PlanRes
             @RequestParam(required = false) Boolean display,
             @RequestParam(required = false) DietType type,
             @RequestParam(required = false) List<Long> excludeIds,
+            @RequestParam(required = false) ObjectiveType objective,
             @Valid @RequestBody PageableBody pageableBody,
             ServerWebExchange exchange
     ) {
-        return planService.getPlansFilteredWithCount(title, approved, display, type, excludeIds, pageableBody, requestsUtils.extractAuthUser(exchange))
+        return planService.getPlansFilteredWithCount(title, approved, display, type, objective, excludeIds, pageableBody, requestsUtils.extractAuthUser(exchange))
                 .flatMap(m -> plansReactiveResponseBuilder.toModelWithEntityCountPageable(m, PlanController.class));
     }
 
@@ -262,10 +268,11 @@ public class PlanController implements ApproveController<Plan, PlanBody, PlanRes
             @RequestParam(required = false) Boolean display,
             @RequestParam(required = false) DietType type,
             @RequestParam(required = false) List<Long> excludeIds,
+            @RequestParam(required = false) ObjectiveType objective,
             @Valid @RequestBody PageableBody pageableBody,
             ServerWebExchange exchange
     ) {
-        return planService.getPlansFilteredWithUser(title, approved, display, type, excludeIds, pageableBody, requestsUtils.extractAuthUser(exchange))
+        return planService.getPlansFilteredWithUser(title, approved, display, type, objective, excludeIds, pageableBody, requestsUtils.extractAuthUser(exchange))
                 .flatMap(m -> plansReactiveResponseBuilder.toModelWithUserPageable(m, PlanController.class));
     }
 
@@ -276,11 +283,12 @@ public class PlanController implements ApproveController<Plan, PlanBody, PlanRes
             @RequestParam(required = false) Boolean approved,
             @RequestParam(required = false) Boolean display,
             @RequestParam(required = false) DietType type,
+            @RequestParam(required = false) ObjectiveType objective,
             @PathVariable Long trainerId,
             @Valid @RequestBody PageableBody pageableBody,
             ServerWebExchange exchange
     ) {
-        return planService.getPlansFilteredTrainer(title, approved, display, type, pageableBody, requestsUtils.extractAuthUser(exchange), trainerId)
+        return planService.getPlansFilteredTrainer(title, approved, display, type, objective, pageableBody, requestsUtils.extractAuthUser(exchange), trainerId)
                 .flatMap(m -> plansReactiveResponseBuilder.toModelPageable(m, PlanController.class));
     }
 
@@ -291,11 +299,12 @@ public class PlanController implements ApproveController<Plan, PlanBody, PlanRes
             @RequestParam(required = false) Boolean approved,
             @RequestParam(required = false) Boolean display,
             @RequestParam(required = false) DietType type,
+            @RequestParam(required = false) ObjectiveType objective,
             @PathVariable Long trainerId,
             @Valid @RequestBody PageableBody pageableBody,
             ServerWebExchange exchange
     ) {
-        return planService.getPlansFilteredTrainerWithCount(title, approved, display, type, pageableBody, requestsUtils.extractAuthUser(exchange), trainerId)
+        return planService.getPlansFilteredTrainerWithCount(title, approved, display, type, objective, pageableBody, requestsUtils.extractAuthUser(exchange), trainerId)
                 .flatMap(m -> plansReactiveResponseBuilder.toModelWithEntityCountPageable(m, PlanController.class));
     }
 
@@ -307,30 +316,52 @@ public class PlanController implements ApproveController<Plan, PlanBody, PlanRes
                 .flatMap(m -> plansReactiveResponseBuilder.toModel(m, PlanController.class));
     }
 
-    @GetMapping(value = "/recipes/{id}", produces = {MediaType.APPLICATION_NDJSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
-    public Flux<RecipeResponse> getRecipesByPlan(@PathVariable Long id, ServerWebExchange exchange) {
-        return planService.getRecipesByPlan(id, requestsUtils.extractAuthUser(exchange));
+    @GetMapping(value = "/days/full/{id}", produces = {MediaType.APPLICATION_NDJSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
+    @ResponseStatus(HttpStatus.OK)
+    public Flux<FullDayResponse> getFullDaysByPlan(@PathVariable Long id, ServerWebExchange exchange) {
+        return planService.getFullDaysByPlan(id, requestsUtils.extractAuthUser(exchange));
     }
+
+    @GetMapping(value = "/days/{id}", produces = {MediaType.APPLICATION_NDJSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
+    @ResponseStatus(HttpStatus.OK)
+    public Flux<DayResponse> getDaysByPlan(@PathVariable Long id, ServerWebExchange exchange) {
+        return planService.getDaysByPlan(id, requestsUtils.extractAuthUser(exchange));
+    }
+
+
+    @GetMapping(value = "/days/{id}/{dayId}", produces = {MediaType.APPLICATION_NDJSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
+    public Mono<ResponseEntity<FullDayResponse>> getDayByPlan(@PathVariable Long id, @PathVariable Long dayId, ServerWebExchange exchange) {
+        return planService.getDayByPlan(id, dayId, requestsUtils.extractAuthUser(exchange))
+                .map(ResponseEntity::ok);
+    }
+
+    @GetMapping(value = "/internal/days/{id}", produces = {MediaType.APPLICATION_NDJSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
+    @ResponseStatus(HttpStatus.OK)
+    public Flux<FullDayResponse> getDaysByPlanInternal(@PathVariable Long id, ServerWebExchange exchange) {
+        return planService.getDaysByPlanInternal(id, requestsUtils.extractAuthUser(exchange));
+    }
+
+    @GetMapping(value = "/internal/days/full/{id}/{dayId}", produces = {MediaType.APPLICATION_NDJSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
+    public Mono<ResponseEntity<FullDayResponse>> getFullDayByPlanInternal(@PathVariable Long id,
+                                                                          @PathVariable Long dayId,
+                                                                          ServerWebExchange exchange) {
+        return planService.getDayByPlanInternal(id, dayId, requestsUtils.extractAuthUser(exchange))
+                .map(ResponseEntity::ok);
+    }
+
 
     @PatchMapping(value = "/internal/filtered/withUser", produces = {MediaType.APPLICATION_NDJSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
     @ResponseStatus(HttpStatus.OK)
     public Flux<PageableResponse<ResponseWithUserDtoEntity<PlanResponse>>> getAllPlansFilteredWithUserByIds(
             @RequestParam(required = false) String title,
             @RequestParam(required = false) DietType type,
+            @RequestParam(required = false) ObjectiveType objective,
             @RequestParam List<Long> ids,
             @Valid @RequestBody PageableBody pageableBody,
             ServerWebExchange exchange
     ) {
-        return planService.getPlansFilteredWithUserByIds(title, type, pageableBody, ids, requestsUtils.extractAuthUser(exchange))
+        return planService.getPlansFilteredWithUserByIds(title, type, objective, pageableBody, ids, requestsUtils.extractAuthUser(exchange))
                 .flatMap(m -> plansReactiveResponseBuilder.toModelWithUserPageable(m, PlanController.class));
-    }
-
-    @GetMapping(value = "/internal/recipes/{id}/{recipeId}", produces = {MediaType.APPLICATION_NDJSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
-    public Mono<ResponseEntity<ResponseWithUserDtoEntity<RecipeResponse>>> getRecipeByPlanInternal(@PathVariable Long id,
-                                                                                                   @PathVariable Long recipeId,
-                                                                                                   ServerWebExchange exchange) {
-        return planService.getRecipeInternalByPlan(id, recipeId, requestsUtils.extractAuthUser(exchange))
-                .map(ResponseEntity::ok);
     }
 
 
@@ -348,11 +379,27 @@ public class PlanController implements ApproveController<Plan, PlanBody, PlanRes
         return planService.getModelsTrainerInternal(trainerId, requestsUtils.extractAuthUser(exchange));
     }
 
-//    //todo in subscription tine minte si planurile cumparate dar si retetele din ele si fa overwrite la get with user la
-//    // protected to true daca e in ele
-//    @GetMapping(value = "/recipes/{id}/{recipeId}", produces = {MediaType.APPLICATION_NDJSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
-//    public Mono<ResponseEntity<RecipeResponse>> getRecipeByPlan(@PathVariable Long id, @PathVariable Long recipeId, ServerWebExchange exchange) {
-//        return planService.getRecipeByPlan(id, recipeId, requestsUtils.extractAuthUser(exchange))
-//                .map(ResponseEntity::ok);
-//    }
+    @GetMapping(value = "/internal/days/recipe/{id}/{dayId}/{recipeId}", produces = {MediaType.APPLICATION_NDJSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
+    Mono<ResponseEntity<ResponseWithUserDtoEntity<RecipeResponse>>> getRecipeByIdWithUserInternal(@PathVariable Long id, @PathVariable Long dayId,
+                                                                                                  @PathVariable Long recipeId, ServerWebExchange exchange) {
+        return planService.getRecipeByIdWithUserInternal(id, dayId, recipeId, requestsUtils.extractAuthUser(exchange))
+                .map(ResponseEntity::ok);
+    }
+
+    @GetMapping(value = "/internal/days/{id}/{dayId}", produces = {MediaType.APPLICATION_NDJSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
+    public Mono<ResponseEntity<ResponseWithUserDtoEntity<DayResponse>>> getDayByIdWithUserInternal(@PathVariable Long id,
+                                                                                                   @PathVariable Long dayId,
+                                                                                                   ServerWebExchange exchange) {
+        return planService.getDayByIdWithUserInternal(id, dayId, requestsUtils.extractAuthUser(exchange))
+                .map(ResponseEntity::ok);
+    }
+
+    @GetMapping(value = "/internal/days/meals/{id}/{dayId}", produces = {MediaType.APPLICATION_NDJSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
+    @ResponseStatus(HttpStatus.OK)
+    public Flux<CustomEntityModel<MealResponse>> getMealsByDayInternalEntity(@PathVariable Long dayId,
+                                                                             @PathVariable Long id,
+                                                                             ServerWebExchange exchange) {
+        return planService.getMealsByDayInternal(id, dayId, requestsUtils.extractAuthUser(exchange));
+    }
+
 }

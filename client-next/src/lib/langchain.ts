@@ -113,8 +113,8 @@ export class VectorStoreSingleton {
   }
 
   public async getPGVectorStore(): Promise<PGVectorStore | undefined> {
-    if (!this.isInitialized) {
-      await this.initialize();
+    if (!this.isInitialized || !this.pgVectorStore) {
+      await this.initialize(false, false);
     }
     return this.pgVectorStore;
   }
@@ -158,13 +158,6 @@ export class VectorStoreSingleton {
     //);
     // return [...tsxDocs, ...jsonDocs];
     return tsxDocs;
-  }
-
-  public static async gar(m = 512) {
-    // return await VectorStoreSingleton.generateJSONEmbeddings().then((e) =>
-    //   this.tokenizeDocuments(e, m),
-    // );
-    return [1];
   }
 
   private static async tokenizeDocuments(
@@ -242,34 +235,6 @@ export class VectorStoreSingleton {
       true,
     );
 
-    // const docs = (await loader.load())
-    //   .filter((doc) => doc.metadata.source.endsWith("page.tsx"))
-    //   .map((doc, i): DocumentInterface => {
-    //     const url =
-    //       doc.metadata.source
-    //         .replace(/\\/g, "/")
-    //         .split("/src/app/[locale]")[1]
-    //         .split("/page.")[0]
-    //         .replace(/\([^)]*\)/g, "")
-    //         .replace(/\/+/g, "/") || "/";
-    //
-    //     const pageContentTrimmed = doc.pageContent
-    //       .replace(/^import.*$/gm, "") // Remove all import statements
-    //       .replace(/ className=(["']).*?\1| className={.*?}/g, "") // Remove all className props
-    //       .replace(/^\s*[\r]/gm, "") // remove empty lines
-    //       .trim();
-    //
-    //     return {
-    //       pageContent: pageContentTrimmed,
-    //       metadata: {
-    //         scope:
-    //           "Page URL: " +
-    //           url +
-    //           " . Where you see URL parts in [] , for example: [id] ,  ask the user for more info about these parameters. Never put them in the sentence directly.",
-    //       },
-    //     };
-    //   });
-
     const docs = (await loader.load()).map((doc, i) => {
       const url =
         doc.metadata.source
@@ -291,8 +256,8 @@ export class VectorStoreSingleton {
     });
 
     const splitter = RecursiveCharacterTextSplitter.fromLanguage("html", {
-      chunkSize: 1000,
-      chunkOverlap: 200,
+      chunkSize: 1250,
+      chunkOverlap: 300,
     });
 
     const splitDocs = (await splitter.splitDocuments(docs)).map((doc, i) => ({

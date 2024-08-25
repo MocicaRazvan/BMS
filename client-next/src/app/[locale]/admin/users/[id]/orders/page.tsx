@@ -7,7 +7,9 @@ import { getUserOrdersAdminPageTexts } from "@/texts/pages";
 import { getUserWithMinRole } from "@/lib/user";
 import { sortingOrdersSortingOptionsKeys } from "@/texts/components/list";
 import UserOrdersAdminPageContent from "@/app/[locale]/admin/users/[id]/orders/page-content";
-import { AdminMenuTexts } from "@/components/admin/menu-list";
+import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
+import { Metadata } from "next";
+import { getIntlMetadata } from "@/texts/metadata";
 
 interface Props {
   params: { locale: Locale; id: string };
@@ -18,7 +20,16 @@ export interface UserOrdersAdminPageTexts {
   themeSwitchTexts: ThemeSwitchTexts;
   title: string;
   header: string;
-  menuTexts: AdminMenuTexts;
+  menuTexts: SidebarMenuTexts;
+}
+export async function generateMetadata({
+  params: { locale, id },
+}: Props): Promise<Metadata> {
+  return await getIntlMetadata(
+    "admin.UserOrders",
+    "/admin/users/" + id + "/orders",
+    locale,
+  );
 }
 
 export default async function UserOrdersAdminPage({
