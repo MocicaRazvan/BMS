@@ -35,6 +35,7 @@ import { CheckoutDrawerTexts } from "@/components/forms/checkout-drawer";
 import { AdminEmailTexts } from "@/components/forms/admin-email";
 import { DayFromTexts } from "@/components/forms/day-form";
 import { planObjectives } from "@/types/dto";
+import { UploadingProgressTexts } from "@/components/forms/uploading-progress";
 
 export type FormType = "create" | "update";
 
@@ -104,6 +105,17 @@ export async function getButtonSubmitTexts(): Promise<ButtonSubmitTexts> {
     loadingText: t("loadingText"),
   };
 }
+export async function getUploadingProgressTexts(
+  type: "image" | "video",
+): Promise<UploadingProgressTexts> {
+  const t = await getTranslations(
+    "zod.forms.components.UploadingProgressTexts",
+  );
+  const intlType = t("type." + type);
+  return {
+    loadedItems: t("loadedItems", { type: intlType }),
+  };
+}
 
 export interface BaseFormTexts {
   header: string;
@@ -135,6 +147,7 @@ export const getPostFormTexts = async (type: FormType) => {
     inputMultipleSelectorTexts,
     buttonSubmitTexts,
     baseFormTexts,
+    loadedImages,
   ] = await Promise.all([
     getPostSchemaTexts(),
     getInputFileText("image"),
@@ -142,6 +155,7 @@ export const getPostFormTexts = async (type: FormType) => {
     getInputMultipleSelectorTexts("tags"),
     getButtonSubmitTexts(),
     getBaseFormTexts("PostForm", type),
+    getUploadingProgressTexts("image"),
   ]);
   return {
     postSchemaTexts,
@@ -150,6 +164,7 @@ export const getPostFormTexts = async (type: FormType) => {
     inputMultipleSelectorTexts,
     buttonSubmitTexts,
     baseFormTexts,
+    loadedImages,
   };
 };
 
@@ -305,6 +320,8 @@ export async function getRecipeFormTexts(
     baseFormTexts,
     titleBodyTexts,
     childInputMultipleSelectorTexts,
+    loadedImages,
+    loadedVideos,
     t,
   ] = await Promise.all([
     getIngredientQuantitySchemaTexts(),
@@ -316,6 +333,8 @@ export async function getRecipeFormTexts(
     getBaseFormTexts("RecipeForm", type),
     getTitleBodyText(),
     getChildInputMultipleSelectorTexts("ingredients"),
+    getUploadingProgressTexts("image"),
+    getUploadingProgressTexts("video"),
     getTranslations("components.forms.RecipeFormTexts"),
   ]);
 
@@ -329,6 +348,8 @@ export async function getRecipeFormTexts(
     baseFormTexts,
     titleBodyTexts,
     childInputMultipleSelectorTexts,
+    loadedImages,
+    loadedVideos,
     error: t("error", { type }),
     addIngredient: t("addIngredient"),
     ingredientsLabel: t("ingredientsLabel"),
@@ -339,6 +360,10 @@ export async function getRecipeFormTexts(
     quantityChildLabel: t("quantityChildLabel"),
     quantityChildPlaceholder: t("quantityChildPlaceholder"),
     dietType: t("dietType"),
+    areIngredientsCompletedButNotSubmitted: t(
+      "areIngredientsCompletedButNotSubmitted",
+    ),
+    continueBtn: t("continueBtn"),
   };
 }
 
@@ -398,6 +423,7 @@ export async function getPlanFormTexts(type: FormType): Promise<PlanFormTexts> {
     buttonSubmitTexts,
     planSchemaTexts,
     baseFormTexts,
+    loadedImages,
     t,
   ] = await Promise.all([
     getTitleBodyText(),
@@ -406,6 +432,7 @@ export async function getPlanFormTexts(type: FormType): Promise<PlanFormTexts> {
     getButtonSubmitTexts(),
     getPlanSchemaTexts(),
     getBaseFormTexts("PlanForm", type),
+    getUploadingProgressTexts("image"),
     getTranslations("components.forms.PlanFormTexts"),
   ]);
 
@@ -416,6 +443,7 @@ export async function getPlanFormTexts(type: FormType): Promise<PlanFormTexts> {
     buttonSubmitTexts,
     planSchemaTexts,
     baseFormTexts,
+    loadedImages,
     pricePlaceholder: t("pricePlaceholder"),
     priceLabel: t("priceLabel"),
     dietMessage: t("dietMessage"),

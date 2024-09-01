@@ -48,7 +48,19 @@ public class BeanConfig {
 
     @Bean
     @LoadBalanced
-    public WebClient.Builder webClient() {
+    public WebClient.Builder userWebClient() {
+        return WebClient.builder();
+    }
+
+    @Bean
+    @LoadBalanced
+    public WebClient.Builder fileWebClient() {
+        return WebClient.builder();
+    }
+
+    @Bean("commentWebClient")
+    @LoadBalanced
+    public WebClient.Builder commentWebClient() {
         return WebClient.builder();
     }
 
@@ -56,14 +68,14 @@ public class BeanConfig {
     public UserClient userClient(
             CircuitBreakerRegistry circuitBreakerRegistry, RetryRegistry retryRegistry, RateLimiterRegistry rateLimiterRegistry
     ) {
-        return new UserClient("userService", webClient(), circuitBreakerRegistry, retryRegistry, rateLimiterRegistry);
+        return new UserClient("userService", userWebClient(), circuitBreakerRegistry, retryRegistry, rateLimiterRegistry);
     }
 
     @Bean
     public FileClient fileClient(
             CircuitBreakerRegistry circuitBreakerRegistry, RetryRegistry retryRegistry, RateLimiterRegistry rateLimiterRegistry
     ) {
-        return new FileClient("fileService", webClient(), circuitBreakerRegistry, retryRegistry, rateLimiterRegistry);
+        return new FileClient("fileService", fileWebClient(), circuitBreakerRegistry, retryRegistry, rateLimiterRegistry);
     }
 
     @Bean

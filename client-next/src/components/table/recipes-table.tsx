@@ -38,6 +38,7 @@ import AlertDialogApprovePost from "@/components/dialogs/posts/approve-post";
 import LoadingSpinner from "@/components/common/loading-spinner";
 import AlertDialogApproveRecipes from "@/components/dialogs/recipes/approve-recipe";
 import useClientNotFound from "@/hoooks/useClientNotFound";
+import OverflowTextTooltip from "@/components/common/overflow-text-tooltip";
 
 export interface RecipeTableColumnsTexts {
   id: string;
@@ -182,7 +183,9 @@ export default function RecipeTable({
             {recipeTableColumnsTexts.title}
           </p>
         ),
-        cell: ({ row }) => <p>{row.original.model.title}</p>,
+        cell: ({ row }) => (
+          <OverflowTextTooltip text={row.original.model.title} />
+        ),
       },
       {
         id: recipeTableColumnsTexts.type,

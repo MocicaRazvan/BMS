@@ -23,7 +23,7 @@ export default function AlertDialogApprovePost({
       title={post.title}
       approved={!post.approved}
       notificationName={approvePostNotificationName}
-      stompExtraLink={`/posts/single/${post.id}`}
+      stompExtraLink={`/trainer/posts/single/${post.id}`}
     />
   );
 }

@@ -81,19 +81,6 @@ export const createPlansLinks: createLinks = ({ id }): LinkNav[] => [
   },
 ];
 
-export const createOrdersLinks: createLinks = ({ id }): LinkNav[] => [
-  {
-    href: `/users/${id}/orders`,
-    role: "ROLE_USER",
-    id: "yourOrders",
-  },
-  {
-    href: "/sidebar/orders",
-    role: "ROLE_ADMIN",
-    id: "allOrders",
-  },
-];
-
 export type ComponentMenuLink = Omit<LinkNav, "id"> & { text: string };
 
 export const fromLinkNavsToComponentMenuLinks = (

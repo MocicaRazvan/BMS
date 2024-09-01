@@ -73,53 +73,6 @@ export default function SingeRecipePageContent({
 
   const { navigateToNotFound } = useClientNotFound();
 
-  // const aggegatedNF: NutritionalFactResponse | null = useMemo(
-  //   () =>
-  //     IQMessage.length === 0
-  //       ? null
-  //       : IQMessage.map(
-  //           (i) => i.nutritionalFact,
-  //         ).reduce<NutritionalFactResponse>((acc, cur) => {
-  //           if (!acc?.fat) return cur;
-  //           return {
-  //             ...acc,
-  //             fat: acc.fat + cur.fat,
-  //             saturatedFat: acc.saturatedFat + cur.saturatedFat,
-  //             carbohydrates: acc.carbohydrates + cur.carbohydrates,
-  //             sugar: acc.sugar + cur.sugar,
-  //             protein: acc.protein + cur.protein,
-  //             salt: acc.salt + cur.salt,
-  //           };
-  //         }, {} as NutritionalFactResponse),
-  //   [IQMessage],
-  // );
-
-  const react = useCallback(
-    async (type: "like" | "dislike") => {
-      try {
-        const resp = await fetchStream<CustomEntityModel<RecipeResponse>>({
-          path: `/recipes/${type}/${id}`,
-          method: "PATCH",
-          token: authUser.token,
-        });
-        console.log(resp);
-        const newPost = resp.messages[0]?.content;
-        setRecipeState((prev) =>
-          !prev
-            ? prev
-            : {
-                ...prev,
-                userLikes: newPost.userLikes,
-                userDislikes: newPost.userDislikes,
-              },
-        );
-      } catch (error) {
-        console.log(error);
-      }
-    },
-    [authUser.token, id, setRecipeState],
-  );
-
   if (!recipeIsFinished || !IQIsFinished)
     return (
       <section className="w-full min-h-[calc(100vh-4rem)] flex items-center justify-center transition-all">
@@ -245,8 +198,8 @@ export default function SingeRecipePageContent({
                       i !== IQMessage.length - 1 && "border-b pb-4",
                     )}
                   >
-                    <div className="flex w-full items-center justify-around md:justify-between flex-1 md:flex-2">
-                      <h3 className="text-lg  ">{name}</h3>
+                    <div className="flex w-full items-center justify-around md:justify-between flex-1 md:flex-2 gap-1.5 md:gap-3.5">
+                      <h3 className="text-lg ">{name}</h3>
                       <div className=" flex items-center justify-center gap-2">
                         <span className={"font-semibold"}>{count}</span>
                         <Badge

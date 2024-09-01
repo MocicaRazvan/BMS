@@ -68,7 +68,8 @@
       },
       "unit": "Unitatea este invalidă",
       "refineSaturatedFat": "Grăsimea saturată trebuie să fie mai mică decât grăsimea totală",
-      "refineSugar": "Zahărul trebuie să fie mai mic decât carbohidrații"
+      "refineSugar": "Zahărul trebuie să fie mai mic decât carbohidrații",
+      "atLeastOnePositive": "Cel puțin unul dintre grasimi, proteine, carbohidrați sau sare trebuie să fie un număr pozitiv"
     },
     "IngredientQuantitySchemaTexts": {
       "minQuantity": "Cantitatea trebuie să fie cel puțin 1",
@@ -179,6 +180,13 @@
             "meals": "mese",
             "days": "zile"
           }
+        },
+        "UploadingProgressTexts": {
+          "type": {
+            "image": "Imagini",
+            "video": "Videoclipuri"
+          },
+          "loadedItems": "{type} încărcate"
         }
       },
       "PostForm": {
@@ -373,7 +381,9 @@
         "addIngredient": "Adăugați linie noua",
         "quantityChildPlaceholder": "Introduceți cantitatea",
         "quantityChildLabel": "Cantitate",
-        "dietType": "Rețeta este:"
+        "dietType": "Rețeta este:",
+        "areIngredientsCompletedButNotSubmitted": "Sunt ingrediente completate care nu sunt adăugate, continuați iar ele vor fi ignorate",
+        "continueBtn": "Continuați"
       },
       "PlanFormTexts": {
         "priceLabel": "Preț",

@@ -299,8 +299,8 @@ export function DataTable<TData extends Record<string, any>, TValue>({
                     initial={{ opacity: 0, y: 20, scale: 0.8 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     transition={{
-                      duration: 0.12,
-                      delay: i * 0.14,
+                      duration: 0.1,
+                      delay: i * 0.11,
                       ease: "linear",
                     }}
                     whileHover={{

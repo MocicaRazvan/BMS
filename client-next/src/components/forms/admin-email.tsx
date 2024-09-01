@@ -136,7 +136,7 @@ export default function AdminEmail({
       const body: EmailRequest = { ...data, recipientEmail: data.email };
       try {
         const res = await fetchStream({
-          path: "/users/sidebar/email",
+          path: "/users/admin/email",
           method: "POST",
           token: authUser.token,
           body,
@@ -176,6 +176,7 @@ export default function AdminEmail({
           <form
             onSubmit={form.handleSubmit(onSubmit)}
             className="space-y-8 lg:space-y-12"
+            noValidate
           >
             <FormField
               control={form.control}

@@ -17,4 +17,6 @@ public interface NutritionalFactService extends ManyToOneUserService<
     Mono<NutritionalFactResponse> findByIngredientId(Long ingredientId);
 
     Mono<NutritionalFactResponse> createModel(NutritionalFactBody modelBody, Long referenceId, String userId);
+
+    Mono<NutritionalFactResponse> updateModelByIngredient(Long ingredientId, NutritionalFactBody modelBody, String userId);
 }

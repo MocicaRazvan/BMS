@@ -262,8 +262,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { ChangeEvent, useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import SortableList, { SortableItem } from "@/components/dnd/sortable-list";
 import { arrayMove } from "@dnd-kit/sortable";
@@ -272,7 +271,6 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { ItemTexts } from "@/components/dnd/item";
-import Loader from "@/components/ui/spinner";
 import { Loader2 } from "lucide-react";
 
 export type InputFieldName = "images" | "videos";
@@ -327,6 +325,7 @@ export default function InputFile<T extends FieldValues>({
   });
   const { setValue, clearErrors, getValues } = useFormContext<T>();
   const [isListCollapsed, setIsListCollapsed] = useState(true);
+  const [isLoadingInitial, setIsLoadingInitial] = useState(true);
 
   if (!(fieldName in getValues())) {
     throw new Error(`Invalid field name: ${fieldName}`);
@@ -356,7 +355,7 @@ export default function InputFile<T extends FieldValues>({
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     accept: fieldName.includes("image")
-      ? { "image/*": [".jpeg", ".jpg", ".png", ".gif"] }
+      ? { "image/png": [".png"], "image/jpeg": [".jpg", ".jpeg"] }
       : { "video/mp4": [".mp4"] },
     multiple,
   });
@@ -401,6 +400,12 @@ export default function InputFile<T extends FieldValues>({
     }
   }, [fieldValue?.length]);
 
+  useEffect(() => {
+    if (!(initialLength > 0 && fieldValue?.length === 0) && isLoadingInitial) {
+      setIsLoadingInitial(false);
+    }
+  }, [fieldValue?.length, initialLength, isLoadingInitial]);
+
   return (
     <div className="w-full">
       <FormField
@@ -415,14 +420,14 @@ export default function InputFile<T extends FieldValues>({
                   variant={"destructive"}
                   size={"sm"}
                   onClick={deleteAllItems}
-                  disabled={initialLength > 0 && fieldValue?.length === 0}
+                  disabled={isLoadingInitial}
                 >
                   {clearAll}
                 </Button>
               )}
             </div>
             <FormControl>
-              {initialLength > 0 && fieldValue?.length === 0 ? (
+              {isLoadingInitial ? (
                 <div className="w-full flex items-center justify-center h-full gap-3">
                   <Loader2 className=" h-16 w-16 text-primary/60 animate-spin" />
                   <p className="font-semibold">{loading}</p>

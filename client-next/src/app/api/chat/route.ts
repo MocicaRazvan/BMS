@@ -42,6 +42,7 @@ export async function POST(req: NextRequest) {
         : session?.user?.role === "ROLE_TRAINER"
           ? "trainer"
           : "admin";
+    const currentUserId = session?.user?.id;
 
     const [vectorStore, vectorFilter, body] = await Promise.all([
       vectorStoreInstance.getPGVectorStore(),
@@ -128,7 +129,7 @@ export async function POST(req: NextRequest) {
     // const combineDocsChain = await createDocsChain(handlers);
     const [historyAwareRetrieverChain, combineDocsChain] = await Promise.all([
       createHistroyChain(vectorStore, vectorFilter),
-      createDocsChain(handlers, currentUserRole),
+      createDocsChain(handlers, currentUserRole, currentUserId),
     ]);
 
     // const prompt = ChatPromptTemplate.fromMessages([
@@ -238,6 +239,7 @@ async function createHistroyChain(
 async function createDocsChain(
   handlers: ReturnType<typeof LangChainStream>["handlers"],
   currentUserRole: string,
+  currentUserId: string | undefined,
 ) {
   const chatModel = new ChatOllama({
     model: modelName,
@@ -296,10 +298,16 @@ async function createDocsChain(
             ? "As a 'trainer', provide information relevant to both general users and trainers. However, do not share details related to admin features.\n"
             : "As an 'admin', provide information relevant to users, trainers, and admins as necessary.") +
         "\n\n" +
+        (currentUserId
+          ? "The current user has the unique ID: " +
+            currentUserId +
+            ". Use this ID in any links that are specific to the user, ensuring the URLs are personalized.\n\n"
+          : "") +
         +"**Key guidelines for interaction**:\n" +
         "1. Focus on user experience, health, and well-being.\n" +
         "2. Keep the conversation engaging, informative, and fun.\n" +
-        "3. Never provide HTML/JS code or discuss technical details with the user.\n\n" +
+        "3. Never provide HTML/JS code or discuss technical details with the user.\n" +
+        "4. Never send images to the user, you are a text based chat, but you can send emojis. \n\n" +
         "Context:\n{context}",
     ],
     new MessagesPlaceholder("chat_history"),

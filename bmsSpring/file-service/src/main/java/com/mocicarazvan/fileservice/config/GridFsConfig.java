@@ -2,6 +2,7 @@ package com.mocicarazvan.fileservice.config;
 
 
 import com.mongodb.ConnectionString;
+import com.mongodb.MongoClientSettings;
 import com.mongodb.reactivestreams.client.MongoClient;
 import com.mongodb.reactivestreams.client.MongoClients;
 import com.mongodb.reactivestreams.client.MongoDatabase;
@@ -22,9 +23,19 @@ public class GridFsConfig {
     @Value("${spring.data.mongodb.uri}")
     private String mongoUri;
 
+    @Value("${spring.data.mongodb.connection-pool.max-pool-size}")
+    private int maxPoolSize;
+
     @Bean
     public MongoClient reactiveMongoClient() {
-        return MongoClients.create(mongoUri);
+        MongoClientSettings settings = MongoClientSettings.builder()
+                .applyConnectionString(new ConnectionString(mongoUri))
+                .applyToConnectionPoolSettings(builder -> builder.maxSize(maxPoolSize)
+                )
+                .retryWrites(true)
+                .retryReads(true)
+                .build();
+        return MongoClients.create(settings);
     }
 
     @Bean

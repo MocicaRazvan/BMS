@@ -48,6 +48,7 @@ export default async function UpdatePostPage({
         inputMultipleSelectorTexts,
         buttonSubmitTexts,
         baseFormTexts,
+        loadedImages,
       },
       ...rest
     },
@@ -77,6 +78,7 @@ export default async function UpdatePostPage({
             buttonSubmitTexts={buttonSubmitTexts}
             {...baseFormTexts}
             path={`/posts/updateWithImages/${id}`}
+            loadedImages={loadedImages}
           />
         </Suspense>
       </main>

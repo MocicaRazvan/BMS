@@ -261,6 +261,7 @@ export default function DayForm({
           <form
             onSubmit={form.handleSubmit(onSubmit)}
             className="space-y-8 lg:space-y-12 w-full"
+            noValidate
           >
             <TitleBodyForm<DaySchemaType>
               control={form.control}

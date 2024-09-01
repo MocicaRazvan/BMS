@@ -85,6 +85,7 @@ export default function UpdateProfile({
               lastName: data.lastName,
             },
           },
+          clientId: "NONE",
         });
         await session.update({
           ...session,
@@ -135,6 +136,7 @@ export default function UpdateProfile({
         <form
           onSubmit={form.handleSubmit(onSubmit)}
           className="space-y-8 lg:space-y-12 w-full px-10 lg:px-20"
+          noValidate
         >
           <FormField
             control={form.control}

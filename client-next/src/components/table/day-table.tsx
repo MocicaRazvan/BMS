@@ -33,6 +33,7 @@ import { Button } from "@/components/ui/button";
 import { MoreHorizontal } from "lucide-react";
 import AlertDialogDeleteDay from "@/components/dialogs/days/delete-day";
 import LoadingSpinner from "@/components/common/loading-spinner";
+import OverflowTextTooltip from "@/components/common/overflow-text-tooltip";
 
 export interface DayTableColumnsTexts {
   id: string;
@@ -152,9 +153,7 @@ export default function DaysTable({
           </p>
         ),
         cell: ({ row }) => (
-          <div className="max-w-16 text-nowrap overflow-x-hidden">
-            <p>{row.original.model.title}</p>
-          </div>
+          <OverflowTextTooltip text={row.original.model.title} />
         ),
       },
       {

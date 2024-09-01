@@ -149,11 +149,11 @@ export default function IngredientForm({
   const floatProtein = parseFloat(protein as unknown as string);
   const floatSalt = parseFloat(salt as unknown as string);
   const showChart =
-    floatProtein > 0 &&
-    floatFat > 0 &&
-    floatCarbohydrates > 0 &&
-    floatSalt > 0 &&
-    floatProtein + floatFat + floatCarbohydrates + floatSalt === 100;
+    floatProtein >= 0 &&
+    floatFat >= 0 &&
+    floatCarbohydrates >= 0 &&
+    floatSalt >= 0 &&
+    floatProtein + floatFat + floatCarbohydrates + floatSalt > 0;
 
   console.log("protein", protein);
 
@@ -177,7 +177,7 @@ export default function IngredientForm({
     if (
       form.formState.errors.nutritionalFact?.saturatedFat?.type === "custom" &&
       !form.formState.errors.nutritionalFact?.fat &&
-      0 < floatSaturatedFat &&
+      0 <= floatSaturatedFat &&
       floatSaturatedFat <= floatFat
     ) {
       form.clearErrors("nutritionalFact.saturatedFat");
@@ -188,7 +188,7 @@ export default function IngredientForm({
     if (
       form.formState.errors.nutritionalFact?.sugar?.type === "custom" &&
       !form.formState.errors.nutritionalFact.carbohydrates &&
-      0 < floatSugar &&
+      0 <= floatSugar &&
       floatSugar <= floatCarbohydrates
     ) {
       form.clearErrors("nutritionalFact.sugar");
@@ -204,38 +204,100 @@ export default function IngredientForm({
     form.clearErrors("nutritionalFact.saturatedFat");
   }, [form, unitForm]);
 
-  useEffect(() => {
-    const keysToCheck: (keyof Omit<
-      IngredientNutritionalFactType["nutritionalFact"],
-      "unit" | "saturatedFat" | "sugar"
-    >)[] = ["carbohydrates", "protein", "fat", "salt"];
-    const anyCustomError: Record<(typeof keysToCheck)[number], boolean> =
-      keysToCheck.reduce(
-        (acc, k) => ({
-          ...acc,
-          [k]: form.formState.errors.nutritionalFact?.[k]?.type === "custom",
-        }),
-        { carbohydrates: false, protein: false, fat: false, salt: false },
-      );
-    const sum = floatProtein + floatFat + floatCarbohydrates + floatSalt;
+  // useEffect(() => {
+  //   const keysToCheck: (keyof Omit<
+  //     IngredientNutritionalFactType["nutritionalFact"],
+  //     "unit" | "saturatedFat" | "sugar"
+  //   >)[] = ["carbohydrates", "protein", "fat", "salt"];
+  //   const anyCustomError: Record<(typeof keysToCheck)[number], boolean> =
+  //     keysToCheck.reduce(
+  //       (acc, k) => ({
+  //         ...acc,
+  //         [k]: form.formState.errors.nutritionalFact?.[k]?.type === "custom",
+  //       }),
+  //       { carbohydrates: false, protein: false, fat: false, salt: false },
+  //     );
+  //   const sum = floatProtein + floatFat + floatCarbohydrates + floatSalt;
+  //
+  //   if (anyCustomError && sum === 100) {
+  //     keysToCheck.forEach((k) => {
+  //       form.clearErrors(`nutritionalFact.${k}`);
+  //     });
+  //   } else if (lastUpdatedField.current) {
+  //     Object.entries(anyCustomError).forEach(([k, v]) => {
+  //       if (k !== lastUpdatedField.current && v) {
+  //         form.clearErrors(
+  //           `nutritionalFact.${k as (typeof keysToCheck)[number]}`,
+  //         );
+  //       }
+  //     });
+  //   }
+  // }, [floatCarbohydrates, floatFat, floatProtein, floatSalt, form]);
 
-    if (anyCustomError && sum === 100) {
-      keysToCheck.forEach((k) => {
-        form.clearErrors(`nutritionalFact.${k}`);
-      });
-    } else if (lastUpdatedField.current) {
-      Object.entries(anyCustomError).forEach(([k, v]) => {
-        if (k !== lastUpdatedField.current && v) {
-          form.clearErrors(
-            `nutritionalFact.${k as (typeof keysToCheck)[number]}`,
-          );
-        }
-      });
+  useEffect(() => {
+    const total = floatProtein + floatFat + floatCarbohydrates + floatSalt;
+    if (
+      total > 0 &&
+      [floatProtein, floatFat, floatCarbohydrates, floatSalt].every(
+        (v) => v >= 0,
+      )
+    ) {
+      const keysToCheck: (keyof Omit<
+        IngredientNutritionalFactType["nutritionalFact"],
+        "unit" | "saturatedFat" | "sugar"
+      >)[] = ["carbohydrates", "protein", "fat", "salt"];
+      const manualErrors: Record<(typeof keysToCheck)[number], boolean> =
+        keysToCheck.reduce(
+          (acc, k) => ({
+            ...acc,
+            [k]: form.formState.errors.nutritionalFact?.[k]?.type === "manual",
+          }),
+          { carbohydrates: false, protein: false, fat: false, salt: false },
+        );
+      if (Object.values(manualErrors).some((v) => v)) {
+        keysToCheck.forEach((k) => {
+          form.clearErrors(`nutritionalFact.${k}`);
+        });
+      }
     }
   }, [floatCarbohydrates, floatFat, floatProtein, floatSalt, form]);
 
   const onSubmit = useCallback(
     async (data: IngredientNutritionalFactType) => {
+      const total =
+        data.nutritionalFact.carbohydrates +
+        data.nutritionalFact.protein +
+        data.nutritionalFact.fat +
+        data.nutritionalFact.salt;
+
+      if (total === 0) {
+        form.setError("nutritionalFact.protein", {
+          message:
+            ingredientNutritionalFactSchemaTexts.nutritionalFact
+              .atLeastOnePositive,
+          type: "manual",
+        });
+        form.setError("nutritionalFact.fat", {
+          message:
+            ingredientNutritionalFactSchemaTexts.nutritionalFact
+              .atLeastOnePositive,
+          type: "manual",
+        });
+        form.setError("nutritionalFact.carbohydrates", {
+          message:
+            ingredientNutritionalFactSchemaTexts.nutritionalFact
+              .atLeastOnePositive,
+          type: "manual",
+        });
+        form.setError("nutritionalFact.salt", {
+          message:
+            ingredientNutritionalFactSchemaTexts.nutritionalFact
+              .atLeastOnePositive,
+          type: "manual",
+        });
+        return;
+      }
+
       setIsLoading(true);
       setErrorMsg("");
       try {
@@ -298,7 +360,9 @@ export default function IngredientForm({
       descriptionToast,
       error,
       form,
+      ingredientNutritionalFactSchemaTexts.nutritionalFact.atLeastOnePositive,
       path,
+      router,
       setErrorMsg,
       setIsLoading,
       titleTaken,
@@ -318,6 +382,7 @@ export default function IngredientForm({
         <form
           onSubmit={form.handleSubmit(onSubmit)}
           className="space-y-8 lg:space-y-12"
+          noValidate
         >
           <div className="flex flex-col lg:flex-row gap-8 lg:gap-12 w-full items-center justify-center">
             <div className="flex-1 w-full">

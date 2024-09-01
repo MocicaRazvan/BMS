@@ -26,20 +26,33 @@ export default function RecipeMacros({
     () =>
       ingredients.length === 0
         ? null
-        : ingredients
-            .map((i) => i.nutritionalFact)
-            .reduce<NutritionalFactResponse>((acc, cur) => {
-              if (!acc?.fat) return cur;
+        : ingredients.reduce<NutritionalFactResponse>(
+            (acc, { nutritionalFact, count }) => {
+              const quantity = count / 100;
+              if (!acc?.fat)
+                return {
+                  ...nutritionalFact,
+                  fat: nutritionalFact.fat * quantity,
+                  saturatedFat: nutritionalFact.saturatedFat * quantity,
+                  carbohydrates: nutritionalFact.carbohydrates * quantity,
+                  sugar: nutritionalFact.sugar * quantity,
+                  protein: nutritionalFact.protein * quantity,
+                  salt: nutritionalFact.salt * quantity,
+                };
               return {
                 ...acc,
-                fat: acc.fat + cur.fat,
-                saturatedFat: acc.saturatedFat + cur.saturatedFat,
-                carbohydrates: acc.carbohydrates + cur.carbohydrates,
-                sugar: acc.sugar + cur.sugar,
-                protein: acc.protein + cur.protein,
-                salt: acc.salt + cur.salt,
+                fat: acc.fat + nutritionalFact.fat * quantity,
+                saturatedFat:
+                  acc.saturatedFat + nutritionalFact.saturatedFat * quantity,
+                carbohydrates:
+                  acc.carbohydrates + nutritionalFact.carbohydrates * quantity,
+                sugar: acc.sugar + nutritionalFact.sugar * quantity,
+                protein: acc.protein + nutritionalFact.protein * quantity,
+                salt: acc.salt + nutritionalFact.salt * quantity,
               };
-            }, {} as NutritionalFactResponse),
+            },
+            {} as NutritionalFactResponse,
+          ),
     [ingredients],
   );
   if (!aggegatedNF) return null;

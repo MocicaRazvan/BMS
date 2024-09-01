@@ -196,9 +196,10 @@ public class PlanController implements ApproveController<Plan, PlanBody, PlanRes
     @PostMapping(value = "/createWithImages", produces = {MediaType.APPLICATION_NDJSON_VALUE, MediaType.APPLICATION_JSON_VALUE}, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public Mono<ResponseEntity<CustomEntityModel<PlanResponse>>> createModelWithImages(@RequestPart("files") Flux<FilePart> files,
                                                                                        @RequestPart("body") String body,
+                                                                                       @RequestParam("clientId") String clientId,
                                                                                        ServerWebExchange exchange) {
         return requestsUtils.getBodyFromJson(body, PlanBody.class, objectMapper)
-                .flatMap(planBody -> planService.createModel(files, planBody, requestsUtils.extractAuthUser(exchange))
+                .flatMap(planBody -> planService.createModel(files, planBody, requestsUtils.extractAuthUser(exchange), clientId)
                         .flatMap(m -> plansReactiveResponseBuilder.toModel(m, PlanController.class))
                         .map(ResponseEntity::ok));
     }
@@ -207,10 +208,11 @@ public class PlanController implements ApproveController<Plan, PlanBody, PlanRes
     @PostMapping(value = "/updateWithImages/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = {MediaType.APPLICATION_NDJSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
     public Mono<ResponseEntity<CustomEntityModel<PlanResponse>>> updateModelWithImages(@RequestPart("files") Flux<FilePart> files,
                                                                                        @RequestPart("body") String body,
+                                                                                       @RequestParam("clientId") String clientId,
                                                                                        @PathVariable Long id,
                                                                                        ServerWebExchange exchange) {
         return requestsUtils.getBodyFromJson(body, PlanBody.class, objectMapper)
-                .flatMap(planBody -> planService.updateModelWithImages(files, id, planBody, requestsUtils.extractAuthUser(exchange))
+                .flatMap(planBody -> planService.updateModelWithImages(files, id, planBody, requestsUtils.extractAuthUser(exchange), clientId)
                         .flatMap(m -> plansReactiveResponseBuilder.toModel(m, PlanController.class))
                         .map(ResponseEntity::ok));
     }

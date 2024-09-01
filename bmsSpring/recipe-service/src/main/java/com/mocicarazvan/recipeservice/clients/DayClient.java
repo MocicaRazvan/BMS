@@ -8,6 +8,7 @@ import io.github.resilience4j.ratelimiter.RateLimiterRegistry;
 import io.github.resilience4j.retry.RetryRegistry;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -21,17 +22,16 @@ public class DayClient extends CountInParentClient {
     @Value("${day-service.url}")
     private String dayServiceUrl;
 
-    public DayClient(WebClient.Builder webClientBuilder, CircuitBreakerRegistry circuitBreakerRegistry, RetryRegistry retryRegistry, RateLimiterRegistry rateLimiterRegistry) {
+    public DayClient(
+            @Qualifier("dayWebClient") WebClient.Builder webClientBuilder, CircuitBreakerRegistry circuitBreakerRegistry, RetryRegistry retryRegistry, RateLimiterRegistry rateLimiterRegistry) {
         super(CLIENT_NAME, webClientBuilder, circuitBreakerRegistry, retryRegistry, rateLimiterRegistry);
     }
 
     @Override
-    // todo CHANGE TO BE GOOD
     public Mono<EntityCount> getCountInParent(Long childId, String userId) {
         log.error("GET COUNT IN PARENT");
         return super.getCountInParent(childId, userId, e -> Mono.just(new EntityCount(1L)))
                 .log();
-//        return Mono.just(new EntityCount(0L));
     }
 
     @Override

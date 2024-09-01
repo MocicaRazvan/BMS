@@ -14,7 +14,7 @@ import InputMultipleSelector, {
 import ButtonSubmit, {
   ButtonSubmitTexts,
 } from "@/components/forms/button-submit";
-import { useCallback, useEffect, useMemo } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
@@ -31,6 +31,11 @@ import { toast } from "@/components/ui/use-toast";
 import { ToastAction } from "@/components/ui/toast";
 import useFilesBase64 from "@/hoooks/useFilesObjectURL";
 import { handleBaseError } from "@/lib/utils";
+import useProgressWebSocket from "@/hoooks/useProgressWebSocket";
+import { v4 as uuidv4 } from "uuid";
+import UploadingProgress, {
+  UploadingProgressTexts,
+} from "@/components/forms/uploading-progress";
 
 export interface PostFormProps
   extends Partial<Omit<PostType, "images">>,
@@ -43,6 +48,7 @@ export interface PostFormProps
   buttonSubmitTexts: ButtonSubmitTexts;
   authUser: NonNullable<Session["user"]>;
   images?: string[];
+  loadedImages: UploadingProgressTexts;
 }
 
 export default function PostForm({
@@ -63,12 +69,18 @@ export default function PostForm({
   altToast,
   path,
   type = "create",
+  loadedImages,
 }: PostFormProps) {
   const schema = useMemo(
     () => getPostSchema(postSchemaTexts),
     [postSchemaTexts],
   );
-
+  const [clientId] = useState(uuidv4);
+  const { messages: messagesImages } = useProgressWebSocket(
+    authUser.token,
+    clientId,
+    "IMAGE",
+  );
   const { isLoading, setIsLoading, router, errorMsg, setErrorMsg } =
     useLoadingErrorState();
 
@@ -83,6 +95,9 @@ export default function PostForm({
       title,
     },
   });
+
+  const watchImages = form.watch("images");
+
   const { fileCleanup } = useFilesBase64({
     files: images,
     fieldName: "images",
@@ -116,6 +131,7 @@ export default function PostForm({
             files,
             body: postBody,
           },
+          clientId,
         });
         toast({
           title: data.title,
@@ -124,13 +140,15 @@ export default function PostForm({
           action: (
             <ToastAction
               altText={altToast}
-              onClick={() => router.push(`/posts/single/${res.content.id}`)}
+              onClick={() =>
+                router.push(`/trainer/posts/single/${res.content.id}`)
+              }
             >
               {toastAction}
             </ToastAction>
           ),
         });
-        router.push(`/posts/single/${res.content.id}`);
+        router.push(`/trainer/posts/single/${res.content.id}`);
       } catch (e) {
         console.log(e);
         handleBaseError(e, setErrorMsg, error);
@@ -148,6 +166,7 @@ export default function PostForm({
       setErrorMsg,
       setIsLoading,
       toastAction,
+      clientId,
     ],
   );
 
@@ -161,6 +180,7 @@ export default function PostForm({
           <form
             onSubmit={form.handleSubmit(onSubmit)}
             className="space-y-8 lg:space-y-12"
+            noValidate
           >
             <TitleBodyForm<PostType>
               control={form.control}
@@ -184,6 +204,13 @@ export default function PostForm({
               disable={false}
               buttonSubmitTexts={buttonSubmitTexts}
             />
+            {isLoading && (
+              <UploadingProgress
+                total={watchImages.length}
+                loaded={messagesImages.length}
+                {...loadedImages}
+              />
+            )}
           </form>
         </Form>
       </CardContent>

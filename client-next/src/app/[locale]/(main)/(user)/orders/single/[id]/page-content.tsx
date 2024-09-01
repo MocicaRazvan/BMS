@@ -24,6 +24,7 @@ import { useFormatter } from "next-intl";
 import { format } from "date-fns";
 import useClientNotFound from "@/hoooks/useClientNotFound";
 import { motion } from "framer-motion";
+import CustomImage from "@/components/common/custom-image";
 
 export interface SingleOrderPageContentTexts {
   title: string;
@@ -145,7 +146,8 @@ export default function SingleOrderPageContent({
                 key={plan.id + "" + i + (plans?.length || -1)}
                 className="border rounded-lg px-2 py-4 flex items-center justify-between hover:shadow-md transition-all duration-300 shadow-foreground hover:shadow-foreground/40 hover:scale-[1.02]"
               >
-                <Image
+                <CustomImage
+                  thumblinator
                   src={plan.images[0]}
                   width={150}
                   height={150}

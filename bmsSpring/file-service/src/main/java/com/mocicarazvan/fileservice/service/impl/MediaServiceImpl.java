@@ -1,5 +1,6 @@
 package com.mocicarazvan.fileservice.service.impl;
 
+import com.mocicarazvan.fileservice.websocket.ProgressWebSocketHandler;
 import com.mocicarazvan.fileservice.dtos.FileUploadResponse;
 import com.mocicarazvan.fileservice.dtos.MetadataDto;
 import com.mocicarazvan.fileservice.enums.FileType;
@@ -37,6 +38,7 @@ public class MediaServiceImpl implements MediaService {
     private final ReactiveGridFsTemplate gridFsTemplate;
     private final MediaRepository mediaRepository;
     private final MediaMetadataRepository mediaMetadataRepository;
+    private final ProgressWebSocketHandler progressWebSocketHandler;
 
     @Value("${images.url}")
     private String imagesUrl;
@@ -47,18 +49,26 @@ public class MediaServiceImpl implements MediaService {
     @Override
     public Mono<FileUploadResponse> uploadFiles(Flux<FilePart> files, MetadataDto metadataDto) {
         return files.index()
-                .flatMap(indexedFilePart -> saveFileWithIndex(indexedFilePart.getT1(), indexedFilePart.getT2(), metadataDto))
+                .flatMap(indexedFilePart -> saveFileWithIndex(indexedFilePart.getT1(), indexedFilePart.getT2(), metadataDto)
+                        .doOnNext(tuple -> {
+                            log.error("Sending progress update " + tuple.getT1());
+                            progressWebSocketHandler.sendProgressUpdate(metadataDto.getClientId() != null ? metadataDto.getClientId() : "default", metadataDto.getFileType(), tuple.getT1());
+                        })
+                )
                 .collectList()
-                .doOnNext(urls -> {
-                    log.error("Files uploaded: {}", urls);
-                })
                 .map(urls -> {
                     urls.sort(Comparator.comparing(Tuple2::getT1));
                     return FileUploadResponse.builder()
                             .files(urls.stream().map(Tuple2::getT2).toList())
                             .fileType(metadataDto.getFileType())
                             .build();
-                });
+                })
+                .doOnNext(_ ->
+                        progressWebSocketHandler.sendCompletionMessage(
+                                metadataDto.getClientId() != null ? metadataDto.getClientId() : "default",
+                                metadataDto.getFileType()
+                        )
+                );
 
     }
 

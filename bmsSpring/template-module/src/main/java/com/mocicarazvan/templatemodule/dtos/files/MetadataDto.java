@@ -8,6 +8,7 @@ public class MetadataDto {
 
     private String name;
     private FileType fileType;
+    private String clientId;
 
     @JsonProperty("name")
     public String getName() {
@@ -27,5 +28,15 @@ public class MetadataDto {
     @JsonProperty("fileType")
     public void setFileType(FileType fileType) {
         this.fileType = fileType;
+    }
+
+    @JsonProperty("clientId")
+    public String getClientId() {
+        return clientId;
+    }
+
+    @JsonProperty("clientId")
+    public void setClientId(String clientId) {
+        this.clientId = clientId;
     }
 }

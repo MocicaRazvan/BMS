@@ -1,7 +1,10 @@
 import { ReactNode } from "react";
 import { getUserWithMinRole } from "@/lib/user";
 import { unstable_setRequestLocale } from "next-intl/server";
-import { Locale } from "@/navigation";
+import { Locale, redirect } from "@/navigation";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/auth-options";
+import { notFound } from "next/navigation";
 
 export default async function UserLayout({
   children,
@@ -11,7 +14,11 @@ export default async function UserLayout({
   params: { locale: Locale };
 }) {
   unstable_setRequestLocale(locale);
-  const user = await getUserWithMinRole("ROLE_USER");
-  console.log("authUser", user);
+  const session = await getServerSession(authOptions);
+
+  if (!session || !session.user) {
+    return redirect("/auth/signin");
+  }
+
   return <>{children}</>;
 }

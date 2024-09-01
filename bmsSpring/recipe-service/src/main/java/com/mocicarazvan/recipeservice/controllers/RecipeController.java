@@ -20,6 +20,7 @@ import com.mocicarazvan.templatemodule.hateos.CustomEntityModel;
 import com.mocicarazvan.templatemodule.utils.RequestsUtils;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -35,6 +36,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/recipes")
+@Slf4j
 public class RecipeController implements ApproveController<Recipe, RecipeBody, RecipeResponse, RecipeRepository, RecipeMapper, RecipeService>,
         CountInParentController
         ,
@@ -185,9 +187,10 @@ public class RecipeController implements ApproveController<Recipe, RecipeBody, R
     @PostMapping(value = "/createWithImages", produces = {MediaType.APPLICATION_NDJSON_VALUE, MediaType.APPLICATION_JSON_VALUE}, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public Mono<ResponseEntity<CustomEntityModel<RecipeResponse>>> createModelWithImages(@RequestPart("files") Flux<FilePart> files,
                                                                                          @RequestPart("body") String body,
+                                                                                         @RequestParam("clientId") String clientId,
                                                                                          ServerWebExchange exchange) {
         return requestsUtils.getBodyFromJson(body, RecipeBody.class, objectMapper)
-                .flatMap(recipeBody -> recipeService.createModel(files, recipeBody, requestsUtils.extractAuthUser(exchange))
+                .flatMap(recipeBody -> recipeService.createModel(files, recipeBody, requestsUtils.extractAuthUser(exchange), clientId)
                         .flatMap(m -> recipeReactiveResponseBuilder.toModel(m, RecipeController.class))
                         .map(ResponseEntity::ok));
     }
@@ -196,10 +199,11 @@ public class RecipeController implements ApproveController<Recipe, RecipeBody, R
     @PostMapping(value = "/updateWithImages/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = {MediaType.APPLICATION_NDJSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
     public Mono<ResponseEntity<CustomEntityModel<RecipeResponse>>> updateModelWithImages(@RequestPart("files") Flux<FilePart> files,
                                                                                          @RequestPart("body") String body,
+                                                                                         @RequestParam("clientId") String clientId,
                                                                                          @PathVariable Long id,
                                                                                          ServerWebExchange exchange) {
         return requestsUtils.getBodyFromJson(body, RecipeBody.class, objectMapper)
-                .flatMap(recipeBody -> recipeService.updateModelWithImages(files, id, recipeBody, requestsUtils.extractAuthUser(exchange))
+                .flatMap(recipeBody -> recipeService.updateModelWithImages(files, id, recipeBody, requestsUtils.extractAuthUser(exchange), clientId)
                         .flatMap(m -> recipeReactiveResponseBuilder.toModel(m, RecipeController.class))
                         .map(ResponseEntity::ok));
     }
@@ -249,9 +253,10 @@ public class RecipeController implements ApproveController<Recipe, RecipeBody, R
             @RequestPart("images") Flux<FilePart> images,
             @RequestPart("videos") Flux<FilePart> videos,
             @RequestPart("body") String body,
+            @RequestParam("clientId") String clientId,
             ServerWebExchange exchange) {
         return requestsUtils.getBodyFromJson(body, RecipeBody.class, objectMapper)
-                .flatMap(recipeBody -> recipeService.createModelWithVideos(images, videos, recipeBody, requestsUtils.extractAuthUser(exchange)))
+                .flatMap(recipeBody -> recipeService.createModelWithVideos(images, videos, recipeBody, requestsUtils.extractAuthUser(exchange), clientId))
                 .flatMap(m -> recipeReactiveResponseBuilder.toModel(m, RecipeController.class))
                 .map(ResponseEntity::ok);
     }
@@ -261,10 +266,11 @@ public class RecipeController implements ApproveController<Recipe, RecipeBody, R
             @RequestPart("images") Flux<FilePart> images,
             @RequestPart("videos") Flux<FilePart> videos,
             @RequestPart("body") String body,
+            @RequestParam("clientId") String clientId,
             @PathVariable Long id,
             ServerWebExchange exchange) {
         return requestsUtils.getBodyFromJson(body, RecipeBody.class, objectMapper)
-                .flatMap(recipeBody -> recipeService.updateModelWithVideos(images, videos, recipeBody, id, requestsUtils.extractAuthUser(exchange)))
+                .flatMap(recipeBody -> recipeService.updateModelWithVideos(images, videos, recipeBody, id, requestsUtils.extractAuthUser(exchange), clientId))
                 .flatMap(m -> recipeReactiveResponseBuilder.toModel(m, RecipeController.class))
                 .map(ResponseEntity::ok);
     }

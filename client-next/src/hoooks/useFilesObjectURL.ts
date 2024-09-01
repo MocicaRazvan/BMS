@@ -114,12 +114,11 @@ async function fetchFileObjectURL(url: string): Promise<FieldInputItem> {
   const mimeType =
     res.headers.get("content-type") || "application/octet-stream";
   const file = new File([blob], fileName, { type: mimeType });
-
-  const objectURL = URL.createObjectURL(blob); // Create an object URL instead of base64
+  const objectURL = URL.createObjectURL(blob);
 
   return {
     id: uuidv4(),
-    src: objectURL, // Store the object URL
+    src: objectURL,
     file,
   };
 }
@@ -167,16 +166,6 @@ export default function useFilesObjectURL<T extends FieldValues>({
         setFirstRun(false);
         setValue(fieldName as Path<T>, fs as PathValue<T, Path<T>>);
       });
-
-      // Clean up object URLs when component unmounts or files change
-      // return () => {
-      //   const currentFiles = getValues(
-      //     fieldName as Path<T>,
-      //   ) as FieldInputItem[];
-      //   currentFiles?.forEach((item) => {
-      //     URL.revokeObjectURL(item.src); // Revoke object URLs to prevent memory leaks
-      //   });
-      // };
     }
   }, [
     fieldName,

@@ -57,7 +57,7 @@ public class IngredientNutritionalFactServiceImpl implements IngredientNutrition
     @Override
     public Mono<IngredientNutritionalFactResponse> updateModel(Long id, IngredientNutritionalFactBody body, String userId) {
         return ingredientService.updateModel(id, body.getIngredient(), userId)
-                .zipWith(nutritionalFactService.updateModel(id, body.getNutritionalFact(), userId))
+                .zipWith(nutritionalFactService.updateModelByIngredient(id, body.getNutritionalFact(), userId))
                 .map(t -> ingredientNutritionalFactMapper.fromResponsesToResponse(t.getT1(), t.getT2()));
     }
 

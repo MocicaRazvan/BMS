@@ -20,8 +20,8 @@ public abstract class TitleBodyImagesReactiveLinkBuilder<MODEL extends TitleBody
     @Override
     public List<WebFluxLinkBuilder.WebFluxLink> createModelLinks(RESPONSE response, Class<C> c) {
         List<WebFluxLinkBuilder.WebFluxLink> links = super.createModelLinks(response, c);
-        links.add(WebFluxLinkBuilder.linkTo(WebFluxLinkBuilder.methodOn(c).createModelWithImages(null, null, null)).withRel("createWithImages"));
-        links.add(WebFluxLinkBuilder.linkTo(WebFluxLinkBuilder.methodOn(c).updateModelWithImages(null, null, null, null)).withRel("updateWithImages"));
+        links.add(WebFluxLinkBuilder.linkTo(WebFluxLinkBuilder.methodOn(c).createModelWithImages(null, null, null, null)).withRel("createWithImages"));
+        links.add(WebFluxLinkBuilder.linkTo(WebFluxLinkBuilder.methodOn(c).updateModelWithImages(null, null, null, null, null)).withRel("updateWithImages"));
         return links;
     }
 }

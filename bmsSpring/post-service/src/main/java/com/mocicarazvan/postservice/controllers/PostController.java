@@ -241,6 +241,7 @@ public class PostController implements ApproveController
     public Mono<ResponseEntity<CustomEntityModel<PostResponse>>> createModelWithImages(
             @RequestPart("files") Flux<FilePart> files,
             @RequestPart("body") String body,
+            @RequestParam("clientId") String clientId,
             ServerWebExchange exchange) {
 //        PostBody postBody = null;
 //        try {
@@ -250,7 +251,7 @@ public class PostController implements ApproveController
 //        }
 
         return requestsUtils.getBodyFromJson(body, PostBody.class, objectMapper)
-                .flatMap(postBody -> postService.createModel(files, postBody, requestsUtils.extractAuthUser(exchange))
+                .flatMap(postBody -> postService.createModel(files, postBody, requestsUtils.extractAuthUser(exchange), clientId)
                         .flatMap(m -> postReactiveResponseBuilder.toModel(m, PostController.class))
                         .map(ResponseEntity::ok));
     }
@@ -260,10 +261,11 @@ public class PostController implements ApproveController
     public Mono<ResponseEntity<CustomEntityModel<PostResponse>>> updateModelWithImages(
             @RequestPart("files") Flux<FilePart> files,
             @RequestPart("body") String body,
+            @RequestParam("clientId") String clientId,
             @PathVariable Long id,
             ServerWebExchange exchange) {
         return requestsUtils.getBodyFromJson(body, PostBody.class, objectMapper)
-                .flatMap(postBody -> postService.updateModelWithImages(files, id, postBody, requestsUtils.extractAuthUser(exchange))
+                .flatMap(postBody -> postService.updateModelWithImages(files, id, postBody, requestsUtils.extractAuthUser(exchange), clientId)
                         .flatMap(m -> postReactiveResponseBuilder.toModel(m, PostController.class))
                         .map(ResponseEntity::ok));
     }

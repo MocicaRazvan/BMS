@@ -8,6 +8,8 @@ import com.mocicarazvan.ingredientservice.repositories.NutritionalFactRepository
 import com.mocicarazvan.ingredientservice.services.IngredientService;
 import com.mocicarazvan.ingredientservice.services.NutritionalFactService;
 import com.mocicarazvan.templatemodule.clients.UserClient;
+import com.mocicarazvan.templatemodule.exceptions.action.PrivateRouteException;
+import com.mocicarazvan.templatemodule.exceptions.notFound.NotFoundEntity;
 import com.mocicarazvan.templatemodule.services.impl.ManyToOneUserServiceImpl;
 import com.mocicarazvan.templatemodule.utils.PageableUtilsCustom;
 import org.springframework.stereotype.Service;
@@ -38,8 +40,13 @@ public class NutritionalFactServiceImpl extends
 
     @Override
     public Mono<NutritionalFactResponse> findByIngredientId(Long ingredientId) {
-        return modelRepository.findByIngredientId(ingredientId)
+        return getModelByIngredientId(ingredientId)
                 .map(modelMapper::fromModelToResponse);
+    }
+
+    private Mono<NutritionalFact> getModelByIngredientId(Long ingredientId) {
+        return modelRepository.findByIngredientId(ingredientId)
+                .switchIfEmpty(Mono.error(new NotFoundEntity("NutritionalFact for ingredient id ", ingredientId)));
     }
 
     @Override
@@ -53,4 +60,19 @@ public class NutritionalFactServiceImpl extends
                             .map(modelMapper::fromModelToResponse);
                 });
     }
+
+    @Override
+    public Mono<NutritionalFactResponse> updateModelByIngredient(Long ingredientId, NutritionalFactBody modelBody, String userId) {
+        return userClient.getUser("", userId)
+                .flatMap(authUser -> getModelByIngredientId(ingredientId)
+                        .flatMap(model -> isNotAuthor(model, authUser)
+                                .filter(Boolean.FALSE::equals)
+                                .switchIfEmpty(Mono.error(new PrivateRouteException()))
+                                .flatMap(_ -> modelMapper.updateModelFromBody(modelBody, model)
+                                        .flatMap(modelRepository::save)
+                                        .map(modelMapper::fromModelToResponse))
+                        )
+                );
+    }
+
 }

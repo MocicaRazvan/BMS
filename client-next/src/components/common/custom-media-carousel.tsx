@@ -10,6 +10,7 @@ import {
 import { useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
+import CustomImage from "@/components/common/custom-image";
 
 interface Media {
   type: "image" | "video";
@@ -44,12 +45,15 @@ export default function CustomMediaCarousel({ media }: Props) {
                 }}
               >
                 {item.type === "image" ? (
-                  <Image
+                  <CustomImage
+                    thumblinator
+                    quality={100}
                     src={item.src}
                     alt="media image"
                     fill={true}
                     className="w-full max-w-[1000px] object-cover h-full"
                     priority={i === 0}
+                    width={1000}
                   />
                 ) : (
                   <video
@@ -74,7 +78,9 @@ export default function CustomMediaCarousel({ media }: Props) {
               "bg-background w-6 h-6 flex items-center justify-center font-bold"
             }
           >
-            <Image
+            <CustomImage
+              thumblinator
+              quality={100}
               src={currentImage}
               alt="current image"
               fill={true}

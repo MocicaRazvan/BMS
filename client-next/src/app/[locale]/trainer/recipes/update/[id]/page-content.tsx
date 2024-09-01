@@ -33,7 +33,7 @@ export default function UpdateRecipePageContent({
     path: `/recipes/${id}`,
     method: "GET",
     authToken: true,
-    useAbortController: false,
+    // useAbortController: false,
   });
 
   const {
@@ -44,7 +44,7 @@ export default function UpdateRecipePageContent({
     path: `/recipes/ingredients/${id}`,
     method: "GET",
     authToken: true,
-    useAbortController: false,
+    // useAbortController: false,
   });
 
   const { navigateToNotFound } = useClientNotFound();
@@ -114,14 +114,14 @@ export default function UpdateRecipePageContent({
 
   if (!recipeIsFinished || !IQIsFinished) return <LoadingSpinner />;
 
-  if (recipeError || IQError) {
+  if (recipeError?.status || IQError?.status) {
     return navigateToNotFound();
   }
   if (recipeIsFinished && !recipeMessage[0]) {
-    return navigateToNotFound();
+    return <LoadingSpinner />;
   }
   if (IQIsFinished && !(IQMessage.length > 0)) {
-    return navigateToNotFound();
+    return <LoadingSpinner />;
   }
 
   const recipe = recipeMessage[0].content;

@@ -56,7 +56,7 @@ export default function NutritionalTable({
         <TableHeader>
           <TableRow>
             {finalCols.map((col) => (
-              <TableHead key={col}>
+              <TableHead key={col + "lg"}>
                 {" "}
                 {ingredientColumnTexts[col] as string}{" "}
               </TableHead>
@@ -65,7 +65,11 @@ export default function NutritionalTable({
         </TableHeader>
         <TableBody>
           {tableColsKeys.map((col) => (
-            <TableCell key={col}>{ing.nutritionalFact[col]}</TableCell>
+            <TableCell key={col}>
+              {typeof ing.nutritionalFact[col] === "number"
+                ? ing.nutritionalFact[col]?.toFixed(2)
+                : ing.nutritionalFact[col]}
+            </TableCell>
           ))}
           <TableCell>{getCalories(ing)}</TableCell>
           {showUnit && (
@@ -87,9 +91,13 @@ export default function NutritionalTable({
 
         {tableColsKeys.map((col) => (
           <>
-            <div key={col} className="flex justify-between">
+            <div key={col + "sm"} className="flex justify-between">
               <p>{ingredientColumnTexts[col] as string}</p>
-              <p>{ing.nutritionalFact[col]}</p>
+              <p>
+                {typeof ing.nutritionalFact[col] === "number"
+                  ? ing.nutritionalFact[col]?.toFixed(2)
+                  : ing.nutritionalFact[col]}
+              </p>
             </div>
             <hr className="border" />
           </>

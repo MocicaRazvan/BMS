@@ -12,8 +12,8 @@ import reactor.core.publisher.Mono;
 public interface TitleBodyImagesService<MODEL extends TitleBodyImages, BODY, RESPONSE extends WithUserDto,
         S extends TitleBodyImagesRepository<MODEL>, M extends DtoMapper<MODEL, BODY, RESPONSE>>
         extends TitleBodyService<MODEL, BODY, RESPONSE, S, M> {
-    Mono<RESPONSE> createModel(Flux<FilePart> images, BODY body, String userId);
+    Mono<RESPONSE> createModel(Flux<FilePart> images, BODY body, String userId, String clientId);
 
 
-    Mono<RESPONSE> updateModelWithImages(Flux<FilePart> images, Long id, BODY body, String userId);
+    Mono<RESPONSE> updateModelWithImages(Flux<FilePart> images, Long id, BODY body, String userId, String clientId);
 }

@@ -11,6 +11,7 @@ import { ThemeSwitchTexts } from "@/texts/components/nav";
 import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
 import { getCreatePostPageTexts } from "@/texts/pages";
 import SidebarContentLayout from "@/components/sidebar/sidebar-content-layout";
+import { UploadingProgressTexts } from "@/components/forms/uploading-progress";
 
 interface Props {
   params: { locale: Locale };
@@ -45,6 +46,7 @@ export default async function CreatePostPage({ params: { locale } }: Props) {
         inputMultipleSelectorTexts,
         buttonSubmitTexts,
         baseFormTexts,
+        loadedImages,
       },
       ...rest
     },
@@ -71,6 +73,7 @@ export default async function CreatePostPage({ params: { locale } }: Props) {
             titleBodyTexts={titleBodyTexts}
             inputMultipleSelectorTexts={inputMultipleSelectorTexts}
             buttonSubmitTexts={buttonSubmitTexts}
+            loadedImages={loadedImages}
             {...baseFormTexts}
             authUser={authUser}
             path={"/posts/createWithImages"}

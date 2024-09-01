@@ -37,7 +37,7 @@ export function calculateRecipeCaloriesPer100(
     fat: number;
     protein: number;
     carbohydrates: number;
-    quantity: number; // quantity in grams
+    quantity: number;
   }[],
 ): number {
   const totalCalories = recipe.reduce((total, ingredient) => {

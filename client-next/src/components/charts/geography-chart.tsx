@@ -72,7 +72,7 @@ export default function GeographyChart({
   );
 
   const { messages, error, isFinished } = useFetchStream<CountryOrderSummary>({
-    path: "/orders/sidebar/summaryByCountry",
+    path: "/orders/admin/summaryByCountry",
     method: "GET",
     authToken: true,
     queryParams: {

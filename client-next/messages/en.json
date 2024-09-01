@@ -69,7 +69,8 @@
       },
       "unit": "Unit is invalid",
       "refineSaturatedFat": "Saturated fat must be less than fat",
-      "refineSugar": "Sugar must be less than carbohydrates"
+      "refineSugar": "Sugar must be less than carbohydrates",
+      "atLeastOnePositive": "At least one of fat, carbohydrates, protein and salt must be a positive number"
     },
     "IngredientQuantitySchemaTexts": {
       "minQuantity": "Quantity must be at least 1",
@@ -151,6 +152,13 @@
             "meals": "meals",
             "days": "days"
           }
+        },
+        "UploadingProgressTexts": {
+          "type": {
+            "image": "Images",
+            "video": "Videos"
+          },
+          "loadedItems": "Loaded {type}"
         }
       },
       "PostForm": {
@@ -374,7 +382,9 @@
         "addIngredient": "Add new line",
         "quantityChildPlaceholder": "Enter the quantity",
         "quantityChildLabel": "Quantity",
-        "dietType": "The diet is:"
+        "dietType": "The diet is:",
+        "continueBtn": "Continue",
+        "areIngredientsCompletedButNotSubmitted": "There are some ingredients that are completed but not submitted, if you submit the form they will be lost"
       },
       "PlanFormTexts": {
         "priceLabel": "Price",

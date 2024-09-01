@@ -16,6 +16,7 @@ import CheckoutDrawer, {
   CheckoutDrawerTexts,
 } from "@/components/forms/checkout-drawer";
 import { getCheckoutSchemaTexts } from "@/texts/components/forms-server";
+import CustomImage from "@/components/common/custom-image";
 
 export interface CartPageContentTexts {
   emptyCart: string;
@@ -102,7 +103,8 @@ export default function CartPageContent({
               key={plan.id}
               className="border rounded-lg px-2 py-4 flex items-center justify-between hover:shadow-md transition-all duration-300 shadow-foreground hover:shadow-foreground/40 hover:scale-[1.02]"
             >
-              <Image
+              <CustomImage
+                thumblinator
                 src={plan.images[0]}
                 width={150}
                 height={150}

@@ -35,16 +35,16 @@ public abstract class TitleBodyImagesServiceImpl<MODEL extends TitleBodyImages, 
     }
 
     @Override
-    public Mono<RESPONSE> createModel(Flux<FilePart> images, BODY body, String userId) {
-        return getModelToBeCreatedWithImages(images, body, userId)
+    public Mono<RESPONSE> createModel(Flux<FilePart> images, BODY body, String userId, String clientId) {
+        return getModelToBeCreatedWithImages(images, body, userId, clientId)
                 .flatMap(modelRepository::save)
                 .map(modelMapper::fromModelToResponse);
     }
 
     @Override
-    public Mono<RESPONSE> updateModelWithImages(Flux<FilePart> images, Long id, BODY body, String userId) {
+    public Mono<RESPONSE> updateModelWithImages(Flux<FilePart> images, Long id, BODY body, String userId, String clientId) {
         return updateModelWithSuccess(id, userId, model -> fileClient.deleteFiles(model.getImages())
-                .then(uploadFiles(images, FileType.IMAGE)
+                .then(uploadFiles(images, FileType.IMAGE, clientId)
                         .flatMap(fileUploadResponse -> modelMapper.updateModelFromBody(body, model)
                                 .map(m -> {
                                     m.setImages(fileUploadResponse.getFiles());
@@ -75,16 +75,17 @@ public abstract class TitleBodyImagesServiceImpl<MODEL extends TitleBodyImages, 
 //        return fileClient.uploadFiles(images, metadataDto, objectMapper);
 //    }
 
-    protected Mono<FileUploadResponse> uploadFiles(Flux<FilePart> files, FileType fileType) {
+    protected Mono<FileUploadResponse> uploadFiles(Flux<FilePart> files, FileType fileType, String clientId) {
         MetadataDto metadataDto = new MetadataDto();
         metadataDto.setName(fileType.toString() + " " + modelName);
         metadataDto.setFileType(fileType);
+        metadataDto.setClientId(clientId);
         return fileClient.uploadFiles(files, metadataDto, objectMapper);
     }
 
-    protected Mono<MODEL> getModelToBeCreatedWithImages(Flux<FilePart> images, BODY body, String userId) {
+    protected Mono<MODEL> getModelToBeCreatedWithImages(Flux<FilePart> images, BODY body, String userId, String clientId) {
         return userClient.getUser("", userId)
-                .flatMap(authUser -> uploadFiles(images, FileType.IMAGE)
+                .flatMap(authUser -> uploadFiles(images, FileType.IMAGE, clientId)
                         .map(fileUploadResponse -> {
                             MODEL model = modelMapper.fromBodyToModel(body);
                             model.setImages(fileUploadResponse.getFiles());

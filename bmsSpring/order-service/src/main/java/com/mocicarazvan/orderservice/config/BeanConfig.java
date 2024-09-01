@@ -18,6 +18,7 @@ import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 import io.github.resilience4j.ratelimiter.RateLimiterRegistry;
 import io.github.resilience4j.retry.RetryRegistry;
 import jakarta.validation.Validator;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -30,7 +31,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 @Configuration
 public class BeanConfig {
 
-    
+
     @Bean
     public ObjectMapper customObjectMapper(final Jackson2ObjectMapperBuilder builder) {
         return new CustomObjectMapper(builder).customObjectMapper();
@@ -53,7 +54,19 @@ public class BeanConfig {
 
     @Bean
     @LoadBalanced
-    public WebClient.Builder webClient() {
+    public WebClient.Builder userWebClient() {
+        return WebClient.builder();
+    }
+
+    @Bean(name = "webSocketWebClient")
+    @LoadBalanced
+    public WebClient.Builder webSocketClient() {
+        return WebClient.builder();
+    }
+
+    @Bean(name = "planWebClient")
+    @LoadBalanced
+    public WebClient.Builder planClient() {
         return WebClient.builder();
     }
 
@@ -61,7 +74,7 @@ public class BeanConfig {
     public UserClient userClient(
             CircuitBreakerRegistry circuitBreakerRegistry, RetryRegistry retryRegistry, RateLimiterRegistry rateLimiterRegistry
     ) {
-        return new UserClient("userService", webClient(), circuitBreakerRegistry, retryRegistry, rateLimiterRegistry);
+        return new UserClient("userService", userWebClient(), circuitBreakerRegistry, retryRegistry, rateLimiterRegistry);
     }
 
 //    @Bean

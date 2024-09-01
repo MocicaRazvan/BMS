@@ -29,11 +29,13 @@ public interface TitleBodyImagesController<MODEL extends TitleBodyImages, BODY, 
     @PostMapping(value = "/createWithImages", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     Mono<ResponseEntity<CustomEntityModel<RESPONSE>>> createModelWithImages(@RequestPart("files") Flux<FilePart> files,
                                                                             @RequestPart("body") String body,
+                                                                            @RequestParam("clientId") String clientId,
                                                                             ServerWebExchange exchange);
 
     @PostMapping(value = "/updateWithImages/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     Mono<ResponseEntity<CustomEntityModel<RESPONSE>>> updateModelWithImages(@RequestPart("files") Flux<FilePart> files,
                                                                             @RequestPart("body") String body,
+                                                                            @RequestParam("clientId") String clientId,
                                                                             @PathVariable Long id,
                                                                             ServerWebExchange exchange
     );

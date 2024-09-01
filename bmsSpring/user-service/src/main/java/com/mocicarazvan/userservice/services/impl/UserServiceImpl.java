@@ -148,6 +148,7 @@ public class UserServiceImpl implements UserService {
                                                 MetadataDto metadataDto = new MetadataDto();
                                                 metadataDto.setFileType(FileType.IMAGE);
                                                 metadataDto.setName("profile " + userId);
+                                                metadataDto.setClientId(userId + "_profile");
                                                 return fileClient.uploadFiles(finalFiles, metadataDto, objectMapper).map(fileUploadResponse -> {
                                                     user.setImage(fileUploadResponse.getFiles().get(0));
                                                     return user;

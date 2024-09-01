@@ -25,6 +25,7 @@ interface Props<R> extends WithUser, ChildInputMultipleSelectorTexts {
   maxSelected?: number;
   giveUnselectedValue?: boolean;
   allowDuplicates?: boolean;
+  pageSize?: number;
 }
 
 export default function ChildInputMultipleSelector<R>({
@@ -43,6 +44,7 @@ export default function ChildInputMultipleSelector<R>({
   maxSelected,
   giveUnselectedValue = true,
   allowDuplicates = false,
+  pageSize = 10,
 }: Props<R>) {
   const fetchData = useCallback(
     async (value: string): Promise<Option[]> => {
@@ -56,7 +58,7 @@ export default function ChildInputMultipleSelector<R>({
         method: "PATCH",
         body: {
           page: 0,
-          size: 10,
+          size: pageSize,
           sortingCriteria,
         },
         acceptHeader: "application/x-ndjson",
@@ -68,6 +70,7 @@ export default function ChildInputMultipleSelector<R>({
       authUser.token,
       extraQueryParams,
       mapping,
+      pageSize,
       path,
       sortingCriteria,
       valueKey,

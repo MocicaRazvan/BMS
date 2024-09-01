@@ -36,6 +36,7 @@ import {
 import useBinaryFilter from "@/components/list/useBinaryFilter";
 import { postColumnActions } from "@/lib/constants";
 import useClientNotFound from "@/hoooks/useClientNotFound";
+import OverflowTextTooltip from "@/components/common/overflow-text-tooltip";
 
 export interface PostTableColumnsTexts {
   id: string;
@@ -153,12 +154,13 @@ export default function PostsTable({
             {postTableColumnsTexts.title}
           </p>
         ),
+        cell: ({ row }) => <OverflowTextTooltip text={row.original.title} />,
       },
       {
         id: postTableColumnsTexts.userLikes,
         accessorKey: "userLikes",
         header: () => (
-          <p className="font-bold text-lg text-left">
+          <p className="font-bold text-lg text-left ">
             {postTableColumnsTexts.userLikes}
           </p>
         ),

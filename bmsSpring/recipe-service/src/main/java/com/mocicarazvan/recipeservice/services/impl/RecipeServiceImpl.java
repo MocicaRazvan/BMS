@@ -92,7 +92,7 @@ public class RecipeServiceImpl extends ApprovedServiceImpl<Recipe, RecipeBody, R
 //    }
 
     @Override
-    public Mono<RecipeResponse> createModelWithVideos(Flux<FilePart> images, Flux<FilePart> videos, RecipeBody recipeBody, String userId) {
+    public Mono<RecipeResponse> createModelWithVideos(Flux<FilePart> images, Flux<FilePart> videos, RecipeBody recipeBody, String userId, String clientId) {
 
 
         return ingredientClient.verifyIds(recipeBody.getIngredients().stream().map(i -> i.getIngredientId().toString()).toList(), userId)
@@ -107,7 +107,7 @@ public class RecipeServiceImpl extends ApprovedServiceImpl<Recipe, RecipeBody, R
                                                 return Mono.error(new InvalidTypeException(recipeBody.getType(), ingTs));
                                             }
 
-                                            return getModelToBeCreatedWithVideos(images, videos, recipeBody, userId)
+                                            return getModelToBeCreatedWithVideos(images, videos, recipeBody, userId, clientId)
                                                     .flatMap(modelRepository::save)
                                                     .flatMap(m ->
                                                             ingredientQuantityService.saveAllFromIngredientList(m.getId(), recipeBody.getIngredients())
@@ -121,7 +121,7 @@ public class RecipeServiceImpl extends ApprovedServiceImpl<Recipe, RecipeBody, R
     }
 
     @Override
-    public Mono<RecipeResponse> updateModelWithVideos(Flux<FilePart> images, Flux<FilePart> videos, RecipeBody recipeBody, Long id, String userId) {
+    public Mono<RecipeResponse> updateModelWithVideos(Flux<FilePart> images, Flux<FilePart> videos, RecipeBody recipeBody, Long id, String userId, String clientId) {
         return
                 ingredientQuantityService.findAllByRecipeId(id, userId)
                         .map(ing -> ing.getIngredient().getId())
@@ -140,8 +140,8 @@ public class RecipeServiceImpl extends ApprovedServiceImpl<Recipe, RecipeBody, R
                                     List<String> urls = model.getImages();
                                     urls.addAll(model.getVideos());
                                     return fileClient.deleteFiles(urls)
-                                            .then(uploadFiles(images, FileType.IMAGE)
-                                                    .zipWith(uploadFiles(videos, FileType.VIDEO))
+                                            .then(uploadFiles(images, FileType.IMAGE, clientId)
+                                                    .zipWith(uploadFiles(videos, FileType.VIDEO, clientId))
                                                     .flatMap(t -> modelMapper.updateModelFromBody(recipeBody, model)
                                                             .flatMap(m -> {
                                                                 m.setImages(t.getT1().getFiles());
@@ -221,10 +221,10 @@ public class RecipeServiceImpl extends ApprovedServiceImpl<Recipe, RecipeBody, R
                         );
     }
 
-    private Mono<Recipe> getModelToBeCreatedWithVideos(Flux<FilePart> images, Flux<FilePart> videos, RecipeBody recipeBody, String userId) {
+    private Mono<Recipe> getModelToBeCreatedWithVideos(Flux<FilePart> images, Flux<FilePart> videos, RecipeBody recipeBody, String userId, String clientId) {
         return userClient.getUser("", userId)
-                .flatMap(authUser -> uploadFiles(images, FileType.IMAGE)
-                        .zipWith(uploadFiles(videos, FileType.VIDEO))
+                .flatMap(authUser -> uploadFiles(images, FileType.IMAGE, clientId)
+                        .zipWith(uploadFiles(videos, FileType.VIDEO, clientId))
                         .map(t -> {
                             Recipe recipe = modelMapper.fromBodyToModel(recipeBody);
                             recipe.setUserId(authUser.getId());

@@ -13,6 +13,7 @@ import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 import io.github.resilience4j.ratelimiter.RateLimiterRegistry;
 import io.github.resilience4j.retry.RetryRegistry;
 import jakarta.validation.Validator;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -47,7 +48,13 @@ public class BeanConfig {
 
     @Bean
     @LoadBalanced
-    public WebClient.Builder webClient() {
+    public WebClient.Builder userWebClient() {
+        return WebClient.builder();
+    }
+
+    @Bean(name = "recipeWebClient")
+    @LoadBalanced
+    public WebClient.Builder recipeClient() {
         return WebClient.builder();
     }
 
@@ -55,7 +62,7 @@ public class BeanConfig {
     public UserClient userClient(
             CircuitBreakerRegistry circuitBreakerRegistry, RetryRegistry retryRegistry, RateLimiterRegistry rateLimiterRegistry
     ) {
-        return new UserClient("userService", webClient(), circuitBreakerRegistry, retryRegistry, rateLimiterRegistry);
+        return new UserClient("userService", userWebClient(), circuitBreakerRegistry, retryRegistry, rateLimiterRegistry);
     }
 
 

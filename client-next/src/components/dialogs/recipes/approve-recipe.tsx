@@ -23,7 +23,7 @@ export default function AlertDialogApproveRecipes({
       title={recipe.title}
       approved={!recipe.approved}
       notificationName={approveRecipeNotificationName}
-      stompExtraLink={`/recipes/single/${recipe.id}`}
+      stompExtraLink={`/trainer/recipes/single/${recipe.id}`}
     />
   );
 }

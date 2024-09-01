@@ -23,6 +23,7 @@ import { loadGlobalModel } from "@/actions/toxcity";
 import AiChatBox from "@/components/ai-chat/ai-chat-box";
 import { vectorStoreInstance } from "@/lib/langchain";
 import { getAiChatBoxTexts } from "@/texts/components/ai-chat";
+import ValidUserSessionContext from "@/context/valid-user-session";
 
 const fontSans = FontSans({
   subsets: ["latin"],
@@ -102,40 +103,46 @@ export default async function BaseLayout({
             disableTransitionOnChange
           >
             <NextAuthSessionProvider>
-              <StompProvider
-                url={spring + "/ws/ws-service"}
-                authUser={session?.user}
-              >
-                <ScrollTopProvider>
-                  <ChatProvider authUser={session?.user}>
-                    <ChatMessageNotificationProvider authUser={session?.user}>
-                      <PostApproveNotificationProvider authUser={session?.user}>
-                        <RecipeApproveNotificationProvider
+              <ValidUserSessionContext>
+                <StompProvider
+                  url={spring + "/ws/ws-service"}
+                  authUser={session?.user}
+                >
+                  <ScrollTopProvider>
+                    <ChatProvider authUser={session?.user}>
+                      <ChatMessageNotificationProvider authUser={session?.user}>
+                        <PostApproveNotificationProvider
                           authUser={session?.user}
                         >
-                          <PlanApproveNotificationProvider
+                          <RecipeApproveNotificationProvider
                             authUser={session?.user}
                           >
-                            <BoughtNotificationProvider
+                            <PlanApproveNotificationProvider
                               authUser={session?.user}
                             >
-                              <CartProvider>
-                                <SubscriptionProvider authUser={session?.user}>
-                                  <>
-                                    {children}
-                                    <AiChatBox {...aiTexts} />
-                                  </>
-                                </SubscriptionProvider>
-                              </CartProvider>
-                            </BoughtNotificationProvider>
-                          </PlanApproveNotificationProvider>
-                        </RecipeApproveNotificationProvider>
-                      </PostApproveNotificationProvider>
-                    </ChatMessageNotificationProvider>
-                  </ChatProvider>
-                </ScrollTopProvider>
-              </StompProvider>
-              <Toaster />
+                              <BoughtNotificationProvider
+                                authUser={session?.user}
+                              >
+                                <CartProvider>
+                                  <SubscriptionProvider
+                                    authUser={session?.user}
+                                  >
+                                    <>
+                                      {children}
+                                      <AiChatBox {...aiTexts} />
+                                    </>
+                                  </SubscriptionProvider>
+                                </CartProvider>
+                              </BoughtNotificationProvider>
+                            </PlanApproveNotificationProvider>
+                          </RecipeApproveNotificationProvider>
+                        </PostApproveNotificationProvider>
+                      </ChatMessageNotificationProvider>
+                    </ChatProvider>
+                  </ScrollTopProvider>
+                </StompProvider>
+                <Toaster />
+              </ValidUserSessionContext>
             </NextAuthSessionProvider>
           </ThemeProvider>
         </NextIntlClientProvider>

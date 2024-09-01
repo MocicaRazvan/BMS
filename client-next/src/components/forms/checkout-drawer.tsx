@@ -191,7 +191,7 @@ export default function CheckoutDrawer({
             <DrawerDescription>{header}</DrawerDescription>
           </DrawerHeader>
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)}>
+            <form onSubmit={form.handleSubmit(onSubmit)} noValidate>
               <FormField
                 control={form.control}
                 name="userConfirmedPrice"

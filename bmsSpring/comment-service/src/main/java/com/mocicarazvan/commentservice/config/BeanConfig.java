@@ -12,6 +12,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 import io.github.resilience4j.ratelimiter.RateLimiterRegistry;
 import io.github.resilience4j.retry.RetryRegistry;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.context.annotation.Bean;
@@ -34,7 +35,13 @@ public class BeanConfig {
 
     @Bean
     @LoadBalanced
-    public WebClient.Builder webClient() {
+    public WebClient.Builder userWebClient() {
+        return WebClient.builder();
+    }
+
+    @Bean(name = "postWebClient")
+    @LoadBalanced
+    public WebClient.Builder postClient() {
         return WebClient.builder();
     }
 
@@ -42,7 +49,7 @@ public class BeanConfig {
     public UserClient userClient(
             CircuitBreakerRegistry circuitBreakerRegistry, RetryRegistry retryRegistry, RateLimiterRegistry rateLimiterRegistry
     ) {
-        return new UserClient("userService", webClient(), circuitBreakerRegistry, retryRegistry, rateLimiterRegistry);
+        return new UserClient("userService", userWebClient(), circuitBreakerRegistry, retryRegistry, rateLimiterRegistry);
     }
 
     @Bean

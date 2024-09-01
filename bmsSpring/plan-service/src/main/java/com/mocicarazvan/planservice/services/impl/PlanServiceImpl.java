@@ -288,22 +288,22 @@ public class PlanServiceImpl
     }
 
     @Override
-    public Mono<PlanResponse> createModel(Flux<FilePart> images, PlanBody planBody, String userId) {
+    public Mono<PlanResponse> createModel(Flux<FilePart> images, PlanBody planBody, String userId, String clientId) {
         return
                 dayClient.verifyIds(planBody.getDays()
                                 .stream().map(Object::toString).toList()
                         , userId).then(
-                        super.createModel(images, planBody, userId));
+                        super.createModel(images, planBody, userId, clientId));
     }
 
     @Override
-    public Mono<PlanResponse> updateModelWithImages(Flux<FilePart> images, Long id, PlanBody planBody, String userId) {
+    public Mono<PlanResponse> updateModelWithImages(Flux<FilePart> images, Long id, PlanBody planBody, String userId, String clientId) {
         return
                 getModelById(id, userId)
                         .map(plan -> planBody.getDays().stream().filter(r -> !plan.getDays().contains(r))
                                 .map(Object::toString).toList())
                         .flatMap(ids -> dayClient.verifyIds(ids, userId))
-                        .then(super.updateModelWithImages(images, id, planBody, userId));
+                        .then(super.updateModelWithImages(images, id, planBody, userId, clientId));
 
 //                super.updateModelWithImages(images, id, planBody, userId);
     }

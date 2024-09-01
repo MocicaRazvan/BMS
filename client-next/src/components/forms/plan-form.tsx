@@ -101,6 +101,11 @@ import {
 } from "@dnd-kit/core";
 import { AnimatePresence, motion } from "framer-motion";
 import { SyntheticListenerMap } from "@dnd-kit/core/dist/hooks/utilities";
+import { v4 as uuidv4 } from "uuid";
+import useProgressWebSocket from "@/hoooks/useProgressWebSocket";
+import UploadingProgress, {
+  UploadingProgressTexts,
+} from "@/components/forms/uploading-progress";
 
 export interface PlanFormTexts {
   titleBodyTexts: TitleBodyTexts;
@@ -118,6 +123,7 @@ export interface PlanFormTexts {
   dietMessage: string;
   dayIndex: string;
   objectives: Record<(typeof planObjectives)[number], string>;
+  loadedImages: UploadingProgressTexts;
 }
 export interface PlanFormProps
   extends WithUser,
@@ -153,14 +159,22 @@ export default function PlanForm({
   initialOptions = [],
   dayIndex,
   objectives,
+  loadedImages,
 }: PlanFormProps) {
   const planSchema = useMemo(
     () => getPlanSchema(planSchemaTexts),
     [planSchemaTexts],
   );
-
+  const [clientId] = useState(uuidv4);
   const { isLoading, setIsLoading, router, errorMsg, setErrorMsg } =
     useLoadingErrorState();
+
+  const { messages: messagesImages } = useProgressWebSocket(
+    authUser.token,
+    clientId,
+    "IMAGE",
+  );
+
   const [selectedOptions, setSelectedOptions] = useState<
     (Option & { dragId: string })[]
   >(initialOptions || []);
@@ -179,6 +193,7 @@ export default function PlanForm({
   });
 
   const daysWatch = form.watch("days");
+  const watchImages = form.watch("images");
 
   useEffect(() => {
     if (daysWatch.length) {
@@ -269,6 +284,7 @@ export default function PlanForm({
             files,
             body,
           },
+          clientId,
         });
         toast({
           title: data.title,
@@ -277,12 +293,15 @@ export default function PlanForm({
           action: (
             <ToastAction
               altText={altToast}
-              // onClick={() => router.push(`/posts/single/${res.content.id}`)}
+              onClick={() =>
+                router.push(`/trainer/plans/single/${res.content.id}`)
+              }
             >
               {toastAction}
             </ToastAction>
           ),
         });
+        router.push(`/trainer/plans/single/${res.content.id}`);
       } catch (e) {
         handleBaseError(e, setErrorMsg, error);
       } finally {
@@ -299,6 +318,8 @@ export default function PlanForm({
       toastAction,
       path,
       dietType,
+      clientId,
+      router,
     ],
   );
 
@@ -314,6 +335,7 @@ export default function PlanForm({
           <form
             onSubmit={form.handleSubmit(onSubmit)}
             className="space-y-8 lg:space-y-12 w-full"
+            noValidate
           >
             <TitleBodyForm<PlanSchemaType>
               control={form.control}
@@ -454,6 +476,13 @@ export default function PlanForm({
               disable={false}
               buttonSubmitTexts={buttonSubmitTexts}
             />
+            {isLoading && (
+              <UploadingProgress
+                total={watchImages.length}
+                loaded={messagesImages.length}
+                {...loadedImages}
+              />
+            )}
           </form>
         </Form>
       </CardContent>

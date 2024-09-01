@@ -41,6 +41,7 @@ import AlertDialogDeletePlan from "@/components/dialogs/plans/delete-plan";
 import LoadingSpinner from "@/components/common/loading-spinner";
 import { useFormatter } from "next-intl";
 import useClientNotFound from "@/hoooks/useClientNotFound";
+import OverflowTextTooltip from "@/components/common/overflow-text-tooltip";
 
 export interface PlanTableColumnsTexts {
   id: string;
@@ -224,9 +225,7 @@ export default function PlansTable({
           </p>
         ),
         cell: ({ row }) => (
-          <div className="max-w-16 text-nowrap overflow-x-hidden">
-            <p>{row.original.model.title}</p>
-          </div>
+          <OverflowTextTooltip text={row.original.model.title} />
         ),
       },
       {

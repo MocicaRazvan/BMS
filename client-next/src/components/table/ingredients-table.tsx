@@ -43,6 +43,7 @@ import { ColumnActionsTexts } from "@/texts/components/table";
 import ToggleDisplayIngredient from "@/components/dialogs/ingredients/ingredient-toggle-display";
 import AlertDialogDeleteIngredient from "@/components/dialogs/ingredients/delete-ingredient";
 import useClientNotFound from "@/hoooks/useClientNotFound";
+import OverflowTextTooltip from "@/components/common/overflow-text-tooltip";
 
 export interface IngredientTableColumnTexts {
   id: string;
@@ -199,9 +200,7 @@ export default function IngredientsTable({
           </p>
         ),
         cell: ({ row }) => (
-          <div className="max-w-16 text-nowrap overflow-x-hidden">
-            <p>{row.original.model.ingredient.name}</p>
-          </div>
+          <OverflowTextTooltip text={row.original.model.ingredient.name} />
         ),
       },
       {

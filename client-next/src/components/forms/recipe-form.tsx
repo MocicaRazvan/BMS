@@ -1,11 +1,5 @@
 "use client";
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Option } from "@/components/ui/multiple-selector";
 import {
   CustomEntityModel,
@@ -65,6 +59,10 @@ import { toast } from "@/components/ui/use-toast";
 import { ToastAction } from "@/components/ui/toast";
 import { BaseError } from "@/types/responses";
 import useFilesBase64 from "@/hoooks/useFilesObjectURL";
+import useProgressWebSocket from "@/hoooks/useProgressWebSocket";
+import UploadingProgress, {
+  UploadingProgressTexts,
+} from "@/components/forms/uploading-progress";
 
 export interface RecipeFormTexts extends SingleChildFormTexts {
   ingredientQuantitySchemaTexts: IngredientQuantitySchemaTexts;
@@ -80,6 +78,10 @@ export interface RecipeFormTexts extends SingleChildFormTexts {
   ingredientsLabel: string;
   addIngredient: string;
   dietType: string;
+  areIngredientsCompletedButNotSubmitted: string;
+  continueBtn: string;
+  loadedImages: UploadingProgressTexts;
+  loadedVideos: UploadingProgressTexts;
 }
 
 export interface RecipeFormProps
@@ -121,14 +123,39 @@ export default function RecipeForm({
   videos = [],
   // initialIngredients = [],
   initialChildren = {},
+  areIngredientsCompletedButNotSubmitted,
+  continueBtn,
+  loadedImages,
+  loadedVideos,
 }: RecipeFormProps) {
   const initialChildrenKeys = Object.keys(initialChildren);
   const initialChildrenValues = Object.values(initialChildren);
-
   const recipeSchema = useMemo(
     () => getRecipeSchema(recipeSchemaTexts),
     [recipeSchemaTexts],
   );
+  const [clientId] = useState(uuidv4);
+
+  const [
+    isIngredientCompletedButNotSubmitted,
+    setIsIngredientCompletedButNotSubmitted,
+  ] = useState<Record<string, boolean>>({});
+
+  const { messages: messagesVideos } = useProgressWebSocket(
+    authUser.token,
+    clientId,
+    "VIDEO",
+  );
+  const { messages: messagesImages } = useProgressWebSocket(
+    authUser.token,
+    clientId,
+    "IMAGE",
+  );
+
+  const isOneIngredientCompletedButNotSubmitted = useMemo(() => {
+    const values = Object.values(isIngredientCompletedButNotSubmitted);
+    return values.length > 0 && values.includes(true);
+  }, [isIngredientCompletedButNotSubmitted]);
 
   const form = useForm<RecipeSchemaType>({
     resolver: zodResolver(recipeSchema),
@@ -143,6 +170,9 @@ export default function RecipeForm({
       })),
     },
   });
+
+  const watchImages = form.watch("images");
+  const watchVideos = form.watch("videos");
 
   const { fileCleanup: imagesCleanup } = useFilesBase64({
     files: images,
@@ -294,6 +324,7 @@ export default function RecipeForm({
             body: recipeBody,
             filesObj: fileObj,
           },
+          clientId,
         });
         toast({
           title: data.title,
@@ -330,6 +361,7 @@ export default function RecipeForm({
       baseFormTexts.toastAction,
       router,
       error,
+      clientId,
     ],
   );
 
@@ -352,6 +384,7 @@ export default function RecipeForm({
           <form
             onSubmit={form.handleSubmit(onSubmit)}
             className="space-y-8 lg:space-y-12 w-full"
+            noValidate
           >
             <TitleBodyForm<RecipeSchemaType>
               control={form.control}
@@ -407,16 +440,48 @@ export default function RecipeForm({
                             quantityChildPlaceholder={quantityChildPlaceholder}
                             quantityChildLabel={quantityChildLabel}
                             initialValue={initialChildren[childId]}
+                            setIsIngredientCompletedButNotSubmitted={(
+                              value,
+                            ) => {
+                              setIsIngredientCompletedButNotSubmitted(
+                                (prev) => ({
+                                  ...prev,
+                                  [childId]: value,
+                                }),
+                              );
+                            }}
                           />
                           // </div>
                         ))}
                       </AnimatePresence>
                     </div>
-                  </FormControl>{" "}
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
+            {children.length > 1 && (
+              <div className="w-full flex items-center justify-end">
+                <AnimatePresence>
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0 }}
+                    transition={{ duration: 0.5 }}
+                  >
+                    <Button
+                      type="button"
+                      size={"lg"}
+                      className="flex items-center justify-center gap-2"
+                      onClick={() => setChildren((prev) => [...prev, uuidv4()])}
+                    >
+                      <DiamondPlus />
+                      <p>{addIngredient}</p>
+                    </Button>
+                  </motion.div>
+                </AnimatePresence>
+              </div>
+            )}
             <div>
               <AnimatePresence>
                 {chartItems.length > 0 && (
@@ -458,11 +523,43 @@ export default function RecipeForm({
               fieldTexts={videosText}
               initialLength={videos?.length || 0}
             />
-            <ButtonSubmit
-              isLoading={isLoading}
-              disable={false}
-              buttonSubmitTexts={buttonSubmitTexts}
-            />
+            {isOneIngredientCompletedButNotSubmitted && (
+              <div className="w-full space-y-8">
+                <p className="text-lg font-medium text-destructive">
+                  {areIngredientsCompletedButNotSubmitted}
+                </p>
+                <Button
+                  variant={"destructive"}
+                  type={"button"}
+                  onClick={() => {
+                    setIsIngredientCompletedButNotSubmitted({});
+                  }}
+                >
+                  {continueBtn}
+                </Button>
+              </div>
+            )}
+            {!isOneIngredientCompletedButNotSubmitted && (
+              <ButtonSubmit
+                isLoading={isLoading}
+                disable={false}
+                buttonSubmitTexts={buttonSubmitTexts}
+              />
+            )}
+            {isLoading && (
+              <div className="space-y-5">
+                <UploadingProgress
+                  total={watchImages.length}
+                  loaded={messagesImages.length}
+                  {...loadedImages}
+                />
+                <UploadingProgress
+                  total={watchVideos.length}
+                  loaded={messagesVideos.length}
+                  {...loadedVideos}
+                />
+              </div>
+            )}
             <ErrorMessage message={error} show={!!errorMsg} />
           </form>
         </Form>
@@ -479,6 +576,7 @@ interface SingleChildFormTexts {
   quantityChildPlaceholder: string;
   quantityChildLabel: string;
 }
+
 interface SingleChildFormProps extends WithUser, SingleChildFormTexts {
   disableCallback: (
     i: PageableResponse<CustomEntityModel<IngredientNutritionalFactResponse>>,
@@ -494,6 +592,7 @@ interface SingleChildFormProps extends WithUser, SingleChildFormTexts {
   initialId?: number;
   initialQuantity?: number;
   initialValue?: Option & { quantity: number };
+  setIsIngredientCompletedButNotSubmitted: (value: boolean) => void;
 }
 function SingleChildForm({
   authUser,
@@ -513,6 +612,7 @@ function SingleChildForm({
   quantityChildPlaceholder,
   quantityChildLabel,
   initialValue = undefined,
+  setIsIngredientCompletedButNotSubmitted,
 }: SingleChildFormProps) {
   const ingredientQuantitySchema = useMemo(
     () => getIngredientQuantitySchema(ingredientQuantitySchemaTexts),
@@ -531,6 +631,14 @@ function SingleChildForm({
       quantity: undefined,
     },
   });
+  const watchId = form.watch("id");
+  const watchQuantity = form.watch("quantity");
+
+  useEffect(() => {
+    if (watchId && watchQuantity && !wasSubmitted) {
+      setIsIngredientCompletedButNotSubmitted(true);
+    }
+  }, [wasSubmitted, watchId, watchQuantity]);
 
   useEffect(() => {
     if (initialValue) {
@@ -541,6 +649,7 @@ function SingleChildForm({
 
   const onSubmit = useCallback(
     async (data: IngredientQuantitySchemaType) => {
+      setIsIngredientCompletedButNotSubmitted(false);
       onSubmitCallback(data);
       console.log("data", data);
       setWasSubmitted(true);
@@ -600,6 +709,7 @@ function SingleChildForm({
                           extraQueryParams={{ display: "true" }}
                           valueKey={"name"}
                           maxSelected={1}
+                          pageSize={20}
                           mapping={(i) => ({
                             value: i.content.content.ingredient.id.toString(),
                             label: i.content.content.ingredient.name,

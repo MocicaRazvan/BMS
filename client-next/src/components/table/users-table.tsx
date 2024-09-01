@@ -30,6 +30,7 @@ import { userColumnActions } from "@/lib/constants";
 import { useStompClient } from "react-stomp-hooks";
 import { AlertDialogMakeTrainer } from "@/components/dialogs/user/make-trainer-alert";
 import useClientNotFound from "@/hoooks/useClientNotFound";
+import OverflowTextTooltip from "@/components/common/overflow-text-tooltip";
 
 export interface UserTableColumnsTexts {
   id: string;
@@ -198,6 +199,12 @@ export default function UsersTable({
           <p className="font-bold text-lg text-left">
             {userTableColumnsTexts.email}
           </p>
+        ),
+        cell: ({ row }) => (
+          <OverflowTextTooltip
+            text={row.original.email}
+            triggerClassName="max-w-[200px]"
+          />
         ),
       },
       {

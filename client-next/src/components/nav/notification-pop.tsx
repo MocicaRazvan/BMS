@@ -59,21 +59,6 @@ interface NotificationPopProps {
   authUser: NonNullable<Session["user"]>;
 }
 
-function isChatMessageNotificationResponseArray(
-  value: any,
-): value is ChatMessageNotificationResponse[] {
-  return (
-    Array.isArray(value) &&
-    value.every(
-      (item) =>
-        item &&
-        typeof item === "object" &&
-        "reference" in item &&
-        "receiver" in item,
-    )
-  );
-}
-
 enum ACCORDION_ITEMS {
   MESSAGES = "messages",
   POSTS = "posts",
@@ -106,8 +91,6 @@ export interface NotificationPopTexts {
 }
 
 export default function NotificationPop({ authUser }: NotificationPopProps) {
-  // todo intl
-
   const [accordionsState, setAccordionsState] = useState<AccordionsState>(
     initialAccordionsState,
   );
@@ -285,7 +268,7 @@ export default function NotificationPop({ authUser }: NotificationPopProps) {
         </div>
       </DropdownMenuTrigger>
       {totalNotifications > 0 && (
-        <DropdownMenuContent className={"w-[460px] p-4 ps-5"}>
+        <DropdownMenuContent className={"max-w-[460px] w-screen p-4 ps-5"}>
           <div className=" mb-4 space-y-4 w-full">
             <div className="space-y-1">
               <h3 className="text-xl font-semibold">
@@ -358,15 +341,7 @@ export default function NotificationPop({ authUser }: NotificationPopProps) {
           <hr className="border my-3" />
 
           <DropdownMenuGroup>
-            <ScrollArea
-              // className={cn(
-              //   "w-full px-1",
-              //   chatNotificationsGroupedBySender.totalSenders < 5
-              //     ? `h-[calc(${chatNotificationsGroupedBySender.totalSenders}rem+3.5rem)]`
-              //     : "h-60",
-              // )}
-              className="w-full max-h-[400px]"
-            >
+            <ScrollArea className="w-full max-h-[400px]">
               {totalChatNotifications > 0 &&
                 chatMessageNotificationTexts &&
                 (isNotUser ? (
@@ -386,19 +361,38 @@ export default function NotificationPop({ authUser }: NotificationPopProps) {
                     }
                   >
                     <AccordionItem value={ACCORDION_ITEMS.MESSAGES}>
-                      <AccordionTrigger className="hover:no-underline group">
-                        <div className="flex justify-start items-center gap-3 ">
-                          <h4 className="font-bold group-hover:underline">
-                            {notificationPopTexts.messages}
-                          </h4>
-                          <Badge
-                            variant={"destructive"}
-                            className="hover:bg-destructive "
-                          >
-                            {totalChatNotifications}
-                          </Badge>
+                      <div className="flex items-center justify-between gap-14 w-full">
+                        <div className="w-1/2">
+                          <AccordionTrigger className="hover:no-underline group">
+                            <div className="flex justify-start items-center gap-3 ">
+                              <h4 className="font-bold group-hover:underline">
+                                {notificationPopTexts.messages}
+                              </h4>
+                              <Badge
+                                variant={"destructive"}
+                                className="hover:bg-destructive "
+                              >
+                                {totalChatNotifications}
+                              </Badge>
+                            </div>
+                          </AccordionTrigger>
                         </div>
-                      </AccordionTrigger>
+                        <Button
+                          variant="outline"
+                          size={"icon"}
+                          className="border-destructive text-destructive w-10 h-10"
+                          onClick={() => {
+                            if (stompClient && stompClient.connected) {
+                              clearChatNotifications({
+                                stompClient,
+                                receiverEmail: authUser.email,
+                              });
+                            }
+                          }}
+                        >
+                          <Trash2 size={18} />
+                        </Button>
+                      </div>
                       <AccordionContent className=" p-2">
                         <ChatNotificationsContent
                           notifications={
@@ -437,19 +431,38 @@ export default function NotificationPop({ authUser }: NotificationPopProps) {
                     }
                   >
                     <AccordionItem value={ACCORDION_ITEMS.POSTS}>
-                      <AccordionTrigger className="hover:no-underline group">
-                        <div className="flex justify-start items-center gap-3 ">
-                          <h4 className="font-bold group-hover:underline">
-                            {notificationPopTexts.posts}
-                          </h4>
-                          <Badge
-                            variant={"destructive"}
-                            className="hover:bg-destructive hover:!no-underline"
-                          >
-                            {totalPostNotifications}
-                          </Badge>
+                      <div className="flex items-center justify-between gap-14 w-full">
+                        <div className="w-1/2">
+                          <AccordionTrigger className="hover:no-underline group">
+                            <div className="flex justify-start items-center gap-3 ">
+                              <h4 className="font-bold group-hover:underline">
+                                {notificationPopTexts.posts}
+                              </h4>
+                              <Badge
+                                variant={"destructive"}
+                                className="hover:bg-destructive hover:!no-underline"
+                              >
+                                {totalPostNotifications}
+                              </Badge>
+                            </div>
+                          </AccordionTrigger>
                         </div>
-                      </AccordionTrigger>
+                        <Button
+                          variant="outline"
+                          size={"icon"}
+                          className="border-destructive text-destructive w-10 h-10"
+                          onClick={() => {
+                            if (stompClient && stompClient.connected) {
+                              clearPostNotifications({
+                                stompClient,
+                                receiverEmail: authUser.email,
+                              });
+                            }
+                          }}
+                        >
+                          <Trash2 size={18} />
+                        </Button>
+                      </div>
                       <AccordionContent className=" p-2">
                         <ApproveNotificationContent
                           items={getPostNotificationState().notifications}
@@ -479,19 +492,38 @@ export default function NotificationPop({ authUser }: NotificationPopProps) {
                     }
                   >
                     <AccordionItem value={ACCORDION_ITEMS.RECIPES}>
-                      <AccordionTrigger className="hover:no-underline group">
-                        <div className="flex justify-start items-center gap-3 ">
-                          <h4 className="font-bold group-hover:underline">
-                            {notificationPopTexts.recipes}
-                          </h4>
-                          <Badge
-                            variant={"destructive"}
-                            className="hover:bg-destructive hover:!no-underline"
-                          >
-                            {totalRecipeNotifications}
-                          </Badge>
+                      <div className="flex items-center justify-between gap-14 w-full">
+                        <div className="w-1/2">
+                          <AccordionTrigger className="hover:no-underline group">
+                            <div className="flex justify-start items-center gap-3 ">
+                              <h4 className="font-bold group-hover:underline">
+                                {notificationPopTexts.recipes}
+                              </h4>
+                              <Badge
+                                variant={"destructive"}
+                                className="hover:bg-destructive hover:!no-underline"
+                              >
+                                {totalRecipeNotifications}
+                              </Badge>
+                            </div>
+                          </AccordionTrigger>
                         </div>
-                      </AccordionTrigger>
+                        <Button
+                          variant="outline"
+                          size={"icon"}
+                          className="border-destructive text-destructive w-10 h-10"
+                          onClick={() => {
+                            if (stompClient && stompClient.connected) {
+                              clearRecipeNotifications({
+                                stompClient,
+                                receiverEmail: authUser.email,
+                              });
+                            }
+                          }}
+                        >
+                          <Trash2 size={18} />
+                        </Button>
+                      </div>
                       <AccordionContent className=" p-2">
                         <ApproveNotificationContent
                           items={getRecipeNotificationState().notifications}
@@ -521,19 +553,39 @@ export default function NotificationPop({ authUser }: NotificationPopProps) {
                     }
                   >
                     <AccordionItem value={ACCORDION_ITEMS.PLANS}>
-                      <AccordionTrigger className="hover:no-underline group">
-                        <div className="flex justify-start items-center gap-3 ">
-                          <h4 className="font-bold group-hover:underline">
-                            {notificationPopTexts.plans}
-                          </h4>
-                          <Badge
-                            variant={"destructive"}
-                            className="hover:bg-destructive hover:!no-underline"
-                          >
-                            {totalPlanNotifications}
-                          </Badge>
+                      {" "}
+                      <div className="flex items-center justify-between gap-14 w-full">
+                        <div className="w-1/2">
+                          <AccordionTrigger className="hover:no-underline group">
+                            <div className="flex justify-start items-center gap-3 ">
+                              <h4 className="font-bold group-hover:underline">
+                                {notificationPopTexts.plans}
+                              </h4>
+                              <Badge
+                                variant={"destructive"}
+                                className="hover:bg-destructive hover:!no-underline"
+                              >
+                                {totalPlanNotifications}
+                              </Badge>
+                            </div>
+                          </AccordionTrigger>
                         </div>
-                      </AccordionTrigger>
+                        <Button
+                          variant="outline"
+                          size={"icon"}
+                          className="border-destructive text-destructive w-10 h-10"
+                          onClick={() => {
+                            if (stompClient && stompClient.connected) {
+                              clearPlanNotifications({
+                                stompClient,
+                                receiverEmail: authUser.email,
+                              });
+                            }
+                          }}
+                        >
+                          <Trash2 size={18} />
+                        </Button>
+                      </div>
                       <AccordionContent className=" p-2">
                         <ApproveNotificationContent
                           items={getPlanNotificationState().notifications}
@@ -563,19 +615,39 @@ export default function NotificationPop({ authUser }: NotificationPopProps) {
                     }
                   >
                     <AccordionItem value={ACCORDION_ITEMS.BOUGHT}>
-                      <AccordionTrigger className="hover:no-underline group">
-                        <div className="flex justify-start items-center gap-3 ">
-                          <h4 className="font-bold group-hover:underline">
-                            {notificationPopTexts.bought}
-                          </h4>
-                          <Badge
-                            variant={"destructive"}
-                            className="hover:bg-destructive hover:!no-underline"
-                          >
-                            {totalBoughtNotifications}
-                          </Badge>
+                      {" "}
+                      <div className="flex items-center justify-between gap-14 w-full">
+                        <div className="w-1/2">
+                          <AccordionTrigger className="hover:no-underline group">
+                            <div className="flex justify-start items-center gap-3 ">
+                              <h4 className="font-bold group-hover:underline">
+                                {notificationPopTexts.bought}
+                              </h4>
+                              <Badge
+                                variant={"destructive"}
+                                className="hover:bg-destructive hover:!no-underline"
+                              >
+                                {totalBoughtNotifications}
+                              </Badge>
+                            </div>
+                          </AccordionTrigger>
                         </div>
-                      </AccordionTrigger>
+                        <Button
+                          variant="outline"
+                          size={"icon"}
+                          className="border-destructive text-destructive w-10 h-10"
+                          onClick={() => {
+                            if (stompClient && stompClient.connected) {
+                              clearNotificationsBought({
+                                stompClient,
+                                receiverEmail: authUser.email,
+                              });
+                            }
+                          }}
+                        >
+                          <Trash2 size={18} />
+                        </Button>
+                      </div>
                       <AccordionContent className=" p-2">
                         <BoughtNotificationContent
                           items={getBoughtNotificationState().notifications}

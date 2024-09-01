@@ -174,6 +174,7 @@ export default function CalculatorPageContent({
           <form
             onSubmit={form.handleSubmit(onSubmit)}
             className="space-y-8 lg:space-y-12 "
+            noValidate
           >
             <div className="flex flex-col lg:flex-row items-start justify-center w-full gap-8 lg:gap-12">
               <FormField

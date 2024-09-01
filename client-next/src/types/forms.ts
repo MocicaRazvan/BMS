@@ -368,6 +368,7 @@ export interface NutritionalFactSchemaTexts {
   refineSaturatedFat: string;
   refineSugar: string;
   totalGrams: string;
+  atLeastOnePositive: string;
 }
 
 export async function getNutritionalFactSchemaTexts(): Promise<NutritionalFactSchemaTexts> {
@@ -397,6 +398,7 @@ export async function getNutritionalFactSchemaTexts(): Promise<NutritionalFactSc
     refineSaturatedFat: t("refineSaturatedFat"),
     refineSugar: t("refineSugar"),
     totalGrams: t("totalGrams"),
+    atLeastOnePositive: t("atLeastOnePositive"),
     ...macro,
   } as NutritionalFactSchemaTexts;
 }
@@ -412,37 +414,38 @@ const getNutritionalFactSchema = ({
   protein,
   carbohydrates,
   totalGrams,
+  atLeastOnePositive,
 }: NutritionalFactSchemaTexts) =>
   z
     .object({
       fat: z.coerce
         .number()
-        .positive({ message: fat.positive })
+        // .positive({ message: fat.positive })
         .nonnegative({ message: fat.nonnegative })
         .max(100, { message: fat.max }),
       saturatedFat: z.coerce
         .number()
-        .positive({ message: saturatedFat.positive })
+        // .positive({ message: saturatedFat.positive })
         .nonnegative({ message: saturatedFat.nonnegative })
         .max(100, { message: saturatedFat.max }),
       carbohydrates: z.coerce
         .number()
-        .positive({ message: carbohydrates.positive })
+        // .positive({ message: carbohydrates.positive })
         .nonnegative({ message: carbohydrates.nonnegative })
         .max(100, { message: carbohydrates.max }),
       sugar: z.coerce
         .number()
-        .positive({ message: sugar.positive })
+        // .positive({ message: sugar.positive })
         .nonnegative({ message: sugar.nonnegative })
         .max(100, { message: sugar.max }),
       protein: z.coerce
         .number()
-        .positive({ message: protein.positive })
+        // .positive({ message: protein.positive })
         .nonnegative({ message: protein.nonnegative })
         .max(100, { message: protein.max }),
       salt: z.coerce
         .number()
-        .positive({ message: salt.positive })
+        // .positive({ message: salt.positive })
         .nonnegative({ message: salt.nonnegative })
         .max(100, { message: salt.max }),
       unit: z.enum(unitTypes, { message: unit }),
@@ -452,7 +455,7 @@ const getNutritionalFactSchema = ({
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           message: refineSaturatedFat,
-          path: ["saturatedFat"], // specify the path for the error
+          path: ["saturatedFat"],
         });
       }
     })
@@ -461,34 +464,35 @@ const getNutritionalFactSchema = ({
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           message: refineSugar,
-          path: ["sugar"], // specify the path for the error
+          path: ["sugar"],
         });
       }
-    })
-    .superRefine((data, ctx) => {
-      const keysToCheck: (keyof typeof data)[] = [
-        "carbohydrates",
-        "protein",
-        "fat",
-        "salt",
-      ];
-      const allFieldsTouched = keysToCheck.every(
-        (key) => data[key] !== undefined && data[key] !== 0,
-      );
-
-      if (allFieldsTouched) {
-        const sum = data.carbohydrates + data.protein + data.fat + data.salt;
-        if (sum !== 100) {
-          keysToCheck.forEach((key) => {
-            ctx.addIssue({
-              code: z.ZodIssueCode.custom,
-              message: totalGrams + ` ${sum}`,
-              path: [key],
-            });
-          });
-        }
-      }
     });
+
+// .superRefine((data, ctx) => {
+//   const keysToCheck: (keyof typeof data)[] = [
+//     "carbohydrates",
+//     "protein",
+//     "fat",
+//     "salt",
+//   ];
+//   const allFieldsTouched = keysToCheck.every(
+//     (key) => data[key] !== undefined && data[key] !== 0,
+//   );
+//
+//   if (allFieldsTouched) {
+//     const sum = data.carbohydrates + data.protein + data.fat + data.salt;
+//     if (sum !== 100) {
+//       keysToCheck.forEach((key) => {
+//         ctx.addIssue({
+//           code: z.ZodIssueCode.custom,
+//           message: totalGrams + ` ${sum}`,
+//           path: [key],
+//         });
+//       });
+//     }
+//   }
+// });
 
 export interface IngredientNutritionalFactSchemaTexts {
   ingredient: IngredientSchemaTexts;

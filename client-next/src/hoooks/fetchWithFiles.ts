@@ -5,6 +5,7 @@ interface BaseArgs {
   token: string;
   path: string;
   method?: "POST" | "PUT";
+  clientId: string;
 }
 
 export interface BaseBodyMultipleFiles<T extends object> {
@@ -24,6 +25,7 @@ export async function fetchWithFilesMultipleFiles<
   data: { body, filesObj },
   token,
   method = "POST",
+  clientId,
 }: FetchWithFilesArgsMultipleFiles<T>) {
   const formData = new FormData();
   formData.append("body", JSON.stringify(body));
@@ -34,14 +36,17 @@ export async function fetchWithFilesMultipleFiles<
     }
   });
 
-  const res = await fetch(`${process.env.NEXT_PUBLIC_SPRING_CLIENT}${path}`, {
-    method,
-    body: formData,
-    headers: {
-      Authorization: `Bearer ${token}`,
-      Accept: "application/json",
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_SPRING_CLIENT}${path}?clientId=${clientId}`,
+    {
+      method,
+      body: formData,
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/json",
+      },
     },
-  });
+  );
   if (res.ok) {
     console.log("res.ok");
     return (await res.json()) as R;

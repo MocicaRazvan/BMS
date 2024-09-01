@@ -24,6 +24,7 @@ CREATE TABLE IF NOT EXISTS nutritional_fact
     salt NUMERIC NOT NULL CHECK (salt >= 0),
     unit VARCHAR(25) NOT NULL,
     ingredient_id BIGINT NOT NULL UNIQUE REFERENCES ingredient(id) ON DELETE CASCADE
+    CHECK (fat + protein + carbohydrates + salt > 0)
 );
 
 
