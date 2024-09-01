@@ -31,6 +31,7 @@ public class GridFsConfig {
         MongoClientSettings settings = MongoClientSettings.builder()
                 .applyConnectionString(new ConnectionString(mongoUri))
                 .applyToConnectionPoolSettings(builder -> builder.maxSize(maxPoolSize)
+                        .minSize(5)
                 )
                 .retryWrites(true)
                 .retryReads(true)

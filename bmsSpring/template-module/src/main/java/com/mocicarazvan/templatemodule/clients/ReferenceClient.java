@@ -3,6 +3,7 @@ package com.mocicarazvan.templatemodule.clients;
 import com.mocicarazvan.templatemodule.dtos.generic.ApproveDto;
 import com.mocicarazvan.templatemodule.exceptions.client.ThrowFallback;
 import com.mocicarazvan.templatemodule.exceptions.notFound.NotFoundEntity;
+import com.mocicarazvan.templatemodule.hateos.CustomEntityModel;
 import com.mocicarazvan.templatemodule.utils.RequestsUtils;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 import io.github.resilience4j.ratelimiter.RateLimiterRegistry;
@@ -11,6 +12,7 @@ import io.github.resilience4j.reactor.ratelimiter.operator.RateLimiterOperator;
 import io.github.resilience4j.reactor.retry.RetryOperator;
 import io.github.resilience4j.retry.RetryRegistry;
 import lombok.Setter;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -32,7 +34,6 @@ public abstract class ReferenceClient extends ClientBase {
         return webClientBuilder.baseUrl(serviceUrl + "/" + referenceName + "s").build();
     }
 
-    // todo exist all by ids  and apporved
     public Mono<Void> existsApprovedReference(String referenceId) {
         if (serviceUrl == null) {
             return Mono.error(new NotFoundEntity(referenceName, Long.valueOf(referenceId)));
@@ -74,6 +75,8 @@ public abstract class ReferenceClient extends ClientBase {
         if (serviceUrl == null) {
             return Mono.error(new NotFoundEntity(referenceName, Long.valueOf(referenceId)));
         }
-        return getItemById(referenceId, userId, clazz, e -> Mono.error(new NotFoundEntity(referenceName, Long.valueOf(referenceId))));
+        return getItemById(referenceId, userId, new ParameterizedTypeReference<CustomEntityModel<T>>() {
+        }, e -> Mono.error(new NotFoundEntity(referenceName, Long.valueOf(referenceId))))
+                .map(CustomEntityModel::getContent);
     }
 }

@@ -102,6 +102,12 @@ public abstract class ClientBase {
         return getItemById(id, userId, clazz, "", fallback);
     }
 
+    public <T> Mono<T> getItemById(String id, String userId, ParameterizedTypeReference<T> typeRef, Function<ThrowFallback, Mono<? extends T>> fallback) {
+
+
+        return getItemById(id, userId, typeRef, "", fallback);
+    }
+
     public <T> Mono<T> getItemById(String id, String userId, Class<T> clazz, String path, Function<ThrowFallback, Mono<? extends T>> fallback) {
 
         return getItemById(id, userId, ParameterizedTypeReference.forType(clazz), path, fallback);
