@@ -3,6 +3,7 @@ package com.mocicarazvan.orderservice.services.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mocicarazvan.orderservice.cache.OrderCacher;
 import com.mocicarazvan.orderservice.clients.BoughtWebSocketClient;
 import com.mocicarazvan.orderservice.clients.PlanClient;
 import com.mocicarazvan.orderservice.dtos.*;
@@ -94,6 +95,7 @@ public class OrderServiceImpl implements OrderService {
     private final OrderMapper orderMapper;
 
     private final EmailUtils emailUtils;
+    private final OrderCacher orderCacher;
 
 
     @PostConstruct
@@ -343,15 +345,27 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public Flux<CountryOrderSummary> getOrdersSummaryByCountry(CountrySummaryType type) {
-        return (type.equals(CountrySummaryType.COUNT) ?
-                orderRepository.getOrdersCountByCountry() :
-                orderRepository.getOrdersTotalByCountry())
-                .map(e -> {
-                    e.setId(
-                            new Locale.Builder().setRegion(e.getId().toUpperCase()).build().getISO3Country()
-                    );
-                    return e;
-                });
+//        return (type.equals(CountrySummaryType.COUNT) ?
+//                orderRepository.getOrdersCountByCountry() :
+//                orderRepository.getOrdersTotalByCountry())
+//                .map(e -> {
+//                    e.setId(
+//                            new Locale.Builder().setRegion(e.getId().toUpperCase()).build().getISO3Country()
+//                    );
+//                    return e;
+//                });
+
+        return orderCacher.getCachedCountryOrderSummaryFlux(type,
+                (type.equals(CountrySummaryType.COUNT) ?
+                        orderRepository.getOrdersCountByCountry() :
+                        orderRepository.getOrdersTotalByCountry())
+                        .map(e -> {
+                            e.setId(
+                                    new Locale.Builder().setRegion(e.getId().toUpperCase()).build().getISO3Country()
+                            );
+                            return e;
+                        })
+        );
     }
 
     @Override
@@ -507,6 +521,7 @@ public class OrderServiceImpl implements OrderService {
                     ))
                     .flatMap(order -> sendOrderEmail(order, customerEmail))
                     .then(sendNotifications(plans, customerEmail))
+                    .then(orderCacher.invalidateAllCache())
                     .thenReturn("Success");
         } else {
             return Mono.error(new IllegalActionException("Customer details are missing"));

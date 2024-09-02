@@ -2,7 +2,6 @@ package com.mocicarazvan.orderservice.config;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mocicarazvan.templatemodule.clients.FileClient;
 import com.mocicarazvan.templatemodule.clients.UserClient;
 import com.mocicarazvan.templatemodule.email.EmailUtils;
 import com.mocicarazvan.templatemodule.email.config.CustomMailProps;
@@ -18,7 +17,6 @@ import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 import io.github.resilience4j.ratelimiter.RateLimiterRegistry;
 import io.github.resilience4j.retry.RetryRegistry;
 import jakarta.validation.Validator;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
