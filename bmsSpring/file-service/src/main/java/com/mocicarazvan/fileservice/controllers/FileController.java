@@ -6,6 +6,7 @@ import com.mocicarazvan.fileservice.dtos.FileUploadResponse;
 import com.mocicarazvan.fileservice.dtos.GridIdsDto;
 import com.mocicarazvan.fileservice.dtos.MetadataDto;
 import com.mocicarazvan.fileservice.enums.FileType;
+import com.mocicarazvan.fileservice.repositories.ImageRedisRepository;
 import com.mocicarazvan.fileservice.service.BytesService;
 import com.mocicarazvan.fileservice.service.MediaService;
 import com.mongodb.client.gridfs.model.GridFSFile;
@@ -35,6 +36,7 @@ public class FileController {
     private final MediaService mediaService;
     private final ObjectMapper objectMapper;
     private final BytesService bytesService;
+    private final ImageRedisRepository imageRedisRepository;
 
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public Mono<ResponseEntity<FileUploadResponse>> uploadFiles(
@@ -53,6 +55,35 @@ public class FileController {
                                                    @RequestParam(required = false) Integer height,
                                                    @RequestParam(required = false) Double quality,
                                                    ServerWebExchange exchange) {
+        boolean shouldCheckCache = (width != null || height != null || quality != null);
+        Mono<ServerHttpResponse> responseMono = shouldCheckCache ?
+                imageRedisRepository.getImage(gridId, width, height, quality).flatMap(
+                                cachedImage -> {
+                                    log.info("Image found in cache");
+                                    ServerHttpResponse response = exchange.getResponse();
+                                    response.getHeaders().set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + gridId + "\"");
+                                    response.getHeaders().set(HttpHeaders.CONTENT_TYPE, "image/**");
+                                    response.getHeaders().setContentLength(cachedImage.length);
+                                    return response.writeWith(Mono.just(response.bufferFactory().wrap(cachedImage)))
+                                            .thenReturn(response)
+                                            .onErrorResume(e -> {
+                                                response.setStatusCode(HttpStatus.FOUND);
+                                                response.getHeaders().setLocation(URI.create("/files/download/" + gridId));
+                                                return response.setComplete()
+                                                        .thenReturn(response);
+                                            });
+                                }
+                        )
+                        .switchIfEmpty(fetchFileAndProcessFromGridFS(gridId, width, height, quality, exchange)) :
+                fetchFileAndProcessFromGridFS(gridId, width, height, quality, exchange);
+
+        return
+                responseMono.doOnError(e -> log.error("Error getting file", e))
+                        .flatMap(response -> Mono.just(new ResponseEntity<>(response.getStatusCode() != null ? response.getStatusCode() : HttpStatus.NOT_FOUND)));
+    }
+
+
+    private Mono<ServerHttpResponse> fetchFileAndProcessFromGridFS(String gridId, Integer width, Integer height, Double quality, ServerWebExchange exchange) {
         return mediaService.getFile(gridId)
                 .flatMap(file -> file.getGridFSFile()
                         .flatMap(gridFSFile -> {
@@ -79,11 +110,13 @@ public class FileController {
                                 downloadStream =
                                         bytesService.convertWithThumblinator(width, height, quality, downloadStream, response
                                                 )
-                                                .doOnNext(dataBuffer -> {
+                                                .flatMap(dataBuffer -> {
                                                     response.getHeaders().setContentLength(dataBuffer.readableByteCount());
+                                                    return imageRedisRepository.saveImage(gridId, width, height, quality, dataBuffer.toByteBuffer().array())
+                                                            .thenReturn(dataBuffer);
                                                 });
                             } else if (fileType.equals(FileType.VIDEO) && !httpRanges.isEmpty()) {
-                                HttpRange range = httpRanges.get(0);
+                                HttpRange range = httpRanges.getFirst();
                                 long start = range.getRangeStart(fileLength);
                                 long end = range.getRangeEnd(fileLength);
                                 response.getHeaders().add(HttpHeaders.CONTENT_RANGE, "bytes " + start + "-" + end + "/" + fileLength);
@@ -109,11 +142,8 @@ public class FileController {
                                         return response.setComplete()
                                                 .thenReturn(response);
                                     });
-                        }))
-                .doOnError(e -> log.error("Error getting file", e))
-                .flatMap(response -> Mono.just(new ResponseEntity<>(response.getStatusCode() != null ? response.getStatusCode() : HttpStatus.INTERNAL_SERVER_ERROR)));
+                        }));
     }
-
 
     @GetMapping("/info/{gridId}")
     public Mono<ResponseEntity<GridFSFile>> getFileInfo(@PathVariable String gridId) {
@@ -127,6 +157,7 @@ public class FileController {
     @DeleteMapping("/delete")
     public Mono<ResponseEntity<Void>> deleteFiles(@RequestBody GridIdsDto ids) {
         return mediaService.deleteFiles(ids.getGridFsIds())
+                .then(imageRedisRepository.deleteAllImagesByGridIds(ids.getGridFsIds()))
                 .then(Mono.just(ResponseEntity.noContent().build()));
     }
 }

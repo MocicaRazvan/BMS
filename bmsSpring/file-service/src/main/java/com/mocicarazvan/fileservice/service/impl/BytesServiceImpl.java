@@ -13,22 +13,16 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
-
 import javax.imageio.ImageIO;
+import javax.imageio.ImageReadParam;
 import javax.imageio.ImageReader;
 import javax.imageio.stream.ImageInputStream;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
-import java.nio.channels.Channels;
-import java.nio.channels.ReadableByteChannel;
-import java.util.Arrays;
 import java.util.Iterator;
-import java.util.Optional;
-import java.util.function.Function;
 
 @Service
 @RequiredArgsConstructor
@@ -84,7 +78,6 @@ public class BytesServiceImpl implements BytesService {
                         ImageInputStream imageInputStream = ImageIO.createImageInputStream(inputStream);
                         Iterator<ImageReader> imageReaders = ImageIO.getImageReaders(imageInputStream);
 
-
                         if (!imageReaders.hasNext()) {
                             return getImageFallback(response, inputStream);
                         }
@@ -100,7 +93,7 @@ public class BytesServiceImpl implements BytesService {
                         }
 
 
-                        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                        ByteArrayOutputStream outputStream = new ByteArrayOutputStream(1024);
                         configureThumblinator(width, height, quality, image, reader, outputStream);
                         DataBuffer buffer = response.bufferFactory().wrap(outputStream.toByteArray());
                         return Mono.just(buffer);
@@ -193,25 +186,6 @@ public class BytesServiceImpl implements BytesService {
             return Mono.error(e);
         }
     }
-
-//    public Mono<DataBuffer> getImageFallback(ServerHttpResponse response, ByteArrayInputStream byteArrayInputStream) {
-//
-//        try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
-//            byte[] buffer = new byte[1024];
-//            int bytesRead;
-//
-//            while ((bytesRead = byteArrayInputStream.read(buffer)) != -1) {
-//                outputStream.write(buffer, 0, bytesRead);
-//            }
-//
-//            byte[] imageBytes = outputStream.toByteArray();
-//
-//            return Mono.just(response.bufferFactory().wrap(ByteBuffer.wrap(imageBytes));
-//        } catch (IOException e) {
-//            log.error("Error reading from ByteArrayInputStream", e);
-//            return Mono.error(e);
-//        }
-//    }
 
 
 }
