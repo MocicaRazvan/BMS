@@ -1,7 +1,12 @@
 package com.mocicarazvan.commentservice.config;
 
 import com.mocicarazvan.commentservice.clients.PostClient;
+import com.mocicarazvan.commentservice.dtos.CommentResponse;
 import com.mocicarazvan.commentservice.enums.CommentReferenceType;
+import com.mocicarazvan.templatemodule.cache.FilteredListCaffeineCacheApproveFilterKey;
+import com.mocicarazvan.templatemodule.cache.FilteredListCaffeineCacheChildFilterKey;
+import com.mocicarazvan.templatemodule.cache.impl.FilteredListCaffeineCacheApproveFilterKeyImpl;
+import com.mocicarazvan.templatemodule.cache.impl.FilteredListCaffeineCacheChildFilterKeyImpl;
 import com.mocicarazvan.templatemodule.clients.ReferenceClient;
 import com.mocicarazvan.templatemodule.clients.UserClient;
 import com.mocicarazvan.templatemodule.jackson.CustomObjectMapper;
@@ -74,5 +79,9 @@ public class BeanConfig {
         return Map.of(CommentReferenceType.POST, postClient);
     }
 
+    @Bean
+    public FilteredListCaffeineCacheChildFilterKey<CommentResponse> commentResponseFilteredListCaffeineCacheChildFilterKey() {
+        return new FilteredListCaffeineCacheChildFilterKeyImpl<>("commentService");
+    }
 
 }

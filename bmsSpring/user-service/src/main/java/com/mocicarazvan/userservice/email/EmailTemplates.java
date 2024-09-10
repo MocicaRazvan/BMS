@@ -54,7 +54,7 @@ public class EmailTemplates {
                                         </tr>
                                       </tbody>
                                     </table>
-                                    <table align="center" width="100%" border="0" cellPadding="0" cellSpacing="0" role="presentation" style="height:50px;background-color:rgb(148,163,184);border-bottom-right-radius:0.25rem;border-bottom-left-radius:0.25rem">
+                                    <table align="center" width="100%" border="0" cellPadding="0" cellSpacing="0" role="presentation" style="height:50px;background-color:rgb(148,163,184);border-bottom-right-radius:0.25rem;border-bottom-left-radius:0.25rem;margin-top:0.15rem">
                                       <tbody>
                                         <tr>
                                           <td>
@@ -131,7 +131,7 @@ public class EmailTemplates {
                                         </tr>
                                       </tbody>
                                     </table>
-                                    <table align="center" width="100%" border="0" cellPadding="0" cellSpacing="0" role="presentation" style="height:50px;background-color:rgb(148,163,184);border-bottom-right-radius:0.25rem;border-bottom-left-radius:0.25rem">
+                                    <table align="center" width="100%" border="0" cellPadding="0" cellSpacing="0" role="presentation" style="height:50px;background-color:rgb(148,163,184);border-bottom-right-radius:0.25rem;border-bottom-left-radius:0.25rem;margin-top:0.15rem">
                                       <tbody>
                                         <tr>
                                           <td>
@@ -197,7 +197,7 @@ public class EmailTemplates {
                                         </tr>
                                       </tbody>
                                     </table>
-                                    <table align="center" width="100%" border="0" cellPadding="0" cellSpacing="0" role="presentation" style="height:50px;background-color:rgb(148,163,184);border-bottom-right-radius:0.25rem;border-bottom-left-radius:0.25rem">
+                                    <table align="center" width="100%" border="0" cellPadding="0" cellSpacing="0" role="presentation" style="height:50px;background-color:rgb(148,163,184);border-bottom-right-radius:0.25rem;border-bottom-left-radius:0.25rem;margin-top:0.15rem">
                                       <tbody>
                                         <tr>
                                           <td>

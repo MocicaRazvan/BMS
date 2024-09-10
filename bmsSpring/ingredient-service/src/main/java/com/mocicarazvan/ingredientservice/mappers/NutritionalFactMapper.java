@@ -30,6 +30,7 @@ public abstract class NutritionalFactMapper extends DtoMapper<NutritionalFact, N
                 .protein(nutritionalFact.getProtein())
                 .salt(nutritionalFact.getSalt())
                 .unit(nutritionalFact.getUnit())
+                .ingredientId(nutritionalFact.getIngredientId())
                 .build();
     }
 

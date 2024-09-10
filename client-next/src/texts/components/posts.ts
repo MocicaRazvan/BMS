@@ -15,6 +15,8 @@ export interface PostCommentsTexts {
   edited: string;
   editHeader: string;
   commentAccordionTexts: CommentAccordionTexts;
+  deleteCommentDialog: string;
+  editCommentLabel: string;
 }
 
 export async function getPostCommentsTexts(): Promise<PostCommentsTexts> {
@@ -33,6 +35,8 @@ export async function getPostCommentsTexts(): Promise<PostCommentsTexts> {
     edited: t("edited"),
     editHeader: t("editHeader"),
     commentAccordionTexts,
+    deleteCommentDialog: t("deleteCommentDialog"),
+    editCommentLabel: t("editCommentLabel"),
   };
 }
 export async function getCommentAccordionTexts(): Promise<CommentAccordionTexts> {

@@ -574,7 +574,7 @@ export async function getTrainerPlanPageTexts(): Promise<TrainerPlanPageTexts> {
 export async function getSingleDayTrainerPageTexts(): Promise<SingleDayTrainerPageTexts> {
   const [singleDayTexts, t, menuTexts, themeSwitchTexts] = await Promise.all([
     getSingleDayTexts(),
-    getTranslations("pages.trainer.SingleDayPageTexts"),
+    getTranslations("pages.trainer.SingleDayTrainerPageTexts"),
     getSidebarMenuTexts(
       "trainer",
       trainerGroupLabels,

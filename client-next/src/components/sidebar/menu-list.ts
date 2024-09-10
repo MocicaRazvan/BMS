@@ -1,5 +1,6 @@
 import {
   Calendar,
+  CalendarCog,
   CalendarDays,
   CookingPot,
   HandPlatter,
@@ -312,7 +313,7 @@ export const getTrainerMenuList: (
           href: "",
           label: labels["days"],
           active: pathname.includes("/days"),
-          icon: NotebookPen,
+          icon: CalendarCog,
           submenus: [
             {
               href: `/trainer/user/${authUser.id}/days`,

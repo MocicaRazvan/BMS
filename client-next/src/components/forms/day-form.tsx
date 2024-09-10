@@ -60,6 +60,7 @@ import ErrorMessage from "@/components/forms/error-message";
 import { fetchStream } from "@/hoooks/fetchStream";
 import { toast } from "@/components/ui/use-toast";
 import { ToastAction } from "@/components/ui/toast";
+import { useRouter } from "@/navigation";
 
 export interface DayFromTexts extends SingleMealTexts {
   titleBodyTexts: TitleBodyTexts;
@@ -72,6 +73,8 @@ export interface DayFromTexts extends SingleMealTexts {
   mealsLabel: string;
   addMeal: string;
   dayDietType: string;
+  areMealsCompletedButNotSubmitted: string;
+  continueBtn: string;
 }
 
 export type CurrentMealType = MealSchemaType & { id: string };
@@ -112,9 +115,18 @@ export default function DayForm({
   existingDay,
   dayDietType: dayD,
   mealType,
+  areMealsCompletedButNotSubmitted,
+  continueBtn,
 }: DayFormProps) {
+  const router = useRouter();
+
   const initialCurrentMeals = useMemo(
-    () => (initialData ? Object.values(initialData) : []),
+    () =>
+      initialData
+        ? Object.values(initialData)
+            .sort((a, b) => a.period.hour - b.period.hour)
+            .sort((a, b) => a.period.minute - b.period.minute)
+        : [],
     [JSON.stringify(initialData)],
   );
   const initialChildrenMeals = useMemo(
@@ -146,6 +158,13 @@ export default function DayForm({
   );
 
   const [isAnyMealNotSubmitted, setIsAnyMealNotSubmitted] = useState(true);
+
+  const [isMealCompletedButNotSubmitted, setIsMealCompletedButNotSubmitted] =
+    useState<Record<string, boolean>>({});
+  const isOneMealCompletedButNotSubmitted = useMemo(() => {
+    const values = Object.values(isMealCompletedButNotSubmitted);
+    return values.length > 0 && values.includes(true);
+  }, [isMealCompletedButNotSubmitted]);
 
   const { isLoading, setIsLoading, errorMsg, setErrorMsg } =
     useLoadingErrorState();
@@ -221,8 +240,21 @@ export default function DayForm({
             title: data.title,
             description: descriptionToast,
             variant: "success",
-            action: <ToastAction altText={altToast}>{toastAction}</ToastAction>,
+            action: (
+              <ToastAction
+                altText={altToast}
+                onClick={() =>
+                  router.push(
+                    `/trainer/days/single/${res?.messages?.[0]?.content.id}`,
+                  )
+                }
+              >
+                {toastAction}
+              </ToastAction>
+            ),
           });
+
+          router.push(`/trainer/days/single/${res?.messages?.[0]?.content.id}`);
         }
       } catch (e) {
         handleBaseError(e, setErrorMsg, error);
@@ -236,6 +268,7 @@ export default function DayForm({
       descriptionToast,
       error,
       path,
+      router,
       setErrorMsg,
       setIsLoading,
       toastAction,
@@ -349,6 +382,12 @@ export default function DayForm({
                             mealType={mealType}
                             initialMeal={initialData?.[cm]}
                             optionsChangeCallback={handleMealOptionsChange}
+                            setIsMealCompletedButNotSubmitted={(value) => {
+                              setIsMealCompletedButNotSubmitted((prev) => ({
+                                ...prev,
+                                [cm]: value,
+                              }));
+                            }}
                           />
                         ))}
                       </AnimatePresence>
@@ -356,7 +395,32 @@ export default function DayForm({
                   </FormControl>
                 </FormItem>
               )}
-            />{" "}
+            />
+            {childrenMeals.length > 1 && (
+              <div className="w-full flex items-center justify-end">
+                <AnimatePresence>
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0 }}
+                    transition={{ duration: 0.5 }}
+                  >
+                    <Button
+                      type="button"
+                      size={"lg"}
+                      className="flex items-center justify-center gap-2"
+                      onClick={() =>
+                        setChildrenMeals((prev) => [...prev, uuidv4()])
+                      }
+                    >
+                      <DiamondPlus />
+                      <p>{addMeal}</p>
+                    </Button>
+                  </motion.div>
+                </AnimatePresence>
+              </div>
+            )}
+
             {dayDietType && (
               <FormDescription className="my-5">
                 {dayD}{" "}
@@ -367,13 +431,30 @@ export default function DayForm({
             )}
             <div className="mt-15">
               <ErrorMessage message={error} show={!!errorMsg} />
-
-              <ButtonSubmit
-                isLoading={isLoading}
-                // disable={!isAnyMealNotSubmitted}
-                disable={false}
-                buttonSubmitTexts={buttonSubmitTexts}
-              />
+              {isOneMealCompletedButNotSubmitted && (
+                <div className="w-full space-y-8">
+                  <p className="text-lg font-medium text-destructive">
+                    {areMealsCompletedButNotSubmitted}
+                  </p>
+                  <Button
+                    variant={"destructive"}
+                    type={"button"}
+                    onClick={() => {
+                      setIsMealCompletedButNotSubmitted({});
+                    }}
+                  >
+                    {continueBtn}
+                  </Button>
+                </div>
+              )}
+              {!isOneMealCompletedButNotSubmitted && (
+                <ButtonSubmit
+                  isLoading={isLoading}
+                  // disable={!isAnyMealNotSubmitted}
+                  disable={false}
+                  buttonSubmitTexts={buttonSubmitTexts}
+                />
+              )}
             </div>
           </form>
         </Form>
@@ -407,6 +488,7 @@ interface SingleMealProps extends WithUser, SingleMealTexts {
   currentMeals: CurrentMealType[];
   initialMeal?: InitialDataType[string];
   optionsChangeCallback: (dietType: DietType | null) => void;
+  setIsMealCompletedButNotSubmitted: (value: boolean) => void;
 }
 
 function SingleMealForm({
@@ -431,6 +513,7 @@ function SingleMealForm({
   initialMeal,
   optionsChangeCallback,
   mealType,
+  setIsMealCompletedButNotSubmitted,
 }: SingleMealProps) {
   const mealSchema = useMemo(
     () => getMealSchema(mealSchemaTexts),
@@ -455,6 +538,13 @@ function SingleMealForm({
 
   const hourWatch = form.watch("period.hour");
   const minuteWatch = form.watch("period.minute");
+  const recipesWatch = form.watch("recipes");
+
+  useEffect(() => {
+    if (hourWatch && minuteWatch && recipesWatch.length > 0 && !wasSubmitted) {
+      setIsMealCompletedButNotSubmitted(true);
+    }
+  }, [hourWatch, minuteWatch, recipesWatch?.length, wasSubmitted]);
 
   useEffect(() => {
     if (!hourWatch || !minuteWatch) return;
@@ -490,6 +580,7 @@ function SingleMealForm({
 
   const onSubmit = useCallback(
     (data: MealSchemaType) => {
+      setIsMealCompletedButNotSubmitted(false);
       setWasSubmitted(true);
       onSubmitCallback({ ...data, id: mealId });
     },
@@ -562,6 +653,7 @@ function SingleMealForm({
                     sortingCriteria={{ title: "asc" }}
                     extraQueryParams={{ approved: "true" }}
                     valueKey={"title"}
+                    pageSize={20}
                     mapping={(r) => ({
                       value: r.content.content.id.toString(),
                       label:

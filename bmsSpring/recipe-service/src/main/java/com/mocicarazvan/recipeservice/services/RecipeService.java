@@ -13,6 +13,7 @@ import com.mocicarazvan.templatemodule.dtos.response.ResponseWithUserDto;
 import com.mocicarazvan.templatemodule.services.ApprovedService;
 import com.mocicarazvan.templatemodule.services.CountInParentService;
 import com.mocicarazvan.templatemodule.services.ValidIds;
+import org.springframework.data.util.Pair;
 import org.springframework.http.codec.multipart.FilePart;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -21,15 +22,17 @@ import java.util.List;
 
 public interface RecipeService extends ApprovedService<Recipe, RecipeBody, RecipeResponse, RecipeRepository, RecipeMapper>, CountInParentService, ValidIds<Recipe, RecipeRepository, RecipeResponse> {
     // todo filtered with count for all and for trainer
-    Flux<PageableResponse<ResponseWithUserDto<RecipeResponse>>> getRecipesFilteredWithUser(String title, DietType dietType, PageableBody pageableBody, String userId, Boolean approved);
+    Flux<PageableResponse<ResponseWithUserDto<RecipeResponse>>> getRecipesFilteredWithUser(String title, DietType dietType, PageableBody pageableBody, String userId, Boolean approved, Boolean admin);
 
-    Flux<PageableResponse<RecipeResponse>> getRecipesFiltered(String title, DietType dietType, PageableBody pageableBody, String userId, Boolean approved);
+    Flux<PageableResponse<RecipeResponse>> getRecipesFiltered(String title, DietType dietType, PageableBody pageableBody, String userId, Boolean approved, Boolean admin);
 
-    Flux<PageableResponse<ResponseWithEntityCount<RecipeResponse>>> getRecipesFilteredWithCount(String title, DietType dietType, PageableBody pageableBody, String userId, Boolean approved);
+    Flux<PageableResponse<ResponseWithEntityCount<RecipeResponse>>> getRecipesFilteredWithCount(String title, DietType dietType, PageableBody pageableBody, String userId, Boolean approved, Boolean admin);
 
     Mono<RecipeResponse> createModelWithVideos(Flux<FilePart> images, Flux<FilePart> videos, RecipeBody recipeBody, String userId, String clientId);
 
     Mono<RecipeResponse> updateModelWithVideos(Flux<FilePart> images, Flux<FilePart> videos, RecipeBody recipeBody, Long id, String userId, String clientId);
+
+    Mono<Pair<RecipeResponse, Boolean>> updateModelWithVideosGetOriginalApproved(Flux<FilePart> images, Flux<FilePart> videos, RecipeBody recipeBody, Long id, String userId, String clientId);
 
     Flux<PageableResponse<RecipeResponse>> getRecipesFilteredTrainer(String title, DietType type, Long trainerId, PageableBody pageableBody, String userId, Boolean approved);
 

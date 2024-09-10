@@ -3,7 +3,9 @@ package com.mocicarazvan.orderservice.services.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mocicarazvan.orderservice.cache.OrderCacher;
+import com.mocicarazvan.orderservice.cache.OrderCacheServiceHandler;
+import com.mocicarazvan.orderservice.cache.OrderWithAddressCacheHandler;
+import com.mocicarazvan.orderservice.cache.TrainerSummaryCacheHandler;
 import com.mocicarazvan.orderservice.clients.BoughtWebSocketClient;
 import com.mocicarazvan.orderservice.clients.PlanClient;
 import com.mocicarazvan.orderservice.dtos.*;
@@ -95,7 +97,11 @@ public class OrderServiceImpl implements OrderService {
     private final OrderMapper orderMapper;
 
     private final EmailUtils emailUtils;
-    private final OrderCacher orderCacher;
+    private final OrderCacheServiceHandler orderCacheServiceHandler;
+
+    private final TrainerSummaryCacheHandler trainerSummaryCacheHandler;
+
+    private final OrderWithAddressCacheHandler orderWithAddressCacheHandler;
 
 
     @PostConstruct
@@ -118,7 +124,8 @@ public class OrderServiceImpl implements OrderService {
                     metadata.put("total", String.valueOf(checkoutRequestBody.getTotal()));
 
                     try {
-                        String plansJson = objectMapper.writeValueAsString(checkoutRequestBody.getPlans());
+                        List<Long> planIds = checkoutRequestBody.getPlans().stream().map(IdGenerateDto::getId).toList();
+                        String plansJson = objectMapper.writeValueAsString(planIds);
                         metadata.put("plans", plansJson);
                     } catch (JsonProcessingException e) {
                         return Mono.error(new RuntimeException("Failed to serialize plans", e));
@@ -136,6 +143,7 @@ public class OrderServiceImpl implements OrderService {
                             .setClientReferenceId(customer.getEmail())
                             .setBillingAddressCollection(SessionCreateParams.BillingAddressCollection.REQUIRED)
                             .putAllMetadata(metadata)
+
                             .setInvoiceCreation(SessionCreateParams.InvoiceCreation.builder().setEnabled(true)
                                     .build());
 
@@ -264,33 +272,46 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public Flux<MonthlyEntityGroup<OrderDto>> getOrdersGroupedByMonth(int month, String userId) {
-        return userClient.getUser("", userId)
-                .flatMapMany(userDto -> {
-                    if (!userDto.getRole().equals(Role.ROLE_ADMIN)) {
-                        return Mono.error(new PrivateRouteException());
-                    }
-                    LocalDateTime now = LocalDateTime.now();
-                    int year = now.getYear();
-                    if (month == 1 && now.getMonthValue() == 1) {
-                        year -= 1;
-                    }
-                    return orderRepository.findModelByMonth(month, year)
-                            .map(m -> {
-                                        YearMonth ym = YearMonth.from(m.getCreatedAt());
-                                        return MonthlyEntityGroup.<OrderDto>builder()
-                                                .month(ym.getMonthValue())
-                                                .year(ym.getYear())
-                                                .entity(orderMapper.fromModelToDto(m))
-                                                .build();
-                                    }
-                            );
-                });
+        return
+
+                userClient.getUser("", userId)
+                        .flatMapMany(userDto ->
+
+                                orderCacheServiceHandler.getGetModelGroupedByMonthPersist().apply(
+
+                                        Flux.defer(() -> {
+                                            if (!userDto.getRole().equals(Role.ROLE_ADMIN)) {
+                                                return Mono.error(new PrivateRouteException());
+                                            }
+                                            LocalDateTime now = LocalDateTime.now();
+                                            int year = now.getYear();
+                                            if (month == 1 && now.getMonthValue() == 1) {
+                                                year -= 1;
+                                            }
+                                            return orderRepository.findModelByMonth(month, year)
+                                                    .map(m -> {
+                                                                YearMonth ym = YearMonth.from(m.getCreatedAt());
+                                                                return MonthlyEntityGroup.<OrderDto>builder()
+                                                                        .month(ym.getMonthValue())
+                                                                        .year(ym.getYear())
+                                                                        .entity(orderMapper.fromModelToDto(m))
+                                                                        .build();
+                                                            }
+                                                    );
+                                        }), userDto, month)
+
+
+                        );
     }
 
     @Override
     public Flux<MonthlyOrderSummary> getOrdersSummaryByMonth(LocalDate from, LocalDate to, String userId) {
         Pair<LocalDateTime, LocalDateTime> intervalDates = getIntervalDates(from, to);
-        return orderRepository.getOrdersSummaryByDateRangeGroupedByMonth(intervalDates.getFirst(), intervalDates.getSecond());
+        return
+                orderCacheServiceHandler.getGetOrdersSummaryByMonthPersist().apply(
+                        orderRepository.getOrdersSummaryByDateRangeGroupedByMonth(intervalDates.getFirst(), intervalDates.getSecond())
+                        , from, to)
+                ;
     }
 
     @Override
@@ -300,13 +321,19 @@ public class OrderServiceImpl implements OrderService {
         return userClient.existsTrainerOrAdmin("/exists", trainerId)
                 .thenMany(planClient.getTrainersPlans(String.valueOf(trainerId), userId)
                         .collectList()
-                        .flatMapMany(plans -> orderRepository.getTrainerOrdersSummaryByDateRangeGroupedByMonth(intervalDates.getFirst(), intervalDates.getSecond())
-                                .map(e -> fromTrainerSummaryToSummary(plans, e, (p) -> MonthlyOrderSummary.builder()
-                                        .year(e.getYear())
-                                        .month(e.getMonth())
-                                        .totalAmount(p.getFirst())
-                                        .count(p.getSecond())
-                                        .build()))));
+                        .flatMapMany(
+                                plans ->
+                                        trainerSummaryCacheHandler.getTrainersMonthlyOrdersSummary(
+                                                orderRepository.getTrainerOrdersSummaryByDateRangeGroupedByMonth(intervalDates.getFirst(), intervalDates.getSecond())
+                                                        .map(e -> fromTrainerSummaryToSummary(plans, e, (p) -> MonthlyOrderSummary.builder()
+                                                                .year(e.getYear())
+                                                                .month(e.getMonth())
+                                                                .totalAmount(p.getFirst())
+                                                                .count(p.getSecond())
+                                                                .build())), from, to, trainerId, plans)
+
+
+                        ));
 
     }
 
@@ -316,7 +343,9 @@ public class OrderServiceImpl implements OrderService {
 
         Pair<LocalDateTime, LocalDateTime> intervalDates = getIntervalDates(from, to);
 
-        return orderRepository.getOrdersSummaryByDateRangeGroupedByDay(intervalDates.getFirst(), intervalDates.getSecond());
+        return
+                orderCacheServiceHandler.getGetOrdersSummaryByDayPersist().apply(
+                        orderRepository.getOrdersSummaryByDateRangeGroupedByDay(intervalDates.getFirst(), intervalDates.getSecond()), from, to);
     }
 
     @Override
@@ -327,14 +356,17 @@ public class OrderServiceImpl implements OrderService {
                         .thenMany(
                                 planClient.getTrainersPlans(String.valueOf(trainerId), userId)
                                         .collectList()
-                                        .flatMapMany(plans -> orderRepository.getTrainerOrdersSummaryByDateRangeGroupedByDay(intervalDates.getFirst(), intervalDates.getSecond())
-                                                .map(e -> fromTrainerSummaryToSummary(plans, e, (p) -> DailyOrderSummary.builder()
-                                                        .year(e.getYear())
-                                                        .month(e.getMonth())
-                                                        .day(e.getDay())
-                                                        .totalAmount(p.getFirst())
-                                                        .count(p.getSecond())
-                                                        .build()))));
+                                        .flatMapMany(plans ->
+
+                                                trainerSummaryCacheHandler.getTrainersDailyOrdersSummary(
+                                                        orderRepository.getTrainerOrdersSummaryByDateRangeGroupedByDay(intervalDates.getFirst(), intervalDates.getSecond())
+                                                                .map(e -> fromTrainerSummaryToSummary(plans, e, (p) -> DailyOrderSummary.builder()
+                                                                        .year(e.getYear())
+                                                                        .month(e.getMonth())
+                                                                        .day(e.getDay())
+                                                                        .totalAmount(p.getFirst())
+                                                                        .count(p.getSecond())
+                                                                        .build())), from, to, trainerId, plans)));
     }
 
     private Pair<LocalDateTime, LocalDateTime> getIntervalDates(LocalDate from, LocalDate to) {
@@ -345,17 +377,8 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public Flux<CountryOrderSummary> getOrdersSummaryByCountry(CountrySummaryType type) {
-//        return (type.equals(CountrySummaryType.COUNT) ?
-//                orderRepository.getOrdersCountByCountry() :
-//                orderRepository.getOrdersTotalByCountry())
-//                .map(e -> {
-//                    e.setId(
-//                            new Locale.Builder().setRegion(e.getId().toUpperCase()).build().getISO3Country()
-//                    );
-//                    return e;
-//                });
 
-        return orderCacher.getCachedCountryOrderSummaryFlux(type,
+        return orderCacheServiceHandler.getGetOrdersSummaryByCountryPersist().apply(
                 (type.equals(CountrySummaryType.COUNT) ?
                         orderRepository.getOrdersCountByCountry() :
                         orderRepository.getOrdersTotalByCountry())
@@ -364,8 +387,8 @@ public class OrderServiceImpl implements OrderService {
                                     new Locale.Builder().setRegion(e.getId().toUpperCase()).build().getISO3Country()
                             );
                             return e;
-                        })
-        );
+                        }), type);
+
     }
 
     @Override
@@ -486,16 +509,15 @@ public class OrderServiceImpl implements OrderService {
         String userId = metadata.get("user_id");
         double total = Double.parseDouble(metadata.get("total"));
 
-        List<PlanResponse> plans;
+        List<Long> planIds;
         try {
             String plansJson = metadata.get("plans");
-            plans = objectMapper.readValue(plansJson, new TypeReference<List<PlanResponse>>() {
+            planIds = objectMapper.readValue(plansJson, new TypeReference<List<Long>>() {
             });
         } catch (JsonProcessingException e) {
             return Mono.error(new RuntimeException("Failed to deserialize plans", e));
         }
 
-        List<Long> lineItemIdsList = plans.stream().map(PlanResponse::getId).toList();
         // Handle the event
         System.out.println("Checkout Session completed for customer: " + customerEmail);
 //        System.out.println("Line Item IDs: " + lineItemIds);
@@ -505,24 +527,29 @@ public class OrderServiceImpl implements OrderService {
 //        List<Long> lineItemIdsList = convertLineItemIds(lineItemIds);
 
 
-        if (customerDetails != null && customerDetails.getAddress() != null && userId != null && !lineItemIdsList.isEmpty()) {
+        if (customerDetails != null && customerDetails.getAddress() != null && userId != null && !planIds.isEmpty()) {
             System.out.println("Customer Address: " + customerDetails.getAddress());
-            return customAddressService.saveAddress(customerDetails.getAddress())
-                    .flatMap(a -> orderRepository.save(
-                            Order.builder()
-                                    .addressId(a.getId())
-                                    .planIds(lineItemIdsList)
-                                    .total(total)
-                                    .userId(Long.valueOf(userId))
-                                    .createdAt(LocalDateTime.now())
-                                    .updatedAt(LocalDateTime.now())
-                                    .stripeInvoiceId(session.getInvoice())
-                                    .build()
-                    ))
-                    .flatMap(order -> sendOrderEmail(order, customerEmail))
-                    .then(sendNotifications(plans, customerEmail))
-                    .then(orderCacher.invalidateAllCache())
-                    .thenReturn("Success");
+            return
+                    orderCacheServiceHandler.getCreateOrderInvalidate().apply(
+                            planClient.getByIds(planIds.stream().map(Object::toString).toList(), userId).collectList()
+                                    .flatMap(plans ->
+                                            customAddressService.saveAddress(customerDetails.getAddress())
+                                                    .flatMap(a -> orderRepository.save(
+                                                            Order.builder()
+                                                                    .addressId(a.getId())
+                                                                    .planIds(planIds)
+                                                                    .total(total)
+                                                                    .userId(Long.valueOf(userId))
+                                                                    .createdAt(LocalDateTime.now())
+                                                                    .updatedAt(LocalDateTime.now())
+                                                                    .stripeInvoiceId(session.getInvoice())
+                                                                    .build()
+                                                    ))
+                                                    .flatMap(order -> sendOrderEmail(order, customerEmail))
+                                                    .then(sendNotifications(plans, customerEmail))
+                                                    .then(trainerSummaryCacheHandler.invalidateCacheForTrainers(plans))
+                                                    .then(orderWithAddressCacheHandler.createOrderWithAddressInvalidate(userId))
+                                                    .thenReturn("Success")), userId);
         } else {
             return Mono.error(new IllegalActionException("Customer details are missing"));
         }
@@ -572,6 +599,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public Mono<EntityCount> countInParent(Long childId) {
         return orderRepository.countInParent(childId)
+                .collectList()
                 .map(EntityCount::new);
     }
 

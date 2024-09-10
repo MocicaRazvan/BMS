@@ -77,6 +77,9 @@ export default async function AdminOrdersPage({ params: { locale } }: Props) {
               {...orderTableTexts}
               authUser={authUser}
               sizeOptions={[10, 20, 30, 40]}
+              extraQueryParams={{
+                admin: "true",
+              }}
             />
           </div>
         </Suspense>

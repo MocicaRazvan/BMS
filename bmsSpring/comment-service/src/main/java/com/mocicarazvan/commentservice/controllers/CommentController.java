@@ -139,7 +139,7 @@ public class CommentController implements TitleBodyController<Comment, CommentBo
     @ResponseStatus(HttpStatus.OK)
     public Flux<PageableResponse<CustomEntityModel<CommentResponse>>> getModelsByIdIn(@Valid @RequestBody PageableBody pageableBody,
                                                                                       @RequestParam List<Long> ids) {
-        return commentService.getModelsByIdIn(ids, pageableBody)
+        return commentService.getModelsByIdInPageable(ids, pageableBody)
                 .flatMap(m -> commentReactiveResponseBuilder.toModelPageable(m, CommentController.class));
     }
 

@@ -2,6 +2,14 @@ package com.mocicarazvan.ingredientservice.conifg;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mocicarazvan.ingredientservice.dtos.IngredientNutritionalFactResponse;
+import com.mocicarazvan.ingredientservice.dtos.IngredientResponse;
+import com.mocicarazvan.ingredientservice.dtos.NutritionalFactResponse;
+import com.mocicarazvan.templatemodule.cache.FilteredListCaffeineCache;
+import com.mocicarazvan.templatemodule.cache.FilteredListCaffeineCacheChildFilterKey;
+import com.mocicarazvan.templatemodule.cache.impl.FilteredListCaffeineCacheBaseImpl;
+import com.mocicarazvan.templatemodule.cache.impl.FilteredListCaffeineCacheChildFilterKeyImpl;
+import com.mocicarazvan.templatemodule.cache.keys.FilterKeyType;
 import com.mocicarazvan.templatemodule.clients.FileClient;
 import com.mocicarazvan.templatemodule.clients.UserClient;
 import com.mocicarazvan.templatemodule.jackson.CustomObjectMapper;
@@ -74,5 +82,20 @@ public class BeanConfig {
     @Bean
     public RepositoryUtils repositoryUtils() {
         return new RepositoryUtils();
+    }
+
+    @Bean
+    public FilteredListCaffeineCache<FilterKeyType, IngredientResponse> filterKeyTypeIngredientResponseFilteredListCaffeineCache() {
+        return new FilteredListCaffeineCacheBaseImpl<>("ingredient");
+    }
+
+    @Bean
+    public FilteredListCaffeineCache<FilterKeyType, IngredientNutritionalFactResponse> filterKeyTypeIngredientNutritionalFactResponseFilteredListCaffeineCache() {
+        return new FilteredListCaffeineCacheBaseImpl<>("ingredient-nutritionalFact");
+    }
+
+    @Bean
+    public FilteredListCaffeineCacheChildFilterKey<NutritionalFactResponse> nutritionalFactResponseFilteredListCaffeineCacheChildFilterKey() {
+        return new FilteredListCaffeineCacheChildFilterKeyImpl<>("nutritionalFact");
     }
 }

@@ -64,8 +64,10 @@ public class UserControllerImpl implements UserController {
                                                                           @RequestParam(required = false) String email,
                                                                           @RequestParam(required = false) Set<Role> roles,
                                                                           @RequestParam(required = false) Set<AuthProvider> providers,
-                                                                          @RequestParam(required = false) Boolean emailVerified) {
-        return userService.getAllUsers(pageableBody, email, roles, providers, emailVerified)
+                                                                          @RequestParam(required = false) Boolean emailVerified,
+                                                                          @RequestParam(name = "admin", required = false, defaultValue = "false") Boolean admin
+    ) {
+        return userService.getAllUsers(pageableBody, email, roles, providers, emailVerified, admin)
                 .flatMap(pageableUserAssembler::toModel);
     }
 

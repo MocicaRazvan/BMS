@@ -13,17 +13,17 @@ import java.util.List;
 public interface PlanRepository extends ApprovedRepository<Plan>, CountInParent, CountIds {
 
     @Query("""
-                    select count(*) from plan p
+                    select distinct p.id from plan p
                     where :childId = any (p.days)
             """)
-    Mono<Long> countInParent(Long childId);
+    Flux<Long> countInParent(Long childId);
 
 
     @Query("""
-                select count(*) from plan p
+                select distinct p.id  from plan p
                 where p.id in (:ids) and p.approved = true
             """)
-    Mono<Long> countByIds(List<Long> ids);
+    Flux<Long> countByIds(List<Long> ids);
 
     Flux<Plan> findAllByIdInAndApprovedTrue(List<Long> ids);
 

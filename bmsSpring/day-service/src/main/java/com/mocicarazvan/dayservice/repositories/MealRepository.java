@@ -39,4 +39,13 @@ public interface MealRepository extends ManyToOneUserRepository<Meal> {
             WHERE day_id = ANY (:dayIds)
             """)
     Flux<Long> findUniqueRecipeIdsByDayIds(Long[] dayIds);
+
+    @Query("""
+            SELECT * FROM meal 
+            WHERE day_id = :dayId 
+            ORDER BY 
+                CAST(SPLIT_PART(period, ':', 1) AS int), 
+                CAST(SPLIT_PART(period, ':', 2) AS int)
+            """)
+    Flux<Meal> findAllByDayIdCustomPeriodSort(Long dayId);
 }

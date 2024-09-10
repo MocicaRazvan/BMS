@@ -34,4 +34,6 @@ public class NutritionalFactResponse extends WithUserDto {
     private double salt;
 
     private UnitType unit;
+
+    private Long ingredientId;
 }

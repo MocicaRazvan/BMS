@@ -36,10 +36,10 @@ public interface IngredientRepository extends ManyToOneUserRepository<Ingredient
 
     @Override
     @Query("""
-                select count(*) from  ingredient i
+                select distinct i.id from  ingredient i
                 where i.id in (:ids) and i.display = true
             """)
-    Mono<Long> countByIds(List<Long> ids);
+    Flux<Long> countByIds(List<Long> ids);
 
     Flux<Ingredient> findAllByIdInAndDisplayTrue(List<Long> ids);
 

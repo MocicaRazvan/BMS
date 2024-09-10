@@ -77,7 +77,7 @@ public class MealController implements ManyToOneUserController<
     @PatchMapping(value = "/byIds", produces = {MediaType.APPLICATION_NDJSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
     @ResponseStatus(HttpStatus.OK)
     public Flux<PageableResponse<CustomEntityModel<MealResponse>>> getModelsByIdIn(@Valid @RequestBody PageableBody pageableBody, @RequestParam List<Long> ids) {
-        return mealService.getModelsByIdIn(ids, pageableBody)
+        return mealService.getModelsByIdInPageable(ids, pageableBody)
                 .flatMap(m -> mealReactiveResponseBuilder.toModelPageable(m, MealController.class));
     }
 

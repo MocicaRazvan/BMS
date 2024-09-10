@@ -18,9 +18,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.r2dbc.repository.R2dbcRepository;
 import reactor.core.publisher.Mono;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -111,5 +110,11 @@ public class EntitiesUtils {
     public static Double getDoubleValue(Row row, String columnName) {
         Double value = row.get(columnName, Double.class);
         return value != null ? value : 0.0;
+    }
+
+    public static List<Object> getListOfNotNullObjects(Object... objects) {
+        return Arrays.stream(objects)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 }

@@ -2,6 +2,10 @@ package com.mocicarazvan.orderservice.config;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mocicarazvan.orderservice.dtos.OrderDto;
+import com.mocicarazvan.orderservice.dtos.OrderDtoWithAddress;
+import com.mocicarazvan.templatemodule.cache.FilteredListCaffeineCacheChildFilterKey;
+import com.mocicarazvan.templatemodule.cache.impl.FilteredListCaffeineCacheChildFilterKeyImpl;
 import com.mocicarazvan.templatemodule.clients.UserClient;
 import com.mocicarazvan.templatemodule.email.EmailUtils;
 import com.mocicarazvan.templatemodule.email.config.CustomMailProps;
@@ -101,6 +105,16 @@ public class BeanConfig {
     public EmailUtils emailUtils(JavaMailSender jml) {
 
         return new EmailUtilsImpl(jml);
+    }
+
+    @Bean
+    public FilteredListCaffeineCacheChildFilterKey<OrderDto> orderDtoFilteredListCaffeineCacheChildFilterKey() {
+        return new FilteredListCaffeineCacheChildFilterKeyImpl<>("orderService");
+    }
+
+    @Bean
+    public FilteredListCaffeineCacheChildFilterKey<OrderDtoWithAddress> orderDtoWithAddressFilteredListCaffeineCacheChildFilterKey() {
+        return new FilteredListCaffeineCacheChildFilterKeyImpl<>("orderService");
     }
 
 }

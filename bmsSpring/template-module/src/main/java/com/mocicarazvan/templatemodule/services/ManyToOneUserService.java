@@ -29,7 +29,7 @@ public interface ManyToOneUserService<MODEL extends ManyToOneUser, BODY, RESPONS
 
     Flux<ResponseWithUserDto<RESPONSE>> getModelsWithUser(List<Long> ids, String userId);
 
-    Flux<PageableResponse<RESPONSE>> getModelsByIdIn(List<Long> ids, PageableBody pageableBody);
+    Flux<PageableResponse<RESPONSE>> getModelsByIdInPageable(List<Long> ids, PageableBody pageableBody);
 
     Flux<RESPONSE> getModelsByIdIn(List<Long> ids);
 

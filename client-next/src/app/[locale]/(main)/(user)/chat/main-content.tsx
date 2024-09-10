@@ -88,6 +88,7 @@ export default function ChatMainContent({
           }
           const params = new URLSearchParams(searchParams.toString());
           params.set("chatId", messages[0].id.toString());
+          params.delete("email");
           window.history.pushState(null, "", `?${params.toString()}`);
         }
       });
@@ -96,7 +97,7 @@ export default function ChatMainContent({
     authUser.email,
     authUser.token,
     email,
-    searchParams,
+    // searchParams,
     JSON.stringify(chatRooms),
   ]);
 
@@ -141,9 +142,11 @@ export default function ChatMainContent({
 
     if (activeRoomId) {
       params.set("chatId", activeRoomId.toString());
+      params.delete("email");
     } else {
       if (params.has("chatId")) {
         params.delete("chatId");
+        params.delete("email");
       }
     }
     window.history.pushState(null, "", `?${params.toString()}`);
@@ -151,15 +154,19 @@ export default function ChatMainContent({
   }, [activeRoomId, searchParams]);
 
   useSubscription(`/user/${authUser.email}/chatRooms`, (message) => {
-    // console.log("chat rooms", message);
     const newMessage = JSON.parse(message.body);
     setChatRooms((prev) => {
-      const filteredRooms = prev.filter((room) => room.id !== newMessage.id);
-      return [...filteredRooms, newMessage];
+      const isRoomPresent = prev.findIndex((room) => room.id === newMessage.id);
+      if (isRoomPresent === -1) {
+        return prev;
+      }
+      // return [...prev.filter((room) => room.id !== newMessage.id), newMessage];
+      return prev.map((room) =>
+        room.id === newMessage.id ? newMessage : room,
+      );
     });
   });
   useSubscription(`/user/${authUser.email}/chatRooms/delete`, (message) => {
-    // console.log("chat rooms", message);
     const newMessage = JSON.parse(message.body);
     setChatRooms((prev) => prev.filter((room) => room.id !== newMessage.id));
   });

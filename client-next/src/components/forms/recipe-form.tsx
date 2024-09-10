@@ -20,7 +20,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -40,7 +39,7 @@ import {
 import { v4 as uuidv4 } from "uuid";
 import { TitleBodyForm, TitleBodyTexts } from "@/components/forms/title-body";
 import InputFile, { FieldInputTexts } from "@/components/forms/input-file";
-import { cn, determineMostRestrictiveDiet, handleBaseError } from "@/lib/utils";
+import { determineMostRestrictiveDiet, handleBaseError } from "@/lib/utils";
 import IngredientMacrosPieChart, {
   calculateMacroProportions,
   IngredientPieChartTexts,

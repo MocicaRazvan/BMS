@@ -1,6 +1,9 @@
 package com.mocicarazvan.postservice.conifg;
 
 
+import com.mocicarazvan.postservice.dtos.PostResponse;
+import com.mocicarazvan.templatemodule.cache.FilteredListCaffeineCacheApproveFilterKey;
+import com.mocicarazvan.templatemodule.cache.impl.FilteredListCaffeineCacheApproveFilterKeyImpl;
 import com.mocicarazvan.templatemodule.clients.FileClient;
 import com.mocicarazvan.templatemodule.clients.UserClient;
 import com.mocicarazvan.templatemodule.jackson.CustomObjectMapper;
@@ -87,4 +90,11 @@ public class BeanConfig {
     public RepositoryUtils repositoryUtils() {
         return new RepositoryUtils();
     }
+
+    @Bean
+    public FilteredListCaffeineCacheApproveFilterKey<PostResponse> filteredListCaffeineCache() {
+        return new FilteredListCaffeineCacheApproveFilterKeyImpl<>("postService");
+    }
+
+
 }

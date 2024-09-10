@@ -368,3 +368,25 @@ export function fromDistanceToNowUtc(
     locale: locale === "ro" ? ro : enUS,
   });
 }
+
+export const fromStringOfDotToObjectValue = <T extends object>(
+  str: string,
+  obj: T,
+  lastIsLength = false,
+) => {
+  const keys = str.split(".");
+
+  return keys.reduce((value, key, index) => {
+    if (value && typeof value === "object" && key in value) {
+      const currentValue = value[key as keyof typeof value];
+
+      if (index === keys.length - 1 && lastIsLength) {
+        return (currentValue as any[])?.length;
+      }
+
+      return currentValue;
+    }
+
+    return undefined;
+  }, obj as any);
+};

@@ -104,6 +104,8 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     // todo scoate transactional
 //    @Transactional
     @Override
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
+    @CustomRetryable
     public List<ChatRoomResponse> getChatRooms(String email) {
         log.error("Email: {}", email);
         var initial = chatRoomRepository.findChatRoomsByUserEmail(email);
@@ -117,6 +119,8 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     }
 
     @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, isolation = Isolation.REPEATABLE_READ)
+    @CustomRetryable
     public PageableResponse<List<ChatRoomResponse>> getChatRoomsFiltered(String email, String filterEmail, PageableBody pageableBody) {
 
         //todo remove

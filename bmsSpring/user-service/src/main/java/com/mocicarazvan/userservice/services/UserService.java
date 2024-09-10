@@ -19,7 +19,7 @@ import java.util.Set;
 public interface UserService {
     Mono<UserDto> getUser(Long id);
 
-    Flux<PageableResponse<UserDto>> getAllUsers(PageableBody pageableBody, String email, Set<Role> roles, Set<AuthProvider> providers, Boolean emailVerified);
+    Flux<PageableResponse<UserDto>> getAllUsers(PageableBody pageableBody, String email, Set<Role> roles, Set<AuthProvider> providers, Boolean emailVerified, Boolean admin);
 
     Mono<UserDto> makeTrainer(Long id);
 

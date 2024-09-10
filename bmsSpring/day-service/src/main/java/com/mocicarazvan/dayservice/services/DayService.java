@@ -25,11 +25,11 @@ public interface DayService extends TitleBodyService<
         Day, DayBody, DayResponse, DayRepository, DayMapper
         >, CountInParentService, ValidIds<Day, DayRepository, DayResponse> {
 
-    Flux<PageableResponse<DayResponse>> getDaysFiltered(String title, DayType type, List<Long> excludeIds, PageableBody pageableBody, String userId);
+    Flux<PageableResponse<DayResponse>> getDaysFiltered(String title, DayType type, List<Long> excludeIds, PageableBody pageableBody, String userId, Boolean admin);
 
-    Flux<PageableResponse<ResponseWithUserDto<DayResponse>>> getDaysFilteredWithUser(String title, DayType type, List<Long> excludeIds, PageableBody pageableBody, String userId);
+    Flux<PageableResponse<ResponseWithUserDto<DayResponse>>> getDaysFilteredWithUser(String title, DayType type, List<Long> excludeIds, PageableBody pageableBody, String userId, Boolean admin);
 
-    Flux<PageableResponse<ResponseWithEntityCount<DayResponse>>> getDaysFilteredWithCount(String title, DayType type, List<Long> excludeIds, PageableBody pageableBody, String userId);
+    Flux<PageableResponse<ResponseWithEntityCount<DayResponse>>> getDaysFilteredWithCount(String title, DayType type, List<Long> excludeIds, PageableBody pageableBody, String userId, Boolean admin);
 
     Flux<PageableResponse<DayResponse>> getDaysFilteredTrainer(String title, DayType type, List<Long> excludeIds, PageableBody pageableBody, String userId, Long trainerId);
 

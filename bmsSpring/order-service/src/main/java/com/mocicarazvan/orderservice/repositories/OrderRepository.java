@@ -13,6 +13,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public interface OrderRepository extends ManyToOneUserRepository<Order>, CountInParent {
 
@@ -44,11 +45,12 @@ public interface OrderRepository extends ManyToOneUserRepository<Order>, CountIn
 //             """)
 //    Mono<OrderWithAddress> findByIdWithAddress(Long id);
 
+    @Override
     @Query("""
-                select count(*) from custom_order o
+                select distinct o.id from custom_order o
                 where :childId = any (o.plan_ids)
             """)
-    Mono<Long> countInParent(Long childId);
+    Flux<Long> countInParent(Long childId);
 
     @Query("SELECT COUNT(*) > 0 FROM custom_order WHERE user_id = :userId AND :planId = ANY(plan_ids)")
     Mono<Boolean> existsByUserIdAndPlanId(Long userId, Long planId);

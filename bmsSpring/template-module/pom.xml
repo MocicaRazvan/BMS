@@ -177,6 +177,11 @@
             <artifactId>caffeine</artifactId>
             <version>3.1.8</version>
         </dependency>
+        <dependency>
+            <groupId>org.jooq</groupId>
+            <artifactId>jool</artifactId>
+            <version>0.9.15</version>
+        </dependency>
     </dependencies>
     <dependencyManagement>
         <dependencies>

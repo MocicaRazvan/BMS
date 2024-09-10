@@ -12,6 +12,13 @@ import com.mocicarazvan.templatemodule.repositories.TitleBodyRepository;
 import com.mocicarazvan.templatemodule.services.TitleBodyService;
 import com.mocicarazvan.templatemodule.utils.EntitiesUtils;
 import com.mocicarazvan.templatemodule.utils.PageableUtilsCustom;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.experimental.SuperBuilder;
+import org.jooq.lambda.function.Function3;
+import org.jooq.lambda.function.Function4;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
@@ -23,45 +30,55 @@ public abstract class TitleBodyServiceImpl<MODEL extends TitleBody, BODY, RESPON
 
 
     protected final EntitiesUtils entitiesUtils;
+    protected final TitleBodyServiceCacheHandler<MODEL, BODY, RESPONSE> titleBodyServiceCacheHandler;
 
-    public TitleBodyServiceImpl(S modelRepository, M modelMapper, PageableUtilsCustom pageableUtils, UserClient userClient, String modelName, List<String> allowedSortingFields, EntitiesUtils entitiesUtils) {
-        super(modelRepository, modelMapper, pageableUtils, userClient, modelName, allowedSortingFields);
+    public TitleBodyServiceImpl(S modelRepository, M modelMapper, PageableUtilsCustom pageableUtils, UserClient userClient, String modelName, List<String> allowedSortingFields, EntitiesUtils entitiesUtils, TitleBodyServiceCacheHandler<MODEL, BODY, RESPONSE> titleBodyServiceCacheHandler) {
+        super(modelRepository, modelMapper, pageableUtils, userClient, modelName, allowedSortingFields, titleBodyServiceCacheHandler);
         this.entitiesUtils = entitiesUtils;
+        this.titleBodyServiceCacheHandler = titleBodyServiceCacheHandler;
     }
 
     @Override
     public Mono<RESPONSE> reactToModel(Long id, String type, String userId) {
-        return userClient.getUser("", userId)
-                .flatMap(authUser -> getModel(id)
-                        .flatMap(model -> entitiesUtils.setReaction(model, authUser, type)
-                                .flatMap(modelRepository::save)
-                                .map(modelMapper::fromModelToResponse)
-                        )
+        return
+                titleBodyServiceCacheHandler.reactToModelInvalidate.apply(
+                        userClient.getUser("", userId)
+                                .flatMap(authUser -> getModel(id)
+                                        .flatMap(model -> entitiesUtils.setReaction(model, authUser, type)
+                                                .flatMap(modelRepository::save)
+                                                .map(modelMapper::fromModelToResponse)
+                                        )
 
+                                ), id, type, userId);
 
-                );
     }
 
     @Override
     public Mono<RESPONSE> createModel(BODY body, String userId) {
-        return userClient.getUser("", userId)
-                .flatMap(authUser -> {
-                    MODEL model = modelMapper.fromBodyToModel(body);
-                    model.setUserId(authUser.getId());
-                    if (model.getUserDislikes() == null)
-                        model.setUserDislikes(List.of());
-                    if (model.getUserLikes() == null)
-                        model.setUserLikes(List.of());
-                    return modelRepository.save(model)
-                            .map(modelMapper::fromModelToResponse);
-                });
+        return
+                titleBodyServiceCacheHandler.createModelInvalidate.apply(
+                        userClient.getUser("", userId)
+                                .flatMap(authUser -> {
+                                    MODEL model = modelMapper.fromBodyToModel(body);
+                                    model.setUserId(authUser.getId());
+                                    if (model.getUserDislikes() == null)
+                                        model.setUserDislikes(List.of());
+                                    if (model.getUserLikes() == null)
+                                        model.setUserLikes(List.of());
+                                    return modelRepository.save(model)
+                                            .map(modelMapper::fromModelToResponse);
+                                }), body, userId);
     }
 
     @Override
     public Mono<ResponseWithUserLikesAndDislikes<RESPONSE>> getModelByIdWithUserLikesAndDislikes(Long id, String userId) {
         return userClient.getUser("", userId)
-                .flatMap(authUser -> getModel(id)
-                        .flatMap(model -> getModelGuardWithLikesAndDislikes(authUser, model, true))
+                .flatMap(authUser ->
+                        titleBodyServiceCacheHandler.getModelByIdWithUserLikesAndDislikesPersist.apply(
+                                getModel(id)
+                                        .flatMap(model -> getModelGuardWithLikesAndDislikes(authUser, model, true))
+                                , authUser, id
+                        )
                 );
     }
 
@@ -80,6 +97,23 @@ public abstract class TitleBodyServiceImpl<MODEL extends TitleBody, BODY, RESPON
                             .userDislikes(userDislikes)
                             .build();
                 });
+    }
+
+    @EqualsAndHashCode(callSuper = true)
+    @Data
+//    @SuperBuilder
+    @AllArgsConstructor
+    public static class TitleBodyServiceCacheHandler<MODEL extends TitleBody, BODY, RESPONSE extends WithUserDto>
+            extends ManyToOneUserServiceImpl.ManyToOneUserServiceCacheHandler<MODEL, BODY, RESPONSE> {
+
+        Function4<Mono<RESPONSE>, Long, String, String, Mono<RESPONSE>> reactToModelInvalidate;
+        Function3<Mono<ResponseWithUserLikesAndDislikes<RESPONSE>>, UserDto, Long, Mono<ResponseWithUserLikesAndDislikes<RESPONSE>>> getModelByIdWithUserLikesAndDislikesPersist;
+
+        public TitleBodyServiceCacheHandler() {
+            super();
+            this.reactToModelInvalidate = (mono, id, type, userId) -> mono;
+            this.getModelByIdWithUserLikesAndDislikesPersist = (mono, authUser, id) -> mono;
+        }
     }
 
 

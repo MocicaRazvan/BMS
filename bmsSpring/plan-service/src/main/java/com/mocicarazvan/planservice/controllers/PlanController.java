@@ -15,6 +15,9 @@ import com.mocicarazvan.planservice.mappers.PlanMapper;
 import com.mocicarazvan.planservice.models.Plan;
 import com.mocicarazvan.planservice.repositories.PlanRepository;
 import com.mocicarazvan.planservice.services.PlanService;
+import com.mocicarazvan.templatemodule.cache.FilteredListCaffeineCache;
+import com.mocicarazvan.templatemodule.cache.FilteredListCaffeineCacheApproveFilterKey;
+import com.mocicarazvan.templatemodule.cache.keys.FilterKeyType;
 import com.mocicarazvan.templatemodule.controllers.ApproveController;
 import com.mocicarazvan.templatemodule.controllers.CountInParentController;
 import com.mocicarazvan.templatemodule.controllers.ValidControllerIds;
@@ -24,6 +27,7 @@ import com.mocicarazvan.templatemodule.hateos.CustomEntityModel;
 import com.mocicarazvan.templatemodule.utils.RequestsUtils;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.util.Pair;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -62,6 +66,7 @@ public class PlanController implements ApproveController<Plan, PlanBody, PlanRes
             @RequestParam(required = false) String title,
             @RequestParam(name = "approved", required = false, defaultValue = "true") boolean approved,
             @Valid @RequestBody PageableBody pageableBody,
+            @RequestParam(name = "admin", required = false, defaultValue = "false") Boolean admin,
             ServerWebExchange exchange
     ) {
         return planService.getModelsWithUser(title, pageableBody, requestsUtils.extractAuthUser(exchange), approved)
@@ -148,7 +153,7 @@ public class PlanController implements ApproveController<Plan, PlanBody, PlanRes
     @ResponseStatus(HttpStatus.OK)
     public Flux<PageableResponse<CustomEntityModel<PlanResponse>>> getModelsByIdIn(@Valid @RequestBody PageableBody pageableBody,
                                                                                    @RequestParam List<Long> ids) {
-        return planService.getModelsByIdIn(ids, pageableBody)
+        return planService.getModelsByIdInPageable(ids, pageableBody)
                 .flatMap(m -> plansReactiveResponseBuilder.toModelPageable(m, PlanController.class));
     }
 
@@ -164,8 +169,9 @@ public class PlanController implements ApproveController<Plan, PlanBody, PlanRes
     @GetMapping("/admin/groupedByMonth")
     @ResponseStatus(HttpStatus.OK)
     public Flux<MonthlyEntityGroup<CustomEntityModel<PlanResponse>>> getModelGroupedByMonth(@RequestParam int month, ServerWebExchange exchange) {
-        return planService.getModelGroupedByMonth(month, requestsUtils.extractAuthUser(exchange))
-                .flatMap(m -> plansReactiveResponseBuilder.toModelMonthlyEntityGroup(m, PlanController.class));
+        return
+                planService.getModelGroupedByMonth(month, requestsUtils.extractAuthUser(exchange))
+                        .flatMap(m -> plansReactiveResponseBuilder.toModelMonthlyEntityGroup(m, PlanController.class));
     }
 
     @Override
@@ -200,8 +206,8 @@ public class PlanController implements ApproveController<Plan, PlanBody, PlanRes
                                                                                        ServerWebExchange exchange) {
         return requestsUtils.getBodyFromJson(body, PlanBody.class, objectMapper)
                 .flatMap(planBody -> planService.createModel(files, planBody, requestsUtils.extractAuthUser(exchange), clientId)
-                        .flatMap(m -> plansReactiveResponseBuilder.toModel(m, PlanController.class))
-                        .map(ResponseEntity::ok));
+                        .flatMap(m -> plansReactiveResponseBuilder.toModel(m, PlanController.class)))
+                .map(ResponseEntity::ok);
     }
 
     @Override
@@ -212,9 +218,11 @@ public class PlanController implements ApproveController<Plan, PlanBody, PlanRes
                                                                                        @PathVariable Long id,
                                                                                        ServerWebExchange exchange) {
         return requestsUtils.getBodyFromJson(body, PlanBody.class, objectMapper)
-                .flatMap(planBody -> planService.updateModelWithImages(files, id, planBody, requestsUtils.extractAuthUser(exchange), clientId)
-                        .flatMap(m -> plansReactiveResponseBuilder.toModel(m, PlanController.class))
-                        .map(ResponseEntity::ok));
+                .flatMap(planBody -> planService.updateModelWithImagesGetOriginalApproved(files, id, planBody, requestsUtils.extractAuthUser(exchange), clientId)
+                        .flatMap(m -> plansReactiveResponseBuilder.toModelWithPair(m, PlanController.class))
+                        .map(Pair::getFirst)
+                )
+                .map(ResponseEntity::ok);
     }
 
     @Override
@@ -239,10 +247,11 @@ public class PlanController implements ApproveController<Plan, PlanBody, PlanRes
             @RequestParam(required = false) DietType type,
             @RequestParam(required = false) ObjectiveType objective,
             @RequestParam(required = false) List<Long> excludeIds,
+            @RequestParam(name = "admin", required = false, defaultValue = "false") Boolean admin,
             @Valid @RequestBody PageableBody pageableBody,
             ServerWebExchange exchange
     ) {
-        return planService.getPlansFiltered(title, approved, display, type, objective, excludeIds, pageableBody, requestsUtils.extractAuthUser(exchange))
+        return planService.getPlansFiltered(title, approved, display, type, objective, excludeIds, pageableBody, requestsUtils.extractAuthUser(exchange), admin)
                 .flatMap(m -> plansReactiveResponseBuilder.toModelPageable(m, PlanController.class));
     }
 
@@ -256,10 +265,12 @@ public class PlanController implements ApproveController<Plan, PlanBody, PlanRes
             @RequestParam(required = false) List<Long> excludeIds,
             @RequestParam(required = false) ObjectiveType objective,
             @Valid @RequestBody PageableBody pageableBody,
+            @RequestParam(name = "admin", required = false, defaultValue = "false") Boolean admin,
             ServerWebExchange exchange
     ) {
-        return planService.getPlansFilteredWithCount(title, approved, display, type, objective, excludeIds, pageableBody, requestsUtils.extractAuthUser(exchange))
+        return planService.getPlansFilteredWithCount(title, approved, display, type, objective, excludeIds, pageableBody, requestsUtils.extractAuthUser(exchange), admin)
                 .flatMap(m -> plansReactiveResponseBuilder.toModelWithEntityCountPageable(m, PlanController.class));
+
     }
 
     @PatchMapping(value = "/filtered/withUser", produces = {MediaType.APPLICATION_NDJSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
@@ -272,10 +283,12 @@ public class PlanController implements ApproveController<Plan, PlanBody, PlanRes
             @RequestParam(required = false) List<Long> excludeIds,
             @RequestParam(required = false) ObjectiveType objective,
             @Valid @RequestBody PageableBody pageableBody,
+            @RequestParam(name = "admin", required = false, defaultValue = "false") Boolean admin,
             ServerWebExchange exchange
     ) {
-        return planService.getPlansFilteredWithUser(title, approved, display, type, objective, excludeIds, pageableBody, requestsUtils.extractAuthUser(exchange))
+        return planService.getPlansFilteredWithUser(title, approved, display, type, objective, excludeIds, pageableBody, requestsUtils.extractAuthUser(exchange), admin)
                 .flatMap(m -> plansReactiveResponseBuilder.toModelWithUserPageable(m, PlanController.class));
+
     }
 
     @PatchMapping(value = "/trainer/filtered/{trainerId}", produces = {MediaType.APPLICATION_NDJSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
@@ -311,11 +324,12 @@ public class PlanController implements ApproveController<Plan, PlanBody, PlanRes
     }
 
     @PatchMapping(value = "/alterDisplay/{id}", produces = {MediaType.APPLICATION_NDJSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
-    public Mono<CustomEntityModel<PlanResponse>> toggleDisplay(@PathVariable Long id,
-                                                               @RequestParam boolean display,
-                                                               ServerWebExchange exchange) {
+    public Mono<ResponseEntity<CustomEntityModel<PlanResponse>>> toggleDisplay(@PathVariable Long id,
+                                                                               @RequestParam boolean display,
+                                                                               ServerWebExchange exchange) {
         return planService.toggleDisplay(id, display, requestsUtils.extractAuthUser(exchange))
-                .flatMap(m -> plansReactiveResponseBuilder.toModel(m, PlanController.class));
+                .flatMap(m -> plansReactiveResponseBuilder.toModel(m, PlanController.class))
+                .map(ResponseEntity::ok);
     }
 
     @GetMapping(value = "/days/full/{id}", produces = {MediaType.APPLICATION_NDJSON_VALUE, MediaType.APPLICATION_JSON_VALUE})

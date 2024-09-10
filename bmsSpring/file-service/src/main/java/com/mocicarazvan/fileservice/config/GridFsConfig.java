@@ -22,6 +22,8 @@ public class GridFsConfig {
 
     @Value("${spring.data.mongodb.uri}")
     private String mongoUri;
+    @Value("${spring.data.mongodb.chunk-size}")
+    private int chunkSize;
 
     @Value("${spring.data.mongodb.connection-pool.max-pool-size}")
     private int maxPoolSize;
@@ -48,7 +50,8 @@ public class GridFsConfig {
 
     @Bean
     public GridFSBucket gridFSBucket(MongoDatabase reactiveMongoDatabase) {
-        return GridFSBuckets.create(reactiveMongoDatabase);
+        return GridFSBuckets.create(reactiveMongoDatabase)
+                .withChunkSizeBytes(chunkSize);
     }
 
     @Bean

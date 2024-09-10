@@ -180,11 +180,10 @@ export function TotalAmountCountOrders({
               axisLine={false}
               tickMargin={8}
               // tickCount={8}
-              tickFormatter={(tick) =>
-                showTotalAmount ? tick : Number.isInteger(tick) ? tick : ""
-              }
+              tickFormatter={(tick) => (Number.isInteger(tick) ? tick : "")}
               interval={"preserveStartEnd"}
               domain={[0, "dataMax"]}
+              allowDecimals={false}
             />
             <ChartTooltip
               cursor={false}
@@ -237,9 +236,7 @@ export function TotalAmountCountOrders({
               axisLine={false}
               tickMargin={8}
               // tickCount={8}
-              tickFormatter={(tick) =>
-                showTotalAmount ? tick : Number.isInteger(tick) ? tick : ""
-              }
+              tickFormatter={(tick) => (Number.isInteger(tick) ? tick : "")}
               interval={"preserveStartEnd"}
               domain={[
                 0,
@@ -247,6 +244,7 @@ export function TotalAmountCountOrders({
                   ? "auto"
                   : max[showCount ? "count" : "totalAmount"],
               ]}
+              allowDecimals={false}
             />
             <ChartTooltip
               cursor={false}
@@ -464,6 +462,7 @@ export function TotalAmountOrdersSingleBarChart({
               tickMargin={8}
               tickCount={8}
               domain={[0, "dataMax"]}
+              allowDecimals={false}
             />
             <ChartTooltip
               cursor={false}

@@ -29,13 +29,13 @@ public interface PlanService
         extends ApprovedService<Plan, PlanBody, PlanResponse, PlanRepository, PlanMapper>
         , CountInParentService, ValidIds<Plan, PlanRepository, PlanResponse> {
 
-    Flux<PageableResponse<ResponseWithUserDto<PlanResponse>>> getPlansFilteredWithUser(String title, Boolean approved, Boolean display, DietType type, ObjectiveType objective, List<Long> excludeIds, PageableBody pageableBody, String userId);
+    Flux<PageableResponse<ResponseWithUserDto<PlanResponse>>> getPlansFilteredWithUser(String title, Boolean approved, Boolean display, DietType type, ObjectiveType objective, List<Long> excludeIds, PageableBody pageableBody, String userId, Boolean admin);
 
     Flux<PageableResponse<ResponseWithUserDto<PlanResponse>>> getPlansFilteredWithUserByIds(String title, DietType type, ObjectiveType objective, PageableBody pageableBody, List<Long> ids, String userId);
 
-    Flux<PageableResponse<PlanResponse>> getPlansFiltered(String title, Boolean approved, Boolean display, DietType type, ObjectiveType objective, List<Long> excludeIds, PageableBody pageableBody, String userId);
+    Flux<PageableResponse<PlanResponse>> getPlansFiltered(String title, Boolean approved, Boolean display, DietType type, ObjectiveType objective, List<Long> excludeIds, PageableBody pageableBody, String userId, Boolean admin);
 
-    Flux<PageableResponse<ResponseWithEntityCount<PlanResponse>>> getPlansFilteredWithCount(String title, Boolean approved, Boolean display, DietType type, ObjectiveType objective, List<Long> excludeIds, PageableBody pageableBody, String userId);
+    Flux<PageableResponse<ResponseWithEntityCount<PlanResponse>>> getPlansFilteredWithCount(String title, Boolean approved, Boolean display, DietType type, ObjectiveType objective, List<Long> excludeIds, PageableBody pageableBody, String userId, Boolean admin);
 
     Flux<PageableResponse<PlanResponse>> getPlansFilteredTrainer(String title, Boolean approved, Boolean display, DietType type, ObjectiveType objective, PageableBody pageableBody, String userId, Long trainerId);
 

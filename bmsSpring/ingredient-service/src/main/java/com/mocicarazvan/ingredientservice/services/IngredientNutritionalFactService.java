@@ -22,9 +22,9 @@ public interface IngredientNutritionalFactService {
 
     Mono<IngredientNutritionalFactResponse> updateModel(Long id, IngredientNutritionalFactBody body, String userId);
 
-    Flux<PageableResponse<IngredientNutritionalFactResponse>> getAllModelsFiltered(String name, Boolean display, DietType type, PageableBody pageableBody, String userId);
+    Flux<PageableResponse<IngredientNutritionalFactResponse>> getAllModelsFiltered(String name, Boolean display, DietType type, PageableBody pageableBody, String userId, Boolean admin);
 
-    Flux<PageableResponse<ResponseWithEntityCount<IngredientNutritionalFactResponse>>> getAllModelsFilteredWithEntityCount(String name, Boolean display, DietType type, PageableBody pageableBody, String userId);
+    Flux<PageableResponse<ResponseWithEntityCount<IngredientNutritionalFactResponse>>> getAllModelsFilteredWithEntityCount(String name, Boolean display, DietType type, PageableBody pageableBody, String userId, Boolean admin);
 
 
     Mono<IngredientNutritionalFactResponse> createModel(IngredientNutritionalFactBody body, String userId);

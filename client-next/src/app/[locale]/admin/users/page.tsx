@@ -75,6 +75,9 @@ export default async function AdminUsersPage({ params: { locale } }: Props) {
               authUser={authUser}
               {...userTableTexts}
               sizeOptions={[10, 20, 30, 40]}
+              extraQueryParams={{
+                admin: "true",
+              }}
             />
           </div>
         </Suspense>

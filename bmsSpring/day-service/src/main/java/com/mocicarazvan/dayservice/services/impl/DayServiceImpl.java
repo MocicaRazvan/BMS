@@ -15,14 +15,23 @@ import com.mocicarazvan.dayservice.repositories.DayRepository;
 import com.mocicarazvan.dayservice.repositories.ExtendedDayRepository;
 import com.mocicarazvan.dayservice.services.DayService;
 import com.mocicarazvan.dayservice.services.MealService;
+import com.mocicarazvan.templatemodule.adapters.CacheBaseFilteredToHandlerAdapter;
+import com.mocicarazvan.templatemodule.cache.FilteredListCaffeineCache;
+import com.mocicarazvan.templatemodule.cache.keys.FilterKeyType;
 import com.mocicarazvan.templatemodule.clients.UserClient;
 import com.mocicarazvan.templatemodule.dtos.PageableBody;
+import com.mocicarazvan.templatemodule.dtos.generic.IdGenerateDto;
 import com.mocicarazvan.templatemodule.dtos.response.*;
 import com.mocicarazvan.templatemodule.exceptions.action.IllegalActionException;
 import com.mocicarazvan.templatemodule.services.impl.TitleBodyServiceImpl;
 import com.mocicarazvan.templatemodule.utils.EntitiesUtils;
 import com.mocicarazvan.templatemodule.utils.PageableUtilsCustom;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
+import org.jooq.lambda.function.Function2;
+import org.jooq.lambda.function.Function7;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.reactive.TransactionalOperator;
 import reactor.core.publisher.Flux;
@@ -42,39 +51,43 @@ public class DayServiceImpl
     private final ExtendedDayRepository extendedDayRepository;
     private final PlanClient planClient;
     private final RecipeClient recipeClient;
+    private final DayServiceCacheHandler dayServiceCacheHandler;
 
 
-    public DayServiceImpl(DayRepository modelRepository, DayMapper modelMapper, PageableUtilsCustom pageableUtils, UserClient userClient, EntitiesUtils entitiesUtils, MealService mealService, TransactionalOperator transactionalOperator, ExtendedDayRepository extendedDayRepository, PlanClient planClient, RecipeClient recipeClient) {
-        super(modelRepository, modelMapper, pageableUtils, userClient, "day", List.of("id", "userId", "type", "title", "createdAt", "updatedAt"), entitiesUtils);
+    public DayServiceImpl(DayRepository modelRepository, DayMapper modelMapper, PageableUtilsCustom pageableUtils, UserClient userClient, EntitiesUtils entitiesUtils, MealService mealService, TransactionalOperator transactionalOperator, ExtendedDayRepository extendedDayRepository, PlanClient planClient, RecipeClient recipeClient, DayServiceCacheHandler dayServiceCacheHandler) {
+        super(modelRepository, modelMapper, pageableUtils, userClient, "day", List.of("id", "userId", "type", "title", "createdAt", "updatedAt"), entitiesUtils, dayServiceCacheHandler);
         this.mealService = mealService;
         this.transactionalOperator = transactionalOperator;
         this.extendedDayRepository = extendedDayRepository;
         this.planClient = planClient;
         this.recipeClient = recipeClient;
+        this.dayServiceCacheHandler = dayServiceCacheHandler;
     }
 
     // todo admin route
     @Override
-    public Flux<PageableResponse<DayResponse>> getDaysFiltered(String title, DayType type, List<Long> excludeIds, PageableBody pageableBody, String userId) {
+    public Flux<PageableResponse<DayResponse>> getDaysFiltered(String title, DayType type, List<Long> excludeIds, PageableBody pageableBody, String userId, Boolean admin) {
         return pageableUtils.isSortingCriteriaValid(pageableBody.getSortingCriteria(), allowedSortingFields)
                 .then(pageableUtils.createPageRequest(pageableBody))
-                .flatMapMany(pr -> pageableUtils.createPageableResponse(
-                        extendedDayRepository.getDaysFiltered(title, type, pr, excludeIds).map(modelMapper::fromModelToResponse),
-                        extendedDayRepository.countDayFiltered(title, type, excludeIds),
-                        pr
-                ));
+                .flatMapMany(pr ->
+                        dayServiceCacheHandler.getDaysFilteredPersist.apply(
+                                pageableUtils.createPageableResponse(
+                                        extendedDayRepository.getDaysFiltered(title, type, pr, excludeIds).map(modelMapper::fromModelToResponse),
+                                        extendedDayRepository.countDayFiltered(title, type, excludeIds),
+                                        pr
+                                ), title, type, excludeIds, pageableBody, userId, admin));
     }
 
     // todo admin route
     @Override
-    public Flux<PageableResponse<ResponseWithUserDto<DayResponse>>> getDaysFilteredWithUser(String title, DayType type, List<Long> excludeIds, PageableBody pageableBody, String userId) {
-        return getDaysFiltered(title, type, excludeIds, pageableBody, userId)
+    public Flux<PageableResponse<ResponseWithUserDto<DayResponse>>> getDaysFilteredWithUser(String title, DayType type, List<Long> excludeIds, PageableBody pageableBody, String userId, Boolean admin) {
+        return getDaysFiltered(title, type, excludeIds, pageableBody, userId, admin)
                 .concatMap(this::getPageableWithUser);
     }
 
     @Override
-    public Flux<PageableResponse<ResponseWithEntityCount<DayResponse>>> getDaysFilteredWithCount(String title, DayType type, List<Long> excludeIds, PageableBody pageableBody, String userId) {
-        return getDaysFiltered(title, type, excludeIds, pageableBody, userId)
+    public Flux<PageableResponse<ResponseWithEntityCount<DayResponse>>> getDaysFilteredWithCount(String title, DayType type, List<Long> excludeIds, PageableBody pageableBody, String userId, Boolean admin) {
+        return getDaysFiltered(title, type, excludeIds, pageableBody, userId, admin)
                 .concatMap(pr -> toResponseWithCount(userId, planClient, pr));
     }
 
@@ -82,11 +95,13 @@ public class DayServiceImpl
     public Flux<PageableResponse<DayResponse>> getDaysFilteredTrainer(String title, DayType type, List<Long> excludeIds, PageableBody pageableBody, String userId, Long trainerId) {
         return pageableUtils.isSortingCriteriaValid(pageableBody.getSortingCriteria(), allowedSortingFields)
                 .then(pageableUtils.createPageRequest(pageableBody))
-                .flatMapMany(pr -> pageableUtils.createPageableResponse(
-                        extendedDayRepository.getDaysFilteredTrainer(title, type, pr, excludeIds, trainerId).map(modelMapper::fromModelToResponse),
-                        extendedDayRepository.countDayFilteredTrainer(title, type, excludeIds, trainerId),
-                        pr
-                ));
+                .flatMapMany(pr ->
+                        dayServiceCacheHandler.getDaysFilteredTrainerPersist.apply(
+                                pageableUtils.createPageableResponse(
+                                        extendedDayRepository.getDaysFilteredTrainer(title, type, pr, excludeIds, trainerId).map(modelMapper::fromModelToResponse),
+                                        extendedDayRepository.countDayFilteredTrainer(title, type, excludeIds, trainerId),
+                                        pr
+                                ), title, type, excludeIds, pageableBody, userId, trainerId));
     }
 
     @Override
@@ -97,7 +112,11 @@ public class DayServiceImpl
 
     @Override
     public Mono<Void> validIds(List<Long> ids) {
-        return this.validIds(ids, modelRepository, modelName);
+        return
+                dayServiceCacheHandler.validIdsPersist.apply(
+                                this.validIds(ids, modelRepository, modelName)
+                                        .thenReturn(true), ids)
+                        .then();
     }
 
     @Override
@@ -108,65 +127,53 @@ public class DayServiceImpl
 //                        .then(Mono.just(day))
 //                        .onErrorResume(e -> deleteModel(day.getId(), userId).then(Mono.error(e)))
 //                );
-        return transactionalOperator.transactional(
-                super.createModel(dayBodyWithMeals, userId)
-                        .flatMap(day ->
-                                Flux.fromIterable(dayBodyWithMeals.getMeals())
-                                        .flatMap(body -> mealService.createModel(MealBody.fromCompose(body, day.getId()), userId))
-                                        .then(Mono.just(day))
-                        )
-                        .onErrorMap(e -> {
-                            log.error("Error creating day with meals", e);
-                            return new IllegalActionException("Recipe ids are invalid at creating");
-                        })
-        );
+        return
+
+                dayServiceCacheHandler.getCreateModelInvalidate().apply(
+                        transactionalOperator.transactional(
+                                super.createModel(dayBodyWithMeals, userId)
+                                        .flatMap(day ->
+                                                Flux.fromIterable(dayBodyWithMeals.getMeals())
+                                                        .flatMap(body -> mealService.createModel(MealBody.fromCompose(body, day.getId()), userId))
+                                                        .then(Mono.just(day))
+                                        )
+                                        .onErrorMap(e -> {
+                                            log.error("Error creating day with meals", e);
+                                            return new IllegalActionException("Recipe ids are invalid at creating");
+                                        })
+                        ), dayBodyWithMeals, userId);
     }
 
     @Override
     public Mono<DayResponse> updateWithMeals(Long id, DayBodyWithMeals dayBodyWithMeals, String userId) {
 
-//        return getModelById(id, userId)
-//                .flatMap(existingDay ->
-//                        super.updateModel(id, dayBodyWithMeals, userId)
-//                                .flatMap(updatedDay -> Flux.fromIterable(dayBodyWithMeals.getMeals())
-//                                        .flatMap(body -> mealService.createModel(MealBody.fromCompose(body, updatedDay.getId()), userId))
-//                                        .then(Mono.just(updatedDay))
-//                                )
-//                                .onErrorResume(e -> super.updateModel(id, DayBody.builder()
-//                                        .type(existingDay.getType())
-//                                        .title(existingDay.getTitle())
-//                                        .body(existingDay.getBody())
-//                                        .build(), userId).then(Mono.error(e)))
-//                );
 
-        return transactionalOperator.transactional(
-                        updateModelWithSuccess(id, userId, day -> mealService.deleteAllByDay(day.getId())
-                                .then(modelMapper.updateModelFromBody(dayBodyWithMeals, day)))
-                                .flatMap(updatedDay ->
-                                        Flux.fromIterable(dayBodyWithMeals.getMeals())
-                                                .flatMap(body -> mealService.createModel(MealBody.fromCompose(body, updatedDay.getId()), userId))
-                                                .then(Mono.just(updatedDay))
-                                )
-                )
-                .onErrorMap(e -> {
-                            log.error("Error updating day with meals", e);
-                            return new IllegalActionException("Recipe ids are invalid at updating");
-                        }
-                );
+        return
+
+                dayServiceCacheHandler.getUpdateModelInvalidate().apply(
+                        transactionalOperator.transactional(
+                                        mealService.getMealsByDay(id, userId)
+                                                .map(MealResponse::getRecipes)
+                                                .flatMap(Flux::fromIterable)
+                                                .collectList()
+                                                .flatMap(recipeIds ->
+                                                        updateModelWithSuccess(id, userId, day -> mealService.deleteAllByDay(day.getId())
+                                                                .then(modelMapper.updateModelFromBody(dayBodyWithMeals, day)))
+                                                                .flatMap(updatedDay ->
+                                                                        Flux.fromIterable(dayBodyWithMeals.getMeals())
+                                                                                .flatMap(body -> mealService.createModelCustomVerify(MealBody.fromCompose(body, updatedDay.getId()), recipeIds, userId))
+                                                                                .then(Mono.just(updatedDay))
+                                                                )
+                                                ))
+                                .onErrorMap(e -> {
+                                            log.error("Error updating day with meals", e);
+                                            return new IllegalActionException("Recipe ids are invalid at updating");
+                                        }
+                                ), id, dayBodyWithMeals, userId);
     }
 
     @Override
     public Mono<ResponseWithUserDtoEntity<RecipeResponse>> getRecipeByIdWithUserInternal(Long id, Long recipeId, String userId) {
-//        return getModel(id)
-//                .thenMany(mealService.getMealsByDayInternal(id, userId))
-//                .map(MealResponse::getRecipes)
-//                .collectList()
-//                .flatMap(recipes -> {
-//                    if (recipes.stream().flatMap(List::stream).noneMatch(r -> r.equals(recipeId))) {
-//                        return Mono.error(new IllegalActionException("Recipe not found in day"));
-//                    }
-//                    return recipeClient.getByIdWithUser(String.valueOf(recipeId), userId);
-//                });
 
         return getModel(id)
                 .then(mealService.existsByDayIdAndRecipeId(id, recipeId))
@@ -191,17 +198,77 @@ public class DayServiceImpl
 
     @Override
     public Mono<EntityCount> countInParent(Long childId) {
-        return modelRepository.countInParent(childId)
-                .map(EntityCount::new);
+        return
+                modelRepository.countInParent(childId)
+                        .collectList()
+                        .map(EntityCount::new);
     }
 
     @Override
     public Flux<DayResponse> getModelsByIds(List<Long> ids) {
-        return modelRepository.findAllByIdIn(ids)
-                .collectMap(Day::getId, modelMapper::fromModelToResponse)
-                .flatMapMany(map -> Flux.fromIterable(ids)
-                        .map(map::get)
-                        .filter(Objects::nonNull)
+        return
+                dayServiceCacheHandler.getModelsByIdsPersist.apply(
+                        modelRepository.findAllByIdIn(ids)
+                                .collectMap(Day::getId, modelMapper::fromModelToResponse)
+                                .flatMapMany(map -> Flux.fromIterable(ids)
+                                        .map(map::get)
+                                        .filter(Objects::nonNull)
+                                ), ids);
+    }
+
+    @EqualsAndHashCode(callSuper = true)
+    @Data
+    @Component
+    public static class DayServiceCacheHandler
+            extends TitleBodyServiceImpl.TitleBodyServiceCacheHandler<Day, DayBody, DayResponse> {
+        private final FilteredListCaffeineCache<FilterKeyType, DayResponse> cacheFilter;
+
+        Function7<Flux<PageableResponse<DayResponse>>, String, DayType, List<Long>, PageableBody, String, Boolean, Flux<PageableResponse<DayResponse>>>
+                getDaysFilteredPersist;
+        Function7<Flux<PageableResponse<DayResponse>>, String, DayType, List<Long>, PageableBody, String, Long, Flux<PageableResponse<DayResponse>>> getDaysFilteredTrainerPersist;
+        Function2<Mono<Boolean>, List<Long>, Mono<Boolean>> validIdsPersist;
+        Function2<Flux<DayResponse>, List<Long>, Flux<DayResponse>> getModelsByIdsPersist;
+
+        public DayServiceCacheHandler(FilteredListCaffeineCache<FilterKeyType, DayResponse> cacheFilter) {
+            super();
+            this.cacheFilter = cacheFilter;
+
+            CacheBaseFilteredToHandlerAdapter.convertToTitleBodyHandler(cacheFilter, this);
+
+            this.getDaysFilteredPersist = (flux, title, type, excludeIds, pageableBody, userId, admin) -> {
+                FilterKeyType.KeyRouteType keyRouteType = Boolean.TRUE.equals(admin) ? FilterKeyType.KeyRouteType.createForAdmin() : FilterKeyType.KeyRouteType.createForPublic();
+                return cacheFilter.getUniqueFluxCache(
+                        EntitiesUtils.getListOfNotNullObjects(title, type, excludeIds, pageableBody, admin),
+                        "getDaysFiltered",
+                        m -> m.getContent().getId(),
+                        keyRouteType,
+                        flux
                 );
+            };
+
+
+            this.getDaysFilteredTrainerPersist = (flux, title, type, excludeIds, pageableBody, userId, trainerId) -> cacheFilter.getUniqueFluxCacheForTrainer(
+                    EntitiesUtils.getListOfNotNullObjects(title, type, excludeIds, pageableBody, trainerId),
+                    trainerId,
+                    "getDaysFilteredTrainer",
+                    m -> m.getContent().getId(),
+                    flux
+            );
+
+            this.validIdsPersist = (mono, ids) -> cacheFilter.getUniqueMonoCacheIdListIndependent(
+                    EntitiesUtils.getListOfNotNullObjects(ids),
+                    "validIdsPersist" + ids,
+                    ids,
+                    mono
+            );
+
+
+            this.getModelsByIdsPersist = (flux, ids) -> cacheFilter.getUniqueFluxCacheIndependent(
+                    EntitiesUtils.getListOfNotNullObjects(ids),
+                    "getModelsByIdsPersist" + ids,
+                    IdGenerateDto::getId,
+                    flux
+            );
+        }
     }
 }

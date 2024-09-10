@@ -136,7 +136,7 @@ export default function DaysTable({
     () => [
       {
         id: dayTableColumnTexts.id,
-        accessorKey: "id",
+        accessorKey: "model.id",
         header: () => (
           <p className="font-bold text-lg text-left">
             {dayTableColumnTexts.id}
@@ -146,7 +146,7 @@ export default function DaysTable({
       },
       {
         id: dayTableColumnTexts.title,
-        accessorKey: "ingredient.title",
+        accessorKey: "model.title",
         header: () => (
           <p className="font-bold text-lg text-left">
             {dayTableColumnTexts.title}
@@ -158,7 +158,7 @@ export default function DaysTable({
       },
       {
         id: dayTableColumnTexts.type,
-        accessorKey: "ingredient.type",
+        accessorKey: "model.type",
         header: () => (
           <p className="font-bold text-lg text-left">
             {dayTableColumnTexts.type}
@@ -172,6 +172,7 @@ export default function DaysTable({
       },
       {
         id: dayTableColumnTexts.count,
+        accessorKey: "count",
         header: () => (
           <p className="font-bold text-lg text-left">
             {dayTableColumnTexts.count}
@@ -185,7 +186,7 @@ export default function DaysTable({
       },
       {
         id: dayTableColumnTexts.userLikes,
-        accessorKey: "userLikes",
+        accessorKey: "model.userLikes",
         header: () => (
           <p className="font-bold text-lg text-left">
             {dayTableColumnTexts.userLikes}
@@ -195,7 +196,7 @@ export default function DaysTable({
       },
       {
         id: dayTableColumnTexts.userDislikes,
-        accessorKey: "userDislikes",
+        accessorKey: "model.userDislikes",
         header: () => (
           <p className="font-bold text-lg text-left">
             {dayTableColumnTexts.userDislikes}
@@ -205,7 +206,7 @@ export default function DaysTable({
       },
       {
         id: dayTableColumnTexts.createdAt,
-        accessorKey: "createdAt",
+        accessorKey: "model.createdAt",
         header: () => (
           <p className="font-bold text-lg text-left">
             {dayTableColumnTexts.createdAt}
@@ -217,7 +218,7 @@ export default function DaysTable({
       },
       {
         id: dayTableColumnTexts.updatedAt,
-        accessorKey: "updatedAt",
+        accessorKey: "model.updatedAt",
         header: () => (
           <p className="font-bold text-lg text-left">
             {dayTableColumnTexts.updatedAt}

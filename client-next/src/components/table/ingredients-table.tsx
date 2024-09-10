@@ -183,7 +183,7 @@ export default function IngredientsTable({
     () => [
       {
         id: ingredientTableColumnTexts.id,
-        accessorKey: "ingredient.id",
+        accessorKey: "model.ingredient.id",
         header: () => (
           <p className="font-bold text-lg text-left">
             {ingredientTableColumnTexts.id}
@@ -193,7 +193,7 @@ export default function IngredientsTable({
       },
       {
         id: ingredientTableColumnTexts.name,
-        accessorKey: "ingredient.name",
+        accessorKey: "model.ingredient.name",
         header: () => (
           <p className="font-bold text-lg text-left">
             {ingredientTableColumnTexts.name}
@@ -205,7 +205,7 @@ export default function IngredientsTable({
       },
       {
         id: ingredientTableColumnTexts.type,
-        accessorKey: "ingredient.type",
+        accessorKey: "model.ingredient.type",
         header: () => (
           <p className="font-bold text-lg text-left">
             {ingredientTableColumnTexts.type}
@@ -240,7 +240,7 @@ export default function IngredientsTable({
       },
       {
         id: ingredientTableColumnTexts.display.header,
-        accessorKey: "ingredient.display",
+        accessorKey: "model.ingredient.display",
         header: () => (
           <p className="font-bold text-lg text-left">
             {ingredientTableColumnTexts.display.header}
@@ -260,6 +260,7 @@ export default function IngredientsTable({
       },
       {
         id: ingredientTableColumnTexts.count,
+        accessorKey: "count",
         header: () => (
           <p className="font-bold text-lg text-left">
             {ingredientTableColumnTexts.count}
@@ -273,7 +274,7 @@ export default function IngredientsTable({
       },
       {
         id: ingredientTableColumnTexts.fat,
-        accessorKey: "nutritionalFact.fat",
+        accessorKey: "model.nutritionalFact.fat",
         header: () => (
           <p className="font-bold text-lg text-left">
             {ingredientTableColumnTexts.fat}
@@ -283,7 +284,7 @@ export default function IngredientsTable({
       },
       {
         id: ingredientTableColumnTexts.saturatedFat,
-        accessorKey: "nutritionalFact.saturatedFat",
+        accessorKey: "model.nutritionalFact.saturatedFat",
         header: () => (
           <p className="font-bold text-lg text-left">
             {ingredientTableColumnTexts.saturatedFat}
@@ -295,7 +296,7 @@ export default function IngredientsTable({
       },
       {
         id: ingredientTableColumnTexts.carbohydrates,
-        accessorKey: "nutritionalFact.carbohydrates",
+        accessorKey: "model.nutritionalFact.carbohydrates",
         header: () => (
           <div className="max-w-16 text-nowrap overflow-x-hidden">
             <p className="font-bold text-lg text-left">
@@ -310,7 +311,7 @@ export default function IngredientsTable({
 
       {
         id: ingredientTableColumnTexts.sugar,
-        accessorKey: "nutritionalFact.sugar",
+        accessorKey: "model.nutritionalFact.sugar",
         header: () => (
           <p className="font-bold text-lg text-left">
             {ingredientTableColumnTexts.sugar}
@@ -320,7 +321,7 @@ export default function IngredientsTable({
       },
       {
         id: ingredientTableColumnTexts.protein,
-        accessorKey: "nutritionalFact.protein",
+        accessorKey: "model.nutritionalFact.protein",
         header: () => (
           <p className="font-bold text-lg text-left">
             {ingredientTableColumnTexts.protein}
@@ -331,7 +332,7 @@ export default function IngredientsTable({
 
       {
         id: ingredientTableColumnTexts.salt,
-        accessorKey: "nutritionalFact.salt",
+        accessorKey: "model.nutritionalFact.salt",
         header: () => (
           <p className="font-bold text-lg text-left">
             {ingredientTableColumnTexts.salt}
@@ -350,7 +351,7 @@ export default function IngredientsTable({
       },
       {
         id: ingredientTableColumnTexts.unit,
-        accessorKey: "nutritionalFact.unit",
+        accessorKey: "model.nutritionalFact.unit",
         header: () => (
           <p className="font-bold text-lg text-left">
             {ingredientTableColumnTexts.unit}
@@ -544,6 +545,7 @@ export default function IngredientsTable({
           data={data || []}
           pageInfo={pageInfo}
           setPageInfo={setPageInfo}
+          hidePDFColumnIds={[ingredientTableColumnTexts.calories]}
           {...dataTableTexts}
           searchInputProps={{
             value: filter.name || "",

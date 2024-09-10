@@ -44,6 +44,8 @@ export default function PostComments({
   edited,
   editHeader,
   commentAccordionTexts,
+  deleteCommentDialog,
+  editCommentLabel,
 }: Props) {
   const pageSize = 10;
   const [comments, setComments] = useState<
@@ -222,6 +224,8 @@ export default function PostComments({
           editHeader={editHeader}
           englishError={commentAccordionTexts.englishError}
           toxicError={commentAccordionTexts.toxicError}
+          deleteCommentDialog={deleteCommentDialog}
+          editCommentLabel={editCommentLabel}
         />
       )}
       {!isFinished && <Loader />}

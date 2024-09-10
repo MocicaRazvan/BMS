@@ -42,7 +42,7 @@ public class OrderWithAddressController {
                                                                                             @RequestParam(required = false) String country,
                                                                                             @Valid @RequestBody PageableBody pageableBody,
                                                                                             ServerWebExchange exchange) {
-        return orderWithAddressService.getModelsFiltered(city, state, country, pageableBody, requestsUtils.extractAuthUser(exchange))
+        return orderWithAddressService.getModelsFilteredAdmin(city, state, country, pageableBody, requestsUtils.extractAuthUser(exchange))
                 .flatMap(m -> orderWithAddressReactiveResponseBuilder.toModelPageable(m, OrderWithAddressController.class));
     }
 

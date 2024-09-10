@@ -3,8 +3,11 @@ package com.mocicarazvan.kanbanservice.conifg;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.mocicarazvan.kanbanservice.dtos.columns.KanbanColumnResponse;
 import com.mocicarazvan.kanbanservice.dtos.tasks.KanbanTaskResponse;
 import com.mocicarazvan.kanbanservice.jackson.GroupedKanbanTaskDeserializer;
+import com.mocicarazvan.templatemodule.cache.FilteredListCaffeineCacheChildFilterKey;
+import com.mocicarazvan.templatemodule.cache.impl.FilteredListCaffeineCacheChildFilterKeyImpl;
 import com.mocicarazvan.templatemodule.clients.FileClient;
 import com.mocicarazvan.templatemodule.clients.UserClient;
 import com.mocicarazvan.templatemodule.jackson.CustomObjectMapper;
@@ -74,6 +77,16 @@ public class BeanConfig {
     @Bean
     public Validator localValidatorFactoryBean() {
         return new LocalValidatorFactoryBean();
+    }
+
+    @Bean
+    public FilteredListCaffeineCacheChildFilterKey<KanbanTaskResponse> kanbanTaskResponseFilteredListCaffeineCacheChildFilterKey() {
+        return new FilteredListCaffeineCacheChildFilterKeyImpl<>("kanbanTaskResponse");
+    }
+
+    @Bean
+    public FilteredListCaffeineCacheChildFilterKey<KanbanColumnResponse> kanbanColumnResponseFilteredListCaffeineCacheChildFilterKey() {
+        return new FilteredListCaffeineCacheChildFilterKeyImpl<>("kanbanColumnResponse");
     }
 
 }

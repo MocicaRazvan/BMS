@@ -3,7 +3,6 @@ package com.mocicarazvan.dayservice.controllers;
 import com.mocicarazvan.dayservice.dtos.day.DayBody;
 import com.mocicarazvan.dayservice.dtos.day.DayBodyWithMeals;
 import com.mocicarazvan.dayservice.dtos.day.DayResponse;
-import com.mocicarazvan.dayservice.dtos.meal.ComposeMealBody;
 import com.mocicarazvan.dayservice.dtos.recipe.RecipeResponse;
 import com.mocicarazvan.dayservice.enums.DayType;
 import com.mocicarazvan.dayservice.hateos.day.DayReactiveResponseBuilder;
@@ -103,6 +102,7 @@ public class DayController implements TitleBodyController<
                 .map(ResponseEntity::ok);
     }
 
+    // todo stergi cache by dayid in meal
     @PostMapping(value = "/update/meals/{id}", produces = {MediaType.APPLICATION_NDJSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
     public Mono<ResponseEntity<CustomEntityModel<DayResponse>>> updateWithMeals(@Valid @RequestBody DayBodyWithMeals dayBodyWithMeals, @PathVariable Long id, ServerWebExchange exchange) {
         return dayService.updateWithMeals(id, dayBodyWithMeals, requestsUtils.extractAuthUser(exchange))
@@ -114,7 +114,7 @@ public class DayController implements TitleBodyController<
     @PatchMapping(value = "/byIds", produces = {MediaType.APPLICATION_NDJSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
     @ResponseStatus(HttpStatus.OK)
     public Flux<PageableResponse<CustomEntityModel<DayResponse>>> getModelsByIdIn(@Valid @RequestBody PageableBody pageableBody, @RequestParam List<Long> ids) {
-        return dayService.getModelsByIdIn(ids, pageableBody)
+        return dayService.getModelsByIdInPageable(ids, pageableBody)
                 .flatMap(m -> dayReactiveResponseBuilder.toModelPageable(m, DayController.class));
     }
 
@@ -159,8 +159,9 @@ public class DayController implements TitleBodyController<
                                                                                   @RequestParam(required = false) DayType type,
                                                                                   @RequestParam(required = false) List<Long> excludeIds,
                                                                                   @Valid @RequestBody PageableBody pageableBody,
+                                                                                  @RequestParam(name = "admin", required = false, defaultValue = "false") Boolean admin,
                                                                                   ServerWebExchange exchange) {
-        return dayService.getDaysFiltered(title, type, excludeIds, pageableBody, requestsUtils.extractAuthUser(exchange))
+        return dayService.getDaysFiltered(title, type, excludeIds, pageableBody, requestsUtils.extractAuthUser(exchange), admin)
                 .flatMap(m -> dayReactiveResponseBuilder.toModelPageable(m, DayController.class));
     }
 
@@ -170,8 +171,9 @@ public class DayController implements TitleBodyController<
                                                                                                   @RequestParam(required = false) DayType type,
                                                                                                   @RequestParam(required = false) List<Long> excludeIds,
                                                                                                   @Valid @RequestBody PageableBody pageableBody,
+                                                                                                  @RequestParam(name = "admin", required = false, defaultValue = "false") Boolean admin,
                                                                                                   ServerWebExchange exchange) {
-        return dayService.getDaysFilteredWithUser(title, type, excludeIds, pageableBody, requestsUtils.extractAuthUser(exchange))
+        return dayService.getDaysFilteredWithUser(title, type, excludeIds, pageableBody, requestsUtils.extractAuthUser(exchange), admin)
                 .flatMap(m -> dayReactiveResponseBuilder.toModelWithUserPageable(m, DayController.class));
     }
 
@@ -181,8 +183,9 @@ public class DayController implements TitleBodyController<
                                                                                                                     @RequestParam(required = false) DayType type,
                                                                                                                     @RequestParam(required = false) List<Long> excludeIds,
                                                                                                                     @Valid @RequestBody PageableBody pageableBody,
+                                                                                                                    @RequestParam(name = "admin", required = false, defaultValue = "false") Boolean admin,
                                                                                                                     ServerWebExchange exchange) {
-        return dayService.getDaysFilteredWithCount(title, type, excludeIds, pageableBody, requestsUtils.extractAuthUser(exchange))
+        return dayService.getDaysFilteredWithCount(title, type, excludeIds, pageableBody, requestsUtils.extractAuthUser(exchange), admin)
                 .flatMap(m -> dayReactiveResponseBuilder.toModelWithEntityCountPageable(m, DayController.class));
     }
 

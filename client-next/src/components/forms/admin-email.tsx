@@ -234,8 +234,11 @@ export default function AdminEmail({
               <p className="font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-lg capitalize">
                 {preview}
               </p>
-              <div className="bg-slate-50 w-fit mx-auto p-6 rounded">
-                <div dangerouslySetInnerHTML={{ __html: renderContent }} />
+              <div className="bg-slate-50 w-fit max-w-3xl mx-auto px-6 py-4 rounded ">
+                <div
+                  className="prose max-w-none [&_ol]:list-decimal [&_ul]:list-disc text-wrap"
+                  dangerouslySetInnerHTML={{ __html: renderContent }}
+                />
               </div>
             </div>
             <ErrorMessage message={error} show={!!errorMsg} />

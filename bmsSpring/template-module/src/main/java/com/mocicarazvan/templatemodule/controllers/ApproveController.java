@@ -37,6 +37,7 @@ public interface ApproveController<MODEL extends Approve, BODY extends TitleBody
     Flux<PageableResponse<ResponseWithUserDtoEntity<RESPONSE>>> getModelsWithUser(@RequestParam(required = false) String title,
                                                                                   @RequestParam(required = false) boolean approved,
                                                                                   @Valid @RequestBody PageableBody pageableBody,
+                                                                                  @RequestParam(name = "admin", required = false, defaultValue = "false") Boolean admin,
                                                                                   ServerWebExchange exchange);
 
     @PatchMapping("/trainer/{trainerId}")

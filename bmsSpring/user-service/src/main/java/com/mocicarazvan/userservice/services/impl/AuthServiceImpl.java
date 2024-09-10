@@ -3,6 +3,7 @@ package com.mocicarazvan.userservice.services.impl;
 import com.mocicarazvan.templatemodule.enums.AuthProvider;
 import com.mocicarazvan.templatemodule.enums.Role;
 import com.mocicarazvan.templatemodule.exceptions.common.UsernameNotFoundException;
+import com.mocicarazvan.userservice.cache.FilteredCacheListCaffeineRoleUserFilterKey;
 import com.mocicarazvan.userservice.dtos.auth.requests.CallbackBody;
 import com.mocicarazvan.userservice.dtos.auth.requests.LoginRequest;
 import com.mocicarazvan.userservice.dtos.auth.requests.RegisterRequest;
@@ -33,8 +34,10 @@ public class AuthServiceImpl extends BasicUserProvider implements AuthService {
     private final GoogleUserService googleUserService;
 
 
-    public AuthServiceImpl(UserRepository userRepository, JwtTokenRepository jwtTokenRepository, JwtUtils jwtUtil, UserMapper userMapper, WebClient.Builder webClient, PasswordEncoder passwordEncoder, GithubUserService githubUserService, GoogleUserService googleUserService) {
-        super(userRepository, jwtTokenRepository, jwtUtil, userMapper);
+    public AuthServiceImpl(UserRepository userRepository, JwtTokenRepository jwtTokenRepository, JwtUtils jwtUtil, UserMapper userMapper, WebClient.Builder webClient, PasswordEncoder passwordEncoder, GithubUserService githubUserService, GoogleUserService googleUserService
+            , FilteredCacheListCaffeineRoleUserFilterKey cacheFilter
+    ) {
+        super(userRepository, jwtTokenRepository, jwtUtil, userMapper, cacheFilter);
         this.webClient = webClient;
         this.passwordEncoder = passwordEncoder;
         this.githubUserService = githubUserService;
@@ -51,7 +54,9 @@ public class AuthServiceImpl extends BasicUserProvider implements AuthService {
                     }
                     return userRepository.save(userMapper.fromRegisterRequestToUserCustom(registerRequest))
                             .flatMap(u -> generateResponse(u, AuthProvider.LOCAL));
-                });
+                })
+                .flatMap(cacheHandler::createUserInvalidate)
+                ;
     }
 
     @Override

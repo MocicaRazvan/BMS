@@ -4,6 +4,7 @@ package com.mocicarazvan.templatemodule.hateos.controller;
 import com.mocicarazvan.templatemodule.dtos.response.*;
 import com.mocicarazvan.templatemodule.hateos.CustomEntityModel;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.util.Pair;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.server.reactive.WebFluxLinkBuilder;
 import reactor.core.publisher.Flux;
@@ -28,6 +29,11 @@ public class ReactiveResponseBuilder<RESPONSE, C> {
                 .doOnNext(model::add)
                 .thenReturn(model);
 
+    }
+
+    public <P> Mono<Pair<CustomEntityModel<RESPONSE>, P>> toModelWithPair(Pair<RESPONSE, P> response, Class<C> clazz) {
+        return toModel(response.getFirst(), clazz)
+                .map(model -> Pair.of(model, response.getSecond()));
     }
 
     public Mono<ResponseWithUserDtoEntity<RESPONSE>> toModelWithUser(ResponseWithUserDto<RESPONSE> response, Class<C> clazz) {

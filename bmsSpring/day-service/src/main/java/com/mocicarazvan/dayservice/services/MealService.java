@@ -33,4 +33,6 @@ public interface MealService extends ManyToOneUserService<
     Mono<Boolean> existsByDayIdAndRecipeId(Long dayId, Long recipeId);
 
     Mono<DietType> determineMostRestrictiveDietTypeByDay(List<Long> dayIds, String userId);
+
+    Mono<MealResponse> createModelCustomVerify(MealBody mealBody, List<Long> idsToNotVerify, String userId);
 }

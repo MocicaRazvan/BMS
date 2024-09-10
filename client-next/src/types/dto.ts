@@ -468,4 +468,9 @@ export interface BoughtNotificationBody
   extends NotificationTemplateBody<BoughtNotificationType> {}
 
 export interface BoughtNotificationResponse
-  extends NotificationTemplateResponse<PlanResponse, BoughtNotificationType> {}
+  extends NotificationTemplateResponse<
+    PlanResponse & {
+      appId: number;
+    },
+    BoughtNotificationType
+  > {}

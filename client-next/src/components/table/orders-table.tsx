@@ -308,6 +308,17 @@ export default function OrdersTable({
           data={data || []}
           pageInfo={pageInfo}
           setPageInfo={setPageInfo}
+          specialPDFColumns={[
+            {
+              key: "address",
+              handler: (value: object) => {
+                if ("country" in value && "city" in value && "state" in value) {
+                  return `${value["country"]} ${value["city"]} ${value["state"]}`;
+                }
+                return "";
+              },
+            },
+          ]}
           {...dataTableTexts}
           searchInputProps={{
             value: filter[searchKey] || "",

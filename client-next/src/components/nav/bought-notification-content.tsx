@@ -44,6 +44,9 @@ export default function BoughtNotificationContent({
           // }
           if (stompClient && stompClient?.connected) {
             deleteCallback({ stompClient, payload: item });
+            if (item?.reference?.appId) {
+              router.push(`/trainer/plans/single/${item.reference.appId}`);
+            }
           }
         }}
       >

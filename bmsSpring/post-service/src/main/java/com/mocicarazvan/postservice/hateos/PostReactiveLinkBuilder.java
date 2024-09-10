@@ -19,8 +19,8 @@ public class PostReactiveLinkBuilder extends ApproveReactiveLinkBuilder<Post, Po
     public List<WebFluxLinkBuilder.WebFluxLink> createModelLinks(PostResponse postResponse, Class<PostController> c) {
         List<WebFluxLinkBuilder.WebFluxLink> links = super.createModelLinks(postResponse, c);
 
-        links.add(WebFluxLinkBuilder.linkTo(WebFluxLinkBuilder.methodOn(c).getPostsFilteredWithUser(null, null, null, null, null, null)).withRel("getPostsFilteredWithUser"));
-        links.add(WebFluxLinkBuilder.linkTo(WebFluxLinkBuilder.methodOn(c).getPostsFiltered(null, null, null, null, null, null)).withRel("getPostsFiltered"));
+        links.add(WebFluxLinkBuilder.linkTo(WebFluxLinkBuilder.methodOn(c).getPostsFilteredWithUser(null, null, null, null, null, null, null)).withRel("getPostsFilteredWithUser"));
+        links.add(WebFluxLinkBuilder.linkTo(WebFluxLinkBuilder.methodOn(c).getPostsFiltered(null, null, null, null, null, null, null)).withRel("getPostsFiltered"));
 
         return links;
     }

@@ -2,6 +2,13 @@ package com.mocicarazvan.dayservice.config;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mocicarazvan.dayservice.dtos.day.DayResponse;
+import com.mocicarazvan.dayservice.dtos.meal.MealResponse;
+import com.mocicarazvan.templatemodule.cache.FilteredListCaffeineCache;
+import com.mocicarazvan.templatemodule.cache.FilteredListCaffeineCacheChildFilterKey;
+import com.mocicarazvan.templatemodule.cache.impl.FilteredListCaffeineCacheBaseImpl;
+import com.mocicarazvan.templatemodule.cache.impl.FilteredListCaffeineCacheChildFilterKeyImpl;
+import com.mocicarazvan.templatemodule.cache.keys.FilterKeyType;
 import com.mocicarazvan.templatemodule.clients.FileClient;
 import com.mocicarazvan.templatemodule.clients.UserClient;
 import com.mocicarazvan.templatemodule.jackson.CustomObjectMapper;
@@ -99,5 +106,15 @@ public class BeanConfig {
     @Bean
     public TransactionalOperator transactionalOperator(ReactiveTransactionManager txManager) {
         return TransactionalOperator.create(txManager);
+    }
+
+    @Bean
+    public FilteredListCaffeineCache<FilterKeyType, DayResponse> dayResponseFilteredListCaffeineCache() {
+        return new FilteredListCaffeineCacheBaseImpl<>("dayService");
+    }
+
+    @Bean
+    public FilteredListCaffeineCacheChildFilterKey<MealResponse> filteredListCaffeineCacheChildFilterKey() {
+        return new FilteredListCaffeineCacheChildFilterKeyImpl<>("mealService");
     }
 }

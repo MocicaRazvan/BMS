@@ -78,9 +78,10 @@ public class IngredientNutritionalFactController {
             @RequestParam(required = false) Boolean display,
             @RequestParam(required = false) DietType type,
             @Valid @RequestBody PageableBody pageableBody,
+            @RequestParam(name = "admin", required = false, defaultValue = "false") Boolean admin,
             ServerWebExchange exchange
     ) {
-        return ingredientNutritionalFactService.getAllModelsFiltered(name, display, type, pageableBody, requestsUtils.extractAuthUser(exchange))
+        return ingredientNutritionalFactService.getAllModelsFiltered(name, display, type, pageableBody, requestsUtils.extractAuthUser(exchange), admin)
                 .flatMap(pr -> ingredientNutritionalValueResponseBuilder.toModelPageable(pr, IngredientNutritionalFactController.class));
     }
 
@@ -91,9 +92,10 @@ public class IngredientNutritionalFactController {
             @RequestParam(required = false) Boolean display,
             @RequestParam(required = false) DietType type,
             @Valid @RequestBody PageableBody pageableBody,
+            @RequestParam(name = "admin", required = false, defaultValue = "false") Boolean admin,
             ServerWebExchange exchange
     ) {
-        return ingredientNutritionalFactService.getAllModelsFilteredWithEntityCount(name, display, type, pageableBody, requestsUtils.extractAuthUser(exchange))
+        return ingredientNutritionalFactService.getAllModelsFilteredWithEntityCount(name, display, type, pageableBody, requestsUtils.extractAuthUser(exchange), admin)
                 .flatMap(pr -> ingredientNutritionalValueResponseBuilder.toModelWithEntityCountPageable(pr, IngredientNutritionalFactController.class));
     }
 

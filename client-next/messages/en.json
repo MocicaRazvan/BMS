@@ -446,7 +446,9 @@
         "editMeal": "Edit Meal",
         "removeMeal": "Remove Meal",
         "mealType": "The meal will be for: ",
-        "dayDietType": "The day will be for: "
+        "dayDietType": "The day will be for: ",
+        "areMealsCompletedButNotSubmitted": "There are some meals that are completed but not submitted, if you submit the form they will be lost",
+        "continueBtn": "Continue"
       }
     },
     "nav": {
@@ -623,7 +625,9 @@
         "newest": "Newest",
         "oldest": "Oldest",
         "edited": "Edited",
-        "editHeader": "Edit Comment"
+        "editHeader": "Edit Comment",
+        "deleteCommentDialog": "This action cannot be undone. This will delete the comment and it will be lost forever.",
+        "editCommentLabel": "Start typing to edit"
       },
       "CommentAccordionTexts": {
         "englishError": "The comment must be in English",

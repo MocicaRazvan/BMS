@@ -76,6 +76,9 @@ export default async function AdminRecipesPage({ params: { locale } }: Props) {
               authUser={authUser}
               sizeOptions={[10, 20, 30, 40]}
               mainDashboard={true}
+              extraQueryParams={{
+                admin: "true",
+              }}
             />
           </div>
         </Suspense>

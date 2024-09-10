@@ -19,17 +19,17 @@ public interface RecipeRepository extends ApprovedRepository<Recipe>, CountInPar
 
 
     @Query("""
-                select count(*) from recipe r
+                select distinct  r.id from recipe r
                 join ingredient_quantity i on r.id = i.recipe_id
                 where i.ingredient_id = :childId
             """)
-    Mono<Long> countInParent(Long childId);
+    Flux<Long> countInParent(Long childId);
 
     @Query(""" 
-                            select count(*) from recipe r 
+                            select distinct  r.id from recipe r 
                             where r.id in (:ids) and r.approved = true
             """)
-    Mono<Long> countByIds(List<Long> ids);
+    Flux<Long> countByIds(List<Long> ids);
 
 
     @Query("""

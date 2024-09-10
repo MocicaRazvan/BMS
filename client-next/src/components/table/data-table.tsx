@@ -41,7 +41,6 @@ import {
   DataTablePagination,
   DataTablePaginationTexts,
 } from "./data-table-pagination";
-import Loader from "@/components/ui/spinner";
 import SearchInput, { SearchInputProps } from "@/components/forms/input-serach";
 import RadioSort, {
   RadioSortProps,
@@ -51,15 +50,11 @@ import { mkConfig, generateCsv, download } from "export-to-csv";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { Download } from "lucide-react";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { motion } from "framer-motion";
 import { Skeleton } from "@/components/ui/skeleton";
-import { cn } from "@/lib/utils";
+import { cn, fromStringOfDotToObjectValue } from "@/lib/utils";
+import { format, parseISO } from "date-fns";
+import { useFormatter } from "next-intl";
 
 export interface TableFilter {
   key: string;
@@ -86,6 +81,11 @@ interface DataTableProps<TData, TValue> extends DataTableTexts {
   radioSortProps: Omit<RadioSortProps, "noSort">;
   extraCriteria?: ReactNode;
   sizeOptions?: number[];
+  hidePDFColumnIds?: string[];
+  specialPDFColumns?: {
+    key: string;
+    handler: (value: object) => string;
+  }[];
 }
 
 const MotionTableRow = motion(TableRow);
@@ -106,7 +106,11 @@ export function DataTable<TData extends Record<string, any>, TValue>({
   exportLabel,
   sizeOptions,
   fileName,
+  hidePDFColumnIds = [],
+  specialPDFColumns = [],
 }: DataTableProps<TData, TValue>) {
+  const formatIntl = useFormatter();
+
   const csvConfig = mkConfig({
     fieldSeparator: ",",
     filename: `${fileName}-${new Date().toISOString()}`,
@@ -121,9 +125,9 @@ export function DataTable<TData extends Record<string, any>, TValue>({
             Object.entries(original).reduce(
               (acc, [key, value]) => ({
                 ...acc,
-                [key]: Array.isArray(value) ? value.join(", ") : value,
+                [key]: Array.isArray(value) ? value.join(", ") : `${value}`,
               }),
-              {} as Record<string, any>,
+              {} as Record<string, string>,
             ),
           ),
         ),
@@ -134,24 +138,108 @@ export function DataTable<TData extends Record<string, any>, TValue>({
 
   const exportPdf = useCallback(
     (rows: Row<TData>[]) => {
-      const doc = new jsPDF();
-      const tableColumnHeaders = columns.reduce((acc, cur) => {
-        if (cur.id) {
-          acc.push(cur.id as string);
-        } else if ("accessorKey" in cur) {
-          acc.push(cur.accessorKey as string);
-        }
-        return acc;
-      }, [] as string[]);
+      const doc = new jsPDF({
+        orientation: "landscape",
+      });
+      const tableColumnHeaders = columns
+        .filter((c) =>
+          table
+            .getAllColumns()
+            .filter((column) => column.getIsVisible())
+            .map((column) => column.id)
+            .includes(c?.id || ""),
+        )
+        .reduce(
+          (acc, cur) => {
+            console.log("cur", cur);
+            const obj = {
+              id: "",
+              accessorKey: "",
+            };
+
+            if (cur.id) {
+              if (cur.id === "actions" || hidePDFColumnIds.includes(cur.id)) {
+                return acc;
+              }
+              obj.id = cur.id;
+            }
+            if ("accessorKey" in cur) {
+              obj.accessorKey = String(cur.accessorKey);
+            }
+            acc.push(obj);
+            return acc;
+          },
+          [] as {
+            id: string;
+            accessorKey: string;
+          }[],
+        );
+
+      const lastLengthColumns = ["userLikes", "userDislikes"];
+      const dateColumns = ["createdAt", "updatedAt"];
+      const numberColumns = ["price", "total"];
       const tableRows = rows.map(({ original }) =>
         tableColumnHeaders.map((h) => {
-          const value = original[h as keyof TData];
-          return Array.isArray(value) ? value.join(", ") : value;
+          const {
+            isLastLengthColumn,
+            isDateColumn,
+            isNumberColumn,
+            isSpecial,
+          } = h.accessorKey.split(".").reduce(
+            (acc, key) => {
+              if (
+                lastLengthColumns.includes(key) ||
+                key.toLowerCase().includes("ids")
+              ) {
+                acc.isLastLengthColumn = true;
+              }
+              if (dateColumns.includes(key)) {
+                acc.isDateColumn = true;
+              }
+              if (numberColumns.includes(key)) {
+                acc.isNumberColumn = true;
+              }
+
+              if (specialPDFColumns.find((s) => s.key === h.accessorKey)) {
+                acc.isSpecial = true;
+              }
+
+              return acc;
+            },
+            {
+              isLastLengthColumn: false,
+              isDateColumn: false,
+              isNumberColumn: false,
+              isSpecial: false,
+            },
+          );
+          let value = fromStringOfDotToObjectValue(
+            h.accessorKey,
+            original,
+            isLastLengthColumn,
+          );
+          if (Array.isArray(value)) {
+            value = value.join(", ");
+          } else if (isDateColumn) {
+            value = format(parseISO(value), "dd/MM/yyyy");
+          } else if (isNumberColumn) {
+            value = formatIntl.number(value, {
+              style: "currency",
+              currency: "EUR",
+              maximumFractionDigits: 2,
+            });
+          } else if (typeof value === "object" && isSpecial) {
+            value = specialPDFColumns
+              .find((s) => s.key === h.accessorKey)
+              ?.handler(value);
+          }
+          return value;
         }),
       );
       autoTable(doc, {
-        head: [tableColumnHeaders],
+        head: [tableColumnHeaders.map((h) => h.id)],
         body: tableRows,
+        useCss: true,
         theme: "striped",
         headStyles: { fillColor: [22, 160, 133] },
         bodyStyles: { fillColor: [244, 244, 244] },
@@ -300,7 +388,7 @@ export function DataTable<TData extends Record<string, any>, TValue>({
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     transition={{
                       duration: 0.1,
-                      delay: i * 0.11,
+                      // delay: i * 0.11,
                       ease: "linear",
                     }}
                     whileHover={{

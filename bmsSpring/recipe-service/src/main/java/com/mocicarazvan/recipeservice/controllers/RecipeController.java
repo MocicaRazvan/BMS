@@ -11,16 +11,21 @@ import com.mocicarazvan.recipeservice.models.Recipe;
 import com.mocicarazvan.recipeservice.repositories.RecipeRepository;
 import com.mocicarazvan.recipeservice.services.IngredientQuantityService;
 import com.mocicarazvan.recipeservice.services.RecipeService;
+import com.mocicarazvan.templatemodule.cache.FilteredListCaffeineCache;
+import com.mocicarazvan.templatemodule.cache.FilteredListCaffeineCacheApproveFilterKey;
+import com.mocicarazvan.templatemodule.cache.keys.FilterKeyType;
 import com.mocicarazvan.templatemodule.controllers.ApproveController;
 import com.mocicarazvan.templatemodule.controllers.CountInParentController;
 import com.mocicarazvan.templatemodule.controllers.ValidControllerIds;
 import com.mocicarazvan.templatemodule.dtos.PageableBody;
+import com.mocicarazvan.templatemodule.dtos.generic.IdGenerateDto;
 import com.mocicarazvan.templatemodule.dtos.response.*;
 import com.mocicarazvan.templatemodule.hateos.CustomEntityModel;
 import com.mocicarazvan.templatemodule.utils.RequestsUtils;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.util.Pair;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -58,15 +63,18 @@ public class RecipeController implements ApproveController<Recipe, RecipeBody, R
                 .flatMap(m -> recipeReactiveResponseBuilder.toModelPageable(m, RecipeController.class));
     }
 
+
     @Override
     @PatchMapping("/withUser")
     @ResponseStatus(HttpStatus.OK)
     public Flux<PageableResponse<ResponseWithUserDtoEntity<RecipeResponse>>> getModelsWithUser(@RequestParam(required = false) String title,
                                                                                                @RequestParam(name = "approved", required = false, defaultValue = "true") boolean approved,
                                                                                                @Valid @RequestBody PageableBody pageableBody,
+                                                                                               @RequestParam(name = "admin", required = false, defaultValue = "false") Boolean admin,
                                                                                                ServerWebExchange exchange) {
-        return recipeService.getModelsWithUser(title, pageableBody, requestsUtils.extractAuthUser(exchange), approved)
-                .concatMap(m -> recipeReactiveResponseBuilder.toModelWithUserPageable(m, RecipeController.class));
+        return
+                recipeService.getModelsWithUser(title, pageableBody, requestsUtils.extractAuthUser(exchange), approved)
+                        .concatMap(m -> recipeReactiveResponseBuilder.toModelWithUserPageable(m, RecipeController.class));
     }
 
     @Override
@@ -77,8 +85,10 @@ public class RecipeController implements ApproveController<Recipe, RecipeBody, R
                                                                                       @Valid @RequestBody PageableBody pageableBody,
                                                                                       @PathVariable Long trainerId,
                                                                                       ServerWebExchange exchange) {
-        return recipeService.getModelsTrainer(title, trainerId, pageableBody, requestsUtils.extractAuthUser(exchange), approved)
-                .flatMap(m -> recipeReactiveResponseBuilder.toModelPageable(m, RecipeController.class));
+        return
+                recipeService.getModelsTrainer(title, trainerId, pageableBody, requestsUtils.extractAuthUser(exchange), approved)
+                        .flatMap(m -> recipeReactiveResponseBuilder.toModelPageable(m, RecipeController.class)
+                        );
     }
 
     @Override
@@ -112,18 +122,20 @@ public class RecipeController implements ApproveController<Recipe, RecipeBody, R
     @Override
     @GetMapping(value = "/{id}", produces = {MediaType.APPLICATION_NDJSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
     public Mono<ResponseEntity<CustomEntityModel<RecipeResponse>>> getModelById(@PathVariable Long id, ServerWebExchange exchange) {
-        return recipeService.getModelById(id, requestsUtils.extractAuthUser(exchange))
-                .flatMap(m -> recipeReactiveResponseBuilder.toModel(m, RecipeController.class))
-                .map(ResponseEntity::ok);
+        return
+                recipeService.getModelById(id, requestsUtils.extractAuthUser(exchange))
+                        .flatMap(m -> recipeReactiveResponseBuilder.toModel(m, RecipeController.class)
+                        ).map(ResponseEntity::ok);
     }
 
 
     @Override
     @GetMapping(value = "/withUser/{id}", produces = {MediaType.APPLICATION_NDJSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
     public Mono<ResponseEntity<ResponseWithUserDtoEntity<RecipeResponse>>> getModelByIdWithUser(@PathVariable Long id, ServerWebExchange exchange) {
-        return recipeService.getModelByIdWithUser(id, requestsUtils.extractAuthUser(exchange))
-                .flatMap(m -> recipeReactiveResponseBuilder.toModelWithUser(m, RecipeController.class))
-                .map(ResponseEntity::ok);
+        return
+                recipeService.getModelByIdWithUser(id, requestsUtils.extractAuthUser(exchange))
+                        .flatMap(m -> recipeReactiveResponseBuilder.toModelWithUser(m, RecipeController.class)
+                        ).map(ResponseEntity::ok);
     }
 
     @Override
@@ -139,7 +151,7 @@ public class RecipeController implements ApproveController<Recipe, RecipeBody, R
     @ResponseStatus(HttpStatus.OK)
     public Flux<PageableResponse<CustomEntityModel<RecipeResponse>>> getModelsByIdIn(@Valid @RequestBody PageableBody pageableBody,
                                                                                      @RequestParam List<Long> ids) {
-        return recipeService.getModelsByIdIn(ids, pageableBody)
+        return recipeService.getModelsByIdInPageable(ids, pageableBody)
                 .flatMap(m -> recipeReactiveResponseBuilder.toModelPageable(m, RecipeController.class));
     }
 
@@ -155,8 +167,9 @@ public class RecipeController implements ApproveController<Recipe, RecipeBody, R
     @GetMapping("/admin/groupedByMonth")
     @ResponseStatus(HttpStatus.OK)
     public Flux<MonthlyEntityGroup<CustomEntityModel<RecipeResponse>>> getModelGroupedByMonth(@RequestParam int month, ServerWebExchange exchange) {
-        return recipeService.getModelGroupedByMonth(month, requestsUtils.extractAuthUser(exchange))
-                .flatMap(m -> recipeReactiveResponseBuilder.toModelMonthlyEntityGroup(m, RecipeController.class));
+        return
+                recipeService.getModelGroupedByMonth(month, requestsUtils.extractAuthUser(exchange))
+                        .flatMap(m -> recipeReactiveResponseBuilder.toModelMonthlyEntityGroup(m, RecipeController.class));
     }
 
     @Override
@@ -204,8 +217,8 @@ public class RecipeController implements ApproveController<Recipe, RecipeBody, R
                                                                                          ServerWebExchange exchange) {
         return requestsUtils.getBodyFromJson(body, RecipeBody.class, objectMapper)
                 .flatMap(recipeBody -> recipeService.updateModelWithImages(files, id, recipeBody, requestsUtils.extractAuthUser(exchange), clientId)
-                        .flatMap(m -> recipeReactiveResponseBuilder.toModel(m, RecipeController.class))
-                        .map(ResponseEntity::ok));
+                        .flatMap(m -> recipeReactiveResponseBuilder.toModel(m, RecipeController.class)))
+                .map(ResponseEntity::ok);
     }
 
     @Override
@@ -221,8 +234,9 @@ public class RecipeController implements ApproveController<Recipe, RecipeBody, R
                                                                                           @RequestParam(required = false) Boolean approved,
                                                                                           @RequestParam(required = false) DietType type,
                                                                                           @Valid @RequestBody PageableBody pageableBody,
+                                                                                          @RequestParam(name = "admin", required = false, defaultValue = "false") Boolean admin,
                                                                                           ServerWebExchange exchange) {
-        return recipeService.getRecipesFiltered(title, type, pageableBody, requestsUtils.extractAuthUser(exchange), approved)
+        return recipeService.getRecipesFiltered(title, type, pageableBody, requestsUtils.extractAuthUser(exchange), approved, admin)
                 .flatMap(m -> recipeReactiveResponseBuilder.toModelPageable(m, RecipeController.class));
     }
 
@@ -232,8 +246,10 @@ public class RecipeController implements ApproveController<Recipe, RecipeBody, R
                                                                                                                             @RequestParam(required = false) Boolean approved,
                                                                                                                             @RequestParam(required = false) DietType type,
                                                                                                                             @Valid @RequestBody PageableBody pageableBody,
+                                                                                                                            @RequestParam(name = "admin", required = false, defaultValue = "false") Boolean admin,
                                                                                                                             ServerWebExchange exchange) {
-        return recipeService.getRecipesFilteredWithCount(title, type, pageableBody, requestsUtils.extractAuthUser(exchange), approved)
+
+        return recipeService.getRecipesFilteredWithCount(title, type, pageableBody, requestsUtils.extractAuthUser(exchange), approved, admin)
                 .flatMap(m -> recipeReactiveResponseBuilder.toModelWithEntityCountPageable(m, RecipeController.class));
     }
 
@@ -243,8 +259,9 @@ public class RecipeController implements ApproveController<Recipe, RecipeBody, R
                                                                                                           @RequestParam(required = false) Boolean approved,
                                                                                                           @RequestParam(required = false) DietType type,
                                                                                                           @Valid @RequestBody PageableBody pageableBody,
+                                                                                                          @RequestParam(name = "admin", required = false, defaultValue = "false") Boolean admin,
                                                                                                           ServerWebExchange exchange) {
-        return recipeService.getRecipesFilteredWithUser(title, type, pageableBody, requestsUtils.extractAuthUser(exchange), approved)
+        return recipeService.getRecipesFilteredWithUser(title, type, pageableBody, requestsUtils.extractAuthUser(exchange), approved, admin)
                 .flatMap(m -> recipeReactiveResponseBuilder.toModelWithUserPageable(m, RecipeController.class));
     }
 
@@ -270,8 +287,10 @@ public class RecipeController implements ApproveController<Recipe, RecipeBody, R
             @PathVariable Long id,
             ServerWebExchange exchange) {
         return requestsUtils.getBodyFromJson(body, RecipeBody.class, objectMapper)
-                .flatMap(recipeBody -> recipeService.updateModelWithVideos(images, videos, recipeBody, id, requestsUtils.extractAuthUser(exchange), clientId))
-                .flatMap(m -> recipeReactiveResponseBuilder.toModel(m, RecipeController.class))
+                .flatMap(recipeBody -> recipeService.updateModelWithVideosGetOriginalApproved(images, videos, recipeBody, id, requestsUtils.extractAuthUser(exchange), clientId))
+                .flatMap(m -> recipeReactiveResponseBuilder.toModelWithPair(m, RecipeController.class)
+                        .map(Pair::getFirst)
+                )
                 .map(ResponseEntity::ok);
     }
 
@@ -295,8 +314,9 @@ public class RecipeController implements ApproveController<Recipe, RecipeBody, R
                                                                                                                                 @PathVariable Long trainerId,
                                                                                                                                 @Valid @RequestBody PageableBody pageableBody,
                                                                                                                                 ServerWebExchange exchange) {
-        return recipeService.getRecipesFilteredTrainerWithCount(title, type, trainerId, pageableBody, requestsUtils.extractAuthUser(exchange), approved)
-                .flatMap(m -> recipeReactiveResponseBuilder.toModelWithEntityCountPageable(m, RecipeController.class));
+        return
+                recipeService.getRecipesFilteredTrainerWithCount(title, type, trainerId, pageableBody, requestsUtils.extractAuthUser(exchange), approved)
+                        .flatMap(m -> recipeReactiveResponseBuilder.toModelWithEntityCountPageable(m, RecipeController.class));
     }
 
     @GetMapping(value = "/ingredients/{id}", produces = {MediaType.APPLICATION_NDJSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
@@ -325,15 +345,18 @@ public class RecipeController implements ApproveController<Recipe, RecipeBody, R
 
     @Override
     @GetMapping(value = "/internal/getByIds", produces = {MediaType.APPLICATION_NDJSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
+    @ResponseStatus(HttpStatus.OK)
     public Flux<RecipeResponse> getByIds(@RequestParam List<Long> ids) {
-        return recipeService.getModelsByIds(ids);
+        return
+                recipeService.getModelsByIds(ids);
     }
 
 
     @GetMapping(value = "/internal/withUser/{id}", produces = {MediaType.APPLICATION_NDJSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
     public Mono<ResponseEntity<ResponseWithUserDtoEntity<RecipeResponse>>> getModelByIdWithUserInternal(@PathVariable Long id) {
-        return recipeService.getModelByIdWithUserInternal(id)
-                .flatMap(m -> recipeReactiveResponseBuilder.toModelWithUser(m, RecipeController.class))
-                .map(ResponseEntity::ok);
+        return
+                recipeService.getModelByIdWithUserInternal(id)
+                        .flatMap(m -> recipeReactiveResponseBuilder.toModelWithUser(m, RecipeController.class)
+                        ).map(ResponseEntity::ok);
     }
 }

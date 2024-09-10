@@ -30,7 +30,8 @@ public interface UserController {
 
     Flux<PageableResponse<CustomEntityModel<UserDto>>> getAllUsers(
             @Valid @RequestBody PageableBody pageableBody, @RequestParam(required = false) String email,
-            @RequestParam(required = false) Set<Role> roles, @RequestParam(required = false) Set<AuthProvider> providers, @RequestParam(required = false) Boolean emailVerified
+            @RequestParam(required = false) Set<Role> roles, @RequestParam(required = false) Set<AuthProvider> providers, @RequestParam(required = false) Boolean emailVerified,
+            @RequestParam(name = "admin", required = false, defaultValue = "false") Boolean admin
 
     );
 

@@ -15,17 +15,17 @@ public interface DayRepository extends TitleBodyRepository<Day>, CountInParent, 
 
 
     @Query("""
-                select  count(*) from day d
+                select  distinct d.id from day d
                 join meal m on m.day_id = d.id
                 where :childId = any (m.recipes)
             """)
-    Mono<Long> countInParent(Long childId);
+    Flux<Long> countInParent(Long childId);
 
     @Query("""
-                select count(*) from day d
+                select distinct d.id from day d
                 where d.id in (:ids)
             """)
-    Mono<Long> countByIds(List<Long> ids);
+    Flux<Long> countByIds(List<Long> ids);
 
     @Query("""
             SELECT * FROM day

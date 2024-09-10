@@ -412,6 +412,8 @@ export async function getDayFromTexts(type: FormType): Promise<DayFromTexts> {
     removeMeal: t("removeMeal"),
     mealType: t("mealType"),
     dayDietType: t("dayDietType"),
+    areMealsCompletedButNotSubmitted: t("areMealsCompletedButNotSubmitted"),
+    continueBtn: t("continueBtn"),
   };
 }
 

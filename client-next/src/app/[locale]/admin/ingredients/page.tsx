@@ -92,6 +92,9 @@ export default async function AdminIngredientsPage({
               authUser={authUser}
               sizeOptions={[10, 15, 20, 50]}
               forWhom={"admin"}
+              extraQueryParams={{
+                admin: "true",
+              }}
             />
           </div>
         </Suspense>

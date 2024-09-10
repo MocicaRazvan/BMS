@@ -1,6 +1,7 @@
 package com.mocicarazvan.userservice.services.impl;
 
 import com.mocicarazvan.templatemodule.enums.AuthProvider;
+import com.mocicarazvan.userservice.cache.FilteredCacheListCaffeineRoleUserFilterKey;
 import com.mocicarazvan.userservice.dtos.auth.response.AuthResponse;
 import com.mocicarazvan.userservice.jwt.JwtUtils;
 import com.mocicarazvan.userservice.mappers.UserMapper;
@@ -21,13 +22,16 @@ public class BasicUserProvider implements HandleUserProvider {
     protected final JwtTokenRepository jwtTokenRepository;
     protected final JwtUtils jwtUtil;
     protected final UserMapper userMapper;
+    protected final FilteredCacheListCaffeineRoleUserFilterKey cacheHandler;
 
     public Mono<AuthResponse> saveOrUpdateUserProvider(AuthProvider provider, UserCustom user) {
         return userRepository.findByEmail(user.getEmail())
                 .log()
                 .flatMap(u -> generateResponse(u, u.getProvider()))
                 .switchIfEmpty(userRepository.save(user)
-                        .flatMap(u -> generateResponse(u, provider)));
+                        .flatMap(u -> generateResponse(u, provider)))
+                .flatMap(cacheHandler::createUserInvalidate)
+                ;
     }
 
     public Mono<AuthResponse> generateResponse(UserCustom user, AuthProvider authProvider) {

@@ -445,7 +445,9 @@
         "editMeal": "Editați rețeta",
         "removeMeal": "Eliminați rețeta",
         "mealType": "Masa va fi pentru: ",
-        "dayDietType": "Ziua va fi pentru: "
+        "dayDietType": "Ziua va fi pentru: ",
+        "areMealsCompletedButNotSubmitted": "Sunt mese completate care nu sunt adăugate, continuați iar ele vor fi ignorate",
+        "continueBtn": "Continuați"
       }
     },
     "nav": {
@@ -623,7 +625,9 @@
         "newest": "Cele mai noi",
         "oldest": "Cele mai vechi",
         "edited": "Editat",
-        "editHeader": "Editează comentariul"
+        "editHeader": "Editează comentariul",
+        "deleteCommentDialog": "Această acțiune nu poate fi anulată. Comentariul va fi pierdut pentru totdeauna.",
+        "editCommentLabel": "Începeți să scrieți pentru a edita"
       },
       "CommentAccordionTexts": {
         "englishError": "Comentariul trebuie să fie scris în engleză",

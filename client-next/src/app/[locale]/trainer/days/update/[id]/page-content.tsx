@@ -113,9 +113,6 @@ export default function UpdateDayPageContent({
     return navigateToNotFound();
   }
 
-  console.log("UPD day", day);
-  console.log("UPD meals", meals);
-
   const dayResponse = day[0].content;
   const ownerReturn = checkOwner(authUser, dayResponse, navigateToNotFound);
 

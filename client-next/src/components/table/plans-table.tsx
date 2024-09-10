@@ -208,7 +208,7 @@ export default function PlansTable({
     () => [
       {
         id: planTableColumnsTexts.id,
-        accessorKey: "ingredient.id",
+        accessorKey: "model.id",
         header: () => (
           <p className="font-bold text-lg text-left">
             {planTableColumnsTexts.id}
@@ -218,7 +218,7 @@ export default function PlansTable({
       },
       {
         id: planTableColumnsTexts.title,
-        accessorKey: "ingredient.title",
+        accessorKey: "model.title",
         header: () => (
           <p className="font-bold text-lg text-left">
             {planTableColumnsTexts.title}
@@ -230,7 +230,7 @@ export default function PlansTable({
       },
       {
         id: planTableColumnsTexts.type,
-        accessorKey: "ingredient.type",
+        accessorKey: "model.type",
         header: () => (
           <p className="font-bold text-lg text-left">
             {planTableColumnsTexts.type}
@@ -265,7 +265,7 @@ export default function PlansTable({
       },
       {
         id: planTableColumnsTexts.objective,
-        accessorKey: "objective",
+        accessorKey: "model.objective",
         header: () => (
           <p className="font-bold text-lg text-left">
             {planTableColumnsTexts.objective}
@@ -279,7 +279,7 @@ export default function PlansTable({
       },
       {
         id: planTableColumnsTexts.display.header,
-        accessorKey: "ingredient.display",
+        accessorKey: "model.display",
         header: () => (
           <p className="font-bold text-lg text-left">
             {planTableColumnsTexts.display.header}
@@ -297,6 +297,7 @@ export default function PlansTable({
       },
       {
         id: planTableColumnsTexts.count,
+        accessorKey: "count",
         header: () => (
           <p className="font-bold text-lg text-left">
             {planTableColumnsTexts.count}
@@ -310,6 +311,7 @@ export default function PlansTable({
       },
       {
         id: planTableColumnsTexts.price,
+        accessorKey: "model.price",
         header: () => (
           <p className="font-bold text-lg text-left">
             {planTableColumnsTexts.price}
@@ -329,7 +331,7 @@ export default function PlansTable({
       },
       {
         id: planTableColumnsTexts.userLikes,
-        accessorKey: "userLikes",
+        accessorKey: "model.userLikes",
         header: () => (
           <p className="font-bold text-lg text-left">
             {planTableColumnsTexts.userLikes}
@@ -339,7 +341,7 @@ export default function PlansTable({
       },
       {
         id: planTableColumnsTexts.userDislikes,
-        accessorKey: "userDislikes",
+        accessorKey: "model.userDislikes",
         header: () => (
           <p className="font-bold text-lg text-left">
             {planTableColumnsTexts.userDislikes}
@@ -349,7 +351,7 @@ export default function PlansTable({
       },
       {
         id: planTableColumnsTexts.createdAt,
-        accessorKey: "createdAt",
+        accessorKey: "model.createdAt",
         header: () => (
           <p className="font-bold text-lg text-left">
             {planTableColumnsTexts.createdAt}
@@ -361,7 +363,7 @@ export default function PlansTable({
       },
       {
         id: planTableColumnsTexts.updatedAt,
-        accessorKey: "updatedAt",
+        accessorKey: "model.updatedAt",
         header: () => (
           <p className="font-bold text-lg text-left">
             {planTableColumnsTexts.updatedAt}
@@ -373,7 +375,7 @@ export default function PlansTable({
       },
       {
         id: planTableColumnsTexts.approved.header,
-        accessorKey: "approved",
+        accessorKey: "model.approved",
         header: () => (
           <div className="font-bold text-lg text-left">
             {planTableColumnsTexts.approved.header}

@@ -44,7 +44,7 @@ public class UserDtoAssembler implements ReactiveRepresentationModelAssembler<Us
                                                 .page(0)
                                                 .size(10)
                                                 .sortingCriteria(Map.of("email", "asc"))
-                                                .build(), "raz", Set.of(Role.ROLE_USER, Role.ROLE_TRAINER), Set.of(AuthProvider.GOOGLE), true))
+                                                .build(), "raz", Set.of(Role.ROLE_USER, Role.ROLE_TRAINER), Set.of(AuthProvider.GOOGLE), true, false))
                                 .withRel(IanaLinkRelations.COLLECTION)
                                 .toMono()
                                 .doOnNext(model::add).then(Mono.just(model)))

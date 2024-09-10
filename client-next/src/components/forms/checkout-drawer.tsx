@@ -28,7 +28,7 @@ import {
 } from "@/types/dto";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { motion } from "framer-motion";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 
 import {
@@ -97,6 +97,12 @@ export default function CheckoutDrawer({
     },
   });
 
+  useEffect(() => {
+    if (!isDrawerOpen) {
+      form.reset();
+    }
+  }, [isDrawerOpen]);
+
   const onSubmit = useCallback(
     async ({ userConfirmedPrice }: CheckoutSchemaType) => {
       console.log(userConfirmedPrice);
@@ -118,6 +124,7 @@ export default function CheckoutDrawer({
           console.log(messages[0]);
           window.location.href = messages[0].url;
           clearCartForUser();
+          form.reset();
         }
       } catch (e) {
         console.log(e);

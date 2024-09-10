@@ -24,7 +24,14 @@ import {
 } from "@/types/forms";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Form } from "@/components/ui/form";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { TitleBodyForm, TitleBodyTexts } from "@/components/forms/title-body";
 import ErrorMessage from "@/components/forms/error-message";
 import ButtonSubmit, {
@@ -34,6 +41,7 @@ import useLoadingErrorState from "@/hoooks/useLoadingErrorState";
 import { fetchStream } from "@/hoooks/fetchStream";
 import { getToxicity } from "@/actions/toxcity";
 import DOMPurify from "dompurify";
+import Editor from "@/components/editor/editor";
 
 export interface BaseSingleCommentProps {
   deleteCommentCallback: (commentId: number) => void;
@@ -45,6 +53,8 @@ export interface BaseSingleCommentProps {
   updateCallback: (id: number, data: TitleBodyType, updatedAt: string) => void;
   edited: string;
   editHeader: string;
+  deleteCommentDialog: string;
+  editCommentLabel: string;
 }
 
 interface Props extends WithUser, BaseSingleCommentProps {
@@ -74,6 +84,8 @@ export const SingleComment = memo<Props>(
     edited,
     toxicError,
     englishError,
+    deleteCommentDialog,
+    editCommentLabel,
   }) => {
     const schema = useMemo(
       () => getTitleBodySchema(titleBodySchemaTexts),
@@ -159,7 +171,7 @@ export const SingleComment = memo<Props>(
         <div className="flex-col items-center">
           <div className="flex w-full items-center justify-between px-2">
             <div className="flex items-center justify-start gap-4">
-              <h3 className="font-bold text-lg">{content.title}</h3>
+              {/*<h3 className="font-bold text-lg">{content.title}</h3>*/}
               <LikesDislikes
                 react={react(content.id)}
                 likes={content.userLikes || []}
@@ -188,7 +200,8 @@ export const SingleComment = memo<Props>(
                   callBack={() => deleteCommentCallback(content.id)}
                   token={authUser.token ?? ""}
                   comment={content}
-                  title={content.title}
+                  title={deleteCommentDialog}
+                  // title={content.title}
                 />
               )}
             </div>
@@ -200,7 +213,7 @@ export const SingleComment = memo<Props>(
             {`${authorText} ${email}`}
           </Link>
 
-          <div className="mt-5 px-5">
+          <div className="my-5 px-5">
             <ProseText html={content.body} />
           </div>
           {parseInt(authUser.id ?? "") === userId && (
@@ -219,12 +232,34 @@ export const SingleComment = memo<Props>(
                       onSubmit={form.handleSubmit(onSubmit)}
                       className="space-y-8 w-full px-10 pt-1 lg:space-y-12"
                     >
-                      <TitleBodyForm<TitleBodyType>
-                        control={form.control}
-                        titleBodyTexts={titleBodyTexts}
-                        hideTitle={true}
-                      />
+                      {/*<TitleBodyForm<TitleBodyType>*/}
+                      {/*  control={form.control}*/}
+                      {/*  titleBodyTexts={{*/}
+                      {/*    ...titleBodyTexts,*/}
+                      {/*    body: editCommentLabel,*/}
+                      {/*  }}*/}
+                      {/*  hideTitle={true}*/}
+                      {/*/>*/}
 
+                      <FormField
+                        control={form.control}
+                        name={"body"}
+                        render={({ field }) => (
+                          <FormItem className="space-y-0">
+                            <FormLabel>{editCommentLabel}</FormLabel>
+                            <FormControl>
+                              {/* <Textarea placeholder={bodyPlaceholder} {...field} />
+                               */}
+                              <Editor
+                                descritpion={field.value as string}
+                                onChange={field.onChange}
+                                placeholder={titleBodyTexts.bodyPlaceholder}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
                       <ErrorMessage message={errorText} show={!!errorMsg} />
                       <ButtonSubmit
                         isLoading={isLoading}

@@ -8,14 +8,25 @@ import com.mocicarazvan.templatemodule.repositories.ManyToOneUserRepository;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.Collections;
 import java.util.List;
 
 public interface ValidIds<M extends ManyToOneUser, R extends ManyToOneUserRepository<M> & CountIds, RESP extends WithUserDto> {
 
     //    Mono<Void> validIds(List<Long> ids);
     default Mono<Void> validIds(List<Long> ids, R modelRepository, String name) {
-        return modelRepository.countByIds(ids)
-                .map(count -> count == ids.size())
+        return modelRepository.countByIds(
+                        ids.stream().distinct().toList()
+                )
+                .collectList()
+                .map(cIds -> {
+                    if (cIds.size() != ids.size()) {
+                        return false;
+                    }
+                    Collections.sort(ids);
+                    Collections.sort(cIds);
+                    return ids.equals(cIds);
+                })
                 .filter(Boolean::booleanValue)
                 .switchIfEmpty(Mono.error(new IllegalActionException(name + " " + ids.toString() + " are not valid")))
                 .log()

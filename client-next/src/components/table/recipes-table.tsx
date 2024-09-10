@@ -167,7 +167,7 @@ export default function RecipeTable({
     () => [
       {
         id: recipeTableColumnsTexts.id,
-        accessorKey: "id",
+        accessorKey: "model.id",
         header: () => (
           <p className="font-bold text-lg text-left">
             {recipeTableColumnsTexts.id}
@@ -177,7 +177,7 @@ export default function RecipeTable({
       },
       {
         id: recipeTableColumnsTexts.title,
-        accessorKey: "title",
+        accessorKey: "model.title",
         header: () => (
           <p className="font-bold text-lg text-left">
             {recipeTableColumnsTexts.title}
@@ -189,7 +189,7 @@ export default function RecipeTable({
       },
       {
         id: recipeTableColumnsTexts.type,
-        accessorKey: "type",
+        accessorKey: "model.type",
         header: () => (
           <p className="font-bold text-lg text-left">
             {recipeTableColumnsTexts.type}
@@ -224,6 +224,7 @@ export default function RecipeTable({
       },
       {
         id: recipeTableColumnsTexts.count,
+        accessorKey: "count",
         header: () => (
           <p className="font-bold text-lg text-left">
             {recipeTableColumnsTexts.count}
@@ -237,7 +238,7 @@ export default function RecipeTable({
       },
       {
         id: recipeTableColumnsTexts.userLikes,
-        accessorKey: "userLikes",
+        accessorKey: "model.userLikes",
         header: () => (
           <p className="font-bold text-lg text-left">
             {recipeTableColumnsTexts.userLikes}
@@ -247,7 +248,7 @@ export default function RecipeTable({
       },
       {
         id: recipeTableColumnsTexts.userDislikes,
-        accessorKey: "userDislikes",
+        accessorKey: "model.userDislikes",
         header: () => (
           <p className="font-bold text-lg text-left">
             {recipeTableColumnsTexts.userDislikes}
@@ -257,7 +258,7 @@ export default function RecipeTable({
       },
       {
         id: recipeTableColumnsTexts.createdAt,
-        accessorKey: "createdAt",
+        accessorKey: "model.createdAt",
         header: () => (
           <p className="font-bold text-lg text-left">
             {recipeTableColumnsTexts.createdAt}
@@ -269,7 +270,7 @@ export default function RecipeTable({
       },
       {
         id: recipeTableColumnsTexts.updatedAt,
-        accessorKey: "updatedAt",
+        accessorKey: "model.updatedAt",
         header: () => (
           <p className="font-bold text-lg text-left">
             {recipeTableColumnsTexts.updatedAt}
@@ -281,7 +282,7 @@ export default function RecipeTable({
       },
       {
         id: recipeTableColumnsTexts.approved.header,
-        accessorKey: "approved",
+        accessorKey: "model.approved",
         header: () => (
           <div className="font-bold text-lg text-left">
             {recipeTableColumnsTexts.approved.header}

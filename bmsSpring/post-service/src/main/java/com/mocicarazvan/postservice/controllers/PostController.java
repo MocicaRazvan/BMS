@@ -2,6 +2,7 @@ package com.mocicarazvan.postservice.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mocicarazvan.postservice.repositories.PostRepository;
+import com.mocicarazvan.templatemodule.cache.keys.FilterKeyType;
 import com.mocicarazvan.templatemodule.controllers.ApproveController;
 import com.mocicarazvan.templatemodule.dtos.PageableBody;
 import com.mocicarazvan.templatemodule.dtos.response.*;
@@ -17,6 +18,7 @@ import com.mocicarazvan.postservice.services.PostService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.util.Pair;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -26,7 +28,6 @@ import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.time.Duration;
 import java.util.List;
 
 @RestController
@@ -59,6 +60,7 @@ public class PostController implements ApproveController
     public Flux<PageableResponse<ResponseWithUserDtoEntity<PostResponse>>> getModelsWithUser(@RequestParam(required = false) String title,
                                                                                              @RequestParam(name = "approved", required = false, defaultValue = "true") boolean approved,
                                                                                              @Valid @RequestBody PageableBody pageableBody,
+                                                                                             @RequestParam(name = "admin", required = false, defaultValue = "false") Boolean admin,
                                                                                              ServerWebExchange exchange) {
 
         log.error("approved: " + approved);
@@ -74,13 +76,18 @@ public class PostController implements ApproveController
                                                                                                     @RequestParam(required = false) List<String> tags,
                                                                                                     @RequestParam(required = false) Boolean liked,
                                                                                                     @Valid @RequestBody PageableBody pageableBody,
+                                                                                                    @RequestParam(name = "admin", required = false, defaultValue = "false") Boolean admin,
                                                                                                     ServerWebExchange exchange) {
 
-        log.error("approved: " + approved);
-        return postService.
-                getPostsFilteredWithUser(title, pageableBody, requestsUtils.extractAuthUser(exchange), approved, tags, liked)
+        log.error("admin: " + admin);
+        FilterKeyType.KeyRouteType keyRouteType = Boolean.TRUE.equals(admin) ? FilterKeyType.KeyRouteType.createForAdmin() : FilterKeyType.KeyRouteType.createForPublic();
+        return
+
+                postService.
+                        getPostsFilteredWithUser(title, pageableBody, requestsUtils.extractAuthUser(exchange), approved, tags, liked, admin)
 //                .delayElements(Duration.ofSeconds(3))
-                .concatMap(m -> postReactiveResponseBuilder.toModelWithUserPageable(m, PostController.class));
+                        .concatMap(m -> postReactiveResponseBuilder.toModelWithUserPageable(m, PostController.class))
+                ;
     }
 
     @PatchMapping("/tags")
@@ -90,13 +97,17 @@ public class PostController implements ApproveController
                                                                                     @RequestParam(required = false) List<String> tags,
                                                                                     @RequestParam(required = false) Boolean liked,
                                                                                     @Valid @RequestBody PageableBody pageableBody,
+                                                                                    @RequestParam(name = "admin", required = false, defaultValue = "false") Boolean admin,
                                                                                     ServerWebExchange exchange) {
 
-        log.error("approved: " + approved);
-        return postService.
-                getPostsFiltered(title, pageableBody, requestsUtils.extractAuthUser(exchange), approved, tags, liked)
+        log.error("admin: " + admin);
+        FilterKeyType.KeyRouteType keyRouteType = Boolean.TRUE.equals(admin) ? FilterKeyType.KeyRouteType.createForAdmin() : FilterKeyType.KeyRouteType.createForPublic();
+
+        return
+                postService.
+                        getPostsFiltered(title, pageableBody, requestsUtils.extractAuthUser(exchange), approved, tags, liked, admin)
 //                .delayElements(Duration.ofSeconds(3))
-                .flatMap(m -> postReactiveResponseBuilder.toModelPageable(m, PostController.class));
+                        .flatMap(m -> postReactiveResponseBuilder.toModelPageable(m, PostController.class));
     }
 
     @Override
@@ -116,9 +127,12 @@ public class PostController implements ApproveController
     public Flux<PageableResponse<CustomEntityModel<PostResponse>>> getModelsTrainerTags(@RequestParam(required = false) String title,
                                                                                         @RequestParam(required = false) Boolean approved,
                                                                                         @RequestParam(required = false) List<String> tags,
-                                                                                        @Valid @RequestBody PageableBody pageableBody, @PathVariable Long trainerId, ServerWebExchange exchange) {
-        return postService.getModelsTrainer(title, trainerId, pageableBody, requestsUtils.extractAuthUser(exchange), approved, tags)
-                .flatMap(m -> postReactiveResponseBuilder.toModelPageable(m, PostController.class));
+                                                                                        @Valid @RequestBody PageableBody pageableBody,
+                                                                                        @PathVariable Long trainerId,
+                                                                                        ServerWebExchange exchange) {
+        return
+                postService.getModelsTrainer(title, trainerId, pageableBody, requestsUtils.extractAuthUser(exchange), approved, tags)
+                        .flatMap(m -> postReactiveResponseBuilder.toModelPageable(m, PostController.class));
     }
 
     @Override
@@ -126,15 +140,18 @@ public class PostController implements ApproveController
     public Mono<ResponseEntity<CustomEntityModel<PostResponse>>> createModel(@Valid @RequestBody PostBody body, ServerWebExchange exchange) {
         return postService.createModel(body, requestsUtils.extractAuthUser(exchange))
                 .flatMap(m -> postReactiveResponseBuilder.toModel(m, PostController.class))
-                .map(ResponseEntity::ok);
+                .map(ResponseEntity::ok)
+                ;
     }
+
 
     @Override
     @GetMapping("/admin/groupedByMonth")
     @ResponseStatus(HttpStatus.OK)
     public Flux<MonthlyEntityGroup<CustomEntityModel<PostResponse>>> getModelGroupedByMonth(@RequestParam int month, ServerWebExchange exchange) {
-        return postService.getModelGroupedByMonth(month, requestsUtils.extractAuthUser(exchange))
-                .flatMap(m -> postReactiveResponseBuilder.toModelMonthlyEntityGroup(m, PostController.class));
+        return
+                postService.getModelGroupedByMonth(month, requestsUtils.extractAuthUser(exchange))
+                        .flatMap(m -> postReactiveResponseBuilder.toModelMonthlyEntityGroup(m, PostController.class));
     }
 
     @Override
@@ -146,6 +163,7 @@ public class PostController implements ApproveController
                 .flatMap(m -> postReactiveResponseBuilder.toModelWithUser(m, PostController.class))
                 .map(ResponseEntity::ok);
     }
+
 
     @Override
     @PatchMapping(value = "/admin", produces = {MediaType.APPLICATION_NDJSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
@@ -165,6 +183,7 @@ public class PostController implements ApproveController
                 .map(ResponseEntity::ok);
     }
 
+
     @Override
     @GetMapping(value = "/{id}", produces = {MediaType.APPLICATION_NDJSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
     public Mono<ResponseEntity<CustomEntityModel<PostResponse>>> getModelById(@PathVariable Long id, ServerWebExchange exchange) {
@@ -176,9 +195,10 @@ public class PostController implements ApproveController
     @Override
     @GetMapping(value = "/withUser/{id}", produces = {MediaType.APPLICATION_NDJSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
     public Mono<ResponseEntity<ResponseWithUserDtoEntity<PostResponse>>> getModelByIdWithUser(@PathVariable Long id, ServerWebExchange exchange) {
-        return postService.getModelByIdWithUser(id, requestsUtils.extractAuthUser(exchange))
-                .flatMap(m -> postReactiveResponseBuilder.toModelWithUser(m, PostController.class))
-                .map(ResponseEntity::ok);
+        return
+                postService.getModelByIdWithUser(id, requestsUtils.extractAuthUser(exchange))
+                        .flatMap(m -> postReactiveResponseBuilder.toModelWithUser(m, PostController.class))
+                        .map(ResponseEntity::ok);
     }
 
     @Override
@@ -194,10 +214,11 @@ public class PostController implements ApproveController
     @ResponseStatus(HttpStatus.OK)
     public Flux<PageableResponse<CustomEntityModel<PostResponse>>> getModelsByIdIn(@Valid @RequestBody PageableBody pageableBody,
                                                                                    @RequestParam List<Long> ids) {
-        return postService.getModelsByIdIn(ids, pageableBody)
+        return postService.getModelsByIdInPageable(ids, pageableBody)
                 .flatMap(m -> postReactiveResponseBuilder.toModelPageable(m, PostController.class));
     }
 
+    // todo id displaying nr likes or dislikes invalidate the cache for id
     @Override
     @PatchMapping(value = "/like/{id}", produces = {MediaType.APPLICATION_NDJSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
     public Mono<ResponseEntity<CustomEntityModel<PostResponse>>> likeModel(@PathVariable Long id, ServerWebExchange exchange) {
@@ -224,8 +245,9 @@ public class PostController implements ApproveController
 
     @GetMapping(value = "/internal/existsApproved/{id}", produces = {MediaType.APPLICATION_NDJSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
     public Mono<ResponseEntity<Void>> existsById(@PathVariable Long id) {
-        return postService.existsByIdAndApprovedIsTrue(id)
-                .then(Mono.fromCallable(() -> ResponseEntity.noContent().build()));
+        return
+                postService.existsByIdAndApprovedIsTrue(id)
+                        .then(Mono.fromCallable(() -> ResponseEntity.noContent().build()));
     }
 
     @GetMapping(value = "/withComments/{id}", produces = {MediaType.APPLICATION_NDJSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
@@ -252,8 +274,10 @@ public class PostController implements ApproveController
 
         return requestsUtils.getBodyFromJson(body, PostBody.class, objectMapper)
                 .flatMap(postBody -> postService.createModel(files, postBody, requestsUtils.extractAuthUser(exchange), clientId)
-                        .flatMap(m -> postReactiveResponseBuilder.toModel(m, PostController.class))
-                        .map(ResponseEntity::ok));
+                        .flatMap(m -> postReactiveResponseBuilder.toModel(m, PostController.class)))
+
+                .map(ResponseEntity::ok)
+                ;
     }
 
     @PostMapping(value = "/updateWithImages/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -264,9 +288,15 @@ public class PostController implements ApproveController
             @RequestParam("clientId") String clientId,
             @PathVariable Long id,
             ServerWebExchange exchange) {
-        return requestsUtils.getBodyFromJson(body, PostBody.class, objectMapper)
-                .flatMap(postBody -> postService.updateModelWithImages(files, id, postBody, requestsUtils.extractAuthUser(exchange), clientId)
-                        .flatMap(m -> postReactiveResponseBuilder.toModel(m, PostController.class))
-                        .map(ResponseEntity::ok));
+        // getting original approved status of the post
+        return
+                requestsUtils.getBodyFromJson(body, PostBody.class, objectMapper)
+                        .flatMap(postBody -> postService.updateModelWithImagesGetOriginalApproved(files, id, postBody, requestsUtils.extractAuthUser(exchange), clientId)
+                                .flatMap(m -> postReactiveResponseBuilder.toModelWithPair(m, PostController.class))
+                                .map(Pair::getFirst)
+                        )
+                        .map(ResponseEntity::ok);
     }
+
+
 }

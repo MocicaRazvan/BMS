@@ -14,7 +14,6 @@ import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
 import javax.imageio.ImageIO;
-import javax.imageio.ImageReadParam;
 import javax.imageio.ImageReader;
 import javax.imageio.stream.ImageInputStream;
 import java.awt.image.BufferedImage;
@@ -71,8 +70,7 @@ public class BytesServiceImpl implements BytesService {
         return DataBufferUtils.join(downloadStream)
                 .publishOn(Schedulers.boundedElastic())
                 .flatMapMany(dataBuffer -> {
-                    try {
-                        InputStream inputStream = dataBuffer.asInputStream();
+                    try (InputStream inputStream = dataBuffer.asInputStream(true)) {
                         DataBufferUtils.release(dataBuffer);
 
                         ImageInputStream imageInputStream = ImageIO.createImageInputStream(inputStream);
@@ -84,19 +82,27 @@ public class BytesServiceImpl implements BytesService {
 
                         ImageReader reader = imageReaders.next();
 
-                        reader.setInput(imageInputStream);
-                        BufferedImage image = reader.read(0);
+                        try {
+                            reader.setInput(imageInputStream);
+                            BufferedImage image = reader.read(0);
 
-                        if (image == null) {
-                            log.error("Could not read image, redirecting to fallback");
-                            return getImageFallback(response, inputStream);
+                            if (image == null) {
+                                log.error("Could not read image, redirecting to fallback");
+                                return getImageFallback(response, inputStream);
+                            }
+
+
+                            ByteArrayOutputStream outputStream = new ByteArrayOutputStream(1024);
+                            configureThumblinator(width, height, quality, image, reader, outputStream);
+                            DataBuffer buffer = response.bufferFactory().wrap(outputStream.toByteArray());
+                            return Mono.just(buffer);
+                        } catch (IOException e) {
+                            log.error("Error processing image: {}", e.getMessage(), e);
+                            return Flux.error(new IOException("Failed to process the image"));
+                        } finally {
+                            reader.dispose();
                         }
 
-
-                        ByteArrayOutputStream outputStream = new ByteArrayOutputStream(1024);
-                        configureThumblinator(width, height, quality, image, reader, outputStream);
-                        DataBuffer buffer = response.bufferFactory().wrap(outputStream.toByteArray());
-                        return Mono.just(buffer);
 
                     } catch (Exception e) {
                         log.error("Error processing image: {}", e.getMessage(), e);

@@ -75,12 +75,6 @@ public class ExtendedOrderWithAddressRepositoryImpl implements ExtendedOrderWith
 
         appendWhereClause(queryBuilder, city, state, country);
 
-//        if (queryBuilder.length() > SELECT_ALL.length()) {
-//            queryBuilder.append(" AND");
-//        } else {
-//            queryBuilder.append(" WHERE");
-//        }
-//        queryBuilder.append(" user_id = :userId");
 
         repositoryUtils.addNotNullField(userId, queryBuilder, new RepositoryUtils.MutableBoolean(queryBuilder.length() > SELECT_ALL.length()),
                 " user_id = :userId");
@@ -88,8 +82,6 @@ public class ExtendedOrderWithAddressRepositoryImpl implements ExtendedOrderWith
         queryBuilder.append(pageableUtilsCustom.createPageRequestQuery(pageRequest));
 
         DatabaseClient.GenericExecuteSpec executeSpec = getGenericExecuteSpec(city, state, country, queryBuilder);
-
-//        executeSpec = executeSpec.bind("userId", userId);
 
         executeSpec = repositoryUtils.bindNotNullField(userId, executeSpec, "userId");
 
@@ -101,21 +93,14 @@ public class ExtendedOrderWithAddressRepositoryImpl implements ExtendedOrderWith
     public Mono<Long> countModelsFilteredUser(String city, String state, String country, Long userId) {
         StringBuilder queryBuilder = new StringBuilder(COUNT_ALL);
 
-//        if (queryBuilder.length() > COUNT_ALL.length()) {
-//            queryBuilder.append(" AND");
-//        } else {
-//            queryBuilder.append(" WHERE");
-//        }
-//        queryBuilder.append(" user_id = :userId");
+        appendWhereClause(queryBuilder, city, state, country);
 
         repositoryUtils.addNotNullField(userId, queryBuilder, new RepositoryUtils.MutableBoolean(queryBuilder.length() > COUNT_ALL.length()),
                 " user_id = :userId");
 
-        appendWhereClause(queryBuilder, city, state, country);
 
         DatabaseClient.GenericExecuteSpec executeSpec = getGenericExecuteSpec(city, state, country, queryBuilder);
 
-//        executeSpec = executeSpec.bind("userId", userId);
 
         executeSpec = repositoryUtils.bindNotNullField(userId, executeSpec, "userId");
 
@@ -123,30 +108,15 @@ public class ExtendedOrderWithAddressRepositoryImpl implements ExtendedOrderWith
     }
 
     private void appendWhereClause(StringBuilder queryBuilder, String city, String state, String country) {
-//        boolean hasPreviousCriteria = false;
 
         RepositoryUtils.MutableBoolean hasPreviousCriteria = new RepositoryUtils.MutableBoolean(false);
 
-//        if (city != null && !city.isEmpty()) {
-//            queryBuilder.append(" WHERE");
-//            queryBuilder.append(" UPPER(city) LIKE UPPER(:city)");
-//            hasPreviousCriteria = true;
-//        }
 
         repositoryUtils.addStringField(city, queryBuilder, hasPreviousCriteria, " UPPER(city) LIKE UPPER(:city)");
 
-//        if (state != null && !state.isEmpty()) {
-//            queryBuilder.append(hasPreviousCriteria ? " AND" : " WHERE");
-//            queryBuilder.append(" UPPER(state) LIKE UPPER(:state)");
-//            hasPreviousCriteria = true;
-//        }
 
         repositoryUtils.addStringField(state, queryBuilder, hasPreviousCriteria, " UPPER(state) LIKE UPPER(:state)");
 
-//        if (country != null && !country.isEmpty()) {
-//            queryBuilder.append(hasPreviousCriteria ? " AND" : " WHERE");
-//            queryBuilder.append(" UPPER(country) LIKE UPPER(:country)");
-//        }
 
         repositoryUtils.addStringField(country, queryBuilder, hasPreviousCriteria, " UPPER(country) LIKE UPPER(:country)");
     }
@@ -155,21 +125,12 @@ public class ExtendedOrderWithAddressRepositoryImpl implements ExtendedOrderWith
     private DatabaseClient.GenericExecuteSpec getGenericExecuteSpec(String city, String state, String country, StringBuilder queryBuilder) {
         DatabaseClient.GenericExecuteSpec executeSpec = databaseClient.sql(queryBuilder.toString());
 
-//        if (city != null && !city.isEmpty()) {
-//            executeSpec = executeSpec.bind("city", "%" + city + "%");
-//        }
 
         executeSpec = repositoryUtils.bindStringSearchField(city, executeSpec, "city");
 
-//        if (state != null && !state.isEmpty()) {
-//            executeSpec = executeSpec.bind("state", "%" + state + "%");
-//        }
 
         executeSpec = repositoryUtils.bindStringSearchField(state, executeSpec, "state");
 
-//        if (country != null && !country.isEmpty()) {
-//            executeSpec = executeSpec.bind("country", "%" + country + "%");
-//        }
 
         executeSpec = repositoryUtils.bindStringSearchField(country, executeSpec, "country");
 

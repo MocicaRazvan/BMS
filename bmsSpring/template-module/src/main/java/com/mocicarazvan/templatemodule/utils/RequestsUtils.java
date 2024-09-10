@@ -6,8 +6,9 @@ import com.mocicarazvan.templatemodule.exceptions.notFound.AuthHeaderNotFound;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class RequestsUtils {
     public static final String AUTH_HEADER = "x-auth-user-id";
@@ -26,6 +27,12 @@ public class RequestsUtils {
             return Mono.error(e);
         }
         return Mono.just(body);
+    }
+
+    public List<Object> getListOfNotNullObjects(Object... objects) {
+        return Arrays.stream(objects)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 
 

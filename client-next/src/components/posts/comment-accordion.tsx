@@ -3,8 +3,15 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { useCallback, useMemo, useState } from "react";
-import { useForm } from "react-hook-form";
-import { Form } from "@/components/ui/form";
+import { Path, useForm } from "react-hook-form";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import {
   Accordion,
   AccordionTrigger,
@@ -21,6 +28,7 @@ import ButtonSubmit from "@/components/forms/button-submit";
 import { TitleBodyForm } from "@/components/forms/title-body";
 import { getToxicity } from "@/actions/toxcity";
 import { fetchStream } from "@/hoooks/fetchStream";
+import Editor from "@/components/editor/editor";
 
 export interface CommentAccordionTexts {
   commentFormTexts: CommentFormTexts;
@@ -68,7 +76,7 @@ export default function CommentAccordion({
     resolver: zodResolver(schema),
     defaultValues: {
       body,
-      title,
+      title: "NONE",
     },
   });
   const { isLoading, setIsLoading, router, errorMsg, setErrorMsg } =
@@ -99,19 +107,25 @@ export default function CommentAccordion({
     async (body: TitleBodyType) => {
       if (!token) return;
       setIsLoading(true);
-      const [titleRes, bodyRes] = await Promise.all([
-        getToxicity(
-          DOMPurify.sanitize(body.title, {
-            ALLOWED_TAGS: [],
-            ALLOWED_ATTR: [],
-          }),
-        ),
+      const [
+        // titleRes,
+        bodyRes,
+      ] = await Promise.all([
+        // getToxicity(
+        //   DOMPurify.sanitize(body.title, {
+        //     ALLOWED_TAGS: [],
+        //     ALLOWED_ATTR: [],
+        //   }),
+        // ),
         getToxicity(
           DOMPurify.sanitize(body.body, { ALLOWED_TAGS: [], ALLOWED_ATTR: [] }),
         ),
       ]);
-      if (titleRes.failure || bodyRes.failure) {
-        handleToxicResp(titleRes, "title");
+      if (
+        // titleRes.failure ||
+        bodyRes.failure
+      ) {
+        // handleToxicResp(titleRes, "title");
         handleToxicResp(bodyRes, "body");
         setIsLoading(false);
         return;
@@ -177,16 +191,40 @@ export default function CommentAccordion({
           <Form {...form}>
             <form
               onSubmit={form.handleSubmit(onSubmit)}
-              className="space-y-8 w-full px-10 pt-1 lg:space-y-12"
+              className="space-y-8 w-full px-10 pt-1 mb-4"
             >
-              <h2 className="text-xl font-bold tracking-tighter mt-2">
-                {englishHeading}
-              </h2>
-              <TitleBodyForm<TitleBodyType>
-                control={form.control}
-                titleBodyTexts={titleBodyTexts}
-              />
+              <div>
+                <h2 className="text-xl font-bold tracking-tighter mt-2">
+                  {englishHeading}
+                </h2>
+                {/*<TitleBodyForm<TitleBodyType>*/}
+                {/*  control={form.control}*/}
+                {/*  titleBodyTexts={titleBodyTexts}*/}
+                {/*  hideTitle={true}*/}
+                {/*/>*/}
 
+                <FormField
+                  control={form.control}
+                  name={"body"}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="capitalize sr-only">
+                        {body}
+                      </FormLabel>
+                      <FormControl>
+                        {/* <Textarea placeholder={bodyPlaceholder} {...field} />
+                         */}
+                        <Editor
+                          descritpion={field.value as string}
+                          onChange={field.onChange}
+                          placeholder={titleBodyTexts.bodyPlaceholder}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
               <ErrorMessage message={error} show={!!errorMsg} />
               <ButtonSubmit
                 isLoading={isLoading}

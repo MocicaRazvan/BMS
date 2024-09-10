@@ -19,9 +19,9 @@ public class RecipesReactiveLinkBuilder extends ApproveReactiveLinkBuilder<Recip
     public List<WebFluxLinkBuilder.WebFluxLink> createModelLinks(RecipeResponse recipeResponse, Class<RecipeController> c) {
         List<WebFluxLinkBuilder.WebFluxLink> links = super.createModelLinks(recipeResponse, c);
 
-        links.add(WebFluxLinkBuilder.linkTo(WebFluxLinkBuilder.methodOn(c).getAllModelsFiltered(null, null, null, null, null)).withRel("getAllModelsFiltered"));
-        links.add(WebFluxLinkBuilder.linkTo(WebFluxLinkBuilder.methodOn(c).getAllModelsFilteredWithCount(null, null, null, null, null)).withRel("getModelsFilteredWithCount"));
-        links.add(WebFluxLinkBuilder.linkTo(WebFluxLinkBuilder.methodOn(c).getAllModelsFilteredWithUser(null, null, null, null, null)).withRel("getAllModelsFilteredWithUser"));
+        links.add(WebFluxLinkBuilder.linkTo(WebFluxLinkBuilder.methodOn(c).getAllModelsFiltered(null, null, null, null, null, null)).withRel("getAllModelsFiltered"));
+        links.add(WebFluxLinkBuilder.linkTo(WebFluxLinkBuilder.methodOn(c).getAllModelsFilteredWithCount(null, null, null, null, null, null)).withRel("getModelsFilteredWithCount"));
+        links.add(WebFluxLinkBuilder.linkTo(WebFluxLinkBuilder.methodOn(c).getAllModelsFilteredWithUser(null, null, null, null, null, null)).withRel("getAllModelsFilteredWithUser"));
         links.add(WebFluxLinkBuilder.linkTo(WebFluxLinkBuilder.methodOn(c).createWithVideos(null, null, null, null, null)).withRel("createWithVideos"));
         links.add(WebFluxLinkBuilder.linkTo(WebFluxLinkBuilder.methodOn(c).updateWithVideos(null, null, null, null, null, null)).withRel("updateWithVideos"));
         links.add(WebFluxLinkBuilder.linkTo(WebFluxLinkBuilder.methodOn(c).getModelsTrainerFiltered(null, null, null, null, null, null)).withRel("getModelsTrainerFiltered"));

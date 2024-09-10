@@ -34,7 +34,7 @@ public abstract class ApproveReactiveLinkBuilder<MODEL extends Approve, BODY ext
         links.add(WebFluxLinkBuilder.linkTo(WebFluxLinkBuilder.methodOn(c).getAllModelsAdmin(response.getTitle(),
                 PageableBody.builder().page(0).size(10).build(), null)).withRel("all models admin"));
         links.add(WebFluxLinkBuilder.linkTo(WebFluxLinkBuilder.methodOn(c).getModelsWithUser(response.getTitle(), true,
-                PageableBody.builder().page(0).size(10).build(), null)).withRel("models with user"));
+                PageableBody.builder().page(0).size(10).build(), null, null)).withRel("models with user"));
         return links;
     }
 }

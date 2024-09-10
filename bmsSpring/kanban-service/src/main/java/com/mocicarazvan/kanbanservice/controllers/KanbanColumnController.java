@@ -73,7 +73,7 @@ public class KanbanColumnController implements ManyToOneUserController
     @GetMapping("/byIds")
     @ResponseStatus(HttpStatus.OK)
     public Flux<PageableResponse<CustomEntityModel<KanbanColumnResponse>>> getModelsByIdIn(@Valid @RequestBody PageableBody pageableBody, @RequestParam List<Long> ids) {
-        return kanbanColumnService.getModelsByIdIn(ids, pageableBody)
+        return kanbanColumnService.getModelsByIdInPageable(ids, pageableBody)
                 .flatMap(c -> kanbanColumnReactiveResponseBuilder.toModelPageable(c, KanbanColumnController.class));
     }
 

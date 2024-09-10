@@ -78,6 +78,9 @@ export default async function AdminPlansPage({ params: { locale } }: Props) {
               sizeOptions={[10, 20, 30, 40]}
               authUser={authUser}
               mainDashboard={true}
+              extraQueryParams={{
+                admin: "true",
+              }}
             />
           </div>
         </Suspense>

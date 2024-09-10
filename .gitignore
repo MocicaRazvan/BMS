@@ -107,3 +107,5 @@ ollama_models
 nginx/certs
 
 scrape
+
+wol.txt

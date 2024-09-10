@@ -24,9 +24,9 @@ public interface PostService extends ApprovedService<Post, PostBody, PostRespons
     Mono<ResponseWithChildList<PostResponse, ResponseWithUserDto<CommentResponse>>>
     getPostWithComments(Long id, boolean approved);
 
-    Flux<PageableResponse<ResponseWithUserDto<PostResponse>>> getPostsFilteredWithUser(String title, PageableBody pageableBody, String userId, Boolean approved, List<String> tags, Boolean liked);
+    Flux<PageableResponse<ResponseWithUserDto<PostResponse>>> getPostsFilteredWithUser(String title, PageableBody pageableBody, String userId, Boolean approved, List<String> tags, Boolean liked, Boolean admin);
 
-    Flux<PageableResponse<PostResponse>> getPostsFiltered(String title, PageableBody pageableBody, String userId, Boolean approved, List<String> tags, Boolean liked);
+    Flux<PageableResponse<PostResponse>> getPostsFiltered(String title, PageableBody pageableBody, String userId, Boolean approved, List<String> tags, Boolean liked, Boolean admin);
 
     Flux<PageableResponse<PostResponse>> getModelsTrainer(String title, Long trainerId, PageableBody pageableBody, String userId, Boolean approved, List<String> tags);
 }
