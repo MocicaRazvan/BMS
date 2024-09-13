@@ -363,11 +363,7 @@ const ChatMessageItem = memo(
       </div>
     );
   },
-  (prev, next) =>
-    isDeepEqual(prev, next) &&
-    isDeepEqual(prev.chatMessage, next.chatMessage) &&
-    isDeepEqual(prev.sender, next.sender) &&
-    isDeepEqual(prev.receiver, next.receiver),
+  (prev, next) => isDeepEqual(prev, next),
 );
 
 ChatMessageItem.displayName = "ChatMessageItem";

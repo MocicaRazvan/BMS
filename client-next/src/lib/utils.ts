@@ -9,100 +9,21 @@ import { getTimezoneOffset, toZonedTime } from "date-fns-tz";
 import { formatDistanceToNow, parseISO } from "date-fns";
 import { enUS, ro } from "date-fns/locale";
 import { Locale } from "@/navigation";
+import isEqual from "lodash.isequal";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
 export function isDeepEqual<T>(obj1: T, obj2: T): boolean {
-  if (obj1 === obj2) {
-    return true;
-  }
-
-  if (
-    typeof obj1 !== "object" ||
-    typeof obj2 !== "object" ||
-    obj1 === null ||
-    obj2 === null
-  ) {
-    return obj1 === obj2;
-  }
-
-  if (obj1 instanceof Date && obj2 instanceof Date) {
-    return obj1.getTime() === obj2.getTime();
-  }
-
-  if (Array.isArray(obj1) && Array.isArray(obj2)) {
-    if (obj1.length !== obj2.length) {
-      return false;
-    }
-    for (let i = 0; i < obj1.length; i++) {
-      if (!isDeepEqual(obj1[i], obj2[i])) {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  if (obj1 instanceof Map && obj2 instanceof Map) {
-    if (obj1.size !== obj2.size) {
-      return false;
-    }
-    for (const [key, value] of obj1) {
-      if (!obj2.has(key) || !isDeepEqual(value, obj2.get(key))) {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  if (obj1 instanceof Set && obj2 instanceof Set) {
-    if (obj1.size !== obj2.size) {
-      return false;
-    }
-    for (const item of obj1) {
-      if (!obj2.has(item)) {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  const keys1 = Object.keys(obj1) as Array<keyof T>;
-  const keys2 = Object.keys(obj2) as Array<keyof T>;
-
-  if (keys1.length !== keys2.length) {
-    return false;
-  }
-
-  for (const key of keys1) {
-    const val1 = obj1[key];
-    const val2 = obj2[key];
-
-    const areObjects = isObject(val1) && isObject(val2);
-    if (
-      (areObjects && !isDeepEqual(val1, val2)) ||
-      (!areObjects && val1 !== val2)
-    ) {
-      return false;
-    }
-  }
-
-  return true;
+  if (obj1 === null && obj2 !== null) return false;
+  if (obj1 !== null && obj2 === null) return false;
+  return isEqual(obj1, obj2);
 }
 
-// Helper function to determine if a value is an object and not null
 function isObject(value: any): value is object {
   return value !== null && typeof value === "object";
 }
-
-// export function makeSortFetchParams(
-//   sort: Record<string | number | symbol, string>,
-// ) {
-//   return Object.fromEntries(
-//     Object.entries(sort).filter(([_, value]) => value !== "none"),
-//   );
-// }
 
 export function makeSortFetchParams(sort: SortingOption[]) {
   return sort.reduce<Record<string, SortDirection>>(

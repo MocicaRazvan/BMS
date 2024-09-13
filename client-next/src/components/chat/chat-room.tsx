@@ -124,8 +124,7 @@ export const ChatRoom = memo(
     );
   },
   (prevProps, nextProps) =>
-    JSON.stringify(prevProps.chatRooms) ===
-      JSON.stringify(nextProps.chatRooms) &&
+    isDeepEqual(prevProps.chatRooms, nextProps.chatRooms) &&
     isDeepEqual(prevProps.authUser, nextProps.authUser) &&
     isDeepEqual(prevProps.activeRoom, nextProps.activeRoom),
 );
