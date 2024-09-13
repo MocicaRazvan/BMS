@@ -7,6 +7,7 @@ import com.mocicarazvan.websocketservice.dtos.generic.NotificationTemplateRespon
 import com.mocicarazvan.websocketservice.enums.ApprovedNotificationType;
 import com.mocicarazvan.websocketservice.enums.NotificationNotifyType;
 import com.mocicarazvan.websocketservice.mappers.generic.NotificationTemplateMapper;
+import com.mocicarazvan.websocketservice.messaging.CustomConvertAndSendToUser;
 import com.mocicarazvan.websocketservice.models.ConversationUser;
 import com.mocicarazvan.websocketservice.models.generic.ApprovedModel;
 import com.mocicarazvan.websocketservice.models.generic.NotificationTemplate;
@@ -36,8 +37,8 @@ public abstract class ApproveNotificationServiceTemplateImpl<R extends ApprovedM
         extends NotificationTemplateServiceImpl<R, RRESP, ApprovedNotificationType, MODEL, BODY, RESPONSE, RREPO, MREOP, MMAP>
         implements ApproveNotificationServiceTemplate<R, RRESP, BODY, RESPONSE> {
 
-    public ApproveNotificationServiceTemplateImpl(RREPO referenceRepository, ConversationUserService conversationUserService, String referenceName, String notificationName, Executor asyncExecutor, MREOP notificationTemplateRepository, MMAP notificationTemplateMapper, SimpMessagingTemplate messagingTemplate) {
-        super(referenceRepository, conversationUserService, referenceName, notificationName, asyncExecutor, notificationTemplateRepository, notificationTemplateMapper, messagingTemplate);
+    public ApproveNotificationServiceTemplateImpl(RREPO referenceRepository, ConversationUserService conversationUserService, String referenceName, String notificationName, Executor asyncExecutor, MREOP notificationTemplateRepository, MMAP notificationTemplateMapper, SimpMessagingTemplate messagingTemplate, CustomConvertAndSendToUser customConvertAndSendToUser) {
+        super(referenceRepository, conversationUserService, referenceName, notificationName, asyncExecutor, notificationTemplateRepository, notificationTemplateMapper, messagingTemplate, customConvertAndSendToUser);
     }
 
     public abstract R createApprovedReference(BODY body, Long appId, ConversationUser receiver);

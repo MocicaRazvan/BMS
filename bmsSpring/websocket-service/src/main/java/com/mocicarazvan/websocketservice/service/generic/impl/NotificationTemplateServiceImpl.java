@@ -7,6 +7,7 @@ import com.mocicarazvan.websocketservice.dtos.generic.NotificationTemplateRespon
 import com.mocicarazvan.websocketservice.enums.NotificationNotifyType;
 import com.mocicarazvan.websocketservice.exceptions.notFound.EntityNotFound;
 import com.mocicarazvan.websocketservice.mappers.generic.NotificationTemplateMapper;
+import com.mocicarazvan.websocketservice.messaging.CustomConvertAndSendToUser;
 import com.mocicarazvan.websocketservice.models.ConversationUser;
 import com.mocicarazvan.websocketservice.models.generic.IdGenerated;
 import com.mocicarazvan.websocketservice.models.generic.NotificationTemplate;
@@ -44,6 +45,7 @@ public abstract class NotificationTemplateServiceImpl<R extends IdGenerated, RRE
     protected final MREOP notificationTemplateRepository;
     protected final MMAP notificationTemplateMapper;
     protected final SimpMessagingTemplate messagingTemplate;
+    private final CustomConvertAndSendToUser customConvertAndSendToUser;
 
 
     //    @Transactional(propagation = Propagation.REQUIRES_NEW)
@@ -145,7 +147,9 @@ public abstract class NotificationTemplateServiceImpl<R extends IdGenerated, RRE
 
     public void notifyReceiver(RESPONSE response, NotificationNotifyType notificationNotifyType) {
         String type = notificationNotifyType.name().toLowerCase();
-        messagingTemplate.convertAndSendToUser(response.getReceiver().getEmail(), "/queue/notification/" + notificationName + "/" + type, response);
+//        messagingTemplate.convertAndSendToUser(response.getReceiver().getEmail(), "/queue/notification/" + notificationName + "/" + type, response);
+        customConvertAndSendToUser.sendToUser(response.getReceiver().getEmail(), "/queue/notification-" + notificationName + "-" + type, response);
+
 
     }
 
@@ -221,7 +225,8 @@ public abstract class NotificationTemplateServiceImpl<R extends IdGenerated, RRE
                 .runAsync(() -> CompletableFuture.allOf(
                         receiverEmails.stream()
                                 .map(email -> CompletableFuture.runAsync(() ->
-                                        messagingTemplate.convertAndSendToUser(email, "/queue/notification/" + notificationName + "/removed", referenceId.toString()), asyncExecutor))
+//                                        messagingTemplate.convertAndSendToUser(email, "/queue/notification/" + notificationName + "/removed", referenceId.toString()), asyncExecutor))
+                                        customConvertAndSendToUser.sendToUser(email, "/queue/notification-" + notificationName + "-removed", referenceId.toString()), asyncExecutor))
                                 .toArray(CompletableFuture[]::new)
                 ).join(), asyncExecutor);
     }

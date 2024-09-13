@@ -24,6 +24,7 @@ import AiChatBox from "@/components/ai-chat/ai-chat-box";
 import { vectorStoreInstance } from "@/lib/langchain";
 import { getAiChatBoxTexts } from "@/texts/components/ai-chat";
 import ValidUserSessionContext from "@/context/valid-user-session";
+import { NotificationPopProvider } from "@/context/notification-pop-context";
 
 const fontSans = FontSans({
   subsets: ["latin"],
@@ -123,16 +124,20 @@ export default async function BaseLayout({
                               <BoughtNotificationProvider
                                 authUser={session?.user}
                               >
-                                <CartProvider>
-                                  <SubscriptionProvider
-                                    authUser={session?.user}
-                                  >
-                                    <>
-                                      {children}
-                                      <AiChatBox {...aiTexts} />
-                                    </>
-                                  </SubscriptionProvider>
-                                </CartProvider>
+                                <NotificationPopProvider
+                                  authUser={session?.user}
+                                >
+                                  <CartProvider>
+                                    <SubscriptionProvider
+                                      authUser={session?.user}
+                                    >
+                                      <>
+                                        {children}
+                                        <AiChatBox {...aiTexts} />
+                                      </>
+                                    </SubscriptionProvider>
+                                  </CartProvider>
+                                </NotificationPopProvider>
                               </BoughtNotificationProvider>
                             </PlanApproveNotificationProvider>
                           </RecipeApproveNotificationProvider>

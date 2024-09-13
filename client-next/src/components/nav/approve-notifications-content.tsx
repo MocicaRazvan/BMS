@@ -2,16 +2,16 @@ import {
   ApproveModelNotificationResponse,
   ApproveNotificationResponse,
 } from "@/types/dto";
-import { CheckCheck, MessageCircleIcon, ThumbsUpIcon, X } from "lucide-react";
+import { CheckCheck, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { cn, fromDistanceToNowUtc } from "@/lib/utils";
+import { fromDistanceToNowUtc } from "@/lib/utils";
 import { Locale, useRouter } from "@/navigation";
 import { Client } from "@stomp/stompjs";
 import { useStompClient } from "react-stomp-hooks";
-import { formatDistanceToNow, parseISO } from "date-fns";
-import { enUS, ro } from "date-fns/locale";
+import { parseISO } from "date-fns";
+import isEqual from "lodash.isequal";
 import { useLocale } from "next-intl";
-import { ReactNode } from "react";
+import { memo, ReactNode } from "react";
 
 export interface ApproveNotificationContentTexts {
   title: ReactNode;
@@ -28,7 +28,7 @@ export interface Props<
   deleteCallback: (appId: number, stompClient: Client) => void;
 }
 
-export default function ApproveNotificationContent<
+function ApproveNotificationContent<
   T extends ApproveModelNotificationResponse,
   I extends ApproveNotificationResponse<T>,
 >({ items, itemName, deleteCallback, itemsText }: Props<T, I>) {
@@ -82,3 +82,11 @@ export default function ApproveNotificationContent<
     );
   });
 }
+export default memo(
+  ApproveNotificationContent,
+  (prevProps, nextProps) =>
+    prevProps.itemName === nextProps.itemName &&
+    isEqual(prevProps.items, nextProps.items) &&
+    isEqual(prevProps.itemsText, nextProps.itemsText) &&
+    prevProps.deleteCallback === nextProps.deleteCallback,
+);

@@ -2,6 +2,7 @@ package com.mocicarazvan.websocketservice.service.impl;
 
 import com.mocicarazvan.websocketservice.enums.ApprovedNotificationType;
 import com.mocicarazvan.websocketservice.mappers.ApprovePlanNotificationMapper;
+import com.mocicarazvan.websocketservice.messaging.CustomConvertAndSendToUser;
 import com.mocicarazvan.websocketservice.models.*;
 import com.mocicarazvan.websocketservice.repositories.ApprovePlanNotificationRepository;
 import com.mocicarazvan.websocketservice.repositories.PlanRepository;
@@ -24,8 +25,8 @@ public class ApprovePlanNotificationServiceImpl
         implements ApprovePlanNotificationService {
 
 
-    public ApprovePlanNotificationServiceImpl(PlanRepository referenceRepository, ConversationUserService conversationUserService, Executor asyncExecutor, ApprovePlanNotificationRepository notificationTemplateRepository, ApprovePlanNotificationMapper notificationTemplateMapper, SimpMessagingTemplate messagingTemplate) {
-        super(referenceRepository, conversationUserService, "chat_plan", "approvePlanNotification", asyncExecutor, notificationTemplateRepository, notificationTemplateMapper, messagingTemplate);
+    public ApprovePlanNotificationServiceImpl(PlanRepository referenceRepository, ConversationUserService conversationUserService, Executor asyncExecutor, ApprovePlanNotificationRepository notificationTemplateRepository, ApprovePlanNotificationMapper notificationTemplateMapper, SimpMessagingTemplate messagingTemplate, CustomConvertAndSendToUser customConvertAndSendToUser) {
+        super(referenceRepository, conversationUserService, "chat_plan", "approvePlanNotification", asyncExecutor, notificationTemplateRepository, notificationTemplateMapper, messagingTemplate, customConvertAndSendToUser);
     }
 
     @Override

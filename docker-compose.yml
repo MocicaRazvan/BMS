@@ -490,6 +490,32 @@ services:
         nginx -g 'daemon off;'"
     depends_on:
       - next-js
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq-container-bms
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+      - "61613:61613"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - bms
+    restart: unless-stopped
+    healthcheck:
+      test: "rabbitmq-diagnostics -q ping"
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 10s
+    command: >
+      bash -c "
+      rabbitmq-plugins enable rabbitmq_stomp &&
+      rabbitmq-plugins enable rabbitmq_web_stomp &&
+      rabbitmq-server"
 
 
 volumes:
@@ -498,6 +524,7 @@ volumes:
   postgres_data_vectors:
   mongo_data:
   redis_data:
+  rabbitmq_data:
 networks:
   bms:
     driver: bridge

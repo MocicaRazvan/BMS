@@ -4,21 +4,14 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Bell, Trash2 } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Fragment, useCallback, useEffect, useMemo, useState } from "react";
+import { memo, useEffect, useMemo, useRef, useState } from "react";
 import { useStompClient, useSubscription } from "react-stomp-hooks";
-import { usePathname, useRouter, Link } from "@/navigation";
-import {
-  ChatMessageNotificationResponse,
-  ConversationUserResponse,
-} from "@/types/dto";
+import { usePathname, useRouter } from "@/navigation";
+import { ConversationUserResponse } from "@/types/dto";
 import { Session } from "next-auth";
 import {
   Tooltip,
@@ -40,11 +33,10 @@ import { Badge } from "@/components/ui/badge";
 import ApproveNotificationContent, {
   ApproveNotificationContentTexts,
 } from "@/components/nav/approve-notifications-content";
-import { Client } from "@stomp/stompjs";
+import isEqual from "lodash.isequal";
 import {
   getApprovedNotificationTextsByItems,
   getBoughtNotificationTextsByItems,
-  getChatMessageNotificationContentTexts,
   getChatMessageNotificationTextsForReceiver,
   getNotificationPopTexts,
 } from "@/texts/components/nav";
@@ -54,6 +46,7 @@ import BoughtNotificationContent, {
   BoughtNotificationContentTexts,
 } from "@/components/nav/bought-notification-content";
 import { useBoughtNotification } from "@/context/bought-notification-context";
+import { useNotificationPop } from "@/context/notification-pop-context";
 
 interface NotificationPopProps {
   authUser: NonNullable<Session["user"]>;
@@ -94,137 +87,490 @@ export default function NotificationPop({ authUser }: NotificationPopProps) {
   const [accordionsState, setAccordionsState] = useState<AccordionsState>(
     initialAccordionsState,
   );
+  const [isAccordionOpen, setIsAccordionOpen] = useState(false);
 
-  const [notificationPopTexts, setNotificationPopTexts] =
-    useState<NotificationPopTexts | null>(null);
-  const [chatMessageNotificationTexts, setChatMessageNotificationTexts] =
-    useState<Record<string, ChatMessageNotificationContentTexts> | null>(null);
-  const [postMessageNotificationsTexts, setPostMessageNotificationsTexts] =
-    useState<Record<string, ApproveNotificationContentTexts> | null>(null);
-  const [recipeMessageNotificationsTexts, setRecipeMessageNotificationsTexts] =
-    useState<Record<string, ApproveNotificationContentTexts> | null>(null);
-  const [planMessageNotificationsTexts, setPlanMessageNotificationsTexts] =
-    useState<Record<string, ApproveNotificationContentTexts> | null>(null);
-  const [boughtNotificationTexts, setBoughtNotificationTexts] = useState<Record<
-    string,
-    BoughtNotificationContentTexts
-  > | null>(null);
-
+  // const [notificationPopTexts, setNotificationPopTexts] =
+  //   useState<NotificationPopTexts | null>(null);
+  //
+  // const [chatMessageNotificationTexts, setChatMessageNotificationTexts] =
+  //   useState<Record<string, ChatMessageNotificationContentTexts> | null>(null);
+  // const previousChatMsgGroupedBySender = useRef<
+  //   ReturnType<typeof getNotificationsGroupedBySender>["notifications"] | null
+  // >(null);
+  //
+  // const [postMessageNotificationsTexts, setPostMessageNotificationsTexts] =
+  //   useState<Record<string, ApproveNotificationContentTexts> | null>(null);
+  // const previousPostNotifications = useRef<
+  //   ReturnType<typeof getPostNotificationState>["notifications"] | null
+  // >(null);
+  //
+  // const [recipeMessageNotificationsTexts, setRecipeMessageNotificationsTexts] =
+  //   useState<Record<string, ApproveNotificationContentTexts> | null>(null);
+  // const previousRecipeNotifications = useRef<
+  //   ReturnType<typeof getRecipeNotificationState>["notifications"] | null
+  // >(null);
+  //
+  // const [planMessageNotificationsTexts, setPlanMessageNotificationsTexts] =
+  //   useState<Record<string, ApproveNotificationContentTexts> | null>(null);
+  // const previousPlanNotifications = useRef<
+  //   ReturnType<typeof getPlanNotificationState>["notifications"] | null
+  // >(null);
+  //
+  // const [boughtNotificationTexts, setBoughtNotificationTexts] = useState<Record<
+  //   string,
+  //   BoughtNotificationContentTexts
+  // > | null>(null);
+  // const previousBoughtNotifications = useRef<
+  //   ReturnType<typeof getBoughtNotificationState>["notifications"] | null
+  // >(null);
+  //
+  // const {
+  //   getNotificationsGroupedBySender,
+  //   getTotals: getChatTotals,
+  //   clearNotifications: clearChatNotifications,
+  // } = useChatNotification();
+  // const {
+  //   getTotals: getPostTotals,
+  //   getNotificationState: getPostNotificationState,
+  //   removeByAppId: removePostNotificationByAppId,
+  //   clearNotifications: clearPostNotifications,
+  // } = usePostApproveNotification();
+  //
+  // const {
+  //   getTotals: getRecipeTotals,
+  //   getNotificationState: getRecipeNotificationState,
+  //   removeByAppId: removeRecipeNotificationByAppId,
+  //   clearNotifications: clearRecipeNotifications,
+  // } = useRecipeApproveNotification();
+  // const {
+  //   getTotals: getPlanTotals,
+  //   getNotificationState: getPlanNotificationState,
+  //   removeByAppId: removePlanNotificationByAppId,
+  //   clearNotifications: clearPlanNotifications,
+  // } = usePlanApproveNotification();
+  //
+  // const {
+  //   getTotals: getBoughtTotals,
+  //   getNotificationState: getBoughtNotificationState,
+  //   removeNotificationBought,
+  //   clearNotificationsBought,
+  // } = useBoughtNotification();
+  //
+  // const totalChatNotifications = useMemo(
+  //   () => getChatTotals().total,
+  //   [getChatTotals().total],
+  // );
+  // const totalPostNotifications = useMemo(
+  //   () => getPostTotals().total,
+  //   [getPostTotals().total],
+  // );
+  // const totalRecipeNotifications = useMemo(
+  //   () => getRecipeTotals().total,
+  //   [getRecipeTotals().total],
+  // );
+  // const totalPlanNotifications = useMemo(
+  //   () => getPlanTotals().total,
+  //   [getPlanTotals().total],
+  // );
+  // const totalBoughtNotifications = useMemo(
+  //   () => getBoughtTotals().total,
+  //   [getBoughtTotals().total],
+  // );
+  // const totalNotifications = useMemo(
+  //   () =>
+  //     totalChatNotifications +
+  //     totalPostNotifications +
+  //     totalRecipeNotifications +
+  //     totalPlanNotifications +
+  //     totalBoughtNotifications,
+  //   [
+  //     totalChatNotifications,
+  //     totalPostNotifications,
+  //     totalRecipeNotifications,
+  //     totalPlanNotifications,
+  //     totalBoughtNotifications,
+  //   ],
+  // );
+  // const chatNotificationsGroupedBySender = getNotificationsGroupedBySender();
+  // const stompClient = useStompClient();
+  // const router = useRouter();
+  // // const { setActiveChatId } = useChatContext();
+  // const { removeBySender } = useChatNotification();
+  // const pathName = usePathname();
+  //
+  // useEffect(() => {
+  //   getNotificationPopTexts(totalNotifications).then(setNotificationPopTexts);
+  // }, [totalNotifications]);
+  //
+  // useEffect(() => {
+  //   if (
+  //     chatMessageNotificationTexts === null ||
+  //     previousChatMsgGroupedBySender.current === null ||
+  //     !isEqual(
+  //       chatNotificationsGroupedBySender.notifications,
+  //       previousChatMsgGroupedBySender.current,
+  //     )
+  //   ) {
+  //     previousChatMsgGroupedBySender.current =
+  //       chatNotificationsGroupedBySender.notifications;
+  //     getChatMessageNotificationTextsForReceiver(
+  //       chatNotificationsGroupedBySender.notifications,
+  //     ).then(setChatMessageNotificationTexts);
+  //   }
+  // }, [
+  //   chatMessageNotificationTexts,
+  //   chatNotificationsGroupedBySender.notifications,
+  // ]);
+  //
+  // useEffect(() => {
+  //   console.error(
+  //     "Fetching post notifications...",
+  //     postMessageNotificationsTexts,
+  //   );
+  //   console.error("Prev Post", previousPostNotifications.current);
+  //   console.error(
+  //     "isEqual",
+  //     isEqual(
+  //       getPostNotificationState().notifications,
+  //       previousPostNotifications.current,
+  //     ),
+  //   );
+  //   console.error("Current Post", getPostNotificationState().notifications);
+  //   if (
+  //     postMessageNotificationsTexts === null ||
+  //     previousPostNotifications.current === null ||
+  //     !isEqual(
+  //       getPostNotificationState().notifications,
+  //       previousPostNotifications.current,
+  //     )
+  //   ) {
+  //     console.error("Setting post notifications...");
+  //     previousPostNotifications.current =
+  //       getPostNotificationState().notifications;
+  //
+  //     getApprovedNotificationTextsByItems(
+  //       "post",
+  //       getPostNotificationState().notifications,
+  //     ).then((texts) => {
+  //       console.error("TEXTS post", texts);
+  //       setPostMessageNotificationsTexts(texts);
+  //     });
+  //   }
+  // }, [
+  //   getPostNotificationState,
+  //   JSON.stringify(getPostNotificationState().notifications),
+  //   postMessageNotificationsTexts,
+  // ]);
+  //
+  // // useEffect(() => {
+  // //   if (postMessageNotificationsTexts === null) {
+  // //     getApprovedNotificationTextsByItems(
+  // //       "post",
+  // //       getPostNotificationState().notifications,
+  // //     ).then(setPostMessageNotificationsTexts);
+  // //   }
+  // // }, [postMessageNotificationsTexts, getPostNotificationState]);
+  //
+  // useEffect(() => {
+  //   if (
+  //     recipeMessageNotificationsTexts === null ||
+  //     previousRecipeNotifications.current === null ||
+  //     !isEqual(
+  //       getRecipeNotificationState().notifications,
+  //       previousRecipeNotifications.current,
+  //     )
+  //   ) {
+  //     previousRecipeNotifications.current =
+  //       getRecipeNotificationState().notifications;
+  //
+  //     getApprovedNotificationTextsByItems(
+  //       "recipe",
+  //       getRecipeNotificationState().notifications,
+  //     ).then(setRecipeMessageNotificationsTexts);
+  //   }
+  // }, [
+  //   getRecipeNotificationState,
+  //   recipeMessageNotificationsTexts,
+  //   JSON.stringify(getRecipeNotificationState().notifications),
+  // ]);
+  //
+  // // useEffect(() => {
+  // //   if (recipeMessageNotificationsTexts === null) {
+  // //     getApprovedNotificationTextsByItems(
+  // //       "recipe",
+  // //       getRecipeNotificationState().notifications,
+  // //     ).then(setRecipeMessageNotificationsTexts);
+  // //   }
+  // // }, [getRecipeNotificationState, recipeMessageNotificationsTexts]);
+  //
+  // useEffect(() => {
+  //   if (
+  //     planMessageNotificationsTexts === null ||
+  //     previousPlanNotifications.current === null ||
+  //     !isEqual(
+  //       getPlanNotificationState().notifications,
+  //       previousPlanNotifications.current,
+  //     )
+  //   ) {
+  //     previousPlanNotifications.current =
+  //       getPlanNotificationState().notifications;
+  //
+  //     getApprovedNotificationTextsByItems(
+  //       "plan",
+  //       getPlanNotificationState().notifications,
+  //     ).then(setPlanMessageNotificationsTexts);
+  //   }
+  // }, [
+  //   getPlanNotificationState,
+  //   JSON.stringify(getPlanNotificationState().notifications),
+  //   planMessageNotificationsTexts,
+  // ]);
+  //
+  // // useEffect(() => {
+  // //   if (planMessageNotificationsTexts === null) {
+  // //     getApprovedNotificationTextsByItems(
+  // //       "plan",
+  // //       getPlanNotificationState().notifications,
+  // //     ).then(setPlanMessageNotificationsTexts);
+  // //   }
+  // // }, [getPlanNotificationState, planMessageNotificationsTexts]);
+  //
+  // useEffect(() => {
+  //   if (
+  //     boughtNotificationTexts === null ||
+  //     previousBoughtNotifications.current === null ||
+  //     !isEqual(
+  //       getBoughtNotificationState().notifications,
+  //       previousBoughtNotifications.current,
+  //     )
+  //   ) {
+  //     previousBoughtNotifications.current =
+  //       getBoughtNotificationState().notifications;
+  //
+  //     getBoughtNotificationTextsByItems(
+  //       getBoughtNotificationState().notifications,
+  //     ).then(setBoughtNotificationTexts);
+  //   }
+  // }, [
+  //   boughtNotificationTexts,
+  //   getBoughtNotificationState,
+  //   JSON.stringify(getBoughtNotificationState().notifications),
+  // ]);
+  //
+  // // useEffect(() => {
+  // //   if (boughtNotificationTexts === null) {
+  // //     getBoughtNotificationTextsByItems(
+  // //       getBoughtNotificationState().notifications,
+  // //     ).then(setBoughtNotificationTexts);
+  // //   }
+  // // }, [boughtNotificationTexts, getBoughtNotificationState]);
+  //
+  // // useEffect(() => {
+  // //   console.error(
+  // //     "Fetching post notifications...",
+  // //     postMessageNotificationsTexts,
+  // //   );
+  // //   if (
+  // //     postMessageNotificationsTexts === null ||
+  // //     !isEqual(
+  // //       getPostNotificationState().notifications,
+  // //       previousPostNotifications.current,
+  // //     )
+  // //   ) {
+  // //     console.error("Setting post notifications...");
+  // //     previousPostNotifications.current =
+  // //       getPostNotificationState().notifications;
+  // //     getApprovedNotificationTextsByItems(
+  // //       "post",
+  // //       getPostNotificationState().notifications,
+  // //     ).then(setPostMessageNotificationsTexts);
+  // //   }
+  // // }, [getPostNotificationState, postMessageNotificationsTexts]);
+  // //
+  // // useEffect(() => {
+  // //   if (postMessageNotificationsTexts === null) {
+  // //     getApprovedNotificationTextsByItems(
+  // //       "post",
+  // //       getPostNotificationState().notifications,
+  // //     ).then(setPostMessageNotificationsTexts);
+  // //   }
+  // // }, [postMessageNotificationsTexts, getPostNotificationState]);
+  // //
+  // // useEffect(() => {
+  // //   if (
+  // //     recipeMessageNotificationsTexts === null ||
+  // //     !isEqual(
+  // //       getRecipeNotificationState().notifications,
+  // //       previousRecipeNotifications.current,
+  // //     )
+  // //   ) {
+  // //     previousRecipeNotifications.current =
+  // //       getRecipeNotificationState().notifications;
+  // //     getApprovedNotificationTextsByItems(
+  // //       "recipe",
+  // //       getRecipeNotificationState().notifications,
+  // //     ).then(setRecipeMessageNotificationsTexts);
+  // //   }
+  // // }, [getRecipeNotificationState, recipeMessageNotificationsTexts]);
+  // //
+  // // useEffect(() => {
+  // //   if (recipeMessageNotificationsTexts === null) {
+  // //     getApprovedNotificationTextsByItems(
+  // //       "recipe",
+  // //       getRecipeNotificationState().notifications,
+  // //     ).then(setRecipeMessageNotificationsTexts);
+  // //   }
+  // // }, [getRecipeNotificationState, recipeMessageNotificationsTexts]);
+  // //
+  // // useEffect(() => {
+  // //   if (
+  // //     planMessageNotificationsTexts === null ||
+  // //     !isEqual(
+  // //       getPlanNotificationState().notifications,
+  // //       previousPlanNotifications.current,
+  // //     )
+  // //   ) {
+  // //     previousPlanNotifications.current =
+  // //       getPlanNotificationState().notifications;
+  // //     getApprovedNotificationTextsByItems(
+  // //       "plan",
+  // //       getPlanNotificationState().notifications,
+  // //     ).then(setPlanMessageNotificationsTexts);
+  // //   }
+  // // }, [getPlanNotificationState, planMessageNotificationsTexts]);
+  // //
+  // // useEffect(() => {
+  // //   if (planMessageNotificationsTexts === null) {
+  // //     getApprovedNotificationTextsByItems(
+  // //       "plan",
+  // //       getPlanNotificationState().notifications,
+  // //     ).then(setPlanMessageNotificationsTexts);
+  // //   }
+  // // }, [getPlanNotificationState, planMessageNotificationsTexts]);
+  // //
+  // // useEffect(() => {
+  // //   if (
+  // //     boughtNotificationTexts === null ||
+  // //     !isEqual(
+  // //       getBoughtNotificationState().notifications,
+  // //       previousBoughtNotifications.current,
+  // //     )
+  // //   ) {
+  // //     previousBoughtNotifications.current =
+  // //       getBoughtNotificationState().notifications;
+  // //     getBoughtNotificationTextsByItems(
+  // //       getBoughtNotificationState().notifications,
+  // //     ).then(setBoughtNotificationTexts);
+  // //   }
+  // // }, [boughtNotificationTexts, getBoughtNotificationState]);
+  // //
+  // // useEffect(() => {
+  // //   if (boughtNotificationTexts === null) {
+  // //     getBoughtNotificationTextsByItems(
+  // //       getBoughtNotificationState().notifications,
+  // //     ).then(setBoughtNotificationTexts);
+  // //   }
+  // // }, [boughtNotificationTexts, getBoughtNotificationState]);
+  //
+  // // useSubscription(`/user/${authUser.email}/chat/changed`, (message) => {
+  // //   const newMessage = JSON.parse(message.body) as ConversationUserResponse;
+  // //   console.log("newMessage chat notif", newMessage);
+  // //   console.log("not path", pathName);
+  // //
+  // //   // navigate to chat room after it is created
+  // //   if (newMessage.connectedChatRoom?.id) {
+  // //     // router.push(`/chat/?chatId=${newMessage.connectedChatRoom?.id}`);
+  // //     // setActiveChatId(newMessage.connectedChatRoom?.id);
+  // //     // router.push(`/chat`);
+  // //     const sender = newMessage.connectedChatRoom?.users.find(
+  // //       (user) => user.email !== authUser.email,
+  // //     );
+  // //     if (sender && stompClient && stompClient.connected) {
+  // //       removeBySender({
+  // //         stompClient,
+  // //         senderEmail: sender.email,
+  // //         receiverEmail: authUser.email,
+  // //       });
+  // //       router.push(`/chat/?chatId=${newMessage.connectedChatRoom?.id}`);
+  // //       // if (pathName === "/chat") {
+  // //       //   router.refresh();
+  // //       // } else {
+  // //       //   router.push(`/chat`);
+  // //       // }
+  // //     }
+  // //   }
+  // // });
+  // useSubscription(`/queue/chat-changed-${authUser.email}`, (message) => {
+  //   const newMessage = JSON.parse(message.body) as ConversationUserResponse;
+  //   console.log("newMessage chat notif", newMessage);
+  //   console.log("not path", pathName);
+  //
+  //   // navigate to chat room after it is created
+  //   if (newMessage.connectedChatRoom?.id) {
+  //     // router.push(`/chat/?chatId=${newMessage.connectedChatRoom?.id}`);
+  //     // setActiveChatId(newMessage.connectedChatRoom?.id);
+  //     // router.push(`/chat`);
+  //     const sender = newMessage.connectedChatRoom?.users.find(
+  //       (user) => user.email !== authUser.email,
+  //     );
+  //     if (sender && stompClient && stompClient.connected) {
+  //       removeBySender({
+  //         stompClient,
+  //         senderEmail: sender.email,
+  //         receiverEmail: authUser.email,
+  //       });
+  //       router.push(`/chat/?chatId=${newMessage.connectedChatRoom?.id}`);
+  //       // if (pathName === "/chat") {
+  //       //   router.refresh();
+  //       // } else {
+  //       //   router.push(`/chat`);
+  //       // }
+  //     }
+  //   }
+  // });
   const {
-    getNotificationsGroupedBySender,
-    getTotals: getChatTotals,
-    clearNotifications: clearChatNotifications,
-  } = useChatNotification();
-  const {
-    getTotals: getPostTotals,
-    getNotificationState: getPostNotificationState,
-    removeByAppId: removePostNotificationByAppId,
-    clearNotifications: clearPostNotifications,
-  } = usePostApproveNotification();
-
-  const {
-    getTotals: getRecipeTotals,
-    getNotificationState: getRecipeNotificationState,
-    removeByAppId: removeRecipeNotificationByAppId,
-    clearNotifications: clearRecipeNotifications,
-  } = useRecipeApproveNotification();
-  const {
-    getTotals: getPlanTotals,
-    getNotificationState: getPlanNotificationState,
-    removeByAppId: removePlanNotificationByAppId,
-    clearNotifications: clearPlanNotifications,
-  } = usePlanApproveNotification();
-
-  const {
-    getTotals: getBoughtTotals,
-    getNotificationState: getBoughtNotificationState,
-    removeNotificationBought,
+    chatMessageNotificationTexts,
+    chatNotificationsGroupedBySender,
+    notificationPopTexts,
+    setNotificationPopTexts,
+    boughtNotificationTexts,
+    setBoughtNotificationTexts,
+    postMessageNotificationsTexts,
+    setPostMessageNotificationsTexts,
+    recipeMessageNotificationsTexts,
+    clearRecipeNotifications,
+    planMessageNotificationsTexts,
+    clearPlanNotifications,
     clearNotificationsBought,
-  } = useBoughtNotification();
-
-  const totalChatNotifications = getChatTotals().total;
-  const totalPostNotifications = getPostTotals().total;
-  const totalRecipeNotifications = getRecipeTotals().total;
-  const totalPlanNotifications = getPlanTotals().total;
-  const totalBoughtNotifications = getBoughtTotals().total;
-  const totalNotifications =
-    totalChatNotifications +
-    totalPostNotifications +
-    totalRecipeNotifications +
-    totalPlanNotifications +
-    totalBoughtNotifications;
-  const chatNotificationsGroupedBySender = getNotificationsGroupedBySender();
-  const stompClient = useStompClient();
-  const router = useRouter();
-  // const { setActiveChatId } = useChatContext();
-  const { removeBySender } = useChatNotification();
-  const pathName = usePathname();
-
-  useEffect(() => {
-    getNotificationPopTexts(totalNotifications).then(setNotificationPopTexts);
-  }, [totalNotifications]);
-
-  useEffect(() => {
-    getChatMessageNotificationTextsForReceiver(
-      chatNotificationsGroupedBySender.notifications,
-    ).then(setChatMessageNotificationTexts);
-  }, [JSON.stringify(chatNotificationsGroupedBySender.notifications)]);
+    clearChatNotifications,
+    removeNotificationBought,
+    clearPostNotifications,
+    totalBoughtNotifications,
+    removePlanNotificationByAppId,
+    totalChatNotifications,
+    totalPostNotifications,
+    totalRecipeNotifications,
+    totalPlanNotifications,
+    removePostNotificationByAppId,
+    removeRecipeNotificationByAppId,
+    totalNotifications,
+    removeBySender,
+    setChatMessageNotificationTexts,
+    setPlanMessageNotificationsTexts,
+    setRecipeMessageNotificationsTexts,
+    stompClient,
+    pathName,
+    getPlanNotificationState,
+    getRecipeNotificationState,
+    getPostNotificationState,
+    getBoughtNotificationState,
+  } = useNotificationPop();
 
   useEffect(() => {
-    getApprovedNotificationTextsByItems(
-      "post",
-      getPostNotificationState().notifications,
-    ).then(setPostMessageNotificationsTexts);
-  }, [JSON.stringify(getPostNotificationState().notifications)]);
-
-  useEffect(() => {
-    getApprovedNotificationTextsByItems(
-      "recipe",
-      getRecipeNotificationState().notifications,
-    ).then(setRecipeMessageNotificationsTexts);
-  }, [JSON.stringify(getRecipeNotificationState().notifications)]);
-
-  useEffect(() => {
-    getApprovedNotificationTextsByItems(
-      "plan",
-      getPlanNotificationState().notifications,
-    ).then(setPlanMessageNotificationsTexts);
-  }, [JSON.stringify(getPlanNotificationState().notifications)]);
-
-  useEffect(() => {
-    getBoughtNotificationTextsByItems(
-      getBoughtNotificationState().notifications,
-    ).then(setBoughtNotificationTexts);
-  }, [JSON.stringify(getBoughtNotificationState().notifications)]);
-
-  useSubscription(`/user/${authUser.email}/chat/changed`, (message) => {
-    const newMessage = JSON.parse(message.body) as ConversationUserResponse;
-    console.log("newMessage chat notif", newMessage);
-    console.log("not path", pathName);
-
-    // navigate to chat room after it is created
-    if (newMessage.connectedChatRoom?.id) {
-      // router.push(`/chat/?chatId=${newMessage.connectedChatRoom?.id}`);
-      // setActiveChatId(newMessage.connectedChatRoom?.id);
-      // router.push(`/chat`);
-      const sender = newMessage.connectedChatRoom?.users.find(
-        (user) => user.email !== authUser.email,
-      );
-      if (sender && stompClient && stompClient.connected) {
-        removeBySender({
-          stompClient,
-          senderEmail: sender.email,
-          receiverEmail: authUser.email,
-        });
-        router.push(`/chat/?chatId=${newMessage.connectedChatRoom?.id}`);
-        // if (pathName === "/chat") {
-        //   router.refresh();
-        // } else {
-        //   router.push(`/chat`);
-        // }
-      }
+    if (totalNotifications === 0) {
+      setIsAccordionOpen(false);
     }
-  });
+  }, [totalNotifications]);
 
   const isNotUser = authUser.role !== "ROLE_USER";
   const isOneAccordionOpen = Object.values(accordionsState).some(
@@ -238,8 +584,44 @@ export default function NotificationPop({ authUser }: NotificationPopProps) {
       </Button>
     );
 
+  console.error("NAV AccordingState", accordionsState);
+  console.error(
+    "POSTS",
+    getPostNotificationState().notifications,
+    totalPostNotifications,
+    postMessageNotificationsTexts !== null,
+  );
+  console.error(
+    "RECIPES",
+    getRecipeNotificationState().notifications,
+    totalRecipeNotifications,
+    recipeMessageNotificationsTexts !== null,
+  );
+  console.error(
+    "PLANS",
+    getPlanNotificationState().notifications,
+    totalPlanNotifications,
+    planMessageNotificationsTexts !== null,
+  );
+  console.error(
+    "BOUGHT",
+    getBoughtNotificationState().notifications,
+    totalBoughtNotifications,
+    boughtNotificationTexts !== null,
+  );
+  console.error(
+    "CHAT",
+    chatNotificationsGroupedBySender.notifications,
+    totalChatNotifications,
+    chatMessageNotificationTexts !== null,
+  );
+
   return (
-    <DropdownMenu modal={false}>
+    <DropdownMenu
+      modal={false}
+      open={isAccordionOpen}
+      onOpenChange={(v) => setIsAccordionOpen(v)}
+    >
       <DropdownMenuTrigger asChild>
         <div className="relative">
           <TooltipProvider disableHoverableContent>
@@ -341,7 +723,7 @@ export default function NotificationPop({ authUser }: NotificationPopProps) {
           <hr className="border my-3" />
 
           <DropdownMenuGroup>
-            <ScrollArea className="w-full max-h-[400px]">
+            <div className="w-full max-h-[400px] pe-2.5 overflow-y-auto">
               {totalChatNotifications > 0 &&
                 chatMessageNotificationTexts &&
                 (isNotUser ? (
@@ -658,7 +1040,7 @@ export default function NotificationPop({ authUser }: NotificationPopProps) {
                     </AccordionItem>
                   </Accordion>
                 )}
-            </ScrollArea>
+            </div>
           </DropdownMenuGroup>
         </DropdownMenuContent>
       )}

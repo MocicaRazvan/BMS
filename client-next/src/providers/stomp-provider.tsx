@@ -39,6 +39,8 @@ export const StompProvider = ({
         console.log("STOMP error WebSocket error: ", err.message);
         // console.error("Detailed WebSocket error: ", err);
       }}
+      heartbeatIncoming={10000}
+      heartbeatOutgoing={10000}
     >
       {children}
     </StompSessionProvider>

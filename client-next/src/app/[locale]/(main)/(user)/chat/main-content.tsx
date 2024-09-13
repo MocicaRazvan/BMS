@@ -153,7 +153,20 @@ export default function ChatMainContent({
     // router.replace(`/chat?${params.toString()}`);
   }, [activeRoomId, searchParams]);
 
-  useSubscription(`/user/${authUser.email}/chatRooms`, (message) => {
+  // useSubscription(`/user/${authUser.email}/chatRooms`, (message) => {
+  //   const newMessage = JSON.parse(message.body);
+  //   setChatRooms((prev) => {
+  //     const isRoomPresent = prev.findIndex((room) => room.id === newMessage.id);
+  //     if (isRoomPresent === -1) {
+  //       return prev;
+  //     }
+  //     // return [...prev.filter((room) => room.id !== newMessage.id), newMessage];
+  //     return prev.map((room) =>
+  //       room.id === newMessage.id ? newMessage : room,
+  //     );
+  //   });
+  // });
+  useSubscription(`/queue/chatRooms-${authUser.email}`, (message) => {
     const newMessage = JSON.parse(message.body);
     setChatRooms((prev) => {
       const isRoomPresent = prev.findIndex((room) => room.id === newMessage.id);
@@ -166,9 +179,24 @@ export default function ChatMainContent({
       );
     });
   });
-  useSubscription(`/user/${authUser.email}/chatRooms/delete`, (message) => {
+  // useSubscription(`/user/${authUser.email}/chatRooms/delete`, (message) => {
+  //   const newMessage = JSON.parse(message.body);
+  //   setChatRooms((prev) => prev.filter((room) => room.id !== newMessage.id));
+  // });
+  useSubscription(`/queue/chatRooms-delete-${authUser.email}`, (message) => {
     const newMessage = JSON.parse(message.body);
     setChatRooms((prev) => prev.filter((room) => room.id !== newMessage.id));
+  });
+
+  useSubscription(`/queue/chatRooms-create-${authUser.email}`, (message) => {
+    const newMessage = JSON.parse(message.body);
+    setChatRooms((prev) => {
+      const isRoomPresent = prev.findIndex((room) => room.id === newMessage.id);
+      if (isRoomPresent === -1) {
+        return [...prev, newMessage];
+      }
+      return prev;
+    });
   });
 
   const [clientInitialized, setClientInitialized] = useState(false);

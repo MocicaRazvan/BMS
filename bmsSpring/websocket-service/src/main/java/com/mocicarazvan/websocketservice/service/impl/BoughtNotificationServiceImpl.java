@@ -9,6 +9,7 @@ import com.mocicarazvan.websocketservice.dtos.plan.PlanResponse;
 import com.mocicarazvan.websocketservice.enums.BoughtNotificationType;
 import com.mocicarazvan.websocketservice.exceptions.notFound.EntityNotFound;
 import com.mocicarazvan.websocketservice.mappers.BoughtNotificationMapper;
+import com.mocicarazvan.websocketservice.messaging.CustomConvertAndSendToUser;
 import com.mocicarazvan.websocketservice.models.BoughtNotification;
 import com.mocicarazvan.websocketservice.models.ConversationUser;
 import com.mocicarazvan.websocketservice.models.Plan;
@@ -42,8 +43,8 @@ public class BoughtNotificationServiceImpl
 
     private final ObjectMapper objectMapper;
 
-    public BoughtNotificationServiceImpl(PlanRepository referenceRepository, ConversationUserService conversationUserService, Executor asyncExecutor, BoughtNotificationRepository notificationTemplateRepository, BoughtNotificationMapper notificationTemplateMapper, SimpMessagingTemplate messagingTemplate, ObjectMapper objectMapper) {
-        super(referenceRepository, conversationUserService, "chat_plan", "boughtNotification", asyncExecutor, notificationTemplateRepository, notificationTemplateMapper, messagingTemplate);
+    public BoughtNotificationServiceImpl(PlanRepository referenceRepository, ConversationUserService conversationUserService, Executor asyncExecutor, BoughtNotificationRepository notificationTemplateRepository, BoughtNotificationMapper notificationTemplateMapper, SimpMessagingTemplate messagingTemplate, ObjectMapper objectMapper, CustomConvertAndSendToUser customConvertAndSendToUser) {
+        super(referenceRepository, conversationUserService, "chat_plan", "boughtNotification", asyncExecutor, notificationTemplateRepository, notificationTemplateMapper, messagingTemplate, customConvertAndSendToUser);
 
         this.objectMapper = objectMapper;
     }

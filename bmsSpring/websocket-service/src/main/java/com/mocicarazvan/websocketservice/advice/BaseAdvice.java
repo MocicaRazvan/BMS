@@ -2,6 +2,7 @@ package com.mocicarazvan.websocketservice.advice;
 
 import com.mocicarazvan.websocketservice.dtos.errors.BaseErrorResponse;
 import com.mocicarazvan.websocketservice.dtos.errors.WebSocketErrorResponse;
+import com.mocicarazvan.websocketservice.messaging.CustomConvertAndSendToUser;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -41,11 +42,14 @@ public abstract class BaseAdvice {
     }
 
     protected void handleWithMessageWs(RuntimeException e, Message<?> message, StompHeaderAccessor accessor, HttpStatus status,
-                                       SimpMessagingTemplate simpMessagingTemplate) {
+                                       SimpMessagingTemplate simpMessagingTemplate,
+                                       CustomConvertAndSendToUser customConvertAndSendToUser
+    ) {
         WebSocketErrorResponse resp = respWithMessageWs(e, accessor, status, message);
         String username = Objects.requireNonNull(accessor.getUser()).getName();
         if (username != null) {
-            simpMessagingTemplate.convertAndSendToUser(username, "/queue/errors", resp);
+//            simpMessagingTemplate.convertAndSendToUser(username, "/queue/errors", resp);
+            customConvertAndSendToUser.sendToUser(username, "/queue/errors", resp);
         } else {
             simpMessagingTemplate.convertAndSend("/queue/errors", resp);
         }

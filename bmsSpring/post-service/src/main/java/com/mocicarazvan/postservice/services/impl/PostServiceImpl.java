@@ -10,11 +10,16 @@ import com.mocicarazvan.templatemodule.cache.keys.FilterKeyType;
 import com.mocicarazvan.templatemodule.clients.FileClient;
 import com.mocicarazvan.templatemodule.clients.UserClient;
 import com.mocicarazvan.templatemodule.dtos.PageableBody;
+import com.mocicarazvan.templatemodule.dtos.notifications.ApproveNotificationBody;
 import com.mocicarazvan.templatemodule.dtos.response.PageableResponse;
 import com.mocicarazvan.templatemodule.dtos.response.ResponseWithChildList;
 import com.mocicarazvan.templatemodule.dtos.response.ResponseWithUserDto;
+import com.mocicarazvan.templatemodule.enums.ApprovedNotificationType;
 import com.mocicarazvan.templatemodule.exceptions.notFound.NotFoundEntity;
+import com.mocicarazvan.templatemodule.services.RabbitMqApprovedSenderWrapper;
+import com.mocicarazvan.templatemodule.services.RabbitMqSender;
 import com.mocicarazvan.templatemodule.services.impl.ApprovedServiceImpl;
+import com.mocicarazvan.templatemodule.services.impl.RabbitMqApprovedSenderWrapperImpl;
 import com.mocicarazvan.templatemodule.utils.EntitiesUtils;
 import com.mocicarazvan.templatemodule.utils.PageableUtilsCustom;
 import com.mocicarazvan.postservice.clients.CommentClient;
@@ -29,6 +34,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
 import org.jooq.lambda.function.Function2;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -48,15 +54,35 @@ public class PostServiceImpl extends ApprovedServiceImpl<Post, PostBody, PostRes
     private final CommentClient commentClient;
     private final PostExtendedRepository postExtendedRepository;
     private final PostServiceCacheHandler postServiceCacheHandler;
+    private final RabbitMqApprovedSenderWrapper<PostResponse> rabbitMqSender;
 
 
-    public PostServiceImpl(PostRepository modelRepository, PostMapper modelMapper, PageableUtilsCustom pageableUtils, UserClient userClient, EntitiesUtils entitiesUtils, FileClient fileClient, ObjectMapper objectMapper, CommentClient commentClient, PostExtendedRepository postExtendedRepository, PostServiceCacheHandler postServiceCacheHandler) {
-        super(modelRepository, modelMapper, pageableUtils, userClient, "post", List.of("id", "userId", "title", "createdAt", "updatedAt", "approved"), entitiesUtils, fileClient, objectMapper, postServiceCacheHandler);
+    public PostServiceImpl(PostRepository modelRepository, PostMapper modelMapper, PageableUtilsCustom pageableUtils, UserClient userClient, EntitiesUtils entitiesUtils, FileClient fileClient, ObjectMapper objectMapper, CommentClient commentClient, PostExtendedRepository postExtendedRepository, PostServiceCacheHandler postServiceCacheHandler, RabbitMqApprovedSenderWrapper<PostResponse> rabbitMqSender) {
+        super(modelRepository, modelMapper, pageableUtils, userClient, "post", List.of("id", "userId", "title", "createdAt", "updatedAt", "approved"), entitiesUtils, fileClient, objectMapper, postServiceCacheHandler, rabbitMqSender);
         this.commentClient = commentClient;
         this.postExtendedRepository = postExtendedRepository;
         this.postServiceCacheHandler = postServiceCacheHandler;
+        this.rabbitMqSender = rabbitMqSender;
     }
 
+//    @Override
+//    public Mono<ResponseWithUserDto<PostResponse>> approveModel(Long id, String userId, boolean approved) {
+//        return super.approveModelWithCallback(id, userId, approved,
+//                (r, u) -> {
+//                    rabbitMqSender.sendMessage(
+//                            ApproveNotificationBody.builder()
+//                                    .senderEmail(u.getEmail())
+//                                    .receiverEmail(r.getUser().getEmail())
+//                                    .type(approved ? ApprovedNotificationType.APPROVED : ApprovedNotificationType.DISAPPROVED)
+//                                    .referenceId(r.getModel().getId())
+//                                    .content(r.getModel().getTitle())
+//                                    .extraLink(extraLink + r.getModel().getId())
+//                                    .build()
+//                    );
+//                    return null;
+//                }
+//        );
+//    }
 
     @Override
     public Mono<PostResponse> deleteModel(Long id, String userId) {

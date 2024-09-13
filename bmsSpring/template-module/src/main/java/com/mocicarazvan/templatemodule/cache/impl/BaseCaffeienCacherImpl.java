@@ -19,9 +19,9 @@ import java.util.stream.Collectors;
 @Getter
 @Slf4j
 public class BaseCaffeienCacherImpl<K> implements BaseCaffeineCacher<K> {
-    private Integer cacheExpirationTimeMinutes;
-    private Integer cacheMaximumSize;
-    private Duration internalCacheExpirationTime;
+    private final Integer cacheExpirationTimeMinutes;
+    private final Integer cacheMaximumSize;
+    private final Duration internalCacheExpirationTime;
     private final AsyncCache<K, Publisher<?>> cacheMap;
     private final Executor executor;
 

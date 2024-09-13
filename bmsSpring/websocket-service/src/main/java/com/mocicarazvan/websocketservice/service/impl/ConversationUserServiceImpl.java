@@ -9,6 +9,7 @@ import com.mocicarazvan.websocketservice.enums.ConnectedStatus;
 import com.mocicarazvan.websocketservice.exceptions.notFound.ConversationUserNotFound;
 import com.mocicarazvan.websocketservice.exceptions.notFound.NoChatRoomFound;
 import com.mocicarazvan.websocketservice.mappers.ConversationUserMapper;
+import com.mocicarazvan.websocketservice.messaging.CustomConvertAndSendToUser;
 import com.mocicarazvan.websocketservice.models.ConversationUser;
 import com.mocicarazvan.websocketservice.repositories.ChatRoomRepository;
 import com.mocicarazvan.websocketservice.repositories.ConversationUserRepository;
@@ -44,6 +45,7 @@ public class ConversationUserServiceImpl implements ConversationUserService {
     private final ConversationUserRepository conversationUserRepository;
     private final SimpMessagingTemplate messagingTemplate;
     private final ChatRoomRepository chatRoomRepository;
+    private final CustomConvertAndSendToUser customConvertAndSendToUser;
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, isolation = Isolation.REPEATABLE_READ)
@@ -171,7 +173,19 @@ public class ConversationUserServiceImpl implements ConversationUserService {
     public ConversationUserResponse mapToResponseAndNotify(ConversationUser conversationUser) {
         notifyOtherUsers(conversationUser.getEmail());
         log.error("Conversation user chat room: {}", conversationUser.getConnectedChatRoom());
-        messagingTemplate.convertAndSendToUser(conversationUser.getEmail(), "/chat/changed",
+//        messagingTemplate.convertAndSendToUser(conversationUser.getEmail(), "/chat/changed",
+//                ConversationUserResponse.builder()
+//                        .id(conversationUser.getId())
+//                        .connectedChatRoom(conversationUser.getConnectedChatRoom() == null ? null :
+//                                ChatRoomResponse.builder()
+//                                        .id(conversationUser.getConnectedChatRoom().getId())
+//                                        .users(conversationUser.getConnectedChatRoom().getUsers()
+//                                                .stream()
+//                                                .map(conversationUserMapper::fromModelToResponse)
+//                                                .collect(Collectors.toSet()))
+//                                        .build())
+//                        .build());
+        customConvertAndSendToUser.sendToUser(conversationUser.getEmail(), "/queue/chat-changed",
                 ConversationUserResponse.builder()
                         .id(conversationUser.getId())
                         .connectedChatRoom(conversationUser.getConnectedChatRoom() == null ? null :
@@ -189,8 +203,19 @@ public class ConversationUserServiceImpl implements ConversationUserService {
     @Transactional(isolation = Isolation.REPEATABLE_READ)
     @CustomRetryable
     public void notifyOtherUsers(String senderEmail) {
+//        chatRoomRepository.findOthersEmailsBySenderEmail(senderEmail)
+//                .forEach(d -> messagingTemplate.convertAndSendToUser(d.getUserEmail(), "/chatRooms",
+//                        ChatRoomResponse.builder()
+//                                .id(d.getChatId())
+//                                .users(
+//                                        Stream.of(d.getUserEmail(), senderEmail)
+//                                                .map(this::getUserByEmail)
+//                                                .map(conversationUserMapper::fromModelToResponse)
+//                                                .collect(Collectors.toSet())
+//                                )
+//                                .build()));
         chatRoomRepository.findOthersEmailsBySenderEmail(senderEmail)
-                .forEach(d -> messagingTemplate.convertAndSendToUser(d.getUserEmail(), "/chatRooms",
+                .forEach(d -> customConvertAndSendToUser.sendToUser(d.getUserEmail(), "/queue/chatRooms",
                         ChatRoomResponse.builder()
                                 .id(d.getChatId())
                                 .users(

@@ -9,6 +9,7 @@ import com.mocicarazvan.websocketservice.enums.ConnectedStatus;
 import com.mocicarazvan.websocketservice.exceptions.MoreThenOneChatRoom;
 import com.mocicarazvan.websocketservice.exceptions.notFound.NoChatRoomFound;
 import com.mocicarazvan.websocketservice.mappers.ChatMessageMapper;
+import com.mocicarazvan.websocketservice.messaging.CustomConvertAndSendToUser;
 import com.mocicarazvan.websocketservice.models.ChatRoom;
 import com.mocicarazvan.websocketservice.repositories.ChatMessageRepository;
 import com.mocicarazvan.websocketservice.service.ChatMessageService;
@@ -50,6 +51,7 @@ public class ChatMessageServiceImpl implements ChatMessageService {
     private final ConversationUserService conversationUserService;
     private final Executor asyncExecutor;
     private final PageableUtilsCustom pageableUtilsCustom;
+    private final CustomConvertAndSendToUser customConvertAndSendToUser;
 
 
     @Override
@@ -102,10 +104,12 @@ public class ChatMessageServiceImpl implements ChatMessageService {
                             c.getReceiver().getConnectedChatRoom().getId().equals(
                                     Objects.requireNonNull(c.getSender().getConnectedChatRoom()).getId())) {
                         log.error("Sending to receiver " + c.getReceiver().getEmail());
-                        messagingTemplate.convertAndSendToUser(chatMessagePayload.getReceiverEmail(), "/queue/messages", cmr);
+//                        messagingTemplate.convertAndSendToUser(chatMessagePayload.getReceiverEmail(), "/queue/messages", cmr);
+                        customConvertAndSendToUser.sendToUser(chatMessagePayload.getReceiverEmail(), "/topic/messages", cmr);
                     } else {
                         log.error("Sending to sender" + c.getSender().getEmail());
-                        messagingTemplate.convertAndSendToUser(chatMessagePayload.getSenderEmail(), "/queue/messages", cmr);
+//                        messagingTemplate.convertAndSendToUser(chatMessagePayload.getSenderEmail(), "/queue/messages", cmr);
+                        customConvertAndSendToUser.sendToUser(chatMessagePayload.getSenderEmail(), "/topic/messages", cmr);
                     }
 
                     return cmr;

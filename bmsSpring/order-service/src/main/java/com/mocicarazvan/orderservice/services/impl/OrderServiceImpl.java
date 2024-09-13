@@ -42,6 +42,7 @@ import com.mocicarazvan.templatemodule.exceptions.action.IllegalActionException;
 import com.mocicarazvan.templatemodule.exceptions.action.PrivateRouteException;
 import com.mocicarazvan.templatemodule.exceptions.notFound.NotFoundEntity;
 import com.mocicarazvan.templatemodule.hateos.CustomEntityModel;
+import com.mocicarazvan.templatemodule.services.RabbitMqSender;
 import com.mocicarazvan.templatemodule.utils.EntitiesUtils;
 import com.stripe.Stripe;
 import com.stripe.exception.SignatureVerificationException;
@@ -92,6 +93,7 @@ public class OrderServiceImpl implements OrderService {
     private final ObjectMapper objectMapper;
 
     private final BoughtWebSocketClient boughtWebSocketClient;
+    private final RabbitMqSender rabbitMqSender;
 
     private final EntitiesUtils entitiesUtils;
     private final OrderMapper orderMapper;
@@ -655,7 +657,11 @@ public class OrderServiceImpl implements OrderService {
                 .senderEmail(senderEmail)
                 .plans(plans.stream().map(p -> new InternalBoughtBody.InnerPlanResponse(p.getId().toString(), p.getTitle())).toList())
                 .build();
-        return boughtWebSocketClient.saveNotifications(internalBoughtBody);
+//        return boughtWebSocketClient.saveNotifications(internalBoughtBody);
+        return Mono.fromCallable(() -> {
+            rabbitMqSender.sendMessage(internalBoughtBody);
+            return null;
+        });
     }
 
     private Mono<Order> getOrderById(Long orderId) {

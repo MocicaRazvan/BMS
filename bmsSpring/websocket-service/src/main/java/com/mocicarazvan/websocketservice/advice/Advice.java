@@ -6,6 +6,7 @@ import com.mocicarazvan.websocketservice.exceptions.MoreThenOneChatRoom;
 import com.mocicarazvan.websocketservice.exceptions.SameUserChatRoom;
 import com.mocicarazvan.websocketservice.exceptions.UserIsConnectedToTheRoom;
 import com.mocicarazvan.websocketservice.exceptions.notFound.NotFoundBase;
+import com.mocicarazvan.websocketservice.messaging.CustomConvertAndSendToUser;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -22,7 +23,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 public class Advice extends BaseAdvice {
 
     private final SimpMessagingTemplate simpMessagingTemplate;
-
+    private final CustomConvertAndSendToUser customConvertAndSendToUser;
 
     @ExceptionHandler({NotFoundBase.class, MoreThenOneChatRoom.class, SameUserChatRoom.class, UserIsConnectedToTheRoom.class})
     public ResponseEntity<BaseErrorResponse> handleBadRequest(RuntimeException e, HttpServletRequest request) {
@@ -53,7 +54,7 @@ public class Advice extends BaseAdvice {
 //        } else {
 //            simpMessagingTemplate.convertAndSend("/queue/errors", resp);
 //        }
-        handleWithMessageWs(e, message, accessor, HttpStatus.BAD_REQUEST, simpMessagingTemplate);
+        handleWithMessageWs(e, message, accessor, HttpStatus.BAD_REQUEST, simpMessagingTemplate, customConvertAndSendToUser);
 
     }
 }

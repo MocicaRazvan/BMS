@@ -161,14 +161,53 @@ export default function Conversation({
     totalMessages,
   ]);
 
-  useSubscription(`/user/${sender.email}/queue/messages`, (message) => {
+  // useSubscription(`/user/${sender.email}/queue/messages`, (message) => {
+  //   const newMessage = JSON.parse(message.body);
+  //   console.log("sender queue", newMessage);
+  //   setTotalMessages((prev) => ++prev);
+  //   setChatMessages((prev) => updateMessages(prev, newMessage));
+  //   setScrollPosition(true);
+  // });
+  // useSubscription(`/user/${receiver.email}/queue/messages`, (message) => {
+  //   const newMessage = JSON.parse(message.body) as ChatMessageResponse;
+  //   console.log("receiver queue", newMessage);
+  //   console.log("rec email", receiver.email);
+  //   console.log("sender email", sender.email);
+  //   console.log("newmsg rec", newMessage.receiver.email);
+  //   console.log("newmsg send", newMessage.sender.email);
+  //   if (
+  //     newMessage.receiver.email === receiver.email &&
+  //     newMessage.sender.email === sender.email
+  //   ) {
+  //     setTotalMessages((prev) => ++prev);
+  //     setChatMessages((prev) => updateMessages(prev, newMessage));
+  //     setScrollPosition(true);
+  //   }
+  // });
+  useSubscription(`/topic/messages-${sender.email}`, (message) => {
     const newMessage = JSON.parse(message.body);
     console.log("sender queue", newMessage);
     setTotalMessages((prev) => ++prev);
     setChatMessages((prev) => updateMessages(prev, newMessage));
     setScrollPosition(true);
   });
-  useSubscription(`/user/${receiver.email}/queue/messages`, (message) => {
+  // useSubscription(`/user/${receiver.email}/queue/messages`, (message) => {
+  //   const newMessage = JSON.parse(message.body) as ChatMessageResponse;
+  //   console.log("receiver queue", newMessage);
+  //   console.log("rec email", receiver.email);
+  //   console.log("sender email", sender.email);
+  //   console.log("newmsg rec", newMessage.receiver.email);
+  //   console.log("newmsg send", newMessage.sender.email);
+  //   if (
+  //     newMessage.receiver.email === receiver.email &&
+  //     newMessage.sender.email === sender.email
+  //   ) {
+  //     setTotalMessages((prev) => ++prev);
+  //     setChatMessages((prev) => updateMessages(prev, newMessage));
+  //     setScrollPosition(true);
+  //   }
+  // });
+  useSubscription(`/topic/messages-${receiver.email}`, (message) => {
     const newMessage = JSON.parse(message.body) as ChatMessageResponse;
     console.log("receiver queue", newMessage);
     console.log("rec email", receiver.email);

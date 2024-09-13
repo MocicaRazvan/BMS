@@ -248,7 +248,7 @@ async function createDocsChain(
     // verbose: true,
     keepAlive: "-1m",
     callbacks: [handlers],
-    cache: true,
+    // cache: true,
     temperature: 0.7,
   });
 

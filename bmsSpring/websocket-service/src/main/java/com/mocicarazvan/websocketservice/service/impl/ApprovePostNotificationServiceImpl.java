@@ -5,6 +5,7 @@ import com.mocicarazvan.websocketservice.dtos.post.ApprovePostNotificationRespon
 import com.mocicarazvan.websocketservice.dtos.post.PostResponse;
 import com.mocicarazvan.websocketservice.enums.ApprovedNotificationType;
 import com.mocicarazvan.websocketservice.mappers.ApprovePostNotificationMapper;
+import com.mocicarazvan.websocketservice.messaging.CustomConvertAndSendToUser;
 import com.mocicarazvan.websocketservice.models.ApprovePostNotification;
 import com.mocicarazvan.websocketservice.models.ConversationUser;
 import com.mocicarazvan.websocketservice.models.Post;
@@ -23,8 +24,8 @@ public class ApprovePostNotificationServiceImpl
         extends ApproveNotificationServiceTemplateImpl
         <Post, PostResponse, ApprovePostNotification, ApprovePostNotificationBody, ApprovePostNotificationResponse, PostRepository, ApprovePostNotificationRepository, ApprovePostNotificationMapper>
         implements ApprovePostNotificationService {
-    public ApprovePostNotificationServiceImpl(PostRepository referenceRepository, ConversationUserService conversationUserService, Executor asyncExecutor, ApprovePostNotificationRepository notificationTemplateRepository, ApprovePostNotificationMapper notificationTemplateMapper, SimpMessagingTemplate messagingTemplate) {
-        super(referenceRepository, conversationUserService, "chat_post", "approvePostNotification", asyncExecutor, notificationTemplateRepository, notificationTemplateMapper, messagingTemplate);
+    public ApprovePostNotificationServiceImpl(PostRepository referenceRepository, ConversationUserService conversationUserService, Executor asyncExecutor, ApprovePostNotificationRepository notificationTemplateRepository, ApprovePostNotificationMapper notificationTemplateMapper, SimpMessagingTemplate messagingTemplate, CustomConvertAndSendToUser customConvertAndSendToUser) {
+        super(referenceRepository, conversationUserService, "chat_post", "approvePostNotification", asyncExecutor, notificationTemplateRepository, notificationTemplateMapper, messagingTemplate, customConvertAndSendToUser);
     }
 
     @Override

@@ -3,6 +3,7 @@ package com.mocicarazvan.templatemodule.hateos.controller.generics;
 
 import com.mocicarazvan.templatemodule.controllers.ApproveController;
 import com.mocicarazvan.templatemodule.dtos.PageableBody;
+import com.mocicarazvan.templatemodule.dtos.generic.ApproveDto;
 import com.mocicarazvan.templatemodule.dtos.generic.TitleBodyDto;
 import com.mocicarazvan.templatemodule.dtos.generic.TitleBodyUserDto;
 import com.mocicarazvan.templatemodule.hateos.controller.ReactiveLinkBuilder;
@@ -15,7 +16,7 @@ import org.springframework.hateoas.server.reactive.WebFluxLinkBuilder;
 
 import java.util.List;
 
-public abstract class ApproveReactiveLinkBuilder<MODEL extends Approve, BODY extends TitleBodyDto, RESPONSE extends TitleBodyUserDto,
+public abstract class ApproveReactiveLinkBuilder<MODEL extends Approve, BODY extends TitleBodyDto, RESPONSE extends ApproveDto,
         S extends ApprovedRepository<MODEL>, M extends DtoMapper<MODEL, BODY, RESPONSE>,
         G extends ApprovedService<MODEL, BODY, RESPONSE, S, M>,
         C extends ApproveController<MODEL, BODY, RESPONSE, S, M, G>

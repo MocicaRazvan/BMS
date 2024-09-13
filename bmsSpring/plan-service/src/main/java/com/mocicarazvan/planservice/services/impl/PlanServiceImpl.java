@@ -30,6 +30,7 @@ import com.mocicarazvan.templatemodule.exceptions.action.IllegalActionException;
 import com.mocicarazvan.templatemodule.exceptions.action.PrivateRouteException;
 import com.mocicarazvan.templatemodule.exceptions.action.SubEntityUsed;
 import com.mocicarazvan.templatemodule.hateos.CustomEntityModel;
+import com.mocicarazvan.templatemodule.services.RabbitMqApprovedSenderWrapper;
 import com.mocicarazvan.templatemodule.services.impl.ApprovedServiceImpl;
 import com.mocicarazvan.templatemodule.utils.EntitiesUtils;
 import com.mocicarazvan.templatemodule.utils.PageableUtilsCustom;
@@ -63,14 +64,16 @@ public class PlanServiceImpl
     private final DayClient dayClient;
     private final OrderClient orderClient;
     private final PlanServiceCacheHandler planServiceCacheHandler;
+    private final RabbitMqApprovedSenderWrapper<PlanResponse> rabbitMqSender;
 
 
-    public PlanServiceImpl(PlanRepository modelRepository, PlanMapper modelMapper, PageableUtilsCustom pageableUtils, UserClient userClient, EntitiesUtils entitiesUtils, FileClient fileClient, ObjectMapper objectMapper, ExtendedPlanRepository extendedPlanRepository, DayClient dayClient, OrderClient orderClient, PlanServiceCacheHandler planServiceCacheHandler) {
-        super(modelRepository, modelMapper, pageableUtils, userClient, "plan", List.of("id", "userId", "type", "title", "createdAt", "updatedAt", "approved", "display"), entitiesUtils, fileClient, objectMapper, planServiceCacheHandler);
+    public PlanServiceImpl(PlanRepository modelRepository, PlanMapper modelMapper, PageableUtilsCustom pageableUtils, UserClient userClient, EntitiesUtils entitiesUtils, FileClient fileClient, ObjectMapper objectMapper, ExtendedPlanRepository extendedPlanRepository, DayClient dayClient, OrderClient orderClient, PlanServiceCacheHandler planServiceCacheHandler, RabbitMqApprovedSenderWrapper<PlanResponse> rabbitMqSender) {
+        super(modelRepository, modelMapper, pageableUtils, userClient, "plan", List.of("id", "userId", "type", "title", "createdAt", "updatedAt", "approved", "display"), entitiesUtils, fileClient, objectMapper, planServiceCacheHandler, rabbitMqSender);
         this.extendedPlanRepository = extendedPlanRepository;
         this.dayClient = dayClient;
         this.orderClient = orderClient;
         this.planServiceCacheHandler = planServiceCacheHandler;
+        this.rabbitMqSender = rabbitMqSender;
     }
 
     @Override

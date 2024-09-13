@@ -276,6 +276,12 @@ export default function RecipeForm({
 
   const handleRemove = useCallback(
     (childId: string) => {
+      setIsIngredientCompletedButNotSubmitted((prev) => {
+        if (prev[childId]) {
+          delete prev[childId];
+        }
+        return prev;
+      });
       handleClear(childId);
       setChildren((prev) => prev.filter((id) => id !== childId));
     },
@@ -797,7 +803,10 @@ function SingleChildForm({
                       // wasSubmitted ||
                       childrenNumber === 1
                     }
-                    onClick={() => onRemove(childId)}
+                    onClick={() => {
+                      setIsIngredientCompletedButNotSubmitted(false);
+                      onRemove(childId);
+                    }}
                     type="button"
                   >
                     <DiamondMinus className="me-2" />

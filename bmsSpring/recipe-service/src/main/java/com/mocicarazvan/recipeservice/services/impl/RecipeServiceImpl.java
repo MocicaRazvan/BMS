@@ -26,6 +26,7 @@ import com.mocicarazvan.templatemodule.dtos.response.*;
 import com.mocicarazvan.templatemodule.enums.FileType;
 import com.mocicarazvan.templatemodule.exceptions.action.IllegalActionException;
 import com.mocicarazvan.templatemodule.exceptions.action.SubEntityUsed;
+import com.mocicarazvan.templatemodule.services.RabbitMqApprovedSenderWrapper;
 import com.mocicarazvan.templatemodule.services.impl.ApprovedServiceImpl;
 import com.mocicarazvan.templatemodule.utils.EntitiesUtils;
 import com.mocicarazvan.templatemodule.utils.PageableUtilsCustom;
@@ -57,15 +58,16 @@ public class RecipeServiceImpl extends ApprovedServiceImpl<Recipe, RecipeBody, R
     private final IngredientClient ingredientClient;
     private final IngredientQuantityService ingredientQuantityService;
     private final RecipeServiceCacheHandler recipeServiceCacheHandler;
-
+    private final RabbitMqApprovedSenderWrapper<RecipeResponse> rabbitMqSender;
     private final DayClient dayClient;
 
-    public RecipeServiceImpl(RecipeRepository modelRepository, RecipeMapper modelMapper, PageableUtilsCustom pageableUtils, UserClient userClient, EntitiesUtils entitiesUtils, FileClient fileClient, ObjectMapper objectMapper, RecipeExtendedRepository recipeExtendedRepository, IngredientClient ingredientClient, IngredientQuantityService ingredientQuantityService, RecipeServiceCacheHandler recipeServiceCacheHandler, DayClient dayClient) {
-        super(modelRepository, modelMapper, pageableUtils, userClient, "recipe", List.of("id", "userId", "type", "title", "createdAt", "updatedAt", "approved"), entitiesUtils, fileClient, objectMapper, recipeServiceCacheHandler);
+    public RecipeServiceImpl(RecipeRepository modelRepository, RecipeMapper modelMapper, PageableUtilsCustom pageableUtils, UserClient userClient, EntitiesUtils entitiesUtils, FileClient fileClient, ObjectMapper objectMapper, RecipeExtendedRepository recipeExtendedRepository, IngredientClient ingredientClient, IngredientQuantityService ingredientQuantityService, RecipeServiceCacheHandler recipeServiceCacheHandler, RabbitMqApprovedSenderWrapper<RecipeResponse> rabbitMqSender, DayClient dayClient) {
+        super(modelRepository, modelMapper, pageableUtils, userClient, "recipe", List.of("id", "userId", "type", "title", "createdAt", "updatedAt", "approved"), entitiesUtils, fileClient, objectMapper, recipeServiceCacheHandler, rabbitMqSender);
         this.recipeExtendedRepository = recipeExtendedRepository;
         this.ingredientClient = ingredientClient;
         this.ingredientQuantityService = ingredientQuantityService;
         this.recipeServiceCacheHandler = recipeServiceCacheHandler;
+        this.rabbitMqSender = rabbitMqSender;
         this.dayClient = dayClient;
     }
 

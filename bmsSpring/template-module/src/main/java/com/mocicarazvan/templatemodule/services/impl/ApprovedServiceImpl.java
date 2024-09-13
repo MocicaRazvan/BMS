@@ -5,11 +5,14 @@ import com.mocicarazvan.templatemodule.clients.FileClient;
 import com.mocicarazvan.templatemodule.clients.UserClient;
 import com.mocicarazvan.templatemodule.dtos.PageableBody;
 import com.mocicarazvan.templatemodule.dtos.UserDto;
+import com.mocicarazvan.templatemodule.dtos.generic.ApproveDto;
 import com.mocicarazvan.templatemodule.dtos.generic.TitleBodyDto;
 import com.mocicarazvan.templatemodule.dtos.generic.WithUserDto;
+import com.mocicarazvan.templatemodule.dtos.notifications.ApproveNotificationBody;
 import com.mocicarazvan.templatemodule.dtos.response.PageableResponse;
 import com.mocicarazvan.templatemodule.dtos.response.ResponseWithUserDto;
 import com.mocicarazvan.templatemodule.dtos.response.ResponseWithUserLikesAndDislikes;
+import com.mocicarazvan.templatemodule.enums.ApprovedNotificationType;
 import com.mocicarazvan.templatemodule.enums.FileType;
 import com.mocicarazvan.templatemodule.enums.Role;
 import com.mocicarazvan.templatemodule.exceptions.action.IllegalActionException;
@@ -18,6 +21,8 @@ import com.mocicarazvan.templatemodule.mappers.DtoMapper;
 import com.mocicarazvan.templatemodule.models.Approve;
 import com.mocicarazvan.templatemodule.repositories.ApprovedRepository;
 import com.mocicarazvan.templatemodule.services.ApprovedService;
+import com.mocicarazvan.templatemodule.services.RabbitMqApprovedSenderWrapper;
+import com.mocicarazvan.templatemodule.services.RabbitMqSender;
 import com.mocicarazvan.templatemodule.utils.EntitiesUtils;
 import com.mocicarazvan.templatemodule.utils.PageableUtilsCustom;
 import lombok.AllArgsConstructor;
@@ -34,18 +39,21 @@ import reactor.util.function.Tuple2;
 import reactor.util.function.Tuples;
 
 import java.util.List;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
-public abstract class ApprovedServiceImpl<MODEL extends Approve, BODY extends TitleBodyDto, RESPONSE extends WithUserDto,
+public abstract class ApprovedServiceImpl<MODEL extends Approve, BODY extends TitleBodyDto, RESPONSE extends ApproveDto,
         S extends ApprovedRepository<MODEL>, M extends DtoMapper<MODEL, BODY, RESPONSE>>
         extends TitleBodyImagesServiceImpl<MODEL, BODY, RESPONSE, S, M>
         implements ApprovedService<MODEL, BODY, RESPONSE, S, M> {
 
     protected final ApprovedServiceCacheHandler<MODEL, BODY, RESPONSE> approvedServiceCacheHandler;
+    private final RabbitMqApprovedSenderWrapper<RESPONSE> rabbitMqApprovedSenderWrapper;
 
-    public ApprovedServiceImpl(S modelRepository, M modelMapper, PageableUtilsCustom pageableUtils, UserClient userClient, String modelName, List<String> allowedSortingFields, EntitiesUtils entitiesUtils, FileClient fileClient, ObjectMapper objectMapper, ApprovedServiceCacheHandler<MODEL, BODY, RESPONSE> approvedServiceCacheHandler) {
+    public ApprovedServiceImpl(S modelRepository, M modelMapper, PageableUtilsCustom pageableUtils, UserClient userClient, String modelName, List<String> allowedSortingFields, EntitiesUtils entitiesUtils, FileClient fileClient, ObjectMapper objectMapper, ApprovedServiceCacheHandler<MODEL, BODY, RESPONSE> approvedServiceCacheHandler, RabbitMqApprovedSenderWrapper<RESPONSE> rabbitMqApprovedSenderWrapper) {
         super(modelRepository, modelMapper, pageableUtils, userClient, modelName, allowedSortingFields, entitiesUtils, fileClient, objectMapper, approvedServiceCacheHandler);
         this.approvedServiceCacheHandler = approvedServiceCacheHandler;
+        this.rabbitMqApprovedSenderWrapper = rabbitMqApprovedSenderWrapper;
     }
 
     @Override
@@ -62,10 +70,28 @@ public abstract class ApprovedServiceImpl<MODEL extends Approve, BODY extends Ti
                                                     return modelRepository.save(model).flatMap(m -> getModelGuardWithUser(authUser, m, !m.isApproved()));
                                                 }
 
-                                        )
+                                        ).doOnSuccess(r -> rabbitMqApprovedSenderWrapper.sendMessage(approved, r, authUser))
                                 ), id, userId, approved);
 
     }
+
+//    protected Mono<ResponseWithUserDto<RESPONSE>> approveModelWithCallback(Long id, String userId, boolean approved, BiFunction<ResponseWithUserDto<RESPONSE>, UserDto, Void> successCallback) {
+//        return
+//                approvedServiceCacheHandler.approveModelInvalidate.apply(
+//                        userClient.getUser("", userId)
+//                                .flatMap(authUser -> getModel(id)
+//                                        .flatMap(model -> {
+//                                                    if (model.isApproved() && approved) {
+//                                                        return Mono.error(new IllegalActionException(modelName + " with id " + id + " is already approved!"));
+//                                                    }
+//                                                    model.setApproved(approved);
+//                                                    return modelRepository.save(model).flatMap(m -> getModelGuardWithUser(authUser, m, !m.isApproved()));
+//                                                }
+//
+//                                        ).doOnSuccess(r -> successCallback.apply(r, authUser))
+//                                ), id, userId, approved);
+//
+//    }
 
     @Override
     public Flux<PageableResponse<RESPONSE>> getModelsApproved(PageableBody pageableBody, String userId) {

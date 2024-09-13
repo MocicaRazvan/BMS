@@ -2,6 +2,7 @@ package com.mocicarazvan.templatemodule.controllers;
 
 
 import com.mocicarazvan.templatemodule.dtos.PageableBody;
+import com.mocicarazvan.templatemodule.dtos.generic.ApproveDto;
 import com.mocicarazvan.templatemodule.dtos.generic.TitleBodyDto;
 import com.mocicarazvan.templatemodule.dtos.generic.WithUserDto;
 import com.mocicarazvan.templatemodule.dtos.response.PageableResponse;
@@ -21,7 +22,7 @@ import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-public interface ApproveController<MODEL extends Approve, BODY extends TitleBodyDto, RESPONSE extends WithUserDto,
+public interface ApproveController<MODEL extends Approve, BODY extends TitleBodyDto, RESPONSE extends ApproveDto,
         S extends ApprovedRepository<MODEL>, M extends DtoMapper<MODEL, BODY, RESPONSE>,
         G extends ApprovedService<MODEL, BODY, RESPONSE, S, M>>
 

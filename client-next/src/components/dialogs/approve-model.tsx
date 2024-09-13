@@ -71,21 +71,21 @@ export function AlertDialogApprove({
         //todo better error handling
         console.log(resp.error);
       } else {
-        const type: ApprovedNotificationType = approved
-          ? "APPROVED"
-          : "DISAPPROVED";
-        stompClient.publish({
-          destination: `/app/${notificationName}/sendNotificationCreateReference/${model.id}`,
-          body: JSON.stringify({
-            senderEmail: authUser.email,
-            receiverEmail: resp.messages[0].user.email,
-            type,
-            content: JSON.stringify({
-              title: model.title,
-            }),
-            extraLink: stompExtraLink,
-          }),
-        });
+        // const type: ApprovedNotificationType = approved
+        //   ? "APPROVED"
+        //   : "DISAPPROVED";
+        // stompClient.publish({
+        //   destination: `/app/${notificationName}/sendNotificationCreateReference/${model.id}`,
+        //   body: JSON.stringify({
+        //     senderEmail: authUser.email,
+        //     receiverEmail: resp.messages[0].user.email,
+        //     type,
+        //     content: JSON.stringify({
+        //       title: model.title,
+        //     }),
+        //     extraLink: stompExtraLink,
+        //   }),
+        // });
         callBack();
         toast({
           title: model.title,

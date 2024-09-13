@@ -10,10 +10,12 @@ import org.springframework.messaging.converter.DefaultContentTypeResolver;
 import org.springframework.messaging.converter.MappingJackson2MessageConverter;
 import org.springframework.messaging.converter.MessageConverter;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
+import org.springframework.web.socket.config.annotation.WebSocketTransportRegistration;
 
 import java.util.List;
 
@@ -28,11 +30,39 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Value("${front.url}")
     private String frontUrl;
 
+    @Value("${spring.rabbitmq.host}")
+    private String rabbitmqHost;
+
+    @Value("${spring.rabbitmq.stomp.port}")
+    private int rabbitmqStompPort;
+
+    @Value("${spring.rabbitmq.username}")
+    private String rabbitmqUsername;
+
+    @Value("${spring.rabbitmq.password}")
+    private String rabbitmqPassword;
+
+    private final ThreadPoolTaskScheduler threadPoolTaskScheduler;
+
+
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
-        registry.enableSimpleBroker("/user", "/queue", "/chat");
+//        registry.enableSimpleBroker("/user", "/queue", "/chat");
+        registry.enableStompBrokerRelay("/topic", "/queue")
+                .setRelayHost(rabbitmqHost)
+                .setRelayPort(rabbitmqStompPort)
+                .setClientLogin(rabbitmqUsername)
+                .setClientPasscode(rabbitmqPassword)
+                .setUserRegistryBroadcast("/topic/unresolved-user")
+                .setUserDestinationBroadcast("/topic/resolved-user")
+                .setSystemHeartbeatReceiveInterval(10000)
+                .setSystemHeartbeatSendInterval(10000)
+                .setTaskScheduler(threadPoolTaskScheduler);
+
+
         registry.setApplicationDestinationPrefixes("/app");
-        registry.setUserDestinationPrefix("/user");
+
+//        registry.setUserDestinationPrefix("/user");
     }
 
     @Override
@@ -54,5 +84,13 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         converter.setContentTypeResolver(resolver);
         messageConverters.add(converter);
         return false;
+    }
+
+    @Override
+    public void configureWebSocketTransport(WebSocketTransportRegistration registry) {
+        registry.setMessageSizeLimit(5 * 1024 * 1024);
+        registry.setSendTimeLimit(50 * 10000);
+        registry.setSendBufferSizeLimit(5 * 512 * 1024);
+
     }
 }

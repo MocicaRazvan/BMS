@@ -410,8 +410,17 @@ export const NotificationTemplateProvider = <
     },
   });
 
+  // useSubscription(
+  //   `/user/${authUser?.email}/queue/notification/${notificationName}/added`,
+  //   (message) => {
+  //     console.log("total added", notificationName);
+  //     const newMessage = JSON.parse(message.body) satisfies T;
+  //     console.log("ADD", newMessage.id);
+  //     dispatch({ type: "ADD", payload: newMessage });
+  //   },
+  // );
   useSubscription(
-    `/user/${authUser?.email}/queue/notification/${notificationName}/added`,
+    `/queue/notification-${notificationName}-added-${authUser?.email}`,
     (message) => {
       console.log("total added", notificationName);
       const newMessage = JSON.parse(message.body) satisfies T;
@@ -419,8 +428,37 @@ export const NotificationTemplateProvider = <
       dispatch({ type: "ADD", payload: newMessage });
     },
   );
+  // useSubscription(
+  //   `/user/${authUser?.email}/queue/notification/${notificationName}/removed`,
+  //   (message) => {
+  //     const newMessage = JSON.parse(message.body);
+  //
+  //     let referenceId;
+  //
+  //     if (typeof newMessage === "string") {
+  //       console.log("referenceId string");
+  //       referenceId = parseInt(newMessage);
+  //     } else if (newMessage?.reference?.id) {
+  //       console.log("referenceId obj");
+  //       referenceId = newMessage.reference.id;
+  //     }
+  //
+  //     if (!referenceId) return;
+  //
+  //     console.log("referenceId", referenceId);
+  //
+  //     console.log("total removed", newMessage);
+  //     console.log("REMOVE BY REFERENCE", newMessage);
+  //     dispatch({
+  //       type: "REMOVE_BY_REFERENCE",
+  //       payload: {
+  //         referenceId,
+  //       },
+  //     });
+  //   },
+  // );
   useSubscription(
-    `/user/${authUser?.email}/queue/notification/${notificationName}/removed`,
+    `/queue/notification-${notificationName}-removed-${authUser?.email}`,
     (message) => {
       const newMessage = JSON.parse(message.body);
 

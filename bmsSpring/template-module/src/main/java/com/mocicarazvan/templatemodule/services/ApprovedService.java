@@ -2,6 +2,7 @@ package com.mocicarazvan.templatemodule.services;
 
 
 import com.mocicarazvan.templatemodule.dtos.PageableBody;
+import com.mocicarazvan.templatemodule.dtos.generic.ApproveDto;
 import com.mocicarazvan.templatemodule.dtos.generic.TitleBodyDto;
 import com.mocicarazvan.templatemodule.dtos.generic.WithUserDto;
 import com.mocicarazvan.templatemodule.dtos.response.PageableResponse;
@@ -15,7 +16,7 @@ import org.springframework.http.codec.multipart.FilePart;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-public interface ApprovedService<MODEL extends Approve, BODY extends TitleBodyDto, RESPONSE extends WithUserDto,
+public interface ApprovedService<MODEL extends Approve, BODY extends TitleBodyDto, RESPONSE extends ApproveDto,
         S extends ApprovedRepository<MODEL>, M extends DtoMapper<MODEL, BODY, RESPONSE>>
         extends TitleBodyImagesService<MODEL, BODY, RESPONSE, S, M> {
     Mono<ResponseWithUserDto<RESPONSE>> approveModel(Long id, String userId, boolean approved);

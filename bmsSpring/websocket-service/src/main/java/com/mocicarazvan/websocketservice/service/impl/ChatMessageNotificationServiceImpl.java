@@ -5,6 +5,7 @@ import com.mocicarazvan.websocketservice.dtos.notifications.ChatMessageNotificat
 import com.mocicarazvan.websocketservice.dtos.notifications.ChatMessageNotificationResponse;
 import com.mocicarazvan.websocketservice.enums.ChatMessageNotificationType;
 import com.mocicarazvan.websocketservice.mappers.ChatMessageNotificationMapper;
+import com.mocicarazvan.websocketservice.messaging.CustomConvertAndSendToUser;
 import com.mocicarazvan.websocketservice.models.ChatMessageNotification;
 import com.mocicarazvan.websocketservice.models.ChatRoom;
 import com.mocicarazvan.websocketservice.models.ConversationUser;
@@ -29,8 +30,8 @@ public class ChatMessageNotificationServiceImpl
         implements ChatMessageNotificationService {
     public ChatMessageNotificationServiceImpl(ChatRoomRepository referenceRepository, ConversationUserService conversationUserService, Executor asyncExecutor,
                                               ChatMessageNotificationRepository notificationTemplateRepository, ChatMessageNotificationMapper notificationTemplateMapper,
-                                              SimpMessagingTemplate messagingTemplate) {
-        super(referenceRepository, conversationUserService, "chatRoom", "chatMessageNotification", asyncExecutor, notificationTemplateRepository, notificationTemplateMapper, messagingTemplate);
+                                              SimpMessagingTemplate messagingTemplate, CustomConvertAndSendToUser customConvertAndSendToUser) {
+        super(referenceRepository, conversationUserService, "chatRoom", "chatMessageNotification", asyncExecutor, notificationTemplateRepository, notificationTemplateMapper, messagingTemplate, customConvertAndSendToUser);
     }
 
     @Override

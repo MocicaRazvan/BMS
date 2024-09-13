@@ -181,6 +181,12 @@ export default function DayForm({
 
   const handleMealRemove = useCallback(
     (mealId: string) => {
+      setIsMealCompletedButNotSubmitted((prev) => {
+        if (prev[mealId]) {
+          delete prev[mealId];
+        }
+        return prev;
+      });
       const newMeals = currentMeals.filter((meal) => meal.id !== mealId);
       setCurrentMeals(newMeals);
       setChildrenMeals((prev) => prev.filter((id) => id !== mealId));
@@ -719,7 +725,10 @@ function SingleMealForm({
             <div className="flex items-center justify-center gap-5">
               <Button
                 variant="destructive"
-                onClick={() => onRemove(mealId)}
+                onClick={() => {
+                  setIsMealCompletedButNotSubmitted(false);
+                  onRemove(mealId);
+                }}
                 disabled={wasSubmitted}
                 type="button"
               >

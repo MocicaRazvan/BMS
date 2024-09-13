@@ -7,6 +7,9 @@ import com.mocicarazvan.templatemodule.cache.impl.FilteredListCaffeineCacheAppro
 import com.mocicarazvan.templatemodule.clients.FileClient;
 import com.mocicarazvan.templatemodule.clients.UserClient;
 import com.mocicarazvan.templatemodule.jackson.CustomObjectMapper;
+import com.mocicarazvan.templatemodule.services.RabbitMqApprovedSenderWrapper;
+import com.mocicarazvan.templatemodule.services.RabbitMqSender;
+import com.mocicarazvan.templatemodule.services.impl.RabbitMqApprovedSenderWrapperImpl;
 import com.mocicarazvan.templatemodule.utils.EntitiesUtils;
 import com.mocicarazvan.templatemodule.utils.PageableUtilsCustom;
 import com.mocicarazvan.templatemodule.utils.RepositoryUtils;

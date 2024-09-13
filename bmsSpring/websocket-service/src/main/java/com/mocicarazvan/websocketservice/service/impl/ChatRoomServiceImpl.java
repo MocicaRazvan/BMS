@@ -11,6 +11,7 @@ import com.mocicarazvan.websocketservice.exceptions.SameUserChatRoom;
 import com.mocicarazvan.websocketservice.exceptions.UserIsConnectedToTheRoom;
 import com.mocicarazvan.websocketservice.exceptions.notFound.NoChatRoomFound;
 import com.mocicarazvan.websocketservice.mappers.ChatRoomMapper;
+import com.mocicarazvan.websocketservice.messaging.CustomConvertAndSendToUser;
 import com.mocicarazvan.websocketservice.models.ChatRoom;
 import com.mocicarazvan.websocketservice.models.ConversationUser;
 import com.mocicarazvan.websocketservice.repositories.ChatMessageRepository;
@@ -52,6 +53,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     private final ChatRoomMapper chatRoomMapper;
     private final ConversationUserService conversationUserService;
     private final SimpMessagingTemplate messagingTemplate;
+    private final CustomConvertAndSendToUser customConvertAndSendToUser;
     private final Executor asyncExecutor;
     private final ChatMessageNotificationService chatMessageNotificationService;
     private final ChatMessageRepository chatMessageRepository;
@@ -80,7 +82,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
                     .map(chatRoomRepository::save)
                     .map(c -> {
                         ChatRoomResponse cr = chatRoomMapper.fromModelToResponse(c);
-                        notifyUsers(chatRoomPayload.getUsers(), cr);
+                        notifyUsers(chatRoomPayload.getUsers(), cr, "-create");
                         return cr;
                     });
         }
@@ -170,10 +172,15 @@ public class ChatRoomServiceImpl implements ChatRoomService {
                                 chatMessageNotificationService.notifyDeleteByReferenceId(id, receiverEmails),
                                 deleteChatRoomById(id)
                         ).thenRunAsync(() -> {
+//                            notifyUsersModel(
+//                                    new HashSet<>(chatRoom.getUsers()),
+//                                    chatRoomMapper.fromModelToResponse(chatRoom),
+//                                    "/delete"
+//                            );
                             notifyUsersModel(
                                     new HashSet<>(chatRoom.getUsers()),
                                     chatRoomMapper.fromModelToResponse(chatRoom),
-                                    "/delete"
+                                    "-delete"
                             );
                         }, asyncExecutor);
                     } catch (Exception e) {
@@ -220,12 +227,14 @@ public class ChatRoomServiceImpl implements ChatRoomService {
 
 
     public void notifyUsers(Set<ConversationUserBase> users, ChatRoomResponse chatRoomResponse, String path) {
-        users.forEach(u -> messagingTemplate.convertAndSendToUser(u.getEmail(), "/chatRooms" + path, chatRoomResponse));
+//        users.forEach(u -> messagingTemplate.convertAndSendToUser(u.getEmail(), "/chatRooms" + path, chatRoomResponse));
+        users.forEach(u -> customConvertAndSendToUser.sendToUser(u.getEmail(), "/queue/chatRooms" + path, chatRoomResponse));
     }
 
 
     public void notifyUsersModel(Set<ConversationUser> users, ChatRoomResponse chatRoomResponse, String path) {
-        users.forEach(u -> messagingTemplate.convertAndSendToUser(u.getEmail(), "/chatRooms" + path, chatRoomResponse));
+//        users.forEach(u -> messagingTemplate.convertAndSendToUser(u.getEmail(), "/chatRooms" + path, chatRoomResponse));
+        users.forEach(u -> customConvertAndSendToUser.sendToUser(u.getEmail(), "/queue/chatRooms" + path, chatRoomResponse));
     }
 
 
