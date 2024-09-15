@@ -2,7 +2,7 @@
 import SingleDay, { SingleDayProps } from "@/components/days/single-day";
 import useGetDaysWithMeals from "@/hoooks/days/useGetDayWithMeals";
 import LoadingSpinner from "@/components/common/loading-spinner";
-import React, { memo, useState } from "react";
+import React, { memo, useEffect, useState } from "react";
 import CustomPaginationButtons, {
   CustomDisplayProps,
 } from "@/components/ui/custom-pagination-buttons";
@@ -17,14 +17,23 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
 
-export interface DaysListProps extends Omit<SingleDayItemProps, "dayId"> {
+export interface DaysListTexts {
+  header: string;
+}
+
+export interface DaysListProps
+  extends DaysListTexts,
+    Omit<SingleDayItemProps, "dayId"> {
   dayIds: number[];
 }
 
-const DaysList = memo(({ dayIds, ...rest }: DaysListProps) => {
+const DaysList = memo(({ dayIds, header, ...rest }: DaysListProps) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   return (
     <div className="w-full relative">
+      <h3 className="text-3xl md:text-5xl tracking-tighter font-bold text-center mb-5">
+        {header}
+      </h3>
       <div className="mb-5">
         <CustomPaginationButtons
           items={dayIds}
@@ -108,6 +117,7 @@ const SelectDisplay = ({
   setCurrentIndex,
 }: CustomDisplayProps) => {
   const [inputValue, setInputValue] = useState<number>(currentIndex + 1);
+  const [popOpen, setPopOpen] = useState(false);
 
   const handleSearch = () => {
     let newIndex = inputValue - 1;
@@ -122,8 +132,14 @@ const SelectDisplay = ({
     setInputValue(newIndex + 1);
   };
 
+  useEffect(() => {
+    if (!popOpen && currentIndex !== inputValue - 1) {
+      setInputValue(currentIndex + 1);
+    }
+  }, [currentIndex, inputValue, popOpen]);
+
   return (
-    <Popover>
+    <Popover open={popOpen} onOpenChange={setPopOpen}>
       <PopoverTrigger asChild>
         <Button variant="outline">{`${currentIndex + 1} / ${
           items.length

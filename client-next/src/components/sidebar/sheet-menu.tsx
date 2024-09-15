@@ -12,7 +12,6 @@ import {
 import { Link } from "@/navigation";
 import { Menu } from "@/components/sidebar/menu";
 import {
-  getMenuListType,
   MappingListFunctionKeys,
   SidebarMenuTexts,
 } from "@/components/sidebar/menu-list";

@@ -39,7 +39,7 @@ export default function LikesDislikes({
         />
         <p
           className={cn(
-            "text-success  font-bold group-hover:scale-105 group-active:scale-95 transition-all",
+            "text-success  font-bold group-hover:scale-105 group-active:scale-95 transition-all tabular-nums",
             size === "lg" && "text-lg",
           )}
         >
@@ -63,7 +63,7 @@ export default function LikesDislikes({
         />
         <p
           className={cn(
-            "text-destructive  font-bold group-hover:scale-105 group-active:scale-95 transition-all",
+            "text-destructive  font-bold group-hover:scale-105 group-active:scale-95 transition-all tabular-nums",
             size === "lg" && "text-lg",
           )}
         >

@@ -11,7 +11,7 @@ import {
   TooltipContent,
   TooltipProvider,
 } from "@/components/ui/tooltip";
-import { usePathname, Link } from "@/navigation";
+import { usePathname, Link, useRouter } from "@/navigation";
 import {
   SidebarMenuTexts,
   MappingListFunctionKeys,
@@ -28,6 +28,7 @@ interface MenuProps extends WithUser {
 
 export function Menu({ isOpen, texts, mappingKey, authUser }: MenuProps) {
   const pathname = usePathname();
+  const router = useRouter();
   const menuList = mappingFunctions[mappingKey](authUser, pathname, texts);
 
   return (
@@ -106,14 +107,16 @@ export function Menu({ isOpen, texts, mappingKey, authUser }: MenuProps) {
               )}
             </li>
           ))}
-          <li className="w-full grow flex items-end">
+          <li className="w-full grow flex items-start pb-1">
             <TooltipProvider disableHoverableContent>
               <Tooltip delayDuration={100}>
                 <TooltipTrigger asChild>
                   <Button
-                    onClick={() => {}}
+                    onClick={() => {
+                      router.push(`/${mappingKey}/account/signout`);
+                    }}
                     variant="outline"
-                    className="w-full justify-center h-10 mt-5"
+                    className="w-5/6 justify-center h-10 mt-5"
                   >
                     <span className={cn(!isOpen ? "" : "mr-4")}>
                       <LogOut size={18} />
@@ -129,7 +132,7 @@ export function Menu({ isOpen, texts, mappingKey, authUser }: MenuProps) {
                   </Button>
                 </TooltipTrigger>
                 {!isOpen && (
-                  <TooltipContent side="right">Sign out</TooltipContent>
+                  <TooltipContent side="right">{"Sign out"}</TooltipContent>
                 )}
               </Tooltip>
             </TooltipProvider>

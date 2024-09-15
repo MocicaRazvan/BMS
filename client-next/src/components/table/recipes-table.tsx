@@ -465,7 +465,7 @@ export default function RecipeTable({
           }}
           extraCriteria={
             <div className="flex items-start justify-center gap-8 flex-1 flex-wrap">
-              <div className="flex items-center justify-end gap-4 flex-1">
+              <div className="flex items-center justify-end gap-4 flex-1 flex-wrap">
                 {dietTypeCriteriaCallback(resetCurrentPage)}
                 {approvedFieldCriteriaCallBack(resetCurrentPage)}
               </div>

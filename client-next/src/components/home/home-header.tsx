@@ -150,7 +150,7 @@ export default function HomeHeader({ title }: HomeHeaderTexts) {
                       </div>
                       <WordPullUp
                         words={title}
-                        className="hidden md:block md:text-sm lg:text-xl z-2 tracking-tighter font-bold [text-shadow:_1px_5px_1px_rgb(0_0_0_/_50%)]"
+                        className="hidden md:block md:text-sm lg:text-[16px] text-balance z-2 tracking-tighter font-bold [text-shadow:_1px_5px_1px_rgb(0_0_0_/_50%)]"
                       />
 
                       <p className="md:hidden text-xs text-center font-bold mt-[30%] [text-shadow:_1px_5px_1px_rgb(0_0_0_/_50%)]">

@@ -335,17 +335,17 @@ export default function RecipeForm({
           title: data.title,
           description: baseFormTexts.descriptionToast,
           variant: "success",
-          action: (
-            <ToastAction
-              altText={baseFormTexts.altToast}
-              onClick={() =>
-                // todo fix, on click goes to home
-                router.push(`/trainer/recipes/single/${res.content.id}`)
-              }
-            >
-              {baseFormTexts.toastAction}
-            </ToastAction>
-          ),
+          // action: (
+          //   <ToastAction
+          //     altText={baseFormTexts.altToast}
+          //     onClick={() =>
+          //       // todo fix, on click goes to home
+          //       router.push(`/trainer/recipes/single/${res.content.id}`)
+          //     }
+          //   >
+          //     {baseFormTexts.toastAction}
+          //   </ToastAction>
+          // ),
         });
         router.push(`/trainer/recipes/single/${res.content.id}`);
       } catch (e) {

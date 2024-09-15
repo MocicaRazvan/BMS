@@ -599,10 +599,12 @@ export default function PlansTable({
           }}
           extraCriteria={
             <div className="flex items-start justify-center gap-8 flex-1 flex-wrap">
-              {dietTypeCriteriaCallback(resetCurrentPage)}
-              {objectiveTypeCriteriaCallback(resetCurrentPage)}
-              {displayCriteriaCallBack(resetCurrentPage)}
-              {approvedCriteriaCallBack(resetCurrentPage)}
+              <div className="flex items-center justify-end gap-4 flex-1 flex-wrap">
+                {dietTypeCriteriaCallback(resetCurrentPage)}
+                {objectiveTypeCriteriaCallback(resetCurrentPage)}
+                {displayCriteriaCallBack(resetCurrentPage)}
+                {approvedCriteriaCallBack(resetCurrentPage)}
+              </div>
             </div>
           }
         />

@@ -112,7 +112,7 @@ export default function SortableList({
       onDragCancel={handleDragCancel}
     >
       <SortableContext items={itemIds}>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 w-full max-w-[1200px] mx-auto mt-4 p-2 py-4 ">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 w-full max-w-[1200px] mx-auto mt-4 p-2 py-4 ">
           {items.map((item, i) => (
             <SortableItemWrapper
               key={item.id}

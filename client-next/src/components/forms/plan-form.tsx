@@ -290,16 +290,16 @@ export default function PlanForm({
           title: data.title,
           description: descriptionToast,
           variant: "success",
-          action: (
-            <ToastAction
-              altText={altToast}
-              onClick={() =>
-                router.push(`/trainer/plans/single/${res.content.id}`)
-              }
-            >
-              {toastAction}
-            </ToastAction>
-          ),
+          // action: (
+          //   <ToastAction
+          //     altText={altToast}
+          //     onClick={() =>
+          //       router.push(`/trainer/plans/single/${res.content.id}`)
+          //     }
+          //   >
+          //     {toastAction}
+          //   </ToastAction>
+          // ),
         });
         router.push(`/trainer/plans/single/${res.content.id}`);
       } catch (e) {
@@ -389,6 +389,7 @@ export default function PlanForm({
                       path={`/days/trainer/filtered/${authUser.id}`}
                       sortingCriteria={{ title: "asc" }}
                       // extraQueryParams={{ approved: "true" }}
+                      pageSize={20}
                       valueKey={"title"}
                       mapping={(r) => ({
                         value: r.content.content.id.toString(),
@@ -729,7 +730,7 @@ const DayItem = forwardRef<HTMLDivElement, DayItemProps>(
         <div className="flex-1 flex flex-col items-center justify-between p-4">
           {index !== undefined && dayIndex && (
             <p className="font-semibold">
-              {dayIndex} {index}
+              {dayIndex} {index + 1}
             </p>
           )}
           <p className="text-lg font-bold">{item.label}</p>

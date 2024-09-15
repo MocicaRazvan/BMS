@@ -174,7 +174,7 @@ export default function UserPageContent({
           </h3>
         </div>
         <div className="flex justify-between w-full mx-auto items-center mt-10 flex-wrap">
-          <div className="flex  items-center justify-around gap-2 w-full ">
+          <div className="flex flex-col md:flex-row items-center justify-around gap-2 w-full ">
             <p className="text-lg">
               {firstNameLabel}
               <span className="font-bold ml-4">

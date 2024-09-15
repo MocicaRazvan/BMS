@@ -86,7 +86,7 @@ export function HomeCard({ index, title, description, icon, href }: Props) {
       custom={index}
       viewport={{
         once: true,
-        amount: 0.2,
+        // amount: 0.2,
       }}
     >
       <MagicCard

@@ -1,7 +1,5 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { CirclePlus, Plus } from "lucide-react";
 import {
   ReactNode,
   useCallback,

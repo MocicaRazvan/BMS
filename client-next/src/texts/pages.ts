@@ -113,7 +113,7 @@ import {
 } from "@/app/[locale]/(main)/(user)/calculator/page";
 import { UserDaysPageTexts } from "@/app/[locale]/trainer/user/[id]/days/page";
 import { SingleDayPageTexts } from "@/app/[locale]/trainer/days/single/[id]/page-content";
-import { getSingleDayTexts } from "@/texts/components/days";
+import { getDaysListTexts, getSingleDayTexts } from "@/texts/components/days";
 import { planObjectives } from "@/types/dto";
 import { getSidebarMenuTexts } from "@/texts/components/sidebar";
 import { AdminUserPageTexts } from "@/app/[locale]/admin/users/[id]/page";
@@ -145,6 +145,8 @@ import { CreatePlanPageTexts } from "@/app/[locale]/trainer/plans/create/page";
 import { UpdatePlanPageTexts } from "@/app/[locale]/trainer/plans/update/[id]/page";
 import { TrainerPlanPageTexts } from "@/app/[locale]/trainer/plans/single/[id]/page";
 import { TrainerKanbanPageTexts } from "@/app/[locale]/trainer/kanban/page";
+import SignOutWrapper from "@/app/[locale]/(main)/auth/signout/page";
+import { TermsOfServiceTexts } from "@/app/[locale]/(main)/terms-of-service/page";
 
 export async function getSinglePostPageTexts(): Promise<SinglePostPageTexts> {
   const [elementHeaderTexts, t, postCommentsTexts] = await Promise.all([
@@ -1018,12 +1020,14 @@ export async function getSingleTrainerPlanPageTexts(): Promise<SingleTrainerPlan
     nutritionalTableTexts,
     ingredientPieChartTexts,
     singleDayTexts,
+    daysListTexts,
     t,
   ] = await Promise.all([
     getElementHeaderTexts(),
     getNutritionalTableTexts(),
     getIngredientPieChartTexts(),
     getSingleDayTexts(),
+    getDaysListTexts(),
     getTranslations("pages.plans.SingleTrainerPlanPageTexts"),
   ]);
 
@@ -1032,6 +1036,7 @@ export async function getSingleTrainerPlanPageTexts(): Promise<SingleTrainerPlan
     nutritionalTableTexts,
     ingredientPieChartTexts,
     singleDayTexts,
+    daysListTexts,
     displayed: t("displayed"),
     notDisplayed: t("notDisplayed"),
     price: t("price"),
@@ -1149,11 +1154,13 @@ export async function getSingleSubscriptionTexts(): Promise<SingleSubscriptionTe
     nutritionalTableTexts,
     ingredientPieChartTexts,
     singleDayTexts,
+    daysListTexts,
   ] = await Promise.all([
     getElementHeaderTexts(),
     getNutritionalTableTexts(),
     getIngredientPieChartTexts(),
     getSingleDayTexts(),
+    getDaysListTexts(),
   ]);
 
   return {
@@ -1161,6 +1168,7 @@ export async function getSingleSubscriptionTexts(): Promise<SingleSubscriptionTe
     nutritionalTableTexts,
     ingredientPieChartTexts,
     singleDayTexts,
+    daysListTexts,
   };
 }
 
@@ -1530,6 +1538,39 @@ export async function getCalculatorPageTexts(): Promise<CalculatorPageTexts> {
     intakeTitles: intakeTitles.reduce(
       (acc, title) => ({ ...acc, [title]: t(`intakeTitles.${title}`) }),
       {} as IntakeTitle,
+    ),
+  };
+}
+
+export async function getSignOutPageTexts() {
+  const t = await getTranslations("auth.SignOutPageText");
+  return {
+    buttonSignIn: t("buttonSignIn"),
+    buttonSignOut: t("buttonSignOut"),
+    questionText: t("questionText"),
+  };
+}
+export const terms = [
+  "terms1",
+  "terms2",
+  "terms3",
+  "terms4",
+  "terms5",
+] as const;
+
+export async function getTermsOfServiceTexts(): Promise<TermsOfServiceTexts> {
+  const t = await getTranslations("pages.terms-of-service.TermsOfServiceTexts");
+  return {
+    title: t("title"),
+    terms: terms.reduce(
+      (acc, key) => ({
+        ...acc,
+        [key]: {
+          title: t(`terms.${key}.title`),
+          body: t(`terms.${key}.body`),
+        },
+      }),
+      {} as Record<(typeof terms)[number], { title: string; body: string }>,
     ),
   };
 }

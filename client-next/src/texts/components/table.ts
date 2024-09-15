@@ -60,6 +60,7 @@ import {
   DayTableTexts,
 } from "@/components/table/day-table";
 import { dayTypes, planObjectives } from "@/types/dto";
+import { getDayTypeBadgeTexts } from "@/texts/components/days";
 
 export async function getDataTablePaginationTexts(): Promise<DataTablePaginationTexts> {
   const t = await getTranslations("components.table.DataTablePaginationTexts");
@@ -348,21 +349,28 @@ export async function getRecipeTableTexts(): Promise<RecipeTableTexts> {
 }
 
 export async function getDayTableTexts(): Promise<DayTableTexts> {
-  const [dataTableTexts, dayTableColumnTexts, typeDropdownTexts, t] =
-    await Promise.all([
-      getDataTableTexts(),
-      getDayTableColumnsTexts(),
-      getUseFilterDropdownTexts(
-        "UseTypeDropdownTexts",
-        dayTypes as unknown as string[],
-      ),
-      getTranslations("components.table.DayTableTexts"),
-    ]);
+  const [
+    dataTableTexts,
+    dayTableColumnTexts,
+    typeDropdownTexts,
+    dayTypeBadgeTexts,
+    t,
+  ] = await Promise.all([
+    getDataTableTexts(),
+    getDayTableColumnsTexts(),
+    getUseFilterDropdownTexts(
+      "UseTypeDropdownTexts",
+      dayTypes as unknown as string[],
+    ),
+    getDayTypeBadgeTexts(),
+    getTranslations("components.table.DayTableTexts"),
+  ]);
 
   return {
     dataTableTexts,
     dayTableColumnTexts,
     typeDropdownTexts,
+    dayTypeBadgeTexts,
     search: t("search"),
   };
 }

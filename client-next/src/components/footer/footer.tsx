@@ -31,9 +31,9 @@ export default async function Footer() {
   } = await getFooterTexts();
   return (
     <footer className="w-full py-6 mt-28 flex items-center justify-center flex-col ">
-      <div className=" max-w-[1600px] mx-auto w-full flex flex-col items-stretch justify-center gap-4 px-4 md:px-6">
-        <div className="grid items-start gap-10 grid-cols-2 md:gap-4 lg:grid-cols-4 lg:gap-8">
-          <div className="flex items-center gap-2 col-span-1 transition-all hover:scale-[1.02]">
+      <div className=" max-w-[1600px] mx-auto w-full flex flex-col items-stretch justify-center gap-4 px-4 md:px-6 ">
+        <div className="grid items-start gap-10 grid-cols-2 md:gap-4 lg:grid-cols-4 lg:gap-8 ">
+          <div className="flex items-center gap-2 col-span-1 transition-all hover:scale-[1.02] hover:underline hover:underline-offset-[2px] md:ps-3">
             <Link className="flex items-center gap-2 font-medium" href="/">
               <Logo />
               <span className="sr-only">{home}</span>
@@ -74,7 +74,7 @@ export default async function Footer() {
             <div className="flex items-center gap-2">
               <MailIcon className="w-4 h-4 flex-shrink-0" />
               <a
-                className="text-sm font-medium underline underline-offset-2"
+                className="text-xs sm:text-sm font-medium underline underline-offset-2"
                 href="mailto:razvanmocica@gmail.com"
               >
                 {"razvanmocica@gmail.com"}
@@ -83,7 +83,7 @@ export default async function Footer() {
           </div>
           <div className="space-y-2 col-span-1 capitalize">
             <div className="transition-all hover:scale-[1.02]">
-              <Link className="text-sm font-medium " href="#">
+              <Link className="text-sm font-medium " href="/terms-of-service">
                 {termsOfService}
               </Link>
             </div>

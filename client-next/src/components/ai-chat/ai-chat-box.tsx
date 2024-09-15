@@ -62,7 +62,10 @@ export default function AiChatBox({
       <motion.div
         className={cn(
           `w-20 h-20 bg-background shadow-lg cursor-pointer flex items-center justify-center`,
-          isOpen && " h-[34rem] cursor-default w-[85vw] max-w-xl ",
+          isOpen && " h-[34rem] cursor-default w-[85vw] max-w-xl border-2",
+          !isOpen
+            ? "bg-background"
+            : "bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/75",
         )}
         layout
         animate={{
@@ -102,7 +105,7 @@ export default function AiChatBox({
               </Button>
             </div>
             <div
-              className="flex-1 h-full w-full overflow-y-auto px-5"
+              className="h-full w-full overflow-y-auto px-5 overflow-x-hidden "
               onScroll={(e) => {
                 e.stopPropagation();
               }}
@@ -133,7 +136,7 @@ export default function AiChatBox({
 
               {!error && messages.length === 0 && (
                 <ShineBorder
-                  className="mx-8 flex h-full flex-col items-center justify-center gap-3 text-center p-10 bg-background/95"
+                  className="flex w-full h-full flex-col items-center justify-center gap-3 text-center p-10 bg-background/95"
                   color={["#A07CFE", "#FE8FB5", "#FFBE7B"]}
                   borderWidth={2}
                 >

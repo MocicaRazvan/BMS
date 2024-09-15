@@ -4,7 +4,6 @@ import { cn } from "@/lib/utils";
 import { Link } from "@/navigation";
 import { Button } from "@/components/ui/button";
 import SidebarToggle from "@/components/sidebar/sidebar-toggle";
-import { Home, PanelsTopLeft } from "lucide-react";
 import { Menu } from "@/components/sidebar/menu";
 import {
   Tooltip,
@@ -13,7 +12,6 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import {
-  getMenuListType,
   MappingListFunctionKeys,
   SidebarMenuTexts,
 } from "@/components/sidebar/menu-list";

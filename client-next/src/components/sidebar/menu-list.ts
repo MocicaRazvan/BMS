@@ -42,7 +42,7 @@ export const adminGroupLabels = [
   "company",
 ] as const;
 
-export const trainerGroupLabels = ["contents", "sales"] as const;
+export const trainerGroupLabels = ["contents", "sales", "settings"] as const;
 
 export const adminLabels = [
   "dashboard",
@@ -71,6 +71,7 @@ export const trainerLabels = [
   "monthlySales",
   "dailySales",
   "kanban",
+  "account",
 ] as const;
 
 export const adminSubLabels = ["allIngredients", "createIngredient"] as const;
@@ -235,7 +236,7 @@ export const getAdminMenuList: getMenuListType<AdminSidebarMenuTexts> = (
       groupLabel: groupLabels["settings"],
       menus: [
         {
-          href: "/account",
+          href: "/admin/account",
           label: labels["account"],
           active: pathname.includes("/account"),
           icon: Settings,
@@ -379,6 +380,18 @@ export const getTrainerMenuList: (
           label: labels["dailySales"],
           active: pathname.includes("/dailySales"),
           icon: CalendarDays,
+          submenus: [],
+        },
+      ],
+    },
+    {
+      groupLabel: groupLabels["settings"],
+      menus: [
+        {
+          href: "/trainer/account",
+          label: labels["account"],
+          active: pathname.includes("/account"),
+          icon: Settings,
           submenus: [],
         },
       ],

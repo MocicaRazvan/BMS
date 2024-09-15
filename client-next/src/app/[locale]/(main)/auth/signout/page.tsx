@@ -3,6 +3,7 @@ import { getTranslations, unstable_setRequestLocale } from "next-intl/server";
 import SignOut from "@/app/[locale]/(main)/auth/signout/page-content";
 import { Metadata } from "next";
 import { getIntlMetadata } from "@/texts/metadata";
+import { getSignOutPageTexts } from "@/texts/pages";
 export async function generateMetadata({
   params: { locale },
 }: LocaleProps): Promise<Metadata> {
@@ -18,12 +19,13 @@ export default async function SignOutWrapper({
   params: { locale },
 }: LocaleProps) {
   unstable_setRequestLocale(locale);
-  const t = await getTranslations("auth.SignOutPageText");
+  const texts = await getSignOutPageTexts();
   return (
     <SignOut
-      buttonSignIn={t("buttonSignIn")}
-      buttonSignOut={t("buttonSignOut")}
-      questionText={t("questionText")}
+      {...texts}
+      // buttonSignIn={t("buttonSignIn")}
+      // buttonSignOut={t("buttonSignOut")}
+      // questionText={t("questionText")}
     />
   );
 }

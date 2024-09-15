@@ -31,6 +31,9 @@ export async function getHomeAboutTexts(): Promise<HomeAboutTexts> {
   const t = await getTranslations("components.home.HomeAboutTexts");
   return {
     title: t("title"),
+    content1: t("content1"),
+    content2: t("content2"),
+    content3: t("content3"),
   };
 }
 

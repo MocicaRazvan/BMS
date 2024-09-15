@@ -16,7 +16,7 @@ import { BurgerNav } from "@/components/nav/burger-nav";
 import NavProfile from "@/components/nav/nav-profile";
 import { DashboardIcon } from "@radix-ui/react-icons";
 import NotificationPop from "@/components/nav/notification-pop";
-import CartPop from "@/components/nav/cart-pop";
+import CartPop, { CartPopsTexts } from "@/components/nav/cart-pop";
 import Logo from "@/components/logo/logo";
 import { LockKeyhole } from "lucide-react";
 import ActiveLink from "@/components/nav/active-link";
@@ -43,13 +43,18 @@ export interface NavTexts {
   };
 }
 
+interface NavProps extends NavTexts {
+  cartPopTexts: CartPopsTexts;
+}
+
 export default function Nav({
   themeSwitchTexts,
   postsTexts,
   recipesTexts,
   links,
   plansTexts,
-}: NavTexts) {
+  cartPopTexts,
+}: NavProps) {
   const session = useSession();
 
   const authUser = session?.data?.user;
@@ -75,13 +80,13 @@ export default function Nav({
 
   return (
     <nav
-      className="min-h-10 md:flex items-center justify-between px-4 py-2 border-b sticky top-0 bg-opacity-60 z-[49]
+      className="min-h-10 md:flex items-center justify-between px-2.5 py-2 border-b sticky top-0 bg-opacity-60 z-[49]
     w-full border-border/40 bg-background/95 backdrop-blur
      supports-[backdrop-filter]:bg-background/60 flex-wrap 2xl:border-l 2xl:border-r"
     >
       <div className="hidden xl:flex items-center justify-between w-full">
-        <div className="flex items-center justify-center gap-3 me-3">
-          <div className="mr-8 flex items-center justify-start gap-1">
+        <div className="flex items-center justify-center gap-1.5 me-1.5">
+          <div className="mr-8 flex items-center justify-start gap-1.5">
             <Link
               href="/"
               className="font-bold hover:underline flex items-center justify-center gap-2 hover:scale-[1.03] transition-all
@@ -94,20 +99,19 @@ export default function Nav({
             {isAdmin && (
               <Link
                 href="/admin/dashboard"
-                className="font-bold hover:underline flex items-center justify-center gap-2 hover:scale-[1.03] transition-all
-              px-1"
+                className="text-balance gap-1 font-bold hover:underline flex items-center justify-center hover:scale-[1.03] transition-all px-1"
               >
                 <LockKeyhole className="w-6 h-6" />
-                <p className="text-center">{links.adminDashboard}</p>
+                <p>{links.adminDashboard}</p>
               </Link>
             )}
             {isAdminOrTrainer && (
               <Link
                 href={`/trainer/user/${authUser?.id}/posts`}
-                className="font-bold hover:underline flex items-center justify-center gap-2 hover:scale-[1.03] transition-all px-1"
+                className="text-balance gap-1 font-bold hover:underline flex items-center justify-center hover:scale-[1.03] transition-all px-1"
               >
                 <DashboardIcon className="w-6 h-6" />
-                {links.trainerDashboard}
+                <p>{links.trainerDashboard}</p>
               </Link>
             )}
           </div>
@@ -158,7 +162,7 @@ export default function Nav({
             <>
               <NavProfile authUser={authUser} />
               <NotificationPop authUser={authUser} />
-              <CartPop authUser={authUser} />
+              <CartPop authUser={authUser} cartPopTexts={cartPopTexts} />
             </>
           )}
           {!authUser && (
@@ -195,7 +199,7 @@ export default function Nav({
           {authUser && (
             <>
               <NotificationPop authUser={authUser} />
-              <CartPop authUser={authUser} />
+              <CartPop authUser={authUser} cartPopTexts={cartPopTexts} />
             </>
           )}
           <LocaleSwitcher />

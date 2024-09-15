@@ -34,7 +34,7 @@ import { PlanFormTexts } from "@/components/forms/plan-form";
 import { CheckoutDrawerTexts } from "@/components/forms/checkout-drawer";
 import { AdminEmailTexts } from "@/components/forms/admin-email";
 import { DayFromTexts } from "@/components/forms/day-form";
-import { planObjectives } from "@/types/dto";
+import { DayType, dayTypes, planObjectives } from "@/types/dto";
 import { UploadingProgressTexts } from "@/components/forms/uploading-progress";
 
 export type FormType = "create" | "update";
@@ -414,6 +414,10 @@ export async function getDayFromTexts(type: FormType): Promise<DayFromTexts> {
     dayDietType: t("dayDietType"),
     areMealsCompletedButNotSubmitted: t("areMealsCompletedButNotSubmitted"),
     continueBtn: t("continueBtn"),
+    dayTypesLabels: dayTypes.reduce(
+      (acc, cur) => ({ ...acc, [cur]: t(`dayTypes.${cur}`) }),
+      {} as Record<DayType, string>,
+    ),
   };
 }
 

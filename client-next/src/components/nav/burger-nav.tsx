@@ -8,12 +8,12 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { Home, LockKeyhole, Menu } from "lucide-react";
+import { Home, LockKeyhole, LogOut, Menu } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Session } from "next-auth";
 import { ComponentMenuLink, LinkNav, linksEqual } from "@/components/nav/links";
 import { MenuBarMenuNav } from "@/components/nav/menu-bar-menu-nav";
-import { isDeepEqual } from "@/lib/utils";
+import { cn, isDeepEqual } from "@/lib/utils";
 import { AvatarImage } from "@radix-ui/react-avatar";
 import { Avatar } from "@/components/ui/avatar";
 import { Link, usePathname } from "@/navigation";
@@ -122,6 +122,21 @@ const BurgerNav = memo<Props>(
                   >
                     {texts.links.calculator}
                   </ActiveLink>
+                </div>
+                <div className="mt-5 ps-2 flex items-center justify-start transition-all hover:scale-[1.03] ">
+                  <Button
+                    asChild
+                    variant="outline"
+                    className="w-5/6 justify-center"
+                  >
+                    <Link
+                      href={`/auth/signout`}
+                      className="flex items-center gap-2"
+                    >
+                      <LogOut size={18} />
+                      <p>Sign out</p>
+                    </Link>
+                  </Button>
                 </div>
               </>
             )}

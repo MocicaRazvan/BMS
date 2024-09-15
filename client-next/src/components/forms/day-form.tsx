@@ -75,6 +75,7 @@ export interface DayFromTexts extends SingleMealTexts {
   dayDietType: string;
   areMealsCompletedButNotSubmitted: string;
   continueBtn: string;
+  dayTypesLabels: Record<DayType, string>;
 }
 
 export type CurrentMealType = MealSchemaType & { id: string };
@@ -117,6 +118,7 @@ export default function DayForm({
   mealType,
   areMealsCompletedButNotSubmitted,
   continueBtn,
+  dayTypesLabels,
 }: DayFormProps) {
   const router = useRouter();
 
@@ -246,18 +248,18 @@ export default function DayForm({
             title: data.title,
             description: descriptionToast,
             variant: "success",
-            action: (
-              <ToastAction
-                altText={altToast}
-                onClick={() =>
-                  router.push(
-                    `/trainer/days/single/${res?.messages?.[0]?.content.id}`,
-                  )
-                }
-              >
-                {toastAction}
-              </ToastAction>
-            ),
+            // action: (
+            //   <ToastAction
+            //     altText={altToast}
+            //     onClick={() =>
+            //       router.push(
+            //         `/trainer/days/single/${res?.messages?.[0]?.content.id}`,
+            //       )
+            //     }
+            //   >
+            //     {toastAction}
+            //   </ToastAction>
+            // ),
           });
 
           router.push(`/trainer/days/single/${res?.messages?.[0]?.content.id}`);
@@ -328,7 +330,7 @@ export default function DayForm({
                           value={value}
                           className="cursor-pointer"
                         >
-                          {value}
+                          {dayTypesLabels[value]}
                         </SelectItem>
                       ))}
                     </SelectContent>

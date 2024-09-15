@@ -112,7 +112,7 @@ export default function SinglePostPageContent({
   const { isOwnerOrAdmin, isAdmin, isOwner } = privilegeReturn;
 
   return (
-    <section className="w-full mx-auto max-w-[1500px] min-h-[calc(100vh-4rem)] flex-col items-center justify-center transition-all px-6 py-10 relative ">
+    <section className="w-full mx-auto max-w-[1500px] min-h-[calc(100vh-4rem)] flex-col items-center justify-center transition-all px-1 md:px-6 py-10 relative ">
       <ElementHeader
         elementState={postState}
         react={react}

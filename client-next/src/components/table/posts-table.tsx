@@ -376,7 +376,7 @@ export default function PostsTable({
           }}
           extraCriteria={
             <div className="flex items-start justify-center gap-8 flex-1 flex-wrap">
-              <div className="flex-1">
+              <div className="flex-1 flex-wrap">
                 {extraCriteriaWithCallBack(resetCurrentPage)}
               </div>
               {fieldCriteriaCallBack(resetCurrentPage)}

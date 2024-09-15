@@ -204,36 +204,6 @@ export default function IngredientForm({
     form.clearErrors("nutritionalFact.saturatedFat");
   }, [form, unitForm]);
 
-  // useEffect(() => {
-  //   const keysToCheck: (keyof Omit<
-  //     IngredientNutritionalFactType["nutritionalFact"],
-  //     "unit" | "saturatedFat" | "sugar"
-  //   >)[] = ["carbohydrates", "protein", "fat", "salt"];
-  //   const anyCustomError: Record<(typeof keysToCheck)[number], boolean> =
-  //     keysToCheck.reduce(
-  //       (acc, k) => ({
-  //         ...acc,
-  //         [k]: form.formState.errors.nutritionalFact?.[k]?.type === "custom",
-  //       }),
-  //       { carbohydrates: false, protein: false, fat: false, salt: false },
-  //     );
-  //   const sum = floatProtein + floatFat + floatCarbohydrates + floatSalt;
-  //
-  //   if (anyCustomError && sum === 100) {
-  //     keysToCheck.forEach((k) => {
-  //       form.clearErrors(`nutritionalFact.${k}`);
-  //     });
-  //   } else if (lastUpdatedField.current) {
-  //     Object.entries(anyCustomError).forEach(([k, v]) => {
-  //       if (k !== lastUpdatedField.current && v) {
-  //         form.clearErrors(
-  //           `nutritionalFact.${k as (typeof keysToCheck)[number]}`,
-  //         );
-  //       }
-  //     });
-  //   }
-  // }, [floatCarbohydrates, floatFat, floatProtein, floatSalt, form]);
-
   useEffect(() => {
     const total = floatProtein + floatFat + floatCarbohydrates + floatSalt;
     if (
@@ -317,15 +287,15 @@ export default function IngredientForm({
             title: data.ingredient.name,
             description: descriptionToast,
             variant: "success",
-            action: (
-              <ToastAction
-                altText={altToast}
-                // todo to single ingredient
-                onClick={() => router.push(`/admin/ingredients/`)}
-              >
-                {toastAction}
-              </ToastAction>
-            ),
+            // action: (
+            //   <ToastAction
+            //     altText={altToast}
+            //     // todo to single ingredient
+            //     onClick={() => router.push(`/admin/ingredients/`)}
+            //   >
+            //     {toastAction}
+            //   </ToastAction>
+            // ),
           });
           router.push(`/admin/ingredients/`);
         }

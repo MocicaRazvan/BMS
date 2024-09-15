@@ -2,7 +2,7 @@
 
 import { WithUser } from "@/lib/user";
 import { useGetTitleBodyUser } from "@/hoooks/useGetTitleBodyUser";
-import { PlanResponse } from "@/types/dto";
+import { CustomEntityModel, PlanResponse } from "@/types/dto";
 import LoadingSpinner from "@/components/common/loading-spinner";
 import { checkOwnerOrAdmin, cn, isSuccessCheckReturn } from "@/lib/utils";
 import { ElementHeaderTexts } from "@/components/common/element-header";
@@ -12,14 +12,13 @@ import CustomImageCarousel from "@/components/common/custom-image-crousel";
 import ProseText from "@/components/common/prose-text";
 import AuthorProfile from "@/components/common/author-profile";
 import { useFormatter } from "next-intl";
-import { MealRecipeList } from "@/components/days/meal-recipes";
 import useClientNotFound from "@/hoooks/useClientNotFound";
-import React from "react";
-import DaysList from "@/components/days/days-list";
+import React, { useCallback } from "react";
+import DaysList, { DaysListTexts } from "@/components/days/days-list";
 import { SingleDayTexts } from "@/components/days/single-day";
 import LikesDislikes from "@/components/common/likes-dislikes";
-import { Badge } from "@/components/ui/badge";
 import DietBadge from "@/components/common/diet-badge";
+import { fetchStream } from "@/hoooks/fetchStream";
 
 export interface SingleTrainerPlanPageTexts {
   elementHeaderTexts: ElementHeaderTexts;
@@ -29,6 +28,7 @@ export interface SingleTrainerPlanPageTexts {
   displayed: string;
   notDisplayed: string;
   singleDayTexts: SingleDayTexts;
+  daysListTexts: DaysListTexts;
 }
 
 interface Props extends WithUser, SingleTrainerPlanPageTexts {
@@ -45,6 +45,7 @@ export default function SingleTrainerPlanPageContent({
   displayed,
   price,
   singleDayTexts,
+  daysListTexts,
 }: Props) {
   const {
     itemState: planState,
@@ -63,6 +64,32 @@ export default function SingleTrainerPlanPageContent({
   });
   const { navigateToNotFound } = useClientNotFound();
   const formatIntl = useFormatter();
+
+  const react = useCallback(
+    async (type: "like" | "dislike") => {
+      if (!planState?.approved) return;
+      try {
+        const resp = await fetchStream<CustomEntityModel<PlanResponse>>({
+          path: `/plans/${type}/${id}`,
+          method: "PATCH",
+          token: authUser.token,
+        });
+        const newPlan = resp.messages[0]?.content;
+        setPlanState((prev) =>
+          !prev
+            ? prev
+            : {
+                ...prev,
+                userDislikes: newPlan.userDislikes,
+                userLikes: newPlan.userLikes,
+              },
+        );
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    [authUser.token, id, planState?.approved, setPlanState],
+  );
 
   if (error?.status) {
     return navigateToNotFound();
@@ -90,7 +117,7 @@ export default function SingleTrainerPlanPageContent({
   const { isOwnerOrAdmin, isAdmin, isOwner } = ownerReturn;
 
   return (
-    <section className="w-full mx-auto max-w-[1500px] min-h-[calc(100vh-4rem)] flex-col items-center justify-center transition-all px-6 py-10 relative ">
+    <section className="w-full mx-auto max-w-[1500px] min-h-[calc(100vh-4rem)] flex-col items-center justify-center transition-all px-1 md:px-6 py-10 relative ">
       <div
         className="sticky top-[4rem] z-10 shadow-sm p-4 w-[130px] rounded-xl
       bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 overflow-hidden
@@ -120,21 +147,24 @@ export default function SingleTrainerPlanPageContent({
               ) : (
                 <p>{notDisplayed}</p>
               )}
-            </div>{" "}
+            </div>
             <div className="flex items-center justify-center gap-4">
               <LikesDislikes
-                likes={planState.userDislikes}
+                likes={planState.userLikes}
                 dislikes={planState.userDislikes}
                 isLiked={isLiked || false}
                 isDisliked={isDisliked || false}
-                disabled={true}
+                react={react}
+                disabled={!plan?.approved}
               />
             </div>
           </div>
         </div>
         <div className=" flex items-center justify-center order-0 md:order-1 flex-1 ">
           <h1
-            className={cn("text-5xl tracking-tighter font-bold text-center  ")}
+            className={cn(
+              "text-2xl md:text-6xl text-balance tracking-tighter font-bold text-center  ",
+            )}
           >
             {planState.title}
           </h1>
@@ -158,6 +188,7 @@ export default function SingleTrainerPlanPageContent({
           authUser={authUser}
           dayIds={planState.days}
           texts={singleDayTexts}
+          {...daysListTexts}
         />
       </div>
     </section>

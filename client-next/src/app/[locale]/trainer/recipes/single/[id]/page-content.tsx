@@ -36,6 +36,7 @@ import RecipeMacros from "@/components/recipes/recipe-macros";
 import useClientNotFound from "@/hoooks/useClientNotFound";
 import LikesDislikes from "@/components/common/likes-dislikes";
 import DietBadge from "@/components/common/diet-badge";
+import RecipeIngredients from "@/components/recipes/recipe-ingredients";
 
 export interface SingleRecipePageTexts {
   elementHeaderTexts: ElementHeaderTexts;
@@ -107,14 +108,7 @@ export default function SingeRecipePageContent({
   }
 
   return (
-    <section className="w-full mx-auto max-w-[1500px] min-h-[calc(100vh-4rem)] flex-col items-center justify-center transition-all px-6 py-10 relative ">
-      {/*<ElementHeader*/}
-      {/*  elementState={recipeState}*/}
-      {/*  react={react}*/}
-      {/*  isLiked={isLiked}*/}
-      {/*  isDisliked={isDisliked}*/}
-      {/*  {...elementHeaderTexts}*/}
-      {/*/>*/}
+    <section className="w-full mx-auto max-w-[1500px] min-h-[calc(100vh-4rem)] flex-col items-center justify-center transition-all px-1 md:px-6 py-10 relative ">
       <div className="w-3/4 mx-auto flex flex-col md:flex-row items-center justify-between gap-10 md:gap-20 mb-2 ">
         <div className="order-1 flex items-center justify-center gap-3">
           <div className="flex flex-row md:flex-col items-center justify-center gap-4 flex-1">
@@ -140,7 +134,9 @@ export default function SingeRecipePageContent({
         </div>
         <div className=" flex items-center justify-center order-0 md:order-1 flex-1 ">
           <h1
-            className={cn("text-5xl tracking-tighter font-bold text-center  ")}
+            className={cn(
+              "text-2xl md:text-6xl text-balance tracking-tighter font-bold text-center  ",
+            )}
           >
             {recipeState.title}
           </h1>
@@ -172,59 +168,63 @@ export default function SingeRecipePageContent({
         />
       </div>
       {IQMessage.length > 0 && (
-        <Accordion
-          type={"single"}
-          collapsible
-          className="w-full md:w-2/3 mx-auto mt-20 lg:mt-25"
-        >
-          <AccordionItem value={"item"}>
-            <AccordionTrigger className="text-lg md:text-xl">
-              {showIngredients}
-            </AccordionTrigger>
-            <AccordionContent className="space-y-10 mt-5">
-              {IQMessage.map(
-                (
-                  {
-                    ingredient: { name, type, id },
-                    nutritionalFact: { unit },
-                    count,
-                  },
-                  i,
-                ) => (
-                  <div
-                    key={id}
-                    className={cn(
-                      "w-full gap-10 md:gap-0 flex flex-col md:flex-row items-center justify-between px-0 lg:px-6",
-                      i !== IQMessage.length - 1 && "border-b pb-4",
-                    )}
-                  >
-                    <div className="flex w-full items-center justify-around md:justify-between flex-1 md:flex-2 gap-1.5 md:gap-3.5">
-                      <h3 className="text-lg ">{name}</h3>
-                      <div className=" flex items-center justify-center gap-2">
-                        <span className={"font-semibold"}>{count}</span>
-                        <Badge
-                          variant={unit === "GRAM" ? "secondary" : "default"}
-                        >
-                          {unit}
-                        </Badge>
-                      </div>
-                    </div>
-
-                    <div className={"flex-1 flex justify-end"}>
-                      <p
-                        className={cn(
-                          `px-3 py-1 bg-${colorMap[type]} text-${colorMap[type]}-foreground rounded-full font-bold`,
-                        )}
-                      >
-                        {type}
-                      </p>
-                    </div>
-                  </div>
-                ),
-              )}
-            </AccordionContent>
-          </AccordionItem>
-        </Accordion>
+        <RecipeIngredients
+          showIngredients={showIngredients}
+          IQMessage={IQMessage}
+        />
+        // <Accordion
+        //   type={"single"}
+        //   collapsible
+        //   className="w-full md:w-2/3 mx-auto mt-20 lg:mt-25"
+        // >
+        //   <AccordionItem value={"item"}>
+        //     <AccordionTrigger className="text-lg md:text-xl">
+        //       {showIngredients}
+        //     </AccordionTrigger>
+        //     <AccordionContent className="space-y-10 mt-5">
+        //       {IQMessage.map(
+        //         (
+        //           {
+        //             ingredient: { name, type, id },
+        //             nutritionalFact: { unit },
+        //             count,
+        //           },
+        //           i,
+        //         ) => (
+        //           <div
+        //             key={id}
+        //             className={cn(
+        //               "w-full gap-10 md:gap-0 flex flex-col md:flex-row items-center justify-between px-0 lg:px-6",
+        //               i !== IQMessage.length - 1 && "border-b pb-4",
+        //             )}
+        //           >
+        //             <div className="flex w-full items-center justify-around md:justify-between flex-1 md:flex-2 gap-1.5 md:gap-3.5">
+        //               <h3 className="text-lg ">{name}</h3>
+        //               <div className=" flex items-center justify-center gap-2">
+        //                 <span className={"font-semibold"}>{count}</span>
+        //                 <Badge
+        //                   variant={unit === "GRAM" ? "secondary" : "default"}
+        //                 >
+        //                   {unit}
+        //                 </Badge>
+        //               </div>
+        //             </div>
+        //
+        //             <div className={"flex-1 flex justify-end"}>
+        //               <p
+        //                 className={cn(
+        //                   `px-3 py-1 bg-${colorMap[type]} text-${colorMap[type]}-foreground rounded-full font-bold`,
+        //                 )}
+        //               >
+        //                 {type}
+        //               </p>
+        //             </div>
+        //           </div>
+        //         ),
+        //       )}
+        //     </AccordionContent>
+        //   </AccordionItem>
+        // </Accordion>
       )}
     </section>
   );

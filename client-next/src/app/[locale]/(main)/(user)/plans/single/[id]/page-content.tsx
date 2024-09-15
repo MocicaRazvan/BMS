@@ -19,6 +19,7 @@ import AddToCartBtn, {
 } from "@/components/plans/add-to-cart-btn";
 import useClientNotFound from "@/hoooks/useClientNotFound";
 import React from "react";
+import { useSubscription } from "@/context/subscriptions-context";
 export interface UserPlanPageContentTexts {
   elementHeaderTexts: ElementHeaderTexts;
   addToCartBtnTexts: AddToCartBtnTexts;
@@ -52,9 +53,8 @@ export default function UserPlanPageContent({
     authUser,
     basePath: `/plans/withUser`,
   });
-  const { addToCartForUser, isInCartForUser, removeFromCartForUser } =
-    useCartForUser(authUser.id);
-  const { toast } = useToast();
+  const { isPlanInSubscription } = useSubscription();
+
   const formatIntl = useFormatter();
   if (error?.status) {
     return navigateToNotFound();
@@ -91,7 +91,7 @@ export default function UserPlanPageContent({
     VEGETARIAN: "accent",
   };
   return (
-    <section className="w-full mx-auto max-w-[1500px] min-h-[calc(100vh-4rem)] flex-col items-center justify-center transition-all px-6 py-5 relative ">
+    <section className="w-full mx-auto max-w-[1500px] min-h-[calc(100vh-4rem)] flex-col items-center justify-center transition-all px-1 md:px-6 py-5 relative ">
       <div
         className="sticky top-[4rem] z-10 shadow-sm p-4 w-[200px] rounded-xl
       bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 overflow-hidden
@@ -139,13 +139,20 @@ export default function UserPlanPageContent({
         <ProseText html={plan?.body} />
         <AuthorProfile author={user} />
       </div>
-      <div className={"w-full flex items-center justify-center mt-20 "}>
-        <h2 className="text-3xl md:text-4xl font-bold tracking-tighter">
-          {buyPrompt}
-        </h2>
-      </div>
+      {!isPlanInSubscription(plan.id) && (
+        <div className={"w-full flex items-center justify-center mt-20 "}>
+          <h2 className="text-3xl md:text-4xl font-bold tracking-tighter">
+            {buyPrompt}
+          </h2>
+        </div>
+      )}
       <div className="sticky bottom-0 mt-4  w-fit mx-auto  bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/70 p-2 rounded-md">
-        <AddToCartBtn authUser={authUser} plan={plan} {...addToCartBtnTexts} />
+        <AddToCartBtn
+          authUser={authUser}
+          plan={plan}
+          {...addToCartBtnTexts}
+          pulse
+        />
       </div>
     </section>
   );

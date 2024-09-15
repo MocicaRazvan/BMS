@@ -137,16 +137,16 @@ export default function PostForm({
           title: data.title,
           description: descriptionToast,
           variant: "success",
-          action: (
-            <ToastAction
-              altText={altToast}
-              onClick={() =>
-                router.push(`/trainer/posts/single/${res.content.id}`)
-              }
-            >
-              {toastAction}
-            </ToastAction>
-          ),
+          // action: (
+          //   <ToastAction
+          //     altText={altToast}
+          //     onClick={() =>
+          //       router.push(`/trainer/posts/single/${res.content.id}`)
+          //     }
+          //   >
+          //     {toastAction}
+          //   </ToastAction>
+          // ),
         });
         router.push(`/trainer/posts/single/${res.content.id}`);
       } catch (e) {

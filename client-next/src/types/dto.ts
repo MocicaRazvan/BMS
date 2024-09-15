@@ -286,7 +286,8 @@ export type DayType =
   | "HIGH_PROTEIN"
   | "LOW_FAT"
   | "HIGH_FAT"
-  | "LOW_PROTEIN";
+  | "LOW_PROTEIN"
+  | "BALANCED";
 
 export const dayTypes: DayType[] = [
   "LOW_CARB",
@@ -295,6 +296,7 @@ export const dayTypes: DayType[] = [
   "LOW_FAT",
   "HIGH_FAT",
   "LOW_PROTEIN",
+  "BALANCED",
 ] as const;
 
 export interface DayBody extends TitleBodyDto {

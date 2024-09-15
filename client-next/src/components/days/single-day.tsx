@@ -6,30 +6,29 @@ import ProseText from "@/components/common/prose-text";
 import AuthorProfile from "@/components/common/author-profile";
 import MealsList, { MealListProps } from "@/components/days/meals-list";
 import React, { memo, useCallback, useState } from "react";
-import {
-  CustomEntityModel,
-  DayResponse,
-  DietType,
-  RecipeResponse,
-  UserDto,
-} from "@/types/dto";
+import { CustomEntityModel, DayResponse, DietType, UserDto } from "@/types/dto";
 import { NutritionalTableTexts } from "@/components/common/nutritional-table";
 import { IngredientPieChartTexts } from "@/components/charts/ingredient-macros-pie-chart";
 import useFetchStream from "@/hoooks/useFetchStream";
 import useClientNotFound from "@/hoooks/useClientNotFound";
 import DietBadge from "@/components/common/diet-badge";
 import { fetchStream } from "@/hoooks/fetchStream";
+import DayTypeBadge, {
+  DayTypeBadgeTexts,
+} from "@/components/days/day-type-badge";
 
 export interface SingleDayTexts {
   meals: string;
   nutritionalTableTexts: NutritionalTableTexts;
   ingredientPieChartTexts: IngredientPieChartTexts;
+  showIngredients: string;
+  dayBadgeTexts: DayTypeBadgeTexts;
 }
 
 export interface SingleDayProps
   extends Omit<
     MealListProps,
-    "nutritionalTableTexts" | "ingredientPieChartTexts"
+    "nutritionalTableTexts" | "ingredientPieChartTexts" | "showIngredients"
   > {
   day: DayResponse;
   author: UserDto;
@@ -102,7 +101,7 @@ const SingleDay = memo(
     const isDisliked = dayState.userDislikes.includes(Number(authUser.id));
 
     return (
-      <section className="w-full mx-auto max-w-[1500px] flex-col items-center justify-center transition-all px-6 py-10 relative ">
+      <section className="w-full mx-auto max-w-[1500px] flex-col items-center justify-center transition-all px-1 md:px-6 py-10 relative ">
         <div className="w-3/4 mx-auto flex flex-col md:flex-row items-center justify-between gap-10 md:gap-20 mb-2 ">
           <div className="order-1 flex items-center justify-center gap-3">
             <div className="flex items-center justify-center gap-4 flex-1">
@@ -111,16 +110,16 @@ const SingleDay = memo(
                 dislikes={dayState.userDislikes}
                 isLiked={isLiked || false}
                 isDisliked={isDisliked || false}
-                disabled={disableLikes}
+                // disabled={disableLikes}
                 react={react}
               />
             </div>
-            <Badge>{dayState.type}</Badge>
+            <DayTypeBadge type={day.type} {...texts.dayBadgeTexts} />
           </div>
           <div className=" flex items-center justify-center order-0 md:order-1 flex-1 ">
             <h1
               className={cn(
-                "text-5xl tracking-tighter font-bold text-center  ",
+                "text-2xl md:text-6xl text-balance tracking-tighter font-bold text-center  ",
               )}
             >
               {dayState.title}
@@ -148,6 +147,7 @@ const SingleDay = memo(
             recipeBasePath={
               recipeBasePath ? recipeBasePath + `/${day.id}` : undefined
             }
+            showIngredients={texts.showIngredients}
           />
         </div>
       </section>

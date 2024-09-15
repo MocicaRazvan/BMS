@@ -34,6 +34,7 @@ import { MoreHorizontal } from "lucide-react";
 import AlertDialogDeleteDay from "@/components/dialogs/days/delete-day";
 import LoadingSpinner from "@/components/common/loading-spinner";
 import OverflowTextTooltip from "@/components/common/overflow-text-tooltip";
+import { DayTypeBadgeTexts } from "@/components/days/day-type-badge";
 
 export interface DayTableColumnsTexts {
   id: string;
@@ -52,6 +53,7 @@ export interface DayTableTexts {
   dayTableColumnTexts: DayTableColumnsTexts;
   typeDropdownTexts: UseFilterDropdownTexts;
   search: string;
+  dayTypeBadgeTexts: DayTypeBadgeTexts;
 }
 
 export interface DayTableProps
@@ -77,6 +79,7 @@ export default function DaysTable({
   sortingOptions,
   sizeOptions,
   mainDashboard,
+  dayTypeBadgeTexts,
 }: DayTableProps) {
   const router = useRouter();
   const formatIntl = useFormatter();
@@ -166,7 +169,7 @@ export default function DaysTable({
         ),
         cell: ({ row }) => (
           <div className="max-w-32 text-sm font-bold text-nowrap overflow-x-hidden">
-            <p>{row.original.model.type.split("_").join(" ")}</p>
+            <p>{dayTypeBadgeTexts.labels[row.original.model.type]}</p>
           </div>
         ),
       },
@@ -346,7 +349,9 @@ export default function DaysTable({
           }}
           extraCriteria={
             <div className="flex items-start justify-center gap-8 flex-1 flex-wrap">
-              {dayTypeFilterCriteriaCallback(resetCurrentPage)}
+              <div className="flex items-center justify-end gap-4 flex-1 flex-wrap">
+                {dayTypeFilterCriteriaCallback(resetCurrentPage)}
+              </div>
             </div>
           }
         />

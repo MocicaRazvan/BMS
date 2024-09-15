@@ -448,7 +448,16 @@
         "mealType": "The meal will be for: ",
         "dayDietType": "The day will be for: ",
         "areMealsCompletedButNotSubmitted": "There are some meals that are completed but not submitted, if you submit the form they will be lost",
-        "continueBtn": "Continue"
+        "continueBtn": "Continue",
+        "dayTypes": {
+          "LOW_CARB": "Low carb",
+          "HIGH_CARB": "High carb",
+          "HIGH_PROTEIN": "High protein",
+          "LOW_FAT": "Low fat",
+          "HIGH_FAT": "High fat",
+          "LOW_PROTEIN": "Low protein",
+          "BALANCED": "Balanced"
+        }
       }
     },
     "nav": {
@@ -1056,7 +1065,8 @@
           "mainSite": "Main Site",
           "groupLabels": {
             "contents": "Contents",
-            "sales": "Sales"
+            "sales": "Sales",
+            "settings": "Settings"
           },
           "labels": {
             "dashboard": "Dashboard",
@@ -1068,7 +1078,8 @@
             "monthlySales": "Monthly Sales",
             "dailySales": "Daily Sales",
             "kanban": "Kanban",
-            "days": "Days"
+            "days": "Days",
+            "account": "Account"
           },
           "subLabels": {
             "yourPosts": "Your Posts",
@@ -1121,7 +1132,10 @@
         }
       },
       "HomeAboutTexts": {
-        "title": "Why to choose our platform?"
+        "title": "Why to choose our platform?",
+        "content1": "At Bro Meets Science, we bridge the gap between cutting-edge nutritional research and practical, everyday advice. Our team of certified nutritionists and fitness experts is dedicated to providing personalized nutritional plans that are not only effective but also sustainable. Unlike generic diet fads, our plans are rooted in scientific evidence and tailored to meet your unique health goals and lifestyle needs. We believe that proper nutrition is the cornerstone of a healthy life, and we're committed to empowering you with the knowledge and tools you need to make informed decisions about your diet and well-being.",
+        "content2": "Our platform is more than just a place to buy nutritional plans; it's a community of like-minded individuals seeking to improve their health and fitness. Through our regularly updated blog, we share the latest insights in nutrition science, debunk common myths, and offer practical tips to help you stay on track. Whether you're looking to lose weight, build muscle, or simply adopt a healthier lifestyle, our content is designed to educate and inspire you every step of the way. We understand that the journey to optimal health is a personal one, and we're here to support you with expert advice and encouragement.",
+        "content3": "Choosing Bro Meets Science means choosing a partner in your health journey. We pride ourselves on our transparent approach and are committed to providing you with reliable information and high-quality services. Our nutritional plans are customizable, ensuring they align with your specific dietary preferences and restrictions. Plus, with our user-friendly platform, accessing your plans and our wealth of blog content is seamless and convenient. Join us at Bro Meets Science and take the first step towards a healthier, happier you—backed by science and supported by a community that cares."
       },
       "HomeTimelineTexts": {
         "be-aware": {
@@ -1186,7 +1200,20 @@
     },
     "days": {
       "SingleDayTexts": {
-        "meals": "Meals"
+        "meals": "Meals",
+        "showIngredients": "Show Ingredients"
+      },
+      "DayTypeBadgeTexts": {
+        "LOW_CARB": "Low carb",
+        "HIGH_CARB": "High carb",
+        "HIGH_PROTEIN": "High protein",
+        "LOW_FAT": "Low fat",
+        "HIGH_FAT": "High fat",
+        "LOW_PROTEIN": "Low protein",
+        "BALANCED": "Balanced"
+      },
+      "DaysListTexts": {
+        "header": "Days"
       }
     }
   },
@@ -1615,6 +1642,33 @@
         "title": "Kanban Board",
         "header": "Here you can see and manage the tasks you have created"
       }
+    },
+    "terms-of-service": {
+      "TermsOfServiceTexts": {
+        "title": "Terms of Service",
+        "terms": {
+          "terms1": {
+            "title": "EU REGULATIONS",
+            "body": "These Terms And Conditions associated with the processing of personal data (hereinafter referred to as the Conditions) describe the way in which BMS Ltd., with its registered office at Roamnia, ID number 46 440 224, (hereinafter referred to as the `Company` or `we`) processes your personal data for the purpose of providing our services, consisting in the sale and distribution of nutritional supplements, sportswear and exercise accessories through an online store (hereinafter referred to as the `Services`).The company is responsible for the processing of personal data under Regulation (EU) 2016/679 of the European Parliament and of the Council (EU) of 27 April 2016 on the protection of individuals with regard to the processing of personal data and on the free movement of such data, repealing Directive 95/46 / EC [GDPR. `] and Act no. 18/2018 Coll. on the Protection of Personal Data and on Amendments to Certain Acts, as currently in force [hereinafter referred to as `Act no. 18/2018 Coll. `].The company has taken all appropriate technical and organizational measures to ensure the protection of personal data.`Personal data`: data relating to an identified natural person or an identifiable natural person which can be identified directly or indirectly, in particular by a generally applicable identifier, another identifier such as a name, surname, identification number, location data or an online identifier, or on the basis of one or more characteristics or traits that make up its physical identity, physiological identity, genetic identity, mental identity, economic identity, cultural identity or social identity.`Processing of personal data`: a processing operation or set of processing operations involving personal data or personal data files, in particular the acquisition, recording, organizing, structuring, storage, alteration, retrieval, browsing, exploitation, transmission, dissemination or otherwise, combining, restricting, deleting, whether performed by automated means or non-automated means. "
+          },
+          "terms2": {
+            "title": "ON THE BASIS OF WHAT CAN WE PROCESS YOUR PERSONAL DATA?",
+            "body": "In addition to the above, we have the right to process your Personal Data to fulfil our legal obligations under Article 6, Sec 1, (c) of the GDPR or to protect our legitimate interests under Article 6 Sec (1), (f) of GDPR, for example for fraud prevention, network and information security and direct marketing.We will process your Personal Data in accordance with applicable law, and we will protect your Personal Data against misuse and / or illegal disclosure."
+          },
+          "terms3": {
+            "title": "HOW DO WE SHARE YOUR PERSONAL DATA?",
+            "body": "In order to make our Website and/or Services available (and if necessary due to circumstances) we have the right to provide your Personal Data (and you give consent to such provision) in accordance with the principle of minimization only to a limited circle of persons, our employees, subcontractors, officials, advisors, sales representatives, suppliers or related parties of the Company and the Service Provider to the extent that it is reasonable and necessary to achieve the purpose set out in these Terms&Conditions, in particular the following entities:(i) Global Payments Ltd., organizational file, with its registered office at Bucharest Romanian Bd. Iuliu Maniu 51B, Company Identification Number: 50 010 301.(ii) Meta Platforms Ireland Limited, 4 Grand Canal Square, Grand Canal Harbour, Dublin, D02X525, Ireland(iii) Google Ireland Limited, Gordon House, Barrow Street, Dublin 4, Ireland(iv) TikTok Inc., Culver City,Bristol Pkwy 5800, United States"
+          },
+          "terms4": {
+            "title": "DO WE TRANSFER YOUR PERSONAL DATA TO THIRD COUNTRIES?",
+            "body": "The personal data we collect may be stored or otherwise processed and transmitted within the countries in which we conduct our business activities to achieve the purpose of the processing set forth in these Terms. For the same purpose, your data may be transferred between the Member States of the European Union or the European Economic Area and countries which, according to the European Commission, guarantee the level of personal data protection as published from time to time by the Office."
+          },
+          "terms5": {
+            "title": "HOW LONG WILL WE PROCESS YOUR PERSONAL DATA?",
+            "body": "Unless otherwise provided in applicable law, we have the right to process your Personal Data in a form that allows you to identify yourself for the time necessary to achieve the purpose for which the Personal Data was provided (this may include the time you visit our Website or use our Services and / or for the entire period during which the purpose of processing Personal Data lasts)."
+          }
+        }
+      }
     }
   },
   "metadata": {
@@ -1832,6 +1886,16 @@
         "title": "Your Days",
         "description": "Your days on Bro Meets Science",
         "keywords": "view, days, write, knowledge, insights, topics, professionals, free, platform"
+      },
+      "Account": {
+        "title": "Account",
+        "description": "User's account on Bro Meets Science",
+        "keywords": "user, profile, view, edit, verify, email, change, password, start, chat, trainer, trainer dashboard"
+      },
+      "SignOut": {
+        "title": "Sign Out",
+        "description": "Sign out from Bro Meets Science",
+        "keywords": "sign out, logout, account, platform, community, trainer, trainer dashboard"
       }
     },
     "admin": {
@@ -1959,7 +2023,22 @@
         "title": "Recipes For User",
         "description": "Recipes for the user on Bro Meets Science",
         "keywords": "recipes, read, knowledge, insights, topics, professionals, free, platform"
+      },
+      "Account": {
+        "title": "Account",
+        "description": "User's account on Bro Meets Science",
+        "keywords": "user, profile, view, edit, verify, email, change, password, start, chat, admin, admin dashboard"
+      },
+      "SignOut": {
+        "title": "Sign Out",
+        "description": "Sign out from Bro Meets Science",
+        "keywords": "sign out, logout, account, platform, community, admin, admin dashboard"
       }
+    },
+    "terms-of-service": {
+      "title": "Terms of Service",
+      "description": "Terms of Service for Bro Meets Science",
+      "keywords": "terms, service, conditions, privacy, policy, protection, personal, security, gdpr, regulations, law, rights, obligations,"
     }
   }
 }

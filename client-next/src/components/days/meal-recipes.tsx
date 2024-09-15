@@ -1,5 +1,5 @@
 "use client";
-import { memo, useCallback, useState } from "react";
+import React, { memo, useCallback, useState } from "react";
 import { cn, isDeepEqual } from "@/lib/utils";
 import CustomPaginationButtons from "@/components/ui/custom-pagination-buttons";
 import useGetRecipeWithIngredients from "@/hoooks/recipes/useGetRecipeWithIngredients";
@@ -17,6 +17,8 @@ import { CustomEntityModel, PostResponse, RecipeResponse } from "@/types/dto";
 import LikesDislikes from "@/components/common/likes-dislikes";
 import LoadingSpinner from "@/components/common/loading-spinner";
 import useClientNotFound from "@/hoooks/useClientNotFound";
+import RecipeIngredients from "@/components/recipes/recipe-ingredients";
+import DietBadge from "@/components/common/diet-badge";
 
 export interface MealRecipeProps extends WithUser {
   recipeIds: number[];
@@ -25,6 +27,7 @@ export interface MealRecipeProps extends WithUser {
   recipeBasePath?: string;
   showLikes?: boolean;
   disableLikes?: boolean;
+  showIngredients: string;
 }
 
 export const MealRecipeList = memo(
@@ -35,10 +38,10 @@ export const MealRecipeList = memo(
     ingredientPieChartTexts,
     recipeBasePath,
     showLikes,
-    disableLikes = true,
+    disableLikes = false,
+    showIngredients,
   }: MealRecipeProps) => {
     const [currentIndex, setCurrentIndex] = useState(0);
-    console.log("currentIndex", currentIndex);
     return (
       <div>
         <div className="mb-5">
@@ -56,7 +59,10 @@ export const MealRecipeList = memo(
               animate={{ opacity: index === currentIndex ? 1 : 0 }}
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.3 }}
-              className={cn(index !== currentIndex ? "hidden" : "block")}
+              className={cn(
+                "w-full",
+                index !== currentIndex ? "hidden" : "block",
+              )}
             >
               <RecipePlanItem
                 recipeId={recipeId}
@@ -66,6 +72,7 @@ export const MealRecipeList = memo(
                 recipeBasePath={recipeBasePath}
                 showLikes={showLikes}
                 disableLikes={disableLikes}
+                showIngredients={showIngredients}
               />
             </motion.div>
           ))}
@@ -92,6 +99,7 @@ interface RecipePlanItemProps extends WithUser {
   recipeBasePath?: string;
   showLikes?: boolean;
   disableLikes?: boolean;
+  showIngredients: string;
 }
 export const RecipePlanItem = memo(
   ({
@@ -100,8 +108,9 @@ export const RecipePlanItem = memo(
     nutritionalTableTexts,
     ingredientPieChartTexts,
     recipeBasePath,
-    showLikes = false,
-    disableLikes = true,
+    showLikes = true,
+    disableLikes = false,
+    showIngredients,
   }: RecipePlanItemProps) => {
     const {
       recipeState,
@@ -155,11 +164,7 @@ export const RecipePlanItem = memo(
         </section>
       );
     }
-    const colorMap = {
-      VEGAN: "success",
-      OMNIVORE: "secondary",
-      VEGETARIAN: "accent",
-    };
+
     if (!recipe || !recipeState) return null;
 
     if (recipeError || IQError) {
@@ -168,33 +173,32 @@ export const RecipePlanItem = memo(
 
     return (
       <div className="w-full px-5">
-        <div className=" gap-5 md:gap-0 flex flex-col md:flex-row items-center justify-between w-full max-w-screen-lg mx-auto">
-          <div className="order-1 md:order-0 flex items-center justify-center w-[250px] gap-4 ">
-            {showLikes && (
-              <LikesDislikes
-                react={react}
-                likes={recipeState?.userLikes || []}
-                dislikes={recipeState?.userDislikes || []}
-                isLiked={isLiked || false}
-                isDisliked={isDisliked || false}
-                disabled={disableLikes}
-              />
-            )}
+        <div className="w-3/4 mx-auto flex flex-col md:flex-row items-center justify-between gap-10 md:gap-20 mb-2 ">
+          <div className="order-1 flex items-center justify-center gap-3">
+            <div className="flex flex-row md:flex-col items-center justify-center gap-4 flex-1">
+              <div className="flex items-center justify-center gap-4">
+                <LikesDislikes
+                  likes={recipeState.userLikes}
+                  dislikes={recipeState.userDislikes}
+                  isLiked={isLiked || false}
+                  isDisliked={isDisliked || false}
+                  react={react}
+                />
+              </div>
+            </div>
           </div>
-          <div className=" order-0 md:order-1 flex   items-center justify-center w-full ">
-            <h1 className="text-6xl tracking-tighter font-bold text-center md:translate-x-[-125px]">
-              {recipeState?.title}
-            </h1>
-            <p
+          <div className=" flex items-center justify-center order-0 md:order-1 flex-1 ">
+            <h1
               className={cn(
-                `ms-5 px-3 py-1 bg-${colorMap[recipeState.type]} text-${colorMap[recipeState.type]}-foreground rounded-full
-                 md:translate-x-[-125px] font-bold w-fit text-lg mt-2`,
+                "text-3xl md:text-5xl tracking-tighter font-bold text-center  ",
               )}
             >
-              {recipeState.type}
-            </p>
+              {recipeState.title}
+            </h1>
           </div>
-          <div className="w-32 "></div>
+          <div className="order-3">
+            <DietBadge dietType={recipeState.type} />
+          </div>
         </div>
         {recipeState?.images.length > 0 && (
           <div className="mt-10">
@@ -216,6 +220,12 @@ export const RecipePlanItem = memo(
             ingredientPieChartTexts={ingredientPieChartTexts}
           />
         </div>
+        {IQMessage.length > 0 && (
+          <RecipeIngredients
+            showIngredients={showIngredients}
+            IQMessage={IQMessage}
+          />
+        )}
       </div>
     );
   },

@@ -35,9 +35,11 @@ export interface CartPopsTexts {
   emptyCart: string;
 }
 
-interface Props extends WithUser {}
+interface Props extends WithUser {
+  cartPopTexts: CartPopsTexts;
+}
 
-export default function CartPop({ authUser }: Props) {
+export default function CartPop({ authUser, cartPopTexts }: Props) {
   const {
     usersCart,
     removeFromCartForUser,
@@ -47,11 +49,6 @@ export default function CartPop({ authUser }: Props) {
   const router = useRouter();
   const { toast } = useToast();
   const formatIntl = useFormatter();
-  const [cartPopTexts, setCartPopTexts] = useState<CartPopsTexts | null>(null);
-
-  useEffect(() => {
-    getCartPopsTexts().then(setCartPopTexts);
-  }, []);
 
   return (
     <DropdownMenu modal={false}>
@@ -85,7 +82,7 @@ export default function CartPop({ authUser }: Props) {
           </TooltipProvider>
         </div>
       </DropdownMenuTrigger>
-      {cartPopTexts && usersCart.total > 0 && (
+      {usersCart.total > 0 && (
         <DropdownMenuContent className="w-80">
           <DropdownMenuGroup>
             <ScrollArea

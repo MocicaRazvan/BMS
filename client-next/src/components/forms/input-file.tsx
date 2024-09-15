@@ -413,7 +413,7 @@ export default function InputFile<T extends FieldValues>({
         name={fieldName as Path<T>}
         render={({ field: { value, onChange, ...fieldProps } }) => (
           <FormItem>
-            <div className="flex w-full h-full min-h-[50px] justify-between items-center">
+            <div className="flex flex-col md:flex-row w-full h-full min-h-[50px] justify-between items-center">
               <FormLabel className="capitalize">{title}</FormLabel>
               {multiple && fieldValue.length > 0 && (
                 <Button
@@ -434,7 +434,7 @@ export default function InputFile<T extends FieldValues>({
                 </div>
               ) : (
                 <div>
-                  <div className="w-full h-full flex items-center justify-between gap-5">
+                  <div className="w-full h-full flex flex-col md:flex-row items-center justify-between gap-5">
                     <div
                       {...getRootProps()}
                       className={cn(

@@ -447,7 +447,16 @@
         "mealType": "Masa va fi pentru: ",
         "dayDietType": "Ziua va fi pentru: ",
         "areMealsCompletedButNotSubmitted": "Sunt mese completate care nu sunt adăugate, continuați iar ele vor fi ignorate",
-        "continueBtn": "Continuați"
+        "continueBtn": "Continuați",
+        "dayTypes": {
+          "LOW_CARB": "Carbohidrați scăzuți",
+          "HIGH_CARB": "Carbohidrați ridicați",
+          "HIGH_PROTEIN": "Proteine ridicate",
+          "LOW_FAT": "Grăsimi scăzute",
+          "HIGH_FAT": "Grăsimi ridicate",
+          "LOW_PROTEIN": "Proteine scăzute",
+          "BALANCED": "Balansat"
+        }
       }
     },
     "nav": {
@@ -1101,7 +1110,10 @@
         }
       },
       "HomeAboutTexts": {
-        "title": "De ce să alegi platforma noastră?"
+        "title": "De ce să alegi platforma noastră?",
+        "content1": "La Bro Meets Science, facem legătura între cercetările nutriționale de ultimă oră și sfaturile practice, de zi cu zi. Echipa noastră de nutriționiști certificați și experți în fitness este dedicată furnizării de planuri nutriționale personalizate care nu sunt doar eficiente, ci și sustenabile. Spre deosebire de dietele generice la modă, planurile noastre sunt bazate pe dovezi științifice și adaptate pentru a îndeplini obiectivele tale unice de sănătate și nevoile stilului tău de viață. Credem că o nutriție corespunzătoare este piatra de temelie a unei vieți sănătoase și suntem angajați să te împuternicim cu cunoștințele și instrumentele de care ai nevoie pentru a lua decizii informate despre dieta și bunăstarea ta.",
+        "content2": "Platforma noastră este mai mult decât un loc unde poți cumpăra planuri nutriționale; este o comunitate de indivizi cu aceleași idealuri, care caută să își îmbunătățească sănătatea și condiția fizică. Prin intermediul blogului nostru actualizat regulat, împărtășim cele mai recente informații din știința nutriției, demontăm mituri comune și oferim sfaturi practice pentru a te ajuta să rămâi pe drumul cel bun. Fie că dorești să slăbești, să îți dezvolți masa musculară sau pur și simplu să adopți un stil de viață mai sănătos, conținutul nostru este conceput să te educe și să te inspire la fiecare pas. Înțelegem că drumul către o sănătate optimă este unul personal și suntem aici să te sprijinim cu sfaturi experte și încurajare.",
+        "content3": "Alegând Bro Meets Science înseamnă să alegi un partener în călătoria ta spre sănătate. Ne mândrim cu abordarea noastră transparentă și suntem dedicați să îți oferim informații de încredere și servicii de înaltă calitate. Planurile noastre nutriționale sunt personalizabile, asigurându-ne că se aliniază preferințelor și restricțiilor tale alimentare specifice. În plus, cu platforma noastră ușor de utilizat, accesarea planurilor tale și a bogăției noastre de conținut pe blog este simplă și convenabilă. Alătură-te nouă la Bro Meets Science și fă primul pas către un tu mai sănătos și mai fericit—susținut de știință și sprijinit de o comunitate care îți pasă."
       },
       "HomeTimelineTexts": {
         "be-aware": {
@@ -1185,7 +1197,20 @@
     },
     "days": {
       "SingleDayTexts": {
-        "meals": "Mese"
+        "meals": "Mese",
+        "showIngredients": "Afișează ingredientele"
+      },
+      "DayTypeBadgeTexts": {
+        "LOW_CARB": "Carbohidrați scăzuți",
+        "HIGH_CARB": "Carbohidrați ridicați",
+        "HIGH_PROTEIN": "Proteine ridicate",
+        "LOW_FAT": "Grăsimi scăzute",
+        "HIGH_FAT": "Grăsimi ridicate",
+        "LOW_PROTEIN": "Proteine scăzute",
+        "BALANCED": "Balansat"
+      },
+      "DaysListTexts": {
+        "header": "Zile"
       }
     }
   },
@@ -1614,6 +1639,33 @@
         "title": "Tablou Kanban",
         "header": "Aici poți vedea și gestiona toate sarcinile pe care le-ai creat"
       }
+    },
+    "terms-of-service": {
+      "TermsOfServiceTexts": {
+        "title": "Termeni și condiții",
+        "terms": {
+          "terms1": {
+            "title": "REGULAMENTE UE",
+            "body": "Acești Termeni și Condiții asociate cu prelucrarea datelor cu caracter personal (denumite în continuare Condițiile) descriu modul în care BMS Ltd., cu sediul social în Roamnia, numărul de identificare 46 440 224, (denumită în continuare „Compania” sau „noi”) prelucrează datele dumneavoastră cu caracter personal în scopul furnizării serviciilor noastre, constând în vânzarea și distribuția de suplimente nutritive, îmbrăcăminte sportivă și accesorii de exerciții prin intermediul unui magazin online (denumite în continuare „Serviciile”). Compania este responsabilă pentru prelucrarea datelor cu caracter personal în conformitate cu Regulamentul (UE) 2016/679 al Parlamentului European și al Consiliului din 27 aprilie 2016 privind protecția persoanelor fizice în ceea ce privește prelucrarea datelor cu caracter personal și libera circulație a acestor date, care abrogă Directiva 95/46/CE [GDPR] și Legea nr. 18/2018 privind protecția datelor cu caracter personal și modificarea anumitor acte, în prezent în vigoare [denumită în continuare „Legea nr. 18/2018”]. Compania a luat toate măsurile tehnice și organizatorice adecvate pentru a asigura protecția datelor cu caracter personal. „Date cu caracter personal”: date referitoare la o persoană fizică identificată sau identificabilă, care poate fi identificată direct sau indirect, în special printr-un identificator aplicabil general, alt identificator precum un nume, prenume, număr de identificare, date de localizare sau un identificator online, sau pe baza uneia sau mai multor caracteristici sau trăsături care compun identitatea sa fizică, identitatea sa fiziologică, identitatea sa genetică, identitatea sa mentală, identitatea sa economică, identitatea sa culturală sau identitatea sa socială. „Prelucrarea datelor cu caracter personal”: o operațiune de prelucrare sau un set de operațiuni de prelucrare implicând date cu caracter personal sau fișiere de date cu caracter personal, în special achiziționarea, înregistrarea, organizarea, structurarea, stocarea, modificarea, extragerea, navigarea, exploatarea, transmiterea, diseminarea sau altfel, combinarea, restricționarea, ștergerea, indiferent dacă este realizată prin mijloace automatizate sau non-automatizate."
+          },
+          "terms2": {
+            "title": "ÎN BAZA CĂROR TEMEIURI PUTEM PRELUCRA DATELE DUMNEAVOASTRĂ CU CARACTER PERSONAL?",
+            "body": "În plus față de cele menționate mai sus, avem dreptul să prelucrăm datele dumneavoastră cu caracter personal pentru a ne îndeplini obligațiile legale conform articolului 6, alin. 1, lit. (c) din GDPR sau pentru a proteja interesele noastre legitime conform articolului 6 alin. (1), lit. (f) din GDPR, de exemplu pentru prevenirea fraudei, securitatea rețelelor și a informațiilor și marketing direct. Vom prelucra datele dumneavoastră cu caracter personal în conformitate cu legislația aplicabilă și vom proteja datele dumneavoastră cu caracter personal împotriva utilizării necorespunzătoare și/sau dezvăluirii ilegale."
+          },
+          "terms3": {
+            "title": "CUM ÎMPĂRTĂȘIM DATELE DUMNEAVOASTRĂ CU CARACTER PERSONAL?",
+            "body": "Pentru a face disponibil site-ul nostru web și/sau Serviciile noastre (și dacă este necesar din circumstanțe), avem dreptul să furnizăm datele dumneavoastră cu caracter personal (și vă dați consimțământul pentru o astfel de furnizare) în conformitate cu principiul minimizării doar unui cerc limitat de persoane, angajații noștri, subcontractanții, funcționarii, consilierii, reprezentanții de vânzări, furnizorii sau părțile asociate ale Companiei și Furnizorului de Servicii în măsura în care este rezonabil și necesar pentru atingerea scopului stabilit în acești Termeni și Condiții, în special următoarele entități: (i) Global Payments Ltd., fișier organizațional, cu sediul social în Bd. Iuliu Maniu 51B, București, România, Numărul de Identificare al Companiei: 50 010 301. (ii) Meta Platforms Ireland Limited, 4 Grand Canal Square, Grand Canal Harbour, Dublin, D02X525, Irlanda. (iii) Google Ireland Limited, Gordon House, Barrow Street, Dublin 4, Irlanda. (iv) TikTok Inc., Culver City, Bristol Pkwy 5800, Statele Unite."
+          },
+          "terms4": {
+            "title": "TRANSFERĂM DATELE DUMNEAVOASTRĂ CU CARACTER PERSONAL ÎN ȚĂRI TERȚE?",
+            "body": "Datele cu caracter personal pe care le colectăm pot fi stocate sau prelucrate în alt mod și transmise în cadrul țărilor în care ne desfășurăm activitățile de afaceri pentru a atinge scopul prelucrării stabilit în acești Termeni. În același scop, datele dumneavoastră pot fi transferate între Statele Membre ale Uniunii Europene sau Spațiului Economic European și țările care, conform Comisiei Europene, garantează nivelul de protecție a datelor cu caracter personal, așa cum este publicat periodic de Oficiul pentru Protecția Datelor cu Caracter Personal."
+          },
+          "terms5": {
+            "title": "CÂT TIMP VOM PRELUCRA DATELE DUMNEAVOASTRĂ CU CARACTER PERSONAL?",
+            "body": "Cu excepția cazului în care legea aplicabilă prevede altfel, avem dreptul să prelucrăm datele dumneavoastră cu caracter personal într-o formă care să vă permită identificarea pentru perioada necesară atingerii scopului pentru care au fost furnizate datele cu caracter personal (aceasta poate include perioada în care vizitați site-ul nostru web sau utilizați serviciile noastre și/sau pentru întreaga perioadă în care scopul prelucrării datelor cu caracter personal continuă să existe)."
+          }
+        }
+      }
     }
   },
   "metadata": {
@@ -1831,6 +1883,16 @@
         "title": "Zilele tale",
         "description": "Zilele tale pe Bro Meets Science",
         "keywords": "vizualizare, zile, scrie, cunoștințe, informații, subiecte, profesioniști, gratuit, platformă"
+      },
+      "Account": {
+        "title": "Cont",
+        "description": "Contul utilizatorului pe Bro Meets Science",
+        "keywords": "profil, utilizator, gestionare, vizualizare, editare, ștergere, antrenor"
+      },
+      "SignOut": {
+        "title": "Sign Out",
+        "description": "Deconectează-te de la Bro Meets Science",
+        "keywords": "deconectare, sign out, cont, platformă, comunitate, funcții, acces, antrenor"
       }
     },
     "admin": {
@@ -1958,7 +2020,22 @@
         "title": "Rețetele utilizatorului",
         "description": "Rețetele utilizatorului pe Bro Meets Science",
         "keywords": "rețete, utilizator, vizualizare, detalii"
+      },
+      "Account": {
+        "title": "Cont",
+        "description": "Contul utilizatorului pe Bro Meets Science",
+        "keywords": "profil, utilizator, gestionare, vizualizare, editare, ștergere, admin, tablou administrare"
+      },
+      "SignOut": {
+        "title": "Sign Out",
+        "description": "Deconectează-te de la Bro Meets Science",
+        "keywords": "deconectare, sign out, cont, platformă, comunitate, funcții, acces, admin, tablou administrare"
       }
+    },
+    "terms-of-service": {
+      "title": "Termeni și Condiții",
+      "description": "Termeni și condiții pe Bro Meets Science",
+      "keywords": "termeni, condiții, platformă, comunitate, caracteristici, acces"
     }
   }
 }
