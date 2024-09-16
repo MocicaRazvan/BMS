@@ -101,6 +101,9 @@ export default function AiChatBox({
           if (!isOpen) {
             setIsOpen(true);
             setShowBot(false);
+            if (scrollRef.current) {
+              scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+            }
           }
         }}
         onAnimationComplete={() => {
