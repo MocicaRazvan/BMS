@@ -7,9 +7,10 @@ import { EmbeddingsFilter } from "langchain/retrievers/document_compressors/embe
 import { CustomOllamaEmbeddings } from "@/lib/custom-ollama-embeddings";
 import { PoolConfig } from "pg";
 import {
-  PGVectorStore,
   DistanceStrategy,
+  PGVectorStore,
 } from "@langchain/community/vectorstores/pgvector";
+import * as cheerio from "cheerio";
 
 const ollamaBaseUrl = process.env.OLLAMA_BASE_URL;
 const embeddingModel = process.env.OLLAMA_EMBEDDING;
@@ -47,6 +48,8 @@ export class VectorStoreSingleton {
   private filter: EmbeddingsFilter | undefined;
   private isInitialized = false;
   private pgVectorStore: PGVectorStore | undefined;
+  public static CHUNK_SIZE = 1000;
+  public static CHUNK_OVERLAP = 300;
 
   constructor() {
     //
@@ -63,7 +66,7 @@ export class VectorStoreSingleton {
           keepAlive,
           requestOptions: {
             keepAlive,
-
+            numCtx: VectorStoreSingleton.CHUNK_SIZE,
             // numCtx: 2048,
           },
         });
@@ -78,18 +81,19 @@ export class VectorStoreSingleton {
       }
 
       if (!memory && (!this.pgVectorStore || reset)) {
-        this.pgVectorStore = await PGVectorStore.initialize(
-          this.embeddings,
-          pgConfig,
-        );
+        this.pgVectorStore = await PGVectorStore.initialize(this.embeddings, {
+          ...pgConfig,
+          chunkSize: VectorStoreSingleton.CHUNK_SIZE,
+        });
       }
 
       if (!this.filter || reset) {
         this.filter = new EmbeddingsFilter({
           embeddings: this.embeddings,
-          // todo put in env
-          similarityThreshold: 0.9,
+          // low similarly because the vectors are from html pages
+          similarityThreshold: 0.6,
           // k: 25,
+          k: undefined,
         });
       }
 
@@ -221,53 +225,87 @@ export class VectorStoreSingleton {
     //   );
   }
 
+  private static parseHTMLWithCheerio(htmlContent: string, source: string) {
+    const $ = cheerio.load(htmlContent);
+    const slugs = source.match(/\[[^\]]*]/g);
+
+    const title = $("title").text();
+    const metaDescription = $('meta[name="description"]').attr("content") || "";
+    let canonical = $('link[rel="canonical"]').attr("href") || "";
+    const keywords = $('meta[name="keywords"]').attr("content") || "";
+    const bodyContent = $("body").text().trim();
+
+    let numberCount = 0;
+    // sa pastram url im51.go.ro:3443
+    canonical = canonical.replace(/\d+/g, (match) => {
+      numberCount += 1;
+      if (numberCount > 2) {
+        if (slugs?.[numberCount - 3]) {
+          return slugs[numberCount - 3];
+        }
+        return "[id]";
+      }
+      return match;
+    });
+
+    return { title, metaDescription, canonical, keywords, bodyContent };
+  }
+
   private static async generateTSXEmbeddings() {
     const loader = new DirectoryLoader(
-      // "src/app/[locale]/(main)",
-      //`${process.cwd()}/src/app/`,
-      //   "../app/",
       "scrape/",
       {
-        // ".tsx": (path) => new TextLoader(path),
-        // ".json": (path) => new JSONLoader(path),
         ".html": (path) => new TextLoader(path),
       },
       true,
     );
 
     const docs = (await loader.load()).map((doc, i) => {
-      const url =
-        doc.metadata.source
-          .replace(/\\/g, "/")
-          .split("/scrape")[1]
-          .split("/page.")[0]
-          .replace(/\([^)]*\)/g, "")
-          .replace(/\/+/g, "/") || "/";
-
-      const fullUrl = siteUrl + "/en" + url;
+      const { title, metaDescription, canonical, keywords, bodyContent } =
+        VectorStoreSingleton.parseHTMLWithCheerio(
+          doc.pageContent,
+          doc.metadata.source,
+        );
 
       return {
-        pageContent: doc.pageContent,
+        pageContent: bodyContent,
         metadata: {
-          scope: "HTML page of the website",
-          source: doc.metadata.source,
+          scope: "Part of parsed HTML page of the website",
+          // source: doc.metadata.source,
+          url: canonical,
+          keywords,
+          title,
+          source: canonical,
+          description: metaDescription,
+          // fileType: doc.metadata.fileType || "html",
         },
       };
     });
 
-    const splitter = RecursiveCharacterTextSplitter.fromLanguage("html", {
-      chunkSize: 1250,
-      chunkOverlap: 300,
-    });
+    // chunkSize should be less than the embedding model's context length
+    // chunkOverlap can be any value,oo but doesn't affect the size of each chunk
 
+    // const splitter = RecursiveCharacterTextSplitter.fromLanguage("html", {
+    //   chunkSize: VectorStoreSingleton.CHUNK_SIZE,
+    //   chunkOverlap: VectorStoreSingleton.CHUNK_OVERLAP,
+    // });
+    const splitter = new RecursiveCharacterTextSplitter({
+      chunkSize: VectorStoreSingleton.CHUNK_SIZE,
+      chunkOverlap: VectorStoreSingleton.CHUNK_OVERLAP,
+    });
     const splitDocs = (await splitter.splitDocuments(docs)).map((doc, i) => ({
       ...doc,
+      title: doc.metadata.title,
+      description: doc.metadata.description,
+      url: doc.metadata.url,
       id: i.toString() + "_" + doc.metadata.scope + "_" + doc.metadata.source,
     }));
 
     console.log(splitDocs.map((d) => d.id));
-
+    console.log("Split docs size", splitDocs.length);
     console.log("Embeddings generated");
+    const docsWithoutSource = splitDocs.filter((d) => !d.metadata.source);
+    console.log("Docs without source", docsWithoutSource.length);
 
     return splitDocs;
   }

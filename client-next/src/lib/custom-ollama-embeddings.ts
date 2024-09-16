@@ -144,7 +144,16 @@ export class CustomOllamaEmbeddings extends Embeddings {
   async embedQuery(text: string) {
     return (await this.embeddingWithRetry([text]))[0];
   }
+  public cosineSimilarity(vectorA: number[], vectorB: number[]): number {
+    const dotProduct = vectorA.reduce(
+      (sum, a, idx) => sum + a * vectorB[idx],
+      0,
+    );
+    const magnitudeA = Math.sqrt(vectorA.reduce((sum, a) => sum + a * a, 0));
+    const magnitudeB = Math.sqrt(vectorB.reduce((sum, b) => sum + b * b, 0));
 
+    return dotProduct / (magnitudeA * magnitudeB);
+  }
   private async embeddingWithRetry(texts: string[]): Promise<number[][]> {
     const res = await this.caller.call(() =>
       this.client.embed({

@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import ShineBorder from "@/components/magicui/shine-border";
 import Logo from "@/components/logo/logo";
+import { ChatScrollAnchor } from "@/components/ai-chat/chat-scroll-anchor";
 
 export interface AiChatBoxTexts {
   loadingContent: string;
@@ -40,14 +41,37 @@ export default function AiChatBox({
   } = useChat({
     api: "/api/chat",
   });
+  const [isAtBottom, setIsAtBottom] = useState<boolean>(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  const handleScroll = () => {
+    if (!scrollRef.current) return;
+
+    const { scrollTop, scrollHeight, clientHeight } = scrollRef.current;
+    const atBottom = scrollHeight - clientHeight <= scrollTop + 15;
+
+    setIsAtBottom(atBottom);
+  };
+
   useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    if (isLoading) {
+      if (!scrollRef.current) return;
+
+      const scrollAreaElement = scrollRef.current;
+
+      scrollAreaElement.scrollTop =
+        scrollAreaElement.scrollHeight - scrollAreaElement.clientHeight;
+
+      setIsAtBottom(true);
     }
-  }, [messages?.length]);
+  }, [isLoading]);
+
+  // useEffect(() => {
+  //   if (scrollRef.current) {
+  //     scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+  //   }
+  // }, [messages?.length]);
 
   useEffect(() => {
     if (isOpen) {
@@ -107,6 +131,7 @@ export default function AiChatBox({
             <div
               className="h-full w-full overflow-y-auto px-5 overflow-x-hidden "
               onScroll={(e) => {
+                handleScroll();
                 e.stopPropagation();
               }}
               ref={scrollRef}
@@ -115,7 +140,6 @@ export default function AiChatBox({
                 <ChatMessage message={messages} key={messages.id} />
               ))}
               {isLoading && lastMessageIsUser && (
-                // TODO INTL
                 <ChatMessage
                   message={{
                     id: "loading",
@@ -152,8 +176,19 @@ export default function AiChatBox({
                   <p className={"font-medium"}>{emptyContent}</p>
                 </ShineBorder>
               )}
+              <ChatScrollAnchor
+                trackVisibility={isLoading}
+                isAtBottom={isAtBottom}
+                scrollAreaRef={scrollRef}
+              />
             </div>
-            <form onSubmit={handleSubmit} className="m-3 flex gap-1 w-full p-1">
+            <form
+              onSubmit={(e) => {
+                stop();
+                handleSubmit(e);
+              }}
+              className="m-3 flex gap-1 w-full p-1"
+            >
               <Button
                 type="button"
                 size="icon"

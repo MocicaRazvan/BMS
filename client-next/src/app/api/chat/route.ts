@@ -21,6 +21,7 @@ import { VectorStore } from "@langchain/core/vectorstores";
 import { cookies } from "next/headers";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/auth-options";
+import { ScoreThresholdRetriever } from "langchain/retrievers/score_threshold";
 
 const modelName = process.env.OLLAMA_MODEL;
 const ollamaBaseUrl = process.env.OLLAMA_BASE_URL;
@@ -57,7 +58,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // const body = await req.json();
     const messages = body.messages satisfies VercelMessage[];
 
     const chatHistory = messages
@@ -72,106 +72,11 @@ export async function POST(req: NextRequest) {
 
     const { stream, handlers } = LangChainStream();
 
-    // const chatModel = new ChatOllama({
-    //   model: modelName,
-    //   baseUrl: ollamaBaseUrl,
-    //   streaming: true,
-    //   // verbose: true,
-    //   keepAlive: "-1m",
-    //   callbacks: [handlers],
-    //   cache: true,
-    //   temperature: 0.8,
-    // });
-
-    // const rephrasingModel = new ChatOllama({
-    //   model: modelName,
-    //   baseUrl: ollamaBaseUrl,
-    //   keepAlive: "-1m",
-    //   temperature: 0.4,
-    //   // verbose: true,
-    // });
-    //
-    // const retriever = vectorStore.asRetriever({
-    //   searchType: "mmr",
-    //   searchKwargs: {
-    //     fetchK: 35,
-    //   },
-    //   k: 25,
-    // });
-    //
-    // const compressionRetriver = new ContextualCompressionRetriever({
-    //   baseRetriever: retriever,
-    //   baseCompressor: vectorFilter,
-    //   verbose: true,
-    // });
-    //
-    // const rephrasePrompt = ChatPromptTemplate.fromMessages([
-    //   new MessagesPlaceholder("chat_history"),
-    //   ["user", "{input}"],
-    //   [
-    //     "user",
-    //     "Given the above conversation, generate a seach query to look up in order to get information relevant to the current question and context." +
-    //       "Don't leave out any relevant keywords. Only return the query and no other text.",
-    //   ],
-    // ]);
-    //
-    // const historyAwareRetrieverChain = await createHistoryAwareRetriever({
-    //   llm: rephrasingModel,
-    //   // retriever,
-    //   retriever: compressionRetriver,
-    //   rephrasePrompt,
-    // });
-
-    // const historyAwareRetrieverChain = await createHistroyChain(
-    //   vectorStore,
-    //   vectorFilter,
-    // );
-    // const combineDocsChain = await createDocsChain(handlers);
+    // retrievers and documents
     const [historyAwareRetrieverChain, combineDocsChain] = await Promise.all([
-      createHistroyChain(vectorStore, vectorFilter),
+      createHistoryChain(vectorStore, vectorFilter),
       createDocsChain(handlers, currentUserRole, currentUserId),
     ]);
-
-    // const prompt = ChatPromptTemplate.fromMessages([
-    //   [
-    //     "system",
-    //     "You are a chatbot for a nutritional website called Bro Meets Science, and your name is Shaormel. Your primary role is to assist users with information about the site’s purpose and nutrition. " +
-    //       "Never speak about the site's code, development, or technical aspects. " +
-    //       "You are a consumer-focused AI assistant dedicated to users' health and well-being. " +
-    //       "Feel free to make light-hearted jokes when appropriate to create a friendly and engaging atmosphere. " +
-    //       "Answer the user's questions based on the provided context. Guide users to relevant content on the website, such as nutrition posts, meal plans, or account features. " +
-    //       "The site is available in two languages: Romanian (locale: 'ro') and English (locale: 'en'). " +
-    //       "Your default language is english, but always respond in the language the user uses unless they specify otherwise. " +
-    //       "If you detect a different language (e.g., Spanish, French), switch to English or Romanian depending on the user’s input language. " +
-    //       "If you are unsure of the language or the user switches languages during the conversation, default to English but continue to prefer the user's initial language if possible. " +
-    //       "The website includes: " +
-    //       "- Posts about nutrition to help users make informed choices.\n" +
-    //       "- Meal plans available for purchase, tailored to different dietary needs.\n" +
-    //       "- Features for users to create an account, log in, or register using Google or GitHub.\n" +
-    //       "- An orders page for users to view their orders.\n" +
-    //       "- A purchased plans page where users can view and manage their bought meal plans.\n" +
-    //       "- The contact info for the website is email: razvanmocica@gmail.com and the phone: 0764105200\n" +
-    //       "Format your messages in markdown when possible to enhance readability and user experience. " +
-    //       "**Remember**: Focus on user experience, health, and well-being. Keep the conversation helpful, fun, and engaging, and NEVER give html/js code to the user!\n\n" +
-    //       "Context:\n{context}",
-    //   ],
-    //   new MessagesPlaceholder("chat_history"),
-    //   ["user", "{input}"],
-    // ]);
-    //
-    // // {
-    // //           pageContent: pageContentTrimmed,
-    // //           metadata: { scope },
-    // //         };
-    //
-    // const combineDocsChain = await createStuffDocumentsChain({
-    //   llm: chatModel,
-    //   prompt,
-    //   documentPrompt: PromptTemplate.fromTemplate(
-    //     "{scope}\n\nPage content:\n{page_content}",
-    //   ),
-    //   documentSeparator: "\n----END OF DOCUMENT----\n",
-    // });
 
     console.log("RETRIVER DONE");
 
@@ -195,7 +100,7 @@ export async function POST(req: NextRequest) {
   }
 }
 
-async function createHistroyChain(
+async function createHistoryChain(
   vectorStore: VectorStore,
   vectorFilter: EmbeddingsFilter,
 ) {
@@ -203,34 +108,41 @@ async function createHistroyChain(
     model: modelName,
     baseUrl: ollamaBaseUrl,
     keepAlive: "-1m",
-    temperature: 0.4,
+    temperature: 0.2,
     // verbose: true,
   });
-
-  const retriever = vectorStore.asRetriever({
-    searchType: "similarity",
-    k: 40,
-  });
-
-  const compressionRetriever = new ContextualCompressionRetriever({
-    baseRetriever: retriever,
-    baseCompressor: vectorFilter,
-    verbose: true,
-  });
-
   const rephrasePrompt = ChatPromptTemplate.fromMessages([
     new MessagesPlaceholder("chat_history"),
     ["user", "{input}"],
     [
       "user",
-      "Given the above conversation, generate a search query to look up in order to get information relevant to the current question and context." +
-        "Don't leave out any relevant keywords. Only return the query and no other text.",
+      "Your role is to **rephrase the user's input** while maintaining the original intent of the message and staying on-topic." +
+        "Given the above conversation, generate a search query to look up in order to get information relevant to the current question and context." +
+        "Don't leave out any relevant keywords and always rephrase keeping in mind the site purpose. Only return the query and no other text.",
     ],
   ]);
 
+  const thresholdRetriever = ScoreThresholdRetriever.fromVectorStore(
+    vectorStore,
+    {
+      searchType: "mmr",
+      // low similarly because the vectors are from html pages
+      // lower from embeddings model to get more results (pg store is not as good as the embeddings model)
+      minSimilarityScore: 0.3, // similarity threshold
+      maxK: 20, // at most 20 results
+      kIncrement: 2, // increment by 2
+      verbose: true,
+    },
+  );
+
+  const compressionRetriever = new ContextualCompressionRetriever({
+    baseRetriever: thresholdRetriever,
+    baseCompressor: vectorFilter,
+    verbose: true,
+  });
+
   return await createHistoryAwareRetriever({
     llm: rephrasingModel,
-    // retriever,
     retriever: compressionRetriever,
     rephrasePrompt,
   });
@@ -249,10 +161,14 @@ async function createDocsChain(
     keepAlive: "-1m",
     callbacks: [handlers],
     // cache: true,
-    temperature: 0.7,
+    temperature: process.env.OLLAMA_TEMPERATURE
+      ? parseFloat(process.env.OLLAMA_TEMPERATURE)
+      : 0.7,
   });
 
   const locale = cookies().get("NEXT_LOCALE")?.value || "en";
+
+  console.log("CurrentUserId", currentUserId);
 
   const prompt = ChatPromptTemplate.fromMessages([
     [
@@ -262,7 +178,10 @@ async function createDocsChain(
         "Do not discuss any technical aspects, including the site's code or development. " +
         "Your responses should prioritize user health, well-being, and engagement, delivered in a friendly and approachable manner. " +
         "Feel free to use light-hearted humor when appropriate to create a welcoming atmosphere.\n\n" +
-        "Always ensure that any URLs you provide are localized according to the user's current language preference. " +
+        "When constructing URLs, ** ALWAYS ** replace the placeholder [userId] with the: " +
+        (currentUserId || "") +
+        ".\n\n" +
+        "Always ensure that any URLs you provide are localized according to the user's current language preference. The localization means that links start with the user current locale, the rest of the URL it's not localized! " +
         "The site supports English (locale: 'en') and Romanian (locale: 'ro'). The site base URL is" +
         siteUrl +
         " always add it to internal links. " +
@@ -287,10 +206,13 @@ async function createDocsChain(
         "/orders\n" +
         "- Manage already purchased meal plans: /" +
         locale +
-        "/subscriptions\n\n" +
+        "/subscriptions\n" +
+        "- Terms of service: /" +
+        locale +
+        '/termsOfService\n\n"' +
         "If the user communicates in a language other than English or Romanian, respond in English unless the user specifies otherwise. " +
         "If the user's language preference is unclear, default to English but try to maintain the user's initial language if possible. " +
-        "Always format your messages in markdown to improve readability and user experience.\n\n" +
+        "**Always format your messages in markdown** to improve readability and user experience.\n\n" +
         "**Key guidelines based on user roles**:\n" +
         (currentUserRole === "user"
           ? "As a 'user', only provide information relevant to general users. Do not share details related to trainer or admin features.\n"
@@ -298,16 +220,12 @@ async function createDocsChain(
             ? "As a 'trainer', provide information relevant to both general users and trainers. However, do not share details related to admin features.\n"
             : "As an 'admin', provide information relevant to users, trainers, and admins as necessary.") +
         "\n\n" +
-        (currentUserId
-          ? "The current user has the unique ID: " +
-            currentUserId +
-            ". Use this ID in any links that are specific to the user, ensuring the URLs are personalized.\n\n"
-          : "") +
         +"**Key guidelines for interaction**:\n" +
         "1. Focus on user experience, health, and well-being.\n" +
         "2. Keep the conversation engaging, informative, and fun.\n" +
         "3. Never provide HTML/JS code or discuss technical details with the user.\n" +
-        "4. Never send images to the user, you are a text based chat, but you can send emojis. \n\n" +
+        "4. Never send images to the user, you are a text based chat, but you can send emojis. \n" +
+        "5. Never mention other sites and always focus on the site you are assisting with.\n\n" +
         "Context:\n{context}",
     ],
     new MessagesPlaceholder("chat_history"),
@@ -323,7 +241,16 @@ async function createDocsChain(
     llm: chatModel,
     prompt,
     documentPrompt: PromptTemplate.fromTemplate(
-      "{scope}\n\nPage content:\n{page_content}",
+      (
+        "URL: " +
+        "{url}\n" +
+        "Title: " +
+        "{title}\n" +
+        "Description: " +
+        "{description}\n\n" +
+        "Page Content:\n" +
+        "{page_content}"
+      ).slice(0, 501),
     ),
     documentSeparator: "\n----END OF DOCUMENT----\n",
   });

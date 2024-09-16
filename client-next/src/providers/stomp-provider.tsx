@@ -17,13 +17,14 @@ export const StompProvider = ({
     Authorization: `Bearer ${authUser?.token}`,
   };
   const conRec = authUser ? 1000 : 0;
+  const isProduction = process.env.NODE_ENV === "production";
   return (
     <StompSessionProvider
       url={url + `?authToken=${authUser?.token}`}
       connectHeaders={headers}
       connectionTimeout={conRec}
       reconnectDelay={conRec}
-      logRawCommunication={true}
+      logRawCommunication={!isProduction}
       debug={(str) => console.log(`STOMP debug: ${str}`)}
       onConnect={() => {
         console.log("Connected to STOMP broker with url " + url);
