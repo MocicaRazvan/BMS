@@ -1,4 +1,5 @@
 import { AuthProvider, Role } from "./fetch-utils";
+import { Message } from "ai/react";
 
 export interface ImagesDto {
   images: string[];
@@ -476,3 +477,16 @@ export interface BoughtNotificationResponse
     },
     BoughtNotificationType
   > {}
+
+interface BaseAiChatMessage {
+  content: string;
+  vercelId: string;
+  role: Message["role"];
+}
+export interface AiChatMessagePayload extends BaseAiChatMessage {
+  email: string;
+}
+
+export interface AiChatMessageResponse
+  extends BaseAiChatMessage,
+    IdGenerateDto {}

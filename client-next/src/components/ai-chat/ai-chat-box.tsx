@@ -1,10 +1,9 @@
 "use client";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
-import { useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Bot, Minus, SendHorizontal, StopCircle, Trash } from "lucide-react";
 import { Message, useChat } from "ai/react";
-import { useEffect, useRef } from "react";
 import ReactMarkdown from "react-markdown";
 import { Link } from "@/navigation";
 import { Button } from "@/components/ui/button";
@@ -12,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import ShineBorder from "@/components/magicui/shine-border";
 import Logo from "@/components/logo/logo";
 import { ChatScrollAnchor } from "@/components/ai-chat/chat-scroll-anchor";
+import useAiChatPersist from "@/hoooks/useAiChatPersist";
 
 export interface AiChatBoxTexts {
   loadingContent: string;
@@ -20,14 +20,20 @@ export interface AiChatBoxTexts {
   emptyContent: string;
   inputPlaceholder: string;
 }
+
+interface Props extends AiChatBoxTexts {
+  initialMessages: Message[];
+}
 export default function AiChatBox({
   emptyHeader,
   inputPlaceholder,
   loadingContent,
   errorContent,
   emptyContent,
-}: AiChatBoxTexts) {
+  initialMessages,
+}: Props) {
   const [isOpen, setIsOpen] = useState(false);
+  const prevIsOpen = useRef(isOpen);
   const [showBot, setShowBot] = useState(true);
   const {
     messages,
@@ -40,10 +46,12 @@ export default function AiChatBox({
     setMessages,
   } = useChat({
     api: "/api/chat",
+    initialMessages,
   });
   const [isAtBottom, setIsAtBottom] = useState<boolean>(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const { deletePersistedMessages } = useAiChatPersist(messages);
 
   const handleScroll = () => {
     if (!scrollRef.current) return;
@@ -67,15 +75,12 @@ export default function AiChatBox({
     }
   }, [isLoading]);
 
-  // useEffect(() => {
-  //   if (scrollRef.current) {
-  //     scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-  //   }
-  // }, [messages?.length]);
-
   useEffect(() => {
     if (isOpen) {
       inputRef.current?.focus();
+    }
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [isOpen]);
 
@@ -197,7 +202,10 @@ export default function AiChatBox({
                 size="icon"
                 variant="ghost"
                 className="fllex w-10 flex-none items-center justify-center"
-                onClick={() => setMessages([])}
+                onClick={() => {
+                  deletePersistedMessages();
+                  setMessages([]);
+                }}
               >
                 <Trash size={24} />
               </Button>

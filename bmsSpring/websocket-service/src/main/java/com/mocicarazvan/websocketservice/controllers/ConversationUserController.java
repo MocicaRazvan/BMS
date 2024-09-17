@@ -19,13 +19,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-//@Controller
 @RestController
 @RequiredArgsConstructor
 @Slf4j
 public class ConversationUserController {
-    // todo validation !!!!!!
-    // todo sort order users and conversation like project sem1
     private final ConversationUserService conversationUserService;
     private final SimpMessagingTemplate simpMessagingTemplate;
 

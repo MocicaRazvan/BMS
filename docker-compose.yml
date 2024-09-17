@@ -374,7 +374,8 @@ services:
     # ollama run mistral-nemo
     # ollama run mistral-nemo --keepalive -1m
     volumes:
-      - ./ollama_models:/root/.ollama
+      #      - ./ollama_models:/root/.ollama
+      - ollama_fs:/root/.ollama
     networks:
       - bms
     restart: unless-stopped
@@ -525,6 +526,7 @@ volumes:
   mongo_data:
   redis_data:
   rabbitmq_data:
+  ollama_fs:
 networks:
   bms:
     driver: bridge

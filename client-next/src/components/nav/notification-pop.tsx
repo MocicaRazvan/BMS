@@ -1,5 +1,4 @@
 "use client";
-import { useChatNotification } from "@/context/chat-message-notification-context";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -8,10 +7,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Bell, Trash2 } from "lucide-react";
-import { memo, useEffect, useMemo, useRef, useState } from "react";
-import { useStompClient, useSubscription } from "react-stomp-hooks";
-import { usePathname, useRouter } from "@/navigation";
-import { ConversationUserResponse } from "@/types/dto";
+import { useEffect, useState } from "react";
+
 import { Session } from "next-auth";
 import {
   Tooltip,
@@ -19,10 +16,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { usePostApproveNotification } from "@/context/post-approve-notification-context";
-import ChatNotificationsContent, {
-  ChatMessageNotificationContentTexts,
-} from "@/components/nav/chat-notitifications-content";
+import ChatNotificationsContent from "@/components/nav/chat-notitifications-content";
 import {
   Accordion,
   AccordionContent,
@@ -30,22 +24,9 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
-import ApproveNotificationContent, {
-  ApproveNotificationContentTexts,
-} from "@/components/nav/approve-notifications-content";
-import isEqual from "lodash.isequal";
-import {
-  getApprovedNotificationTextsByItems,
-  getBoughtNotificationTextsByItems,
-  getChatMessageNotificationTextsForReceiver,
-  getNotificationPopTexts,
-} from "@/texts/components/nav";
-import { useRecipeApproveNotification } from "@/context/recipe-approve-notification-context";
-import { usePlanApproveNotification } from "@/context/plan-approve-notification-context";
-import BoughtNotificationContent, {
-  BoughtNotificationContentTexts,
-} from "@/components/nav/bought-notification-content";
-import { useBoughtNotification } from "@/context/bought-notification-context";
+import ApproveNotificationContent from "@/components/nav/approve-notifications-content";
+
+import BoughtNotificationContent from "@/components/nav/bought-notification-content";
 import { useNotificationPop } from "@/context/notification-pop-context";
 
 interface NotificationPopProps {
@@ -584,37 +565,37 @@ export default function NotificationPop({ authUser }: NotificationPopProps) {
       </Button>
     );
 
-  console.error("NAV AccordingState", accordionsState);
-  console.error(
-    "POSTS",
-    getPostNotificationState().notifications,
-    totalPostNotifications,
-    postMessageNotificationsTexts !== null,
-  );
-  console.error(
-    "RECIPES",
-    getRecipeNotificationState().notifications,
-    totalRecipeNotifications,
-    recipeMessageNotificationsTexts !== null,
-  );
-  console.error(
-    "PLANS",
-    getPlanNotificationState().notifications,
-    totalPlanNotifications,
-    planMessageNotificationsTexts !== null,
-  );
-  console.error(
-    "BOUGHT",
-    getBoughtNotificationState().notifications,
-    totalBoughtNotifications,
-    boughtNotificationTexts !== null,
-  );
-  console.error(
-    "CHAT",
-    chatNotificationsGroupedBySender.notifications,
-    totalChatNotifications,
-    chatMessageNotificationTexts !== null,
-  );
+  // console.error("NAV AccordingState", accordionsState);
+  // console.error(
+  //   "POSTS",
+  //   getPostNotificationState().notifications,
+  //   totalPostNotifications,
+  //   postMessageNotificationsTexts !== null,
+  // );
+  // console.error(
+  //   "RECIPES",
+  //   getRecipeNotificationState().notifications,
+  //   totalRecipeNotifications,
+  //   recipeMessageNotificationsTexts !== null,
+  // );
+  // console.error(
+  //   "PLANS",
+  //   getPlanNotificationState().notifications,
+  //   totalPlanNotifications,
+  //   planMessageNotificationsTexts !== null,
+  // );
+  // console.error(
+  //   "BOUGHT",
+  //   getBoughtNotificationState().notifications,
+  //   totalBoughtNotifications,
+  //   boughtNotificationTexts !== null,
+  // );
+  // console.error(
+  //   "CHAT",
+  //   chatNotificationsGroupedBySender.notifications,
+  //   totalChatNotifications,
+  //   chatMessageNotificationTexts !== null,
+  // );
 
   return (
     <DropdownMenu

@@ -25,6 +25,7 @@ import { vectorStoreInstance } from "@/lib/langchain";
 import { getAiChatBoxTexts } from "@/texts/components/ai-chat";
 import ValidUserSessionContext from "@/context/valid-user-session";
 import { NotificationPopProvider } from "@/context/notification-pop-context";
+import { AiChatBoxWrapper } from "@/components/ai-chat/ai-chat-box-wrapper";
 
 const fontSans = FontSans({
   subsets: ["latin"],
@@ -84,9 +85,6 @@ export default async function BaseLayout({
 
   return (
     <html lang={locale} suppressHydrationWarning>
-      <head>
-        <link rel="icon" href="/public/logo-light.ico" sizes="any" />
-      </head>
       <body
         className={cn(
           " bg-background font-sans antialiased ",
@@ -133,7 +131,7 @@ export default async function BaseLayout({
                                     >
                                       <>
                                         {children}
-                                        <AiChatBox {...aiTexts} />
+                                        <AiChatBoxWrapper {...aiTexts} />
                                       </>
                                     </SubscriptionProvider>
                                   </CartProvider>

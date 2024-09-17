@@ -52,6 +52,9 @@ export async function POST(req: NextRequest) {
     ]);
 
     if (!vectorStore || !vectorFilter || !body) {
+      console.error("VectorStore", vectorStore);
+      console.error("VectorFilter", vectorFilter);
+      console.error("Body", body);
       return NextResponse.json(
         { error: "Internal Server Error" },
         { status: 500 },
@@ -60,8 +63,11 @@ export async function POST(req: NextRequest) {
 
     const messages = body.messages satisfies VercelMessage[];
 
+    const chatCount = process.env.OLLAMA_CHAT_COUNT
+      ? -(parseInt(process.env.OLLAMA_CHAT_COUNT) + 1)
+      : -21;
     const chatHistory = messages
-      .slice(-21, -1) // last 20 messages
+      .slice(chatCount, -1) // last 20 messages
       .map((m: VercelMessage) =>
         m.role === "user"
           ? new HumanMessage(m.content)
@@ -92,7 +98,7 @@ export async function POST(req: NextRequest) {
 
     return new StreamingTextResponse(stream);
   } catch (error) {
-    console.error(error);
+    console.error("AIError", error);
     return NextResponse.json(
       { error: "Internal Server Error" },
       { status: 500 },

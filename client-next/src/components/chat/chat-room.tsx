@@ -1,10 +1,9 @@
 "use client";
 
 import { ChatRoomResponse, ConversationUserResponse } from "@/types/dto";
-import { Dispatch, memo, SetStateAction, useCallback, useEffect } from "react";
+import { Dispatch, memo, SetStateAction, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
-import { Session } from "next-auth";
-import { cn, isDeepEqual, parseQueryParamAsInt } from "@/lib/utils";
+import { cn, isDeepEqual } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useStompClient } from "react-stomp-hooks";
 import { useChatNotification } from "@/context/chat-message-notification-context";

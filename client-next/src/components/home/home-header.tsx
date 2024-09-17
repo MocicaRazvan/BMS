@@ -131,6 +131,7 @@ export default function HomeHeader({ title }: HomeHeaderTexts) {
                   alt="image"
                   placeholder="blur"
                   className="object-cover"
+                  priority={true}
                 />{" "}
                 <div className="absolute inset-0 bg-black opacity-25 z-1" />
               </div>

@@ -24,31 +24,6 @@ export default function ValidUserSessionContext({
         await signOut({ redirect: false });
         router.replace("/");
       };
-      // fetch(`${process.env.NEXT_PUBLIC_SPRING_CLIENT}/auth/validateToken`, {
-      //   body: JSON.stringify({
-      //     token: session.data.user.token,
-      //     minRoleRequired: session.data.user.role,
-      //   }),
-      //   method: "POST",
-      // })
-      //   .then(async (res) => {
-      //     if (!res.ok) {
-      //       console.error("ValidUserSessionContext " + res.statusText);
-      //       await handleSignOut();
-      //     }
-      //     const data: {
-      //       valid: boolean;
-      //     } = await res.json();
-      //     if (!data.valid) {
-      //       console.error("ValidUserSessionContext Token is not valid");
-      //       await handleSignOut();
-      //     }
-      //     console.log("ValidUserSessionContext Token is valid");
-      //   })
-      //   .catch(async (e) => {
-      //     console.error("ValidUserSessionContext " + e);
-      //     await handleSignOut();
-      //   });
       fetchStream<{
         valid: boolean;
       }>({
