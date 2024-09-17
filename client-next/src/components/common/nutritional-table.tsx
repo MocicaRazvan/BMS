@@ -15,6 +15,7 @@ import {
   NutritionalFactResponse,
 } from "@/types/dto";
 import { cn } from "@/lib/utils";
+
 const tableColsKeys: (keyof NutritionalFactResponse &
   keyof IngredientTableColumnTexts)[] = [
   "fat",

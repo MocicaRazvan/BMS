@@ -11,7 +11,6 @@ import com.mocicarazvan.templatemodule.exceptions.common.UsernameNotFoundExcepti
 import com.mocicarazvan.templatemodule.exceptions.notFound.IdNameException;
 import com.mocicarazvan.templatemodule.exceptions.notFound.NotFoundBase;
 import com.mocicarazvan.templatemodule.exceptions.notFound.TokenNotFound;
-import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

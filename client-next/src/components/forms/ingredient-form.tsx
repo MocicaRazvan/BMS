@@ -42,7 +42,6 @@ import {
   IngredientNutritionalFactResponse,
 } from "@/types/dto";
 import { toast } from "@/components/ui/use-toast";
-import { ToastAction } from "@/components/ui/toast";
 import { handleBaseError } from "@/lib/utils";
 import { BaseError } from "@/types/responses";
 import IngredientMacrosPieChart, {

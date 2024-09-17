@@ -2,8 +2,6 @@ package com.mocicarazvan.templatemodule.utils;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
 import org.springframework.r2dbc.core.DatabaseClient;
 
 import java.lang.reflect.Array;

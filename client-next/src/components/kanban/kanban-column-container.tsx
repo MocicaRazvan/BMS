@@ -1,17 +1,13 @@
 "use client";
 
 import { KanbanColumn, KanbanTask } from "@/components/kanban/kanban-board";
-import { Button } from "@/components/ui/button";
-import { CirclePlus, Trash2 } from "lucide-react";
 import { memo, useCallback, useMemo, useRef, useState } from "react";
-import { motion } from "framer-motion";
 import { SortableContext, useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { Input } from "@/components/ui/input";
 import KanbanTaskCard, {
   KanbanTaskCardTexts,
 } from "@/components/kanban/kanban-task-card";
-import { Textarea } from "@/components/ui/textarea";
 import { cn, isDeepEqual } from "@/lib/utils";
 import DialogKanbanTask, {
   DialogKanbanTaskTexts,

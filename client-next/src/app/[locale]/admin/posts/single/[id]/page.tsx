@@ -7,7 +7,6 @@ import SinglePostPageContent, {
 import { unstable_setRequestLocale } from "next-intl/server";
 import { getUser } from "@/lib/user";
 import { getAdminPostPageTexts } from "@/texts/pages";
-import Heading from "@/components/common/heading";
 import LoadingSpinner from "@/components/common/loading-spinner";
 import SidebarContentLayout from "@/components/sidebar/sidebar-content-layout";
 import { Suspense } from "react";

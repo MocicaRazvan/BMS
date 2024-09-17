@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { useCallback, useMemo, useState } from "react";
-import { Path, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import {
   Form,
   FormControl,
@@ -14,9 +14,9 @@ import {
 } from "@/components/ui/form";
 import {
   Accordion,
-  AccordionTrigger,
   AccordionContent,
   AccordionItem,
+  AccordionTrigger,
 } from "@/components/ui/accordion";
 
 import DOMPurify from "dompurify";
@@ -25,7 +25,6 @@ import { getTitleBodySchema, TitleBodyType } from "@/types/forms";
 import { CommentFormTexts } from "@/texts/components/forms";
 import ErrorMessage from "@/components/forms/error-message";
 import ButtonSubmit from "@/components/forms/button-submit";
-import { TitleBodyForm } from "@/components/forms/title-body";
 import { getToxicity } from "@/actions/toxcity";
 import { fetchStream } from "@/hoooks/fetchStream";
 import Editor from "@/components/editor/editor";

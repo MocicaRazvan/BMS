@@ -1,8 +1,6 @@
 package com.mocicarazvan.templatemodule.adapters;
 
 import com.mocicarazvan.templatemodule.cache.FilteredListCaffeineCacheChildFilterKey;
-import com.mocicarazvan.templatemodule.cache.impl.FilteredListCaffeineCacheImpl;
-import com.mocicarazvan.templatemodule.cache.keys.FilterKeyType;
 import com.mocicarazvan.templatemodule.dtos.generic.IdGenerateDto;
 import com.mocicarazvan.templatemodule.dtos.generic.WithUserDto;
 import com.mocicarazvan.templatemodule.models.IdGenerated;

@@ -1,6 +1,5 @@
 package com.mocicarazvan.websocketservice.models.generic;
 
-import jakarta.annotation.PostConstruct;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;

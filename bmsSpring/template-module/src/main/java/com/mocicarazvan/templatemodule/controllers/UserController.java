@@ -2,7 +2,6 @@ package com.mocicarazvan.templatemodule.controllers;
 
 
 import com.mocicarazvan.templatemodule.dtos.PageableBody;
-import com.mocicarazvan.templatemodule.dtos.UserBody;
 import com.mocicarazvan.templatemodule.dtos.UserDto;
 import com.mocicarazvan.templatemodule.dtos.email.EmailRequest;
 import com.mocicarazvan.templatemodule.dtos.response.PageableResponse;

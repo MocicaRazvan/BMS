@@ -4,7 +4,6 @@ import { WithUser } from "@/lib/user";
 import React, { useCallback } from "react";
 import MultipleSelector, { Option } from "@/components/ui/multiple-selector";
 import { fetchStream } from "@/hoooks/fetchStream";
-import { SortingOption } from "@/components/list/grid-list";
 import { SortDirection } from "@/types/fetch-utils";
 
 export interface ChildInputMultipleSelectorTexts {

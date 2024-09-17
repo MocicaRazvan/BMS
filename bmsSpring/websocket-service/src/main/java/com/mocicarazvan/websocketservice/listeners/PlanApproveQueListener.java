@@ -6,7 +6,6 @@ import com.mocicarazvan.websocketservice.dtos.plan.ApprovePlanNotificationRespon
 import com.mocicarazvan.websocketservice.dtos.plan.PlanResponse;
 import com.mocicarazvan.websocketservice.models.Plan;
 import com.mocicarazvan.websocketservice.service.ApprovePlanNotificationService;
-import com.mocicarazvan.websocketservice.service.ApprovePostNotificationService;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 

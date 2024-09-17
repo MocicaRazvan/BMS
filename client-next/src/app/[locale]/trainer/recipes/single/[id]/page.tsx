@@ -6,15 +6,13 @@ import SingeRecipePageContent, {
 } from "@/app/[locale]/trainer/recipes/single/[id]/page-content";
 import { Locale } from "@/navigation";
 import { unstable_setRequestLocale } from "next-intl/server";
-import {
-  getSingleRecipePageTexts,
-  getTrainerSingleRecipePageTexts,
-} from "@/texts/pages";
+import { getTrainerSingleRecipePageTexts } from "@/texts/pages";
 import { Metadata } from "next";
 import { getIntlMetadata } from "@/texts/metadata";
 import { ThemeSwitchTexts } from "@/texts/components/nav";
 import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
 import SidebarContentLayout from "@/components/sidebar/sidebar-content-layout";
+
 interface Props {
   params: { locale: Locale; id: string };
 }

@@ -9,7 +9,6 @@ import { PlusSquareIcon } from "lucide-react";
 import { useRouter } from "@/navigation";
 import { PlanResponse } from "@/types/dto";
 import { useSubscription } from "@/context/subscriptions-context";
-import ShineBorder from "@/components/magicui/shine-border";
 import PulsatingButton from "@/components/magicui/pulsating-button";
 
 export interface AddToCartBtnTexts {

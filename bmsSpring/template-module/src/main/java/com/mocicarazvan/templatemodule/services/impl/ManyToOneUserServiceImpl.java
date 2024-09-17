@@ -19,21 +19,17 @@ import com.mocicarazvan.templatemodule.repositories.ManyToOneUserRepository;
 import com.mocicarazvan.templatemodule.services.ManyToOneUserService;
 import com.mocicarazvan.templatemodule.utils.PageableUtilsCustom;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
-import lombok.experimental.SuperBuilder;
 import org.jooq.lambda.function.Function2;
 import org.jooq.lambda.function.Function3;
 import org.jooq.lambda.function.Function4;
-import org.springframework.data.util.Pair;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.util.List;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 
 @RequiredArgsConstructor

@@ -4,7 +4,6 @@ import com.mocicarazvan.templatemodule.dtos.generic.ApproveDto;
 import com.mocicarazvan.templatemodule.exceptions.client.ThrowFallback;
 import com.mocicarazvan.templatemodule.exceptions.notFound.NotFoundEntity;
 import com.mocicarazvan.templatemodule.hateos.CustomEntityModel;
-import com.mocicarazvan.templatemodule.utils.RequestsUtils;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 import io.github.resilience4j.ratelimiter.RateLimiterRegistry;
 import io.github.resilience4j.reactor.circuitbreaker.operator.CircuitBreakerOperator;

@@ -1,6 +1,6 @@
 "use client";
 
-import { memo, useEffect, useRef, useState } from "react";
+import { memo, useState } from "react";
 import {
   Sheet,
   SheetClose,
@@ -11,16 +11,13 @@ import { Button } from "@/components/ui/button";
 import { Home, LockKeyhole, LogOut, Menu } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Session } from "next-auth";
-import { ComponentMenuLink, LinkNav, linksEqual } from "@/components/nav/links";
-import { MenuBarMenuNav } from "@/components/nav/menu-bar-menu-nav";
-import { cn, isDeepEqual } from "@/lib/utils";
+import { ComponentMenuLink } from "@/components/nav/links";
+import { isDeepEqual } from "@/lib/utils";
 import { AvatarImage } from "@radix-ui/react-avatar";
 import { Avatar } from "@/components/ui/avatar";
 import { Link, usePathname } from "@/navigation";
-import { AccordionBarMenuNav } from "@/components/nav/accordion-bar-menu-nav";
 import { NavTexts } from "@/components/nav/nav";
 import { DashboardIcon } from "@radix-ui/react-icons";
-import NavProfile from "@/components/nav/nav-profile";
 import ActiveLink from "@/components/nav/active-link";
 
 interface Props {

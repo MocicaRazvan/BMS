@@ -1,8 +1,5 @@
 package com.mocicarazvan.templatemodule.cache.keys;
 
-import lombok.Getter;
-import lombok.Setter;
-
 import java.util.List;
 
 public class ApproveFilterKey extends FilerKeyTypeWithExtra<String, Boolean> {
@@ -55,7 +52,7 @@ public class ApproveFilterKey extends FilerKeyTypeWithExtra<String, Boolean> {
         } else {
             return "false";
         }
-        
+
     }
 }
 //@Setter

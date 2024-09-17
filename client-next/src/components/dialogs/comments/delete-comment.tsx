@@ -1,4 +1,3 @@
-import { AlertDialogDelete } from "@/components/dialogs/delete-model";
 import { CommentResponse } from "@/types/dto";
 import { useEffect, useState } from "react";
 import {
@@ -12,7 +11,6 @@ import {
   AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
-  AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,

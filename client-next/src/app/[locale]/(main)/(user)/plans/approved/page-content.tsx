@@ -21,10 +21,7 @@ import {
 import { useRouter } from "@/navigation";
 import { useCallback, useState } from "react";
 import { useFormatter } from "next-intl";
-import { cn } from "@/lib/utils";
-import AddToCartBtn, {
-  AddToCartBtnTexts,
-} from "@/components/plans/add-to-cart-btn";
+import { AddToCartBtnTexts } from "@/components/plans/add-to-cart-btn";
 import { useSubscription } from "@/context/subscriptions-context";
 import { useSearchParams } from "next/navigation";
 import { Checkbox } from "@/components/ui/checkbox";

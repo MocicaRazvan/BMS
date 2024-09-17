@@ -1,11 +1,7 @@
-import { TextSplitter } from "langchain/text_splitter";
-import {
-  BaseDocumentLoader,
-  DocumentLoader,
-} from "@langchain/core/document_loaders/base";
+import { DocumentLoader } from "@langchain/core/document_loaders/base";
 
 import { promises as fs } from "fs";
-import { Document, BaseDocumentTransformer } from "@langchain/core/documents";
+import { BaseDocumentTransformer, Document } from "@langchain/core/documents";
 
 export class JSONLocaleLoader implements DocumentLoader {
   private readonly filePath: string;

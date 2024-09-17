@@ -1,9 +1,5 @@
 import { Locale } from "@/navigation";
-import { getTranslations, unstable_setRequestLocale } from "next-intl/server";
-
-import { getUser } from "@/lib/user";
-
-import { getDateRangePickerTexts } from "@/texts/components/ui";
+import { unstable_setRequestLocale } from "next-intl/server";
 import HomeHeader, { HomeHeaderTexts } from "@/components/home/home-header";
 import { getHomeTexts } from "@/texts/pages";
 import HomeCards, { HomeCardsText } from "@/components/home/home-cards";

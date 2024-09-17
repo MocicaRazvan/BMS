@@ -3,14 +3,11 @@ package com.mocicarazvan.websocketservice.repositories;
 import com.mocicarazvan.websocketservice.dtos.chatRoom.ChatRoomUserDto;
 import com.mocicarazvan.websocketservice.models.ChatRoom;
 import com.mocicarazvan.websocketservice.repositories.generic.IdGeneratedRepository;
-import jakarta.persistence.LockModeType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 public interface ChatRoomRepository extends IdGeneratedRepository<ChatRoom> {

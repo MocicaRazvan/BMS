@@ -20,12 +20,12 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import {
-  RegisterType,
   getRegistrationSchema,
   RegisterSchemaTexts,
+  RegisterType,
 } from "@/types/forms";
 import { useMemo, useState } from "react";
-import { useRouter, Link } from "@/navigation";
+import { Link, useRouter } from "@/navigation";
 import { Loader2 } from "lucide-react";
 
 import { PasswordInput } from "@/components/ui/password-input";

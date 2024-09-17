@@ -1,11 +1,10 @@
 "use client";
 import { cn } from "@/lib/utils";
-import Image from "next/image";
 import noImg from "../../../public/noImage.jpg";
-import { ReactNode, useEffect, useMemo, useState } from "react";
+import { ReactNode, useMemo } from "react";
 import { ResponseWithUserDtoEntity, TitleBodyImagesUserDto } from "@/types/dto";
 import { format, parseISO } from "date-fns";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { Link } from "@/navigation";
 import CustomImage from "@/components/common/custom-image";
 

@@ -1,5 +1,4 @@
 import { IngredientNutritionalFactResponse } from "@/types/dto";
-import { RecipeSchemaType } from "@/types/forms";
 
 export interface BaseError {
   message: string;

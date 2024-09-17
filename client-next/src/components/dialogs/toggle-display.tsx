@@ -2,7 +2,6 @@
 
 import { ReactNode, useEffect, useState } from "react";
 import { WithUser } from "@/lib/user";
-import { IngredientNutritionalFactResponse } from "@/types/dto";
 import { BaseDialogTexts } from "@/components/dialogs/delete-model";
 import { getAlertDialogToggleDisplayTexts } from "@/texts/components/dialog";
 import { fetchStream } from "@/hoooks/fetchStream";

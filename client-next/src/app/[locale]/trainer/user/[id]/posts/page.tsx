@@ -3,10 +3,7 @@ import { unstable_setRequestLocale } from "next-intl/server";
 import UserPostsPageContent, {
   UserPostsPageContentTexts,
 } from "@/app/[locale]/trainer/user/[id]/posts/page-content";
-import {
-  getUserPostsPageContentTexts,
-  getUserPostsPageTexts,
-} from "@/texts/pages";
+import { getUserPostsPageTexts } from "@/texts/pages";
 import { getSortingOptions } from "@/lib/constants";
 import { sortingPostsSortingOptionsKeys } from "@/texts/components/list";
 import { Suspense } from "react";

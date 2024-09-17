@@ -1,25 +1,9 @@
 "use client";
 
-import { ReactNode, useEffect, useState } from "react";
+import { ReactNode } from "react";
 import { WithUser } from "@/lib/user";
 import { IngredientNutritionalFactResponse } from "@/types/dto";
 import { BaseDialogTexts } from "@/components/dialogs/delete-model";
-import { getAlertDialogToggleDisplayTexts } from "@/texts/components/dialog";
-import { fetchStream } from "@/hoooks/fetchStream";
-import { toast } from "@/components/ui/use-toast";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 import ToggleDisplayDialog from "@/components/dialogs/toggle-display";
 
 export interface AlertDialogToggleDisplayTexts extends BaseDialogTexts {

@@ -12,14 +12,13 @@ import LoadingSpinner from "@/components/common/loading-spinner";
 import CustomImageCarousel from "@/components/common/custom-image-crousel";
 import ProseText from "@/components/common/prose-text";
 import AuthorProfile from "@/components/common/author-profile";
-import { useCartForUser } from "@/context/cart-context";
-import { useToast } from "@/components/ui/use-toast";
 import AddToCartBtn, {
   AddToCartBtnTexts,
 } from "@/components/plans/add-to-cart-btn";
 import useClientNotFound from "@/hoooks/useClientNotFound";
 import React from "react";
 import { useSubscription } from "@/context/subscriptions-context";
+
 export interface UserPlanPageContentTexts {
   elementHeaderTexts: ElementHeaderTexts;
   addToCartBtnTexts: AddToCartBtnTexts;

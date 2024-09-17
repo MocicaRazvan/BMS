@@ -1,11 +1,11 @@
 package com.mocicarazvan.userservice.services.impl;
 
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mocicarazvan.templatemodule.enums.AuthProvider;
 import com.mocicarazvan.userservice.services.AbstractOauthProvider;
 import com.mocicarazvan.userservice.services.OauthUserInfoFactory;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;

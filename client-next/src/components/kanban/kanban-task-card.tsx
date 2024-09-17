@@ -14,6 +14,7 @@ import DeleteKanbanItem, {
   DeleteKanbanItemTexts,
 } from "@/components/dialogs/kanban/delete-kanban-item";
 import { cva } from "class-variance-authority";
+
 const typeMap: Record<KanbanTaskType, BadgeVariants> = {
   LOW: "default",
   NORMAL: "success",

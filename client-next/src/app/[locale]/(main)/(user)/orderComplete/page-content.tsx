@@ -1,10 +1,10 @@
 "use client";
-import { useEffect, useRef } from "react";
+import * as React from "react";
+import { useEffect } from "react";
 import confetti from "canvas-confetti";
 
 import Lottie from "react-lottie-player";
 import orderCompleted from "../../../../../../public/lottie/orderCompleted.json";
-import * as React from "react";
 import { motion } from "framer-motion";
 
 export default function OrderCompletePageContent() {

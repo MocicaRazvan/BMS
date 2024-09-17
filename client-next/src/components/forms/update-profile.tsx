@@ -1,10 +1,6 @@
 "use client";
 
-import {
-  getUpdateProfileSchema,
-  UpdateProfileSchemaTexts,
-  UpdateProfileType,
-} from "@/types/forms";
+import { getUpdateProfileSchema, UpdateProfileType } from "@/types/forms";
 import { useCallback, useEffect, useMemo } from "react";
 import useLoadingErrorState from "@/hoooks/useLoadingErrorState";
 import { WithUser } from "@/lib/user";
@@ -20,7 +16,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import InputFile, { FieldInputTexts } from "@/components/forms/input-file";
+import InputFile from "@/components/forms/input-file";
 import { UpdateProfileTexts } from "@/texts/components/forms";
 import ErrorMessage from "@/components/forms/error-message";
 import ButtonSubmit from "@/components/forms/button-submit";
@@ -29,7 +25,6 @@ import { useSession } from "next-auth/react";
 import { fetchWithFiles } from "@/hoooks/fetchWithFiles";
 import { CustomEntityModel, UserBody, UserDto } from "@/types/dto";
 import { BaseError } from "@/types/responses";
-import { Session } from "next-auth";
 
 interface Props extends WithUser, UpdateProfileTexts {
   successCallback: (userDto: UserDto) => void;

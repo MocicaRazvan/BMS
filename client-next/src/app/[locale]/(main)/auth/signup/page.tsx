@@ -4,6 +4,7 @@ import { LocaleProps } from "@/navigation";
 import SignUp from "@/app/[locale]/(main)/auth/signup/page-content";
 import { Metadata } from "next";
 import { getIntlMetadata } from "@/texts/metadata";
+
 export async function generateMetadata({
   params: { locale },
 }: LocaleProps): Promise<Metadata> {

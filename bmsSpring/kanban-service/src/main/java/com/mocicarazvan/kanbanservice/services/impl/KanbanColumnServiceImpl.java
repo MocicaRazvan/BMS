@@ -9,7 +9,6 @@ import com.mocicarazvan.kanbanservice.repositories.KanbanColumnRepository;
 import com.mocicarazvan.kanbanservice.services.KanbanColumnService;
 import com.mocicarazvan.templatemodule.adapters.CacheChildFilteredToHandlerAdapter;
 import com.mocicarazvan.templatemodule.cache.FilteredListCaffeineCacheChildFilterKey;
-import com.mocicarazvan.templatemodule.cache.keys.ChildFilterKey;
 import com.mocicarazvan.templatemodule.clients.UserClient;
 import com.mocicarazvan.templatemodule.dtos.generic.IdGenerateDto;
 import com.mocicarazvan.templatemodule.services.impl.ManyToOneUserServiceImpl;
@@ -18,11 +17,8 @@ import com.mocicarazvan.templatemodule.utils.PageableUtilsCustom;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
-import org.checkerframework.checker.units.qual.K;
 import org.jooq.lambda.function.Function2;
 import org.jooq.lambda.function.Function3;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Component;
@@ -33,7 +29,6 @@ import reactor.core.publisher.Mono;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Predicate;
 
 @Service
 @Slf4j

@@ -9,14 +9,13 @@ import picture5 from "@/../public/images/Picture5.jpg";
 import picture6 from "@/../public/images/Picture6.jpg";
 import picture7 from "@/../public/images/Picture7.jpg";
 import {
+  AnimatePresence,
+  motion,
+  useMotionValueEvent,
   useScroll,
   useTransform,
-  motion,
-  useAnimation,
-  useMotionValueEvent,
-  AnimatePresence,
 } from "framer-motion";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import DotPattern from "@/components/magicui/dot-pattern";
 import WordPullUp from "@/components/magicui/word-pull-up";
 import Logo from "@/components/logo/logo";

@@ -7,8 +7,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Link, useRouter } from "@/navigation";
+import { Avatar, AvatarImage } from "@/components/ui/avatar";
+import { useRouter } from "@/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import noImg from "../../../public/noImage.jpg";

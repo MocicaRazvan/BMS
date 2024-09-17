@@ -2,17 +2,10 @@
 
 import PlanForm, { PlanFormProps } from "@/components/forms/plan-form";
 import useFetchStream from "@/hoooks/useFetchStream";
-import {
-  CustomEntityModel,
-  DayResponse,
-  DietType,
-  PageableResponse,
-  PlanResponse,
-  RecipeResponse,
-} from "@/types/dto";
+import { CustomEntityModel, DayResponse, PlanResponse } from "@/types/dto";
 import { BaseError } from "@/types/responses";
 import LoadingSpinner from "@/components/common/loading-spinner";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo } from "react";
 import { checkOwner } from "@/lib/utils";
 import { Option } from "@/components/ui/multiple-selector";
 import useClientNotFound from "@/hoooks/useClientNotFound";

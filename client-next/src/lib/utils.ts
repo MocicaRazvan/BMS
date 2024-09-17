@@ -6,7 +6,7 @@ import { ApproveDto, DietType, WithUserDto } from "@/types/dto";
 import { SortingOption } from "@/components/list/grid-list";
 import { Dispatch, ReactNode, SetStateAction } from "react";
 import { getTimezoneOffset, toZonedTime } from "date-fns-tz";
-import { formatDistanceToNow, parseISO } from "date-fns";
+import { formatDistanceToNow } from "date-fns";
 import { enUS, ro } from "date-fns/locale";
 import { Locale } from "@/navigation";
 import isEqual from "lodash.isequal";

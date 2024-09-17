@@ -1,6 +1,5 @@
 "use client";
 import LikesDislikes from "@/components/common/likes-dislikes";
-import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import ProseText from "@/components/common/prose-text";
 import AuthorProfile from "@/components/common/author-profile";

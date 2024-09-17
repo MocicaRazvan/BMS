@@ -11,6 +11,7 @@ import { CountrySummaryType } from "@/types/dto";
 import { MonthlySalesTexts } from "@/components/charts/monthly-sales";
 import { getDateRangePickerTexts } from "@/texts/components/ui";
 import { DailySalesTexts } from "@/components/charts/daily-sales";
+
 export async function getIngredientPieChartTexts(): Promise<IngredientPieChartTexts> {
   const t = await getTranslations("components.charts.IngredientPieChartTexts");
   return {

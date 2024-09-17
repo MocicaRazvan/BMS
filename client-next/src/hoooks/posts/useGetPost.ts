@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { PostResponse, ResponseWithUserDtoEntity } from "@/types/dto";
 import { useParams } from "next/navigation";
-import { useSession } from "next-auth/react";
 import useFetchStream from "@/hoooks/useFetchStream";
 import { BaseError } from "@/types/responses";
 import { useRouter } from "@/navigation";

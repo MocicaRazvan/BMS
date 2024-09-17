@@ -1,14 +1,8 @@
 import { Locale } from "@/navigation";
 import { unstable_setRequestLocale } from "next-intl/server";
 import { getUser } from "@/lib/user";
-import { getAdminUserPageTexts, getUserPageTexts } from "@/texts/pages";
-import UserPageContent, {
-  UserPageTexts,
-} from "@/app/[locale]/(main)/(user)/users/single/[id]/page-content";
-import SidebarContentLayout from "@/components/sidebar/sidebar-content-layout";
-import Heading from "@/components/common/heading";
-import { Suspense } from "react";
-import LoadingSpinner from "@/components/common/loading-spinner";
+import { getAdminUserPageTexts } from "@/texts/pages";
+import { UserPageTexts } from "@/app/[locale]/(main)/(user)/users/single/[id]/page-content";
 import { ThemeSwitchTexts } from "@/texts/components/nav";
 import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
 import AdminUserPageContent from "@/app/[locale]/admin/users/[id]/page-content";

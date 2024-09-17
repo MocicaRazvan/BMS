@@ -7,15 +7,15 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Tooltip,
-  TooltipTrigger,
   TooltipContent,
   TooltipProvider,
+  TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { usePathname, Link, useRouter } from "@/navigation";
+import { Link, usePathname, useRouter } from "@/navigation";
 import {
-  SidebarMenuTexts,
-  MappingListFunctionKeys,
   mappingFunctions,
+  MappingListFunctionKeys,
+  SidebarMenuTexts,
 } from "@/components/sidebar/menu-list";
 import { CollapseMenuButton } from "@/components/sidebar/collpase-menu-button";
 import { WithUser } from "@/lib/user";

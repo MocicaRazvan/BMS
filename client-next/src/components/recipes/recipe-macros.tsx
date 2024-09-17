@@ -12,6 +12,7 @@ import IngredientMacrosPieChart, {
   IngredientPieChartTexts,
 } from "@/components/charts/ingredient-macros-pie-chart";
 import { useMemo } from "react";
+
 interface Props {
   ingredients: IngredientNutritionalFactResponseWithCount[];
   nutritionalTableTexts: NutritionalTableTexts;

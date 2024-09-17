@@ -1,8 +1,6 @@
 "use client";
 
-import ElementHeader, {
-  ElementHeaderTexts,
-} from "@/components/common/element-header";
+import { ElementHeaderTexts } from "@/components/common/element-header";
 import { NutritionalTableTexts } from "@/components/common/nutritional-table";
 import { IngredientPieChartTexts } from "@/components/charts/ingredient-macros-pie-chart";
 import { WithUser } from "@/lib/user";

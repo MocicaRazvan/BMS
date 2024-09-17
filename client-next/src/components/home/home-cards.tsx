@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Beef, Dumbbell, Newspaper, User2 } from "lucide-react";
+import { Beef, Newspaper, User2 } from "lucide-react";
 import { Link } from "@/navigation";
 import { MagicCard } from "@/components/magicui/magic-card";
 import AnimatedShinyText from "@/components/magicui/animated-shiny-text";

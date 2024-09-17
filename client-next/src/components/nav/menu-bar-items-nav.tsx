@@ -5,11 +5,7 @@ import { Session } from "next-auth";
 import { MenubarItem, MenubarSeparator } from "@/components/ui/menubar";
 import { Fragment, memo, useCallback, useMemo } from "react";
 import { cn, isDeepEqual } from "@/lib/utils";
-import {
-  ComponentMenuLink,
-  LinkNav,
-  shouldRenderLink,
-} from "@/components/nav/links";
+import { ComponentMenuLink, shouldRenderLink } from "@/components/nav/links";
 import {
   DropdownMenuItem,
   DropdownMenuSeparator,

@@ -26,7 +26,7 @@
 //     </div>
 //   );
 // }
-import { getTranslations } from "next-intl/server";
+import {getTranslations} from "next-intl/server";
 
 export default async function NotFoundPage() {
   const t = await getTranslations("ErrorPage");

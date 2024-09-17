@@ -1,19 +1,12 @@
 package com.mocicarazvan.websocketservice.service.generic;
 
-import com.mocicarazvan.websocketservice.annotations.CustomRetryable;
 import com.mocicarazvan.websocketservice.dtos.generic.IdResponse;
 import com.mocicarazvan.websocketservice.dtos.generic.NotificationTemplateBody;
 import com.mocicarazvan.websocketservice.dtos.generic.NotificationTemplateResponse;
-import com.mocicarazvan.websocketservice.models.ConversationUser;
 import com.mocicarazvan.websocketservice.models.generic.IdGenerated;
-import org.springframework.transaction.annotation.Isolation;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.BiFunction;
-import java.util.function.Function;
 
 public interface NotificationTemplateService<R extends IdGenerated, RRESP extends IdResponse, E extends Enum<E>,
         BODY extends NotificationTemplateBody<E>, RESPONSE extends NotificationTemplateResponse<RRESP, E>> {

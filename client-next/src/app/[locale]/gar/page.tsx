@@ -1,4 +1,3 @@
-import GarBtn from "@/app/[locale]/gar/gar-btn";
 import { getUser } from "@/lib/user";
 import { getDayFromTexts } from "@/texts/components/forms";
 import DayForm from "@/components/forms/day-form";

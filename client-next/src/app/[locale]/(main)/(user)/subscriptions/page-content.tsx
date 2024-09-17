@@ -17,7 +17,6 @@ import {
   PlanResponse,
   ResponseWithUserDtoEntity,
 } from "@/types/dto";
-import { cn } from "@/lib/utils";
 import Heading from "@/components/common/heading";
 import { useFormatter } from "next-intl";
 import {

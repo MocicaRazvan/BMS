@@ -2,7 +2,6 @@ package com.mocicarazvan.postservice.dtos;
 
 
 import com.mocicarazvan.templatemodule.dtos.generic.TitleBodyDto;
-import com.mocicarazvan.templatemodule.dtos.generic.TitleBodyImagesDto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;

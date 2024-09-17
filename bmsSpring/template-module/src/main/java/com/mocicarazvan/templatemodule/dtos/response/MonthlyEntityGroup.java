@@ -1,6 +1,5 @@
 package com.mocicarazvan.templatemodule.dtos.response;
 
-import com.mocicarazvan.templatemodule.dtos.generic.IdGenerateDto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

@@ -1,8 +1,8 @@
 package com.mocicarazvan.planservice.services.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mocicarazvan.planservice.clients.OrderClient;
 import com.mocicarazvan.planservice.clients.DayClient;
+import com.mocicarazvan.planservice.clients.OrderClient;
 import com.mocicarazvan.planservice.dtos.PlanBody;
 import com.mocicarazvan.planservice.dtos.PlanResponse;
 import com.mocicarazvan.planservice.dtos.dayClient.DayResponse;
@@ -18,7 +18,6 @@ import com.mocicarazvan.planservice.repositories.ExtendedPlanRepository;
 import com.mocicarazvan.planservice.repositories.PlanRepository;
 import com.mocicarazvan.planservice.services.PlanService;
 import com.mocicarazvan.templatemodule.adapters.CacheApprovedFilteredToHandlerAdapter;
-import com.mocicarazvan.templatemodule.cache.FilteredListCaffeineCache;
 import com.mocicarazvan.templatemodule.cache.FilteredListCaffeineCacheApproveFilterKey;
 import com.mocicarazvan.templatemodule.cache.keys.FilterKeyType;
 import com.mocicarazvan.templatemodule.clients.FileClient;
@@ -42,7 +41,6 @@ import org.jooq.lambda.function.Function2;
 import org.jooq.lambda.function.Function7;
 import org.jooq.lambda.function.Function9;
 import org.springframework.data.util.Pair;
-import org.springframework.http.ResponseEntity;
 import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
@@ -51,7 +49,6 @@ import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.function.Function;
 
 @Service
 @Slf4j

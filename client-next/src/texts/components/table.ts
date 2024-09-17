@@ -41,7 +41,6 @@ import {
   IngredientTableColumnTexts,
   IngredientTableTexts,
 } from "@/components/table/ingredients-table";
-import { display } from "html2canvas/dist/types/css/property-descriptors/display";
 import { dietTypes } from "@/types/forms";
 import {
   RecipeTableColumnsTexts,

@@ -3,9 +3,7 @@ package com.mocicarazvan.orderservice.cache;
 import com.mocicarazvan.orderservice.dtos.clients.PlanResponse;
 import com.mocicarazvan.orderservice.dtos.summaries.DailyOrderSummary;
 import com.mocicarazvan.orderservice.dtos.summaries.MonthlyOrderSummary;
-import com.mocicarazvan.templatemodule.cache.BaseCaffeineCacher;
 import com.mocicarazvan.templatemodule.cache.FilteredListCaffeineCache;
-import com.mocicarazvan.templatemodule.cache.impl.BaseCaffeienCacherImpl;
 import com.mocicarazvan.templatemodule.cache.impl.FilteredListCaffeineCacheBaseImpl;
 import com.mocicarazvan.templatemodule.cache.keys.FilterKeyType;
 import com.mocicarazvan.templatemodule.dtos.generic.WithUserDto;
@@ -16,10 +14,7 @@ import reactor.core.publisher.Mono;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Locale;
-import java.util.Set;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 @Service
 public class TrainerSummaryCacheHandler {

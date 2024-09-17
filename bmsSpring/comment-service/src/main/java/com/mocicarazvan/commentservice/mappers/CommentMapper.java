@@ -3,7 +3,6 @@ package com.mocicarazvan.commentservice.mappers;
 
 import com.mocicarazvan.commentservice.dtos.CommentBody;
 import com.mocicarazvan.commentservice.dtos.CommentResponse;
-import com.mocicarazvan.commentservice.enums.CommentReferenceType;
 import com.mocicarazvan.commentservice.models.Comment;
 import com.mocicarazvan.templatemodule.mappers.DtoMapper;
 import org.mapstruct.Mapper;

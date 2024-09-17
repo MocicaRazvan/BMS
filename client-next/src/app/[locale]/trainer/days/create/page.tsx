@@ -1,5 +1,4 @@
 import { getUser } from "@/lib/user";
-import { getDayFromTexts } from "@/texts/components/forms";
 import { Suspense } from "react";
 import LoadingSpinner from "@/components/common/loading-spinner";
 import DayForm, { DayFromTexts } from "@/components/forms/day-form";
@@ -11,6 +10,7 @@ import { Locale } from "@/navigation";
 import { Metadata } from "next";
 import { getIntlMetadata } from "@/texts/metadata";
 import { unstable_setRequestLocale } from "next-intl/server";
+
 interface Props {
   params: { locale: Locale };
 }

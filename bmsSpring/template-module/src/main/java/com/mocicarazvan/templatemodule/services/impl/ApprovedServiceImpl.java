@@ -8,11 +8,9 @@ import com.mocicarazvan.templatemodule.dtos.UserDto;
 import com.mocicarazvan.templatemodule.dtos.generic.ApproveDto;
 import com.mocicarazvan.templatemodule.dtos.generic.TitleBodyDto;
 import com.mocicarazvan.templatemodule.dtos.generic.WithUserDto;
-import com.mocicarazvan.templatemodule.dtos.notifications.ApproveNotificationBody;
 import com.mocicarazvan.templatemodule.dtos.response.PageableResponse;
 import com.mocicarazvan.templatemodule.dtos.response.ResponseWithUserDto;
 import com.mocicarazvan.templatemodule.dtos.response.ResponseWithUserLikesAndDislikes;
-import com.mocicarazvan.templatemodule.enums.ApprovedNotificationType;
 import com.mocicarazvan.templatemodule.enums.FileType;
 import com.mocicarazvan.templatemodule.enums.Role;
 import com.mocicarazvan.templatemodule.exceptions.action.IllegalActionException;
@@ -22,7 +20,6 @@ import com.mocicarazvan.templatemodule.models.Approve;
 import com.mocicarazvan.templatemodule.repositories.ApprovedRepository;
 import com.mocicarazvan.templatemodule.services.ApprovedService;
 import com.mocicarazvan.templatemodule.services.RabbitMqApprovedSenderWrapper;
-import com.mocicarazvan.templatemodule.services.RabbitMqSender;
 import com.mocicarazvan.templatemodule.utils.EntitiesUtils;
 import com.mocicarazvan.templatemodule.utils.PageableUtilsCustom;
 import lombok.AllArgsConstructor;
@@ -39,7 +36,6 @@ import reactor.util.function.Tuple2;
 import reactor.util.function.Tuples;
 
 import java.util.List;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 
 public abstract class ApprovedServiceImpl<MODEL extends Approve, BODY extends TitleBodyDto, RESPONSE extends ApproveDto,

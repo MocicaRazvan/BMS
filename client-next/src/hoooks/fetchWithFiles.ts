@@ -1,5 +1,4 @@
 import { BaseError } from "@/types/responses";
-import { IdGenerateDto } from "@/types/dto";
 
 interface BaseArgs {
   token: string;

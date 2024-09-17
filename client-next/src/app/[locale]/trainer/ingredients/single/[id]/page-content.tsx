@@ -22,6 +22,7 @@ import NutritionalTable, {
   NutritionalTableTexts,
 } from "@/components/common/nutritional-table";
 import useClientNotFound from "@/hoooks/useClientNotFound";
+
 const tableColsKeys: (keyof NutritionalFactResponse &
   keyof IngredientTableColumnTexts)[] = [
   "fat",

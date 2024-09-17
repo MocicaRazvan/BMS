@@ -1,4 +1,4 @@
-import PlansTable, { PlanTableTexts } from "@/components/table/plans-table";
+import { PlanTableTexts } from "@/components/table/plans-table";
 import { getSortingOptions, SortingOptionsTexts } from "@/lib/constants";
 import { Locale } from "@/navigation";
 import { unstable_setRequestLocale } from "next-intl/server";

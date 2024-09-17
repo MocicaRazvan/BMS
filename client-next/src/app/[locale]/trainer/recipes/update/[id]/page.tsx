@@ -3,7 +3,6 @@ import { unstable_setRequestLocale } from "next-intl/server";
 import { getUserWithMinRole } from "@/lib/user";
 import { getRecipeFormTexts } from "@/texts/components/forms";
 import { Suspense } from "react";
-import Loader from "@/components/ui/spinner";
 import UpdateRecipePageContent from "@/app/[locale]/trainer/recipes/update/[id]/page-content";
 import { Metadata } from "next";
 import { getIntlMetadata } from "@/texts/metadata";

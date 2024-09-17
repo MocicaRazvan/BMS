@@ -11,7 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
-import { Fragment, useEffect, useState } from "react";
+import { Fragment } from "react";
 import { ScrollArea } from "../ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { useToast } from "../ui/use-toast";
@@ -19,7 +19,6 @@ import { ToastAction } from "../ui/toast";
 import { Link, useRouter } from "@/navigation";
 import { WithUser } from "@/lib/user";
 import { useFormatter } from "next-intl";
-import { getCartPopsTexts } from "@/texts/components/nav";
 import {
   Tooltip,
   TooltipContent,

@@ -2,7 +2,6 @@ package com.mocicarazvan.templatemodule.dtos.files;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.mocicarazvan.templatemodule.enums.FileType;
-import lombok.Builder;
 
 public class MetadataDto {
 

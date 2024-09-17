@@ -1,6 +1,6 @@
 "use client";
 
-import { notFound, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import {
   getResetPasswordSchema,

@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.mocicarazvan.templatemodule.jackson.validation.BeanDeserializerModifierWithValidation;
-import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.hateoas.mediatype.hal.Jackson2HalModule;
 import org.springframework.hateoas.server.reactive.WebFluxLinkBuilder;

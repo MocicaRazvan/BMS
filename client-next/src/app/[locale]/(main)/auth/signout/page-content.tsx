@@ -1,7 +1,7 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { signOut } from "next-auth/react";
-import { useRouter, Link } from "@/navigation";
+import { useRouter } from "@/navigation";
 
 interface SignOutText {
   questionText: string;

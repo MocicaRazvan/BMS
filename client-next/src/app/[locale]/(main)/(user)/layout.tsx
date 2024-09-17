@@ -1,10 +1,8 @@
 import { ReactNode } from "react";
-import { getUserWithMinRole } from "@/lib/user";
 import { unstable_setRequestLocale } from "next-intl/server";
 import { Locale, redirect } from "@/navigation";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/auth-options";
-import { notFound } from "next/navigation";
 
 export default async function UserLayout({
   children,

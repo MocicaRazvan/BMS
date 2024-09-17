@@ -1,6 +1,6 @@
 "use server";
 import { getTranslations } from "next-intl/server";
-import React, { ReactNode } from "react";
+import React from "react";
 import { BaseDialogTexts } from "@/components/dialogs/delete-model";
 import { AlertDialogApproveTexts } from "@/components/dialogs/approve-model";
 import { AlertDialogMakeTrainerTexts } from "@/components/dialogs/user/make-trainer-alert";

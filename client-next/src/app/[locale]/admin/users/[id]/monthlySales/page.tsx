@@ -8,6 +8,7 @@ import { getUserAdminMonthlySalesPageTexts } from "@/texts/pages";
 import UserAdminMonthlySalesPageContent from "@/app/[locale]/admin/users/[id]/monthlySales/page-content";
 import { Metadata } from "next";
 import { getIntlMetadata } from "@/texts/metadata";
+
 interface Props {
   params: { locale: Locale; id: string };
 }

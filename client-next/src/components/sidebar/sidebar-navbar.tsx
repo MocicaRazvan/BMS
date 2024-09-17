@@ -5,7 +5,6 @@ import { LocaleSwitcher } from "@/components/i18n/LocaleSwitcher";
 import NotificationPop from "@/components/nav/notification-pop";
 import { WithUser } from "@/lib/user";
 import {
-  getMenuListType,
   MappingListFunctionKeys,
   SidebarMenuTexts,
 } from "@/components/sidebar/menu-list";

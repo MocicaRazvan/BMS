@@ -1,4 +1,3 @@
-import { getServerSession } from "next-auth";
 import { ReactNode } from "react";
 import { Locale } from "@/navigation";
 import { unstable_setRequestLocale } from "next-intl/server";

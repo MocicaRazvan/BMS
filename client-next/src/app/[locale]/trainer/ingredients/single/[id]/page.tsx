@@ -4,10 +4,7 @@ import { getUserWithMinRole } from "@/lib/user";
 import SingleIngredientPageContent, {
   SingleIngredientPageTexts,
 } from "@/app/[locale]/trainer/ingredients/single/[id]/page-content";
-import {
-  getSingleIngredientPageTexts,
-  getTrainerSingleIngredientPageTexts,
-} from "@/texts/pages";
+import { getTrainerSingleIngredientPageTexts } from "@/texts/pages";
 import { Metadata } from "next";
 import { getIntlMetadata } from "@/texts/metadata";
 import { ThemeSwitchTexts } from "@/texts/components/nav";

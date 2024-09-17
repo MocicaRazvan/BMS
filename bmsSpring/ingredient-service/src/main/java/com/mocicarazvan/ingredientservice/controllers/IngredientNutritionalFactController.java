@@ -3,10 +3,8 @@ package com.mocicarazvan.ingredientservice.controllers;
 
 import com.mocicarazvan.ingredientservice.dtos.IngredientNutritionalFactBody;
 import com.mocicarazvan.ingredientservice.dtos.IngredientNutritionalFactResponse;
-import com.mocicarazvan.ingredientservice.dtos.NutritionalFactBody;
 import com.mocicarazvan.ingredientservice.enums.DietType;
 import com.mocicarazvan.ingredientservice.hateos.IngredientNutritionalValueResponseBuilder;
-import com.mocicarazvan.ingredientservice.repositories.ExtendedIngredientNutritionalFactRepository;
 import com.mocicarazvan.ingredientservice.services.IngredientNutritionalFactService;
 import com.mocicarazvan.templatemodule.dtos.PageableBody;
 import com.mocicarazvan.templatemodule.dtos.response.PageableResponse;

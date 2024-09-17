@@ -2,8 +2,6 @@ import type { Metadata } from "next";
 import "../globals.css";
 import { Locale, locales } from "@/navigation";
 import { unstable_setRequestLocale } from "next-intl/server";
-
-import { useMessages } from "next-intl";
 import { getIntlMetadata } from "@/texts/metadata";
 
 // export const metadata: Metadata = {

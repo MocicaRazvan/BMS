@@ -1,7 +1,6 @@
 import { Locale } from "@/navigation";
 import { unstable_setRequestLocale } from "next-intl/server";
 import { getUserWithMinRole } from "@/lib/user";
-import { getPlanFormTexts } from "@/texts/components/forms";
 import { Suspense } from "react";
 import LoadingSpinner from "@/components/common/loading-spinner";
 import PlanForm, { PlanFormTexts } from "@/components/forms/plan-form";

@@ -1,5 +1,6 @@
 import { getTranslations } from "next-intl/server";
 import { Locale, locales } from "@/navigation";
+
 const languages = locales.reduce<Record<Locale, string>>(
   (acc, l) => ({ ...acc, [l]: `/${l}` }),
   {} as Record<Locale, string>,

@@ -8,14 +8,12 @@ import com.mocicarazvan.websocketservice.dtos.post.ApprovePostNotificationRespon
 import com.mocicarazvan.websocketservice.dtos.post.PostResponse;
 import com.mocicarazvan.websocketservice.enums.ApprovedNotificationType;
 import com.mocicarazvan.websocketservice.service.ApprovePostNotificationService;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;

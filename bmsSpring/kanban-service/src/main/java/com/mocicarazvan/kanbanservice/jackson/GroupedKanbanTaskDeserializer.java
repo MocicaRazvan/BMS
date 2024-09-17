@@ -1,13 +1,11 @@
 package com.mocicarazvan.kanbanservice.jackson;
 
-import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.mocicarazvan.kanbanservice.dtos.tasks.KanbanTaskResponse;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mocicarazvan.templatemodule.jackson.CustomObjectMapper;
+import com.mocicarazvan.kanbanservice.dtos.tasks.KanbanTaskResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 

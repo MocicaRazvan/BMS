@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import useWebSocket, { ReadyState } from "react-use-websocket";
+import useWebSocket from "react-use-websocket";
 
 interface ProgressUpdateDto {
   index: number;

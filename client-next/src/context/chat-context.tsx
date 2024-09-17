@@ -1,17 +1,16 @@
 "use client";
 import React, {
   createContext,
-  useState,
-  useContext,
   ReactNode,
-  useEffect,
   useCallback,
+  useContext,
+  useEffect,
+  useState,
 } from "react";
 import { useSearchParams } from "next/navigation";
 import { useStompClient } from "react-stomp-hooks";
 import { Session } from "next-auth";
 import { usePathname } from "@/navigation";
-import { revalidatePath } from "next/cache";
 
 interface ChatContextType {
   activeChatId: number | null;

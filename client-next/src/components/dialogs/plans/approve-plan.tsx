@@ -2,7 +2,6 @@ import { AlertDialogApprove } from "@/components/dialogs/approve-model";
 
 import { PlanResponse } from "@/types/dto";
 import { WithUser } from "@/lib/user";
-import { approvePostNotificationName } from "@/context/post-approve-notification-context";
 import { approvePlanNotification } from "@/context/plan-approve-notification-context";
 
 interface Props extends WithUser {

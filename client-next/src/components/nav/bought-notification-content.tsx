@@ -1,12 +1,10 @@
 import { BoughtNotificationResponse } from "@/types/dto";
-import { Client } from "@stomp/stompjs";
 import { Locale, useRouter } from "@/navigation";
 import { useLocale } from "next-intl";
 import { useStompClient } from "react-stomp-hooks";
 import { Button } from "@/components/ui/button";
-import { BadgeEuro, CheckCheck, X } from "lucide-react";
-import { formatDistanceToNow, parseISO } from "date-fns";
-import { enUS, ro } from "date-fns/locale";
+import { BadgeEuro } from "lucide-react";
+import { parseISO } from "date-fns";
 import { BoughtPayloadStomp } from "@/context/bought-notification-context";
 import { fromDistanceToNowUtc } from "@/lib/utils";
 

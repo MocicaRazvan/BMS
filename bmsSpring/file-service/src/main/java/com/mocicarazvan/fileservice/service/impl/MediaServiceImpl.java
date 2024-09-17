@@ -1,6 +1,5 @@
 package com.mocicarazvan.fileservice.service.impl;
 
-import com.mocicarazvan.fileservice.websocket.ProgressWebSocketHandler;
 import com.mocicarazvan.fileservice.dtos.FileUploadResponse;
 import com.mocicarazvan.fileservice.dtos.MetadataDto;
 import com.mocicarazvan.fileservice.enums.FileType;
@@ -10,6 +9,7 @@ import com.mocicarazvan.fileservice.models.MediaMetadata;
 import com.mocicarazvan.fileservice.repositories.MediaMetadataRepository;
 import com.mocicarazvan.fileservice.repositories.MediaRepository;
 import com.mocicarazvan.fileservice.service.MediaService;
+import com.mocicarazvan.fileservice.websocket.ProgressWebSocketHandler;
 import com.mongodb.client.gridfs.model.GridFSFile;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

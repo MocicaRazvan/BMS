@@ -13,16 +13,12 @@ import {
   getRecipeSchemaTexts,
   getTitleBodySchemaTexts,
   getUpdateProfileSchemaTexts,
-  IngredientSchemaTexts,
   macroKeys,
-  RecipeSchemaTexts,
   TitleBodySchemaTexts,
   UpdateProfileSchemaTexts,
 } from "@/types/forms";
 import { ButtonSubmitTexts } from "@/components/forms/button-submit";
-import ChatMessageForm, {
-  ChatMessageFormTexts,
-} from "@/components/forms/chat-message-form";
+import { ChatMessageFormTexts } from "@/components/forms/chat-message-form";
 import {
   FieldTexts,
   IngredientFormTexts,

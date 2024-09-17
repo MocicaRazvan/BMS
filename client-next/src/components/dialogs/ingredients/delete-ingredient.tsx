@@ -1,5 +1,4 @@
 import { IngredientNutritionalFactResponse } from "@/types/dto";
-import { AlertDialogDelete } from "@/components/dialogs/delete-model";
 import {
   AlertDialog,
   AlertDialogAction,

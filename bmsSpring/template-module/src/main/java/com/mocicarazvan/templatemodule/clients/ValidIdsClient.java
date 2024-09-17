@@ -2,7 +2,6 @@ package com.mocicarazvan.templatemodule.clients;
 
 import com.mocicarazvan.templatemodule.dtos.generic.WithUserDto;
 import com.mocicarazvan.templatemodule.exceptions.client.ThrowFallback;
-import com.mocicarazvan.templatemodule.exceptions.notFound.NotFoundEntity;
 import com.mocicarazvan.templatemodule.utils.RequestsUtils;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 import io.github.resilience4j.ratelimiter.RateLimiterRegistry;
@@ -10,7 +9,6 @@ import io.github.resilience4j.reactor.circuitbreaker.operator.CircuitBreakerOper
 import io.github.resilience4j.reactor.ratelimiter.operator.RateLimiterOperator;
 import io.github.resilience4j.reactor.retry.RetryOperator;
 import io.github.resilience4j.retry.RetryRegistry;
-import jakarta.annotation.PostConstruct;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.WebClient;

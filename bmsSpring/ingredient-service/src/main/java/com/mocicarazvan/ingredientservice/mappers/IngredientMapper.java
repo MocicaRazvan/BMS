@@ -7,7 +7,6 @@ import com.mocicarazvan.ingredientservice.models.Ingredient;
 import com.mocicarazvan.templatemodule.mappers.DtoMapper;
 import io.r2dbc.spi.Row;
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;

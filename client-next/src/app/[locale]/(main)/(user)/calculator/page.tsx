@@ -10,6 +10,7 @@ import {
   GenderText,
 } from "@/types/forms";
 import { getCalculatorPageTexts, intakeTitles } from "@/texts/pages";
+
 interface Props {
   params: { locale: Locale };
 }

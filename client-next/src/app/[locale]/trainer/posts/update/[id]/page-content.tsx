@@ -8,7 +8,7 @@ import { BaseError } from "@/types/responses";
 import LoadingSpinner from "@/components/common/loading-spinner";
 import { checkOwner } from "@/lib/utils";
 import { Option } from "@/components/ui/multiple-selector";
-import React, { Suspense } from "react";
+import React from "react";
 import useClientNotFound from "@/hoooks/useClientNotFound";
 
 interface Props extends WithUser, PostFormProps {

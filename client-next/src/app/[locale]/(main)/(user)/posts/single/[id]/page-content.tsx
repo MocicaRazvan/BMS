@@ -1,7 +1,6 @@
 "use client";
 
 import { WithUser } from "@/lib/user";
-import { useGetPost } from "@/hoooks/posts/useGetPost";
 import React, { Suspense, useCallback } from "react";
 import { fetchStream } from "@/hoooks/fetchStream";
 import { CustomEntityModel, PostResponse } from "@/types/dto";

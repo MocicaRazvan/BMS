@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
-import { ButtonHTMLAttributes, HTMLProps, ReactNode } from "react";
+import { ButtonHTMLAttributes, ReactNode } from "react";
 
 export interface ButtonSubmitTexts {
   submitText: string | ReactNode;

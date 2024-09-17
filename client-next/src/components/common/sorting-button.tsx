@@ -1,8 +1,6 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { SortDirection } from "@/types/fetch-utils";
-import { ArrowDown, ArrowUp } from "lucide-react";
 import { Dispatch, SetStateAction, useCallback } from "react";
 import { SortingOption } from "@/hoooks/useList";
 

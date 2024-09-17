@@ -1,6 +1,6 @@
 "use client";
 
-import { TitleBodyImagesUserDto, ResponseWithUserDtoEntity } from "@/types/dto";
+import { ResponseWithUserDtoEntity, TitleBodyImagesUserDto } from "@/types/dto";
 import { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 

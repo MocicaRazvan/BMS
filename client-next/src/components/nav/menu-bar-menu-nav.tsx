@@ -9,7 +9,7 @@ import {
   MenubarTrigger,
 } from "@/components/ui/menubar";
 import { MenuBarItemsNav } from "@/components/nav/menu-bar-items-nav";
-import { ComponentMenuLink, LinkNav } from "@/components/nav/links";
+import { ComponentMenuLink } from "@/components/nav/links";
 
 export interface LinksProps {
   links: ComponentMenuLink[];

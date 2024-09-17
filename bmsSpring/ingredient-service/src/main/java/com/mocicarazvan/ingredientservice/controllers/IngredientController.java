@@ -3,7 +3,6 @@ package com.mocicarazvan.ingredientservice.controllers;
 import com.mocicarazvan.ingredientservice.dtos.IngredientResponse;
 import com.mocicarazvan.ingredientservice.services.IngredientService;
 import com.mocicarazvan.templatemodule.controllers.ValidControllerIds;
-import com.mocicarazvan.templatemodule.dtos.generic.WithUserDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;

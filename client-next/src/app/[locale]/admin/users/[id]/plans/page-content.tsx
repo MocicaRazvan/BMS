@@ -1,6 +1,5 @@
 "use client";
 
-import { UserPlansPageTexts } from "@/app/[locale]/trainer/user/[id]/plans/page";
 import { WithUser } from "@/lib/user";
 import { UseListProps } from "@/hoooks/useList";
 import { UserPlansAdminPageTexts } from "@/app/[locale]/admin/users/[id]/plans/page";

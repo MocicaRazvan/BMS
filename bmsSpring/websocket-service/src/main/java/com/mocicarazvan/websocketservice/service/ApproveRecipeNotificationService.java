@@ -1,6 +1,5 @@
 package com.mocicarazvan.websocketservice.service;
 
-import com.mocicarazvan.websocketservice.dtos.post.ApprovePostNotificationBody;
 import com.mocicarazvan.websocketservice.dtos.recipe.ApproveRecipeNotificationBody;
 import com.mocicarazvan.websocketservice.dtos.recipe.ApproveRecipeNotificationResponse;
 import com.mocicarazvan.websocketservice.dtos.recipe.RecipeResponse;

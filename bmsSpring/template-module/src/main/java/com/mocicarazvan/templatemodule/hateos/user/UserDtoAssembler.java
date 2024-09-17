@@ -3,7 +3,6 @@ package com.mocicarazvan.templatemodule.hateos.user;
 
 import com.mocicarazvan.templatemodule.controllers.UserController;
 import com.mocicarazvan.templatemodule.dtos.PageableBody;
-import com.mocicarazvan.templatemodule.dtos.UserBody;
 import com.mocicarazvan.templatemodule.dtos.UserDto;
 import com.mocicarazvan.templatemodule.enums.AuthProvider;
 import com.mocicarazvan.templatemodule.enums.Role;

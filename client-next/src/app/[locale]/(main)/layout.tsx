@@ -1,5 +1,4 @@
 import { ReactNode } from "react";
-import Nav from "@/components/nav/nav";
 import { unstable_setRequestLocale } from "next-intl/server";
 import { Locale } from "@/navigation";
 import NavWrapper from "@/components/nav/nav-wrapper";

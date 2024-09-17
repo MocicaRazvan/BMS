@@ -11,7 +11,6 @@ import { ThemeSwitchTexts } from "@/texts/components/nav";
 import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
 import { getCreatePostPageTexts } from "@/texts/pages";
 import SidebarContentLayout from "@/components/sidebar/sidebar-content-layout";
-import { UploadingProgressTexts } from "@/components/forms/uploading-progress";
 
 interface Props {
   params: { locale: Locale };

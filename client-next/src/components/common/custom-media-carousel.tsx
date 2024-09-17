@@ -1,5 +1,4 @@
 "use client";
-import Image from "next/image";
 import {
   Carousel,
   CarouselContent,
@@ -9,7 +8,6 @@ import {
 } from "../ui/carousel";
 import { useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { Skeleton } from "@/components/ui/skeleton";
 import CustomImage from "@/components/common/custom-image";
 
 interface Media {

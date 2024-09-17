@@ -13,6 +13,7 @@ import {
 } from "@/components/days/meal-recipes";
 import React, { memo } from "react";
 import { Clock } from "lucide-react";
+
 export interface MealListProps extends Omit<MealRecipeProps, "recipeIds"> {
   meals: MealResponse[];
   recipeBasePath?: string;

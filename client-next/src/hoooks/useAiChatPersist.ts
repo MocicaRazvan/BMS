@@ -2,12 +2,24 @@ import { Message } from "ai/react";
 import { useDebounce } from "@/components/ui/multiple-selector";
 import { useSession } from "next-auth/react";
 import { useStompClient } from "react-stomp-hooks";
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { AiChatMessagePayload } from "@/types/dto";
 
-export default function useAiChatPersist(messages: Message[]) {
+export default function useAiChatPersist(
+  messages: Message[],
+  initialMessages: Message[],
+) {
   const session = useSession();
-  const debounce = useDebounce(messages, 100);
+  const prevAddedMessage = useRef<Message>();
+  const debounce = useDebounce(
+    messages
+      .filter((m) => !initialMessages.some((im) => im.id === m.id))
+      .sort((a, b) => {
+        if (!a.createdAt || !b.createdAt) return 0;
+        return a.createdAt.getTime() - b.createdAt.getTime();
+      }),
+    100,
+  );
   const stompClient = useStompClient();
 
   useEffect(() => {
@@ -18,8 +30,12 @@ export default function useAiChatPersist(messages: Message[]) {
       stompClient?.connected
     ) {
       const lastMessage = debounce.at(-1);
-      console.log("lastMessage", lastMessage);
       if (!lastMessage) return;
+
+      if (prevAddedMessage.current?.id === lastMessage.id) return;
+
+      prevAddedMessage.current = lastMessage;
+
       const body: AiChatMessagePayload = {
         vercelId: lastMessage.id,
         content: lastMessage.content,

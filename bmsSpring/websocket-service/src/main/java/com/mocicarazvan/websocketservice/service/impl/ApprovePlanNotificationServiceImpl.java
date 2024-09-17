@@ -1,9 +1,14 @@
 package com.mocicarazvan.websocketservice.service.impl;
 
+import com.mocicarazvan.websocketservice.dtos.plan.ApprovePlanNotificationBody;
+import com.mocicarazvan.websocketservice.dtos.plan.ApprovePlanNotificationResponse;
+import com.mocicarazvan.websocketservice.dtos.plan.PlanResponse;
 import com.mocicarazvan.websocketservice.enums.ApprovedNotificationType;
 import com.mocicarazvan.websocketservice.mappers.ApprovePlanNotificationMapper;
 import com.mocicarazvan.websocketservice.messaging.CustomConvertAndSendToUser;
-import com.mocicarazvan.websocketservice.models.*;
+import com.mocicarazvan.websocketservice.models.ApprovePlanNotification;
+import com.mocicarazvan.websocketservice.models.ConversationUser;
+import com.mocicarazvan.websocketservice.models.Plan;
 import com.mocicarazvan.websocketservice.repositories.ApprovePlanNotificationRepository;
 import com.mocicarazvan.websocketservice.repositories.PlanRepository;
 import com.mocicarazvan.websocketservice.service.ApprovePlanNotificationService;
@@ -11,9 +16,6 @@ import com.mocicarazvan.websocketservice.service.ConversationUserService;
 import com.mocicarazvan.websocketservice.service.generic.impl.ApproveNotificationServiceTemplateImpl;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
-import com.mocicarazvan.websocketservice.dtos.plan.ApprovePlanNotificationBody;
-import com.mocicarazvan.websocketservice.dtos.plan.ApprovePlanNotificationResponse;
-import com.mocicarazvan.websocketservice.dtos.plan.PlanResponse;
 
 import java.util.concurrent.Executor;
 

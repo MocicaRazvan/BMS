@@ -1,8 +1,6 @@
 package com.mocicarazvan.websocketservice.mappers;
 
-import com.mocicarazvan.websocketservice.dtos.bought.BoughtNotificationBody;
 import com.mocicarazvan.websocketservice.dtos.bought.BoughtNotificationResponse;
-import com.mocicarazvan.websocketservice.dtos.bought.InternalBoughtBody;
 import com.mocicarazvan.websocketservice.dtos.plan.PlanResponse;
 import com.mocicarazvan.websocketservice.enums.BoughtNotificationType;
 import com.mocicarazvan.websocketservice.mappers.generic.NotificationTemplateMapper;

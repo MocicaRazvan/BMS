@@ -1,11 +1,11 @@
 package com.mocicarazvan.gatewayservice.filters;
 
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mocicarazvan.gatewayservice.clients.UserClient;
 import com.mocicarazvan.gatewayservice.dtos.TokenValidationRequest;
 import com.mocicarazvan.gatewayservice.enums.Role;
 import com.mocicarazvan.gatewayservice.routing.RouteValidator;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;

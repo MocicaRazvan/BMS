@@ -1,13 +1,9 @@
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/auth-options";
 import { Suspense } from "react";
 import LoadingSpinner from "@/components/common/loading-spinner";
-import ChatMainContentWrapper, {
-  ChatMainContentWrapperTexts,
-} from "@/app/[locale]/(main)/(user)/chat/main-content-wrapper";
+import ChatMainContentWrapper from "@/app/[locale]/(main)/(user)/chat/main-content-wrapper";
 import { getUser } from "@/lib/user";
 import { getChatMainContentWrapperTexts } from "@/texts/components/chat";
-import { Locale, LocaleProps } from "@/navigation";
+import { Locale } from "@/navigation";
 import { Metadata } from "next";
 import { getIntlMetadata } from "@/texts/metadata";
 

@@ -1,36 +1,16 @@
 "use client";
 
 import { WithUser } from "@/lib/user";
-import { CustomEntityModel, RecipeResponse } from "@/types/dto";
 import LoadingSpinner from "@/components/common/loading-spinner";
-import {
-  checkApprovePrivilege,
-  checkOwnerOrAdmin,
-  cn,
-  isSuccessCheckReturn,
-} from "@/lib/utils";
-import React, { useCallback } from "react";
-import ElementHeader, {
-  ElementHeaderTexts,
-} from "@/components/common/element-header";
-import { fetchStream } from "@/hoooks/fetchStream";
+import { checkOwnerOrAdmin, cn, isSuccessCheckReturn } from "@/lib/utils";
+import React from "react";
+import { ElementHeaderTexts } from "@/components/common/element-header";
 import CustomImageCarousel from "@/components/common/custom-image-crousel";
 import ProseText from "@/components/common/prose-text";
 import AuthorProfile from "@/components/common/author-profile";
 import CustomVideoCarousel from "@/components/common/custom-videos-crousel";
-import NutritionalTable, {
-  NutritionalTableTexts,
-} from "@/components/common/nutritional-table";
-import IngredientMacrosPieChart, {
-  IngredientPieChartTexts,
-} from "@/components/charts/ingredient-macros-pie-chart";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
-import { Badge } from "@/components/ui/badge";
+import { NutritionalTableTexts } from "@/components/common/nutritional-table";
+import { IngredientPieChartTexts } from "@/components/charts/ingredient-macros-pie-chart";
 import useGetRecipeWithIngredients from "@/hoooks/recipes/useGetRecipeWithIngredients";
 import RecipeMacros from "@/components/recipes/recipe-macros";
 import useClientNotFound from "@/hoooks/useClientNotFound";

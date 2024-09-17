@@ -1,7 +1,6 @@
 package com.mocicarazvan.ingredientservice.repositories;
 
 import com.mocicarazvan.ingredientservice.models.NutritionalFact;
-import com.mocicarazvan.templatemodule.dtos.response.PageableResponse;
 import com.mocicarazvan.templatemodule.repositories.ManyToOneUserRepository;
 import org.springframework.data.r2dbc.repository.Query;
 import reactor.core.publisher.Flux;

@@ -5,11 +5,8 @@ import com.mocicarazvan.postservice.models.Post;
 import com.mocicarazvan.templatemodule.repositories.ApprovedRepository;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.r2dbc.repository.Query;
-import org.springframework.data.repository.NoRepositoryBean;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
-import java.util.List;
 
 public interface PostRepository extends ApprovedRepository<Post> {
     Mono<Boolean> existsByIdAndApprovedIsTrue(Long id);

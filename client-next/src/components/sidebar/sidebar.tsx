@@ -17,6 +17,7 @@ import {
 } from "@/components/sidebar/menu-list";
 import Logo from "@/components/logo/logo";
 import { WithUser } from "@/lib/user";
+
 interface Props extends WithUser {
   menuTexts: SidebarMenuTexts;
   mainSite: string;

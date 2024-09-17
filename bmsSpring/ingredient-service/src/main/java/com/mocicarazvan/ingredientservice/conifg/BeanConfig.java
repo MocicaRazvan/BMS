@@ -10,7 +10,6 @@ import com.mocicarazvan.templatemodule.cache.FilteredListCaffeineCacheChildFilte
 import com.mocicarazvan.templatemodule.cache.impl.FilteredListCaffeineCacheBaseImpl;
 import com.mocicarazvan.templatemodule.cache.impl.FilteredListCaffeineCacheChildFilterKeyImpl;
 import com.mocicarazvan.templatemodule.cache.keys.FilterKeyType;
-import com.mocicarazvan.templatemodule.clients.FileClient;
 import com.mocicarazvan.templatemodule.clients.UserClient;
 import com.mocicarazvan.templatemodule.jackson.CustomObjectMapper;
 import com.mocicarazvan.templatemodule.utils.EntitiesUtils;
@@ -21,7 +20,6 @@ import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 import io.github.resilience4j.ratelimiter.RateLimiterRegistry;
 import io.github.resilience4j.retry.RetryRegistry;
 import jakarta.validation.Validator;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

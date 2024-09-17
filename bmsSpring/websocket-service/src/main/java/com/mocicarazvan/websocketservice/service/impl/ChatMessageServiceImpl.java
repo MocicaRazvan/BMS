@@ -1,7 +1,6 @@
 package com.mocicarazvan.websocketservice.service.impl;
 
 import com.mocicarazvan.websocketservice.annotations.CustomRetryable;
-import com.mocicarazvan.websocketservice.dtos.PageableBody;
 import com.mocicarazvan.websocketservice.dtos.PageableResponse;
 import com.mocicarazvan.websocketservice.dtos.message.ChatMessagePayload;
 import com.mocicarazvan.websocketservice.dtos.message.ChatMessageResponse;
@@ -17,17 +16,10 @@ import com.mocicarazvan.websocketservice.service.ChatRoomService;
 import com.mocicarazvan.websocketservice.service.ConversationUserService;
 import com.mocicarazvan.websocketservice.utils.ChunkRequest;
 import com.mocicarazvan.websocketservice.utils.PageableUtilsCustom;
-import jakarta.persistence.OptimisticLockException;
-import jakarta.persistence.PessimisticLockException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.exception.LockAcquisitionException;
-import org.springframework.dao.CannotAcquireLockException;
 import org.springframework.data.domain.Sort;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.orm.jpa.JpaSystemException;
-import org.springframework.retry.annotation.Backoff;
-import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;

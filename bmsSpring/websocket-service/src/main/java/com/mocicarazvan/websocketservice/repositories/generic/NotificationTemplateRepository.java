@@ -1,12 +1,9 @@
 package com.mocicarazvan.websocketservice.repositories.generic;
 
 
-import com.mocicarazvan.websocketservice.models.Post;
 import com.mocicarazvan.websocketservice.models.generic.IdGenerated;
 import com.mocicarazvan.websocketservice.models.generic.NotificationTemplate;
-import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.repository.NoRepositoryBean;
 
 import java.util.List;

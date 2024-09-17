@@ -14,14 +14,13 @@ import {
   makeSortString,
   parseSortString,
 } from "@/lib/utils";
-import useFetchStream, { UseFetchStreamProps } from "@/hoooks/useFetchStream";
+import useFetchStream from "@/hoooks/useFetchStream";
 import {
   PageableResponse,
   PageInfo,
   ResponseWithUserDtoEntity,
   TitleBodyDto,
 } from "@/types/dto";
-import { useDebounce } from "@/components/ui/multiple-selector";
 import { FetchStreamProps } from "@/hoooks/fetchStream";
 import { useDebounceWithCallBack } from "@/hoooks/useDebounceWithCallback";
 

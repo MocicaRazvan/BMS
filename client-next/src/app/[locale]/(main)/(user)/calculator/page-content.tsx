@@ -3,11 +3,10 @@
 import { CalculatorPageTexts } from "@/app/[locale]/(main)/(user)/calculator/page";
 import { useCallback, useMemo, useState } from "react";
 import {
-  getCalculatorSchema,
-  CalculatorSchemaType,
   activities,
+  CalculatorSchemaType,
+  getCalculatorSchema,
 } from "@/types/forms";
-import useLoadingErrorState from "@/hoooks/useLoadingErrorState";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -38,7 +37,6 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { AnimatePresence, motion } from "framer-motion";
-import { useLocale } from "next-intl";
 
 export interface Props extends CalculatorPageTexts {}
 function createIntakeSubtitle(

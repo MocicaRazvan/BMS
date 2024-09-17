@@ -3,10 +3,6 @@
 import { UserRecipesAdminPageTexts } from "@/app/[locale]/admin/users/[id]/recipes/page";
 import { WithUser } from "@/lib/user";
 import { UseListProps } from "@/hoooks/useList";
-import useFetchStream from "@/hoooks/useFetchStream";
-import { CustomEntityModel, UserDto } from "@/types/dto";
-import { BaseError } from "@/types/responses";
-import { notFound } from "next/navigation";
 import SidebarContentLayout from "@/components/sidebar/sidebar-content-layout";
 import LoadingSpinner from "@/components/common/loading-spinner";
 import Heading from "@/components/common/heading";

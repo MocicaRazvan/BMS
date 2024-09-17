@@ -3,7 +3,6 @@ package com.mocicarazvan.templatemodule.clients;
 
 import com.mocicarazvan.templatemodule.dtos.errors.BaseErrorResponse;
 import com.mocicarazvan.templatemodule.dtos.errors.IdNameResponse;
-import com.mocicarazvan.templatemodule.dtos.generic.ApproveDto;
 import com.mocicarazvan.templatemodule.exceptions.action.IllegalActionException;
 import com.mocicarazvan.templatemodule.exceptions.action.PrivateRouteException;
 import com.mocicarazvan.templatemodule.exceptions.client.ThrowFallback;
@@ -33,7 +32,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.net.URI;
-import java.util.List;
 import java.util.function.Function;
 
 @Slf4j

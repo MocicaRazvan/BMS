@@ -1,9 +1,8 @@
 "use server";
 import * as toxicity from "@tensorflow-models/toxicity";
-import * as tf from "@tensorflow/tfjs-node";
 import LanguageDetect from "languagedetect";
 import { franc } from "franc-min";
-import { detect, detectAll } from "tinyld";
+import { detect } from "tinyld";
 
 const lngDetector = new LanguageDetect();
 

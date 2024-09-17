@@ -1,4 +1,4 @@
-import { Copyright, Home, MailIcon, MapPinIcon, PhoneIcon } from "lucide-react";
+import { Copyright, MailIcon, PhoneIcon } from "lucide-react";
 import { Link } from "@/navigation";
 import Logo from "@/components/logo/logo";
 import { getFooterTexts } from "@/texts/components/footer";

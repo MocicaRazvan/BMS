@@ -4,10 +4,8 @@ import com.mocicarazvan.kanbanservice.dtos.columns.KanbanColumnResponse;
 import com.mocicarazvan.kanbanservice.dtos.tasks.GroupedKanbanTask;
 import com.mocicarazvan.kanbanservice.dtos.tasks.KanbanTaskBody;
 import com.mocicarazvan.kanbanservice.dtos.tasks.KanbanTaskResponse;
-import com.mocicarazvan.kanbanservice.mappers.KanbanColumnMapper;
 import com.mocicarazvan.kanbanservice.mappers.KanbanTaskMapper;
 import com.mocicarazvan.kanbanservice.models.KanbanTask;
-import com.mocicarazvan.kanbanservice.repositories.KanbanColumnRepository;
 import com.mocicarazvan.kanbanservice.repositories.KanbanTaskRepository;
 import com.mocicarazvan.kanbanservice.services.KanbanColumnService;
 import com.mocicarazvan.kanbanservice.services.KanbanTaskService;
@@ -16,7 +14,6 @@ import com.mocicarazvan.templatemodule.cache.FilteredListCaffeineCacheChildFilte
 import com.mocicarazvan.templatemodule.cache.keys.ChildFilterKey;
 import com.mocicarazvan.templatemodule.clients.UserClient;
 import com.mocicarazvan.templatemodule.dtos.generic.IdGenerateDto;
-import com.mocicarazvan.templatemodule.exceptions.notFound.NotFoundEntity;
 import com.mocicarazvan.templatemodule.services.impl.ManyToOneUserServiceImpl;
 import com.mocicarazvan.templatemodule.utils.EntitiesUtils;
 import com.mocicarazvan.templatemodule.utils.PageableUtilsCustom;
@@ -32,7 +29,6 @@ import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Set;
 import java.util.function.Predicate;
 
 @Service

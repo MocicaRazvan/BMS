@@ -1,6 +1,5 @@
 package com.mocicarazvan.websocketservice.service;
 
-import com.mocicarazvan.websocketservice.dtos.PageableBody;
 import com.mocicarazvan.websocketservice.dtos.PageableResponse;
 import com.mocicarazvan.websocketservice.dtos.message.ChatMessagePayload;
 import com.mocicarazvan.websocketservice.dtos.message.ChatMessageResponse;

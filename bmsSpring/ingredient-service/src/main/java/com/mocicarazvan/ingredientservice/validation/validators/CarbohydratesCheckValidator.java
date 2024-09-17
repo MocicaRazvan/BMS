@@ -1,9 +1,7 @@
 package com.mocicarazvan.ingredientservice.validation.validators;
 
 import com.mocicarazvan.ingredientservice.dtos.IngredientNutritionalFactBody;
-import com.mocicarazvan.ingredientservice.dtos.NutritionalFactBody;
 import com.mocicarazvan.ingredientservice.validation.CarbohydratesCheck;
-import com.mocicarazvan.ingredientservice.validation.FatCheck;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import lombok.extern.slf4j.Slf4j;

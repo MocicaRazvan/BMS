@@ -1,9 +1,7 @@
 import { Locale } from "@/navigation";
 import { unstable_setRequestLocale } from "next-intl/server";
 import { getUserWithMinRole } from "@/lib/user";
-import { getDayFromTexts } from "@/texts/components/forms";
 import { Suspense } from "react";
-import Loader from "@/components/ui/spinner";
 import UpdateDayPageContent from "@/app/[locale]/trainer/days/update/[id]/page-content";
 import LoadingSpinner from "@/components/common/loading-spinner";
 import { DayFromTexts } from "@/components/forms/day-form";

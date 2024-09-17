@@ -1,18 +1,18 @@
 package com.mocicarazvan.websocketservice.controllers;
 
 
-import com.mocicarazvan.websocketservice.dtos.PageableBody;
 import com.mocicarazvan.websocketservice.dtos.PageableResponse;
 import com.mocicarazvan.websocketservice.dtos.message.ChatMessagePayload;
 import com.mocicarazvan.websocketservice.dtos.message.ChatMessageResponse;
 import com.mocicarazvan.websocketservice.service.ChatMessageService;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 

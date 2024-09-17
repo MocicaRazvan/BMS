@@ -3,7 +3,7 @@ import { ThemeSwitchTexts } from "@/texts/components/nav";
 import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
 import { KanbanBoardTexts } from "@/components/kanban/kanban-board";
 import { unstable_setRequestLocale } from "next-intl/server";
-import { getAdminKanbanTexts, getTrainerKanbanPageTexts } from "@/texts/pages";
+import { getTrainerKanbanPageTexts } from "@/texts/pages";
 import SidebarContentLayout from "@/components/sidebar/sidebar-content-layout";
 import Heading from "@/components/common/heading";
 import { Suspense } from "react";

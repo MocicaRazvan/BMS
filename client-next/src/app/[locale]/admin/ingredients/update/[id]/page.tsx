@@ -1,12 +1,9 @@
 import { Locale } from "@/navigation";
 import { unstable_setRequestLocale } from "next-intl/server";
 import LoadingSpinner from "@/components/common/loading-spinner";
-import { getThemeSwitchTexts, ThemeSwitchTexts } from "@/texts/components/nav";
+import { ThemeSwitchTexts } from "@/texts/components/nav";
 import { getUserWithMinRole } from "@/lib/user";
-import {
-  getAdminIngredientsCreatePageTexts,
-  getAdminPageUpdateIngredientTexts,
-} from "@/texts/pages";
+import { getAdminPageUpdateIngredientTexts } from "@/texts/pages";
 import SidebarContentLayout from "@/components/sidebar/sidebar-content-layout";
 import { Suspense } from "react";
 import { IngredientFormTexts } from "@/components/forms/ingredient-form";

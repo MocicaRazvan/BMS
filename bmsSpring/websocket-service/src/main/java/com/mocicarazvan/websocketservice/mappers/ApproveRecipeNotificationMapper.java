@@ -1,11 +1,9 @@
 package com.mocicarazvan.websocketservice.mappers;
 
-import com.mocicarazvan.websocketservice.dtos.post.ApprovePostNotificationResponse;
 import com.mocicarazvan.websocketservice.dtos.recipe.ApproveRecipeNotificationResponse;
 import com.mocicarazvan.websocketservice.dtos.recipe.RecipeResponse;
 import com.mocicarazvan.websocketservice.enums.ApprovedNotificationType;
 import com.mocicarazvan.websocketservice.mappers.generic.NotificationTemplateMapper;
-import com.mocicarazvan.websocketservice.models.ApprovePostNotification;
 import com.mocicarazvan.websocketservice.models.ApproveRecipeNotification;
 import com.mocicarazvan.websocketservice.models.Recipe;
 import lombok.RequiredArgsConstructor;

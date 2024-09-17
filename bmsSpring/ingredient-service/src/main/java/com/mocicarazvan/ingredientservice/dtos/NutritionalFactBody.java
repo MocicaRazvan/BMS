@@ -3,7 +3,6 @@ package com.mocicarazvan.ingredientservice.dtos;
 import com.mocicarazvan.ingredientservice.enums.UnitType;
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.AllArgsConstructor;
 import lombok.Data;

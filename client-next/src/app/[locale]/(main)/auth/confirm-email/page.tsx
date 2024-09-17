@@ -3,6 +3,7 @@ import { LocaleProps } from "@/navigation";
 import ConfirmEmailPage from "@/app/[locale]/(main)/auth/confirm-email/page-content";
 import { Metadata } from "next";
 import { getIntlMetadata } from "@/texts/metadata";
+
 export async function generateMetadata({
   params: { locale },
 }: LocaleProps): Promise<Metadata> {

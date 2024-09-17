@@ -1,7 +1,6 @@
 package com.mocicarazvan.templatemodule.cache;
 
 import com.mocicarazvan.templatemodule.cache.keys.ChildFilterKey;
-import com.mocicarazvan.templatemodule.dtos.generic.IdGenerateDto;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 

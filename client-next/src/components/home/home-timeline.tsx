@@ -5,11 +5,9 @@ import {
 } from "react-vertical-timeline-component";
 import "react-vertical-timeline-component/style.min.css";
 import { BookIcon, Briefcase, PersonStanding } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
-import { useInView } from "framer-motion";
+import { useRef } from "react";
+import { useInView, useScroll } from "framer-motion";
 import { cn } from "@/lib/utils";
-import picture4 from "@/../public/images/Picture4.jpg";
-import { motion, useScroll, useTransform } from "framer-motion";
 import AnimatedGridPattern from "@/components/magicui/animated-grid-pattern";
 
 export const ids = [

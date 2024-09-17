@@ -1,9 +1,7 @@
 package com.mocicarazvan.orderservice.dtos.summaries.trainer;
 
-import com.mocicarazvan.orderservice.dtos.summaries.CountAmount;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 

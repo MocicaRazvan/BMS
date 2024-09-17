@@ -1,13 +1,8 @@
 package com.mocicarazvan.postservice.repositories;
 
 
-import com.mocicarazvan.postservice.mappers.PostMapper;
 import com.mocicarazvan.postservice.models.Post;
-import com.mocicarazvan.templatemodule.utils.PageableUtilsCustom;
-import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.r2dbc.core.DatabaseClient;
-import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 

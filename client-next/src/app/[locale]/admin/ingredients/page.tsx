@@ -1,19 +1,9 @@
 import { Locale } from "@/navigation";
 import { unstable_setRequestLocale } from "next-intl/server";
-import { getDataTableTexts } from "@/texts/components/table";
 import { getUserWithMinRole } from "@/lib/user";
-import IngredientForm, {
-  IngredientFormTexts,
-} from "@/components/forms/ingredient-form";
-import {
-  getSortingItemSortingOptions,
-  sortingIngredientsSortingOptionsKeys,
-} from "@/texts/components/list";
+import { sortingIngredientsSortingOptionsKeys } from "@/texts/components/list";
 import { getSortingOptions, SortingOptionsTexts } from "@/lib/constants";
-import { getButtonSubmitTexts } from "@/texts/components/forms";
-import IngredientsTable, {
-  IngredientTableTexts,
-} from "@/components/table/ingredients-table";
+import { IngredientTableTexts } from "@/components/table/ingredients-table";
 import SidebarContentLayout from "@/components/sidebar/sidebar-content-layout";
 import { ThemeSwitchTexts } from "@/texts/components/nav";
 import { getAdminIngredientsPageTexts } from "@/texts/pages";

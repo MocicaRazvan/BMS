@@ -2,13 +2,12 @@ package com.mocicarazvan.templatemodule.email.impl;
 
 
 import com.mocicarazvan.templatemodule.email.EmailUtils;
+import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import reactor.core.publisher.Mono;
-import jakarta.mail.internet.MimeMessage;
 
 
 @Slf4j

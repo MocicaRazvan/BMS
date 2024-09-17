@@ -8,12 +8,10 @@ import com.mocicarazvan.kanbanservice.dtos.tasks.KanbanTaskResponse;
 import com.mocicarazvan.kanbanservice.jackson.GroupedKanbanTaskDeserializer;
 import com.mocicarazvan.templatemodule.cache.FilteredListCaffeineCacheChildFilterKey;
 import com.mocicarazvan.templatemodule.cache.impl.FilteredListCaffeineCacheChildFilterKeyImpl;
-import com.mocicarazvan.templatemodule.clients.FileClient;
 import com.mocicarazvan.templatemodule.clients.UserClient;
 import com.mocicarazvan.templatemodule.jackson.CustomObjectMapper;
 import com.mocicarazvan.templatemodule.utils.EntitiesUtils;
 import com.mocicarazvan.templatemodule.utils.PageableUtilsCustom;
-import com.mocicarazvan.templatemodule.utils.RepositoryUtils;
 import com.mocicarazvan.templatemodule.utils.RequestsUtils;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 import io.github.resilience4j.ratelimiter.RateLimiterRegistry;
@@ -28,8 +26,6 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.List;
 import java.util.Map;
-
-import com.fasterxml.jackson.core.type.TypeReference;
 
 
 @Configuration

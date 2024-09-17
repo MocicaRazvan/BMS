@@ -5,10 +5,7 @@ import LoadingSpinner from "@/components/common/loading-spinner";
 import SingleTrainerPlanPageContent, {
   SingleTrainerPlanPageTexts,
 } from "@/app/[locale]/trainer/plans/single/[id]/page-content";
-import {
-  getSingleTrainerPlanPageTexts,
-  getTrainerPlanPageTexts,
-} from "@/texts/pages";
+import { getTrainerPlanPageTexts } from "@/texts/pages";
 import { unstable_setRequestLocale } from "next-intl/server";
 import { Metadata } from "next";
 import { getIntlMetadata } from "@/texts/metadata";

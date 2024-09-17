@@ -7,6 +7,7 @@ import { Locale } from "@/navigation";
 import { unstable_setRequestLocale } from "next-intl/server";
 import { Metadata } from "next";
 import { getIntlMetadata } from "@/texts/metadata";
+
 interface Props {
   params: { locale: Locale; id: string };
 }

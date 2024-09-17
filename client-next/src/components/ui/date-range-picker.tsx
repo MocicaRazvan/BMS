@@ -1,7 +1,7 @@
 /* eslint-disable max-lines */
 "use client";
 
-import React, { type FC, useState, useEffect, useRef, useMemo } from "react";
+import React, { type FC, useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "./button";
 import { Popover, PopoverContent, PopoverTrigger } from "./popover";
 import { Calendar } from "./calendar";
@@ -16,15 +16,15 @@ import {
 } from "./select";
 import { Switch } from "./switch";
 import {
-  ChevronUpIcon,
-  ChevronDownIcon,
   CheckIcon,
+  ChevronDownIcon,
+  ChevronUpIcon,
 } from "@radix-ui/react-icons";
 import { cn } from "@/lib/utils";
-import { Locale } from "date-fns";
+import { format, Locale } from "date-fns";
 import { enUS } from "date-fns/locale";
-import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
+
 export type DateRangeParams = Record<"from" | "to", string>;
 const formatDate = (date: Date, locale: Locale = enUS): string => {
   return format(date, "P", { locale });

@@ -1,7 +1,7 @@
 "use client";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Bot, Minus, SendHorizontal, StopCircle, Trash } from "lucide-react";
 import { Message, useChat } from "ai/react";
 import ReactMarkdown from "react-markdown";
@@ -33,7 +33,6 @@ export default function AiChatBox({
   initialMessages,
 }: Props) {
   const [isOpen, setIsOpen] = useState(false);
-  const prevIsOpen = useRef(isOpen);
   const [showBot, setShowBot] = useState(true);
   const {
     messages,
@@ -51,7 +50,10 @@ export default function AiChatBox({
   const [isAtBottom, setIsAtBottom] = useState<boolean>(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const { deletePersistedMessages } = useAiChatPersist(messages);
+  const { deletePersistedMessages } = useAiChatPersist(
+    messages,
+    initialMessages,
+  );
 
   const handleScroll = () => {
     if (!scrollRef.current) return;

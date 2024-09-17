@@ -5,11 +5,7 @@ import AlertDialogDeleteComment from "@/components/dialogs/comments/delete-comme
 import { Trash2 } from "lucide-react";
 import { Link } from "@/navigation";
 import ProseText from "@/components/common/prose-text";
-import {
-  CommentResponse,
-  CustomEntityModel,
-  ResponseWithUserDtoEntity,
-} from "@/types/dto";
+import { CommentResponse, CustomEntityModel } from "@/types/dto";
 import { WithUser } from "@/lib/user";
 import {
   Accordion,
@@ -32,7 +28,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { TitleBodyForm, TitleBodyTexts } from "@/components/forms/title-body";
+import { TitleBodyTexts } from "@/components/forms/title-body";
 import ErrorMessage from "@/components/forms/error-message";
 import ButtonSubmit, {
   ButtonSubmitTexts,

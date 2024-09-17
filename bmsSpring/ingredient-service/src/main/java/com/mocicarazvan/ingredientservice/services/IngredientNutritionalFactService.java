@@ -2,12 +2,10 @@ package com.mocicarazvan.ingredientservice.services;
 
 import com.mocicarazvan.ingredientservice.dtos.IngredientNutritionalFactBody;
 import com.mocicarazvan.ingredientservice.dtos.IngredientNutritionalFactResponse;
-import com.mocicarazvan.ingredientservice.dtos.IngredientResponse;
 import com.mocicarazvan.ingredientservice.enums.DietType;
 import com.mocicarazvan.templatemodule.dtos.PageableBody;
 import com.mocicarazvan.templatemodule.dtos.response.PageableResponse;
 import com.mocicarazvan.templatemodule.dtos.response.ResponseWithEntityCount;
-import com.mocicarazvan.templatemodule.dtos.response.ResponseWithUserDtoEntity;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 

@@ -7,7 +7,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { Link, Locale, locales, usePathname, useRouter } from "@/navigation";
+import { Locale, locales, usePathname, useRouter } from "@/navigation";
 import { useLocale } from "next-intl";
 import { Languages } from "lucide-react";
 import { cn } from "@/lib/utils";

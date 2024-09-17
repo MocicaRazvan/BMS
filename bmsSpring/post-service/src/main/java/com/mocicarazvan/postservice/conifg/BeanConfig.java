@@ -1,21 +1,17 @@
 package com.mocicarazvan.postservice.conifg;
 
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mocicarazvan.postservice.dtos.PostResponse;
 import com.mocicarazvan.templatemodule.cache.FilteredListCaffeineCacheApproveFilterKey;
 import com.mocicarazvan.templatemodule.cache.impl.FilteredListCaffeineCacheApproveFilterKeyImpl;
 import com.mocicarazvan.templatemodule.clients.FileClient;
 import com.mocicarazvan.templatemodule.clients.UserClient;
 import com.mocicarazvan.templatemodule.jackson.CustomObjectMapper;
-import com.mocicarazvan.templatemodule.services.RabbitMqApprovedSenderWrapper;
-import com.mocicarazvan.templatemodule.services.RabbitMqSender;
-import com.mocicarazvan.templatemodule.services.impl.RabbitMqApprovedSenderWrapperImpl;
 import com.mocicarazvan.templatemodule.utils.EntitiesUtils;
 import com.mocicarazvan.templatemodule.utils.PageableUtilsCustom;
 import com.mocicarazvan.templatemodule.utils.RepositoryUtils;
 import com.mocicarazvan.templatemodule.utils.RequestsUtils;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 import io.github.resilience4j.ratelimiter.RateLimiterRegistry;
 import io.github.resilience4j.retry.RetryRegistry;

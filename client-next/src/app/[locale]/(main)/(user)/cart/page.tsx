@@ -1,4 +1,4 @@
-import { Locale, LocaleProps } from "@/navigation";
+import { LocaleProps } from "@/navigation";
 import { unstable_setRequestLocale } from "next-intl/server";
 import { getUser } from "@/lib/user";
 import LoadingSpinner from "@/components/common/loading-spinner";

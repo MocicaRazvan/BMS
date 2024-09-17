@@ -4,9 +4,9 @@ import SignOut from "@/app/[locale]/(main)/auth/signout/page-content";
 import { Metadata } from "next";
 import { getIntlMetadata } from "@/texts/metadata";
 import { getSignOutPageTexts } from "@/texts/pages";
-import { getUser } from "@/lib/user";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/auth-options";
+
 export async function generateMetadata({
   params: { locale },
 }: LocaleProps): Promise<Metadata> {

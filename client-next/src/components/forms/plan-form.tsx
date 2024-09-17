@@ -2,17 +2,10 @@
 
 import {
   BaseFormProps,
-  getImageSchema,
   getPlanSchema,
-  getTitleBodySchema,
-  ImageSchemaTexts,
   PlanSchemaTexts,
   PlanSchemaType,
-  RecipeSchemaType,
-  TitleBodySchemaTexts,
 } from "@/types/forms";
-
-import { z } from "zod";
 import { WithUser } from "@/lib/user";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -27,7 +20,6 @@ import React, {
   useState,
 } from "react";
 import { Option } from "@/components/ui/multiple-selector";
-import { MacroChartElement } from "@/components/charts/ingredient-macros-pie-chart";
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import {
   Form,
@@ -45,20 +37,17 @@ import ChildInputMultipleSelector, {
 import {
   CustomEntityModel,
   DayResponse,
-  dayTypes,
   DietType,
-  IngredientNutritionalFactResponse,
   ObjectiveType,
   PageableResponse,
   PlanBody,
   planObjectives,
   PlanResponse,
-  RecipeResponse,
 } from "@/types/dto";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import InputFile, { FieldInputTexts } from "@/components/forms/input-file";
-import { cn, determineMostRestrictiveDiet, handleBaseError } from "@/lib/utils";
+import { cn, handleBaseError } from "@/lib/utils";
 import ButtonSubmit, {
   ButtonSubmitTexts,
 } from "@/components/forms/button-submit";
@@ -67,7 +56,6 @@ import ErrorMessage from "@/components/forms/error-message";
 import { fetchWithFiles } from "@/hoooks/fetchWithFiles";
 import { BaseError } from "@/types/responses";
 import { toast } from "@/components/ui/use-toast";
-import { ToastAction } from "@/components/ui/toast";
 import { BaseFormTexts } from "@/texts/components/forms";
 import useFilesBase64 from "@/hoooks/useFilesObjectURL";
 import {
@@ -78,7 +66,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { fetchStream } from "@/hoooks/fetchStream";
-import { SortableListType } from "@/components/dnd/sortable-list";
 import {
   arrayMove,
   SortableContext,

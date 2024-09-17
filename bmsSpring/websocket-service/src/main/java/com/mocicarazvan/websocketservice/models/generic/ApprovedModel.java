@@ -1,7 +1,6 @@
 package com.mocicarazvan.websocketservice.models.generic;
 
 import com.mocicarazvan.websocketservice.models.ConversationUser;
-import com.mocicarazvan.websocketservice.models.generic.IdGenerated;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;

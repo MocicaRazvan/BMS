@@ -1,8 +1,6 @@
 import { Locale } from "@/navigation";
 import { unstable_setRequestLocale } from "next-intl/server";
 import { getUserWithMinRole } from "@/lib/user";
-import { getPlanFormTexts } from "@/texts/components/forms";
-import Loader from "@/components/ui/spinner";
 import { Suspense } from "react";
 import UpdatePlanPageContent from "@/app/[locale]/trainer/plans/update/[id]/page-content";
 import { Metadata } from "next";

@@ -12,11 +12,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { fetchStream } from "@/hoooks/fetchStream";
-import {
-  ApprovedNotificationType,
-  ApproveDto,
-  ResponseWithUserDtoEntity,
-} from "@/types/dto";
+import { ApproveDto, ResponseWithUserDtoEntity } from "@/types/dto";
 import { toast } from "@/components/ui/use-toast";
 import { BaseDialogTexts } from "@/components/dialogs/delete-model";
 import { ReactNode, useEffect, useState } from "react";

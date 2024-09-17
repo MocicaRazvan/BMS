@@ -6,7 +6,6 @@ import { ThemeSwitchTexts } from "@/texts/components/nav";
 import { getUserPostsAdminPageTexts } from "@/texts/pages";
 import { getUserWithMinRole } from "@/lib/user";
 import { notFound } from "next/navigation";
-import UserPageContent from "@/app/[locale]/(main)/(user)/users/single/[id]/page-content";
 import UserPostsAdminPageContent from "@/app/[locale]/admin/users/[id]/posts/page-content";
 import { sortingPostsSortingOptionsKeys } from "@/texts/components/list";
 import { SidebarMenuTexts } from "@/components/sidebar/menu-list";

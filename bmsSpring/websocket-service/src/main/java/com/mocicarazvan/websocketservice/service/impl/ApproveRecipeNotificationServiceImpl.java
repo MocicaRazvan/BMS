@@ -1,21 +1,16 @@
 package com.mocicarazvan.websocketservice.service.impl;
 
-import com.mocicarazvan.websocketservice.dtos.post.ApprovePostNotificationBody;
-import com.mocicarazvan.websocketservice.dtos.post.ApprovePostNotificationResponse;
-import com.mocicarazvan.websocketservice.dtos.post.PostResponse;
 import com.mocicarazvan.websocketservice.dtos.recipe.ApproveRecipeNotificationBody;
 import com.mocicarazvan.websocketservice.dtos.recipe.ApproveRecipeNotificationResponse;
 import com.mocicarazvan.websocketservice.dtos.recipe.RecipeResponse;
 import com.mocicarazvan.websocketservice.enums.ApprovedNotificationType;
-import com.mocicarazvan.websocketservice.mappers.ApprovePostNotificationMapper;
 import com.mocicarazvan.websocketservice.mappers.ApproveRecipeNotificationMapper;
 import com.mocicarazvan.websocketservice.messaging.CustomConvertAndSendToUser;
-import com.mocicarazvan.websocketservice.models.*;
-import com.mocicarazvan.websocketservice.repositories.ApprovePostNotificationRepository;
+import com.mocicarazvan.websocketservice.models.ApproveRecipeNotification;
+import com.mocicarazvan.websocketservice.models.ConversationUser;
+import com.mocicarazvan.websocketservice.models.Recipe;
 import com.mocicarazvan.websocketservice.repositories.ApproveRecipeNotificationRepository;
-import com.mocicarazvan.websocketservice.repositories.PostRepository;
 import com.mocicarazvan.websocketservice.repositories.RecipeRepository;
-import com.mocicarazvan.websocketservice.service.ApprovePostNotificationService;
 import com.mocicarazvan.websocketservice.service.ApproveRecipeNotificationService;
 import com.mocicarazvan.websocketservice.service.ConversationUserService;
 import com.mocicarazvan.websocketservice.service.generic.impl.ApproveNotificationServiceTemplateImpl;

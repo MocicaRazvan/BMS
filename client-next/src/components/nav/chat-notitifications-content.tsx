@@ -1,13 +1,11 @@
 import { ChatMessageNotificationResponse } from "@/types/dto";
 import { MessageCircleIcon } from "lucide-react";
-import { parseISO, formatDistanceToNow } from "date-fns";
+import { parseISO } from "date-fns";
 import { Locale } from "@/navigation";
-import { ro, enUS } from "date-fns/locale";
 import { useLocale } from "next-intl";
 import { Button } from "@/components/ui/button";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback } from "react";
 import { useStompClient } from "react-stomp-hooks";
-import { getChatMessageNotificationContentTexts } from "@/texts/components/nav";
 import { fromDistanceToNowUtc } from "@/lib/utils";
 
 export interface ChatMessageNotificationContentTexts {

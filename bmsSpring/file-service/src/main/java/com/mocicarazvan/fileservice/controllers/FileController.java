@@ -12,7 +12,7 @@ import com.mocicarazvan.fileservice.service.MediaService;
 import com.mongodb.client.gridfs.model.GridFSFile;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.mongodb.gridfs.ReactiveGridFsResource;
+import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.*;
 import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -21,11 +21,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import org.springframework.core.io.buffer.DataBuffer;
 
 import java.net.URI;
 import java.util.List;
-import java.util.Objects;
 
 
 @RestController

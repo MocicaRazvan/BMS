@@ -28,7 +28,6 @@ import { Loader2 } from "lucide-react";
 import { Link, useRouter } from "@/navigation";
 import { logError } from "@/app/[locale]/(main)/auth/signin/actions";
 import OauthProviders from "@/app/[locale]/(main)/auth/oauth-providers";
-import { dezerialize } from "zodex";
 
 export interface SignInPageText {
   cardTitle: string;

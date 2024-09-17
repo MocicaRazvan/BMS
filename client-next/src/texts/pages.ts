@@ -1,164 +1,159 @@
 import {
-    getElementHeaderTexts,
-    getNutritionalTableTexts,
+  getElementHeaderTexts,
+  getNutritionalTableTexts,
 } from "@/texts/components/common";
-import {getTranslations} from "next-intl/server";
-import {SinglePostPageTexts} from "@/app/[locale]/(main)/(user)/posts/single/[id]/page-content";
-import {getPostCommentsTexts} from "@/texts/components/posts";
-import {ApprovedPostsTexts} from "@/app/[locale]/(main)/(user)/posts/approved/page-content";
+import { getTranslations } from "next-intl/server";
+import { SinglePostPageTexts } from "@/app/[locale]/(main)/(user)/posts/single/[id]/page-content";
+import { getPostCommentsTexts } from "@/texts/components/posts";
+import { ApprovedPostsTexts } from "@/app/[locale]/(main)/(user)/posts/approved/page-content";
 import {
-    getGridListTexts,
-    getSortingItemSortingOptions,
-    getUseApprovedFilterTexts,
-    getUseBinaryTexts,
-    getUseFilterDropdownTexts,
-    getUseTagsExtraCriteriaTexts,
-    sortingDaysSortingOptionsKeys,
-    sortingIngredientsSortingOptionsKeys,
-    sortingOrdersSortingOptionsKeys,
-    sortingPlansSortingOptionsKeys,
-    sortingPostsSortingOptionsKeys,
-    sortingRecipesSortingOptionsKeys,
-    sortingUsersSortingOptionsKeys,
+  getGridListTexts,
+  getSortingItemSortingOptions,
+  getUseApprovedFilterTexts,
+  getUseBinaryTexts,
+  getUseFilterDropdownTexts,
+  getUseTagsExtraCriteriaTexts,
+  sortingDaysSortingOptionsKeys,
+  sortingIngredientsSortingOptionsKeys,
+  sortingOrdersSortingOptionsKeys,
+  sortingPlansSortingOptionsKeys,
+  sortingPostsSortingOptionsKeys,
+  sortingRecipesSortingOptionsKeys,
+  sortingUsersSortingOptionsKeys,
 } from "@/texts/components/list";
 import {
-    getAdminEmailTexts,
-    getCheckoutDrawerTexts,
-    getDayFromTexts,
-    getIngredientFormTexts,
-    getPlanFormTexts,
-    getPostFormTexts,
-    getRecipeFormTexts,
-    getUpdateProfileTexts,
+  getAdminEmailTexts,
+  getCheckoutDrawerTexts,
+  getDayFromTexts,
+  getIngredientFormTexts,
+  getPlanFormTexts,
+  getPostFormTexts,
+  getRecipeFormTexts,
+  getUpdateProfileTexts,
 } from "@/texts/components/forms";
-import {UserPostsPageContentTexts} from "@/app/[locale]/trainer/user/[id]/posts/page-content";
+import { UserPostsPageContentTexts } from "@/app/[locale]/trainer/user/[id]/posts/page-content";
 import {
-    getDayTableTexts,
-    getIngredientTableColumnTexts,
-    getIngredientTableTexts,
-    getOrderTableTexts,
-    getPlanTableTexts,
-    getPostTableTexts,
-    getRecipeTableTexts,
-    getUserTableTexts,
+  getDayTableTexts,
+  getIngredientTableColumnTexts,
+  getIngredientTableTexts,
+  getOrderTableTexts,
+  getPlanTableTexts,
+  getPostTableTexts,
+  getRecipeTableTexts,
+  getUserTableTexts,
 } from "@/texts/components/table";
-import {AdminPostsPageTexts} from "@/app/[locale]/admin/posts/page";
-import {getThemeSwitchTexts} from "@/texts/components/nav";
-import {UserPostsAdminPageTexts} from "@/app/[locale]/admin/users/[id]/posts/page";
-import {AdminUsersPageTexts} from "@/app/[locale]/admin/users/page";
-import {UserPageTexts} from "@/app/[locale]/(main)/(user)/users/single/[id]/page-content";
-import {AdminIngredientsCreatePageTexts} from "@/app/[locale]/admin/ingredients/create/page";
-import {AdminIngredientsPageTexts} from "@/app/[locale]/admin/ingredients/page";
-import {AdminPageUpdateIngredientTexts} from "@/app/[locale]/admin/ingredients/update/[id]/page";
-import {IngredientsPageTexts} from "@/app/[locale]/trainer/ingredients/page";
-import {SingleIngredientPageTexts} from "@/app/[locale]/trainer/ingredients/single/[id]/page-content";
+import { AdminPostsPageTexts } from "@/app/[locale]/admin/posts/page";
+import { getThemeSwitchTexts } from "@/texts/components/nav";
+import { UserPostsAdminPageTexts } from "@/app/[locale]/admin/users/[id]/posts/page";
+import { AdminUsersPageTexts } from "@/app/[locale]/admin/users/page";
+import { UserPageTexts } from "@/app/[locale]/(main)/(user)/users/single/[id]/page-content";
+import { AdminIngredientsCreatePageTexts } from "@/app/[locale]/admin/ingredients/create/page";
+import { AdminIngredientsPageTexts } from "@/app/[locale]/admin/ingredients/page";
+import { AdminPageUpdateIngredientTexts } from "@/app/[locale]/admin/ingredients/update/[id]/page";
+import { IngredientsPageTexts } from "@/app/[locale]/trainer/ingredients/page";
+import { SingleIngredientPageTexts } from "@/app/[locale]/trainer/ingredients/single/[id]/page-content";
 import {
-    getAllRelativeItemTexts,
-    getDailySalesTexts,
-    getGeographyChartTexts,
-    getIngredientPieChartTexts,
-    getMonthlySalesTexts,
-    getRelativeItemsSummaryTexts,
-    getTotalAmountCountOrdersTexts,
+  getAllRelativeItemTexts,
+  getDailySalesTexts,
+  getGeographyChartTexts,
+  getIngredientPieChartTexts,
+  getMonthlySalesTexts,
+  getRelativeItemsSummaryTexts,
 } from "@/texts/components/charts";
-import {UserRecipesPageTexts} from "@/app/[locale]/trainer/user/[id]/recipes/page";
-import {AdminRecipesPageTexts} from "@/app/[locale]/admin/recipes/page";
-import {UserRecipesAdminPageTexts} from "@/app/[locale]/admin/users/[id]/recipes/page";
-import {SingleRecipePageTexts} from "@/app/[locale]/trainer/recipes/single/[id]/page-content";
-import {AdminPlansPageTexts} from "@/app/[locale]/admin/plans/page";
-import {UserPlansPageTexts} from "@/app/[locale]/trainer/user/[id]/plans/page";
-import {UserPlansAdminPageTexts} from "@/app/[locale]/admin/users/[id]/plans/page";
-import {SingleTrainerPlanPageTexts} from "@/app/[locale]/trainer/plans/single/[id]/page-content";
-import {ApprovedPlansTexts} from "@/app/[locale]/(main)/(user)/plans/approved/page-content";
+import { UserRecipesPageTexts } from "@/app/[locale]/trainer/user/[id]/recipes/page";
+import { AdminRecipesPageTexts } from "@/app/[locale]/admin/recipes/page";
+import { UserRecipesAdminPageTexts } from "@/app/[locale]/admin/users/[id]/recipes/page";
+import { SingleRecipePageTexts } from "@/app/[locale]/trainer/recipes/single/[id]/page-content";
+import { AdminPlansPageTexts } from "@/app/[locale]/admin/plans/page";
+import { UserPlansPageTexts } from "@/app/[locale]/trainer/user/[id]/plans/page";
+import { UserPlansAdminPageTexts } from "@/app/[locale]/admin/users/[id]/plans/page";
+import { SingleTrainerPlanPageTexts } from "@/app/[locale]/trainer/plans/single/[id]/page-content";
+import { ApprovedPlansTexts } from "@/app/[locale]/(main)/(user)/plans/approved/page-content";
 import {
-    dietTypes,
-    getActivitiesTexts,
-    getCalculatorSchemaTexts,
-    getGenderTexts,
+  dietTypes,
+  getActivitiesTexts,
+  getCalculatorSchemaTexts,
+  getGenderTexts,
 } from "@/types/forms";
-import {getAddToCartBtnTexts} from "@/texts/components/plans";
-import {UserPlanPageContentTexts} from "@/app/[locale]/(main)/(user)/plans/single/[id]/page-content";
-import {CartPageContentTexts} from "@/app/[locale]/(main)/(user)/cart/page-content";
-import {SubscriptionsPageContentTexts} from "@/app/[locale]/(main)/(user)/subscriptions/page-content";
-import {SingleSubscriptionTexts} from "@/app/[locale]/(main)/(user)/subscriptions/single/[id]/page-content";
-import {AdminOrdersPageTexts} from "@/app/[locale]/admin/orders/page";
-import {UserOrdersAdminPageTexts} from "@/app/[locale]/admin/users/[id]/orders/page";
-import {UserOrdersPageTexts} from "@/app/[locale]/(main)/(user)/orders/page";
-import {SingleOrderPageContentTexts} from "@/app/[locale]/(main)/(user)/orders/single/[id]/page-content";
-import {AdminDashboardPageTexts} from "@/app/[locale]/admin/dashboard/page-content";
-import {AdminMonthlySalesTexts} from "@/app/[locale]/admin/monthlySales/page";
-import {getDateRangePickerTexts} from "@/texts/components/ui";
-import {AdminCountriesTexts} from "@/app/[locale]/admin/countries/page";
-import {AdminDailySalesTexts} from "@/app/[locale]/admin/dailySales/page";
-import {UserMonthlySalesPageTexts} from "@/app/[locale]/trainer/user/[id]/plans/monthlySales/page";
-import {UserDailySalesPageTexts} from "@/app/[locale]/trainer/user/[id]/plans/dailySales/page";
-import {UserAdminMonthlySalesPageTexts} from "@/app/[locale]/admin/users/[id]/monthlySales/page";
-import {UserAdminDailySalesPageTexts} from "@/app/[locale]/admin/users/[id]/dailySales/page";
-import {OrderCompletePageTexts} from "@/app/[locale]/(main)/(user)/orderComplete/page";
-import {HomeTexts} from "@/app/[locale]/(main)/page";
+import { getAddToCartBtnTexts } from "@/texts/components/plans";
+import { UserPlanPageContentTexts } from "@/app/[locale]/(main)/(user)/plans/single/[id]/page-content";
+import { CartPageContentTexts } from "@/app/[locale]/(main)/(user)/cart/page-content";
+import { SubscriptionsPageContentTexts } from "@/app/[locale]/(main)/(user)/subscriptions/page-content";
+import { SingleSubscriptionTexts } from "@/app/[locale]/(main)/(user)/subscriptions/single/[id]/page-content";
+import { AdminOrdersPageTexts } from "@/app/[locale]/admin/orders/page";
+import { UserOrdersAdminPageTexts } from "@/app/[locale]/admin/users/[id]/orders/page";
+import { UserOrdersPageTexts } from "@/app/[locale]/(main)/(user)/orders/page";
+import { SingleOrderPageContentTexts } from "@/app/[locale]/(main)/(user)/orders/single/[id]/page-content";
+import { AdminDashboardPageTexts } from "@/app/[locale]/admin/dashboard/page-content";
+import { AdminMonthlySalesTexts } from "@/app/[locale]/admin/monthlySales/page";
+import { AdminCountriesTexts } from "@/app/[locale]/admin/countries/page";
+import { AdminDailySalesTexts } from "@/app/[locale]/admin/dailySales/page";
+import { UserMonthlySalesPageTexts } from "@/app/[locale]/trainer/user/[id]/plans/monthlySales/page";
+import { UserDailySalesPageTexts } from "@/app/[locale]/trainer/user/[id]/plans/dailySales/page";
+import { UserAdminMonthlySalesPageTexts } from "@/app/[locale]/admin/users/[id]/monthlySales/page";
+import { UserAdminDailySalesPageTexts } from "@/app/[locale]/admin/users/[id]/dailySales/page";
+import { OrderCompletePageTexts } from "@/app/[locale]/(main)/(user)/orderComplete/page";
+import { HomeTexts } from "@/app/[locale]/(main)/page";
 import {
-    getHomeAboutTexts,
-    getHomeCardsText,
-    getHomeHeaderTexts,
-    getHomeTimelineTexts,
+  getHomeAboutTexts,
+  getHomeCardsText,
+  getHomeHeaderTexts,
+  getHomeTimelineTexts,
 } from "@/texts/components/home";
-import {AdminEmailPageTexts} from "@/app/[locale]/admin/email/page";
-import {AdminKanbanTexts} from "@/app/[locale]/admin/kanban/page";
-import {getKanbanBoardTexts} from "@/texts/components/kanban";
-import {KanbanPageTexts} from "@/app/[locale]/(main)/(user)/kanban/page";
+import { AdminEmailPageTexts } from "@/app/[locale]/admin/email/page";
+import { AdminKanbanTexts } from "@/app/[locale]/admin/kanban/page";
+import { getKanbanBoardTexts } from "@/texts/components/kanban";
+import { KanbanPageTexts } from "@/app/[locale]/(main)/(user)/kanban/page";
 import {
-    CalculatorPageTexts,
-    IntakeTitle,
-    ItemTexts,
+  CalculatorPageTexts,
+  IntakeTitle,
+  ItemTexts,
 } from "@/app/[locale]/(main)/(user)/calculator/page";
-import {UserDaysPageTexts} from "@/app/[locale]/trainer/user/[id]/days/page";
-import {SingleDayPageTexts} from "@/app/[locale]/trainer/days/single/[id]/page-content";
-import {getDaysListTexts, getSingleDayTexts} from "@/texts/components/days";
-import {planObjectives} from "@/types/dto";
-import {getSidebarMenuTexts} from "@/texts/components/sidebar";
-import {AdminUserPageTexts} from "@/app/[locale]/admin/users/[id]/page";
-import {AdminPostPageTexts} from "@/app/[locale]/admin/posts/single/[id]/page";
-import {AdminRecipePageTexts} from "@/app/[locale]/admin/recipes/single/[id]/page";
-import {AdminPlanPageTexts} from "@/app/[locale]/admin/plans/single/[id]/page";
-import {AdminIngredientPageTexts} from "@/app/[locale]/admin/ingredients/single/[id]/page";
-import {AdminOrderPageTexts} from "@/app/[locale]/admin/orders/single/[id]/page";
+import { UserDaysPageTexts } from "@/app/[locale]/trainer/user/[id]/days/page";
+import { getDaysListTexts, getSingleDayTexts } from "@/texts/components/days";
+import { planObjectives } from "@/types/dto";
+import { getSidebarMenuTexts } from "@/texts/components/sidebar";
+import { AdminUserPageTexts } from "@/app/[locale]/admin/users/[id]/page";
+import { AdminPostPageTexts } from "@/app/[locale]/admin/posts/single/[id]/page";
+import { AdminRecipePageTexts } from "@/app/[locale]/admin/recipes/single/[id]/page";
+import { AdminPlanPageTexts } from "@/app/[locale]/admin/plans/single/[id]/page";
+import { AdminIngredientPageTexts } from "@/app/[locale]/admin/ingredients/single/[id]/page";
+import { AdminOrderPageTexts } from "@/app/[locale]/admin/orders/single/[id]/page";
 import {
-    adminGroupLabels,
-    adminLabels,
-    adminSubLabels,
-    trainerGroupLabels,
-    trainerLabels,
-    trainerSubLabels,
+  adminGroupLabels,
+  adminLabels,
+  adminSubLabels,
+  trainerGroupLabels,
+  trainerLabels,
+  trainerSubLabels,
 } from "@/components/sidebar/menu-list";
-import {UserPostsPageTexts} from "@/app/[locale]/trainer/user/[id]/posts/page";
-import {CreatePostPageTexts} from "@/app/[locale]/trainer/posts/create/page";
-import {UpdatePostPageTexts} from "@/app/[locale]/trainer/posts/update/[id]/page";
-import {TrainerSingleIngredientPageTexts} from "@/app/[locale]/trainer/ingredients/single/[id]/page";
-import {TrainerPostPageTexts} from "@/app/[locale]/trainer/posts/single/[id]/page";
-import {CreateRecipePageTexts} from "@/app/[locale]/trainer/recipes/create/page";
-import {UpdateRecipePageTexts} from "@/app/[locale]/trainer/recipes/update/[id]/page";
-import {TrainerSingleRecipePageTexts} from "@/app/[locale]/trainer/recipes/single/[id]/page";
-import {CreateDayPageTexts} from "@/app/[locale]/trainer/days/create/page";
-import {UpdateDayPageTexts} from "@/app/[locale]/trainer/days/update/[id]/page";
-import {SingleDayTrainerPageTexts} from "@/app/[locale]/trainer/days/single/[id]/page";
-import {CreatePlanPageTexts} from "@/app/[locale]/trainer/plans/create/page";
-import {UpdatePlanPageTexts} from "@/app/[locale]/trainer/plans/update/[id]/page";
-import {TrainerPlanPageTexts} from "@/app/[locale]/trainer/plans/single/[id]/page";
-import {TrainerKanbanPageTexts} from "@/app/[locale]/trainer/kanban/page";
-import SignOutWrapper from "@/app/[locale]/(main)/auth/signout/page";
-import {TermsOfServiceTexts} from "@/app/[locale]/(main)/termsOfService/page";
+import { UserPostsPageTexts } from "@/app/[locale]/trainer/user/[id]/posts/page";
+import { CreatePostPageTexts } from "@/app/[locale]/trainer/posts/create/page";
+import { UpdatePostPageTexts } from "@/app/[locale]/trainer/posts/update/[id]/page";
+import { TrainerSingleIngredientPageTexts } from "@/app/[locale]/trainer/ingredients/single/[id]/page";
+import { TrainerPostPageTexts } from "@/app/[locale]/trainer/posts/single/[id]/page";
+import { CreateRecipePageTexts } from "@/app/[locale]/trainer/recipes/create/page";
+import { UpdateRecipePageTexts } from "@/app/[locale]/trainer/recipes/update/[id]/page";
+import { TrainerSingleRecipePageTexts } from "@/app/[locale]/trainer/recipes/single/[id]/page";
+import { CreateDayPageTexts } from "@/app/[locale]/trainer/days/create/page";
+import { UpdateDayPageTexts } from "@/app/[locale]/trainer/days/update/[id]/page";
+import { SingleDayTrainerPageTexts } from "@/app/[locale]/trainer/days/single/[id]/page";
+import { CreatePlanPageTexts } from "@/app/[locale]/trainer/plans/create/page";
+import { TrainerPlanPageTexts } from "@/app/[locale]/trainer/plans/single/[id]/page";
+import { TrainerKanbanPageTexts } from "@/app/[locale]/trainer/kanban/page";
+import { TermsOfServiceTexts } from "@/app/[locale]/(main)/termsOfService/page";
 
 export async function getSinglePostPageTexts(): Promise<SinglePostPageTexts> {
-    const [elementHeaderTexts, t, postCommentsTexts] = await Promise.all([
-        getElementHeaderTexts(),
-        getTranslations("pages.posts.SinglePageTexts"),
-        getPostCommentsTexts(),
-    ]);
-    return {
-        elementHeaderTexts,
-        updateButton: t("updateButton"),
-        postCommentsTexts,
-    };
+  const [elementHeaderTexts, t, postCommentsTexts] = await Promise.all([
+    getElementHeaderTexts(),
+    getTranslations("pages.posts.SinglePageTexts"),
+    getPostCommentsTexts(),
+  ]);
+  return {
+    elementHeaderTexts,
+    updateButton: t("updateButton"),
+    postCommentsTexts,
+  };
 }
 
 export async function getApprovedPostsPageTexts(): Promise<ApprovedPostsTexts> {

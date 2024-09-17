@@ -1,15 +1,17 @@
 package com.mocicarazvan.templatemodule.cache.impl;
 
 import com.mocicarazvan.templatemodule.cache.BaseCaffeineCacher;
-import com.mocicarazvan.templatemodule.cache.keys.FilterKeyType;
 import com.mocicarazvan.templatemodule.cache.FilteredListCaffeineCache;
+import com.mocicarazvan.templatemodule.cache.keys.FilterKeyType;
 import com.mocicarazvan.templatemodule.dtos.response.ResponseWithUserDtoEntity;
 import com.mocicarazvan.templatemodule.hateos.CustomEntityModel;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Predicate;
 

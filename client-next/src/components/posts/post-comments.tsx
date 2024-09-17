@@ -11,7 +11,6 @@ import {
   ResponseWithUserDtoEntity,
 } from "@/types/dto";
 import { useCallback, useEffect, useState } from "react";
-import { X } from "lucide-react";
 
 import { WithUser } from "@/lib/user";
 import CommentAccordion from "@/components/posts/comment-accordion";
@@ -26,7 +25,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { TitleBodyType } from "@/types/forms";
-import { format } from "date-fns";
 
 interface Props extends WithUser, PostCommentsTexts {
   postId: number;

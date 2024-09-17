@@ -9,7 +9,7 @@ import { useChatNotification } from "@/context/chat-message-notification-context
 import { parseQueryParamAsInt } from "@/lib/utils";
 import { fetchStream } from "@/hoooks/fetchStream";
 import { WithUser } from "@/lib/user";
-import { Link, useRouter } from "@/navigation";
+import { useRouter } from "@/navigation";
 import { ConversationTexts } from "@/components/chat/conversation";
 
 export interface MainContentTexts {

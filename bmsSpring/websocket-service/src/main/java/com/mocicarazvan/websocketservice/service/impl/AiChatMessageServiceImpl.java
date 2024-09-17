@@ -56,7 +56,7 @@ public class AiChatMessageServiceImpl implements AiChatMessageService {
     public List<AiChatMessageResponse> getMessagesByUserEmail(String email) {
         return aiChatRoomService.getOrCreateChatRoomByEmail(email)
                 .map(aiChatRoom -> aiChatMessageRepository.findAllByChatRoomId(aiChatRoom.getId(),
-                                Sort.by(Sort.Order.desc("createdAt")))
+                                Sort.by(Sort.Order.asc("createdAt")))
                         .stream()
                         .map(aiChatMessageMapper::fromModelToResponse)
                         .toList()

@@ -1,6 +1,5 @@
 package com.mocicarazvan.templatemodule.dtos.response;
 
-import com.mocicarazvan.templatemodule.hateos.CustomEntityModel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

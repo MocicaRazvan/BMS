@@ -6,7 +6,6 @@ import com.mocicarazvan.websocketservice.dtos.notifications.SenderTypeDto;
 import com.mocicarazvan.websocketservice.dtos.plan.ApprovePlanNotificationBody;
 import com.mocicarazvan.websocketservice.dtos.plan.ApprovePlanNotificationResponse;
 import com.mocicarazvan.websocketservice.dtos.plan.PlanResponse;
-
 import com.mocicarazvan.websocketservice.enums.ApprovedNotificationType;
 import com.mocicarazvan.websocketservice.service.ApprovePlanNotificationService;
 import jakarta.validation.Valid;

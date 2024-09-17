@@ -3,9 +3,7 @@
 import { cn } from "@/lib/utils";
 import { useSidebarToggle } from "@/context/sidebar-toggle";
 import SideBar from "@/components/sidebar/sidebar";
-import { SidebarFooter } from "@/components/sidebar/sidebar-footer";
 import {
-  getMenuListType,
   MappingListFunctionKeys,
   SidebarMenuTexts,
 } from "@/components/sidebar/menu-list";

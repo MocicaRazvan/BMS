@@ -5,7 +5,6 @@ import { Link, useRouter } from "@/navigation";
 import { useToast } from "@/components/ui/use-toast";
 import { useCartForUser } from "@/context/cart-context";
 import { Button } from "@/components/ui/button";
-import Image from "next/image";
 import { Trash2 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { ToastAction } from "@/components/ui/toast";
