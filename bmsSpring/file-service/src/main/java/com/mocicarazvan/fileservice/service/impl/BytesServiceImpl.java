@@ -1,12 +1,21 @@
 package com.mocicarazvan.fileservice.service.impl;
 
+import com.mocicarazvan.fileservice.enums.FileType;
 import com.mocicarazvan.fileservice.service.BytesService;
+import com.mongodb.BasicDBObject;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.coobird.thumbnailator.Thumbnails;
+import org.bson.Document;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
+import org.springframework.core.io.buffer.DefaultDataBufferFactory;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.mongodb.core.ReactiveMongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.gridfs.ReactiveGridFsResource;
+import org.springframework.data.mongodb.gridfs.ReactiveGridFsTemplate;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -34,6 +43,7 @@ public class BytesServiceImpl implements BytesService {
         int chunkSize = file.getOptions().getChunkSize();
         Flux<DataBuffer> dataBufferFlux = chunkSize > 0 ? file.getDownloadStream(chunkSize) : file.getDownloadStream();
         downloadStream = dataBufferFlux
+                .subscribeOn(Schedulers.boundedElastic())
                 .flatMap(dataBuffer -> {
                     int dataBufferSize = dataBuffer.readableByteCount();
                     // skip data until the start of the range

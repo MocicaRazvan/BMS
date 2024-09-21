@@ -38,9 +38,6 @@ public class GridFsConfig {
                         .minSize(5)
                         .maxWaitTime(200, TimeUnit.SECONDS)
                 )
-                .applyToSocketSettings(builder -> builder
-                        .connectTimeout(60, TimeUnit.SECONDS)
-                )
                 .retryWrites(true)
                 .retryReads(true)
                 .build();

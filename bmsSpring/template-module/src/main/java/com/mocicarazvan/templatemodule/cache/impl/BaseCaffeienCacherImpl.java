@@ -7,6 +7,7 @@ import com.mocicarazvan.templatemodule.cache.BaseCaffeineCacher;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.reactivestreams.Publisher;
+import org.springframework.beans.factory.annotation.Value;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -25,9 +26,16 @@ public class BaseCaffeienCacherImpl<K> implements BaseCaffeineCacher<K> {
     private final AsyncCache<K, Publisher<?>> cacheMap;
     private final Executor executor;
 
+
+    @Value("${cache.initial.timeout:10}")
+    private int cacheInitialTimoutMinutes;
+
+    @Value("${cache.maximum.size:2500}")
+    private int cacheInitialMaximumSize;
+
     public BaseCaffeienCacherImpl(Integer cacheExpirationTimeMinutes, Integer cacheMaximumSize, Executor executor) {
-        this.cacheExpirationTimeMinutes = (cacheExpirationTimeMinutes != null) ? cacheExpirationTimeMinutes : 5;
-        this.cacheMaximumSize = (cacheMaximumSize != null) ? cacheMaximumSize : 1000;
+        this.cacheExpirationTimeMinutes = (cacheExpirationTimeMinutes != null) ? cacheExpirationTimeMinutes : cacheInitialTimoutMinutes;
+        this.cacheMaximumSize = (cacheMaximumSize != null) ? cacheMaximumSize : cacheInitialMaximumSize;
         this.internalCacheExpirationTime = Duration.ofMinutes(this.cacheExpirationTimeMinutes + 1);
         this.executor = (executor != null) ? executor : Executors.newCachedThreadPool();
 

@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 import java.net.URI;
 import java.util.List;
@@ -72,6 +73,7 @@ public class FileController {
                                             });
                                 }
                         )
+                        .subscribeOn(Schedulers.boundedElastic())
                         .switchIfEmpty(fetchFileAndProcessFromGridFS(gridId, width, height, quality, exchange)) :
                 fetchFileAndProcessFromGridFS(gridId, width, height, quality, exchange);
 
@@ -83,6 +85,7 @@ public class FileController {
 
     private Mono<ServerHttpResponse> fetchFileAndProcessFromGridFS(String gridId, Integer width, Integer height, Double quality, ServerWebExchange exchange) {
         return mediaService.getFile(gridId)
+                .subscribeOn(Schedulers.boundedElastic())
                 .flatMap(file -> file.getGridFSFile()
                         .flatMap(gridFSFile -> {
                             FileType fileType = FileType.valueOf(file.getOptions().getMetadata().getString("fileType"));

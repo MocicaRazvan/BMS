@@ -1,6 +1,7 @@
 package com.mocicarazvan.fileservice.repositories.impl;
 
 import com.mocicarazvan.fileservice.repositories.ImageRedisRepository;
+import io.lettuce.core.RedisCommandExecutionException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.ReactiveRedisTemplate;
@@ -17,14 +18,16 @@ import java.util.List;
 public class ImageRedisRepositoryImpl implements ImageRedisRepository {
 
     private final ReactiveRedisTemplate<String, byte[]> reactiveByteArrayRedisTemplate;
-    private final String IMAGE_CACHE_KEY_PATTERN = "image:%s:*";
+    private static final String IMAGE_CACHE_KEY_PATTERN = "image:%s:*";
+    private static final int SCAN_BATCH_SIZE = 100;
+
 
     @Override
     public Mono<Void> saveImage(String gridId, Integer width, Integer height, Double quality, byte[] imageData) {
         return reactiveByteArrayRedisTemplate.opsForValue()
                 .set(generateCacheKey(gridId, width, height, quality), imageData)
                 .filter(Boolean::booleanValue)
-                .switchIfEmpty(Mono.error(new RuntimeException("Failed to save image")))
+                .switchIfEmpty(Mono.error(new RedisCommandExecutionException("Failed to save image")))
                 .then();
     }
 
@@ -67,7 +70,7 @@ public class ImageRedisRepositoryImpl implements ImageRedisRepository {
 
     private Flux<Long> scanAndDeleteKeys(String pattern) {
         return reactiveByteArrayRedisTemplate.scan(ScanOptions.scanOptions().match(pattern).build())
-                .buffer(100)
+                .buffer(SCAN_BATCH_SIZE)
                 .flatMap(keys -> reactiveByteArrayRedisTemplate.delete(Flux.fromIterable(keys)));
     }
 }
