@@ -17,6 +17,8 @@ import org.springframework.data.mongodb.core.SimpleReactiveMongoDatabaseFactory;
 import org.springframework.data.mongodb.core.convert.MappingMongoConverter;
 import org.springframework.data.mongodb.gridfs.ReactiveGridFsTemplate;
 
+import java.util.concurrent.TimeUnit;
+
 @Configuration
 public class GridFsConfig {
 
@@ -34,6 +36,11 @@ public class GridFsConfig {
                 .applyConnectionString(new ConnectionString(mongoUri))
                 .applyToConnectionPoolSettings(builder -> builder.maxSize(maxPoolSize)
                         .minSize(5)
+                        .maxWaitTime(200, TimeUnit.SECONDS)
+                )
+                .applyToSocketSettings(builder -> builder
+                        .connectTimeout(5, TimeUnit.SECONDS)
+                        .readTimeout(10, TimeUnit.SECONDS)
                 )
                 .retryWrites(true)
                 .retryReads(true)

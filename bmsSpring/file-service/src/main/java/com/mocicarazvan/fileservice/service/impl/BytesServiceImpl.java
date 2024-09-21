@@ -28,9 +28,12 @@ import java.util.Iterator;
 @Slf4j
 public class BytesServiceImpl implements BytesService {
 
+
     public Flux<DataBuffer> getVideoByRange(ReactiveGridFsResource file, long[] rangeStart, long[] rangeEnd) {
         Flux<DataBuffer> downloadStream;
-        downloadStream = file.getDownloadStream()
+        int chunkSize = file.getOptions().getChunkSize();
+        Flux<DataBuffer> dataBufferFlux = chunkSize > 0 ? file.getDownloadStream(chunkSize) : file.getDownloadStream();
+        downloadStream = dataBufferFlux
                 .flatMap(dataBuffer -> {
                     int dataBufferSize = dataBuffer.readableByteCount();
                     // skip data until the start of the range
