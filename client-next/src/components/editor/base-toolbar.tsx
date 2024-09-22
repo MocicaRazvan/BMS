@@ -18,7 +18,7 @@ const Toolbar = ({ children, className, sticky = true }: ToolbarProps) => {
       className={cn(
         "inset-x-0 top-14 z-50 my-2 rounded-sm bg-secondary/40 px-4 py-2 backdrop-blur-lg",
         className,
-        sticky && "sticky"
+        sticky && "sticky",
       )}
     >
       {children}

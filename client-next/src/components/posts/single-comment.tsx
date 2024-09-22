@@ -14,9 +14,9 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import {
-  getTitleBodySchema,
-  TitleBodySchemaTexts,
-  TitleBodyType,
+  CommentSchemaTexts,
+  CommentSchemaType,
+  getCommentSchema,
 } from "@/types/forms";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -42,11 +42,15 @@ import Editor from "@/components/editor/editor";
 export interface BaseSingleCommentProps {
   deleteCommentCallback: (commentId: number) => void;
   react: (commentId: number) => (type: "like" | "dislike") => Promise<void>;
-  titleBodySchemaTexts: TitleBodySchemaTexts;
   titleBodyTexts: TitleBodyTexts;
+  commentSchemaTexts: CommentSchemaTexts;
   buttonSubmitTexts: ButtonSubmitTexts;
   errorText: string;
-  updateCallback: (id: number, data: TitleBodyType, updatedAt: string) => void;
+  updateCallback: (
+    id: number,
+    data: CommentSchemaType,
+    updatedAt: string,
+  ) => void;
   edited: string;
   editHeader: string;
   deleteCommentDialog: string;
@@ -71,9 +75,9 @@ export const SingleComment = memo<Props>(
     userId,
     email,
     authorText,
-    titleBodySchemaTexts,
-    buttonSubmitTexts,
     titleBodyTexts,
+    buttonSubmitTexts,
+    commentSchemaTexts,
     errorText,
     updateCallback,
     editHeader,
@@ -84,10 +88,10 @@ export const SingleComment = memo<Props>(
     editCommentLabel,
   }) => {
     const schema = useMemo(
-      () => getTitleBodySchema(titleBodySchemaTexts),
-      [titleBodySchemaTexts],
+      () => getCommentSchema(commentSchemaTexts),
+      [commentSchemaTexts],
     );
-    const form = useForm<TitleBodyType>({
+    const form = useForm<CommentSchemaType>({
       resolver: zodResolver(schema),
       defaultValues: {
         body: content.body,
@@ -99,10 +103,14 @@ export const SingleComment = memo<Props>(
       useLoadingErrorState();
 
     const onSubmit = useCallback(
-      async (data: TitleBodyType) => {
+      async (data: CommentSchemaType) => {
         setIsLoading(true);
+        const trimmedBody = data.body.trim();
         const toxicRes = await getToxicity(
-          DOMPurify.sanitize(data.body, { ALLOWED_TAGS: [], ALLOWED_ATTR: [] }),
+          DOMPurify.sanitize(trimmedBody, {
+            ALLOWED_TAGS: [],
+            ALLOWED_ATTR: [],
+          }),
         );
         if (toxicRes.failure) {
           if (toxicRes.reason.toLowerCase() === "toxicity") {
@@ -124,7 +132,10 @@ export const SingleComment = memo<Props>(
           >({
             path: `/comments/update/${content.id}`,
             method: "PUT",
-            body: data,
+            body: {
+              ...data,
+              body: trimmedBody,
+            },
             token: authUser.token,
           });
           if (error) {

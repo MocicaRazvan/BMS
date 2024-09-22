@@ -3,7 +3,9 @@ import { getTranslations } from "next-intl/server";
 import { TitleBodyTexts } from "@/components/forms/title-body";
 import { InputMultipleSelectorTexts } from "@/components/forms/input-multiselector";
 import {
+  CommentSchemaTexts,
   getAdminEmailSchemaTexts,
+  getCommentSchemaTexts,
   getDaySchemaTexts,
   getIngredientNutritionalFactSchemaTexts,
   getIngredientQuantitySchemaTexts,
@@ -14,7 +16,6 @@ import {
   getTitleBodySchemaTexts,
   getUpdateProfileSchemaTexts,
   macroKeys,
-  TitleBodySchemaTexts,
   UpdateProfileSchemaTexts,
 } from "@/types/forms";
 import { ButtonSubmitTexts } from "@/components/forms/button-submit";
@@ -165,7 +166,7 @@ export const getPostFormTexts = async (type: FormType) => {
 };
 
 export interface CommentFormTexts extends BaseFormTexts {
-  titleBodySchemaTexts: TitleBodySchemaTexts;
+  commentSchemaTexts: CommentSchemaTexts;
   buttonSubmitTexts: ButtonSubmitTexts;
   titleBodyTexts: TitleBodyTexts;
   baseFormTextsUpdate: BaseFormTexts;
@@ -173,20 +174,20 @@ export interface CommentFormTexts extends BaseFormTexts {
 
 export const getCommentFormTexts = async (): Promise<CommentFormTexts> => {
   const [
-    titleBodySchemaTexts,
+    commentSchemaTexts,
     buttonSubmitTexts,
     titleBodyTexts,
     baseFormTexts,
     baseFormTextsUpdate,
   ] = await Promise.all([
-    getTitleBodySchemaTexts(),
+    getCommentSchemaTexts(),
     getButtonSubmitTexts(),
     getTitleBodyText(),
     getBaseFormTexts("CommentForm", "create"),
     getBaseFormTexts("CommentForm", "update"),
   ]);
   return {
-    titleBodySchemaTexts,
+    commentSchemaTexts,
     buttonSubmitTexts,
     titleBodyTexts,
     ...baseFormTexts,

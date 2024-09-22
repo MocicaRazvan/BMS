@@ -6,7 +6,7 @@ import { detect } from "tinyld";
 
 const lngDetector = new LanguageDetect();
 
-const threshold = 0.3;
+const threshold = 0.35;
 let globalModel: toxicity.ToxicityClassifier | null = null;
 
 enum TOXIC_REASON {

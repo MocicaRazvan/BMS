@@ -21,7 +21,11 @@ import {
 
 import DOMPurify from "dompurify";
 import useLoadingErrorState from "@/hoooks/useLoadingErrorState";
-import { getTitleBodySchema, TitleBodyType } from "@/types/forms";
+import {
+  CommentSchemaType,
+  getCommentSchema,
+  TitleBodyType,
+} from "@/types/forms";
 import { CommentFormTexts } from "@/texts/components/forms";
 import ErrorMessage from "@/components/forms/error-message";
 import ButtonSubmit from "@/components/forms/button-submit";
@@ -51,7 +55,7 @@ export default function CommentAccordion({
   token,
   refetch,
   commentFormTexts: {
-    titleBodySchemaTexts,
+    commentSchemaTexts,
     buttonSubmitTexts,
     error,
     descriptionToast,
@@ -67,11 +71,11 @@ export default function CommentAccordion({
 }: Props) {
   const [value, setValue] = useState("");
   const schema = useMemo(
-    () => getTitleBodySchema(titleBodySchemaTexts),
-    [titleBodySchemaTexts],
+    () => getCommentSchema(commentSchemaTexts),
+    [commentSchemaTexts],
   );
 
-  const form = useForm<TitleBodyType>({
+  const form = useForm<CommentSchemaType>({
     resolver: zodResolver(schema),
     defaultValues: {
       body,
@@ -103,9 +107,10 @@ export default function CommentAccordion({
   );
 
   const onSubmit = useCallback(
-    async (body: TitleBodyType) => {
+    async (body: CommentSchemaType) => {
       if (!token) return;
       setIsLoading(true);
+      const trimmedBody = body.body.trim();
       const [
         // titleRes,
         bodyRes,
@@ -117,7 +122,10 @@ export default function CommentAccordion({
         //   }),
         // ),
         getToxicity(
-          DOMPurify.sanitize(body.body, { ALLOWED_TAGS: [], ALLOWED_ATTR: [] }),
+          DOMPurify.sanitize(trimmedBody, {
+            ALLOWED_TAGS: [],
+            ALLOWED_ATTR: [],
+          }),
         ),
       ]);
       if (
@@ -138,7 +146,10 @@ export default function CommentAccordion({
         } = await fetchStream({
           path: `/comments/create/post/${postId}`,
           method: "POST",
-          body,
+          body: {
+            ...body,
+            body: trimmedBody,
+          },
           token,
         });
         console.log("error", error);
@@ -155,7 +166,7 @@ export default function CommentAccordion({
             setIsLoading(false);
             form.reset();
             setValue("");
-          }, 433);
+          }, 450);
         }
       } catch (e) {
         console.log(e);

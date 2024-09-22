@@ -1,9 +1,9 @@
 "use client";
 
 import * as React from "react";
+import { useEffect, useMemo } from "react";
 import {
   Area,
-  AreaChart,
   Bar,
   BarChart,
   CartesianGrid,
@@ -26,7 +26,6 @@ import {
 
 import { useLocale } from "next-intl";
 import { useDebounce } from "@/components/ui/multiple-selector";
-import Loader from "@/components/ui/spinner";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -35,7 +34,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { useEffect, useMemo } from "react";
 import Lottie from "react-lottie-player";
 import emptyChart from "../../../public/lottie/emptyChart.json";
 import { motion } from "framer-motion";

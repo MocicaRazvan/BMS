@@ -1,9 +1,9 @@
 "use client";
-import Image from "next/image";
-import { ImageProps } from "next/image";
+import Image, { ImageProps } from "next/image";
 import { ComponentProps, useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
+
 export default function CustomImage({
   src,
   // quality,

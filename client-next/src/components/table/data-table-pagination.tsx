@@ -13,7 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Dispatch, SetStateAction, memo } from "react";
+import { Dispatch, memo, SetStateAction } from "react";
 import { PageInfo } from "@/types/dto";
 import { cn, isDeepEqual } from "@/lib/utils";
 

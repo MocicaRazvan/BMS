@@ -3,6 +3,7 @@
 import { CountryOrderSummary, CountrySummaryType } from "@/types/dto";
 import { ResponsiveChoropleth } from "@nivo/geo";
 import { geoData } from "@/../public/geoData";
+import * as React from "react";
 import {
   Dispatch,
   SetStateAction,
@@ -20,7 +21,6 @@ import { scaleSequential } from "d3-scale";
 import { interpolateBlues } from "d3-scale-chromatic";
 import { Button } from "@/components/ui/button";
 import { ZoomInIcon, ZoomOutIcon } from "lucide-react";
-import Loader from "@/components/ui/spinner";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -28,7 +28,6 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import * as React from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useLocale } from "next-intl";

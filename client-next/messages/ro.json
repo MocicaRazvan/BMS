@@ -8,6 +8,9 @@
     "description": "Ne pare rău, dar pagina pe care o căutați nu există."
   },
   "zod": {
+    "CommentSchemaTexts": {
+      "body": "Comentariul trebuie să aibă cel puțin 20 caractere"
+    },
     "EmailSchemaTexts": {
       "email": "Adresă de email invalidă"
     },

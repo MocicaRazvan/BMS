@@ -24,21 +24,33 @@ export const StompProvider = ({
       connectHeaders={headers}
       connectionTimeout={conRec}
       reconnectDelay={conRec}
-      logRawCommunication={!isProduction}
-      debug={(str) => console.log(`STOMP debug: ${str}`)}
+      logRawCommunication={isProduction ? undefined : true}
+      debug={(str) => {
+        if (!isProduction) {
+          console.log(`STOMP debug: ${str}`);
+        }
+      }}
       onConnect={() => {
-        console.log("Connected to STOMP broker with url " + url);
+        if (!isProduction) {
+          console.log("Connected to STOMP broker with url " + url);
+        }
       }}
       onDisconnect={() => {
-        console.log("Disconnected from STOMP broker");
+        if (!isProduction) {
+          console.log("Disconnected from STOMP broker");
+        }
       }}
       onStompError={(frame) => {
-        console.log("STOMP error: ", frame.headers["message"]);
-        // console.error("Detailed STOMP error: ", frame.body);
+        if (!isProduction) {
+          console.log("STOMP error: ", frame.headers["message"]);
+          // console.error("Detailed STOMP error: ", frame.body);
+        }
       }}
       onWebSocketError={(err) => {
-        console.log("STOMP error WebSocket error: ", err.message);
-        // console.error("Detailed WebSocket error: ", err);
+        if (!isProduction) {
+          console.log("STOMP error WebSocket error: ", err.message);
+          // console.error("Detailed WebSocket error: ", err);
+        }
       }}
       heartbeatIncoming={10000}
       heartbeatOutgoing={10000}

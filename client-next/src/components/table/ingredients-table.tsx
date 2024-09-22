@@ -13,7 +13,6 @@ import { dietTypes } from "@/types/forms";
 import {
   CustomEntityModel,
   IngredientNutritionalFactResponse,
-  NutritionalFactResponse,
   ResponseWithEntityCount,
 } from "@/types/dto";
 import { Suspense, useMemo } from "react";
@@ -21,13 +20,8 @@ import { ColumnDef } from "@tanstack/react-table";
 import { DataTable, DataTableTexts } from "@/components/table/data-table";
 import LoadingSpinner from "@/components/common/loading-spinner";
 import { getCalories } from "@/types/responses";
-import { format, parseISO } from "date-fns";
-import { useSidebarToggle } from "@/context/sidebar-toggle";
 import { Badge } from "@/components/ui/badge";
-import {
-  ingredientColumnActions,
-  ingredientTableColumns,
-} from "@/lib/constants";
+import { ingredientColumnActions } from "@/lib/constants";
 import {
   DropdownMenu,
   DropdownMenuContent,

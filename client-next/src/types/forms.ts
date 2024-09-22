@@ -2,6 +2,7 @@ import { z } from "zod";
 import { getTranslations } from "next-intl/server";
 import { FormType } from "@/texts/components/forms";
 import { dayTypes, planObjectives } from "@/types/dto";
+import DOMPurify from "dompurify";
 
 export const fileItemSchema = z.object({
   id: z.union([z.string(), z.number()]),
@@ -849,6 +850,37 @@ export const getCalculatorSchema = ({
       },
     ),
   });
+
+export interface CommentSchemaTexts extends TitleBodySchemaTexts {
+  body: string;
+}
+
+export const getCommentSchemaTexts = async (): Promise<CommentSchemaTexts> => {
+  const [titleBodyTexts, t] = await Promise.all([
+    getTitleBodySchemaTexts(),
+    getTranslations("zod.CommentSchemaTexts"),
+  ]);
+  return {
+    ...titleBodyTexts,
+    body: t("body"),
+  };
+};
+
+export const getCommentSchema = (texts: CommentSchemaTexts) =>
+  getTitleBodySchema(texts).extend({
+    body: z.string().refine(
+      (v) =>
+        DOMPurify.sanitize(v, {
+          ALLOWED_TAGS: [],
+          ALLOWED_ATTR: [],
+        })
+          .trim()
+          .replace(/\s+/g, " ").length >= 20,
+      texts.body,
+    ),
+  });
+
+export type CommentSchemaType = z.infer<ReturnType<typeof getCommentSchema>>;
 
 export type CalculatorSchemaType = z.infer<
   ReturnType<typeof getCalculatorSchema>

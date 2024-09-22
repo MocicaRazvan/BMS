@@ -13,7 +13,7 @@ export default function Viewer({ descritpion }: Props) {
       attributes: {
         class: cn(
           "prose max-w-none [&_ol]:list-decimal [&_ul]:list-disc dark:prose-invert",
-          "rounded-md border min-h-[140px] border-input bg-background ring-offset-2"
+          "rounded-md border min-h-[140px] border-input bg-background ring-offset-2",
         ),
       },
     },

@@ -29,10 +29,7 @@ import useTagsExtraCriteria, {
 import { UseApprovedFilterTexts } from "@/components/list/useApprovedFilter";
 import { WithUser } from "@/lib/user";
 import AlertDialogApprovePost from "@/components/dialogs/posts/approve-post";
-import {
-  ColumnActionsTexts,
-  PostColumnActionsTexts,
-} from "@/texts/components/table";
+import { ColumnActionsTexts } from "@/texts/components/table";
 import useBinaryFilter from "@/components/list/useBinaryFilter";
 import { postColumnActions } from "@/lib/constants";
 import useClientNotFound from "@/hoooks/useClientNotFound";

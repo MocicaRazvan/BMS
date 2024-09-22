@@ -8,6 +8,9 @@
     "description": "Sorry, the page you are looking for does not exist."
   },
   "zod": {
+    "CommentSchemaTexts": {
+      "body": "The comment must be at least 20 characters long"
+    },
     "EmailSchemaTexts": {
       "email": "Invalid email address"
     },

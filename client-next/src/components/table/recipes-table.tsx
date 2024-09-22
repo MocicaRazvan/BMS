@@ -15,8 +15,6 @@ import { dietTypes } from "@/types/forms";
 import { Link, useRouter } from "@/navigation";
 import {
   CustomEntityModel,
-  IngredientNutritionalFactResponse,
-  PostResponse,
   RecipeResponse,
   ResponseWithEntityCount,
 } from "@/types/dto";
@@ -34,7 +32,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { MoreHorizontal } from "lucide-react";
-import AlertDialogApprovePost from "@/components/dialogs/posts/approve-post";
 import LoadingSpinner from "@/components/common/loading-spinner";
 import AlertDialogApproveRecipes from "@/components/dialogs/recipes/approve-recipe";
 import useClientNotFound from "@/hoooks/useClientNotFound";
