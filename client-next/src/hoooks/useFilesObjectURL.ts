@@ -89,10 +89,16 @@
 //     }
 //   }, [fieldName, files, firstRun, springClient, setValue, springServer]);
 // }
-import {useCallback, useEffect, useState} from "react";
-import {FieldInputItem} from "@/components/forms/input-file";
-import {v4 as uuidv4} from "uuid";
-import {FieldValues, Path, PathValue, UseFormGetValues, UseFormSetValue,} from "react-hook-form";
+import { useCallback, useEffect, useState } from "react";
+import { FieldInputItem } from "@/components/forms/input-file";
+import { v4 as uuidv4 } from "uuid";
+import {
+  FieldValues,
+  Path,
+  PathValue,
+  UseFormGetValues,
+  UseFormSetValue,
+} from "react-hook-form";
 
 interface Args<T extends FieldValues> {
   files: string[];
@@ -102,7 +108,11 @@ interface Args<T extends FieldValues> {
 }
 
 async function fetchFileObjectURL(url: string): Promise<FieldInputItem> {
-  const res = await fetch(url);
+  const res = await fetch(url, {
+    cache: "no-cache",
+    priority: "high",
+    method: "GET",
+  });
   const blob = await res.blob();
   const fileName = url.split("/").pop() || "file";
   const mimeType =

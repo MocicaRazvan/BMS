@@ -20,6 +20,10 @@ RUN mvn -f order-service/pom.xml clean package -DskipTests -Dmaven.compiler.show
 
 FROM openjdk:22-jdk-slim
 WORKDIR /app
+
+RUN apt-get update && apt-get install -y curl netcat-openbsd && rm -rf /var/lib/apt/lists/*
+
+
 COPY --from=build /app/order-service/target/order-service-0.0.1-SNAPSHOT.jar .
 
 

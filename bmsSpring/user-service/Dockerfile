@@ -20,6 +20,10 @@ RUN mvn -f user-service/pom.xml clean package -DskipTests -Dmaven.compiler.showW
 
 FROM openjdk:22-jdk-slim
 WORKDIR /app
+
+RUN apt-get update && apt-get install -y curl netcat-openbsd && rm -rf /var/lib/apt/lists/*
+
+
 COPY --from=build /app/user-service/target/user-service-0.0.1-SNAPSHOT.jar .
 
 

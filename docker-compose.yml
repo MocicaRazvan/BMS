@@ -8,7 +8,6 @@ services:
       POSTGRES_PASSWORD: mypassword
     #      TZ: Europe/Bucharest
     command: [ "postgres", "-c", "max_connections=2500" ]
-
     ports:
       - "5544:5432"
     volumes:
@@ -16,23 +15,42 @@ services:
     networks:
       - bms
     restart: unless-stopped
-  
-  #  postgres-messages:
-  #    image: postgres:latest
-  #    container_name: postgres-container-messages-bms
-  #    environment:
-  #      POSTGRES_DB: bms
-  #      POSTGRES_USER: myuser
-  #      POSTGRES_PASSWORD: mypassword
-  #
-  #    command: ["postgres", "-c", "max_connections=250"]
-  #
-  #    ports:
-  #      - "5546:5432"
-  #    volumes:
-  #      - postgres_data_messages:/var/lib/postgresql/data
-  #    networks:
-  #      - bms
+
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: pgadmin-container-bms
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "9999:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    networks:
+      - bms
+    restart: unless-stopped
+
+  pgpool:
+    image: bitnami/pgpool:latest
+    container_name: pgpool-container-bms
+    environment:
+      - PGPOOL_BACKEND_NODES=0:postgres:5432
+      - PGPOOL_SR_CHECK_USER=myuser
+      - PGPOOL_SR_CHECK_PASSWORD=mypassword
+      - PGPOOL_POSTGRES_USERNAME=myuser
+      - PGPOOL_POSTGRES_PASSWORD=mypassword
+      - PGPOOL_NUM_INIT_CHILDREN=20
+      - PGPOOL_MAX_POOL=2000
+      - PGPOOL_ENABLE_LOAD_BALANCE=true
+      - PGPOOL_LOAD_BALANCE_MODE=true
+      - PGPOOL_ADMIN_USERNAME=admin
+      - PGPOOL_ADMIN_PASSWORD=adminpassword
+    depends_on:
+      - postgres
+    networks:
+      - bms
+    restart: unless-stopped
 
   mongo-fs:
     image: mongo:latest
@@ -43,6 +61,33 @@ services:
       - mongo_data:/data/db
     networks:
       - bms
+
+  nginx-mongo-fs:
+    image: nginx:latest
+    container_name: nginx-mongo-container-bms
+    volumes:
+      - ./nginx/mongo.conf:/etc/nginx/nginx.conf
+    ports:
+      - "27017:27017"
+    networks:
+      - bms
+    restart: unless-stopped
+    depends_on:
+      - mongo-fs
+    command: >
+      /bin/sh -c "
+        echo 'Updating package list and installing sudo, netcat-openbsd, and utilities...' &&
+        apt-get update &&
+        apt-get install -y sudo &&
+        apt-get install -y netcat-openbsd && 
+        apt-get install -y coreutils inetutils-ping &&  
+        echo 'Waiting for MongoDB to be ready...' &&
+        while ! nc -z mongo-fs 27017; do  
+          echo 'MongoDB is not ready yet, retrying in 5 seconds...';
+          sleep 5;
+        done &&
+        echo 'MongoDB is ready!' &&
+        nginx -g 'daemon off;'  # Start Nginx once MongoDB is ready"
 
   postgres-vectors:
     image: pgvector/pgvector:pg16
@@ -59,6 +104,27 @@ services:
     networks:
       - bms
 
+  pgpool-vectors:
+    image: bitnami/pgpool:latest
+    container_name: pgpool-vectors-container-bms
+    environment:
+      - PGPOOL_BACKEND_NODES=0:postgres-vectors:5432
+      - PGPOOL_SR_CHECK_USER=myuser
+      - PGPOOL_SR_CHECK_PASSWORD=mypassword
+      - PGPOOL_POSTGRES_USERNAME=myuser
+      - PGPOOL_POSTGRES_PASSWORD=mypassword
+      - PGPOOL_NUM_INIT_CHILDREN=10
+      - PGPOOL_MAX_POOL=250
+      - PGPOOL_ENABLE_LOAD_BALANCE=true
+      - PGPOOL_LOAD_BALANCE_MODE=true
+      - PGPOOL_ADMIN_USERNAME=admin
+      - PGPOOL_ADMIN_PASSWORD=adminpassword
+    depends_on:
+      - postgres-vectors
+    networks:
+      - bms
+    restart: unless-stopped
+
   # utilites
   zipkin:
     image: openzipkin/zipkin
@@ -68,90 +134,109 @@ services:
     networks:
       - bms
     restart: unless-stopped
-  
-  #  rabbitmq:
-  #    image: rabbitmq:3-management
-  #    container_name: rabbitmq-container-bms
+
+  #  stripe-cli:
+  #    image: stripe/stripe-cli:latest
+  #    container_name: stripe-cli-container-bms
   #    environment:
-  #      RABBITMQ_DEFAULT_USER: guest
-  #      RABBITMQ_DEFAULT_PASS: guest
-  #    ports:
-  #      - "5672:5672"
-  #      - "15672:15672"
-  #    networks:
-  #      - bms
+  #      STRIPE_API_KEY: ${STRIPE_API_KEY_ENV}
+  #    #     "http://orders:8080/webhook",
+  #
+  #    command:
+  #      [
+  #        "listen",
+  #        "--forward-to",
+  #        "http://host.docker.internal:8080/orders/webhook",
+  #      ]
+  #    network_mode: host
   #    restart: unless-stopped
-
-  stripe-cli:
-    image: stripe/stripe-cli:latest
-    container_name: stripe-cli-container-bms
-    environment:
-      STRIPE_API_KEY: ${STRIPE_API_KEY_ENV}
-    #     "http://orders:8080/webhook",
-
-    command:
-      [
-        "listen",
-        "--forward-to",
-        "http://host.docker.internal:8080/orders/webhook",
-      ]
-    network_mode: host
-    restart: unless-stopped
 
   stripe-cli-docker:
     image: stripe/stripe-cli:latest
     container_name: stripe-cli-docker-container-bms
     environment:
       STRIPE_API_KEY: ${STRIPE_API_KEY_ENV}
-    command:
-      [
-        "listen",
-        "--forward-to",
-        #        "http://gateway-service:8080/orders/webhook"
-        "http://nginx-gateway:80/orders/webhook",
-        #        "https://nginx-gateway:443/orders/webhook",
-      ]
+    command: [
+      "listen",
+      "--forward-to",
+      #        "http://gateway-service:8080/orders/webhook"
+      "http://nginx-gateway:80/orders/webhook",
+      #        "https://nginx-gateway:443/orders/webhook",
+    ]
     networks:
       - bms
     restart: unless-stopped
-  
-  
-  
+
   # SPRING SERVICES
   config-server:
     container_name: config-server-container-bms
-    build:
-      context: ./bmsSpring/config-server
-      dockerfile: Dockerfile
+    image: razvanmocica/config-server-bms
+    #    build:
+    #      context: ./bmsSpring/config-server
+    #      dockerfile: Dockerfile
     environment:
       #      SPRING_PROFILES_ACTIVE: docker
       SPRING_PROFILES_ACTIVE: server
       SPRING_CLOUD_CONFIG_SERVER_GIT_PASSWORD: ${SPRING_CLOUD_CONFIG_SERVER_GIT_PASSWORD}
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "curl --fail http://localhost:8888/actuator/health || exit 1",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
     networks:
       - bms
     restart: unless-stopped
 
   service-registry:
     container_name: service-registry-container-bms
-    build:
-      context: ./bmsSpring/service-registry
-      dockerfile: Dockerfile
+    image: razvanmocica/service-registry-bms
+    #    build:
+    #      context: ./bmsSpring/service-registry
+    #      dockerfile: Dockerfile
     ports:
       - "8761:8761"
     environment:
-      #      SPRING_PROFILES_ACTIVE: docker
-      SPRING_PROFILES_ACTIVE: server
+      SPRING_PROFILES_ACTIVE: docker
+      #          SPRING_PROFILES_ACTIVE: server
+      EUREKA_SERVER_ENABLE_SELF_PRESERVATION: true # Enable self-preservation mode
+      EUREKA_SERVER_EVICTION_INTERVAL_TIMER_IN_MS: 60000 # Eviction task interval set to 60 seconds
+      EUREKA_SERVER_PEER_NODE_READ_TIMEOUT_MS: 60000 # Increase read timeout for peer nodes to 60 seconds
+      EUREKA_SERVER_WAIT_TIME_IN_MS_WHEN_SYNC_EMPTY: 0 # No wait if sync is empty
+      EUREKA_CLIENT_REGISTER_WITH_EUREKA: false # If this is a pure server, prevent it from registering with itself
+      EUREKA_CLIENT_FETCH_REGISTRY: false # Disable fetching registry if this node is not needed for fetching
+      EUREKA_CLIENT_REGISTRY_FETCH_INTERVAL_SECONDS: 30 # Interval for registry fetches (in seconds)
+      EUREKA_CLIENT_INITIAL_INSTANCE_INFO_REPLICATION_INTERVAL_SECONDS: 30 # Time before starting instance
+      LOGGING_LEVEL_COM_NETFLIX_EUREKA: DEBUG # Enable DEBUG logging for Eureka
+      LOGGING_LEVEL_COM_NETFLIX_DISCOVERY: DEBUG # Enable DEBUG logging for Discovery Client
+      LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_CLOUD_NETFLIX_EUREKA: DEBUG # Enable DEBUG logging for Spring Cloud Eureka info replication (in seconds)
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "curl --fail http://localhost:8761/actuator/health || exit 1",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
     networks:
       - bms
     restart: unless-stopped
     depends_on:
-      - config-server
+      config-server:
+        condition: service_healthy
 
   user-service:
     container_name: user-service-container-bms
-    build:
-      context: ./bmsSpring
-      dockerfile: user-service/Dockerfile
+    image: razvanmocica/user-service-bms
+    #    build:
+    #      context: ./bmsSpring
+    #      dockerfile: user-service/Dockerfile
     environment:
       #      SPRING_PROFILES_ACTIVE: docker
       SPRING_PROFILES_ACTIVE: server
@@ -163,20 +248,38 @@ services:
 
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      SPRING_CLOUD_CONFIG_URI: http://config-server:8888
+      EUREKA_CLIENT_SERVICE_URL_DEFAULT_ZONE: http://service-registry:8761/eureka/
+      EUREKA_CLIENT_INITIALIZE_RETRY_INTERVAL_SECONDS: 10 # Retry connection to Eureka every 10 seconds
+      EUREKA_CLIENT_REGISTRATION_RETRY_INTERVAL_SECONDS: 30 # Retry registration every 30 seconds
+      EUREKA_CLIENT_LEASE_EXPIRATION_DURATION_IN_SECONDS: 90 # Allow 90 seconds before marking service as down
+      EUREKA_CLIENT_LEASE_RENEWAL_INTERVAL_IN_SECONDS: 30 # Renew lease every 30 seconds
+      LOGGING_LEVEL_COM_NETFLIX_EUREKA: DEBUG # Enable DEBUG logging for Eureka
+      LOGGING_LEVEL_COM_NETFLIX_DISCOVERY: DEBUG # Enable DEBUG logging for Discovery Client
+      LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_CLOUD_NETFLIX_EUREKA: DEBUG # Enable DEBUG logging for Spring Cloud Eureka
     networks:
       - bms
     restart: unless-stopped
     depends_on:
-      - config-server
-      - service-registry
-      - postgres
-      - zipkin
+      #      - config-server
+      #      - service-registry
+      #      - pgpool
+      #      - zipkin
+      config-server:
+        condition: service_healthy
+      service-registry:
+        condition: service_healthy
+      pgpool:
+        condition: service_started
+      zipkin:
+        condition: service_started
 
   comment-service:
     container_name: comment-service-container-bms
-    build:
-      context: ./bmsSpring
-      dockerfile: comment-service/Dockerfile
+    image: razvanmocica/comment-service-bms
+    #    build:
+    #      context: ./bmsSpring
+    #      dockerfile: comment-service/Dockerfile
     environment:
       #      SPRING_PROFILES_ACTIVE: docker
       SPRING_PROFILES_ACTIVE: server
@@ -184,16 +287,25 @@ services:
       - bms
     restart: unless-stopped
     depends_on:
-      - config-server
-      - service-registry
-      - postgres
-      - zipkin
+      #      - config-server
+      #      - service-registry
+      #      - pgpool
+      #      - zipkin
+      config-server:
+        condition: service_healthy
+      service-registry:
+        condition: service_healthy
+      pgpool:
+        condition: service_started
+      zipkin:
+        condition: service_started
 
   file-service:
     container_name: file-service-container-bms
-    build:
-      context: ./bmsSpring/file-service
-      dockerfile: Dockerfile
+    image: razvanmocica/file-service-bms
+    #    build:
+    #      context: ./bmsSpring/file-service
+    #      dockerfile: Dockerfile
     environment:
       #      SPRING_PROFILES_ACTIVE: docker
       SPRING_PROFILES_ACTIVE: server
@@ -201,16 +313,28 @@ services:
       - bms
     restart: unless-stopped
     depends_on:
-      - config-server
-      - service-registry
-      - mongo-fs
-      - zipkin
+      #      - config-server
+      #      - service-registry
+      #      - nginx-mongo-fs
+      #      - zipkin
+      #      - nginx-redis
+      config-server:
+        condition: service_healthy
+      service-registry:
+        condition: service_healthy
+      nginx-mongo-fs:
+        condition: service_started
+      zipkin:
+        condition: service_started
+      nginx-redis:
+        condition: service_started
 
   gateway-service:
     container_name: gateway-service-container-bms
-    build:
-      context: ./bmsSpring/gateway-service
-      dockerfile: Dockerfile
+    image: razvanmocica/gateway-service-bms
+    #    build:
+    #      context: ./bmsSpring/gateway-service
+    #      dockerfile: Dockerfile
     #    ports:
     #      - "8080:8080"
     environment:
@@ -220,15 +344,22 @@ services:
       - bms
     restart: unless-stopped
     depends_on:
-      - config-server
-      - service-registry
-      - zipkin
+      #      - config-server
+      #      - service-registry
+      #      - zipkin
+      config-server:
+        condition: service_healthy
+      service-registry:
+        condition: service_healthy
+      zipkin:
+        condition: service_started
 
   ingredient-service:
     container_name: ingredient-service-container-bms
-    build:
-      context: ./bmsSpring
-      dockerfile: ingredient-service/Dockerfile
+    image: razvanmocica/ingredient-service-bms
+    #    build:
+    #      context: ./bmsSpring
+    #      dockerfile: ingredient-service/Dockerfile
     environment:
       #      SPRING_PROFILES_ACTIVE: docker
       SPRING_PROFILES_ACTIVE: server
@@ -236,16 +367,25 @@ services:
       - bms
     restart: unless-stopped
     depends_on:
-      - config-server
-      - service-registry
-      - postgres
-      - zipkin
+      #      - config-server
+      #      - service-registry
+      #      - pgpool
+      #      - zipkin
+      config-server:
+        condition: service_healthy
+      service-registry:
+        condition: service_healthy
+      pgpool:
+        condition: service_started
+      zipkin:
+        condition: service_started
 
   kanban-service:
     container_name: kanban-service-container-bms
-    build:
-      context: ./bmsSpring
-      dockerfile: kanban-service/Dockerfile
+    image: razvanmocica/kanban-service-bms
+    #    build:
+    #      context: ./bmsSpring
+    #      dockerfile: kanban-service/Dockerfile
     environment:
       #      SPRING_PROFILES_ACTIVE: docker
       SPRING_PROFILES_ACTIVE: server
@@ -253,16 +393,25 @@ services:
       - bms
     restart: unless-stopped
     depends_on:
-      - config-server
-      - service-registry
-      - postgres
-      - zipkin
+      #      - config-server
+      #      - service-registry
+      #      - pgpool
+      #      - zipkin
+      config-server:
+        condition: service_healthy
+      service-registry:
+        condition: service_healthy
+      pgpool:
+        condition: service_started
+      zipkin:
+        condition: service_started
 
   order-service:
     container_name: order-service-container-bms
-    build:
-      context: ./bmsSpring
-      dockerfile: order-service/Dockerfile
+    image: razvanmocica/order-service-bms
+    #    build:
+    #      context: ./bmsSpring
+    #      dockerfile: order-service/Dockerfile
     ports:
       - "8086:8086"
     environment:
@@ -277,17 +426,31 @@ services:
       - bms
     restart: unless-stopped
     depends_on:
-      - config-server
-      - service-registry
-      - postgres
-      - zipkin
-      - stripe-cli-docker
+      #      - config-server
+      #      - service-registry
+      #      - pgpool
+      #      - zipkin
+      #      - stripe-cli-docker
+
+      config-server:
+        condition: service_healthy
+      service-registry:
+        condition: service_healthy
+      pgpool:
+        condition: service_started
+      zipkin:
+        condition: service_started
+      stripe-cli-docker:
+        condition: service_started
+      nginx-rabbitmq:
+        condition: service_started
 
   plan-service:
     container_name: plan-service-container-bms
-    build:
-      context: ./bmsSpring
-      dockerfile: plan-service/Dockerfile
+    image: razvanmocica/plan-service-bms
+    #    build:
+    #      context: ./bmsSpring
+    #      dockerfile: plan-service/Dockerfile
     environment:
       #      SPRING_PROFILES_ACTIVE: docker
       SPRING_PROFILES_ACTIVE: server
@@ -295,16 +458,25 @@ services:
       - bms
     restart: unless-stopped
     depends_on:
-      - config-server
-      - service-registry
-      - postgres
-      - zipkin
+      #      - config-server
+      #      - service-registry
+      #      - pgpool
+      #      - zipkin
+      config-server:
+        condition: service_healthy
+      service-registry:
+        condition: service_healthy
+      pgpool:
+        condition: service_started
+      zipkin:
+        condition: service_started
 
   post-service:
     container_name: post-service-container-bms
-    build:
-      context: ./bmsSpring
-      dockerfile: post-service/Dockerfile
+    image: razvanmocica/post-service-bms
+    #    build:
+    #      context: ./bmsSpring
+    #      dockerfile: post-service/Dockerfile
     environment:
       #      SPRING_PROFILES_ACTIVE: docker
       SPRING_PROFILES_ACTIVE: server
@@ -312,16 +484,25 @@ services:
       - bms
     restart: unless-stopped
     depends_on:
-      - config-server
-      - service-registry
-      - postgres
-      - zipkin
+      #      - config-server
+      #      - service-registry
+      #      - pgpool
+      #      - zipkin
+      config-server:
+        condition: service_healthy
+      service-registry:
+        condition: service_healthy
+      pgpool:
+        condition: service_started
+      zipkin:
+        condition: service_started
 
   recipe-service:
     container_name: recipe-service-container-bms
-    build:
-      context: ./bmsSpring
-      dockerfile: recipe-service/Dockerfile
+    image: razvanmocica/recipe-service-bms
+    #    build:
+    #      context: ./bmsSpring
+    #      dockerfile: recipe-service/Dockerfile
     environment:
       #      SPRING_PROFILES_ACTIVE: docker
       SPRING_PROFILES_ACTIVE: server
@@ -329,30 +510,77 @@ services:
       - bms
     restart: unless-stopped
     depends_on:
-      - config-server
-      - service-registry
-      - postgres
-      - zipkin
+      #      - config-server
+      #      - service-registry
+      #      - pgpool
+      #      - zipkin
+      config-server:
+        condition: service_healthy
+      service-registry:
+        condition: service_healthy
+      pgpool:
+        condition: service_started
+      zipkin:
+        condition: service_started
+
+  day-service:
+    container_name: day-service-container-bms
+    image: razvanmocica/day-service-bms
+    #    build:
+    #      context: ./bmsSpring
+    #      dockerfile: day-service/Dockerfile
+    environment:
+      #      SPRING_PROFILES_ACTIVE: docker
+      SPRING_PROFILES_ACTIVE: server
+    networks:
+      - bms
+    restart: unless-stopped
+    depends_on:
+      #      - config-server
+      #      - service-registry
+      #      - pgpool
+      #      - zipkin
+      config-server:
+        condition: service_healthy
+      service-registry:
+        condition: service_healthy
+      pgpool:
+        condition: service_started
+      zipkin:
+        condition: service_started
 
   websocket-service:
     container_name: websocket-service-container-bms
-    build:
-      context: ./bmsSpring/websocket-service
-      dockerfile: Dockerfile
+    image: razvanmocica/websocket-service-bms
+    #    build:
+    #      context: ./bmsSpring/websocket-service
+    #      dockerfile: Dockerfile
     environment:
       #      SPRING_PROFILES_ACTIVE: docker
       SPRING_PROFILES_ACTIVE: server
+      # SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/bms
+      SPRING_JPA_PROPERTIES_HIBERNATE_BOOT_ALLOW_JDBC_METADATA_ACCESS: false
+      # SPRING_RABBITMQ_HOST: rabbitmq
     networks:
       - bms
     restart: unless-stopped
     depends_on:
-      - config-server
-      - service-registry
-      - postgres
-      - zipkin
-  
-  
-  
+      #      - config-server
+      #      - service-registry
+      #      - pgpool
+      #      - zipkin
+      #      - nginx-rabbitmq
+      config-server:
+        condition: service_healthy
+      service-registry:
+        condition: service_healthy
+      pgpool:
+        condition: service_started
+      zipkin:
+        condition: service_started
+      nginx-rabbitmq:
+        condition: service_started
+
   ollama:
     image: ollama/ollama:latest
     container_name: ollama-container-bms
@@ -380,35 +608,81 @@ services:
       - bms
     restart: unless-stopped
 
-
   redis:
-    image: redis:latest
+    image: eqalpha/keydb:latest
     container_name: redis-container-bms
-    ports:
-      - "6379:6379"
+    #    ports:
+    #      - "6379:6379"
     volumes:
       - redis_data:/data
     networks:
       - bms
-    command: [ "redis-server", "--appendonly", "yes", "--maxmemory", "2gb", "--maxmemory-policy", "allkeys-lru" ]
-  
-  
+    command:
+      [
+        "keydb-server",
+        "--appendonly",
+        "yes",
+        "--maxmemory",
+        "2gb",
+        "--maxmemory-policy",
+        "allkeys-lru",
+        "--server-threads",
+        "2",
+        "--save",
+        "600",
+        "1",
+        "--save",
+        "150",
+        "10",
+        "--save",
+        "100",
+        "6000",
+      ]
+
+  nginx-redis:
+    image: nginx:latest
+    container_name: nginx-redis-container-bms
+    volumes:
+      - ./nginx/redis.conf:/etc/nginx/nginx.conf
+    ports:
+      - "6379:6379"
+    networks:
+      - bms
+    restart: unless-stopped
+    depends_on:
+      - redis
+    command: >
+      /bin/sh -c "
+        echo 'Updating package list and installing netcat...' &&
+       apt-get update &&
+        apt-get install -y sudo &&
+        apt-get install -y netcat-openbsd &&  
+        apt-get install -y coreutils inetutils-ping &&
+        echo 'Waiting for Redis (KeyDB) to be ready on port 6379...' &&
+        while ! nc -z redis 6379; do  
+          echo 'Redis is not ready yet, retrying in 5 seconds...';
+          sleep 5;
+        done &&
+        echo 'Redis is ready!' &&
+        nginx -g 'daemon off;'"  # Start Nginx after Redis is ready
+
   next-js:
     container_name: next-js-container-bms
-    build:
-      context: ./client-next
-      dockerfile: Dockerfile
-      args:
-        NEXTAUTH_URL: ${NEXTAUTH_URL}
-        NEXTAUTH_SECRET: ${NEXTAUTH_SECRET}
-        NEXTAUTH_URL_INTERNAL: ${NEXTAUTH_URL_INTERNAL}
-        NEXT_PUBLIC_SPRING: ${NEXT_PUBLIC_SPRING}
-        NEXT_PUBLIC_SPRING_CLIENT: ${NEXT_PUBLIC_SPRING_CLIENT}
-        GITHUB_CLIENT_SECRET: ${GIT_CLIENT_SECRET}
-        GITHUB_CLIENT_ID: ${GIT_CLIENT_ID}
-        GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
-        GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
-        NODE_TLS_REJECT_UNAUTHORIZED: ${NODE_TLS_REJECT_UNAUTHORIZED}
+    image: razvanmocica/next-js-bms
+    #    build:
+    #      context: ./client-next
+    #      dockerfile: Dockerfile
+    #      args:
+    #      NEXTAUTH_URL: ${NEXTAUTH_URL}
+    #      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET}
+    #      NEXTAUTH_URL_INTERNAL: ${NEXTAUTH_URL_INTERNAL}
+    #      NEXT_PUBLIC_SPRING: ${NEXT_PUBLIC_SPRING}
+    #      NEXT_PUBLIC_SPRING_CLIENT: ${NEXT_PUBLIC_SPRING_CLIENT}
+    #      GITHUB_CLIENT_SECRET: ${GIT_CLIENT_SECRET}
+    #      GITHUB_CLIENT_ID: ${GIT_CLIENT_ID}
+    #      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+    #      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+    #      NODE_TLS_REJECT_UNAUTHORIZED: ${NODE_TLS_REJECT_UNAUTHORIZED}
     environment:
       NEXTAUTH_URL: ${NEXTAUTH_URL}
       NEXTAUTH_SECRET: ${NEXTAUTH_SECRET}
@@ -423,21 +697,23 @@ services:
       OLLAMA_MODEL: ${OLLAMA_MODEL}
       OLLAMA_BASE_URL: ${OLLAMA_BASE_URL}
       OLLAMA_EMBEDDING: ${OLLAMA_EMBEDDING}
+      OLLAMA_CHAT_COUNT: ${OLLAMA_CHAT_COUNT}
+      OLLAMA_TEMPERATURE: ${OLLAMA_TEMPERATURE}
       POSTGRES_HOST: $POSTGRES_HOST
       POSTGRES_PORT: $POSTGRES_PORT
       POSTGRES_USER: $POSTGRES_USER
       POSTGRES_PASSWORD: $POSTGRES_PASSWORD
       POSTGRES_DB: $POSTGRES_DB
-    
+
     #    ports:
     #      - "3000:3000"
     networks:
       - bms
     restart: unless-stopped
     depends_on:
-      - gateway-service
+      - nginx-gateway
       - ollama
-
+      - pgpool-vectors
 
   nginx-gateway:
     image: nginx:latest
@@ -453,6 +729,12 @@ services:
       - ./nginx/certs:/etc/nginx/ssl
     command: >
       /bin/sh -c "
+      echo 'Waiting for gateway-service to be healthy...' &&
+              while ! curl -s http://gateway-service:8080/actuator/health | grep '\"status\":\"UP\"'; do
+                echo 'gateway-service is not healthy yet, retrying in 5 seconds...';
+                sleep 5;
+              done &&
+      echo 'gateway-service is healthy!' &&
         if [ ! -f /etc/nginx/ssl/selfsigned.crt ]; then
           openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/nginx/ssl/selfsigned.key -out /etc/nginx/ssl/selfsigned.crt -subj '/CN=im51.go.ro';
         fi &&
@@ -464,8 +746,6 @@ services:
     depends_on:
       - gateway-service
 
-
-
   nginx-nextjs:
     image: nginx:latest
     container_name: nginx-nextjs-container-bms
@@ -474,7 +754,7 @@ services:
       HTTPS_PORT: 3443
     ports:
       - "3000:81"
-      - "3443:444"
+      - "443:444"
     volumes:
       - ./nginx/nextjs.conf.template:/etc/nginx/nginx.conf.template
       - ./nginx/certs:/etc/nginx/ssl
@@ -484,6 +764,12 @@ services:
     restart: unless-stopped
     command: >
       /bin/sh -c "
+      echo 'Waiting for next-js to be ready...' &&
+              while ! curl -s http://next-js:3000/en > /dev/null; do
+                echo 'next-js is not ready yet, retrying in 5 seconds...';
+                sleep 5;
+              done &&
+      echo 'next-js is ready!' &&
         if [ ! -f /etc/nginx/ssl/selfsigned.crt ]; then
           openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/nginx/ssl/selfsigned.key -out /etc/nginx/ssl/selfsigned.crt -subj '/CN=im51.go.ro';
         fi &&
@@ -491,18 +777,20 @@ services:
         nginx -g 'daemon off;'"
     depends_on:
       - next-js
+
   rabbitmq:
     image: rabbitmq:3-management
     container_name: rabbitmq-container-bms
     ports:
-      - "5672:5672"
+      #      - "5672:5672"
       - "15672:15672"
-      - "61613:61613"
+    #      - "61613:61613"
     environment:
       RABBITMQ_DEFAULT_USER: guest
       RABBITMQ_DEFAULT_PASS: guest
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
+      - ./rabbitmq/erl.conf:/etc/rabbitmq/rabbitmq.conf
     networks:
       - bms
     restart: unless-stopped
@@ -512,12 +800,49 @@ services:
       timeout: 10s
       retries: 5
       start_period: 10s
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 3g
     command: >
       bash -c "
       rabbitmq-plugins enable rabbitmq_stomp &&
       rabbitmq-plugins enable rabbitmq_web_stomp &&
       rabbitmq-server"
 
+  nginx-rabbitmq:
+    image: nginx:latest
+    container_name: nginx-rabbitmq-proxy
+    ports:
+      - "5672:5672" # Expose AMQP proxy
+      - "61613:61613" # Expose STOMP proxy
+    volumes:
+      - ./nginx/rabbitmq.conf:/etc/nginx/nginx.conf # Mount the custom Nginx config for RabbitMQ
+    networks:
+      - bms
+    restart: unless-stopped
+    depends_on:
+      - rabbitmq
+    command: >
+      /bin/sh -c "
+      echo 'Updating package list and installing netcat...' &&
+            apt-get update &&
+             apt-get install -y sudo &&
+             apt-get install -y netcat-openbsd &&  
+             apt-get install -y coreutils inetutils-ping &&
+
+        echo 'Waiting for RabbitMQ to be ready...' &&
+        while ! nc -z rabbitmq 5672; do  # Check if RabbitMQ AMQP is ready
+          echo 'RabbitMQ is not ready yet, retrying in 5 seconds...';
+          sleep 5;
+        done &&
+        while ! nc -z rabbitmq 61613; do  # Check if RabbitMQ STOMP is ready
+          echo 'RabbitMQ STOMP is not ready yet, retrying in 5 seconds...';
+          sleep 5;
+        done &&
+        echo 'RabbitMQ is ready, starting Nginx...' &&
+        nginx -g 'daemon off;'"
 
 volumes:
   postgres_data:
@@ -527,6 +852,7 @@ volumes:
   redis_data:
   rabbitmq_data:
   ollama_fs:
+  pgadmin_data:
 networks:
   bms:
     driver: bridge

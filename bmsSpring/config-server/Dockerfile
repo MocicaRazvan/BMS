@@ -13,7 +13,7 @@ RUN mvn package -DskipTests -Dmaven.compiler.source=22 -Dmaven.compiler.target=2
 FROM openjdk:22-jdk-slim
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y curl netcat-openbsd && rm -rf /var/lib/apt/lists/*
 
 COPY --from=build /app/target/config-server-0.0.1-SNAPSHOT.jar .
 

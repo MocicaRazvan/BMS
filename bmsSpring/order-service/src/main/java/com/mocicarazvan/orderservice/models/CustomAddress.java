@@ -35,7 +35,7 @@ public class CustomAddress extends IdGenerated {
                 .city(address.getCity())
                 .country(address.getCountry())
                 .line1(address.getLine1())
-                .line2(address.getLine2())
+                .line2(address.getLine2() != null ? address.getLine2() : "")
                 .postalCode(address.getPostalCode())
                 .state(address.getState())
                 .build();

@@ -23,6 +23,9 @@ RUN mvn -f comment-service/pom.xml clean package -DskipTests  -Dmaven.compiler.s
 
 FROM openjdk:22-jdk-slim
 WORKDIR /app
+
+RUN apt-get update && apt-get install -y curl netcat-openbsd && rm -rf /var/lib/apt/lists/*
+
 COPY --from=build /app/comment-service/target/comment-service-0.0.1-SNAPSHOT.jar .
 
 ENTRYPOINT ["java","--enable-preview", "-jar", "comment-service-0.0.1-SNAPSHOT.jar"]

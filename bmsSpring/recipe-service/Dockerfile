@@ -20,6 +20,10 @@ RUN mvn -f recipe-service/pom.xml clean package -DskipTests -Dmaven.compiler.sho
 
 FROM openjdk:22-jdk-slim
 WORKDIR /app
+
+RUN apt-get update && apt-get install -y curl netcat-openbsd && rm -rf /var/lib/apt/lists/*
+
+
 COPY --from=build /app/recipe-service/target/recipe-service-0.0.1-SNAPSHOT.jar .
 
 

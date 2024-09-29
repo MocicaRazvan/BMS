@@ -20,6 +20,10 @@ RUN mvn -f post-service/pom.xml clean package -DskipTests -Dmaven.compiler.showW
 
 FROM openjdk:22-jdk-slim
 WORKDIR /app
+
+RUN apt-get update && apt-get install -y curl netcat-openbsd && rm -rf /var/lib/apt/lists/*
+
+
 COPY --from=build /app/post-service/target/post-service-0.0.1-SNAPSHOT.jar .
 
 
