@@ -11,6 +11,7 @@ export default function useAiChatPersist(
 ) {
   const session = useSession();
   const prevAddedMessage = useRef<Message>();
+  const messageContentRef = useRef<Map<string, string>>(new Map());
   const debounce = useDebounce(
     messages
       .filter((m) => !initialMessages.some((im) => im.id === m.id))
@@ -18,7 +19,7 @@ export default function useAiChatPersist(
         if (!a.createdAt || !b.createdAt) return 0;
         return a.createdAt.getTime() - b.createdAt.getTime();
       }),
-    100,
+    500,
   );
   const stompClient = useStompClient();
 
@@ -32,21 +33,30 @@ export default function useAiChatPersist(
       const lastMessage = debounce.at(-1);
       if (!lastMessage) return;
 
-      if (prevAddedMessage.current?.id === lastMessage.id) return;
+      const previousContent = messageContentRef.current.get(lastMessage.id);
+      if (
+        previousContent !== undefined &&
+        previousContent === lastMessage.content
+      ) {
+        if (prevAddedMessage.current?.id === lastMessage.id) return;
 
-      prevAddedMessage.current = lastMessage;
+        prevAddedMessage.current = lastMessage;
 
-      const body: AiChatMessagePayload = {
-        vercelId: lastMessage.id,
-        content: lastMessage.content,
-        role: lastMessage.role,
-        email: session.data.user.email,
-      };
+        const body: AiChatMessagePayload = {
+          vercelId: lastMessage.id,
+          content: lastMessage.content,
+          role: lastMessage.role,
+          email: session.data.user.email,
+        };
 
-      stompClient.publish({
-        destination: "/app/ai-chat/addMessage",
-        body: JSON.stringify(body),
-      });
+        stompClient.publish({
+          destination: "/app/ai-chat/addMessage",
+          body: JSON.stringify(body),
+        });
+        messageContentRef.current.delete(lastMessage.id);
+      } else {
+        messageContentRef.current.set(lastMessage.id, lastMessage.content);
+      }
     }
   }, [
     session.status,

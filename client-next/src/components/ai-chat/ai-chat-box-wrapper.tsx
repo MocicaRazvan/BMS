@@ -31,7 +31,7 @@ export function AiChatBoxWrapper(props: AiChatBoxTexts) {
             setIsFinished(true);
             return;
           }
-          console.log("AiChatBoxWrapper messages", messages);
+          console.error("AiChatBoxWrapper messages", messages);
           if (messages[0].length > 0) {
             setInitialMessages(
               messages[0].map((m) => ({
@@ -64,7 +64,7 @@ export function AiChatBoxWrapper(props: AiChatBoxTexts) {
         delay: 0.5,
       }}
     >
-      <AiChatBox {...props} initialMessages={initialMessages} />;
+      <AiChatBox {...props} initialMessages={initialMessages} />
     </motion.div>
   );
 }

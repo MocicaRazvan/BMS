@@ -24,6 +24,7 @@ import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 import reactor.util.function.Tuple2;
 import reactor.util.function.Tuples;
 
@@ -49,6 +50,7 @@ public class MediaServiceImpl implements MediaService {
     @Override
     public Mono<FileUploadResponse> uploadFiles(Flux<FilePart> files, MetadataDto metadataDto) {
         return files.index()
+                .subscribeOn(Schedulers.parallel())
                 .flatMap(indexedFilePart -> saveFileWithIndex(indexedFilePart.getT1(), indexedFilePart.getT2(), metadataDto)
                         .doOnNext(tuple -> {
                             log.error("Sending progress update " + tuple.getT1());
@@ -96,6 +98,7 @@ public class MediaServiceImpl implements MediaService {
     @Override
     public Mono<Void> deleteFile(String gridId) {
         return gridFsTemplate.delete(new Query(Criteria.where("_id").is(new ObjectId(gridId))))
+                .subscribeOn(Schedulers.parallel())
                 .then(mediaRepository.findAllByGridFsId(gridId)
                         .flatMap(media -> mediaMetadataRepository.deleteAllByMediaId(media.getId()))
                         .then(mediaRepository.deleteAllByGridFsId(gridId)));

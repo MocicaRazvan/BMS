@@ -115,32 +115,11 @@ export function DataTable<TData extends Record<string, any>, TValue>({
     fieldSeparator: ",",
     filename: `${fileName}-${new Date().toISOString()}`,
     decimalSeparator: ".",
-    useKeysAsHeaders: true,
+    showColumnHeaders: true,
   });
-  const exportCsv = useCallback(
-    (rows: Row<TData>[]) => {
-      download(csvConfig)(
-        generateCsv(csvConfig)(
-          rows.map(({ original }) =>
-            Object.entries(original).reduce(
-              (acc, [key, value]) => ({
-                ...acc,
-                [key]: Array.isArray(value) ? value.join(", ") : `${value}`,
-              }),
-              {} as Record<string, string>,
-            ),
-          ),
-        ),
-      );
-    },
-    [csvConfig],
-  );
 
-  const exportPdf = useCallback(
+  const getExport = useCallback(
     (rows: Row<TData>[]) => {
-      const doc = new jsPDF({
-        orientation: "landscape",
-      });
       const tableColumnHeaders = columns
         .filter((c) =>
           table
@@ -233,9 +212,46 @@ export function DataTable<TData extends Record<string, any>, TValue>({
               .find((s) => s.key === h.accessorKey)
               ?.handler(value);
           }
-          return value;
+          return value as string | number;
         }),
       );
+      return () => ({
+        tableColumnHeaders,
+        tableRows,
+      });
+    },
+    [columns, formatIntl, hidePDFColumnIds, specialPDFColumns],
+  );
+
+  const exportCsv = useCallback(
+    (rows: Row<TData>[]) => {
+      const { tableColumnHeaders, tableRows } = getExport(rows)();
+      const formattedRows = tableRows.map((row) =>
+        tableColumnHeaders.reduce(
+          (acc, cur, index) => {
+            acc[cur.id] = row[index];
+            // optimization
+            return acc;
+          },
+          {} as Record<string, string | number>,
+        ),
+      );
+      const finalConfig = {
+        ...csvConfig,
+        columnHeaders: tableColumnHeaders.map((h) => h.id),
+      };
+      download(finalConfig)(generateCsv(finalConfig)(formattedRows));
+    },
+    [csvConfig, getExport],
+  );
+
+  const exportPdf = useCallback(
+    (rows: Row<TData>[]) => {
+      const doc = new jsPDF({
+        orientation: "landscape",
+      });
+
+      const { tableColumnHeaders, tableRows } = getExport(rows)();
       autoTable(doc, {
         head: [tableColumnHeaders.map((h) => h.id)],
         body: tableRows,
@@ -255,7 +271,7 @@ export function DataTable<TData extends Record<string, any>, TValue>({
       });
       doc.save(`${fileName}-${new Date().toISOString()}.pdf`);
     },
-    [columns, fileName],
+    [columns, fileName, getExport],
   );
 
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});

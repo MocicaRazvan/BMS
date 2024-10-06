@@ -109,7 +109,6 @@ interface Args<T extends FieldValues> {
 
 async function fetchFileObjectURL(url: string): Promise<FieldInputItem> {
   const res = await fetch(url, {
-    cache: "no-cache",
     priority: "high",
     method: "GET",
   });

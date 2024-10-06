@@ -276,8 +276,14 @@ function ChatMessage({ message: { role, content } }: ChatMessageProps) {
               // todo see if its internal link else open in new tab
               <Link
                 {...props}
-                href={props.href ?? ""}
-                className="text-primary hover:underline"
+                href={
+                  props.href
+                    ? props.href?.startsWith(appUrl)
+                      ? props.href.replace(/:\d+/, "")
+                      : ""
+                    : ""
+                }
+                className="text-primary hover:underline font-semibold text-opacity-90"
                 target={props.href?.startsWith(appUrl) ? "_self" : "_blank"}
               >
                 {props.children}

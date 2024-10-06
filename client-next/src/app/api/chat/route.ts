@@ -33,6 +33,10 @@ if (!modelName || !ollamaBaseUrl) {
   );
 }
 
+if (!siteUrl) {
+  throw new Error("NEXTAUTH_URL must be set in the environment");
+}
+
 export async function POST(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
@@ -77,11 +81,17 @@ export async function POST(req: NextRequest) {
     const currentMessageContent = messages[messages.length - 1].content;
 
     const { stream, handlers } = LangChainStream();
-
+    const newHandlers: ReturnType<typeof LangChainStream>["handlers"] = {
+      ...handlers,
+      handleLLMEnd: (output, id) => {
+        console.error("LLMEND", JSON.stringify(output), id);
+        return handlers.handleLLMEnd(output, id);
+      },
+    };
     // retrievers and documents
     const [historyAwareRetrieverChain, combineDocsChain] = await Promise.all([
       createHistoryChain(vectorStore, vectorFilter),
-      createDocsChain(handlers, currentUserRole, currentUserId),
+      createDocsChain(newHandlers, currentUserRole, currentUserId),
     ]);
 
     console.log("RETRIVER DONE");
@@ -115,6 +125,7 @@ async function createHistoryChain(
     baseUrl: ollamaBaseUrl,
     keepAlive: "-1m",
     temperature: 0.2,
+    cache: false,
     // verbose: true,
   });
   const rephrasePrompt = ChatPromptTemplate.fromMessages([
@@ -166,7 +177,7 @@ async function createDocsChain(
     // verbose: true,
     keepAlive: "-1m",
     callbacks: [handlers],
-    // cache: true,
+    cache: false,
     temperature: process.env.OLLAMA_TEMPERATURE
       ? parseFloat(process.env.OLLAMA_TEMPERATURE)
       : 0.7,
@@ -175,7 +186,7 @@ async function createDocsChain(
   const locale = cookies().get("NEXT_LOCALE")?.value || "en";
 
   console.log("CurrentUserId", currentUserId);
-
+  const siteNoPort = siteUrl?.replace(/:\d+/, "");
   const prompt = ChatPromptTemplate.fromMessages([
     [
       "system",
@@ -188,9 +199,9 @@ async function createDocsChain(
         (currentUserId || "") +
         ".\n\n" +
         "Always ensure that any URLs you provide are localized according to the user's current language preference. The localization means that links start with the user current locale, the rest of the URL it's not localized! " +
-        "The site supports English (locale: 'en') and Romanian (locale: 'ro'). The site base URL is" +
-        siteUrl +
-        " always add it to internal links. " +
+        "The site supports English (locale: 'en') and Romanian (locale: 'ro'). The site base URL is " +
+        siteNoPort +
+        " always add it to internal links and ** NEVER ** add a specific port to it. " +
         "You are currently using the '" +
         locale +
         "' locale.\n\n" +

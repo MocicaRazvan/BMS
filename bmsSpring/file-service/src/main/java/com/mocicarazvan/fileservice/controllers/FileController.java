@@ -43,7 +43,8 @@ public class FileController {
             @RequestPart("metadata") String metadata
     ) throws JsonProcessingException {
         MetadataDto parsedMetadata = objectMapper.readValue(metadata, MetadataDto.class);
-        return mediaService.uploadFiles(files, parsedMetadata)
+        return mediaService
+                .uploadFiles(files, parsedMetadata)
                 .map(response -> ResponseEntity.ok().body(response));
     }
 
@@ -73,7 +74,6 @@ public class FileController {
                                             });
                                 }
                         )
-//                        .subscribeOn(Schedulers.boundedElastic())
                         .switchIfEmpty(fetchFileAndProcessFromGridFS(gridId, width, height, quality, exchange)) :
                 fetchFileAndProcessFromGridFS(gridId, width, height, quality, exchange);
 
@@ -85,7 +85,6 @@ public class FileController {
 
     private Mono<ServerHttpResponse> fetchFileAndProcessFromGridFS(String gridId, Integer width, Integer height, Double quality, ServerWebExchange exchange) {
         return mediaService.getFile(gridId)
-//                .subscribeOn(Schedulers.boundedElastic())
                 .flatMap(file -> file.getGridFSFile()
                         .flatMap(gridFSFile -> {
                             FileType fileType = FileType.valueOf(file.getOptions().getMetadata().getString("fileType"));
