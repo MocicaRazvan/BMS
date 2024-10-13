@@ -33,6 +33,8 @@ public class ImageRedisRepositoryImpl implements ImageRedisRepository {
 
     @Override
     public Mono<byte[]> getImage(String gridId, Integer width, Integer height, Double quality) {
+        log.info("Generated cache key: {}", generateCacheKey(gridId, width, height, quality));
+
         return reactiveByteArrayRedisTemplate.opsForValue()
                 .get(generateCacheKey(gridId, width, height, quality));
     }

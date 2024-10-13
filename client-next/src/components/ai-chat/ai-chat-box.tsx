@@ -24,6 +24,7 @@ export interface AiChatBoxTexts {
 interface Props extends AiChatBoxTexts {
   initialMessages: Message[];
 }
+
 export default function AiChatBox({
   emptyHeader,
   inputPlaceholder,
@@ -59,7 +60,8 @@ export default function AiChatBox({
     if (!scrollRef.current) return;
 
     const { scrollTop, scrollHeight, clientHeight } = scrollRef.current;
-    const atBottom = scrollHeight - clientHeight <= scrollTop + 15;
+    // todo schimba 15 cu o variabila si mai mare daca e gen 30
+    const atBottom = scrollHeight - clientHeight <= scrollTop + 20;
 
     setIsAtBottom(atBottom);
   };

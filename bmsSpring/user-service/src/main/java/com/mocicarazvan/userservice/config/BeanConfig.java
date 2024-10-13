@@ -18,10 +18,12 @@ import com.mocicarazvan.userservice.email.SecretProperties;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 import io.github.resilience4j.ratelimiter.RateLimiterRegistry;
 import io.github.resilience4j.retry.RetryRegistry;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
@@ -92,17 +94,26 @@ public class BeanConfig {
         return new EmailUtilsImpl(jml);
     }
 
-    @Bean
+    @Bean(name = "fileWebClient")
+    @Profile("!k8s")
     @LoadBalanced
-    public WebClient.Builder loadBalancedWebClient() {
+    public WebClient.Builder fileWebClient() {
+        return WebClient.builder();
+    }
+
+
+    @Bean(name = "fileWebClient")
+    @Profile("k8s")
+    public WebClient.Builder fileWebClientk8s() {
         return WebClient.builder();
     }
 
     @Bean
     public FileClient fileClient(
-            CircuitBreakerRegistry circuitBreakerRegistry, RetryRegistry retryRegistry, RateLimiterRegistry rateLimiterRegistry
+            CircuitBreakerRegistry circuitBreakerRegistry, RetryRegistry retryRegistry, RateLimiterRegistry rateLimiterRegistry,
+            @Qualifier("fileWebClient") WebClient.Builder fileWebClient
     ) {
-        return new FileClient("fileService", loadBalancedWebClient(), circuitBreakerRegistry, retryRegistry, rateLimiterRegistry);
+        return new FileClient("fileService", fileWebClient, circuitBreakerRegistry, retryRegistry, rateLimiterRegistry);
     }
 
 }

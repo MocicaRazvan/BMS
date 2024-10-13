@@ -1,4 +1,6 @@
 import createNextIntlPlugin from "next-intl/plugin";
+import { EventEmitter } from "events";
+EventEmitter.defaultMaxListeners = 20;
 
 const withNextIntl = createNextIntlPlugin();
 
@@ -30,6 +32,10 @@ const nextConfig = {
   compiler: {
     removeConsole:
       process.env.NODE_ENV === "production" ? { exclude: ["error"] } : false,
+  },
+  experimental: {
+    instrumentationHook: true,
+    serverComponentsExternalPackages: ["@opentelemetry/instrumentation"],
   },
 
   // reactStrictMode: false

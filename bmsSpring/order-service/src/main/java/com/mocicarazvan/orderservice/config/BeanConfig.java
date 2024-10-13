@@ -21,9 +21,11 @@ import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 import io.github.resilience4j.ratelimiter.RateLimiterRegistry;
 import io.github.resilience4j.retry.RetryRegistry;
 import jakarta.validation.Validator;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
@@ -54,29 +56,52 @@ public class BeanConfig {
         return new PageableUtilsCustom();
     }
 
-    @Bean
+    @Bean(name = "userWebClient")
+    @Profile("!k8s")
     @LoadBalanced
     public WebClient.Builder userWebClient() {
         return WebClient.builder();
     }
 
     @Bean(name = "webSocketWebClient")
+    @Profile("!k8s")
     @LoadBalanced
     public WebClient.Builder webSocketClient() {
         return WebClient.builder();
     }
 
     @Bean(name = "planWebClient")
+    @Profile("!k8s")
     @LoadBalanced
     public WebClient.Builder planClient() {
         return WebClient.builder();
     }
 
+
+    @Bean(name = "userWebClient")
+    @Profile("k8s")
+    public WebClient.Builder userWebClientk8s() {
+        return WebClient.builder();
+    }
+
+    @Bean(name = "webSocketWebClient")
+    @Profile("k8s")
+    public WebClient.Builder webSocketClientk8s() {
+        return WebClient.builder();
+    }
+
+    @Bean(name = "planWebClient")
+    @Profile("k8s")
+    public WebClient.Builder planClientk8s() {
+        return WebClient.builder();
+    }
+
     @Bean
     public UserClient userClient(
-            CircuitBreakerRegistry circuitBreakerRegistry, RetryRegistry retryRegistry, RateLimiterRegistry rateLimiterRegistry
+            CircuitBreakerRegistry circuitBreakerRegistry, RetryRegistry retryRegistry, RateLimiterRegistry rateLimiterRegistry,
+            @Qualifier("userWebClient") WebClient.Builder userWebClient
     ) {
-        return new UserClient("userService", userWebClient(), circuitBreakerRegistry, retryRegistry, rateLimiterRegistry);
+        return new UserClient("userService", userWebClient, circuitBreakerRegistry, retryRegistry, rateLimiterRegistry);
     }
 
 //    @Bean
