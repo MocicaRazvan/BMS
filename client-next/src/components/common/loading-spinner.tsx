@@ -13,7 +13,7 @@ export default function LoadingSpinner({
   return (
     <section
       className={cn(
-        "w-full min-h-[calc(100vh-10rem)] flex items-center justify-center transition-all overflow-hidden",
+        "w-full min-h-[calc(100vh-12rem)] flex items-center justify-center transition-all overflow-hidden z-[1]",
         sectionClassName,
       )}
     >

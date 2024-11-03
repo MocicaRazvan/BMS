@@ -111,7 +111,9 @@ export default function SingleSubscriptionPageContent({
         </div>
         <div className=" flex items-center justify-center order-0 md:order-1 flex-1 ">
           <h1
-            className={cn("text-5xl tracking-tighter font-bold text-center  ")}
+            className={cn(
+              "text-2xl md:text-4xl tracking-tighter font-bold text-center  ",
+            )}
           >
             {planState.title}
           </h1>

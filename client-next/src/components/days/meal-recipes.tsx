@@ -158,7 +158,7 @@ export const RecipePlanItem = memo(
 
     if (!IQIsFinished) {
       return (
-        <section className="w-full min-h-[30vh] flex items-center justify-center transition-all">
+        <section className="w-full min-h-[30vh] flex items-center justify-center transition-all overflow-hidden my-2">
           <LoadingSpinner />
         </section>
       );
@@ -189,7 +189,7 @@ export const RecipePlanItem = memo(
           <div className=" flex items-center justify-center order-0 md:order-1 flex-1 ">
             <h1
               className={cn(
-                "text-3xl md:text-5xl tracking-tighter font-bold text-center  ",
+                "text-3xl md:text-4xl tracking-tighter font-bold text-center  ",
               )}
             >
               {recipeState.title}

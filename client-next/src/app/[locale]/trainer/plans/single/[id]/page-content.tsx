@@ -163,7 +163,7 @@ export default function SingleTrainerPlanPageContent({
         <div className=" flex items-center justify-center order-0 md:order-1 flex-1 ">
           <h1
             className={cn(
-              "text-2xl md:text-6xl text-balance tracking-tighter font-bold text-center  ",
+              "text-2xl md:text-4xl text-balance tracking-tighter font-bold text-center  ",
             )}
           >
             {planState.title}

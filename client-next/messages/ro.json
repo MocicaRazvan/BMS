@@ -712,11 +712,12 @@
         "noFilterLabel": "Toate tipurile",
         "labels": {
           "LOW_CARB": "Carbohidrați scăzuți",
-          "HIGH_CARB": "Carbohidrați mari",
-          "HIGH_PROTEIN": "Proteine mari",
+          "HIGH_CARB": "Carbohidrați crescuți",
+          "HIGH_PROTEIN": "Proteine crescute",
           "LOW_FAT": "Grăsime scăzută",
-          "HIGH_FAT": "Grăsime mare",
-          "LOW_PROTEIN": "Proteine scăzute"
+          "HIGH_FAT": "Grăsime crescută",
+          "LOW_PROTEIN": "Proteine scăzute",
+          "BALANCED": "Echilibrat"
         }
       }
     },

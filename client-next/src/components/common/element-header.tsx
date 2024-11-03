@@ -50,7 +50,7 @@ export default function ElementHeader<T extends ApproveDto>({
       <div className="flex-1 flex items-center justify-center order-0 md:order-1">
         <h1
           className={cn(
-            "text-2xl md:text-6xl text-balance tracking-tighter font-bold text-center",
+            "text-2xl md:text-4xl text-balance tracking-tighter font-bold text-center",
             showLikes && "md:translate-x-[-125px] ",
           )}
         >

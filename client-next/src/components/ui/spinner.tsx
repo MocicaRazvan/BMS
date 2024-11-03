@@ -4,7 +4,11 @@ import { Loader2 } from "lucide-react";
 const Loader = ({ className }: { className?: string }) => {
   return (
     <Loader2
-      className={cn("my-28 h-16 w-16 text-primary/60 animate-spin", className)}
+      className={cn(
+        "my-28 h-18 w-18 text-primary/60 animate-spin font-semibold text-lg",
+        className,
+      )}
+      size={25}
     />
   );
 };

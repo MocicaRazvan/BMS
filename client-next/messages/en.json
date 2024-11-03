@@ -717,7 +717,8 @@
           "HIGH_PROTEIN": "High protein",
           "LOW_FAT": "Low fat",
           "HIGH_FAT": "High fat",
-          "LOW_PROTEIN": "Low protein"
+          "LOW_PROTEIN": "Low protein",
+          "BALANCED": "Balanced"
         }
       }
     },

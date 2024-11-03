@@ -30,8 +30,8 @@ export interface DaysListProps
 const DaysList = memo(({ dayIds, header, ...rest }: DaysListProps) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   return (
-    <div className="w-full relative">
-      <h3 className="text-3xl md:text-5xl tracking-tighter font-bold text-center mb-5">
+    <div className="w-full relative mb-2 lg:mb-3">
+      <h3 className="text-3xl md:text-4xl tracking-tighter font-bold text-center mb-5">
         {header}
       </h3>
       <div className="mb-5">

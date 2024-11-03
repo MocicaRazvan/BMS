@@ -15,6 +15,7 @@ import { fetchStream } from "@/hoooks/fetchStream";
 import DayTypeBadge, {
   DayTypeBadgeTexts,
 } from "@/components/days/day-type-badge";
+import LoadingSpinner from "@/components/common/loading-spinner";
 
 export interface SingleDayTexts {
   meals: string;
@@ -85,8 +86,13 @@ const SingleDay = memo(
       [authUser.token, day.id],
     );
 
+    //todo test good
     if (!isFinished) {
-      return null;
+      return (
+        <section className="w-full min-h-[30vh] flex items-center justify-center transition-all overflow-hidden my-2">
+          <LoadingSpinner />
+        </section>
+      );
     }
 
     if (error?.status) {
@@ -118,7 +124,7 @@ const SingleDay = memo(
           <div className=" flex items-center justify-center order-0 md:order-1 flex-1 ">
             <h1
               className={cn(
-                "text-2xl md:text-6xl text-balance tracking-tighter font-bold text-center  ",
+                "text-2xl md:text-4xl text-balance tracking-tighter font-bold text-center  ",
               )}
             >
               {dayState.title}
