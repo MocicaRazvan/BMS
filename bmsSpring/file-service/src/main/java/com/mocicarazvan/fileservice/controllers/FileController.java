@@ -85,6 +85,7 @@ public class FileController {
 
     private Mono<ServerHttpResponse> fetchFileAndProcessFromGridFS(String gridId, Integer width, Integer height, Double quality, ServerWebExchange exchange) {
         return mediaService.getFile(gridId)
+                .subscribeOn(Schedulers.boundedElastic())
                 .flatMap(file -> file.getGridFSFile()
                         .flatMap(gridFSFile -> {
                             FileType fileType = FileType.valueOf(file.getOptions().getMetadata().getString("fileType"));

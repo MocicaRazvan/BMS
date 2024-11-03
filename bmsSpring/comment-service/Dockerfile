@@ -28,4 +28,4 @@ RUN apt-get update && apt-get install -y curl netcat-openbsd && rm -rf /var/lib/
 
 COPY --from=build /app/comment-service/target/comment-service-0.0.1-SNAPSHOT.jar .
 
-ENTRYPOINT ["java","--enable-preview", "-jar", "comment-service-0.0.1-SNAPSHOT.jar"]
+ENTRYPOINT ["java","--enable-preview","-Dreactor.schedulers.defaultBoundedElasticOnVirtualThreads=true","-jar", "comment-service-0.0.1-SNAPSHOT.jar"]

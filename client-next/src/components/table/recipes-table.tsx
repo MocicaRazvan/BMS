@@ -36,6 +36,7 @@ import LoadingSpinner from "@/components/common/loading-spinner";
 import AlertDialogApproveRecipes from "@/components/dialogs/recipes/approve-recipe";
 import useClientNotFound from "@/hoooks/useClientNotFound";
 import OverflowTextTooltip from "@/components/common/overflow-text-tooltip";
+import AlertDialogDeleteRecipe from "@/components/dialogs/recipes/delete-recipe";
 
 export interface RecipeTableColumnsTexts {
   id: string;
@@ -380,6 +381,22 @@ export default function RecipeTable({
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
+                      {row.original.count === 0 && (
+                        <DropdownMenuItem
+                          asChild
+                          onClick={(e) => {
+                            e.stopPropagation();
+                          }}
+                          className="mt-5 py-2"
+                        >
+                          <AlertDialogDeleteRecipe
+                            recipe={row.original.model}
+                            token={authUser.token}
+                            callBack={refetch}
+                            title={row.original.model.title}
+                          />
+                        </DropdownMenuItem>
+                      )}
                     </>
                   )}
 

@@ -37,7 +37,7 @@ public class ExtendedPlanRepositoryImpl implements ExtendedPlanRepository {
         repositoryUtils.addListField(excludeIds, queryBuilder, new RepositoryUtils.MutableBoolean(queryBuilder.length() > SELECT_ALL.length()),
                 " id NOT IN (:excludeIds)");
 
-        queryBuilder.append(pageableUtils.createPageRequestQuery(pageRequest));
+        queryBuilder.append(pageableUtils.createPageRequestQuery(pageRequest, repositoryUtils.createExtraOrder(title, "title", ":title")));
 
         DatabaseClient.GenericExecuteSpec executeSpec = getGenericExecuteSpec(title, approved, type, objective, display, queryBuilder);
 
@@ -57,7 +57,7 @@ public class ExtendedPlanRepositoryImpl implements ExtendedPlanRepository {
         repositoryUtils.addNotNullField(trainerId, queryBuilder, new RepositoryUtils.MutableBoolean(queryBuilder.length() > SELECT_ALL.length()),
                 " user_id = :trainerId");
 
-        queryBuilder.append(pageableUtils.createPageRequestQuery(pageRequest));
+        queryBuilder.append(pageableUtils.createPageRequestQuery(pageRequest, repositoryUtils.createExtraOrder(title, "title", ":title")));
 
         DatabaseClient.GenericExecuteSpec executeSpec = getGenericExecuteSpec(title, approved, type, objective, display, queryBuilder);
 
@@ -146,8 +146,8 @@ public class ExtendedPlanRepositoryImpl implements ExtendedPlanRepository {
 
         executeSpec = repositoryUtils.bindNotNullField(display, executeSpec, "display");
 
-        executeSpec = repositoryUtils.bindStringSearchField(title, executeSpec, "title");
-
+//        executeSpec = repositoryUtils.bindStringSearchField(title, executeSpec, "title");
+        executeSpec = repositoryUtils.bindStringField(title, executeSpec, "title");
 
         executeSpec = repositoryUtils.bindEnumField(type, executeSpec, "type");
 
@@ -167,8 +167,8 @@ public class ExtendedPlanRepositoryImpl implements ExtendedPlanRepository {
         repositoryUtils.addNotNullField(display, queryBuilder, hasPreviousCriteria, "display = :display");
 
 
-        repositoryUtils.addStringField(title, queryBuilder, hasPreviousCriteria, " UPPER(title) LIKE UPPER(:title)");
-
+//        repositoryUtils.addStringField(title, queryBuilder, hasPreviousCriteria, " UPPER(title) LIKE UPPER(:title)");
+        repositoryUtils.addStringField(title, queryBuilder, hasPreviousCriteria, "( UPPER(title) LIKE UPPER('%' || :title || '%') OR similarity(title, :title ) > 0.35 )");
 
         repositoryUtils.addNotNullField(type, queryBuilder, hasPreviousCriteria, " type = :type");
 

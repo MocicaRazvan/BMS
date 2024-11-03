@@ -7,7 +7,7 @@ services:
       POSTGRES_USER: myuser
       POSTGRES_PASSWORD: mypassword
     #      TZ: Europe/Bucharest
-    command: [ "postgres", "-c", "max_connections=2500" ]
+    command: [ "postgres", "-c", "max_connections=2500" ,"-c","log_statement=all" ]
     ports:
       - "5544:5432"
     volumes:

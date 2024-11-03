@@ -1,7 +1,13 @@
 "use client";
 
 import { SortingOption } from "@/hoooks/useList";
-import { Fragment, SetStateAction, useCallback } from "react";
+import {
+  Fragment,
+  SetStateAction,
+  useCallback,
+  useEffect,
+  useRef,
+} from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,6 +18,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { ArrowDown, ArrowUp } from "lucide-react";
+import { useSearchParams } from "next/navigation";
+import { parseSortString } from "@/lib/utils";
 
 export interface RadioSortTexts {
   noSort: string;
@@ -24,6 +32,7 @@ export interface RadioSortProps extends RadioSortTexts {
   setSort: (value: SetStateAction<SortingOption[]>) => void;
   setSortValue: (value: SetStateAction<string>) => void;
   callback?: () => void;
+  useDefaultSort?: boolean;
 }
 
 export default function RadioSort({
@@ -34,7 +43,31 @@ export default function RadioSort({
   setSortValue,
   noSort,
   callback,
+  useDefaultSort = true,
 }: RadioSortProps) {
+  const useDefaultSortRef = useRef(useDefaultSort);
+  const currentSearchParams = useSearchParams();
+
+  useEffect(() => {
+    if (useDefaultSortRef.current && sortingOptions.length > 0) {
+      useDefaultSortRef.current = false;
+      const sortString = currentSearchParams.get("sort");
+      const sortQ = parseSortString(sortString, sortingOptions);
+
+      if (!sortQ || !sortQ.length) {
+        const defaultOption = sortingOptions.find(
+          (o) => o.property === "createdAt" && o.direction === "desc",
+        );
+        console.log("DEFAULT OPTION ", defaultOption);
+        if (defaultOption) {
+          setSort([defaultOption]);
+          setSortValue("createdAt-desc");
+          callback?.();
+        }
+      }
+    }
+  }, [sortingOptions.length]);
+
   const handleValueChange = useCallback(
     (val: string) => {
       if (val === sortValue) {

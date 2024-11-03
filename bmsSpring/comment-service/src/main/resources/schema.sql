@@ -13,3 +13,4 @@ CREATE TABLE IF NOT EXISTS comment
 );
 
 CREATE INDEX IF NOT EXISTS idx_reference_id ON comment (reference_id);
+CREATE INDEX IF NOT EXISTS idx_user_id_comment ON comment (user_id);

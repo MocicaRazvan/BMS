@@ -27,5 +27,6 @@ CREATE TABLE IF NOT EXISTS ingredient_quantity
 
 CREATE INDEX IF NOT EXISTS idx_ingredient_quantity_recipe_id ON ingredient_quantity (recipe_id);
 CREATE INDEX IF NOT EXISTS idx_ingredient_quantity_ingredient_id ON ingredient_quantity (ingredient_id);
-
 CREATE INDEX IF NOT EXISTS idx_recipe_user_id ON recipe (user_id);
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
+CREATE INDEX IF NOT EXISTS idx_recipe_title_trgm ON recipe USING GIN (title gin_trgm_ops);

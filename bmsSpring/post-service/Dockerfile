@@ -27,4 +27,4 @@ RUN apt-get update && apt-get install -y curl netcat-openbsd && rm -rf /var/lib/
 COPY --from=build /app/post-service/target/post-service-0.0.1-SNAPSHOT.jar .
 
 
-ENTRYPOINT ["java", "--enable-preview", "-jar", "post-service-0.0.1-SNAPSHOT.jar"]
+ENTRYPOINT ["java", "--enable-preview","-Dreactor.schedulers.defaultBoundedElasticOnVirtualThreads=true", "-jar", "post-service-0.0.1-SNAPSHOT.jar"]

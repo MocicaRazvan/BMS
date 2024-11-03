@@ -38,7 +38,8 @@ public class PostExtendedRepositoryImpl implements PostExtendedRepository {
         repositoryUtils.addNotNullField(likedUserId, queryBuilder, new RepositoryUtils.MutableBoolean(queryBuilder.length() > SELECT_ALL.length()),
                 " :user_like_id = ANY(user_likes) ");
 
-        queryBuilder.append(pageableUtils.createPageRequestQuery(pageRequest));
+//        queryBuilder.append(pageableUtils.createPageRequestQuery(pageRequest));
+        queryBuilder.append(pageableUtils.createPageRequestQuery(pageRequest, repositoryUtils.createExtraOrder(title, "title", ":title")));
 
         DatabaseClient.GenericExecuteSpec executeSpec = getGenericExecuteSpec(title, approved, tags, queryBuilder);
 
@@ -58,7 +59,8 @@ public class PostExtendedRepositoryImpl implements PostExtendedRepository {
                 " user_id = :trainerId");
 
 
-        queryBuilder.append(pageableUtils.createPageRequestQuery(pageRequest));
+//        queryBuilder.append(pageableUtils.createPageRequestQuery(pageRequest));
+        queryBuilder.append(pageableUtils.createPageRequestQuery(pageRequest, repositoryUtils.createExtraOrder(title, "title", ":title")));
 
         DatabaseClient.GenericExecuteSpec executeSpec = getGenericExecuteSpec(title, approved, tags, queryBuilder);
 
@@ -111,7 +113,7 @@ public class PostExtendedRepositoryImpl implements PostExtendedRepository {
 
 
         executeSpec = repositoryUtils.bindNotNullField(approved, executeSpec, "approved");
-        executeSpec = repositoryUtils.bindStringSearchField(title, executeSpec, "title");
+        executeSpec = repositoryUtils.bindStringField(title, executeSpec, "title");
 
         if (tags != null && !tags.isEmpty()) {
             for (int i = 0; i < tags.size(); i++) {
@@ -129,7 +131,7 @@ public class PostExtendedRepositoryImpl implements PostExtendedRepository {
 
         repositoryUtils.addNotNullField(approved, queryBuilder, hasPreviousCriteria, "approved = :approved");
 
-        repositoryUtils.addStringField(title, queryBuilder, hasPreviousCriteria, "UPPER(title) LIKE UPPER(:title)");
+        repositoryUtils.addStringField(title, queryBuilder, hasPreviousCriteria, "( UPPER(title) LIKE UPPER('%' || :title || '%') OR similarity(title, :title ) > 0.35 )");
 
 
         if (tags != null && !tags.isEmpty()) {

@@ -12,9 +12,11 @@ CREATE TABLE IF NOT EXISTS plan
     images        TEXT[]               default '{}',
     price         NUMERIC     NOT NULL check ( price > 0 ),
     type          varchar(55) NOT NULL,
-    days       BIGINT[]             default '{}',
+    days          BIGINT[]             default '{}',
     display       BOOLEAN     NOT NULL DEFAULT FALSE,
     objective     varchar(55) NOT NULL
 );
 
-CREATE INDEX IF NOT EXISTS idx_user_id ON plan (user_id);
+CREATE INDEX IF NOT EXISTS idx_user_id_plan ON plan (user_id);
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
+CREATE INDEX IF NOT EXISTS idx_plan_title_trgm ON plan USING GIN (title gin_trgm_ops);

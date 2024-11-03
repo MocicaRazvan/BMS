@@ -27,4 +27,4 @@ RUN apt-get update && apt-get install -y curl netcat-openbsd && rm -rf /var/lib/
 COPY --from=build /app/day-service/target/day-service-0.0.1-SNAPSHOT.jar .
 
 
-ENTRYPOINT ["java", "--enable-preview", "-jar", "day-service-0.0.1-SNAPSHOT.jar"]
+ENTRYPOINT ["java", "--enable-preview","-Dreactor.schedulers.defaultBoundedElasticOnVirtualThreads=true", "-jar", "day-service-0.0.1-SNAPSHOT.jar"]

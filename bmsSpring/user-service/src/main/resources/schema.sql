@@ -43,4 +43,9 @@ CREATE TABLE IF NOT EXISTS oauth_state
     updated_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE INDEX IF NOT EXISTS idx_user_id_jwt_token ON jwt_token (user_id);
+CREATE INDEX IF NOT EXISTS idx_user_id_otp_token ON otp_token (user_id);
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
+CREATE INDEX IF NOT EXISTS idx_user_custom_email_trgm ON user_custom USING gin (email gin_trgm_ops);
+
 

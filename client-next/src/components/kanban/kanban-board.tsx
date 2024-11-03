@@ -556,7 +556,7 @@ export default function KanbanBoard({
           transition={{
             type: "spring",
             stiffness: 82.5,
-            duration: 0.45,
+            duration: 0.4,
             damping: 12,
           }}
         >

@@ -27,11 +27,9 @@ export function AiChatBoxWrapper(props: AiChatBoxTexts) {
       })
         .then(({ messages, isFinished, error }) => {
           if (error) {
-            console.error("AiChatBoxWrapper error", error);
             setIsFinished(true);
             return;
           }
-          console.error("AiChatBoxWrapper messages", messages);
           if (messages[0].length > 0) {
             setInitialMessages(
               messages[0].map((m) => ({

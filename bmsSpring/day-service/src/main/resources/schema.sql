@@ -27,4 +27,6 @@ CREATE TABLE IF NOT EXISTS meal
 );
 
 CREATE INDEX IF NOT EXISTS idx_meal_user_id ON meal (user_id);
-
+CREATE INDEX IF NOT EXISTS idx_meal_day_id ON meal (day_id);
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
+CREATE INDEX IF NOT EXISTS idx_day_title_trgm ON day USING GIN (title gin_trgm_ops);

@@ -85,12 +85,91 @@ public class PageableUtilsCustom {
             queryString.setLength(queryString.length() - 2);
         }
 
+        addLimitAndOffset(pageRequest, queryString);
+
+        return queryString.toString();
+    }
+
+    public String createPageRequestQuery(PageRequest pageRequest, String extraOrder) {
+        StringBuilder queryString = new StringBuilder();
+
+        if (pageRequest.getSort().isSorted()) {
+            queryString.append(" ORDER BY ");
+            pageRequest.getSort().forEach(order -> {
+                queryString.append(EntitiesUtils.camelToSnake(order.getProperty()))
+                        .append(" ")
+                        .append(order.getDirection().name())
+                        .append(", ");
+            });
+            // remove the last comma and space
+            queryString.setLength(queryString.length() - 2);
+
+            if (extraOrder != null && !extraOrder.isEmpty()) {
+                queryString.append(" , ")
+                        .append(extraOrder);
+            }
+
+        } else if (extraOrder != null && !extraOrder.isEmpty()) {
+            queryString.append(" ORDER BY ")
+                    .append(extraOrder);
+        }
+
+        addLimitAndOffset(pageRequest, queryString);
+
+        return queryString.toString();
+    }
+
+
+    public String createPageRequestQuery(PageRequest pageRequest, List<String> extraOrders) {
+        StringBuilder queryString = new StringBuilder();
+
+        if (pageRequest.getSort().isSorted()) {
+            queryString.append(" ORDER BY ");
+            pageRequest.getSort().forEach(order -> {
+                queryString.append(EntitiesUtils.camelToSnake(order.getProperty()))
+                        .append(" ")
+                        .append(order.getDirection().name())
+                        .append(", ");
+            });
+            // remove the last comma and space
+            queryString.setLength(queryString.length() - 2);
+
+            if (extraOrders != null && !extraOrders.isEmpty()) {
+                extraOrders.forEach(extraOrder -> {
+                    if (extraOrder != null && !extraOrder.isEmpty()) {
+                        queryString.append(" , ")
+                                .append(extraOrder);
+                    }
+                });
+            }
+
+        } else if (extraOrders != null && !extraOrders.isEmpty()) {
+            final boolean[] first = {true};
+
+            extraOrders.forEach(extraOrder -> {
+                if (extraOrder != null && !extraOrder.isEmpty()) {
+                    if (first[0]) {
+                        queryString.append(" ORDER BY ");
+                        first[0] = false;
+                    } else {
+                        queryString.append(" , ");
+                    }
+                    queryString.append(extraOrder);
+                }
+            });
+
+        }
+
+        addLimitAndOffset(pageRequest, queryString);
+
+        return queryString.toString();
+    }
+
+    private void addLimitAndOffset(PageRequest pageRequest, StringBuilder queryString) {
         queryString.append(" LIMIT ")
                 .append(pageRequest.getPageSize())
                 .append(" OFFSET ")
                 .append(pageRequest.getOffset());
-
-        return queryString.toString();
     }
 
 

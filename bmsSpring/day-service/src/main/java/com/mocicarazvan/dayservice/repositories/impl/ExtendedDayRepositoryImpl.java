@@ -33,7 +33,8 @@ public class ExtendedDayRepositoryImpl implements ExtendedDayRepository {
         StringBuilder queryBuilder = new StringBuilder(SELECT_ALL);
         appendWhereClause(queryBuilder, title, type, excludeIds);
 
-        queryBuilder.append(pageableUtils.createPageRequestQuery(pageRequest));
+//        queryBuilder.append(pageableUtils.createPageRequestQuery(pageRequest));
+        queryBuilder.append(pageableUtils.createPageRequestQuery(pageRequest, repositoryUtils.createExtraOrder(title, "title", ":title")));
 
         DatabaseClient.GenericExecuteSpec executeSpec = getGenericExecuteSpec(title, type, excludeIds, queryBuilder);
 
@@ -46,7 +47,8 @@ public class ExtendedDayRepositoryImpl implements ExtendedDayRepository {
         appendWhereClause(queryBuilder, title, type, excludeIds);
         repositoryUtils.addNotNullField(trainerId, queryBuilder, new RepositoryUtils.MutableBoolean(queryBuilder.length() > SELECT_ALL.length()),
                 " user_id = :trainerId");
-        queryBuilder.append(pageableUtils.createPageRequestQuery(pageRequest));
+//        queryBuilder.append(pageableUtils.createPageRequestQuery(pageRequest));
+        queryBuilder.append(pageableUtils.createPageRequestQuery(pageRequest, repositoryUtils.createExtraOrder(title, "title", ":title")));
 
         DatabaseClient.GenericExecuteSpec executeSpec = getGenericExecuteSpec(title, type, excludeIds, queryBuilder);
         executeSpec = repositoryUtils.bindNotNullField(trainerId, executeSpec, "trainerId");
@@ -116,7 +118,8 @@ public class ExtendedDayRepositoryImpl implements ExtendedDayRepository {
 
     private DatabaseClient.GenericExecuteSpec getGenericExecuteSpec(String title, DayType type, List<Long> excludeIds, StringBuilder queryBuilder) {
         DatabaseClient.GenericExecuteSpec executeSpec = databaseClient.sql(queryBuilder.toString());
-        executeSpec = repositoryUtils.bindStringSearchField(title, executeSpec, "title");
+//        executeSpec = repositoryUtils.bindStringSearchField(title, executeSpec, "title");
+        executeSpec = repositoryUtils.bindStringField(title, executeSpec, "title");
         executeSpec = repositoryUtils.bindEnumField(type, executeSpec, "type");
         executeSpec = repositoryUtils.bindListField(excludeIds, executeSpec, "excludeIds");
         return executeSpec;
@@ -124,7 +127,8 @@ public class ExtendedDayRepositoryImpl implements ExtendedDayRepository {
 
     private void appendWhereClause(StringBuilder queryBuilder, String title, DayType type, List<Long> excludeIds) {
         RepositoryUtils.MutableBoolean hasPreviousCriteria = new RepositoryUtils.MutableBoolean(false);
-        repositoryUtils.addStringField(title, queryBuilder, hasPreviousCriteria, " UPPER(title) LIKE UPPER(:title)");
+//        repositoryUtils.addStringField(title, queryBuilder, hasPreviousCriteria, " UPPER(title) LIKE UPPER(:title)");
+        repositoryUtils.addStringField(title, queryBuilder, hasPreviousCriteria, "( UPPER(title) LIKE UPPER('%' || :title || '%') OR similarity(title, :title ) > 0.35 )");
         repositoryUtils.addNotNullField(type, queryBuilder, hasPreviousCriteria, " type = :type");
         repositoryUtils.addListField(excludeIds, queryBuilder, hasPreviousCriteria,
                 " id NOT IN (:excludeIds)");

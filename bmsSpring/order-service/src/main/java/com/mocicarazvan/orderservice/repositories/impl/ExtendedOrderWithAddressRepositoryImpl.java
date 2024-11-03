@@ -12,6 +12,8 @@ import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
+
 @Repository
 @RequiredArgsConstructor
 public class ExtendedOrderWithAddressRepositoryImpl implements ExtendedOrderWithAddressRepository {
@@ -51,7 +53,11 @@ public class ExtendedOrderWithAddressRepositoryImpl implements ExtendedOrderWith
 
         appendWhereClause(queryBuilder, city, state, country);
 
-        queryBuilder.append(pageableUtilsCustom.createPageRequestQuery(pageRequest));
+        queryBuilder.append(pageableUtilsCustom.createPageRequestQuery(pageRequest, List.of(
+                repositoryUtils.createExtraOrder(city, "city", ":city"),
+                repositoryUtils.createExtraOrder(state, "state", ":state"),
+                repositoryUtils.createExtraOrder(country, "country", ":country")
+        )));
 
         DatabaseClient.GenericExecuteSpec executeSpec = getGenericExecuteSpec(city, state, country, queryBuilder);
 
@@ -79,7 +85,11 @@ public class ExtendedOrderWithAddressRepositoryImpl implements ExtendedOrderWith
         repositoryUtils.addNotNullField(userId, queryBuilder, new RepositoryUtils.MutableBoolean(queryBuilder.length() > SELECT_ALL.length()),
                 " user_id = :userId");
 
-        queryBuilder.append(pageableUtilsCustom.createPageRequestQuery(pageRequest));
+        queryBuilder.append(pageableUtilsCustom.createPageRequestQuery(pageRequest, List.of(
+                repositoryUtils.createExtraOrder(city, "city", ":city"),
+                repositoryUtils.createExtraOrder(state, "state", ":state"),
+                repositoryUtils.createExtraOrder(country, "country", ":country")
+        )));
 
         DatabaseClient.GenericExecuteSpec executeSpec = getGenericExecuteSpec(city, state, country, queryBuilder);
 
@@ -112,13 +122,13 @@ public class ExtendedOrderWithAddressRepositoryImpl implements ExtendedOrderWith
         RepositoryUtils.MutableBoolean hasPreviousCriteria = new RepositoryUtils.MutableBoolean(false);
 
 
-        repositoryUtils.addStringField(city, queryBuilder, hasPreviousCriteria, " UPPER(city) LIKE UPPER(:city)");
+        repositoryUtils.addStringField(city, queryBuilder, hasPreviousCriteria, " ( UPPER(city) LIKE UPPER('%' || :city || '%') OR similarity(city, :city ) > 0.35 )");
 
 
-        repositoryUtils.addStringField(state, queryBuilder, hasPreviousCriteria, " UPPER(state) LIKE UPPER(:state)");
+        repositoryUtils.addStringField(state, queryBuilder, hasPreviousCriteria, "( UPPER(state) LIKE UPPER('%' || :state || '%') OR similarity(state, :state ) > 0.35 )");
 
 
-        repositoryUtils.addStringField(country, queryBuilder, hasPreviousCriteria, " UPPER(country) LIKE UPPER(:country)");
+        repositoryUtils.addStringField(country, queryBuilder, hasPreviousCriteria, "( UPPER(country) LIKE UPPER('%' || :country || '%') OR similarity(country, :country ) > 0.35 )");
     }
 
 
@@ -126,13 +136,22 @@ public class ExtendedOrderWithAddressRepositoryImpl implements ExtendedOrderWith
         DatabaseClient.GenericExecuteSpec executeSpec = databaseClient.sql(queryBuilder.toString());
 
 
-        executeSpec = repositoryUtils.bindStringSearchField(city, executeSpec, "city");
+//        executeSpec = repositoryUtils.bindStringSearchField(city, executeSpec, "city");
+//
+//
+//        executeSpec = repositoryUtils.bindStringSearchField(state, executeSpec, "state");
+//
+//
+//        executeSpec = repositoryUtils.bindStringSearchField(country, executeSpec, "country");
+
+        executeSpec = repositoryUtils.bindStringField(city, executeSpec, "city");
 
 
-        executeSpec = repositoryUtils.bindStringSearchField(state, executeSpec, "state");
+        executeSpec = repositoryUtils.bindStringField(state, executeSpec, "state");
 
 
-        executeSpec = repositoryUtils.bindStringSearchField(country, executeSpec, "country");
+        executeSpec = repositoryUtils.bindStringField(country, executeSpec, "country");
+
 
         return executeSpec;
     }

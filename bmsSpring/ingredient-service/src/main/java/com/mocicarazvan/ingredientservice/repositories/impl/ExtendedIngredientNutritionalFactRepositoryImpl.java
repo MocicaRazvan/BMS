@@ -48,7 +48,9 @@ public class ExtendedIngredientNutritionalFactRepositoryImpl implements Extended
 
         appendWhereClause(queryBuilder, name, display, type);
 
-        queryBuilder.append(pageableUtilsCustom.createPageRequestQuery(pageRequest));
+//        queryBuilder.append(pageableUtilsCustom.createPageRequestQuery(pageRequest));
+
+        queryBuilder.append(pageableUtilsCustom.createPageRequestQuery(pageRequest, repositoryUtils.createExtraOrder(name, "name", ":name")));
 
         DatabaseClient.GenericExecuteSpec executeSpec = getGenericExecuteSpec(name, display, type, queryBuilder);
 
@@ -77,7 +79,8 @@ public class ExtendedIngredientNutritionalFactRepositoryImpl implements Extended
 //            hasPreviousCriteria = true;
 //        }
 
-        repositoryUtils.addStringField(name, queryBuilder, hasPreviousCriteria, " UPPER(ingredient.name) LIKE UPPER(:name)");
+//        repositoryUtils.addStringField(name, queryBuilder, hasPreviousCriteria, " UPPER(ingredient.name) LIKE UPPER(:name)");
+        repositoryUtils.addStringField(name, queryBuilder, hasPreviousCriteria, "( UPPER(name) LIKE UPPER('%' || :name || '%') OR similarity(name, :name ) > 0.35 )");
 
 //        if (display != null) {
 //            queryBuilder.append(hasPreviousCriteria ? " AND" : " WHERE");
@@ -99,7 +102,7 @@ public class ExtendedIngredientNutritionalFactRepositoryImpl implements Extended
     private DatabaseClient.GenericExecuteSpec getGenericExecuteSpec(String name, Boolean display, DietType type, StringBuilder queryBuilder) {
         DatabaseClient.GenericExecuteSpec executeSpec = databaseClient.sql(queryBuilder.toString());
 
-        executeSpec = repositoryUtils.bindStringSearchField(name, executeSpec, "name");
+        executeSpec = repositoryUtils.bindStringField(name, executeSpec, "name");
         executeSpec = repositoryUtils.bindNotNullField(display, executeSpec, "display");
         executeSpec = repositoryUtils.bindEnumField(type, executeSpec, "type");
 

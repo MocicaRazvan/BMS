@@ -40,6 +40,14 @@ public class RepositoryUtils {
         }
     }
 
+    public String createExtraOrder(String field, String fieldName, String clause) {
+        if (field != null && !field.isEmpty()) {
+            return " similarity(" + fieldName + " , " + clause + " ) DESC ";
+        }
+        return "";
+    }
+
+
     public <T> DatabaseClient.GenericExecuteSpec bindNotNullField(T field, DatabaseClient.GenericExecuteSpec executeSpec, String name) {
         if (field != null) {
             executeSpec = executeSpec.bind(name, field);

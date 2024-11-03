@@ -60,7 +60,6 @@ export default function AiChatBox({
     if (!scrollRef.current) return;
 
     const { scrollTop, scrollHeight, clientHeight } = scrollRef.current;
-    // todo schimba 15 cu o variabila si mai mare daca e gen 30
     const atBottom = scrollHeight - clientHeight <= scrollTop + 20;
 
     setIsAtBottom(atBottom);

@@ -13,5 +13,8 @@ CREATE TABLE IF NOT EXISTS post
     images        TEXT[]           default '{}'
 );
 
+CREATE INDEX IF NOT EXISTS idx_user_id_post ON post (user_id);
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
+CREATE INDEX IF NOT EXISTS idx_post_title_trgm ON post USING GIN (title gin_trgm_ops);
 
 
