@@ -20,8 +20,10 @@ jobs:
         id: meta
         uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
         with:
-          images: ${{ env.REGISTRY }}/${{ secrets.DOCKER_USERNAME }}/config-server-bms
-      #          tags: latest
+          images: ${{ secrets.DOCKER_USERNAME }}/config-server-bms
+          tags: |
+            latest
+            sha 
 
       - name: Build and push Docker image
         id: push
@@ -30,12 +32,14 @@ jobs:
           context: ./bmsSpring/config-server
           file: ./Dockerfile
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/config-server-bms:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/config-server-bms:${{ steps.meta.outputs.sha_short }}
           labels: ${{ steps.meta.outputs.labels }}
 
       - name: Generate artifact attestation
         uses: actions/attest-build-provenance@v1
         with:
-          subject-name: ${{ env.REGISTRY }}/${{ secrets.DOCKER_USERNAME }}/config-server-bms
+          subject-name: ${{ env.REGISTRY }}/config-server-bms
           subject-digest: ${{ steps.push.outputs.digest }}
           push-to-registry: true
