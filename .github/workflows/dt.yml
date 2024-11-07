@@ -37,12 +37,12 @@ jobs:
         with:
           context: ./bmsSpring/config-server
           file: ./bmsSpring/config-server/Dockerfile
-          cache-to: type=local,dest=/tmp/.buildx-cache
-          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
           push: true
           tags: |
-            ${{ steps.meta.outputs.tags }}
-            latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/config-server-bms:${{ steps.meta.outputs.tags }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/config-server-bms:latest
           labels: ${{ steps.meta.outputs.labels }}
 
       - name: Generate artifact attestation
