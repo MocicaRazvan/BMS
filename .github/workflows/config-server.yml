@@ -1,4 +1,4 @@
-name: Config Server
+name: Config Server Docker Image
 
 on:
   workflow_dispatch: { }

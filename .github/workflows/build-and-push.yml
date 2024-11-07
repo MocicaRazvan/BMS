@@ -15,6 +15,15 @@ on:
         description: 'Path to Dockerfile'
         required: true
         type: string
+      build-args:
+        description: 'Optional build arguments as a single string (e.g., "ARG1=value1 ARG2=value2")'
+        required: false
+        type: string
+      environment:
+        description: 'Environment variables to set for the build'
+        required: false
+        type: string
+        default: ""
     secrets:
       DOCKERHUB_PASSWORD:
         description: 'Docker Hub password'
@@ -59,3 +68,4 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          build-args: ${{ inputs.build-args || '' }}

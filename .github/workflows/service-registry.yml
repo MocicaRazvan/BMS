@@ -1,4 +1,4 @@
-name: Service Registry
+name: Service Registry Docker Image
 
 on:
   workflow_dispatch: { }

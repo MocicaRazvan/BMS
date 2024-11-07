@@ -1,4 +1,4 @@
-name: User Service
+name: User Service Docker Image
 
 on:
   workflow_dispatch: { }
