@@ -103,9 +103,13 @@ export async function fetchStream<T = any, E extends BaseError = BaseError>({
 
     await read();
   } catch (err) {
-    error = err as E;
-
-    isFinished = true;
+    // check if error is AbortError
+    if (err && err instanceof DOMException && err?.name === "AbortError") {
+      isFinished = false;
+    } else {
+      error = err as E;
+      isFinished = true;
+    }
   }
 
   const cleanUp = () => {

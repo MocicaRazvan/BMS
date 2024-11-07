@@ -21,6 +21,9 @@ public class RedisConfig {
     @Value("${redis.port}")
     private int redisPort;
 
+    @Value("${redis.database:0}")
+    private int redisDatabase;
+
 
     @Bean
     @Primary
@@ -28,6 +31,7 @@ public class RedisConfig {
         RedisStandaloneConfiguration config = new RedisStandaloneConfiguration();
         config.setHostName(redisHost);
         config.setPort(redisPort);
+        config.setDatabase(redisDatabase);
         return new LettuceConnectionFactory(config);
     }
 
