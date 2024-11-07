@@ -8,7 +8,7 @@ on:
     paths:
       - 'bmsSpring/config-server/**'
 jobs:
-  build-and-push:
+  build-and-push-config-server:
     uses: ./.github/workflows/build-and-push.yml
     with:
       image-name: config-server-bms

@@ -8,7 +8,7 @@ on:
     paths:
       - 'bmsSpring/post-service/**'
 jobs:
-  build-and-push:
+  build-and-push-post-service:
     uses: ./.github/workflows/build-and-push.yml
     with:
       image-name: post-service-bms

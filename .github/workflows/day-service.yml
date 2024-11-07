@@ -8,7 +8,7 @@ on:
     paths:
       - 'bmsSpring/day-service/**'
 jobs:
-  build-and-push:
+  build-and-push-day-service:
     uses: ./.github/workflows/build-and-push.yml
     with:
       image-name: day-service-bms

@@ -44,7 +44,7 @@ on:
 #      DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
 #      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
 jobs:
-  docker-build-and-push:
+  docker-build-and-push-next-js:
     runs-on: self-hosted
     steps:
       - name: Checkout code

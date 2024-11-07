@@ -8,7 +8,7 @@ on:
     paths:
       - 'bmsSpring/plan-service/**'
 jobs:
-  build-and-push:
+  build-and-push-plan-service:
     uses: ./.github/workflows/build-and-push.yml
     with:
       image-name: plan-service-bms

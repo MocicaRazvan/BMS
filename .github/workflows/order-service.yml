@@ -8,7 +8,7 @@ on:
     paths:
       - 'bmsSpring/order-service/**'
 jobs:
-  build-and-push:
+  build-and-push-order-service:
     uses: ./.github/workflows/build-and-push.yml
     with:
       image-name: order-service-bms

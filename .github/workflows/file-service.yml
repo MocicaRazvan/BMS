@@ -8,7 +8,7 @@ on:
     paths:
       - 'bmsSpring/file-service/**'
 jobs:
-  build-and-push:
+  build-and-push-file-service:
     uses: ./.github/workflows/build-and-push.yml
     with:
       image-name: file-service-bms

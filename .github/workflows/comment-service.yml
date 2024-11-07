@@ -8,7 +8,7 @@ on:
     paths:
       - 'bmsSpring/comment-service/**'
 jobs:
-  build-and-push:
+  build-and-push-comment-service:
     uses: ./.github/workflows/build-and-push.yml
     with:
       image-name: comment-service-bms

@@ -8,7 +8,7 @@ on:
     paths:
       - 'bmsSpring/recipe-service/**'
 jobs:
-  build-and-push:
+  build-and-push-recipe-service:
     uses: ./.github/workflows/build-and-push.yml
     with:
       image-name: recipe-service-bms
