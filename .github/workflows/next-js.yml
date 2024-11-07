@@ -58,6 +58,12 @@ jobs:
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
+      - name: Generate date tag
+        id: date_tag
+        shell: powershell
+        run: |
+          $DateTag = (Get-Date -Format "yyyyMMddHHmm")
+          Add-Content -Path $env:GITHUB_ENV -Value ("TAG_DATE=$DateTag")
 
       - name: Extract metadata (tags, labels) for Docker
         id: meta
@@ -65,7 +71,7 @@ jobs:
         with:
           images: ${{ secrets.DOCKERHUB_USERNAME }}/next-js-bms
           tags: |
-            type=sha,format=short
+            ${{env.TAG_DATE}}
             latest
 
       - name: Build and push Docker image
