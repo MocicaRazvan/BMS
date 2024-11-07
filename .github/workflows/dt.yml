@@ -20,7 +20,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
         with:
-          images: ${{ secrets.DOCKER_USERNAME }}/config-server-bms
+          images: ${{ secrets.DOCKERHUB_USERNAME }}/config-server-bms
           tags: type=sha,sha=short
 
       - name: Build and push Docker image
