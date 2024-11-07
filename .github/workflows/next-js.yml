@@ -9,9 +9,9 @@ on:
       - 'client-next/**'
 jobs:
   build-and-push:
-    uses: ./.github/workflows/build-and-push.yml
+    uses: ./.github/workflow-templates/build-and-push.yml
     with:
-      image-name: comment-service-bms
+      image-name: next-js-bms
       context: ./client-next
       dockerfile: ./client-next/Dockerfile
       build-args: |

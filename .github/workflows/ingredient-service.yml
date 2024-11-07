@@ -9,7 +9,7 @@ on:
       - 'bmsSpring/ingredient-service/**'
 jobs:
   build-and-push:
-    uses: ./.github/workflows/build-and-push.yml
+    uses: ./.github/workflow-templates/build-and-push.yml
     with:
       image-name: ingredient-service-bms
       context: ./bmsSpring
