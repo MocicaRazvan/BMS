@@ -9,7 +9,7 @@ on:
       - 'bmsSpring/websocket-service/**'
 jobs:
   build-and-push:
-    uses: ./.github/workflow-templates/build-and-push.yml
+    uses: ./.github/workflows/build-and-push.yml
     with:
       image-name: websocket-service-bms
       context: ./bmsSpring/websocket-service

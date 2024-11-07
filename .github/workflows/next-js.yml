@@ -9,7 +9,7 @@ on:
       - 'client-next/**'
 jobs:
   build-and-push:
-    uses: ./.github/workflow-templates/build-and-push.yml
+    uses: ./.github/workflows/build-and-push.yml
     with:
       image-name: next-js-bms
       context: ./client-next
