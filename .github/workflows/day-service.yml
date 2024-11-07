@@ -1,0 +1,19 @@
+name: Day Service Docker Image
+
+on:
+  workflow_dispatch: { }
+  push:
+    branches:
+      - main
+    paths:
+      - 'bmsSpring/day-service/**'
+jobs:
+  build-and-push:
+    uses: ./.github/workflows/build-and-push.yml
+    with:
+      image-name: day-service-bms
+      context: ./bmsSpring
+      dockerfile: ./bmsSpring/day-service/Dockerfile
+    secrets:
+      DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}

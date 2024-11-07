@@ -1,0 +1,19 @@
+name: File Service Docker Image
+
+on:
+  workflow_dispatch: { }
+  push:
+    branches:
+      - main
+    paths:
+      - 'bmsSpring/file-service/**'
+jobs:
+  build-and-push:
+    uses: ./.github/workflows/build-and-push.yml
+    with:
+      image-name: file-service-bms
+      context: ./bmsSpring/file-service
+      dockerfile: ./bmsSpring/file-service/Dockerfile
+    secrets:
+      DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}

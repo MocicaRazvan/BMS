@@ -1,0 +1,19 @@
+name: Order Service Docker Image
+
+on:
+  workflow_dispatch: { }
+  push:
+    branches:
+      - main
+    paths:
+      - 'bmsSpring/order-service/**'
+jobs:
+  build-and-push:
+    uses: ./.github/workflows/build-and-push.yml
+    with:
+      image-name: order-service-bms
+      context: ./bmsSpring
+      dockerfile: ./bmsSpring/order-service/Dockerfile
+    secrets:
+      DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
