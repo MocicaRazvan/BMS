@@ -28,7 +28,9 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: ${{ secrets.DOCKERHUB_USERNAME }}/config-server-bms
-          tags: type=sha,sha=short
+          tags: |
+            type=sha,format=short
+            latest
 
       - name: Build and push Docker image
         id: push
@@ -39,9 +41,7 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
           push: true
-          tags: |
-            ${{ secrets.DOCKERHUB_USERNAME }}/config-server-bms:${{ steps.meta.outputs.tags }}
-            ${{ secrets.DOCKERHUB_USERNAME }}/config-server-bms:latest
+          tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
       - name: Generate artifact attestation
