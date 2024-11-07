@@ -106,7 +106,7 @@ ollama_models
 
 nginx/certs
 
-scrape
+./scrape
 
 wol.txt
 seed
