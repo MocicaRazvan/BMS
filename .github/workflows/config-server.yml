@@ -1,7 +1,12 @@
-name: Test Docker Login
+name: Config Server
 
 on:
   workflow_dispatch: { }
+  push:
+    branches:
+      - main
+    paths:
+      - 'bmsSpring/config-server/**'
 jobs:
   build-and-push:
     uses: ./.github/workflows/build-and-push.yml
