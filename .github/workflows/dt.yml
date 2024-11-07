@@ -31,8 +31,8 @@ jobs:
           file: ./Dockerfile
           push: true
           tags: |
-            ${{ secrets.DOCKER_USERNAME }}/config-server-bms:${{ steps.meta.outputs.tags }}
-            ${{ secrets.DOCKER_USERNAME }}/config-server-bms:latest
+            ${{ steps.meta.outputs.tags }}
+            latest
           labels: ${{ steps.meta.outputs.labels }}
 
       - name: Generate artifact attestation
