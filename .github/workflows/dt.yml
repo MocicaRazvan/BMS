@@ -41,8 +41,8 @@ jobs:
           cache-to: type=gha,mode=max
           push: true
           tags: |
-            ${{ secrets.DOCKERHUB_USERNAME }}/config-server-bms:${{ steps.meta.outputs.tags }}
-            ${{ secrets.DOCKERHUB_USERNAME }}/config-server-bms:latest
+            ${{ steps.meta.outputs.tags }}
+            latest
           labels: ${{ steps.meta.outputs.labels }}
 
       - name: Generate artifact attestation
