@@ -31,7 +31,7 @@ function loadCartFromLocalStorage(): CartState | undefined {
     if (serializedCart === null) return undefined;
     return JSON.parse(serializedCart);
   } catch (err) {
-    console.error("Failed to load cart from local storage:", err);
+    // console.error("Failed to load cart from local storage:", err);
     return undefined;
   }
 }
