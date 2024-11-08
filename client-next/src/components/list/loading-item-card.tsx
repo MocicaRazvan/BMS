@@ -5,7 +5,7 @@ export default function LoadingItemCard() {
   return (
     <div
       className={cn(
-        "flex flex-col justify-between items-center gap-2 border rounded-xl p-4 w-full  shadow-foreground ",
+        "flex flex-col justify-between items-center gap-2 border rounded-xl p-4 w-full  shadow-foreground h-[565px]",
       )}
     >
       <Skeleton className="w-full h-[250px] rounded-lg" />
