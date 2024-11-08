@@ -133,7 +133,7 @@ export default function GridList<T extends TitleBodyImagesUserDto>({
             //   <LoadingSpinner />
             // </section>
             Array.from({ length: sizeOptions?.[0] || 6 }).map((_, i) => (
-              <LoadingItemCard key={i + "loading"} />
+              <LoadingItemCard key={i + "loading"} className="h-[565px] " />
             ))}
           {items.map((item, i) => (
             <motion.div
