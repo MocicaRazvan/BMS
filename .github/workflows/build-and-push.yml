@@ -39,7 +39,6 @@ jobs:
       image-name: ${{ inputs.image-name }}
       context: ${{ inputs.context }}
       dockerfile: ${{ inputs.dockerfile }}
-      build-args: ${{ inputs.build-args }}
     secrets:
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
       DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
