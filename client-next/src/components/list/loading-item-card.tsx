@@ -1,19 +1,18 @@
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
-import { HTMLAttributes } from "react";
 
-interface Props extends HTMLAttributes<HTMLDivElement> {}
-
-export default function LoadingItemCard({ className, ...rest }: Props) {
+export default function LoadingItemCard() {
   return (
     <div
       className={cn(
-        "flex items-center justify-center gap-2 border rounded-xl p-4 w-full  hover:shadow-lg transition-all duration-300 shadow-foreground ",
-        className,
+        "flex flex-col justify-between items-center gap-2 border rounded-xl p-4 w-full  shadow-foreground ",
       )}
-      {...rest}
     >
-      <Skeleton className="w-full h-full flex-1" />
+      <Skeleton className="w-full h-[250px] rounded-lg" />
+      <Skeleton className="w-full h-[80px] mt-1.5 rounded-lg" />
+      <Skeleton className="w-full h-[200px] mt-1.5 rounded-lg" />
+      <hr className="border my-1" />
+      <Skeleton className="w-full flex-grow rounded-lg" />
     </div>
   );
 }
