@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { encode, getToken } from "next-auth/jwt";
+import { emitError } from "@/logger";
 
 export default async function handleOauthCall(
   req: NextRequest,
@@ -73,6 +74,10 @@ export default async function handleOauthCall(
       return new Response(JSON.stringify(data), { status: response.status });
     }
   } catch (error) {
+    emitError({
+      message: "Error handling OAuth call",
+      error: error instanceof Object ? JSON.stringify(error) : "Error",
+    });
     console.log(error);
     return new Response(JSON.stringify({ error: "Internal server error" }), {
       status: 500,

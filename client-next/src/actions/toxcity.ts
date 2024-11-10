@@ -3,6 +3,7 @@ import * as toxicity from "@tensorflow-models/toxicity";
 import LanguageDetect from "languagedetect";
 import { franc } from "franc-min";
 import { detect } from "tinyld";
+import { emitInfo } from "@/logger";
 
 const lngDetector = new LanguageDetect();
 
@@ -26,6 +27,11 @@ export async function loadGlobalModel(): Promise<toxicity.ToxicityClassifier> {
       "toxicity",
     ];
     globalModel = await toxicity.load(threshold, labels);
+    emitInfo({
+      message: "Toxicity Model Loaded",
+      threshold,
+      labels,
+    });
   }
   return globalModel;
 }
