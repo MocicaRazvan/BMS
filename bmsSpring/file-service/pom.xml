@@ -153,6 +153,12 @@
                 <artifactId>mongodb-driver-core</artifactId>
                 <version>5.1.4</version>
             </dependency>
+            <dependency>
+                <groupId>com.github.loki4j</groupId>
+                <artifactId>loki-logback-appender</artifactId>
+                <version>1.5.2</version>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
 
