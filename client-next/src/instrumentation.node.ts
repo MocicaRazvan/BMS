@@ -105,9 +105,10 @@ const sdk = new NodeSDK({
               url: process.env.NEXT_LOKI_URL,
             }),
             {
-              scheduledDelayMillis: 500,
-              maxExportBatchSize: 50,
-              exportTimeoutMillis: 3000,
+              scheduledDelayMillis: 1500,
+              maxExportBatchSize: 512,
+              exportTimeoutMillis: 30000,
+              maxQueueSize: 2048,
             },
           ),
         ]

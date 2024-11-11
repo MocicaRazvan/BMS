@@ -41,10 +41,10 @@ export async function getToxicity(text: string) {
   const tangDet = lngDetector.detect(text, 5).some((l) => l[0] === "english");
   const tinyDet = detect(text) === "en";
 
-  console.log("LANG", franc(text, { minLength: 2 }));
-  console.log("DETECT", lngDetector.detect(text, 5));
-  console.log("TINY", detect(text));
-  console.log("text.length", text.length);
+  // console.log("LANG", franc(text, { minLength: 2 }));
+  // console.log("DETECT", lngDetector.detect(text, 5));
+  // console.log("TINY", detect(text));
+  // console.log("text.length", text.length);
   if (!lang && !tangDet && !tinyDet && text.length > 10) {
     return {
       failure: true,
@@ -54,7 +54,7 @@ export async function getToxicity(text: string) {
   }
   const model = await loadGlobalModel();
   const predictions = await model.classify(text);
-  console.log("PREDICTIONS", JSON.stringify(predictions, null, 2));
+  // console.log("PREDICTIONS", JSON.stringify(predictions, null, 2));
 
   const isToxic = predictions.some((p) => p.results[0].match);
   if (isToxic) {
