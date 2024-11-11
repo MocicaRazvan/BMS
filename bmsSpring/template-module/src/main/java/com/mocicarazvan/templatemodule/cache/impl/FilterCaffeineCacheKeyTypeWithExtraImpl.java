@@ -83,7 +83,7 @@ public abstract class FilterCaffeineCacheKeyTypeWithExtraImpl<E, M, K extends Fi
         return baseCaffeineCacher.<T>getCachedFluxOrEmpty(filterKey)
                 .switchIfEmpty(
                         Flux.defer(() -> {
-                            log.error("Cache miss for key: {}", cacheKey);
+//                            log.error("Cache miss for key: {}", cacheKey);
                             Flux<T> cachedFlux = baseCaffeineCacher.cacheFlux(flux);
                             return cachedFlux
                                     .map(putIdCall)
@@ -111,7 +111,7 @@ public abstract class FilterCaffeineCacheKeyTypeWithExtraImpl<E, M, K extends Fi
         return baseCaffeineCacher.<T>getCachedMonoOrEmpty(filterKey)
                 .switchIfEmpty(
                         Mono.defer(() -> {
-                            log.error("Cache miss for key: {}", cacheKey);
+//                            log.error("Cache miss for key: {}", cacheKey);
                             Mono<T> cachedMono = baseCaffeineCacher.cacheMono(mono);
                             return cachedMono
                                     .switchIfEmpty(cachedMono)
@@ -135,7 +135,7 @@ public abstract class FilterCaffeineCacheKeyTypeWithExtraImpl<E, M, K extends Fi
         return baseCaffeineCacher.<T>getCachedMonoOrEmpty(filterKey)
                 .switchIfEmpty(
                         Mono.defer(() -> {
-                            log.error("Cache miss for key: {}", cacheKey);
+//                            log.error("Cache miss for key: {}", cacheKey);
                             Mono<T> cachedMono = baseCaffeineCacher.cacheMono(mono);
                             return cachedMono
                                     .switchIfEmpty(cachedMono)
@@ -251,7 +251,7 @@ public abstract class FilterCaffeineCacheKeyTypeWithExtraImpl<E, M, K extends Fi
 
     @Override
     public Predicate<K> extraContainingPredicate(M extra) {
-        log.error("extraContainingPredicate: {}", extra);
+//        log.error("extraContainingPredicate: {}", extra);
         return key -> key.getExtra() == null || key.getExtra().equals(extra);
     }
 

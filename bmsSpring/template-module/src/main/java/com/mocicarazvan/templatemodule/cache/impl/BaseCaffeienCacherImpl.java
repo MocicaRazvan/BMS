@@ -89,10 +89,10 @@ public class BaseCaffeienCacherImpl<K> implements BaseCaffeineCacher<K> {
     private <T> Mono<? extends T> getMonoFuture(K key) {
         CompletableFuture<Publisher<?>> futureCached = cacheMap.getIfPresent(key);
         if (futureCached != null) {
-            log.info("Mono cache hit for key: {}", key);
+//            log.info("Mono cache hit for key: {}", key);
             return Mono.fromFuture(futureCached).flatMap(cached -> (Mono<T>) cached);
         }
-        log.info("Mono cache miss for key: {}", key);
+//        log.info("Mono cache miss for key: {}", key);
         return null;
     }
 
@@ -111,11 +111,11 @@ public class BaseCaffeienCacherImpl<K> implements BaseCaffeineCacher<K> {
     private <T> Publisher<T> getPublisherFuture(K key) {
         CompletableFuture<Publisher<?>> futureCached = cacheMap.getIfPresent(key);
         if (futureCached != null) {
-            log.info("Flux cache hit for key: {}", key);
+//            log.info("Flux cache hit for key: {}", key);
             return Mono.fromFuture(futureCached)
                     .flatMapMany(cached -> (Flux<T>) cached);
         }
-        log.info("Flux cache miss for key: {}", key);
+//        log.info("Flux cache miss for key: {}", key);
         return null;
     }
 
@@ -132,14 +132,14 @@ public class BaseCaffeienCacherImpl<K> implements BaseCaffeineCacher<K> {
 
     @Override
     public <T> Flux<T> dangerously_PutAlreadyCachedFlux(K key, Flux<T> flux) {
-        log.error("Dangerously putting for key {}", key);
+//        log.error("Dangerously putting for key {}", key);
         cacheMap.put(key, CompletableFuture.completedFuture(flux));
         return flux;
     }
 
     @Override
     public <T> Mono<T> dangerously_PutAlreadyCachedMono(K key, Mono<T> mono) {
-        log.error("Dangerously putting for key {}", key);
+//        log.error("Dangerously putting for key {}", key);
         cacheMap.put(key, CompletableFuture.completedFuture(mono));
         return mono;
     }
@@ -176,26 +176,26 @@ public class BaseCaffeienCacherImpl<K> implements BaseCaffeineCacher<K> {
     //var future = asyncCache.asMap().remove(key);
     @Override
     public Mono<Void> invalidateCache(K key) {
-        log.info("Invalidating cache for key: {}", key);
+//        log.info("Invalidating cache for key: {}", key);
         return Mono.fromRunnable(() -> cacheMap.synchronous().invalidate(key));
     }
 
     @Override
     public Mono<Void> invalidateAllCache() {
-        log.error("Invalidating all cache");
+//        log.error("Invalidating all cache");
         return Mono.fromRunnable(() -> cacheMap.synchronous().invalidateAll());
     }
 
 
     @Override
     public Mono<Void> invalidateAllCache(Iterable<K> keys) {
-        log.error("Invalidating cache for keys: {}", keys);
+//        log.error("Invalidating cache for keys: {}", keys);
         return Mono.fromRunnable(() -> cacheMap.synchronous().invalidateAll(keys));
     }
 
     @Override
     public Set<K> getKeysByCriteria(Predicate<K> criteria) {
-        log.info("Getting keys by criteria");
+//        log.info("Getting keys by criteria");
         return cacheMap.synchronous().asMap().keySet().stream()
                 .filter(criteria)
                 .collect(Collectors.toSet());
@@ -203,7 +203,7 @@ public class BaseCaffeienCacherImpl<K> implements BaseCaffeineCacher<K> {
 
     @Override
     public ConcurrentMap<K, Publisher<?>> getAsMap() {
-        log.info("Retrieving cache as a map");
+//        log.info("Retrieving cache as a map");
         return cacheMap.synchronous().asMap();
     }
 
@@ -214,14 +214,14 @@ public class BaseCaffeienCacherImpl<K> implements BaseCaffeineCacher<K> {
             if (futureValue != null) {
                 return Mono.fromFuture(futureValue)
                         .doOnSuccess(value -> {
-                            log.error("Changing key from {} to {}", oldKey, newKey);
+//                            log.error("Changing key from {} to {}", oldKey, newKey);
                             cacheMap.synchronous().invalidate(oldKey);
                             cacheMap.put(newKey, CompletableFuture.completedFuture(value));
-                            log.error("Key changed successfully from {} to {}", oldKey, newKey);
+//                            log.error("Key changed successfully from {} to {}", oldKey, newKey);
                         })
                         .then();
             } else {
-                log.error("Value is null for key: {}", oldKey);
+//                log.error("Value is null for key: {}", oldKey);
                 return invalidateAllCache();
             }
         });

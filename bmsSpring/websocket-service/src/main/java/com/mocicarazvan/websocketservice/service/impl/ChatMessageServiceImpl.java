@@ -67,7 +67,7 @@ public class ChatMessageServiceImpl implements ChatMessageService {
                     return cm;
                 }).map(chatMessageRepository::save)
                 .map(c -> {
-                    log.error("Chat msg payload: {}", chatMessagePayload);
+//                    log.error("Chat msg payload: {}", chatMessagePayload);
                     ChatMessageResponse cmr = chatMessageMapper.fromModelToResponse(c);
 
                     // the front subscribes to both queues
@@ -83,9 +83,9 @@ public class ChatMessageServiceImpl implements ChatMessageService {
                     // todo make the check bette
                     // extra safe check just to be sure
                     // sometimes the front in dev mode navigates before the stomp publish  message is processed
-                    log.error("Sender is {} , receiver chat is {}",
-                            c.getSender().getConnectedChatRoom() != null ? c.getSender().getConnectedChatRoom().getId() : null,
-                            c.getReceiver().getConnectedChatRoom() != null ? c.getReceiver().getConnectedChatRoom().getId() : null);
+//                    log.error("Sender is {} , receiver chat is {}",
+//                            c.getSender().getConnectedChatRoom() != null ? c.getSender().getConnectedChatRoom().getId() : null,
+//                            c.getReceiver().getConnectedChatRoom() != null ? c.getReceiver().getConnectedChatRoom().getId() : null);
                     if (c.getSender().getConnectedChatRoom() == null && c.getChatRoom() != null) {
                         c.getSender().setConnectedChatRoom(c.getChatRoom());
                         c.getSender().setConnectedStatus(ConnectedStatus.ONLINE);
@@ -95,11 +95,11 @@ public class ChatMessageServiceImpl implements ChatMessageService {
                     if (c.getReceiver().getConnectedChatRoom() != null &&
                             c.getReceiver().getConnectedChatRoom().getId().equals(
                                     Objects.requireNonNull(c.getSender().getConnectedChatRoom()).getId())) {
-                        log.error("Sending to receiver " + c.getReceiver().getEmail());
+//                        log.error("Sending to receiver " + c.getReceiver().getEmail());
 //                        messagingTemplate.convertAndSendToUser(chatMessagePayload.getReceiverEmail(), "/queue/messages", cmr);
                         customConvertAndSendToUser.sendToUser(chatMessagePayload.getReceiverEmail(), "/topic/messages", cmr);
                     } else {
-                        log.error("Sending to sender" + c.getSender().getEmail());
+//                        log.error("Sending to sender" + c.getSender().getEmail());
 //                        messagingTemplate.convertAndSendToUser(chatMessagePayload.getSenderEmail(), "/queue/messages", cmr);
                         customConvertAndSendToUser.sendToUser(chatMessagePayload.getSenderEmail(), "/topic/messages", cmr);
                     }

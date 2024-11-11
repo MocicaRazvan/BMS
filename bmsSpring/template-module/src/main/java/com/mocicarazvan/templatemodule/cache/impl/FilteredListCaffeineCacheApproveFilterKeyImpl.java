@@ -71,21 +71,21 @@ public class FilteredListCaffeineCacheApproveFilterKeyImpl<R extends ApproveDto>
 
     @Override
     public Predicate<ApproveFilterKey> approvedDeletePredicate(Boolean approved) {
-        log.error("approvedDeletePredicate: {}", approved);
+//        log.error("approvedDeletePredicate: {}", approved);
         return key -> key.getExtra() == null || key.getExtra().equals(key.mapToExtra(approved)) || key.getExtra().equals(key.mapToExtra(null));
 
     }
 
     @Override
     public Predicate<ApproveFilterKey> approvedCreatePredicate() {
-        log.error("approvedCreatePredicate");
+//        log.error("approvedCreatePredicate");
         return approvedDeletePredicate(false);
 
     }
 
     @Override
     public Predicate<ApproveFilterKey> approvedUpdatePredicate(Boolean approved) {
-        log.error("approvedUpdatePredicate: {}", approved);
+//        log.error("approvedUpdatePredicate: {}", approved);
         // if approved then will move to dissaproved so both and null should be invalidated,
         // if not approved then only the dissaproved and null
         if (approved == null || approved.equals(Boolean.TRUE)) {
@@ -96,7 +96,7 @@ public class FilteredListCaffeineCacheApproveFilterKeyImpl<R extends ApproveDto>
 
     @Override
     public Predicate<ApproveFilterKey> approvePredicateForPublic(boolean approved) {
-        log.error("approvePredicateForPublic: {}", approved);
+//        log.error("approvePredicateForPublic: {}", approved);
         if (approved) {
             return byPublicPredicate();
         }

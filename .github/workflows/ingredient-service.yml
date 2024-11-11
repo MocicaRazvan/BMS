@@ -7,6 +7,7 @@ on:
       - main
     paths:
       - 'bmsSpring/ingredient-service/**'
+      - 'bmsSpring/template-module/**'
 jobs:
   build-and-push-ingredient-service:
     uses: ./.github/workflows/build-and-push.yml

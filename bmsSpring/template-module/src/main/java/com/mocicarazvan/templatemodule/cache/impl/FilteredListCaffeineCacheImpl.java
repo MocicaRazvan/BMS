@@ -61,7 +61,7 @@ public abstract class FilteredListCaffeineCacheImpl<K extends FilterKeyType, R> 
         return baseCaffeineCacher.<T>getCachedFluxOrEmpty(filterKey)
                 .switchIfEmpty(
                         Flux.defer(() -> {
-                            log.error("Cache miss Flux for key: {}", cacheKey);
+//                            log.error("Cache miss Flux for key: {}", cacheKey);
                             Flux<T> cachedFlux = baseCaffeineCacher.cacheFlux(flux);
                             return cachedFlux
                                     .map(putIdCall)
@@ -83,7 +83,7 @@ public abstract class FilteredListCaffeineCacheImpl<K extends FilterKeyType, R> 
         return baseCaffeineCacher.<T>getCachedMonoOrEmpty(filterKey)
                 .switchIfEmpty(
                         Mono.defer(() -> {
-                            log.error("Cache miss Mono for key: {}", cacheKey);
+//                            log.error("Cache miss Mono for key: {}", cacheKey);
                             Mono<T> cachedMono = baseCaffeineCacher.cacheMono(mono);
                             return cachedMono
                                     .switchIfEmpty(cachedMono)
@@ -103,7 +103,7 @@ public abstract class FilteredListCaffeineCacheImpl<K extends FilterKeyType, R> 
         return baseCaffeineCacher.<T>getCachedMonoOrEmpty(filterKey)
                 .switchIfEmpty(
                         Mono.defer(() -> {
-                            log.error("Cache miss Mono id list for key: {}", cacheKey);
+//                            log.error("Cache miss Mono id list for key: {}", cacheKey);
                             Mono<T> cachedMono = baseCaffeineCacher.cacheMono(mono);
                             return cachedMono
                                     .switchIfEmpty(cachedMono)
@@ -166,13 +166,13 @@ public abstract class FilteredListCaffeineCacheImpl<K extends FilterKeyType, R> 
 
     @Override
     public Predicate<K> idContainingPredicate(Long id) {
-        log.error("idContainingPredicate: {}", id);
+//        log.error("idContainingPredicate: {}", id);
         return key -> key.getIds() == null || key.getIds().contains(id);
     }
 
     @Override
     public Predicate<K> idContainingPredicate(List<Long> ids) {
-        log.error("idContainingPredicate: {}", ids);
+//        log.error("idContainingPredicate: {}", ids);
         return key -> key.getIds() == null || key.getIds().stream().anyMatch(ids::contains);
     }
 
@@ -183,19 +183,19 @@ public abstract class FilteredListCaffeineCacheImpl<K extends FilterKeyType, R> 
 
     @Override
     public Predicate<K> byTrainerIdPredicate(Long trainerId) {
-        log.error("byTrainerIdPredicate: {}", trainerId);
+//        log.error("byTrainerIdPredicate: {}", trainerId);
         return key -> key.getRouteType().getTrainerId().equals(trainerId);
     }
 
     @Override
     public Predicate<K> byAdminPredicate() {
-        log.error("byAdminPredicate");
+//        log.error("byAdminPredicate");
         return key -> key.getRouteType().getIsAdmin();
     }
 
     @Override
     public Predicate<K> byPublicPredicate() {
-        log.error("byPublicPredicate");
+//        log.error("byPublicPredicate");
         return key -> key.getRouteType().getIsPublic();
     }
 
@@ -265,7 +265,7 @@ public abstract class FilteredListCaffeineCacheImpl<K extends FilterKeyType, R> 
 
     @Override
     public Mono<Void> invalidateAllCache() {
-        log.error("Invalidating all cache");
+//        log.error("Invalidating all cache");
         return baseCaffeineCacher.invalidateAllCache();
     }
 

@@ -7,6 +7,7 @@ on:
       - main
     paths:
       - 'bmsSpring/comment-service/**'
+      - 'bmsSpring/template-module/**'
 jobs:
   build-and-push-comment-service:
     uses: ./.github/workflows/build-and-push.yml
