@@ -27,6 +27,9 @@ export default function SignOut({
           variant="destructive"
           className=" px-24 py-5"
           onClick={() => {
+            if (window && window?.localStorage) {
+              window.localStorage.clear();
+            }
             signOut({ redirect: false, callbackUrl: "/auth/signin" }).then(() =>
               router.push("/auth/signin"),
             );
