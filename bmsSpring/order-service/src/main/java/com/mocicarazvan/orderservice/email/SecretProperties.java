@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 @EqualsAndHashCode(callSuper = true)
 @Component
 @ConfigurationProperties(prefix = "encoding")
-@PropertySource("classpath:secret.properties")
+@PropertySource(value = "classpath:secret.properties", ignoreResourceNotFound = true)
 @Data
 public class SecretProperties extends com.mocicarazvan.templatemodule.email.config.SecretProperties {
 }
