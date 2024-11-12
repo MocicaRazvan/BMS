@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Data
@@ -16,5 +17,6 @@ public class MediaMetadata {
     @Id
     private String id;
     private String name;
+    @Indexed(unique = true)
     private String mediaId;
 }
