@@ -159,6 +159,9 @@ const manualPaths = [
     {
         url: 'trainer/plans/update/2',
         numberMappings: ['[planId]']
+    }, {
+        url: 'trainer/plans/duplicate/2',
+        numberMappings: ['[planId]']
     },
     {
         url: 'trainer/posts/single/67',
@@ -167,6 +170,9 @@ const manualPaths = [
     {
         url: 'trainer/posts/update/67',
         numberMappings: ['[postId]']
+    }, {
+        url: 'trainer/posts/duplicate/67',
+        numberMappings: ['[postId]']
     },
     {
         url: 'trainer/recipes/single/8',
@@ -174,6 +180,9 @@ const manualPaths = [
     },
     {
         url: 'trainer/recipes/update/8',
+        numberMappings: ['[recipeId]']
+    }, {
+        url: 'trainer/recipes/duplicate/8',
         numberMappings: ['[recipeId]']
     },
     {
@@ -207,6 +216,9 @@ const manualPaths = [
     },
     {
         url: "/admin/ingredients/update/8",
+        numberMappings: ['[ingredientId]']
+    }, {
+        url: "/admin/ingredients/duplicate/8",
         numberMappings: ['[ingredientId]']
     },
     {

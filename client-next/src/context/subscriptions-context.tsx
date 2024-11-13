@@ -18,7 +18,8 @@ export interface UserSubscriptions {
 
 export type SubscriptionAction =
   | { type: "ADD"; payload: number }
-  | { type: "INIT_ALL"; payload: number[] };
+  | { type: "INIT_ALL"; payload: number[] }
+  | { type: "ADD_ARRAY"; payload: number[] };
 
 const initialState: UserSubscriptions = {
   planIds: [],
@@ -39,7 +40,11 @@ export const subscriptionReducer = (
         ...state,
         planIds: action.payload,
       };
-
+    case "ADD_ARRAY":
+      return {
+        ...state,
+        planIds: [...new Set([...state.planIds, ...action.payload])],
+      };
     default:
       return state;
   }
@@ -66,9 +71,13 @@ export const SubscriptionProvider = ({ children, authUser }: Props) => {
       fetchStream<UserSubscriptionDto>({
         path: "/orders/subscriptions",
         token: authUser.token,
-        successCallback: (data) => {
+        // successCallback: (data) => {
+        //   console.log("Subscription fetch success", data);
+        //   dispatch({ type: "ADD", payload: data.planId });
+        // },
+        successArrayCallback: (data) => {
           console.log("Subscription fetch success", data);
-          dispatch({ type: "ADD", payload: data.planId });
+          dispatch({ type: "ADD_ARRAY", payload: data.map((d) => d.planId) });
         },
       }).catch((e) => {
         console.error("Subscription fetch error", e);

@@ -69,9 +69,12 @@ export function useFetchStream<T = any, E extends BaseError = BaseError>({
       token,
       cache,
       aboveController: abortController,
-      successCallback: (data) => {
-        setMessages((prev) => [...prev, data]);
+      successArrayCallback: (data) => {
+        setMessages((prev) => [...prev, ...data]);
       },
+      // successCallback: (data) => {
+      //   setMessages((prev) => [...prev, data]);
+      // },
       acceptHeader,
     };
 

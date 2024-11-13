@@ -13,8 +13,10 @@ export interface FetchStreamProps<T> {
   cache?: RequestCache;
   aboveController?: AbortController;
   successCallback?: (data: T) => void;
+  successArrayCallback?: (data: T[]) => void;
   errorCallback?: (error: BaseError) => void;
   acceptHeader?: AcceptHeader;
+  batchSize?: number;
 }
 
 export async function fetchStream<T = any, E extends BaseError = BaseError>({
@@ -29,8 +31,12 @@ export async function fetchStream<T = any, E extends BaseError = BaseError>({
   aboveController,
   successCallback,
   errorCallback,
+  successArrayCallback,
   acceptHeader = "application/x-ndjson",
+  batchSize = 6,
 }: FetchStreamProps<T>) {
+  // TODO RETEST ALL OF THIS
+  let batchBuffer: T[] = [];
   let messages: T[] = [];
   let error: E | null = null;
   let isFinished = false;
@@ -77,7 +83,15 @@ export async function fetchStream<T = any, E extends BaseError = BaseError>({
 
   const url = combinedQuery ? `${path}?${combinedQuery}` : path;
 
+  const handleBatchUpdate = () => {
+    messages.push(...batchBuffer);
+    successArrayCallback?.(batchBuffer);
+    batchBuffer = [];
+  };
+
   try {
+    messages = [];
+    batchBuffer = [];
     const res = await fetch(
       `${process.env.NEXT_PUBLIC_SPRING_CLIENT}${url}`,
       fetchOptions,
@@ -89,13 +103,22 @@ export async function fetchStream<T = any, E extends BaseError = BaseError>({
       const { done, value } = await reader.read();
       if (done) {
         isFinished = true;
+        if (batchBuffer.length > 0) {
+          console.log("handleBatchUpdateDone", path, batchBuffer.length);
+          handleBatchUpdate();
+        }
         return;
       }
       if (!res.ok) {
         error = value as E;
         errorCallback?.(value as E);
       } else {
-        messages = [...messages, value as T];
+        batchBuffer.push(value as T);
+        // messages = [...messages, value as T];
+        if (batchBuffer.length === batchSize) {
+          console.log("handleBatchUpdateSize", path, batchBuffer.length);
+          handleBatchUpdate();
+        }
         successCallback?.(value as T);
       }
       await read();
@@ -114,6 +137,7 @@ export async function fetchStream<T = any, E extends BaseError = BaseError>({
 
   const cleanUp = () => {
     if (!abortController?.signal?.aborted) {
+      batchBuffer = [];
       abortController?.abort();
     }
   };

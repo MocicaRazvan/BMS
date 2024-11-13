@@ -73,11 +73,11 @@ export const ChatRoom = memo(
       [searchParams],
     );
 
-    const fakeRooms = Array.from(
-      { length: 20 },
-      (_, i) =>
-        chatRooms.map((room) => ({ ...room, id: room.id + i })).flat()[0],
-    );
+    // const fakeRooms = Array.from(
+    //   { length: 20 },
+    //   (_, i) =>
+    //     chatRooms.map((room) => ({ ...room, id: room.id + i })).flat()[0],
+    // );
 
     // console.log("chat rooms", chatRooms);
     return (
