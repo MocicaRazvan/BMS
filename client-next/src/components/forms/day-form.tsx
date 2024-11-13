@@ -240,9 +240,10 @@ export default function DayForm({
           method: "POST",
         });
         if (res.error) {
+          // console.log("res", res);
           handleBaseError(res.error, setErrorMsg, error);
         } else {
-          console.log("res", res);
+          // console.log("res", res);
           toast({
             title: data.title,
             description: descriptionToast,

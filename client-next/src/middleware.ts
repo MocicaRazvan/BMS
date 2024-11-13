@@ -15,9 +15,9 @@ export function middleware(request: NextRequest) {
   const { pathname, search, origin } = request.nextUrl;
   const locale = pathname.split("/")[1];
   const localeCookie = request.cookies.get("NEXT_LOCALE");
-  console.log("locale", locale);
-  console.log("localeCookie", localeCookie);
-  console.log("search", search);
+  // console.log("locale", locale);
+  // console.log("localeCookie", localeCookie);
+  // console.log("search", search);
   if (redirectedLocales.includes(locale.toLowerCase()) && localeCookie) {
     const newPathname = `/${localeCookie.value}${pathname}`;
     const url = new URL(newPathname, origin);

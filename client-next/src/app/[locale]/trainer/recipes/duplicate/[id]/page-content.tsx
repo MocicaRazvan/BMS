@@ -10,7 +10,6 @@ import {
 import LoadingSpinner from "@/components/common/loading-spinner";
 import { checkOwner } from "@/lib/utils";
 import React from "react";
-import { Option } from "@/components/ui/multiple-selector";
 import useClientNotFound from "@/hoooks/useClientNotFound";
 import { useGetRecipeChildrenOptions } from "@/hoooks/recipes/useGetRecipeChildrenOptions";
 import { useGetRecipeWithNF } from "@/hoooks/recipes/useGetRecipeWithNF";
@@ -18,32 +17,11 @@ import { useGetRecipeWithNF } from "@/hoooks/recipes/useGetRecipeWithNF";
 interface Props extends RecipeFormProps {
   id: string;
 }
-export default function UpdateRecipePageContent({
+export default function DuplicateRecipePageContent({
   id,
   authUser,
   ...props
 }: Props) {
-  // const {
-  //   messages: recipeMessage,
-  //   error: recipeError,
-  //   isFinished: recipeIsFinished,
-  // } = useFetchStream<CustomEntityModel<RecipeResponse>>({
-  //   path: `/recipes/${id}`,
-  //   method: "GET",
-  //   authToken: true,
-  //   // useAbortController: false,
-  // });
-  //
-  // const {
-  //   messages: IQMessage,
-  //   error: IQError,
-  //   isFinished: IQIsFinished,
-  // } = useFetchStream<IngredientNutritionalFactResponseWithCount>({
-  //   path: `/recipes/ingredients/${id}`,
-  //   method: "GET",
-  //   authToken: true,
-  //   // useAbortController: false,
-  // });
   const {
     recipeIsFinished,
     recipeMessage,
@@ -55,21 +33,15 @@ export default function UpdateRecipePageContent({
   } = useGetRecipeWithNF(id);
   const { navigateToNotFound } = useClientNotFound();
 
-  console.log("HERE", recipeIsFinished, recipeMessage, recipeError);
-  console.log("HEREIQ", IQIsFinished, IQMessage, IQError, IQMessage.length);
-
-  // const children: Record<string, Option & { quantity: number }> =
-  //   useGetRecipeChildrenOptions(IQMessage);
-
   if (!recipeIsFinished || !IQIsFinished) return <LoadingSpinner />;
 
   if (recipeError?.status || IQError?.status) {
     return navigateToNotFound();
   }
-  if (recipeIsFinished && !recipeMessage[0]) {
-    return <LoadingSpinner />;
-  }
-  if (IQIsFinished && !(IQMessage.length > 0)) {
+  if (
+    (recipeIsFinished && !recipeMessage[0]) ||
+    (IQIsFinished && !(IQMessage.length > 0))
+  ) {
     return <LoadingSpinner />;
   }
 
@@ -85,7 +57,7 @@ export default function UpdateRecipePageContent({
     <RecipeForm
       authUser={authUser}
       {...props}
-      title={recipe.title}
+      title={undefined}
       body={recipe.body}
       images={recipe.images}
       videos={recipe.videos}

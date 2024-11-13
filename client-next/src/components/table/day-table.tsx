@@ -234,7 +234,8 @@ export default function DaysTable({
       {
         id: "actions",
         cell: ({ row }) => {
-          const { update, label, view, button } = dayTableColumnTexts.actions;
+          const { update, label, view, button, duplicate } =
+            dayTableColumnTexts.actions;
           return (
             <DropdownMenu modal>
               <DropdownMenuTrigger asChild>

@@ -7,7 +7,7 @@ services:
       POSTGRES_USER: myuser
       POSTGRES_PASSWORD: mypassword
     #      TZ: Europe/Bucharest
-    command: [ "postgres", "-c", "max_connections=2500" ,"-c","log_statement=all" ]
+    command: [ "postgres", "-c", "max_connections=500" ,"-c","log_statement=all" ]
     ports:
       - "5544:5432"
     volumes:
@@ -41,7 +41,7 @@ services:
       - PGPOOL_POSTGRES_USERNAME=myuser
       - PGPOOL_POSTGRES_PASSWORD=mypassword
       - PGPOOL_NUM_INIT_CHILDREN=20
-      - PGPOOL_MAX_POOL=2000
+      - PGPOOL_MAX_POOL=200
       - PGPOOL_ENABLE_LOAD_BALANCE=true
       - PGPOOL_LOAD_BALANCE_MODE=true
       - PGPOOL_ADMIN_USERNAME=admin
@@ -56,38 +56,39 @@ services:
     image: mongo:latest
     container_name: mongo-fs-container-bms
     ports:
-      - 27777:27017
+      #      - 27777:27017
+      - "27777:27017"
     volumes:
       - mongo_data:/data/db
     networks:
       - bms
 
-  nginx-mongo-fs:
-    image: nginx:latest
-    container_name: nginx-mongo-container-bms
-    volumes:
-      - ./nginx/mongo.conf:/etc/nginx/nginx.conf
-    ports:
-      - "27017:27017"
-    networks:
-      - bms
-    restart: unless-stopped
-    depends_on:
-      - mongo-fs
-    command: >
-      /bin/sh -c "
-        echo 'Updating package list and installing sudo, netcat-openbsd, and utilities...' &&
-        apt-get update &&
-        apt-get install -y sudo &&
-        apt-get install -y netcat-openbsd && 
-        apt-get install -y coreutils inetutils-ping &&  
-        echo 'Waiting for MongoDB to be ready...' &&
-        while ! nc -z mongo-fs 27017; do  
-          echo 'MongoDB is not ready yet, retrying in 5 seconds...';
-          sleep 5;
-        done &&
-        echo 'MongoDB is ready!' &&
-        nginx -g 'daemon off;'  # Start Nginx once MongoDB is ready"
+  #  nginx-mongo-fs:
+  #    image: nginx:latest
+  #    container_name: nginx-mongo-container-bms
+  #    volumes:
+  #      - ./nginx/mongo.conf:/etc/nginx/nginx.conf
+  #    ports:
+  #      - "27017:27017"
+  #    networks:
+  #      - bms
+  #    restart: unless-stopped
+  #    depends_on:
+  #      - mongo-fs
+  #    command: >
+  #      /bin/sh -c "
+  #        echo 'Updating package list and installing sudo, netcat-openbsd, and utilities...' &&
+  #        apt-get update &&
+  #        apt-get install -y sudo &&
+  #        apt-get install -y netcat-openbsd &&
+  #        apt-get install -y coreutils inetutils-ping &&
+  #        echo 'Waiting for MongoDB to be ready...' &&
+  #        while ! nc -z mongo-fs 27017; do
+  #          echo 'MongoDB is not ready yet, retrying in 5 seconds...';
+  #          sleep 5;
+  #        done &&
+  #        echo 'MongoDB is ready!' &&
+  #        nginx -g 'daemon off;'  # Start Nginx once MongoDB is ready"
 
   postgres-vectors:
     image: pgvector/pgvector:pg16
@@ -322,11 +323,11 @@ services:
         condition: service_healthy
       service-registry:
         condition: service_healthy
-      nginx-mongo-fs:
+      mongo-fs:
         condition: service_started
       zipkin:
         condition: service_started
-      nginx-redis:
+      redis:
         condition: service_started
 
   gateway-service:
@@ -442,7 +443,7 @@ services:
         condition: service_started
       stripe-cli-docker:
         condition: service_started
-      nginx-rabbitmq:
+      rabbitmq:
         condition: service_started
 
   plan-service:
@@ -578,7 +579,7 @@ services:
         condition: service_started
       zipkin:
         condition: service_started
-      nginx-rabbitmq:
+      rabbitmq:
         condition: service_started
 
   ollama:
@@ -617,6 +618,8 @@ services:
       - redis_data:/data
     networks:
       - bms
+    ports:
+      - "6379:6379"
     command:
       [
         "keydb-server",
@@ -639,32 +642,32 @@ services:
         "6000",
       ]
 
-  nginx-redis:
-    image: nginx:latest
-    container_name: nginx-redis-container-bms
-    volumes:
-      - ./nginx/redis.conf:/etc/nginx/nginx.conf
-    ports:
-      - "6379:6379"
-    networks:
-      - bms
-    restart: unless-stopped
-    depends_on:
-      - redis
-    command: >
-      /bin/sh -c "
-        echo 'Updating package list and installing netcat...' &&
-       apt-get update &&
-        apt-get install -y sudo &&
-        apt-get install -y netcat-openbsd &&  
-        apt-get install -y coreutils inetutils-ping &&
-        echo 'Waiting for Redis (KeyDB) to be ready on port 6379...' &&
-        while ! nc -z redis 6379; do  
-          echo 'Redis is not ready yet, retrying in 5 seconds...';
-          sleep 5;
-        done &&
-        echo 'Redis is ready!' &&
-        nginx -g 'daemon off;'"  # Start Nginx after Redis is ready
+  #  nginx-redis:
+  #    image: nginx:latest
+  #    container_name: nginx-redis-container-bms
+  #    volumes:
+  #      - ./nginx/redis.conf:/etc/nginx/nginx.conf
+  #    ports:
+  #      - "6379:6379"
+  #    networks:
+  #      - bms
+  #    restart: unless-stopped
+  #    depends_on:
+  #      - redis
+  #    command: >
+  #      /bin/sh -c "
+  #        echo 'Updating package list and installing netcat...' &&
+  #       apt-get update &&
+  #        apt-get install -y sudo &&
+  #        apt-get install -y netcat-openbsd &&
+  #        apt-get install -y coreutils inetutils-ping &&
+  #        echo 'Waiting for Redis (KeyDB) to be ready on port 6379...' &&
+  #        while ! nc -z redis 6379; do
+  #          echo 'Redis is not ready yet, retrying in 5 seconds...';
+  #          sleep 5;
+  #        done &&
+  #        echo 'Redis is ready!' &&
+  #        nginx -g 'daemon off;'"  # Start Nginx after Redis is ready
 
   next-js:
     container_name: next-js-container-bms
@@ -784,6 +787,8 @@ services:
     ports:
       #      - "5672:5672"
       - "15672:15672"
+      - "5672:5672" # Expose AMQP proxy
+      - "61613:61613"
     #      - "61613:61613"
     environment:
       RABBITMQ_DEFAULT_USER: guest
@@ -811,38 +816,38 @@ services:
       rabbitmq-plugins enable rabbitmq_web_stomp &&
       rabbitmq-server"
 
-  nginx-rabbitmq:
-    image: nginx:latest
-    container_name: nginx-rabbitmq-proxy
-    ports:
-      - "5672:5672" # Expose AMQP proxy
-      - "61613:61613" # Expose STOMP proxy
-    volumes:
-      - ./nginx/rabbitmq.conf:/etc/nginx/nginx.conf # Mount the custom Nginx config for RabbitMQ
-    networks:
-      - bms
-    restart: unless-stopped
-    depends_on:
-      - rabbitmq
-    command: >
-      /bin/sh -c "
-      echo 'Updating package list and installing netcat...' &&
-            apt-get update &&
-             apt-get install -y sudo &&
-             apt-get install -y netcat-openbsd &&  
-             apt-get install -y coreutils inetutils-ping &&
-
-        echo 'Waiting for RabbitMQ to be ready...' &&
-        while ! nc -z rabbitmq 5672; do  # Check if RabbitMQ AMQP is ready
-          echo 'RabbitMQ is not ready yet, retrying in 5 seconds...';
-          sleep 5;
-        done &&
-        while ! nc -z rabbitmq 61613; do  # Check if RabbitMQ STOMP is ready
-          echo 'RabbitMQ STOMP is not ready yet, retrying in 5 seconds...';
-          sleep 5;
-        done &&
-        echo 'RabbitMQ is ready, starting Nginx...' &&
-        nginx -g 'daemon off;'"
+#  nginx-rabbitmq:
+#    image: nginx:latest
+#    container_name: nginx-rabbitmq-proxy
+#    ports:
+#      - "5672:5672" # Expose AMQP proxy
+#      - "61613:61613" # Expose STOMP proxy
+#    volumes:
+#      - ./nginx/rabbitmq.conf:/etc/nginx/nginx.conf # Mount the custom Nginx config for RabbitMQ
+#    networks:
+#      - bms
+#    restart: unless-stopped
+#    depends_on:
+#      - rabbitmq
+#    command: >
+#      /bin/sh -c "
+#      echo 'Updating package list and installing netcat...' &&
+#            apt-get update &&
+#             apt-get install -y sudo &&
+#             apt-get install -y netcat-openbsd &&
+#             apt-get install -y coreutils inetutils-ping &&
+#
+#        echo 'Waiting for RabbitMQ to be ready...' &&
+#        while ! nc -z rabbitmq 5672; do  # Check if RabbitMQ AMQP is ready
+#          echo 'RabbitMQ is not ready yet, retrying in 5 seconds...';
+#          sleep 5;
+#        done &&
+#        while ! nc -z rabbitmq 61613; do  # Check if RabbitMQ STOMP is ready
+#          echo 'RabbitMQ STOMP is not ready yet, retrying in 5 seconds...';
+#          sleep 5;
+#        done &&
+#        echo 'RabbitMQ is ready, starting Nginx...' &&
+#        nginx -g 'daemon off;'"
 
 volumes:
   postgres_data:

@@ -309,6 +309,7 @@ export default function RecipeTable({
             viewOwner,
             update,
             approve,
+            duplicate,
             viewOwnerItems,
           } = recipeTableColumnsTexts.actions;
 
@@ -378,6 +379,15 @@ export default function RecipeTable({
                           href={`/trainer/recipes/update/${row.original.model.id}`}
                         >
                           {update}
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem asChild>
+                        <Link
+                          className="cursor-pointer"
+                          href={`/trainer/recipes/duplicate/${row.original.model.id}`}
+                        >
+                          {duplicate}
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />

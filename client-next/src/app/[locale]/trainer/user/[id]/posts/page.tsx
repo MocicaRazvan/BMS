@@ -49,7 +49,7 @@ export default async function UsersPostsPage({
     userPostsPageContentTexts.sortingPostsSortingOptions,
   );
 
-  console.log("AUTH", authUser);
+  // console.log("AUTH", authUser);
   return (
     <SidebarContentLayout
       navbarProps={{

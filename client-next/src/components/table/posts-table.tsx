@@ -95,7 +95,7 @@ export default function PostsTable({
 
   const router = useRouter();
   const isAdmin = authUser?.role === "ROLE_ADMIN";
-  console.log("AUTH", authUser);
+  // console.log("AUTH", authUser);
   const {
     messages,
     pageInfo,
@@ -226,6 +226,7 @@ export default function PostsTable({
             viewOwner,
             update,
             approve,
+            duplicate,
             viewOwnerItems,
           } = postTableColumnsTexts.actions;
 
@@ -295,6 +296,15 @@ export default function PostsTable({
                           href={`/trainer/posts/update/${row.original.id}`}
                         >
                           {update}
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem asChild>
+                        <Link
+                          className="cursor-pointer"
+                          href={`/trainer/posts/duplicate/${row.original.id}`}
+                        >
+                          {duplicate}
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />

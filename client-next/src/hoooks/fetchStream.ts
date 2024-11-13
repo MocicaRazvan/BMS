@@ -113,8 +113,8 @@ export async function fetchStream<T = any, E extends BaseError = BaseError>({
   }
 
   const cleanUp = () => {
-    if (!abortController.signal.aborted) {
-      abortController.abort();
+    if (!abortController?.signal?.aborted) {
+      abortController?.abort();
     }
   };
 

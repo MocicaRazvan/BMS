@@ -1,16 +1,16 @@
 import { Locale } from "@/navigation";
 import { unstable_setRequestLocale } from "next-intl/server";
 import { getUserWithMinRole } from "@/lib/user";
+import { getRecipeFormTexts } from "@/texts/components/forms";
 import { Suspense } from "react";
-import UpdateDayPageContent from "@/app/[locale]/trainer/days/update/[id]/page-content";
-import LoadingSpinner from "@/components/common/loading-spinner";
-import { DayFromTexts } from "@/components/forms/day-form";
-import { ThemeSwitchTexts } from "@/texts/components/nav";
-import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
-import { getUpdateDayPageTexts } from "@/texts/pages";
-import SidebarContentLayout from "@/components/sidebar/sidebar-content-layout";
 import { Metadata } from "next";
 import { getIntlMetadata } from "@/texts/metadata";
+import { ThemeSwitchTexts } from "@/texts/components/nav";
+import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
+import LoadingSpinner from "@/components/common/loading-spinner";
+import SidebarContentLayout from "@/components/sidebar/sidebar-content-layout";
+import { getDuplicateRecipePageTexts } from "@/texts/pages";
+import DuplicateRecipePageContent from "@/app/[locale]/trainer/recipes/duplicate/[id]/page-content";
 
 interface Props {
   params: {
@@ -18,32 +18,36 @@ interface Props {
     id: string;
   };
 }
+
 export async function generateMetadata({
   params: { locale, id },
 }: Props): Promise<Metadata> {
-  return await getIntlMetadata(
-    "trainer.UpdateDay",
-    "/trainer/days/update/" + id,
-    locale,
-  );
+  return {
+    ...(await getIntlMetadata(
+      "trainer.DuplicateRecipe",
+      "/trainer/recipes/duplicate/" + id,
+      locale,
+    )),
+  };
 }
-
-export interface UpdateDayPageTexts {
-  dayFormTexts: DayFromTexts;
+export interface DuplicateRecipePageTexts {
+  recipeFormTexts: Awaited<ReturnType<typeof getRecipeFormTexts>>;
   themeSwitchTexts: ThemeSwitchTexts;
   menuTexts: SidebarMenuTexts;
 }
 
-export default async function UpdateDayPage({ params: { locale, id } }: Props) {
+export default async function DuplicateRecipePage({
+  params: { locale, id },
+}: Props) {
   unstable_setRequestLocale(locale);
-  const [authUser, { dayFormTexts, ...rest }] = await Promise.all([
+  const [authUser, { recipeFormTexts, ...rest }] = await Promise.all([
     getUserWithMinRole("ROLE_TRAINER"),
-    getUpdateDayPageTexts(),
+    getDuplicateRecipePageTexts(),
   ]);
   return (
     <SidebarContentLayout
       navbarProps={{
-        title: dayFormTexts.baseFormTexts.header,
+        title: recipeFormTexts.baseFormTexts.header,
         ...rest,
         authUser,
         mappingKey: "trainer",
@@ -51,11 +55,11 @@ export default async function UpdateDayPage({ params: { locale, id } }: Props) {
     >
       <main className="flex items-center justify-center px-6 py-10">
         <Suspense fallback={<LoadingSpinner />}>
-          <UpdateDayPageContent
+          <DuplicateRecipePageContent
             id={id}
             authUser={authUser}
-            {...dayFormTexts}
-            path={`/days/update/meals/${id}`}
+            {...recipeFormTexts}
+            path={`/recipes/createWithVideos`}
           />
         </Suspense>
       </main>

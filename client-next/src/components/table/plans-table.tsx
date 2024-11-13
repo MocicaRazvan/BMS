@@ -406,6 +406,7 @@ export default function PlansTable({
             update,
             approve,
             disapprove,
+            duplicate,
             button,
           } = planTableColumnsTexts.actions;
           return (
@@ -474,6 +475,15 @@ export default function PlansTable({
                           href={`/trainer/plans/update/${row.original.model.id}`}
                         >
                           {update}
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />{" "}
+                      <DropdownMenuItem asChild>
+                        <Link
+                          className="cursor-pointer"
+                          href={`/trainer/plans/duplicate/${row.original.model.id}`}
+                        >
+                          {duplicate}
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />

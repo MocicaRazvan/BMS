@@ -139,6 +139,7 @@ export const postColumnActions = [
   "update",
   "approve",
   "disapprove",
+  "duplicate",
 ] as const;
 export const orderColumnActions = [
   "button",
@@ -156,6 +157,7 @@ export const recipeColumnActions = [
   "update",
   "approve",
   "disapprove",
+  "duplicate",
 ] as const;
 export const userColumnActions = [
   "button",
@@ -179,9 +181,16 @@ export const ingredientColumnActions = [
   "updateIngredient",
   "deleteIngredient",
   "toggleDisplay",
+  "duplicate",
 ] as const;
 
-export const dayColumnActions = ["button", "label", "view", "update"] as const;
+export const dayColumnActions = [
+  "button",
+  "label",
+  "view",
+  "update",
+  "duplicate",
+] as const;
 
 export const planColumnActions = [
   "button",
@@ -194,4 +203,5 @@ export const planColumnActions = [
   "disapprove",
   "display",
   "hide",
+  "duplicate",
 ] as const;

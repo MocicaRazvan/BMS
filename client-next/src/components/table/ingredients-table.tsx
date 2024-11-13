@@ -389,6 +389,7 @@ export default function IngredientsTable({
                 viewIngredient,
                 label,
                 toggleDisplay,
+                duplicate,
                 button,
               } = ingredientTableColumnTexts.actions;
               return (
@@ -428,7 +429,18 @@ export default function IngredientsTable({
                           }
                         >
                           {updateIngredient}
-                        </DropdownMenuItem>{" "}
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem
+                          className="cursor-pointer"
+                          onClick={() =>
+                            router.push(
+                              `/admin/ingredients/duplicate/${ing.ingredient.id}`,
+                            )
+                          }
+                        >
+                          {duplicate}
+                        </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
                           className="cursor-pointer"

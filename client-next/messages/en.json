@@ -784,7 +784,8 @@
             "viewOwnerItems": "View Owner's Posts",
             "update": "Update Post",
             "approve": "Approve Post",
-            "disapprove": "Disapprove Post"
+            "disapprove": "Disapprove Post",
+            "duplicate": "Duplicate Post"
           }
         },
         "recipes": {
@@ -809,7 +810,8 @@
             "viewOwnerItems": "View Owner's Recipes",
             "update": "Update Recipe",
             "approve": "Approve Recipe",
-            "disapprove": "Disapprove Recipe"
+            "disapprove": "Disapprove Recipe",
+            "duplicate": "Duplicate Recipe"
           }
         },
         "users": {
@@ -867,7 +869,8 @@
             "viewIngredient": "View Ingredient",
             "updateIngredient": "Update Ingredient",
             "deleteIngredient": "Delete Ingredient",
-            "toggleDisplay": "Toggle Display"
+            "toggleDisplay": "Toggle Display",
+            "duplicate": "Duplicate Ingredient"
           }
         },
         "plans": {
@@ -901,7 +904,8 @@
             "approve": "Approve Plan",
             "disapprove": "Disapprove Post",
             "display": "Display Plan",
-            "hide": "Hide Plan"
+            "hide": "Hide Plan",
+            "duplicate": "Duplicate Plan"
           }
         },
         "days": {
@@ -917,7 +921,8 @@
             "button": "Open Menu",
             "label": "Actions",
             "view": "View Day",
-            "update": "Update Day"
+            "update": "Update Day",
+            "duplicate": "Duplicate Day"
           }
         },
         "orders": {
@@ -1811,6 +1816,11 @@
         "description": "Update your plan on Bro Meets Science",
         "keywords": "update, plan, nutrition, facts, calories, fat, protein, carbohydrates, sugar, salt, display, toggle"
       },
+      "DuplicatePlan": {
+        "title": "Create Plan",
+        "description": "Create a new plan on Bro Meets Science by duplicating an existing one",
+        "keywords": "create, plan, nutrition, facts, calories, fat, protein, carbohydrates, sugar, salt, display, toggle"
+      },
       "CreatePost": {
         "title": "Create Post",
         "description": "Create a new post on Bro Meets Science",
@@ -1820,6 +1830,11 @@
         "title": "Update Your Post",
         "description": "Update your post on Bro Meets Science",
         "keywords": "update, post, write, knowledge, insights, topics, professionals, free, platform"
+      },
+      "DuplicatePost": {
+        "title": "Create Post",
+        "description": "Create a new post on Bro Meets Science by duplicating an existing one",
+        "keywords": "create, post, write, knowledge, insights, topics, professionals, free, platform"
       },
       "CreateRecipe": {
         "title": "Create Recipe",
@@ -1835,6 +1850,11 @@
         "title": "Update Your Recipe",
         "description": "Update your recipe on Bro Meets Science",
         "keywords": "update, recipe, write, knowledge, insights, topics, professionals, free, platform"
+      },
+      "DuplicateRecipe": {
+        "title": "Create Recipe",
+        "description": "Create a new recipe on Bro Meets Science by duplicating an existing one",
+        "keywords": "create, recipe, write, knowledge, insights, topics, professionals, free, platform"
       },
       "TrainerPlans": {
         "title": "Your Nutrition Plans",
@@ -1932,6 +1952,11 @@
         "title": "Update Ingredient",
         "description": "Update an ingredient on Bro Meets Science",
         "keywords": "update, ingredient, nutrition, facts, calories, fat, protein, carbohydrates, sugar, salt, display"
+      },
+      "DuplicateIngredient": {
+        "title": "Create Ingredient",
+        "description": "Create a new ingredient on Bro Meets Science by duplicating an existing one",
+        "keywords": "create, ingredient, nutrition, facts, calories, fat, protein, carbohydrates, sugar, salt, display"
       },
       "SingleIngredient": {
         "title": "Ingredient",

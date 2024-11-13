@@ -82,7 +82,9 @@ export function useFetchStream<T = any, E extends BaseError = BaseError>({
       })
       .catch((err) => {
         console.log("Error fetching", err);
-        if (err instanceof Object && "message" in err) {
+        if (err && err instanceof DOMException && err?.name === "AbortError") {
+          return;
+        } else if (err instanceof Object && "message" in err) {
           setError(err as E);
         }
         setIsFinished(true);
@@ -93,11 +95,15 @@ export function useFetchStream<T = any, E extends BaseError = BaseError>({
         if (
           useAbortController &&
           abortController &&
-          !abortController.signal.aborted
+          !abortController?.signal?.aborted
         )
-          abortController.abort();
+          abortController?.abort();
       } catch (e) {
-        console.log(e);
+        if (e && e instanceof DOMException && e?.name === "AbortError") {
+          return;
+        } else {
+          console.log(e);
+        }
       }
     };
   }, [

@@ -5,10 +5,10 @@ const Loader = ({ className }: { className?: string }) => {
   return (
     <Loader2
       className={cn(
-        "my-28 h-18 w-18 text-primary/60 animate-spin font-semibold text-lg",
+        "my-28 h-18 w-18 text-primary/60 animate-spin font-bold text-lg",
         className,
       )}
-      size={25}
+      size={46}
     />
   );
 };

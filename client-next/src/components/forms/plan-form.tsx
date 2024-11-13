@@ -198,8 +198,6 @@ export default function PlanForm({
     }
   }, [JSON.stringify(daysWatch)]);
 
-  console.log("DAYS", form.getValues("days"));
-
   const { fileCleanup } = useFilesBase64({
     files: images,
     fieldName: "images",

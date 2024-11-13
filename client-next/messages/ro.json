@@ -783,7 +783,8 @@
             "viewOwnerItems": "Vizualizează postările autorului",
             "update": "Actualizează postarea",
             "approve": "Aprobă postarea",
-            "disapprove": "Dezaprobă postarea"
+            "disapprove": "Dezaprobă postarea",
+            "duplicate": "Duplică postarea"
           }
         },
         "recipes": {
@@ -808,7 +809,8 @@
             "viewOwnerItems": "Vizualizează rețetele autorului",
             "update": "Actualizează rețeta",
             "approve": "Aprobă rețeta",
-            "disapprove": "Dezaprobă rețeta"
+            "disapprove": "Dezaprobă rețeta",
+            "duplicate": "Duplică rețeta"
           }
         },
         "users": {
@@ -866,7 +868,8 @@
             "viewIngredient": "Vezi Ingredientul",
             "updateIngredient": "Actualizează Ingredient",
             "deleteIngredient": "Șterge Ingredient",
-            "toggleDisplay": "Afișează/Ascunde Ingredient"
+            "toggleDisplay": "Afișează/Ascunde Ingredient",
+            "duplicate": "Duplică Ingredient"
           }
         },
         "plans": {
@@ -900,7 +903,8 @@
             "approve": "Aprobă planul",
             "disapprove": "Dezaprobă planul",
             "display": "Afișează planul",
-            "hide": "Ascunde planul"
+            "hide": "Ascunde planul",
+            "duplicate": "Duplică Planul"
           }
         },
         "days": {
@@ -916,7 +920,8 @@
             "button": "Acțiuni",
             "label": "Acțiuni",
             "view": "Vizualizează ziua",
-            "update": "Actualizează ziua"
+            "update": "Actualizează ziua",
+            "duplicate": "Duplică Ziua"
           }
         },
         "orders": {
@@ -1808,6 +1813,11 @@
         "description": "Actualizează planul tău pe Bro Meets Science",
         "keywords": "actualizează, plan, nutriție, informații, calorii, grăsimi, proteine, carbohidrați, zahăr, sare, afișează"
       },
+      "DuplicatePlan": {
+        "title": "Crează un Plan Nou",
+        "description": "Creează un plan nou pe Bro Meets Science pe baza unui plan existent",
+        "keywords": "creează, plan, nutriție, informații, calorii, grăsimi, proteine, carbohidrați, zahăr, sare, afișează"
+      },
       "CreatePost": {
         "title": "Creează o Postare",
         "description": "Creează o postare pe Bro Meets Science",
@@ -1817,6 +1827,11 @@
         "title": "Actualizează Postarea Ta",
         "description": "Actualizează postarea pe Bro Meets Science",
         "keywords": "actualizează, postare, nutriție, informații, calorii, grăsimi, proteine, carbohidrați, zahăr, sare, afișează, comută"
+      },
+      "DuplicatePost": {
+        "title": "Crează o postare nouă",
+        "description": "Creează o postare nouă pe Bro Meets Science pe baza unei postări existente",
+        "keywords": "creează, postare, nutriție, informații, calorii, grăsimi, proteine, carbohidrați, zahăr, sare, afișează, comută"
       },
       "CreateRecipe": {
         "title": "Creează o Rețetă",
@@ -1832,6 +1847,11 @@
         "title": "Actualizează Rețeta Ta",
         "description": "Actualizează rețeta ta pe Bro Meets Science",
         "keywords": "actualizează, rețetă, nutriție, informații, calorii, grăsimi, proteine, carbohidrați, zahăr, sare, afișează, comută"
+      },
+      "DuplicateRecipe": {
+        "title": "Crează o rețetă nouă",
+        "description": "Creează o rețetă nouă pe Bro Meets Science pe baza unei rețete existente",
+        "keywords": "creează, rețetă, nutriție, informații, calorii, grăsimi, proteine, carbohidrați, zahăr, sare, afișează, comută"
       },
       "TrainerPlans": {
         "title": "Planurile Tale de Nutriție",
@@ -1929,6 +1949,11 @@
         "title": "Actualizează ingredient",
         "description": "Actualizează un ingredient pe Bro Meets Science",
         "keywords": "actualizează, ingredient, nutriție, informații, calorii, grăsimi, proteine, carbohidrați, zahăr, sare, afișare"
+      },
+      "DuplicateIngredient": {
+        "title": "Duplică ingredient",
+        "description": "Duplică un ingredient pe Bro Meets Science",
+        "keywords": "duplică, ingredient, nutriție, informații, calorii, grăsimi, proteine, carbohidrați, zahăr, sare, afișare"
       },
       "SingleIngredient": {
         "title": "Ingredient",
