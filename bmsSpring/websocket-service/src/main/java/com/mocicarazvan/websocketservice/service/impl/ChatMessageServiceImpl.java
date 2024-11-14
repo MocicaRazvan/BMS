@@ -18,6 +18,7 @@ import com.mocicarazvan.websocketservice.utils.ChunkRequest;
 import com.mocicarazvan.websocketservice.utils.PageableUtilsCustom;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.data.domain.Sort;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
@@ -41,14 +42,14 @@ public class ChatMessageServiceImpl implements ChatMessageService {
     private final ChatMessageMapper chatMessageMapper;
     private final SimpMessagingTemplate messagingTemplate;
     private final ConversationUserService conversationUserService;
-    private final Executor asyncExecutor;
+    private final SimpleAsyncTaskExecutor asyncExecutor;
     private final PageableUtilsCustom pageableUtilsCustom;
     private final CustomConvertAndSendToUser customConvertAndSendToUser;
 
 
     @Override
 //    @Transactional
-    @Transactional(isolation = Isolation.REPEATABLE_READ, propagation = Propagation.REQUIRES_NEW)
+    @Transactional(isolation = Isolation.READ_COMMITTED, propagation = Propagation.REQUIRES_NEW)
     @CustomRetryable
     public ChatMessageResponse sendMessage(ChatMessagePayload chatMessagePayload) {
         Set<String> emails = Set.of(chatMessagePayload.getSenderEmail(), chatMessagePayload.getReceiverEmail());

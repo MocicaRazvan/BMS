@@ -19,6 +19,7 @@ import com.mocicarazvan.websocketservice.service.BoughtNotificationService;
 import com.mocicarazvan.websocketservice.service.ConversationUserService;
 import com.mocicarazvan.websocketservice.service.generic.impl.NotificationTemplateServiceImpl;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
@@ -42,7 +43,7 @@ public class BoughtNotificationServiceImpl
 
     private final ObjectMapper objectMapper;
 
-    public BoughtNotificationServiceImpl(PlanRepository referenceRepository, ConversationUserService conversationUserService, Executor asyncExecutor, BoughtNotificationRepository notificationTemplateRepository, BoughtNotificationMapper notificationTemplateMapper, SimpMessagingTemplate messagingTemplate, ObjectMapper objectMapper, CustomConvertAndSendToUser customConvertAndSendToUser) {
+    public BoughtNotificationServiceImpl(PlanRepository referenceRepository, ConversationUserService conversationUserService, SimpleAsyncTaskExecutor asyncExecutor, BoughtNotificationRepository notificationTemplateRepository, BoughtNotificationMapper notificationTemplateMapper, SimpMessagingTemplate messagingTemplate, ObjectMapper objectMapper, CustomConvertAndSendToUser customConvertAndSendToUser) {
         super(referenceRepository, conversationUserService, "chat_plan", "boughtNotification", asyncExecutor, notificationTemplateRepository, notificationTemplateMapper, messagingTemplate, customConvertAndSendToUser);
 
         this.objectMapper = objectMapper;

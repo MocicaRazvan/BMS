@@ -14,6 +14,7 @@ import com.mocicarazvan.websocketservice.repositories.RecipeRepository;
 import com.mocicarazvan.websocketservice.service.ApproveRecipeNotificationService;
 import com.mocicarazvan.websocketservice.service.ConversationUserService;
 import com.mocicarazvan.websocketservice.service.generic.impl.ApproveNotificationServiceTemplateImpl;
+import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
@@ -26,7 +27,7 @@ public class ApproveRecipeNotificationServiceImpl
                 RecipeRepository, ApproveRecipeNotificationRepository,
                 ApproveRecipeNotificationMapper>
         implements ApproveRecipeNotificationService {
-    public ApproveRecipeNotificationServiceImpl(RecipeRepository referenceRepository, ConversationUserService conversationUserService, Executor asyncExecutor, ApproveRecipeNotificationRepository notificationTemplateRepository, ApproveRecipeNotificationMapper notificationTemplateMapper, SimpMessagingTemplate messagingTemplate, CustomConvertAndSendToUser customConvertAndSendToUser) {
+    public ApproveRecipeNotificationServiceImpl(RecipeRepository referenceRepository, ConversationUserService conversationUserService, SimpleAsyncTaskExecutor asyncExecutor, ApproveRecipeNotificationRepository notificationTemplateRepository, ApproveRecipeNotificationMapper notificationTemplateMapper, SimpMessagingTemplate messagingTemplate, CustomConvertAndSendToUser customConvertAndSendToUser) {
         super(referenceRepository, conversationUserService, "chat_recipe", "approveRecipeNotification", asyncExecutor, notificationTemplateRepository, notificationTemplateMapper, messagingTemplate, customConvertAndSendToUser);
     }
 

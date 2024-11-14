@@ -14,6 +14,7 @@ import com.mocicarazvan.websocketservice.repositories.ChatRoomRepository;
 import com.mocicarazvan.websocketservice.service.ChatMessageNotificationService;
 import com.mocicarazvan.websocketservice.service.ConversationUserService;
 import com.mocicarazvan.websocketservice.service.generic.impl.NotificationTemplateServiceImpl;
+import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
@@ -28,7 +29,7 @@ public class ChatMessageNotificationServiceImpl
         ChatMessageNotificationRepository, ChatMessageNotificationMapper
         >
         implements ChatMessageNotificationService {
-    public ChatMessageNotificationServiceImpl(ChatRoomRepository referenceRepository, ConversationUserService conversationUserService, Executor asyncExecutor,
+    public ChatMessageNotificationServiceImpl(ChatRoomRepository referenceRepository, ConversationUserService conversationUserService, SimpleAsyncTaskExecutor asyncExecutor,
                                               ChatMessageNotificationRepository notificationTemplateRepository, ChatMessageNotificationMapper notificationTemplateMapper,
                                               SimpMessagingTemplate messagingTemplate, CustomConvertAndSendToUser customConvertAndSendToUser) {
         super(referenceRepository, conversationUserService, "chatRoom", "chatMessageNotification", asyncExecutor, notificationTemplateRepository, notificationTemplateMapper, messagingTemplate, customConvertAndSendToUser);

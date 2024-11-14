@@ -38,7 +38,7 @@ public class ConversationUserServiceImpl implements ConversationUserService {
     private final CustomConvertAndSendToUser customConvertAndSendToUser;
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW, isolation = Isolation.REPEATABLE_READ)
+    @Transactional(propagation = Propagation.REQUIRES_NEW, isolation = Isolation.READ_COMMITTED)
     @CustomRetryable
     public ConversationUserResponse addUser(ConversationUserPayload conversationUserPayload) {
         return conversationUserRepository.findByEmail(conversationUserPayload.getEmail())
@@ -52,7 +52,7 @@ public class ConversationUserServiceImpl implements ConversationUserService {
     }
 
     @Override
-    @Transactional(isolation = Isolation.REPEATABLE_READ)
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     @CustomRetryable
     public ConversationUserResponse changeUserConnectedStatus(ConnectedStatus connectedStatus, String email) {
         return conversationUserRepository.findByEmail(email)
@@ -116,7 +116,7 @@ public class ConversationUserServiceImpl implements ConversationUserService {
 
     @Override
 //    @Transactional
-    @Transactional(propagation = Propagation.REQUIRES_NEW, isolation = Isolation.REPEATABLE_READ)
+    @Transactional(propagation = Propagation.REQUIRES_NEW, isolation = Isolation.READ_COMMITTED)
     @CustomRetryable
 //    @Retryable(
 //            retryFor = {OptimisticLockException.class,
@@ -136,7 +136,7 @@ public class ConversationUserServiceImpl implements ConversationUserService {
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW, isolation = Isolation.REPEATABLE_READ)
+    @Transactional(propagation = Propagation.REQUIRES_NEW, isolation = Isolation.READ_COMMITTED)
     @CustomRetryable
     public ConversationUserResponse changeUserChatRoom(ChatRoomUserDto chatRoomUserDto) {
         return getUserByEmail(chatRoomUserDto.getUserEmail())
@@ -158,11 +158,11 @@ public class ConversationUserServiceImpl implements ConversationUserService {
     }
 
     //    @Transactional
-    @Transactional(isolation = Isolation.REPEATABLE_READ)
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     @CustomRetryable
     public ConversationUserResponse mapToResponseAndNotify(ConversationUser conversationUser) {
         notifyOtherUsers(conversationUser.getEmail());
-        log.error("Conversation user chat room: {}", conversationUser.getConnectedChatRoom());
+//        log.error("Conversation user chat room: {}", conversationUser.getConnectedChatRoom());
 //        messagingTemplate.convertAndSendToUser(conversationUser.getEmail(), "/chat/changed",
 //                ConversationUserResponse.builder()
 //                        .id(conversationUser.getId())
@@ -190,7 +190,7 @@ public class ConversationUserServiceImpl implements ConversationUserService {
         return conversationUserMapper.fromModelToResponse(conversationUser);
     }
 
-    @Transactional(isolation = Isolation.REPEATABLE_READ)
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     @CustomRetryable
     public void notifyOtherUsers(String senderEmail) {
 //        chatRoomRepository.findOthersEmailsBySenderEmail(senderEmail)

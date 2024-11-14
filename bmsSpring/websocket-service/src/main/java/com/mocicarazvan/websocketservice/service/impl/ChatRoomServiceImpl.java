@@ -22,6 +22,7 @@ import com.mocicarazvan.websocketservice.service.ConversationUserService;
 import com.mocicarazvan.websocketservice.utils.PageableUtilsCustom;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
@@ -46,13 +47,13 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     private final ConversationUserService conversationUserService;
     private final SimpMessagingTemplate messagingTemplate;
     private final CustomConvertAndSendToUser customConvertAndSendToUser;
-    private final Executor asyncExecutor;
+    private final SimpleAsyncTaskExecutor asyncExecutor;
     private final ChatMessageNotificationService chatMessageNotificationService;
     private final ChatMessageRepository chatMessageRepository;
     private final PageableUtilsCustom pageableUtilsCustom;
 
     @Override
-    @Transactional(isolation = Isolation.REPEATABLE_READ)
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     @CustomRetryable
     public ChatRoomResponse createChatRoom(ChatRoomPayload chatRoomPayload) {
         Set<String> emails = chatRoomPayload.getUsers()
@@ -98,32 +99,37 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     // todo scoate transactional
 //    @Transactional
     @Override
-    @Transactional(isolation = Isolation.REPEATABLE_READ)
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     @CustomRetryable
     public List<ChatRoomResponse> getChatRooms(String email) {
-        log.error("Email: {}", email);
-        var initial = chatRoomRepository.findChatRoomsByUserEmail(email);
-        log.error("Initial: {}", initial.toString());
-        var rooms = initial
+//        log.error("Email: {}", email);
+//        var initial = chatRoomRepository.findChatRoomsByUserEmail(email);
+////        log.error("Initial: {}", initial.toString());
+//        var rooms = initial
+//                .stream()
+//                .map(chatRoomMapper::fromModelToResponse)
+//                .collect(Collectors.toList());
+////        log.error("Rooms : {}", rooms.toString());
+//        return rooms;
+
+        return chatRoomRepository.findChatRoomsByUserEmail(email)
                 .stream()
                 .map(chatRoomMapper::fromModelToResponse)
                 .collect(Collectors.toList());
-        log.error("Rooms : {}", rooms.toString());
-        return rooms;
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW, isolation = Isolation.REPEATABLE_READ)
+    @Transactional(propagation = Propagation.REQUIRES_NEW, isolation = Isolation.READ_COMMITTED)
     @CustomRetryable
     public PageableResponse<List<ChatRoomResponse>> getChatRoomsFiltered(String email, String filterEmail, PageableBody pageableBody) {
 
-        //todo remove
-        var v = chatRoomRepository.findFilteredChatRooms(email, filterEmail,
-                pageableUtilsCustom.createPageRequest(pageableBody));
-
-        log.error("Email: {}", email);
-        log.error("Filter email: {}", filterEmail);
-        log.error("Chat rooms {} , {}", v.getTotalElements(), v.getContent());
+//        //todo remove
+//        var v = chatRoomRepository.findFilteredChatRooms(email, filterEmail,
+//                pageableUtilsCustom.createPageRequest(pageableBody));
+//
+//        log.error("Email: {}", email);
+//        log.error("Filter email: {}", filterEmail);
+//        log.error("Chat rooms {} , {}", v.getTotalElements(), v.getContent());
 
         return
                 pageableUtilsCustom.createPageableResponse(
@@ -133,7 +139,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
 
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW, isolation = Isolation.REPEATABLE_READ)
+    @Transactional(propagation = Propagation.REQUIRES_NEW, isolation = Isolation.READ_COMMITTED)
     @CustomRetryable
     @Override
     public void deleteChatRoom(Long id, String senderEmail) {

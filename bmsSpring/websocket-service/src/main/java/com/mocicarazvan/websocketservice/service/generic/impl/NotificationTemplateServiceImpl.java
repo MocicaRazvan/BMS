@@ -16,6 +16,8 @@ import com.mocicarazvan.websocketservice.repositories.generic.NotificationTempla
 import com.mocicarazvan.websocketservice.service.ConversationUserService;
 import com.mocicarazvan.websocketservice.service.generic.NotificationTemplateService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
@@ -27,6 +29,7 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
+@Slf4j
 @RequiredArgsConstructor
 
 public abstract class NotificationTemplateServiceImpl<R extends IdGenerated, RRESP extends IdResponse, E extends Enum<E>,
@@ -39,7 +42,7 @@ public abstract class NotificationTemplateServiceImpl<R extends IdGenerated, RRE
     protected final ConversationUserService conversationUserService;
     protected final String referenceName;
     protected final String notificationName;
-    protected final Executor asyncExecutor;
+    protected final SimpleAsyncTaskExecutor asyncExecutor;
     protected final MREOP notificationTemplateRepository;
     protected final MMAP notificationTemplateMapper;
     protected final SimpMessagingTemplate messagingTemplate;
@@ -47,12 +50,14 @@ public abstract class NotificationTemplateServiceImpl<R extends IdGenerated, RRE
 
 
     //    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    @Transactional(propagation = Propagation.REQUIRES_NEW, isolation = Isolation.REPEATABLE_READ)
+    @Transactional(propagation = Propagation.REQUIRES_NEW, isolation = Isolation.READ_COMMITTED)
     @Override
     @CustomRetryable
     public RESPONSE saveNotification(BODY body) {
+
         return fromBodyToModel(body)
                 .thenApplyAsync(model -> {
+
                             RESPONSE response = notificationTemplateMapper.fromModelToResponse(notificationTemplateRepository.save(model));
                             notifyReceiver(response, NotificationNotifyType.ADDED);
                             return response;
@@ -61,7 +66,7 @@ public abstract class NotificationTemplateServiceImpl<R extends IdGenerated, RRE
                 .join();
     }
 
-//    @Transactional(propagation = Propagation.REQUIRES_NEW, isolation = Isolation.REPEATABLE_READ)
+//    @Transactional(propagation = Propagation.REQUIRES_NEW, isolation = Isolation.READ_COMMITTED)
 //    @Override
 //    @CustomRetryable
 //    public RESPONSE saveNotificationCreateReference(BODY body, BiFunction<BODY, ConversationUser, R> createReference) {
@@ -152,7 +157,7 @@ public abstract class NotificationTemplateServiceImpl<R extends IdGenerated, RRE
     }
 
     @Override
-    @Transactional(isolation = Isolation.REPEATABLE_READ)
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     @CustomRetryable
     public List<RESPONSE> getAllByReceiverEmailAndType(String receiverEmail, E type) {
         Long receiverId = conversationUserService.getOrCreateUserByEmail(receiverEmail).getId();
@@ -165,9 +170,10 @@ public abstract class NotificationTemplateServiceImpl<R extends IdGenerated, RRE
 
     @Override
 //    @Transactional
-    @Transactional(isolation = Isolation.REPEATABLE_READ)
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     @CustomRetryable
     public void deleteAllByReceiverEmailAndType(String senderEmail, E type) {
+        log.info("Deleting all notifications for receiver email: {}", senderEmail);
         Long receiverId = conversationUserService.getUserByEmail(senderEmail).getId();
         if (type == null) {
             notificationTemplateRepository.deleteAllByReceiverId(receiverId);
@@ -179,7 +185,7 @@ public abstract class NotificationTemplateServiceImpl<R extends IdGenerated, RRE
 
     @Override
 //    @Transactional
-    @Transactional(isolation = Isolation.REPEATABLE_READ)
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     @CustomRetryable
     public void deleteAllByReceiverEmailAndTypeRemoveReference(String senderEmail, E type, Long referenceId) {
         deleteAllByReceiverEmailAndType(senderEmail, type);
@@ -187,7 +193,7 @@ public abstract class NotificationTemplateServiceImpl<R extends IdGenerated, RRE
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW, isolation = Isolation.REPEATABLE_READ)
+    @Transactional(propagation = Propagation.REQUIRES_NEW, isolation = Isolation.READ_COMMITTED)
 //    @Transactional
     @CustomRetryable
     public void deleteAllByReceiverEmailSenderEmailAndType(String senderEmail, String receiverEmail, E type) {

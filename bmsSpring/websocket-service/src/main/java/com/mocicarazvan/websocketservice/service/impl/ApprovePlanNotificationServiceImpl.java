@@ -14,6 +14,7 @@ import com.mocicarazvan.websocketservice.repositories.PlanRepository;
 import com.mocicarazvan.websocketservice.service.ApprovePlanNotificationService;
 import com.mocicarazvan.websocketservice.service.ConversationUserService;
 import com.mocicarazvan.websocketservice.service.generic.impl.ApproveNotificationServiceTemplateImpl;
+import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
@@ -27,7 +28,7 @@ public class ApprovePlanNotificationServiceImpl
         implements ApprovePlanNotificationService {
 
 
-    public ApprovePlanNotificationServiceImpl(PlanRepository referenceRepository, ConversationUserService conversationUserService, Executor asyncExecutor, ApprovePlanNotificationRepository notificationTemplateRepository, ApprovePlanNotificationMapper notificationTemplateMapper, SimpMessagingTemplate messagingTemplate, CustomConvertAndSendToUser customConvertAndSendToUser) {
+    public ApprovePlanNotificationServiceImpl(PlanRepository referenceRepository, ConversationUserService conversationUserService, SimpleAsyncTaskExecutor asyncExecutor, ApprovePlanNotificationRepository notificationTemplateRepository, ApprovePlanNotificationMapper notificationTemplateMapper, SimpMessagingTemplate messagingTemplate, CustomConvertAndSendToUser customConvertAndSendToUser) {
         super(referenceRepository, conversationUserService, "chat_plan", "approvePlanNotification", asyncExecutor, notificationTemplateRepository, notificationTemplateMapper, messagingTemplate, customConvertAndSendToUser);
     }
 

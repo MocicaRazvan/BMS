@@ -15,6 +15,8 @@ import com.mocicarazvan.websocketservice.repositories.generic.ApproveRepository;
 import com.mocicarazvan.websocketservice.repositories.generic.NotificationTemplateRepository;
 import com.mocicarazvan.websocketservice.service.ConversationUserService;
 import com.mocicarazvan.websocketservice.service.generic.ApproveNotificationServiceTemplate;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
@@ -25,6 +27,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
+@Slf4j
 public abstract class ApproveNotificationServiceTemplateImpl<R extends ApprovedModel,
         RRESP extends ApproveResponse,
         MODEL extends NotificationTemplate<R, ApprovedNotificationType>,
@@ -37,14 +40,14 @@ public abstract class ApproveNotificationServiceTemplateImpl<R extends ApprovedM
         extends NotificationTemplateServiceImpl<R, RRESP, ApprovedNotificationType, MODEL, BODY, RESPONSE, RREPO, MREOP, MMAP>
         implements ApproveNotificationServiceTemplate<R, RRESP, BODY, RESPONSE> {
 
-    public ApproveNotificationServiceTemplateImpl(RREPO referenceRepository, ConversationUserService conversationUserService, String referenceName, String notificationName, Executor asyncExecutor, MREOP notificationTemplateRepository, MMAP notificationTemplateMapper, SimpMessagingTemplate messagingTemplate, CustomConvertAndSendToUser customConvertAndSendToUser) {
+    public ApproveNotificationServiceTemplateImpl(RREPO referenceRepository, ConversationUserService conversationUserService, String referenceName, String notificationName, SimpleAsyncTaskExecutor asyncExecutor, MREOP notificationTemplateRepository, MMAP notificationTemplateMapper, SimpMessagingTemplate messagingTemplate, CustomConvertAndSendToUser customConvertAndSendToUser) {
         super(referenceRepository, conversationUserService, referenceName, notificationName, asyncExecutor, notificationTemplateRepository, notificationTemplateMapper, messagingTemplate, customConvertAndSendToUser);
     }
 
     public abstract R createApprovedReference(BODY body, Long appId, ConversationUser receiver);
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW, isolation = Isolation.REPEATABLE_READ)
+    @Transactional(propagation = Propagation.REQUIRES_NEW, isolation = Isolation.READ_COMMITTED)
     public RESPONSE saveApprovedNotificationCreateReference(BODY body, Long appId) {
         List<MODEL> toBeDeleted = new ArrayList<>();
 
@@ -107,10 +110,11 @@ public abstract class ApproveNotificationServiceTemplateImpl<R extends ApprovedM
     }
 
     @Override
-    @Transactional(isolation = Isolation.REPEATABLE_READ)
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     @CustomRetryable
     public void deleteByReferenceId(Long referenceId) {
         referenceRepository.findById(referenceId).ifPresent((r) -> {
+            log.info("Deleting all notifications for reference id: {}", r.getId());
             notificationTemplateRepository.deleteAllByReferenceId(r.getId());
         });
     }
