@@ -20,7 +20,7 @@ public class OrderServiceApplication {
 
     @PostConstruct
     public void init() {
-        Hooks.enableAutomaticContextPropagation();
+        // Hooks.enableAutomaticContextPropagation();
         TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
 
     }

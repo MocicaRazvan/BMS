@@ -20,7 +20,7 @@ public class DayServiceApplication {
 
     @PostConstruct
     public void init() {
-        Hooks.enableAutomaticContextPropagation();
+        // Hooks.enableAutomaticContextPropagation();
         TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
 
     }

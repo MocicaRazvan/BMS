@@ -19,7 +19,7 @@ public class GatewayServiceApplication {
 
     @PostConstruct
     public void init() {
-        Hooks.enableAutomaticContextPropagation();
+        // Hooks.enableAutomaticContextPropagation();
         TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
 
     }
