@@ -259,7 +259,7 @@ export default function Conversation({
         >
           <div className="flex flex-col h-full ">
             <div className="flex-1 grid w-full p-6 gap-6 flex-col ">
-              <div className="grid gap-2">
+              <div className="grid gap-2.5">
                 {chatMessages.length > 0 &&
                   chatMessages.map((chatMessage) => (
                     <div key={chatMessage.id}>
@@ -312,9 +312,9 @@ const ChatMessageItem = memo(
       return format(adjustedDate, "dd-MM-yy HH:mm:ss");
     };
     return isSender ? (
-      <div className="flex flex-row-reverse gap-2 items-end">
+      <div className="flex flex-row-reverse gap-2.5 items-end">
         <div className="rounded-lg bg-gray-100 dark:bg-gray-900 p-4 max-w-[75%] backdrop-blur">
-          <p className="text-sm text-gray-500 dark:text-gray-400">
+          <p className="text-xs font-semibold text-gray-500 dark:text-gray-400">
             {formatDate(chatMessage.timestamp)}
           </p>
           {/*<p className="text-sm font-medium">You, {sender.email}</p>*/}
@@ -336,7 +336,7 @@ const ChatMessageItem = memo(
         {/*/>*/}
       </div>
     ) : (
-      <div className="flex gap-2 items-end ">
+      <div className="flex gap-2.5 items-end ">
         {/*<img*/}
         {/*  alt="Avatar"*/}
         {/*  className="w-10 h-10 rounded-full border"*/}
@@ -349,7 +349,7 @@ const ChatMessageItem = memo(
         {/*  width="40"*/}
         {/*/>*/}
         <div className="rounded-lg bg-gray-600 dark:bg-white p-4 max-w-[75%] backdrop-blur dark:text-black text-white ">
-          <p className="text-sm text-gray-100 dark:text-gray-950 ">
+          <p className="text-xs font-semibold text-gray-100 dark:text-gray-950 ">
             {formatDate(chatMessage.timestamp)}
           </p>
           {/*<p className="text-sm font-medium">Other {receiver.email}</p>*/}

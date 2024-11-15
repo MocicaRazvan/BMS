@@ -49,7 +49,7 @@ public class ConversationUserController {
 
     @MessageMapping("/disconnectUser/{email}")
     public void disconnectUser(@DestinationVariable String email) {
-        log.error("Disconnect user: {}", email);
+//        log.error("Disconnect user: {}", email);
         conversationUserService.changeUserConnectedStatus(ConnectedStatus.OFFLINE, email)
                 .map(cur -> {
                     simpMessagingTemplate.convertAndSend("/chat/connected",
@@ -65,7 +65,7 @@ public class ConversationUserController {
 
     @MessageMapping("/changeRoom")
     public void changeRoom(@Payload ChatRoomUserDto chatRoomUserDto) {
-        log.error("Change room: {}", chatRoomUserDto);
+//        log.error("Change room: {}", chatRoomUserDto);
         conversationUserService.changeUserChatRoom(chatRoomUserDto)
                 .map(cur -> {
                     simpMessagingTemplate.convertAndSend("/chat/connected",

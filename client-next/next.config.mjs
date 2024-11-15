@@ -27,6 +27,9 @@ const nextConfig = {
       {
         hostname: "nginx-gateway",
       },
+      {
+        hostname: "images.unsplash.com",
+      },
     ],
   },
   compiler: {

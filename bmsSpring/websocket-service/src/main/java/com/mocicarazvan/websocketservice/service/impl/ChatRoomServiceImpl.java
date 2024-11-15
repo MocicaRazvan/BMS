@@ -34,7 +34,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
 
 @Service
@@ -90,10 +89,11 @@ public class ChatRoomServiceImpl implements ChatRoomService {
 //    @Transactional
     @Override
     public List<ChatRoom> getRoomsByUsers(Set<String> emails) {
-        var rooms = chatRoomRepository.findByUsers(emails
-                , emails.size());
-        log.error("Rooms: {}", rooms);
-        return rooms;
+//        var rooms = chatRoomRepository.findByUsers(emails
+//                , emails.size());
+////        log.error("Rooms: {}", rooms);
+//        return rooms;
+        return chatRoomRepository.findByUsers(emails, emails.size());
     }
 
     // todo scoate transactional
@@ -143,7 +143,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     @CustomRetryable
     @Override
     public void deleteChatRoom(Long id, String senderEmail) {
-        log.error("Delete chat room id: {} sender email: {}", id, senderEmail);
+//        log.error("Delete chat room id: {} sender email: {}", id, senderEmail);
         CompletableFuture<ChatRoom> chatRoomCompletableFuture = getChatRoomByIdAsync(id);
         CompletableFuture<ConversationUser> conversationUserCompletableFuture = conversationUserService.getUserByEmailAsync(senderEmail);
 

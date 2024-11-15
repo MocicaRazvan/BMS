@@ -1,6 +1,6 @@
 import { Role } from "@/types/fetch-utils";
 import { Session } from "next-auth";
-import { isDeepEqual } from "@/lib/utils";
+import { appendCreatedAtDesc, isDeepEqual } from "@/lib/utils";
 
 export interface LinkNav {
   href: string;
@@ -11,7 +11,7 @@ export interface LinkNav {
 type createLinks = (authUser: NonNullable<Session["user"]>) => LinkNav[];
 export const createPostsLinks: createLinks = ({ id }): LinkNav[] => [
   {
-    href: "/posts/approved",
+    href: appendCreatedAtDesc("/posts/approved"),
     role: "ROLE_USER",
     id: "approvedPosts",
   },
@@ -21,7 +21,7 @@ export const createPostsLinks: createLinks = ({ id }): LinkNav[] => [
   //   id: "allPosts",
   // },
   {
-    href: `/trainer/user/${id}/posts`,
+    href: appendCreatedAtDesc(`/trainer/user/${id}/posts`),
     role: "ROLE_TRAINER",
     id: "yourPosts",
   },
@@ -38,7 +38,7 @@ export const createRecipesLinks: createLinks = ({ id }): LinkNav[] => [
   //   id: "allRecipes",
   // },
   {
-    href: `/trainer/user/${id}/recipes`,
+    href: appendCreatedAtDesc(`/trainer/user/${id}/recipes`),
     role: "ROLE_TRAINER",
     id: "yourRecipes",
   },
@@ -50,7 +50,7 @@ export const createRecipesLinks: createLinks = ({ id }): LinkNav[] => [
 ];
 export const createPlansLinks: createLinks = ({ id }): LinkNav[] => [
   {
-    href: "/plans/approved",
+    href: appendCreatedAtDesc("/plans/approved"),
     role: "ROLE_USER",
     id: "approvedPlans",
   },
@@ -60,7 +60,7 @@ export const createPlansLinks: createLinks = ({ id }): LinkNav[] => [
   //   id: "allPlans",
   // },
   {
-    href: `/trainer/user/${id}/plans`,
+    href: appendCreatedAtDesc(`/trainer/user/${id}/plans`),
     role: "ROLE_TRAINER",
     id: "yourPlans",
   },

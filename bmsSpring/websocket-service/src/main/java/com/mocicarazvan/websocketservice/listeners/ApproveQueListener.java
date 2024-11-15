@@ -18,7 +18,7 @@ public abstract class ApproveQueListener<R extends ApprovedModel, RRESP extends 
     private final ApproveNotificationServiceTemplate<R, RRESP, BODY, RESPONSE> approvePostNotificationService;
 
     public void listen(BODY message) {
-        log.error("Received message: {}", message);
+//        log.error("Received message: {}", message);
         if (message.getReferenceId() == null) {
             throw new IllegalArgumentException("ReferenceId is required");
         }

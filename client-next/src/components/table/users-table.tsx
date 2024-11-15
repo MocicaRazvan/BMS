@@ -31,6 +31,7 @@ import { useStompClient } from "react-stomp-hooks";
 import { AlertDialogMakeTrainer } from "@/components/dialogs/user/make-trainer-alert";
 import useClientNotFound from "@/hoooks/useClientNotFound";
 import OverflowTextTooltip from "@/components/common/overflow-text-tooltip";
+import { appendCreatedAtDesc } from "@/lib/utils";
 
 export interface UserTableColumnsTexts {
   id: string;
@@ -332,7 +333,7 @@ export default function UsersTable({
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild className="cursor-pointer">
                   <Link
-                    href={`/admin/users/${user.id}/orders`}
+                    href={appendCreatedAtDesc(`/admin/users/${user.id}/orders`)}
                     className="cursor-pointer"
                   >
                     {viewOrders}
@@ -344,7 +345,9 @@ export default function UsersTable({
 
                     <DropdownMenuItem asChild className="cursor-pointer">
                       <Link
-                        href={`/admin/users/${user.id}/posts`}
+                        href={appendCreatedAtDesc(
+                          `/admin/users/${user.id}/posts`,
+                        )}
                         className="cursor-pointer"
                       >
                         {viewPosts}
@@ -353,7 +356,9 @@ export default function UsersTable({
                     <DropdownMenuSeparator />
                     <DropdownMenuItem asChild className="cursor-pointer">
                       <Link
-                        href={`/admin/users/${user.id}/recipes`}
+                        href={appendCreatedAtDesc(
+                          `/admin/users/${user.id}/recipes`,
+                        )}
                         className="cursor-pointer"
                       >
                         {viewRecipes}
@@ -362,7 +367,9 @@ export default function UsersTable({
                     <DropdownMenuSeparator />
                     <DropdownMenuItem asChild className="cursor-pointer">
                       <Link
-                        href={`/admin/users/${user.id}/plans`}
+                        href={appendCreatedAtDesc(
+                          `/admin/users/${user.id}/plans`,
+                        )}
                         className="cursor-pointer"
                       >
                         {viewPlans}

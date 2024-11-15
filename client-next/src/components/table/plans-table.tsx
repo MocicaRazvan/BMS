@@ -318,7 +318,7 @@ export default function PlansTable({
           </p>
         ),
         cell: ({ row }) => (
-          <div className="max-w-16 text-nowrap overflow-x-hidden">
+          <div className="max-w-[4.5rem] text-nowrap overflow-x-hidden">
             <p>
               {formatIntl.number(row.original.model.price, {
                 style: "currency",

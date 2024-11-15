@@ -262,7 +262,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import SortableList, { SortableItem } from "@/components/dnd/sortable-list";
 import { arrayMove } from "@dnd-kit/sortable";
@@ -272,6 +272,8 @@ import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { ItemTexts } from "@/components/dnd/item";
 import { Loader2 } from "lucide-react";
+import { UploadIcon } from "@radix-ui/react-icons";
+import DotPattern from "@/components/magicui/dot-pattern";
 
 export type InputFieldName = "images" | "videos";
 
@@ -300,6 +302,28 @@ export interface FieldInputItem extends SortableItem {
   file: File;
   src: string;
 }
+
+const variantOne = {
+  initial: {
+    x: 20,
+    y: -20,
+    opacity: 1,
+  },
+  animate: {
+    x: 20,
+    y: -20,
+    opacity: 1,
+  },
+};
+
+const variantTwo = {
+  initial: {
+    opacity: 0,
+  },
+  animate: {
+    opacity: 1,
+  },
+};
 
 export default function InputFile<T extends FieldValues>({
   control,
@@ -413,14 +437,15 @@ export default function InputFile<T extends FieldValues>({
         name={fieldName as Path<T>}
         render={({ field: { value, onChange, ...fieldProps } }) => (
           <FormItem>
-            <div className="flex flex-col md:flex-row w-full h-full min-h-[50px] justify-between items-center">
-              <FormLabel className="capitalize">{title}</FormLabel>
+            <div className="flex flex-col md:flex-row w-full h-full min-h-[50px] justify-end items-center">
+              <FormLabel className="capitalize sr-only">{title}</FormLabel>
               {multiple && fieldValue.length > 0 && (
                 <Button
                   variant={"destructive"}
                   size={"sm"}
                   onClick={deleteAllItems}
                   disabled={isLoadingInitial}
+                  className="text-[16px]"
                 >
                   {clearAll}
                 </Button>
@@ -428,32 +453,92 @@ export default function InputFile<T extends FieldValues>({
             </div>
             <FormControl>
               {isLoadingInitial ? (
-                <div className="w-full flex items-center justify-center h-full gap-3">
+                <div className="w-full flex items-center justify-center h-full gap-3 relative min-h-52 rounded-md">
+                  <DotPattern
+                    className={cn(
+                      "[mask-image:radial-gradient(300px_circle_at_center,rgba(255,255,255,0.65),rgba(255,255,255,0.20))]",
+                    )}
+                  />
                   <Loader2 className=" h-16 w-16 text-primary/60 animate-spin" />
                   <p className="font-semibold">{loading}</p>
                 </div>
               ) : (
-                <div>
-                  <div className="w-full h-full flex flex-col md:flex-row items-center justify-between gap-5">
+                <div className="relative rounded-md pb-5">
+                  <DotPattern
+                    className={cn(
+                      ` [mask-image:radial-gradient(300px_circle_at_center,rgba(255,255,255,0.65),rgba(255,255,255,0.20))]
+                      md:[mask-image:radial-gradient(450px_circle_at_center,rgba(255,255,255,0.65),rgba(255,255,255,0.20))]
+                      lg:[mask-image:radial-gradient(650px_circle_at_center,rgba(255,255,255,0.65),rgba(255,255,255,0.20))]
+                      `,
+                    )}
+                  />
+                  <div className="w-full h-full flex flex-col  items-center justify-between gap-5">
                     <div
                       {...getRootProps()}
-                      className={cn(
-                        "border-2 border-dashed p-6 cursor-pointer mx-auto my-2 rounded-md flex-1",
-                        {
-                          "bg-accent": isDragActive,
-                        },
-                      )}
+                      // className={cn(
+                      //   "border-2 border-dashed p-6 cursor-pointer mx-auto my-2 rounded-md flex-1",
+                      //   {
+                      //     "bg-accent": isDragActive,
+                      //   },
+                      // )}
+                      className="w-full h-full "
                     >
+                      <motion.div
+                        whileHover="animate"
+                        className="p-6 group/file block rounded-lg cursor-pointer w-full relative overflow-hidden "
+                      >
+                        <div className="flex flex-col items-center justify-center ">
+                          <p className="relative z-20 font-sans font-bold  capitalize text-xl md:text-2xl tracking-tighter">
+                            {title}
+                          </p>
+                          <p className="relative z-20 font-sans font-normal text-neutral-400 dark:text-neutral-400 text-lg mt-2">
+                            {draggingInactive}
+                          </p>
+                          <div className="flex flex-col items-center justify-center  relative w-full h-full">
+                            <motion.div
+                              layout={false}
+                              variants={variantOne}
+                              transition={{
+                                type: "spring",
+                                stiffness: 350,
+                                damping: 20,
+                              }}
+                              className={cn(
+                                "relative group-hover/file:shadow-2xl z-40 bg-background supports-[backdrop-filter]:bg-primary/20  flex items-center justify-center h-36 mt-4 w-full max-w-[12rem] mx-auto rounded-md",
+                                "shadow-[0px_10px_50px_rgba(0,0,0,0.1)]",
+                              )}
+                            >
+                              {isDragActive ? (
+                                <motion.p
+                                  initial={{ opacity: 0 }}
+                                  animate={{ opacity: 1 }}
+                                  className="font-semibold text-center flex flex-col items-center w-full text-lg tracking-tighter"
+                                >
+                                  {draggingActive}
+                                  <UploadIcon className="h-6 w-6 text-neutral-600 dark:text-neutral-400 font-semibold" />
+                                </motion.p>
+                              ) : (
+                                <UploadIcon className="h-6 w-6 text-neutral-600 dark:text-neutral-300 font-semibold" />
+                              )}
+                            </motion.div>
+                            <motion.div
+                              variants={variantTwo}
+                              className="absolute opacity-0 border border-dashed border-foreground inset-0 z-30 bg-transparent flex items-center justify-center h-36 mt-4 w-full max-w-[12rem] mx-auto rounded-md"
+                            ></motion.div>
+                          </div>
+                        </div>
+                      </motion.div>
                       <input {...getInputProps()} multiple={multiple} />
-                      {isDragActive ? (
-                        <p className="text-center">{draggingActive}</p>
-                      ) : (
-                        <p className="text-center">{draggingInactive}</p>
-                      )}
+                      {/*{isDragActive ? (*/}
+                      {/*  <p className="text-center">{draggingActive}</p>*/}
+                      {/*) : (*/}
+                      {/*  <p className="text-center">{draggingInactive}</p>*/}
+                      {/*)}*/}
                     </div>
                     {fieldValue?.length > 0 && (
                       <Button
                         type="button"
+                        className=" mt-5 md:mt-10 text-[16px]"
                         onClick={() => setIsListCollapsed((prev) => !prev)}
                       >
                         {isListCollapsed ? showList : hideList}
@@ -461,7 +546,7 @@ export default function InputFile<T extends FieldValues>({
                     )}
                   </div>
                   {multiple && fieldValue?.length > 0 && (
-                    <p>
+                    <p className="text-lg md:text-xl font-semibold tracking-tight">
                       {fieldValue.length === 1
                         ? loadCount1
                         : `${fieldValue.length}${loadCountMany}`}

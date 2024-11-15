@@ -311,3 +311,8 @@ export const fromStringOfDotToObjectValue = <T extends object>(
     return undefined;
   }, obj as any);
 };
+
+export const appendCreatedAtDesc = (url: string) =>
+  url.includes("?")
+    ? `${url}&sort=createdAt:desc`
+    : `${url}?sort=createdAt:desc`;

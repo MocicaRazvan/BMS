@@ -98,6 +98,8 @@ import {
   getHomeAboutTexts,
   getHomeCardsText,
   getHomeHeaderTexts,
+  getHomeHeroTexts,
+  getHomeTestimonialsTexts,
   getHomeTimelineTexts,
 } from "@/texts/components/home";
 import { AdminEmailPageTexts } from "@/app/[locale]/admin/email/page";
@@ -1481,18 +1483,28 @@ export async function getOrderCompletePageTexts(): Promise<OrderCompletePageText
 }
 
 export async function getHomeTexts(): Promise<HomeTexts> {
-  const [homeHeaderTexts, homeCardsTexts, homeAboutTexts, homeTimelineTexts] =
-    await Promise.all([
-      getHomeHeaderTexts(),
-      getHomeCardsText(),
-      getHomeAboutTexts(),
-      getHomeTimelineTexts(),
-    ]);
+  const [
+    homeHeaderTexts,
+    homeCardsTexts,
+    homeAboutTexts,
+    homeTimelineTexts,
+    homeHeroTexts,
+    homeTestimonialsTexts,
+  ] = await Promise.all([
+    getHomeHeaderTexts(),
+    getHomeCardsText(),
+    getHomeAboutTexts(),
+    getHomeTimelineTexts(),
+    getHomeHeroTexts(),
+    getHomeTestimonialsTexts(),
+  ]);
   return {
     homeHeaderTexts,
     homeCardsTexts,
     homeAboutTexts,
     homeTimelineTexts,
+    homeHeroTexts,
+    homeTestimonialsTexts,
   };
 }
 
@@ -1613,7 +1625,6 @@ export async function getCalculatorPageTexts(): Promise<CalculatorPageTexts> {
           [key]: {
             label: t(`itemsTexts.${key}.label`),
             placeholder: t(`itemsTexts.${key}.placeholder`),
-            description: t(`itemsTexts.${key}.description`),
           },
         }),
         {} as Record<

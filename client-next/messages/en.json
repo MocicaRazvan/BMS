@@ -545,6 +545,9 @@
       }
     },
     "dialogs": {
+      "DeleteChatRoomDialogTexts": {
+        "chatWith": "Chat with {email}"
+      },
       "DeleteDialogTexts": {
         "anchor": "Delete",
         "title": "Are you absolutely sure?",
@@ -767,8 +770,8 @@
         "posts": {
           "id": "ID",
           "title": "Title",
-          "userLikes": "# of likes",
-          "userDislikes": "# of dislikes",
+          "userLikes": "#of likes",
+          "userDislikes": "#of dislikes",
           "createdAt": "Creation date",
           "updatedAt": "Last update",
           "approved": {
@@ -791,8 +794,8 @@
         "recipes": {
           "id": "ID",
           "title": "Title",
-          "userLikes": "# of likes",
-          "userDislikes": "# of dislikes",
+          "userLikes": "#of likes",
+          "userDislikes": "#of dislikes",
           "createdAt": "Creation date",
           "updatedAt": "Last update",
           "type": "Diet",
@@ -876,8 +879,8 @@
         "plans": {
           "id": "ID",
           "title": "Title",
-          "userLikes": "# of likes",
-          "userDislikes": "# of dislikes",
+          "userLikes": "#of likes",
+          "userDislikes": "#of dislikes",
           "createdAt": "Creation date",
           "updatedAt": "Last update",
           "count": "#orders",
@@ -912,8 +915,8 @@
           "id": "ID",
           "title": "Title",
           "count": "#plans",
-          "userLikes": "# of likes",
-          "userDislikes": "# of dislikes",
+          "userLikes": "#of likes",
+          "userDislikes": "#of dislikes",
           "createdAt": "Creation date",
           "updatedAt": "Last update",
           "type": "Type",
@@ -1125,6 +1128,47 @@
     "home": {
       "HomeHeaderTexts": {
         "title": "Your path to a healthier life starts here !"
+      },
+      "HomeHeroTexts": {
+        "title": "Bro Meets Science <br/> the ultimate nutrition platform",
+        "description": "Get access to the best nutritional plans, recipes, and posts written by professionals. Start your journey to a healthier life today and enjoy your body with Bro Meets Science.",
+        "titles": {
+          "title1": "Enjoy life",
+          "title2": "Eat healthy",
+          "title3": "Stay fit",
+          "title4": "Don't be afraid",
+          "title5": "Be creative",
+          "title6": "Love your food",
+          "title7": "Stay motivated",
+          "title8": "Buy plans",
+          "title9": "Enjoy your body",
+          "title10": "Stay connected"
+        }
+      },
+      "HomeTestimonialsTexts": {
+        "title": " See What Our Customers Are Saying",
+        "testimonials": {
+          "testimonial1": {
+            "quote": "The nutritional insights and meal plans have completely transformed my diet. I feel more energetic and healthier than ever before.",
+            "name": "Sarah Chen",
+            "pleasure": "Passionate about jogging and exploring new trails"
+          },
+          "testimonial2": {
+            "quote": "The recipes are easy to follow, and the platform's flexibility has helped me stay consistent with my fitness goals.",
+            "name": "Andrei Popescu",
+            "pleasure": "Loves cooking and experimenting with new flavors"
+          },
+          "testimonial3": {
+            "quote": "Bro Meets Science has simplified my nutrition planning and introduced me to foods that are both delicious and beneficial for my lifestyle.",
+            "name": "Marcus Johnson",
+            "pleasure": "Enjoys weightlifting and meal prepping"
+          },
+          "testimonial4": {
+            "quote": "The detailed nutritional facts and expert advice have been a game-changer for my diet and overall well-being.",
+            "name": "Jabbad Dutt",
+            "pleasure": "Avid cyclist and outdoor enthusiast"
+          }
+        }
       },
       "HomeCardsText": {
         "register": {

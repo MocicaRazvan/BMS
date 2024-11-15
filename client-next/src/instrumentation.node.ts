@@ -1,20 +1,16 @@
 import { NodeSDK } from "@opentelemetry/sdk-node";
 import { ZipkinExporter } from "@opentelemetry/exporter-zipkin";
-import {
-  ATTR_SERVER_PORT,
-  ATTR_SERVICE_NAME,
-  ATTR_SERVICE_VERSION,
-} from "@opentelemetry/semantic-conventions";
+import { ATTR_SERVICE_NAME } from "@opentelemetry/semantic-conventions";
 import { BatchSpanProcessor } from "@opentelemetry/sdk-trace-node";
 import { getNodeAutoInstrumentations } from "@opentelemetry/auto-instrumentations-node";
 import { TraceIdRatioBasedSampler } from "@opentelemetry/sdk-trace-base";
 import {
-  Resource,
+  browserDetector,
   detectResourcesSync,
   envDetector,
   hostDetector,
   processDetector,
-  browserDetector,
+  Resource,
 } from "@opentelemetry/resources";
 import { PrometheusExporter } from "@opentelemetry/exporter-prometheus";
 import { RuntimeNodeInstrumentation } from "@opentelemetry/instrumentation-runtime-node";

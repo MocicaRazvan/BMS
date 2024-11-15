@@ -33,7 +33,14 @@ export async function getAlertDialogDeleteTexts(
     confirm: t("confirm"),
   };
 }
-
+export async function getDeleteChatRoomDialogTexts(
+  email: string,
+): Promise<DeleteDialogTexts> {
+  const t = await getTranslations(
+    "components.dialogs.DeleteChatRoomDialogTexts",
+  );
+  return getAlertDialogDeleteTexts(t("chatWith", { email }));
+}
 export async function getAlertDialogApproveTexts(
   title: string,
   approved: string,

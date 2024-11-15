@@ -3,11 +3,48 @@ import { getTranslations } from "next-intl/server";
 import { HomeCardsText } from "@/components/home/home-cards";
 import { HomeAboutTexts } from "@/components/home/home-about";
 import { HomeTimelineTexts } from "@/components/home/home-timeline";
+import { HomeHeroTexts, TitleKeys } from "@/components/home/home-hero";
+import {
+  HomeTestimonialsTexts,
+  TypeTestimonials,
+} from "@/components/home/home-testimonials";
+import { Testimonial } from "@/components/aceternityui/animated-testimonials";
 
 export async function getHomeHeaderTexts(): Promise<HomeHeaderTexts> {
   const t = await getTranslations("components.home.HomeHeaderTexts");
   return {
     title: t("title"),
+  };
+}
+export async function getHomeHeroTexts(): Promise<HomeHeroTexts> {
+  const t = await getTranslations("components.home.HomeHeroTexts");
+  return {
+    title: t.rich("title"),
+    description: t("description"),
+    titles: Array.from({ length: 10 }).reduce(
+      (acc, _, i) => {
+        const key = `titles.title${i + 1}` as TitleKeys;
+        return Object.assign(acc as object, { [key]: t(key) });
+      },
+      {} as Record<TitleKeys, string>,
+    ) as Record<TitleKeys, string>,
+  };
+}
+
+export async function getHomeTestimonialsTexts(): Promise<HomeTestimonialsTexts> {
+  const t = await getTranslations("components.home.HomeTestimonialsTexts");
+  return {
+    title: t("title"),
+    testimonials: Array.from({ length: 4 }).reduce((acc, _, i) => {
+      const key = `testimonial${i + 1}`;
+      return Object.assign(acc as object, {
+        [key]: {
+          quote: t(`testimonials.${key}.quote`),
+          name: t(`testimonials.${key}.name`),
+          pleasure: t(`testimonials.${key}.pleasure`),
+        },
+      });
+    }, {}) as Record<TypeTestimonials, Omit<Testimonial, "src">>,
   };
 }
 

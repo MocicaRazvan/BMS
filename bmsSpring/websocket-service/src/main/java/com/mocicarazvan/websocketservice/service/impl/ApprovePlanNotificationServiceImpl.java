@@ -18,8 +18,6 @@ import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
-import java.util.concurrent.Executor;
-
 @Service
 public class ApprovePlanNotificationServiceImpl
         extends ApproveNotificationServiceTemplateImpl

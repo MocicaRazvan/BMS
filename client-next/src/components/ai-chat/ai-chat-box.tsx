@@ -93,10 +93,10 @@ export default function AiChatBox({
     <aside className="z-20 fixed bottom-6 right-4 ">
       <motion.div
         className={cn(
-          `w-20 h-20 bg-background shadow-lg cursor-pointer flex items-center justify-center`,
+          `w-16 h-16 p-1 bg-background shadow-md cursor-pointer flex items-center justify-center shadow-shadow_color`,
           isOpen && " h-[34rem] cursor-default w-[85vw] max-w-xl border-2",
           !isOpen
-            ? "bg-background"
+            ? "bg-background hover:backdrop-blur hover:supports-[backdrop-filter]:bg-primary/10 "
             : "bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/75",
         )}
         layout

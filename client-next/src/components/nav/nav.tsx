@@ -21,6 +21,7 @@ import Logo from "@/components/logo/logo";
 import { LockKeyhole } from "lucide-react";
 import ActiveLink from "@/components/nav/active-link";
 import { useMemo } from "react";
+import { appendCreatedAtDesc } from "@/lib/utils";
 
 export interface NavTexts {
   themeSwitchTexts: ThemeSwitchTexts;
@@ -107,7 +108,9 @@ export default function Nav({
             )}
             {isAdminOrTrainer && (
               <Link
-                href={`/trainer/user/${authUser?.id}/posts`}
+                href={appendCreatedAtDesc(
+                  `/trainer/user/${authUser?.id}/posts`,
+                )}
                 className="text-balance gap-1 font-bold hover:underline flex items-center justify-center hover:scale-[1.03] transition-all px-1"
               >
                 <DashboardIcon className="w-6 h-6" />
@@ -119,21 +122,24 @@ export default function Nav({
             <div className="flex items-center text-lg  justify-center gap-4 flex-wrap">
               <ActiveLink
                 isActive={pathName === "/subscriptions"}
-                href={"/subscriptions"}
+                href={appendCreatedAtDesc("/subscriptions")}
               >
                 {links.subscriptions}
               </ActiveLink>
-              <ActiveLink href="/orders" isActive={pathName === "/orders"}>
+              <ActiveLink
+                href={appendCreatedAtDesc("/orders")}
+                isActive={pathName === "/orders"}
+              >
                 {links.orders}
               </ActiveLink>
               <ActiveLink
-                href="/posts/approved"
+                href={appendCreatedAtDesc("/posts/approved")}
                 isActive={pathName === "/posts/approved"}
               >
                 {links.posts}
               </ActiveLink>
               <ActiveLink
-                href="/plans/approved"
+                href={appendCreatedAtDesc("/plans/approved")}
                 isActive={pathName === "/plans/approved"}
               >
                 {links.plans}

@@ -27,7 +27,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -173,7 +172,7 @@ public abstract class NotificationTemplateServiceImpl<R extends IdGenerated, RRE
     @Transactional(isolation = Isolation.READ_COMMITTED)
     @CustomRetryable
     public void deleteAllByReceiverEmailAndType(String senderEmail, E type) {
-        log.info("Deleting all notifications for receiver email: {}", senderEmail);
+//        log.info("Deleting all notifications for receiver email: {}", senderEmail);
         Long receiverId = conversationUserService.getUserByEmail(senderEmail).getId();
         if (type == null) {
             notificationTemplateRepository.deleteAllByReceiverId(receiverId);

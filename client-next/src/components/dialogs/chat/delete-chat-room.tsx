@@ -11,13 +11,33 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
+import {
+  DeleteDialogTexts,
+  getDeleteChatRoomDialogTexts,
+} from "@/texts/components/dialog";
+import { useEffect, useState } from "react";
 
 interface Props {
   anchor?: React.ReactNode;
   handleDelete: () => Promise<void>;
+  receiverEmail: string;
 }
 
-export default function DeleteChatRoomDialog({ anchor, handleDelete }: Props) {
+export default function DeleteChatRoomDialog({
+  anchor,
+  handleDelete,
+  receiverEmail,
+}: Props) {
+  const [dialogDeleteTexts, setDialogDeleteTexts] =
+    useState<DeleteDialogTexts | null>(null);
+  useEffect(() => {
+    getDeleteChatRoomDialogTexts(receiverEmail).then(setDialogDeleteTexts);
+  }, [receiverEmail]);
+
+  if (!dialogDeleteTexts) {
+    if (anchor) return anchor;
+    else return null;
+  }
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
@@ -28,22 +48,21 @@ export default function DeleteChatRoomDialog({ anchor, handleDelete }: Props) {
             variant="outline"
             className="border-destructive text-destructive"
           >
-            Delete
+            {dialogDeleteTexts.anchor}
           </Button>
         )}
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+          <AlertDialogTitle>{dialogDeleteTexts.title}</AlertDialogTitle>
           <AlertDialogDescription>
-            This action cannot be undone. This will delete the chat room and it
-            will be lost forever.
+            {dialogDeleteTexts.description}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogCancel>{dialogDeleteTexts.cancel}</AlertDialogCancel>
           <AlertDialogAction asChild onClick={() => handleDelete()}>
-            <Button variant="destructive">Continue</Button>
+            <Button variant="destructive">{dialogDeleteTexts.confirm}</Button>
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

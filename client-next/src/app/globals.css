@@ -4,13 +4,13 @@
 
 @layer base {
     :root {
-        --background: 0 0% 100%;
+        --background: 2 2% 98%;
         --foreground: 222.2 84% 4.9%;
 
-        --card: 0 0% 100%;
+        --card: 2 2% 98%;
         --card-foreground: 222.2 84% 4.9%;
 
-        --popover: 0 0% 100%;
+        --popover: 2 2% 98%;
         --popover-foreground: 222.2 84% 4.9%;
 
         --primary: 222.2 47.4% 11.2%;
@@ -150,4 +150,179 @@
 
 ::-webkit-scrollbar-corner {
     background-color: hsl(var(--background));
+}
+
+.like-button {
+    position: relative;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+.burst {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 50px;
+    height: 50px;
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+    display: none;
+}
+
+.burst.show {
+    display: block;
+}
+
+.burst .particle::before {
+    content: "🌯";
+    position: absolute;
+    font-size: 0.8rem;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.burst .particle {
+    content: "";
+    position: absolute;
+    background-color: transparent;
+    opacity: 0;
+    animation: particle-burst 1.5s ease-out forwards;
+}
+
+.burst .particle1 {
+    top: 0;
+    left: 50%;
+    animation-name: particle-burst1;
+}
+
+.burst .particle2 {
+    top: 25%;
+    left: 75%;
+    animation-name: particle-burst2;
+}
+
+.burst .particle3 {
+    top: 50%;
+    left: 100%;
+    animation-name: particle-burst3;
+}
+
+.burst .particle4 {
+    top: 75%;
+    left: 75%;
+    animation-name: particle-burst4;
+}
+
+.burst .particle5 {
+    top: 100%;
+    left: 50%;
+    animation-name: particle-burst5;
+}
+
+.burst .particle6 {
+    top: 75%;
+    left: 25%;
+    animation-name: particle-burst6;
+}
+
+.burst .particle7 {
+    top: 50%;
+    left: 0;
+    animation-name: particle-burst7;
+}
+
+.burst .particle8 {
+    top: 25%;
+    left: 25%;
+    animation-name: particle-burst8;
+}
+
+@keyframes particle-burst1 {
+    0% {
+        opacity: 1;
+        transform: translate(0, 0);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(0, -20px);
+    }
+}
+
+@keyframes particle-burst2 {
+    0% {
+        opacity: 1;
+        transform: translate(0, 0);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(14px, -14px);
+    }
+}
+
+@keyframes particle-burst3 {
+    0% {
+        opacity: 1;
+        transform: translate(0, 0);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(20px, 0);
+    }
+}
+
+@keyframes particle-burst4 {
+    0% {
+        opacity: 1;
+        transform: translate(0, 0);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(14px, 14px);
+    }
+}
+
+@keyframes particle-burst5 {
+    0% {
+        opacity: 1;
+        transform: translate(0, 0);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(0, 20px);
+    }
+}
+
+@keyframes particle-burst6 {
+    0% {
+        opacity: 1;
+        transform: translate(0, 0);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(-14px, 14px);
+    }
+}
+
+@keyframes particle-burst7 {
+    0% {
+        opacity: 1;
+        transform: translate(0, 0);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(-20px, 0);
+    }
+}
+
+@keyframes particle-burst8 {
+    0% {
+        opacity: 1;
+        transform: translate(0, 0);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(-14px, -14px);
+    }
 }

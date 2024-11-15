@@ -545,6 +545,9 @@
       }
     },
     "dialogs": {
+      "DeleteChatRoomDialogTexts": {
+        "chatWith": "Camera de chat cu {email}"
+      },
       "DeleteDialogTexts": {
         "anchor": "Șterge",
         "title": "Sunteți absolut sigur?",
@@ -766,8 +769,8 @@
         "posts": {
           "id": "ID",
           "title": "Titlu",
-          "userLikes": "# de aprecieri",
-          "userDislikes": "# de dezaprobări",
+          "userLikes": "#de aprecieri",
+          "userDislikes": "#de dezapr.",
           "createdAt": "Data creării",
           "updatedAt": "Ultima actualizare",
           "approved": {
@@ -790,8 +793,8 @@
         "recipes": {
           "id": "ID",
           "title": "Titlu",
-          "userLikes": "# de aprecieri",
-          "userDislikes": "# de dezaprobări",
+          "userLikes": "#de aprecieri",
+          "userDislikes": "#de dezapr.",
           "createdAt": "Data creării",
           "updatedAt": "Ultima actualizare",
           "type": "Dietă",
@@ -875,8 +878,8 @@
         "plans": {
           "id": "ID",
           "title": "Titlu",
-          "userLikes": "# de aprecieri",
-          "userDislikes": "# de dezaprobări",
+          "userLikes": "#de aprecieri",
+          "userDislikes": "#de dezapr.",
           "createdAt": "Data creării",
           "updatedAt": "Ultima actualizare",
           "type": "Dietă",
@@ -911,8 +914,8 @@
           "id": "ID",
           "title": "Titlu",
           "count": "#planuri",
-          "userLikes": "# de aprecieri",
-          "userDislikes": "# de dezaprobări",
+          "userLikes": "#de aprecieri",
+          "userDislikes": "#de dezapr.",
           "createdAt": "Data creării",
           "updatedAt": "Ultima actualizare",
           "type": "Tip",
@@ -1103,6 +1106,47 @@
     "home": {
       "HomeHeaderTexts": {
         "title": "Calea către o viață sănătoasă începe aici !"
+      },
+      "HomeHeroTexts": {
+        "title": "Bro meets science <br/> alegerea perfectă pentru sănătate",
+        "description": "Platforma noastră oferă planuri nutriționale personalizate, rețete delicioase și conținut educativ pentru a te ajuta să îți îmbunătățești sănătatea și să îți atingi obiectivele de fitness. Alătură-te comunității noastre și începe-ți călătoria spre o viață mai sănătoasă astăzi!",
+        "titles": {
+          "title1": "Bucură-te de viață",
+          "title2": "Mănâncă sănătos",
+          "title3": "Rămâi în formă",
+          "title4": "Nu te teme",
+          "title5": "Fii creativ",
+          "title6": "Iubește-ți mâncarea",
+          "title7": "Rămâi motivat",
+          "title8": "Cumpără planuri",
+          "title9": "Bucură-te de corpul tău",
+          "title10": "Rămâi conectat"
+        }
+      },
+      "HomeTestimonialsTexts": {
+        "title": "Află ce spun clienții noștri",
+        "testimonials": {
+          "testimonial1": {
+            "quote": "Informațiile nutriționale și planurile de masă mi-au schimbat complet stilul de viață. Mă simt plină de energie și mai sănătoasă ca niciodată.",
+            "name": "Sarah Chen",
+            "pleasure": "Pasionată de jogging și drumeții pe trasee montane"
+          },
+          "testimonial2": {
+            "quote": "Rețetele sunt ușor de urmat, iar flexibilitatea platformei m-a ajutat să îmi mențin consecvența în atingerea obiectivelor de fitness.",
+            "name": "Andrei Popescu",
+            "pleasure": "Adore să gătească și să încerce rețete noi"
+          },
+          "testimonial3": {
+            "quote": "Bro Meets Science mi-a simplificat complet planificarea meselor și mi-a oferit idei delicioase și sănătoase care se potrivesc stilului meu de viață.",
+            "name": "Marcus Johnson",
+            "pleasure": "Iubește antrenamentele cu greutăți și pregătirea meselor sănătoase"
+          },
+          "testimonial4": {
+            "quote": "Informațiile detaliate despre nutriție și sfaturile oferite de experți mi-au transformat dieta și starea generală de bine.",
+            "name": "Jabbad Dutt",
+            "pleasure": "Ciclist pasionat și iubitor de activități în aer liber"
+          }
+        }
       },
       "HomeCardsText": {
         "register": {

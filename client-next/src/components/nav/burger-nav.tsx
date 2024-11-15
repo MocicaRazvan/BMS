@@ -12,7 +12,7 @@ import { Home, LockKeyhole, LogOut, Menu } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Session } from "next-auth";
 import { ComponentMenuLink } from "@/components/nav/links";
-import { isDeepEqual } from "@/lib/utils";
+import { appendCreatedAtDesc, isDeepEqual } from "@/lib/utils";
 import { AvatarImage } from "@radix-ui/react-avatar";
 import { Avatar } from "@/components/ui/avatar";
 import { Link, usePathname } from "@/navigation";
@@ -76,19 +76,22 @@ const BurgerNav = memo<Props>(
                 <div className="mt-5 transition-all ps-2 hover:scale-[1.02] text-lg">
                   <ActiveLink
                     isActive={pathName === "/subscriptions"}
-                    href={"/subscriptions"}
+                    href={appendCreatedAtDesc("/subscriptions")}
                   >
                     {texts.links.subscriptions}
                   </ActiveLink>
                 </div>
                 <div className="mt-5 transition-all ps-2 hover:scale-[1.02] text-lg">
-                  <ActiveLink href="/orders" isActive={pathName === "/orders"}>
+                  <ActiveLink
+                    href={appendCreatedAtDesc("/orders")}
+                    isActive={pathName === "/orders"}
+                  >
                     {texts.links.orders}
                   </ActiveLink>
                 </div>
                 <div className="mt-5 transition-all ps-2 hover:scale-[1.02] text-lg">
                   <ActiveLink
-                    href="/posts/approved"
+                    href={appendCreatedAtDesc("/posts/approved")}
                     isActive={pathName === "/posts/approved"}
                   >
                     {texts.links.posts}
@@ -96,7 +99,7 @@ const BurgerNav = memo<Props>(
                 </div>
                 <div className="mt-5 transition-all ps-2 hover:scale-[1.02] text-lg">
                   <ActiveLink
-                    href="/plans/approved"
+                    href={appendCreatedAtDesc("/plans/approved")}
                     isActive={pathName === "/plans/approved"}
                   >
                     {texts.links.plans}
@@ -151,7 +154,9 @@ const BurgerNav = memo<Props>(
             {isAdminOrTrainer && (
               <div className="mt-5 ps-2 ">
                 <Link
-                  href={`/trainer/user/${authUser?.id}/posts`}
+                  href={appendCreatedAtDesc(
+                    `/trainer/user/${authUser?.id}/posts`,
+                  )}
                   className="font-bold hover:underline flex items-center justify-start gap-2 transition-all hover:scale-[1.02]"
                 >
                   <DashboardIcon /> {texts.links.trainerDashboard}

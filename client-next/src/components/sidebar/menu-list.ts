@@ -15,6 +15,7 @@ import {
   Users,
 } from "lucide-react";
 import { Session } from "next-auth";
+import { appendCreatedAtDesc } from "@/lib/utils";
 
 type Submenu = {
   href: string;
@@ -132,21 +133,21 @@ export const getAdminMenuList: getMenuListType<AdminSidebarMenuTexts> = (
       groupLabel: groupLabels["contents"],
       menus: [
         {
-          href: "/admin/posts",
+          href: appendCreatedAtDesc("/admin/posts"),
           label: labels["posts"],
           active: pathname.includes("/posts") && !pathname.includes("/users"),
           icon: SquarePen,
           submenus: [],
         },
         {
-          href: "/admin/recipes",
+          href: appendCreatedAtDesc("/admin/recipes"),
           label: labels["recipes"],
           active: pathname.includes("/recipes") && !pathname.includes("/users"),
           icon: CookingPot,
           submenus: [],
         },
         {
-          href: "/admin/plans",
+          href: appendCreatedAtDesc("/admin/plans"),
           label: labels["plans"],
           active: pathname.includes("/plans") && !pathname.includes("/users"),
           icon: NotebookPen,
@@ -159,7 +160,7 @@ export const getAdminMenuList: getMenuListType<AdminSidebarMenuTexts> = (
           icon: HandPlatter,
           submenus: [
             {
-              href: "/admin/ingredients",
+              href: appendCreatedAtDesc("/admin/ingredients"),
               label: subLabels["allIngredients"],
               active: pathname === "/admin/ingredients",
             },
@@ -171,14 +172,14 @@ export const getAdminMenuList: getMenuListType<AdminSidebarMenuTexts> = (
           ],
         },
         {
-          href: "/admin/users",
+          href: appendCreatedAtDesc("/admin/users"),
           label: labels["users"],
           active: pathname.includes("/users"),
           icon: Users,
           submenus: [],
         },
         {
-          href: "/admin/orders",
+          href: appendCreatedAtDesc("/admin/orders"),
           label: labels["orders"],
           active: pathname.includes("/orders") && !pathname.includes("/users"),
           icon: ShoppingBag,
@@ -274,7 +275,7 @@ export const getTrainerMenuList: (
           icon: SquarePen,
           submenus: [
             {
-              href: `/trainer/user/${authUser.id}/posts`,
+              href: appendCreatedAtDesc(`/trainer/user/${authUser.id}/posts`),
               label: subLabels["yourPosts"],
               active: pathname === `/trainer/user/${authUser.id}/posts`,
             },
@@ -286,7 +287,7 @@ export const getTrainerMenuList: (
           ],
         },
         {
-          href: "/trainer/ingredients",
+          href: appendCreatedAtDesc("/trainer/ingredients"),
           label: labels["ingredients"],
           active: pathname.includes("/ingredients"),
           icon: HandPlatter,
@@ -299,7 +300,7 @@ export const getTrainerMenuList: (
           icon: CookingPot,
           submenus: [
             {
-              href: `/trainer/user/${authUser.id}/recipes`,
+              href: appendCreatedAtDesc(`/trainer/user/${authUser.id}/recipes`),
               label: subLabels["yourRecipes"],
               active: pathname === `/trainer/user/${authUser.id}/recipes`,
             },
@@ -317,7 +318,7 @@ export const getTrainerMenuList: (
           icon: CalendarCog,
           submenus: [
             {
-              href: `/trainer/user/${authUser.id}/days`,
+              href: appendCreatedAtDesc(`/trainer/user/${authUser.id}/days`),
               label: subLabels["yourDays"],
               active: pathname === `/trainer/user/${authUser.id}/days`,
             },
@@ -345,7 +346,7 @@ export const getTrainerMenuList: (
           icon: NotebookPen,
           submenus: [
             {
-              href: `/trainer/user/${authUser.id}/plans`,
+              href: appendCreatedAtDesc(`/trainer/user/${authUser.id}/plans`),
               label: subLabels["yourPlans"],
               active: pathname === `/trainer/user/${authUser.id}/plans`,
             },

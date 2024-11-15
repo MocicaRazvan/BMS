@@ -81,7 +81,7 @@ export const ChatRoom = memo(
 
     // console.log("chat rooms", chatRooms);
     return (
-      <ScrollArea className="w-full h-[350px] min-w-[200px] md:h-[calc(1000px-4rem-105px)]  space-y-4">
+      <ScrollArea className="w-full h-[350px] min-w-[200px] md:h-[calc(1000px-4rem-105px)]  space-y-4 ">
         <div className="w-full h-full space-y-4 pr-4 pb-6 ">
           {/*<Button*/}
           {/*  onClick={() => {*/}
@@ -164,31 +164,35 @@ const ChatRoomItem = memo(
           callback(room, otherUser);
         }}
       >
-        <div className="flex flex-col items-between justify-center gap-2">
+        <div className="flex flex-col items-between justify-center gap-2 min-h-11">
           <div className="flex items-center justify-between gap-2">
-            <p className=" font-bold">{otherUser.email}</p>
             <div
               className={cn(
-                "w-5 h-5 rounded-full",
+                "w-5 h-5 rounded-full  backdrop-blur ",
                 otherUser.connectedStatus === "ONLINE"
-                  ? "bg-success"
-                  : "bg-destructive",
+                  ? "supports-[backdrop-filter]:bg-success/75"
+                  : "supports-[backdrop-filter]:bg-destructive/75",
               )}
             />
-            {otherUser.connectedChatRoom?.id !== room.id && (
-              <DeleteChatRoomDialog
-                handleDelete={() => handleRoomDelete(room.id)}
-                anchor={
-                  <Button
-                    variant="destructive"
-                    className="py-1 px-2 transition-all hover:shadow-sm hover:scale-110"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <Trash2 className="w-4 h-16" />
-                  </Button>
-                }
-              />
-            )}
+            <div className="flex flex-1 items-center justify-between">
+              <p className=" font-bold">{otherUser.email}</p>
+              {otherUser.connectedChatRoom?.id !== room.id && (
+                <DeleteChatRoomDialog
+                  receiverEmail={otherUser?.email || ""}
+                  handleDelete={() => handleRoomDelete(room.id)}
+                  anchor={
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      className=" transition-all hover:shadow-sm hover:scale-110"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <Trash2 className="w-4 h-7" />
+                    </Button>
+                  }
+                />
+              )}
+            </div>
           </div>
           <div>
             <p
