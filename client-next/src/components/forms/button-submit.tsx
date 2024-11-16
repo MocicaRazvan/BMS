@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { ButtonHTMLAttributes, ReactNode } from "react";
+import { cn } from "@/lib/utils";
 
 export interface ButtonSubmitTexts {
   submitText: string | ReactNode;
@@ -26,11 +27,17 @@ export default function ButtonSubmit({
   return (
     <div className="mt-2">
       {!isLoading ? (
-        <Button type="submit" size={size} disabled={disable} {...props}>
+        <Button
+          type="submit"
+          size={size}
+          disabled={disable}
+          {...props}
+          className={cn(size === "lg" && "text-lg tracking-tight")}
+        >
           {submitText}
         </Button>
       ) : (
-        <Button disabled>
+        <Button disabled size={size}>
           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
           {loadingText}
         </Button>

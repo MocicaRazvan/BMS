@@ -66,7 +66,7 @@ const HeroParallax = memo(
     return (
       <div
         ref={ref}
-        className="h-[240vh] py-40 overflow-hidden  antialiased relative flex flex-col self-auto [perspective:1000px] [transform-style:preserve-3d] !transform-gpu"
+        className="h-[260vh] py-40 overflow-hidden  antialiased relative flex flex-col self-auto [perspective:1000px] [transform-style:preserve-3d] !transform-gpu"
       >
         <Header {...texts} />
         <motion.div
