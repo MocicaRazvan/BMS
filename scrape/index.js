@@ -12,11 +12,11 @@ const __dirname = path.dirname(__filename);
 // getul il faci pe localhost !!!
 // todo REFA CU NOILE RUTE SI SCOATELE PE CELE CARE DAU 404 manual
 // todo pt generare embeddings foloseste pe serverel # OLLAMA_EMBEDDING="zylonai/bge-m3" altfel cel de la chatfire
-
+// todo inainte disable modsecurity
 
 const cookies = [{
     "domain": "im51.go.ro",
-    "expirationDate": 1761480130,
+    "expirationDate": 1763877515,
     "hostOnly": true,
     "httpOnly": false,
     "name": "_pk_id.1.45fb",
@@ -25,10 +25,21 @@ const cookies = [{
     "secure": false,
     "session": false,
     "storeId": "0",
-    "value": "9406497ee04d5d10.1727524930."
+    "value": "dc8ce2a307b78525.1729922315."
 }, {
     "domain": "im51.go.ro",
-    "expirationDate": 1759145611.372074,
+    "hostOnly": true,
+    "httpOnly": true,
+    "name": "__Host-next-auth.csrf-token",
+    "path": "/",
+    "sameSite": "lax",
+    "secure": true,
+    "session": true,
+    "storeId": "0",
+    "value": "430ed7e4e2f39c16fed5e6bb5a3de87734d7c99549ffc56695337d5a7d13a5b9%7C4c6dbdf70edb715fe0d8379e2bb54d3724a183ab2da6062b4be3eaee8fb8f04a"
+}, {
+    "domain": "im51.go.ro",
+    "expirationDate": 1762189738.080164,
     "hostOnly": true,
     "httpOnly": false,
     "name": "NEXT_LOCALE",
@@ -41,38 +52,14 @@ const cookies = [{
 }, {
     "domain": "im51.go.ro",
     "hostOnly": true,
-    "httpOnly": true,
-    "name": "__Host-next-auth.csrf-token",
+    "httpOnly": false,
+    "name": "googleState",
     "path": "/",
-    "sameSite": "lax",
-    "secure": true,
+    "sameSite": "unspecified",
+    "secure": false,
     "session": true,
     "storeId": "0",
-    "value": "6ce01b7ee9ab5b6f429188b71433631dfaf52bb949c1735d8b86c0ba54bd980a%7Cee53450bb196de2f174080a72f81ade21182646bb665a418b6993442fc5d9839"
-}, {
-    "domain": "im51.go.ro",
-    "expirationDate": 1727710087.889046,
-    "hostOnly": true,
-    "httpOnly": true,
-    "name": "portainer_api_key",
-    "path": "/",
-    "sameSite": "strict",
-    "secure": false,
-    "session": false,
-    "storeId": "0",
-    "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJhZG1pbiIsInJvbGUiOjEsInNjb3BlIjoiZGVmYXVsdCIsImZvcmNlQ2hhbmdlUGFzc3dvcmQiOmZhbHNlLCJleHAiOjE3Mjc3MTAwODgsImp0aSI6ImQ0Zjk2ZjhiLWNlOGMtNDViZS05MTY5LTc4NmY5NmNiMTdlNyIsImlhdCI6MTcyNzY4MTI4OH0.52qye5cXZHvQRpyco2gOXluT2I1D7Qa_0hEQe4m6o_s"
-}, {
-    "domain": "im51.go.ro",
-    "expirationDate": 1727729500.241102,
-    "hostOnly": true,
-    "httpOnly": true,
-    "name": "_gorilla_csrf",
-    "path": "/",
-    "sameSite": "lax",
-    "secure": false,
-    "session": false,
-    "storeId": "0",
-    "value": "MTcyNzY4NjMwMHxJamRHYzJSck9XMXpUV3MwU0dkRFNGWmFTMlY1YkU1SE1tTnpkRWR2VjAxd2QwSkpNMHAyYTBzeFNITTlJZ289fHRB_KY_VbVeJB6FQbWlzgdb_l0rzcsmdLLNJhAAdOR7"
+    "value": "3521de1d-4d30-48f4-88c5-8bdd43a59768"
 }, {
     "domain": "im51.go.ro",
     "hostOnly": true,
@@ -86,7 +73,19 @@ const cookies = [{
     "value": "https%3A%2F%2Fim51.go.ro%2Fen%2Fauth%2Fsignin"
 }, {
     "domain": "im51.go.ro",
-    "expirationDate": 1730278399.639447,
+    "expirationDate": 1733933927.840518,
+    "hostOnly": true,
+    "httpOnly": true,
+    "name": "grafana_session",
+    "path": "/",
+    "sameSite": "lax",
+    "secure": false,
+    "session": false,
+    "storeId": "0",
+    "value": "b2f16bf16af88041ff0e0e22009ff358"
+}, {
+    "domain": "im51.go.ro",
+    "expirationDate": 1734343097.591985,
     "hostOnly": true,
     "httpOnly": true,
     "name": "__Secure-next-auth.session-token",
@@ -95,7 +94,7 @@ const cookies = [{
     "secure": true,
     "session": false,
     "storeId": "0",
-    "value": "eyJhbGciOiJkaXIiLCJlbmMiOiJBMjU2R0NNIn0..7Q-ylCbZVQPVuDP3.bKP_XCsPn3Wh6QHZ0J82PWxsI1h-u1zMnZiZcfXgtiy49SugK8ze676t4Yhr4fdLTAEVg7ad-RUZk2XT0yGSjJcpRwqbewBZVveBnOl4hXtoipiP25rBZdKkV6P_ODTg5w3UAf5UsQwrNla_A0PTFM_Sjj0njhahXnHdV94W2fgUfxKPP82zR1SoQpbG6aczjLLq5ZBKgcTm53fOTHvEjXfMl_I0yzLojWMgaLI8XIdD4J-taMYNiWJFqVdwZYxjdbvwaXQuBFx5ZpD-ibET-0O5buVi4oMzXt8TNAKzmgBFRoCxKZLulhuq0G3IWZn9qGgw8V1jo2EEiKqcas5TFuS1V9k7DOX7sfhP0evOAt52y6xlAYErY_kZbQmvUexin2LWJQcDaGR6JMR6KcWNn8UzQoc-zZ9fxD-mSc1GI8ZsLFIpG6an61rIY45cKqPOK3EeHWV3iE61R2iBSgQZOF213ZMTX8n_08Rg-HMzVm2qb8Nc4ApyAPzyHMrSzJwVO1mXak0d1baICmtPBFVOsL1q-5qxUzCLj0cRwVIwE0-NxUgYUegiXuULvalELF1O9WDiUEpZybpu76VP5OFM7P4FuyjQi6HAyEyKlZX-_xy2WQjHci4HU6zXwtHz5IcDP-sl5NSLRNbWHtNUKsEaKMUhAmbMK4PVJ-FaaERpfl_0ssOn5G_bbwhe-faMaRZeY7jKn-3MB77otAVobLRZgCydmmkhJqUqzynuTIZwrWNieVC3fjaGZ4ytQdsIrw_7YFYRwXz_TeKxv86g2c-Fnt6GLK6R1uhmfDkvfe1Ze1pabOJNc9IcH7-EKcIECkdasww9IageQzjevlWzmisRVBMN947Q2T7oH-dyXnEoV20PlH-GXv_U7P-Ha9SUPLOYgmWY0JbrfX7vrqrjo9YFgJ5E-pBKCQh8c6vljFEHeZxaxupjnvhYL1AmSdZl.zUcMEEjKGdNVr-lbadEPKw"
+    "value": "eyJhbGciOiJkaXIiLCJlbmMiOiJBMjU2R0NNIn0..zjsb-FN7x1f1wq9b.dzfDpi_I3qvoZpGpQYPagbt0Vhn9qxdVTu_Ss3uiNam44ooiju7JmgIcb5y90t27tF9zeR0QAERfsOSwGcPhn3PTtgi11ohivyt9ol5E8FeGnDQzLUHa4hwz6xg8Ye8A29YA_yg66ghhdqtHEQGZjitNXfPpKiZ9z88XkJtLfWGvoKZaMLg8o4AVSXi7I4OkoJDv63rnZ6DSiOZU25jWyQRFzeVX6f55qx7z192JH49Ko-ac9ZtPVRhQZko38xPDZ4ll8FxHEtQhzJobtLXODfCFTqHEKiiRhCkUTAu2FMU99knToMaj9qLznzD-_-nhlvPQvx4MMXTLSogFqmEukR6Ui4T0qp1BGzgc_f3S_xYl_h50BsIckHGhnEXejsr4ernlvsERNCnC4nijs3nkwUgq6EhFnoGaPH5vpC0btmb94uaU5nzx-gqMmnGJ6KlLXOFQhb4l48WQDV9L9Wj3eg6Pr_RI8mRSo02a3mhPv7eJTKbbw_LM5v8I-9zRzH62MxG8LrZkl9Gd8QpOZNKZ0asgSV6cxfWx7MfiF85qvDKe2CwWji87JVPrF7-I34SrmcULLrTRBRITgvWNiTEAylpEZIBHTNPrD3gN1bb062gpKe_LQ-A0j_APcxMOXX8NqW_vxTkq3Zod4MsdQQfUfdeJLuK51HECbrsl_wAUp-0WJbossfyvJOjezfO5Ab8t-1WFFdOpxlfrSZ6ekSu9_GBD-veEXnb7ZcspHFbnIadnopMKNP-wbm118AI_mxtgHblsSqhXhlevfyOW35tGSWbeRKdY69aro3CkngtT2y4lu__h4CzlshtOhK0yhnMfn3SqbZdNfhmKYxvGivVcA6MGbV9gb4zk7dxFxIwp8k4Y-aoHpklt0pd1PUn1qvcumZL8ee6TaU8aHYW-Ejca4JADQHygshqivAOWmw9cJa9diskEplm-IcgXYTDvsscnZA.Chan3bNzZUlH4LCPdb_jWQ"
 }]
 
 
