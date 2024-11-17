@@ -33,11 +33,16 @@ public class BaseCaffeienCacherImpl<K> implements BaseCaffeineCacher<K> {
     @Value("${cache.maximum.size:2500}")
     private int cacheInitialMaximumSize;
 
+    public static final int MAX_CACHE_TIMEOUT = 5000;
+
     public BaseCaffeienCacherImpl(Integer cacheExpirationTimeMinutes, Integer cacheMaximumSize, Executor executor) {
+        if (cacheExpirationTimeMinutes != null && cacheExpirationTimeMinutes > MAX_CACHE_TIMEOUT) {
+            throw new IllegalArgumentException("Cache expiration time is too large!");
+        }
         this.cacheExpirationTimeMinutes = (cacheExpirationTimeMinutes != null) ? cacheExpirationTimeMinutes : cacheInitialTimoutMinutes;
         this.cacheMaximumSize = (cacheMaximumSize != null) ? cacheMaximumSize : cacheInitialMaximumSize;
         this.internalCacheExpirationTime = this.cacheExpirationTimeMinutes > 0 ? Duration.ofMinutes(this.cacheExpirationTimeMinutes + 1)
-                : Duration.ofMinutes(Integer.MAX_VALUE);
+                : Duration.ofMinutes(MAX_CACHE_TIMEOUT + 1);
         this.executor = (executor != null) ? executor : Executors.newCachedThreadPool();
 
         Caffeine<Object, Object> cacheBuilder = Caffeine.newBuilder()
