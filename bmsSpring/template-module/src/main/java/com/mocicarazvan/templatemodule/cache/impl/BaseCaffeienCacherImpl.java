@@ -36,7 +36,8 @@ public class BaseCaffeienCacherImpl<K> implements BaseCaffeineCacher<K> {
     public BaseCaffeienCacherImpl(Integer cacheExpirationTimeMinutes, Integer cacheMaximumSize, Executor executor) {
         this.cacheExpirationTimeMinutes = (cacheExpirationTimeMinutes != null) ? cacheExpirationTimeMinutes : cacheInitialTimoutMinutes;
         this.cacheMaximumSize = (cacheMaximumSize != null) ? cacheMaximumSize : cacheInitialMaximumSize;
-        this.internalCacheExpirationTime = Duration.ofMinutes(this.cacheExpirationTimeMinutes + 1);
+        this.internalCacheExpirationTime = this.cacheExpirationTimeMinutes > 0 ? Duration.ofMinutes(this.cacheExpirationTimeMinutes + 1)
+                : Duration.ofMinutes(Integer.MAX_VALUE);
         this.executor = (executor != null) ? executor : Executors.newCachedThreadPool();
 
         Caffeine<Object, Object> cacheBuilder = Caffeine.newBuilder()
@@ -51,7 +52,8 @@ public class BaseCaffeienCacherImpl<K> implements BaseCaffeineCacher<K> {
 
 
         if (this.cacheExpirationTimeMinutes > 0) {
-            cacheBuilder.expireAfterAccess(this.cacheExpirationTimeMinutes, TimeUnit.MINUTES);
+            cacheBuilder.expireAfterWrite(this.cacheExpirationTimeMinutes, TimeUnit.MINUTES);
+            // useless for me now, letting for maybe future use
             cacheBuilder.refreshAfterWrite(this.cacheExpirationTimeMinutes / 2, TimeUnit.MINUTES);
         }
 
