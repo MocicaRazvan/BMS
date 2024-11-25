@@ -46,7 +46,7 @@ export default async function AdminSignOut({ params: { locale } }: Props) {
       }}
     >
       <div className="w-full h-full bg-background">
-        <SignOut {...texts} />
+        <SignOut {...texts} locale={locale} />
       </div>
     </SidebarContentLayout>
   );
