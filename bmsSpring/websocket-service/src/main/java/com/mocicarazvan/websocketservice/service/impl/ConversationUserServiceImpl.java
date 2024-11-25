@@ -78,11 +78,11 @@ public class ConversationUserServiceImpl implements ConversationUserService {
     }
 
     @Override
-//    @Transactional
+    @Transactional
 //    @CustomRetryable
     public ConversationUser getOrCreateUserByEmail(String email) {
         return conversationUserRepository.findByEmail(email)
-                .orElseGet(() -> conversationUserRepository.save(ConversationUser.builder().email(email)
+                .orElseGet(() -> saveUser(ConversationUser.builder().email(email)
                         .connectedChatRoom(null)
                         .connectedStatus(ConnectedStatus.ONLINE)
                         .build()));
@@ -101,7 +101,11 @@ public class ConversationUserServiceImpl implements ConversationUserService {
 //    @Transactional
 //    @CustomRetryable
     public ConversationUser saveUser(ConversationUser conversationUser) {
-        return conversationUserRepository.save(conversationUser);
+        return
+                conversationUserRepository.findByEmail(conversationUser.getEmail())
+                        .orElseGet(() ->
+                                conversationUserRepository.save(conversationUser)
+                        );
     }
 
     @Override
@@ -118,16 +122,6 @@ public class ConversationUserServiceImpl implements ConversationUserService {
 //    @Transactional
     @Transactional(propagation = Propagation.REQUIRES_NEW, isolation = Isolation.READ_COMMITTED)
     @CustomRetryable
-//    @Retryable(
-//            retryFor = {OptimisticLockException.class,
-//                    PessimisticLockException.class,
-//                    CannotAcquireLockException.class,
-//                    JpaSystemException.class,
-//                    LockAcquisitionException.class,
-//                    ObjectOptimisticLockingFailureException.class,
-//                    CannotAcquireLockException.class, SQLException.class, StaleObjectStateException.class},
-//            maxAttempts = 5,
-//            backoff = @Backoff(delay = 200, multiplier = 2, maxDelay = 1000))
     public List<ConversationUserResponse> getConnectedUsers() {
         return conversationUserRepository.findAllByConnectedStatusIs(ConnectedStatus.ONLINE)
                 .stream()
@@ -162,19 +156,6 @@ public class ConversationUserServiceImpl implements ConversationUserService {
     @CustomRetryable
     public ConversationUserResponse mapToResponseAndNotify(ConversationUser conversationUser) {
         notifyOtherUsers(conversationUser.getEmail());
-//        log.error("Conversation user chat room: {}", conversationUser.getConnectedChatRoom());
-//        messagingTemplate.convertAndSendToUser(conversationUser.getEmail(), "/chat/changed",
-//                ConversationUserResponse.builder()
-//                        .id(conversationUser.getId())
-//                        .connectedChatRoom(conversationUser.getConnectedChatRoom() == null ? null :
-//                                ChatRoomResponse.builder()
-//                                        .id(conversationUser.getConnectedChatRoom().getId())
-//                                        .users(conversationUser.getConnectedChatRoom().getUsers()
-//                                                .stream()
-//                                                .map(conversationUserMapper::fromModelToResponse)
-//                                                .collect(Collectors.toSet()))
-//                                        .build())
-//                        .build());
         customConvertAndSendToUser.sendToUser(conversationUser.getEmail(), "/queue/chat-changed",
                 ConversationUserResponse.builder()
                         .id(conversationUser.getId())
@@ -193,17 +174,6 @@ public class ConversationUserServiceImpl implements ConversationUserService {
     @Transactional(isolation = Isolation.READ_COMMITTED)
     @CustomRetryable
     public void notifyOtherUsers(String senderEmail) {
-//        chatRoomRepository.findOthersEmailsBySenderEmail(senderEmail)
-//                .forEach(d -> messagingTemplate.convertAndSendToUser(d.getUserEmail(), "/chatRooms",
-//                        ChatRoomResponse.builder()
-//                                .id(d.getChatId())
-//                                .users(
-//                                        Stream.of(d.getUserEmail(), senderEmail)
-//                                                .map(this::getUserByEmail)
-//                                                .map(conversationUserMapper::fromModelToResponse)
-//                                                .collect(Collectors.toSet())
-//                                )
-//                                .build()));
         chatRoomRepository.findOthersEmailsBySenderEmail(senderEmail)
                 .forEach(d -> customConvertAndSendToUser.sendToUser(d.getUserEmail(), "/queue/chatRooms",
                         ChatRoomResponse.builder()

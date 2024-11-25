@@ -9,6 +9,7 @@ import { Client } from "@stomp/stompjs";
 import useFetchStream from "@/hoooks/useFetchStream";
 import { Session } from "next-auth";
 import { useSubscription } from "react-stomp-hooks";
+import { WithUser } from "@/lib/user";
 
 interface TotalsNotification {
   total: number;
@@ -398,7 +399,46 @@ export const NotificationTemplateProvider = <
     >,
     initialState as NotificationState<R, E, T>,
   );
-
+  if (!authUser || !authUser.email) {
+    return (
+      <NotificationContext.Provider value={{ state, dispatch }}>
+        {children}
+      </NotificationContext.Provider>
+    );
+  }
+  return (
+    <NotificationTemplateAuthUser
+      authUser={authUser}
+      NotificationContext={NotificationContext}
+      state={state}
+      notificationName={notificationName}
+      dispatch={dispatch}
+    >
+      {children}
+    </NotificationTemplateAuthUser>
+  );
+};
+interface NotificationTemplateAuthUser<
+  R extends IdGenerateDto,
+  E extends string,
+  T extends NotificationTemplateResponse<R, E>,
+> extends Omit<NotificationProviderProps, "authUser">,
+    WithUser {
+  state: NotificationState<R, E, T>;
+  dispatch: React.Dispatch<NotificationAction<R, E, T>>;
+}
+const NotificationTemplateAuthUser = <
+  R extends IdGenerateDto,
+  E extends string,
+  T extends NotificationTemplateResponse<R, E>,
+>({
+  children,
+  notificationName,
+  authUser,
+  NotificationContext,
+  state,
+  dispatch,
+}: NotificationTemplateAuthUser<R, E, T>) => {
   const { messages, error, isFinished } = useFetchStream<T[]>({
     path: `/ws-http/${notificationName}/getAllByReceiverEmailAndType`,
     method: "PATCH",
@@ -410,15 +450,6 @@ export const NotificationTemplateProvider = <
     },
   });
 
-  // useSubscription(
-  //   `/user/${authUser?.email}/queue/notification/${notificationName}/added`,
-  //   (message) => {
-  //     console.log("total added", notificationName);
-  //     const newMessage = JSON.parse(message.body) satisfies T;
-  //     console.log("ADD", newMessage.id);
-  //     dispatch({ type: "ADD", payload: newMessage });
-  //   },
-  // );
   useSubscription(
     `/queue/notification-${notificationName}-added-${authUser?.email}`,
     (message) => {
@@ -428,35 +459,7 @@ export const NotificationTemplateProvider = <
       dispatch({ type: "ADD", payload: newMessage });
     },
   );
-  // useSubscription(
-  //   `/user/${authUser?.email}/queue/notification/${notificationName}/removed`,
-  //   (message) => {
-  //     const newMessage = JSON.parse(message.body);
-  //
-  //     let referenceId;
-  //
-  //     if (typeof newMessage === "string") {
-  //       console.log("referenceId string");
-  //       referenceId = parseInt(newMessage);
-  //     } else if (newMessage?.reference?.id) {
-  //       console.log("referenceId obj");
-  //       referenceId = newMessage.reference.id;
-  //     }
-  //
-  //     if (!referenceId) return;
-  //
-  //     console.log("referenceId", referenceId);
-  //
-  //     console.log("total removed", newMessage);
-  //     console.log("REMOVE BY REFERENCE", newMessage);
-  //     dispatch({
-  //       type: "REMOVE_BY_REFERENCE",
-  //       payload: {
-  //         referenceId,
-  //       },
-  //     });
-  //   },
-  // );
+
   useSubscription(
     `/queue/notification-${notificationName}-removed-${authUser?.email}`,
     (message) => {

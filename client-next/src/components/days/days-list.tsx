@@ -90,7 +90,13 @@ const SingleDayItem = memo(
     ...rest
   }: SingleDayItemProps) => {
     const { dayState, dayIsFinished, mealsIsFinished, user, meals } =
-      useGetDaysWithMeals(dayId, authUser, dayBasePath, mealsBasePath, true);
+      useGetDaysWithMeals({
+        dayId,
+        authUser,
+        dayBasePath,
+        mealsBasePath,
+        useAbortController: true,
+      });
 
     if (!mealsIsFinished || !dayIsFinished) {
       return <LoadingSpinner />;

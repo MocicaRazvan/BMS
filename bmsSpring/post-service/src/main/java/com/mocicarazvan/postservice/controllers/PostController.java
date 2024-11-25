@@ -178,7 +178,8 @@ public class PostController implements ApproveController
     @Override
     @DeleteMapping(value = "/delete/{id}", produces = {MediaType.APPLICATION_NDJSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
     public Mono<ResponseEntity<CustomEntityModel<PostResponse>>> deleteModel(@PathVariable Long id, ServerWebExchange exchange) {
-        return postService.deleteModel(id, requestsUtils.extractAuthUser(exchange))
+        return postService.deleteModelGetOriginalApproved(id, requestsUtils.extractAuthUser(exchange))
+                .map(Pair::getFirst)
                 .flatMap(m -> postReactiveResponseBuilder.toModel(m, PostController.class))
                 .map(ResponseEntity::ok);
     }

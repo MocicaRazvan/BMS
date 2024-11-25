@@ -25,7 +25,7 @@ import { useMemo, useState } from "react";
 
 import { Loader2 } from "lucide-react";
 
-import { Link, useRouter } from "@/navigation";
+import { Link, Locale, useRouter } from "@/navigation";
 import { logError } from "@/app/[locale]/(main)/auth/signin/actions";
 import OauthProviders from "@/app/[locale]/(main)/auth/oauth-providers";
 
@@ -42,6 +42,7 @@ export interface SignInPageText {
 
 interface SignInPageProps extends SignInPageText {
   signInSchemaTexts: SignInSchemaTexts;
+  locale: Locale;
 }
 
 export default function SingIn({
@@ -54,6 +55,7 @@ export default function SingIn({
   linkSignUp,
   linkForgotPassword,
   signInSchemaTexts,
+  locale,
 }: SignInPageProps) {
   const schema = useMemo(
     () => getSignInSchema(signInSchemaTexts),
@@ -89,7 +91,10 @@ export default function SingIn({
       } else {
         console.log("Sign-in successful:", result);
         // todo
-        router.push("/");
+        // router.push("/", {});
+        if (window) {
+          window.location.href = "/" + locale + "/";
+        }
       }
     } catch (error) {
       console.error("Unexpected error during sign-in:", error);

@@ -52,8 +52,8 @@ export default function LikesDislikes({
         )}
         onClick={handleLike}
       >
-        <div className="relative  cursor-pointer">
-          <div className={`burst ${showBurst ? "show" : ""}`}>
+        <div className={cn("relative  ", !disabled && "cursor-pointer")}>
+          <div className={`burst ${!disabled && showBurst ? "show" : ""}`}>
             {Array.from({ length: 10 }).map((_, i) => (
               <span key={i} className={`particle particle${i + 1}`} />
             ))}

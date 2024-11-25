@@ -17,13 +17,15 @@ import com.mocicarazvan.planservice.models.Plan;
 import com.mocicarazvan.planservice.repositories.ExtendedPlanRepository;
 import com.mocicarazvan.planservice.repositories.PlanRepository;
 import com.mocicarazvan.planservice.services.PlanService;
-import com.mocicarazvan.templatemodule.adapters.CacheApprovedFilteredToHandlerAdapter;
-import com.mocicarazvan.templatemodule.cache.FilteredListCaffeineCacheApproveFilterKey;
-import com.mocicarazvan.templatemodule.cache.keys.FilterKeyType;
+import com.mocicarazvan.rediscache.annotation.RedisReactiveApprovedCache;
+import com.mocicarazvan.rediscache.annotation.RedisReactiveApprovedCacheEvict;
+import com.mocicarazvan.rediscache.annotation.RedisReactiveCache;
+import com.mocicarazvan.rediscache.annotation.RedisReactiveCacheEvict;
+import com.mocicarazvan.rediscache.enums.BooleanEnum;
 import com.mocicarazvan.templatemodule.clients.FileClient;
 import com.mocicarazvan.templatemodule.clients.UserClient;
 import com.mocicarazvan.templatemodule.dtos.PageableBody;
-import com.mocicarazvan.templatemodule.dtos.generic.IdGenerateDto;
+import com.mocicarazvan.templatemodule.dtos.UserDto;
 import com.mocicarazvan.templatemodule.dtos.response.*;
 import com.mocicarazvan.templatemodule.exceptions.action.IllegalActionException;
 import com.mocicarazvan.templatemodule.exceptions.action.PrivateRouteException;
@@ -33,13 +35,9 @@ import com.mocicarazvan.templatemodule.services.RabbitMqApprovedSenderWrapper;
 import com.mocicarazvan.templatemodule.services.impl.ApprovedServiceImpl;
 import com.mocicarazvan.templatemodule.utils.EntitiesUtils;
 import com.mocicarazvan.templatemodule.utils.PageableUtilsCustom;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.jooq.lambda.function.Function10;
-import org.jooq.lambda.function.Function2;
-import org.jooq.lambda.function.Function7;
-import org.jooq.lambda.function.Function9;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.util.Pair;
 import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.stereotype.Component;
@@ -53,25 +51,24 @@ import java.util.List;
 @Service
 @Slf4j
 public class PlanServiceImpl
-        extends ApprovedServiceImpl<Plan, PlanBody, PlanResponse, PlanRepository, PlanMapper>
+        extends ApprovedServiceImpl<Plan, PlanBody, PlanResponse, PlanRepository, PlanMapper, PlanServiceImpl.PlanServiceRedisCacheWrapper>
         implements PlanService {
 
 
     private final ExtendedPlanRepository extendedPlanRepository;
     private final DayClient dayClient;
     private final OrderClient orderClient;
-    private final PlanServiceCacheHandler planServiceCacheHandler;
     private final RabbitMqApprovedSenderWrapper<PlanResponse> rabbitMqSender;
 
 
-    public PlanServiceImpl(PlanRepository modelRepository, PlanMapper modelMapper, PageableUtilsCustom pageableUtils, UserClient userClient, EntitiesUtils entitiesUtils, FileClient fileClient, ObjectMapper objectMapper, ExtendedPlanRepository extendedPlanRepository, DayClient dayClient, OrderClient orderClient, PlanServiceCacheHandler planServiceCacheHandler, RabbitMqApprovedSenderWrapper<PlanResponse> rabbitMqSender) {
-        super(modelRepository, modelMapper, pageableUtils, userClient, "plan", List.of("id", "userId", "type", "title", "createdAt", "updatedAt", "approved", "display"), entitiesUtils, fileClient, objectMapper, planServiceCacheHandler, rabbitMqSender);
+    public PlanServiceImpl(PlanRepository modelRepository, PlanMapper modelMapper, PageableUtilsCustom pageableUtils, UserClient userClient, EntitiesUtils entitiesUtils, FileClient fileClient, ObjectMapper objectMapper, ExtendedPlanRepository extendedPlanRepository, DayClient dayClient, OrderClient orderClient, RabbitMqApprovedSenderWrapper<PlanResponse> rabbitMqSender, PlanServiceRedisCacheWrapper self) {
+        super(modelRepository, modelMapper, pageableUtils, userClient, "plan", List.of("id", "userId", "type", "title", "createdAt", "updatedAt", "approved", "display"), entitiesUtils, fileClient, objectMapper, rabbitMqSender, self);
         this.extendedPlanRepository = extendedPlanRepository;
         this.dayClient = dayClient;
         this.orderClient = orderClient;
-        this.planServiceCacheHandler = planServiceCacheHandler;
         this.rabbitMqSender = rabbitMqSender;
     }
+
 
     @Override
     public Flux<PageableResponse<ResponseWithUserDto<PlanResponse>>> getPlansFilteredWithUser(String title, Boolean approved, Boolean display, DietType type, ObjectiveType objective, List<Long> excludeIds, PageableBody pageableBody, String userId, Boolean admin) {
@@ -81,17 +78,9 @@ public class PlanServiceImpl
 
     @Override
     public Flux<PageableResponse<ResponseWithUserDto<PlanResponse>>> getPlansFilteredWithUserByIds(String title, DietType type, ObjectiveType objective, PageableBody pageableBody, List<Long> ids, String userId) {
-        return pageableUtils.isSortingCriteriaValid(pageableBody.getSortingCriteria(), allowedSortingFields)
-                .then(pageableUtils.createPageRequest(pageableBody))
-                .flatMapMany(
-                        pr ->
-                                planServiceCacheHandler.getPlansFilteredWithUserByIdsPersist.apply(
-                                        pageableUtils.createPageableResponse(
-                                                extendedPlanRepository.getPlansFilteredByIds(title, null, null, type, objective, ids, pr).map(modelMapper::fromModelToResponse),
-                                                extendedPlanRepository.countPlansFilteredByIds(title, null, null, type, objective, ids), pr
-                                        ), title, type, objective, pageableBody, ids, userId)
 
-                ).concatMap(this::getPageableWithUser);
+        return self.getPlansFilteredWithUserByIdsBase(title, type, objective, pageableBody, ids, allowedSortingFields)
+                .concatMap(this::getPageableWithUser);
     }
 
     @Override
@@ -99,14 +88,7 @@ public class PlanServiceImpl
         final boolean approvedNotNull = approved != null;
 
         return protectRoute(approvedNotNull, pageableBody, userId)
-                .flatMapMany(pr ->
-                        planServiceCacheHandler.getPlansFilteredPersist.apply(
-                                pageableUtils.createPageableResponse(
-                                        extendedPlanRepository.getPlansFiltered(title, approved, display, type, objective, pr, excludeIds).map(modelMapper::fromModelToResponse),
-                                        extendedPlanRepository.countPlansFiltered(title, approved, display, type, objective, excludeIds), pr
-                                ), title, approved, display, type, objective, excludeIds, pageableBody, userId, admin)
-
-                );
+                .flatMapMany(pr -> self.getPlansFilteredBase(title, approved, display, type, objective, excludeIds, pr, admin));
     }
 
     @Override
@@ -120,12 +102,9 @@ public class PlanServiceImpl
 
     @Override
     public Flux<PageableResponse<PlanResponse>> getPlansFilteredTrainer(String title, Boolean approved, Boolean display, DietType type, ObjectiveType objective, PageableBody pageableBody, String userId, Long trainerId) {
+
         return getModelsAuthor(trainerId, pageableBody, userId, pr ->
-                planServiceCacheHandler.getPlansFilteredTrainerPersist.apply(
-                        pageableUtils.createPageableResponse(
-                                extendedPlanRepository.getPlansFilteredTrainer(title, approved, display, type, objective, trainerId, pr).map(modelMapper::fromModelToResponse),
-                                extendedPlanRepository.countPlansFilteredTrainer(title, approved, display, trainerId, type, objective), pr
-                        ), title, approved, display, type, objective, pageableBody, userId, trainerId)
+                self.getPlansFilteredTrainerBase(title, approved, display, type, objective, trainerId, pr)
         );
     }
 
@@ -154,7 +133,7 @@ public class PlanServiceImpl
 
     @Override
     public Flux<FullDayResponse> getDaysByPlanInternal(Long id, String userId) {
-        return getModel(id)
+        return self.getModelInternal(id)
                 .flatMapMany(model -> dayClient.getByIds(model.getDays()
                                 .stream().map(Object::toString).toList(), userId)
                         .flatMap(dr -> getFullDayResponseMono(userId, dr)));
@@ -183,7 +162,7 @@ public class PlanServiceImpl
 
     @Override
     public Mono<FullDayResponse> getDayByPlanInternal(Long id, Long dayId, String userId) {
-        return getModel(id)
+        return self.getModelInternal(id)
                 .flatMap(model -> getSingleFullDayResponse(model.getDays(), dayId, userId));
     }
 
@@ -207,53 +186,39 @@ public class PlanServiceImpl
 
     @Override
     public Mono<Void> validIds(List<Long> ids) {
+
         return
-                planServiceCacheHandler.validIdsPersist.apply(
-                                this.validIds(ids, modelRepository, modelName)
-                                        .thenReturn(true), ids)
+                this.validIds(ids, modelRepository, modelName)
+                        .thenReturn(true)
                         .then();
     }
 
     @Override
     public Mono<PlanResponse> toggleDisplay(Long id, boolean display, String userId) {
         return
-                planServiceCacheHandler.getUpdateModelGetOriginalApprovedInvalidate().apply(
-                                userClient.getUser("", userId)
-                                        .flatMap(authUser -> getModel(id)
-                                                .flatMap(model -> isNotAuthor(model, authUser)
-                                                        .flatMap(isNotAuthor -> {
-                                                            if (isNotAuthor) {
-                                                                return Mono.error(new PrivateRouteException());
-                                                            }
-                                                            model.setDisplay(display);
-                                                            model.setUpdatedAt(LocalDateTime.now());
-                                                            return modelRepository.save(model)
-                                                                    .map(modelMapper::fromModelToResponse)
-                                                                    .map(p -> Pair.of(p, p.isApproved()))
-                                                                    ;
+                userClient.getUser("", userId)
+                        .flatMap(authUser -> getModel(id)
+                                .flatMap(model -> isNotAuthor(model, authUser)
+                                        .flatMap(isNotAuthor -> {
+                                            if (isNotAuthor) {
+                                                return Mono.error(new PrivateRouteException());
+                                            }
+                                            model.setDisplay(display);
+                                            model.setUpdatedAt(LocalDateTime.now());
+                                            return modelRepository.save(model)
+                                                    .map(modelMapper::fromModelToResponse)
+                                                    ;
 
-                                                        })
-                                                )
-                                        ), id, new PlanBody(), userId)
+                                        })
+                                )
+                        ).flatMap(r -> self.toggleDisplayEvict(id, display, userId, r))
                         .map(Pair::getFirst);
     }
-
-//    @Override
-//    public Mono<ResponseWithUserDtoEntity<DayResponse>> getDayInternalByPlan(Long id, Long dayId, String userId) {
-//        return getModel(id)
-//                .flatMap(model -> {
-//                            if (!model.getDays().contains(dayId)) {
-//                                return Mono.error(new PrivateRouteException());
-//                            }
-//                            return dayClient.getByIdWithUser(String.valueOf(dayId), userId);
-//                        }
-//                );
-//    }
 
     @Override
     public Mono<ResponseWithUserDto<PlanResponse>> getModelByIdWithUserInternal(Long id, String userId) {
         return userClient.getUser("", userId)
-                .flatMap(authUser -> getModel(id)
+                .flatMap(authUser -> self.getModel(id)
                         .flatMap(model -> userClient.getUser("", model.getUserId().toString())
                                 .map(user ->
                                         ResponseWithUserDto.<PlanResponse>builder()
@@ -268,14 +233,12 @@ public class PlanServiceImpl
     @Override
     public Flux<PlanResponse> getModelsTrainerInternal(Long trainerId, String userId) {
         return
-                planServiceCacheHandler.getModelsTrainerInternalPersist.apply(
-                        modelRepository.findAllByUserId(trainerId)
-                                .map(modelMapper::fromModelToResponse), trainerId);
+                self.getModelsTrainerInternalBase(trainerId);
     }
 
     @Override
     public Mono<ResponseWithUserDtoEntity<RecipeResponse>> getRecipeByIdWithUserInternal(Long id, Long dayId, Long recipeId, String userId) {
-        return getModel(id)
+        return self.getModelInternal(id)
                 .map(Plan::getDays)
                 .flatMap(days -> {
                     if (!days.contains(dayId)) {
@@ -290,7 +253,7 @@ public class PlanServiceImpl
 
     @Override
     public Mono<ResponseWithUserDtoEntity<DayResponse>> getDayByIdWithUserInternal(Long id, Long dayId, String userId) {
-        return getModel(id)
+        return self.getModelInternal(id)
                 .map(Plan::getDays)
                 .flatMap(days -> {
                     if (!days.contains(dayId)) {
@@ -302,7 +265,7 @@ public class PlanServiceImpl
 
     @Override
     public Flux<CustomEntityModel<MealResponse>> getMealsByDayInternal(Long id, Long dayId, String userId) {
-        return getModel(id)
+        return self.getModelInternal(id)
                 .map(Plan::getDays)
                 .flatMapMany(days -> {
                     if (!days.contains(dayId)) {
@@ -322,41 +285,40 @@ public class PlanServiceImpl
 
     @Override
     public Flux<PlanResponse> getModelsByIds(List<Long> ids) {
-//        return modelRepository.findAllByIdInAndApprovedTrue(ids)
-//                .map(modelMapper::fromModelToResponse);
         return
-                planServiceCacheHandler.getModelsByIdsPersist.apply(
-                        modelRepository.findAllByIdIn(ids)
-                                .map(modelMapper::fromModelToResponse), ids);
+                self.getModelsByIdsBase(ids);
     }
 
     @Override
     public Mono<PlanResponse> createModel(Flux<FilePart> images, PlanBody planBody, String userId, String clientId) {
         return
 
-                planServiceCacheHandler.getCreateModelInvalidate().apply(
-                        dayClient.verifyIds(planBody.getDays()
+                dayClient.verifyIds(planBody.getDays()
                                         .stream().map(Object::toString).toList()
-                                , userId).then(
-                                super.createModel(images, planBody, userId, clientId)), planBody, userId);
+                                , userId)
+
+                        .then(
+                                super.createModel(images, planBody, userId, clientId))
+                        .flatMap(self::createInvalidate)
+                        .map(Pair::getFirst);
     }
 
     @Override
+    @RedisReactiveCacheEvict(key = CACHE_KEY_PATH, id = "#id")
     public Mono<PlanResponse> updateModelWithImages(Flux<FilePart> images, Long id, PlanBody planBody, String userId, String clientId) {
         return
-                planServiceCacheHandler.getUpdateModelInvalidate().apply(
-                        verifyDayIds(id, planBody, userId)
-                                .then(super.updateModelWithImages(images, id, planBody, userId, clientId)), id, planBody, userId);
-//                super.updateModelWithImages(images, id, planBody, userId);
+                verifyDayIds(id, planBody, userId)
+                        .then(super.updateModelWithImages(images, id, planBody, userId, clientId));
     }
 
 
     @Override
     public Mono<Pair<PlanResponse, Boolean>> updateModelWithImagesGetOriginalApproved(Flux<FilePart> images, Long id, PlanBody planBody, String userId, String clientId) {
+
         return
-                planServiceCacheHandler.getUpdateModelGetOriginalApprovedInvalidate().apply(
-                        verifyDayIds(id, planBody, userId)
-                                .then(super.updateModelWithImagesGetOriginalApproved(images, id, planBody, userId, clientId)), id, planBody, userId);
+                verifyDayIds(id, planBody, userId)
+                        .then(super.updateModelWithImagesGetOriginalApproved(images, id, planBody, userId, clientId))
+                        .flatMap(self::updateDeleteInvalidate);
     }
 
     private Mono<Void> verifyDayIds(Long id, PlanBody planBody, String userId) {
@@ -367,92 +329,162 @@ public class PlanServiceImpl
     }
 
     @Override
+    @RedisReactiveCacheEvict(key = CACHE_KEY_PATH, id = "#id")
     public Mono<PlanResponse> deleteModel(Long id, String userId) {
         return
-                planServiceCacheHandler.getDeleteModelInvalidate().apply(
-                        orderClient.getCountInParent(id, userId)
-                                .flatMap(count -> {
-                                    if (count.getCount() > 0) {
-                                        return Mono.error(new SubEntityUsed("plan", id));
-                                    }
-                                    return super.deleteModel(id, userId);
-                                }), id, userId);
+                orderClient.getCountInParent(id, userId)
+                        .flatMap(count -> {
+                            if (count.getCount() > 0) {
+                                return Mono.error(new SubEntityUsed("plan", id));
+                            }
+                            return super.deleteModel(id, userId);
+                        });
     }
 
-    @EqualsAndHashCode(callSuper = true)
-    @Data
+
+    @Override
+    public Mono<Pair<PlanResponse, Boolean>> deleteModelGetOriginalApproved(Long id, String userId) {
+        return orderClient.getCountInParent(id, userId)
+                .flatMap(count -> {
+                    if (count.getCount() > 0) {
+                        return Mono.error(new SubEntityUsed("plan", id));
+                    }
+                    return super.deleteModelGetOriginalApproved(id, userId);
+                }).flatMap(self::updateDeleteInvalidate);
+
+    }
+
+    @Override
+    @RedisReactiveCacheEvict(key = CACHE_KEY_PATH, id = "#id")
+    public Mono<PlanResponse> reactToModel(Long id, String type, String userId) {
+        return super.reactToModel(id, type, userId);
+    }
+
     @Component
-    public static class PlanServiceCacheHandler
-            extends ApprovedServiceImpl.ApprovedServiceCacheHandler<Plan, PlanBody, PlanResponse> {
-        private final FilteredListCaffeineCacheApproveFilterKey<PlanResponse> cacheFilterList;
+    @Getter
+    public static class PlanServiceRedisCacheWrapper extends ApprovedServiceRedisCacheWrapper<Plan, PlanBody, PlanResponse, PlanRepository, PlanMapper> {
 
-        Function10<Flux<PageableResponse<PlanResponse>>, String, Boolean, Boolean, DietType, ObjectiveType, List<Long>, PageableBody, String, Boolean, Flux<PageableResponse<PlanResponse>>>
-                getPlansFilteredPersist;
-        Function7<Flux<PageableResponse<PlanResponse>>, String, DietType, ObjectiveType, PageableBody, List<Long>, String, Flux<PageableResponse<PlanResponse>>>
-                getPlansFilteredWithUserByIdsPersist;
-        Function9<Flux<PageableResponse<PlanResponse>>, String, Boolean, Boolean, DietType, ObjectiveType, PageableBody, String, Long, Flux<PageableResponse<PlanResponse>>>
-                getPlansFilteredTrainerPersist;
-        Function2<Mono<Boolean>, List<Long>, Mono<Boolean>> validIdsPersist;
-        Function2<Flux<PlanResponse>, List<Long>, Flux<PlanResponse>> getModelsByIdsPersist;
-        Function2<Flux<PlanResponse>, Long, Flux<PlanResponse>> getModelsTrainerInternalPersist;
+        private final ExtendedPlanRepository extendedPlanRepository;
 
-        public PlanServiceCacheHandler(FilteredListCaffeineCacheApproveFilterKey<PlanResponse> cacheFilterList) {
-            super();
-            this.cacheFilterList = cacheFilterList;
-            CacheApprovedFilteredToHandlerAdapter.convert(cacheFilterList, this);
+        public PlanServiceRedisCacheWrapper(PlanRepository modelRepository, PlanMapper modelMapper, PageableUtilsCustom pageableUtils, UserClient userClient, ExtendedPlanRepository extendedPlanRepository) {
+            super(modelRepository, modelMapper, "plan", pageableUtils, userClient);
+            this.extendedPlanRepository = extendedPlanRepository;
+        }
 
-            this.getPlansFilteredPersist = (flux, title, approved, display, type, objective, excludeIds, pageableBody, userId, admin) -> {
-                FilterKeyType.KeyRouteType keyRouteType = Boolean.TRUE.equals(admin) ? FilterKeyType.KeyRouteType.createForAdmin() : FilterKeyType.KeyRouteType.createForPublic();
-                return cacheFilterList.getExtraUniqueFluxCache(
-                        EntitiesUtils.getListOfNotNullObjects(title, approved, display, type, objective, excludeIds, pageableBody, admin),
-                        "/getPlansFiltered",
-                        (mwr) -> mwr.getContent().getId(),
-                        keyRouteType,
-                        approved,
-                        flux
-                );
-            };
-            this.getPlansFilteredWithUserByIdsPersist = (flux, title, type, objective, pageableBody, ids, userId) ->
-                    cacheFilterList.getExtraUniqueFluxCacheIndependent(
-                            EntitiesUtils.getListOfNotNullObjects(title, type, objective, pageableBody, ids),
-                            "/getPlansFilteredWithUserByIds",
-                            (mwr) -> mwr.getContent().getId(),
-                            flux
+        @Override
+        @RedisReactiveApprovedCache(key = CACHE_KEY_PATH, idPath = "entity.id", approved = BooleanEnum.NULL, forWhom = "0")
+        public Flux<MonthlyEntityGroup<PlanResponse>> getModelGroupedByMonthBase(int month, UserDto userDto) {
+            return super.getModelGroupedByMonthBase(month, userDto);
+        }
+
+        @Override
+        @RedisReactiveCache(key = CACHE_KEY_PATH, id = "#id")
+        public Mono<Plan> getModel(Long id) {
+            return super.getModel(id);
+        }
+
+        @RedisReactiveCache(key = CACHE_KEY_PATH, id = "#id")
+        public Mono<Plan> getModelInternal(Long id) {
+            return super.getModel(id);
+        }
+
+
+        @Override
+        @RedisReactiveCache(key = CACHE_KEY_PATH, idPath = "id")
+        public Flux<Plan> findAllById(List<Long> ids) {
+            return super.findAllById(ids);
+        }
+
+        @Override
+        @RedisReactiveCache(key = CACHE_KEY_PATH, id = "#id")
+        public Mono<ResponseWithUserDto<PlanResponse>> getModelByIdWithUserBase(UserDto authUser, Long id) {
+            return super.getModelByIdWithUserBase(authUser, id);
+        }
+
+        @Override
+        @RedisReactiveCache(key = CACHE_KEY_PATH, id = "#id")
+        public Mono<ResponseWithUserLikesAndDislikes<PlanResponse>> getModelByIdWithUserLikesAndDislikesBase(Long id, UserDto authUser) {
+            return super.getModelByIdWithUserLikesAndDislikesBase(id, authUser);
+        }
+
+        @Override
+        @RedisReactiveApprovedCache(key = CACHE_KEY_PATH, approvedArgumentPath = "#approved", idPath = "content.id")
+        public Flux<PageableResponse<PlanResponse>> getModelsTitleBase(boolean approved, PageRequest pr, String newTitle) {
+            return super.getModelsTitleBase(approved, pr, newTitle);
+        }
+
+
+        @RedisReactiveApprovedCache(key = CACHE_KEY_PATH, idPath = "content.id", approvedArgumentPath = "#approved", forWhom = "#admin?0:-1")
+        public Flux<PageableResponse<PlanResponse>> getPlansFilteredBase(String title, Boolean approved, Boolean display, DietType type, ObjectiveType objective, List<Long> excludeIds, PageRequest pr, Boolean admin) {
+
+            return
+                    pageableUtils.createPageableResponse(
+                            extendedPlanRepository.getPlansFiltered(title, approved, display, type, objective, pr, excludeIds).map(modelMapper::fromModelToResponse),
+                            extendedPlanRepository.countPlansFiltered(title, approved, display, type, objective, excludeIds), pr
+                    )
+                    ;
+        }
+
+        // independent of approved
+        @RedisReactiveCache(key = CACHE_KEY_PATH, idPath = "content.id")
+        public Flux<PageableResponse<PlanResponse>> getPlansFilteredWithUserByIdsBase(String title, DietType type, ObjectiveType objective, PageableBody pageableBody, List<Long> ids, List<String> allowedSortingFields) {
+            return pageableUtils.isSortingCriteriaValid(pageableBody.getSortingCriteria(), allowedSortingFields)
+                    .then(pageableUtils.createPageRequest(pageableBody))
+                    .flatMapMany(
+                            pr ->
+                                    pageableUtils.createPageableResponse(
+                                            extendedPlanRepository.getPlansFilteredByIds(title, null, null, type, objective, ids, pr).map(modelMapper::fromModelToResponse),
+                                            extendedPlanRepository.countPlansFilteredByIds(title, null, null, type, objective, ids), pr
+                                    )
+
+                    );
+        }
+
+        @RedisReactiveApprovedCache(key = CACHE_KEY_PATH, idPath = "content.id", approvedArgumentPath = "#approved", forWhom = "#trainerId")
+        public Flux<PageableResponse<PlanResponse>> getPlansFilteredTrainerBase(String title, Boolean approved, Boolean display, DietType type, ObjectiveType objective, Long trainerId,
+                                                                                PageRequest pr
+        ) {
+
+            return
+                    pageableUtils.createPageableResponse(
+                            extendedPlanRepository.getPlansFilteredTrainer(title, approved, display, type, objective, trainerId, pr).map(modelMapper::fromModelToResponse),
+                            extendedPlanRepository.countPlansFilteredTrainer(title, approved, display, trainerId, type, objective), pr
                     );
 
-            this.getPlansFilteredTrainerPersist = (flux, title, approved, display, type, objective, pageableBody, userId, trainerId) ->
-                    cacheFilterList.getExtraUniqueCacheForTrainer(
-                            EntitiesUtils.getListOfNotNullObjects(title, approved, display, type, objective, pageableBody, trainerId),
-                            trainerId,
-                            "/getPlansFilteredTrainer" + trainerId,
-                            (mwr) -> mwr.getContent().getId(),
-                            approved,
-                            flux
-                    );
+        }
 
-            this.validIdsPersist = (mono, ids) -> cacheFilterList.getExtraUniqueMonoCacheIdListIndependent(
-                    EntitiesUtils.getListOfNotNullObjects(ids),
-                    "validIdsPersist" + ids,
-                    ids,
-                    mono
-            );
+        @RedisReactiveApprovedCacheEvict(key = CACHE_KEY_PATH, id = "#id", forWhomPath = "#resp.userId")
+        public Mono<Pair<PlanResponse, Boolean>> toggleDisplayEvict(Long id, boolean display, String userId, PlanResponse resp) {
+            return Mono.just(Pair.of(resp, resp.isApproved()));
+        }
 
+        @RedisReactiveCache(key = CACHE_KEY_PATH, idPath = "id")
+        public Flux<PlanResponse> getModelsTrainerInternalBase(Long trainerId) {
+            return
+                    modelRepository.findAllByUserId(trainerId)
+                            .map(modelMapper::fromModelToResponse);
+        }
 
-            this.getModelsByIdsPersist = (flux, ids) -> cacheFilterList.getExtraUniqueFluxCacheIndependent(
-                    EntitiesUtils.getListOfNotNullObjects(ids),
-                    "getModelsByIdsPersist" + ids,
-                    IdGenerateDto::getId,
-                    flux
-            );
-            this.getModelsTrainerInternalPersist = (flux, trainerId) -> cacheFilterList.getExtraUniqueFluxCacheIndependent(
-                    EntitiesUtils.getListOfNotNullObjects(trainerId),
-                    "getModelsTrainerInternalPersist" + trainerId,
-                    IdGenerateDto::getId,
-                    flux
-            );
+        @RedisReactiveCache(key = CACHE_KEY_PATH, idPath = "id")
+        public Flux<PlanResponse> getModelsByIdsBase(List<Long> ids) {
+            return
+                    modelRepository.findAllByIdIn(ids)
+                            .map(modelMapper::fromModelToResponse);
+        }
 
+        @Override
+        @RedisReactiveApprovedCacheEvict(key = CACHE_KEY_PATH, forWhomPath = "#r.userId")
+        protected Mono<Pair<PlanResponse, Boolean>> createInvalidate(PlanResponse r) {
+            return super.createInvalidate(r);
+        }
+
+        @Override
+        @RedisReactiveApprovedCacheEvict(key = CACHE_KEY_PATH, id = "#p.getFirst().getId()", forWhomPath = "#p.getFirst().getUserId()")
+        protected Mono<Pair<PlanResponse, Boolean>> updateDeleteInvalidate(Pair<PlanResponse, Boolean> p) {
+            return super.updateDeleteInvalidate(p);
         }
 
 
     }
+
 }

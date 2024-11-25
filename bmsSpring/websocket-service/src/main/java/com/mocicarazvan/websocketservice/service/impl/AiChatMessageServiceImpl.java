@@ -1,5 +1,6 @@
 package com.mocicarazvan.websocketservice.service.impl;
 
+import com.mocicarazvan.websocketservice.annotations.CustomRetryable;
 import com.mocicarazvan.websocketservice.dtos.ai.AiChatMessagePayload;
 import com.mocicarazvan.websocketservice.dtos.ai.AiChatMessageResponse;
 import com.mocicarazvan.websocketservice.mappers.AiChatMessageMapper;
@@ -53,6 +54,8 @@ public class AiChatMessageServiceImpl implements AiChatMessageService {
     }
 
     @Override
+    @Transactional
+    @CustomRetryable
     public List<AiChatMessageResponse> getMessagesByUserEmail(String email) {
         return aiChatRoomService.getOrCreateChatRoomByEmail(email)
                 .map(aiChatRoom -> aiChatMessageRepository.findAllByChatRoomId(aiChatRoom.getId(),

@@ -13,6 +13,7 @@ import com.mongodb.client.gridfs.model.GridFSFile;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.*;
 import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.publisher.SignalType;
 import reactor.core.scheduler.Schedulers;
 
 import java.net.URI;
@@ -135,7 +137,13 @@ public class FileController {
                                 response.getHeaders().setContentLength(fileLength);
                             }
 
-                            return response.writeWith(downloadStream)
+                            Flux<DataBuffer> finalDownloadStream = downloadStream
+                                    .doFinally(signalType -> {
+                                        if (signalType == SignalType.ON_ERROR || signalType == SignalType.CANCEL) {
+                                            log.warn("Stream terminated with signal: {}", signalType);
+                                        }
+                                    }).doOnDiscard(DataBuffer.class, DataBufferUtils::release);
+                            return response.writeWith(finalDownloadStream)
                                     .thenReturn(response)
                                     .onErrorResume(e -> {
                                         response.setStatusCode(HttpStatus.FOUND);

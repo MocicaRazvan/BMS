@@ -31,8 +31,9 @@ public interface ApprovedService<MODEL extends Approve, BODY extends TitleBodyDt
 
     Mono<Pair<RESPONSE, Boolean>> updateModelWithImagesGetOriginalApproved(Flux<FilePart> images, Long id, BODY body, String userId, String clientId);
 
+    Mono<Pair<RESPONSE, Boolean>> deleteModelGetOriginalApproved(Long id, String userId);
+
     Mono<Pair<RESPONSE, Boolean>> updateModelGetOriginalApproved(Long id, BODY body, String userId);
 
 
-//    Flux<PageableResponse<RESPONSE>> getModelsTitle(String title, boolean approved, PageableBody pageableBody);
 }

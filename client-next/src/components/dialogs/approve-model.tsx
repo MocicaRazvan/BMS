@@ -86,7 +86,7 @@ const AlertDialogApprove = memo(
           // });
           callBack();
           toast({
-            title: model.title,
+            // title: model.title,
             description: dialogApproveTexts?.toast,
             variant: approved ? "success" : "destructive",
           });

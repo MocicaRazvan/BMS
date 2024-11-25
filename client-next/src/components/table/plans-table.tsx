@@ -177,8 +177,8 @@ export default function PlansTable({
     extraQueryParams: {
       ...(extraQueryParams && extraQueryParams),
       ...(dietType && { type: dietType }),
-      ...(approvedField && { approved: approvedField.toString() }),
-      ...(displayField && { display: displayField.toString() }),
+      ...(approvedField !== null && { approved: approvedField.toString() }),
+      ...(displayField !== null && { display: displayField.toString() }),
       ...(objectiveType && { objective: objectiveType }),
     },
     extraArrayQueryParam,

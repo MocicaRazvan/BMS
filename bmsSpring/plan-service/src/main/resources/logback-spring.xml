@@ -22,6 +22,9 @@
                 </message>
                 <sortByTime>true</sortByTime>
             </format>
+            <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+                <level>WARN</level>
+            </filter>
         </appender>
 
         <root level="INFO">

@@ -39,6 +39,11 @@ import {
   createDndIdTask,
 } from "@/components/kanban/kanban-board-wrapper";
 import { useDebounce } from "@/components/ui/multiple-selector";
+import { usePathname } from "@/navigation";
+import {
+  ReindexState,
+  useKanbanRouteChange,
+} from "@/context/kanban-route-change-context";
 
 export interface KanbanTask extends KanbanTaskResponse {
   dndId: string;
@@ -71,11 +76,35 @@ export default function KanbanBoard({
 }: Props) {
   const [columns, setColumns] = useState<KanbanColumn[]>([]);
   const [groupedTasks, setGroupedTasks] = useState<GroupedKanbanTasks>([]);
+  const pathName = usePathname();
+  // const [reindexState, setReindexState] = useState<
+  //   Record<"column" | "task", number>
+  // >({ column: 0, task: 0 });
+  const handleUpdate = useCallback(
+    (rs: ReindexState) => {
+      if (rs.task > 0) {
+        fetchStream({
+          path: "/kanban/task/reindex",
+          method: "POST",
+          token: authUser.token,
+          body: { groupedTasks },
+        }).catch((e) => console.log("REINDEX TASK ERROR", e));
+      }
 
-  const [reindexState, setReindexState] = useState<
-    Record<"column" | "task", number>
-  >({ column: 0, task: 0 });
+      if (rs.column > 0) {
+        fetchStream({
+          path: "/kanban/column/reindex",
+          method: "POST",
+          token: authUser.token,
+          body: { columns },
+        }).catch((e) => console.log("REINDEX COLUMN ERROR", e));
+      }
+      console.log("REINDEX FUNCTION CALL1", rs);
+    },
+    [authUser.token, JSON.stringify(columns), JSON.stringify(groupedTasks)],
+  );
 
+  const { reindexState, setReindexState } = useKanbanRouteChange(handleUpdate);
   const debounceReindex = useDebounce(reindexState, 1000);
 
   const [activeColumn, setActiveColumn] = useState<KanbanColumn | null>(null);
@@ -84,6 +113,7 @@ export default function KanbanBoard({
   const [isDndActive, setIsDndActive] = useState(false);
 
   console.log("counting re-renders", (counter += 1));
+  console.log("REINDEX STATE", reindexState);
 
   useEffect(() => {
     setColumns(initialColumns);
@@ -93,32 +123,32 @@ export default function KanbanBoard({
     setGroupedTasks(initialGroupedTasks);
   }, [initialGroupedTasks]);
 
-  useEffect(() => {
-    console.log("REINDEX TASK", JSON.stringify(groupedTasks));
-    if (debounceReindex.task > 0) {
-      fetchStream({
-        path: "/kanban/task/reindex",
-        method: "POST",
-        token: authUser.token,
-        body: {
-          groupedTasks,
-        },
-      }).catch((e) => console.log("REINDEX TASK", e));
-    }
-  }, [debounceReindex.task]);
-
-  useEffect(() => {
-    if (debounceReindex.column > 0) {
-      fetchStream({
-        path: "/kanban/column/reindex",
-        method: "POST",
-        token: authUser.token,
-        body: {
-          columns,
-        },
-      }).catch((e) => console.log("REINDEX COLUMN", e));
-    }
-  }, [debounceReindex.column]);
+  // useEffect(() => {
+  //   console.log("REINDEX TASK", JSON.stringify(groupedTasks));
+  //   if (debounceReindex.task > 0) {
+  //     fetchStream({
+  //       path: "/kanban/task/reindex",
+  //       method: "POST",
+  //       token: authUser.token,
+  //       body: {
+  //         groupedTasks,
+  //       },
+  //     }).catch((e) => console.log("REINDEX TASK", e));
+  //   }
+  // }, [debounceReindex.task]);
+  //
+  // useEffect(() => {
+  //   if (debounceReindex.column > 0) {
+  //     fetchStream({
+  //       path: "/kanban/column/reindex",
+  //       method: "POST",
+  //       token: authUser.token,
+  //       body: {
+  //         columns,
+  //       },
+  //     }).catch((e) => console.log("REINDEX COLUMN", e));
+  //   }
+  // }, [debounceReindex.column]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -156,7 +186,7 @@ export default function KanbanBoard({
 
         return Object.keys(updatedTasks).reduce(
           (acc, key) => {
-            console.log("TASKS KEY", key);
+            console.log("TASKS KEY", key, typeof Number(key));
             if (updatedTasks[Number(key)]?.length == 0) return acc;
             acc[Number(key)] = updatedTasks[Number(key)].map((task, index) => ({
               ...task,

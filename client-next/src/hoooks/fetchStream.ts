@@ -19,7 +19,10 @@ export interface FetchStreamProps<T> {
   batchSize?: number;
 }
 
-export async function fetchStream<T = any, E extends BaseError = BaseError>({
+export async function fetchStream<
+  T = unknown,
+  E extends BaseError = BaseError,
+>({
   path,
   method = "GET",
   body = null,

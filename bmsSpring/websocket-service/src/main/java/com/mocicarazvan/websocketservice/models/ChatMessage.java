@@ -19,6 +19,14 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @SuperBuilder
 @Entity
+@Table(
+        indexes = {
+                @Index(name = "idx_sender_chat_message_id", columnList = "sender_id"),
+                @Index(name = "idx_receiver_chat_message_id", columnList = "receiver_id"),
+                @Index(name = "idx_chat_room_chat_message_id", columnList = "chat_room_id"),
+                @Index(name = "idx_sender_id_receiver_id_chat_room_id_chat_message", columnList = "sender_id, receiver_id, chat_room_id")
+        }
+)
 public class ChatMessage extends IdGenerated implements Transformable<ChatMessage> {
 
 //    @Id

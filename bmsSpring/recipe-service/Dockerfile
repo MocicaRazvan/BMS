@@ -9,6 +9,13 @@ COPY template-module/src template-module/src
 #build template module
 RUN mvn -f template-module/pom.xml dependency:go-offline -B
 RUN mvn -f template-module/pom.xml clean install -DskipTests -Dmaven.compiler.showWarnings=true -Dmaven.compiler.source=22 -Dmaven.compiler.target=22 -Dmaven.compiler.compilerArgs=--enable-preview
+# copy install cache module
+COPY redis-cache/pom.xml redis-cache/pom.xml
+COPY redis-cache/src redis-cache/src
+
+#build cache module
+RUN mvn -f redis-cache/pom.xml dependency:go-offline -B
+RUN mvn -f redis-cache/pom.xml clean install -DskipTests -Dmaven.compiler.showWarnings=true -Dmaven.compiler.source=22 -Dmaven.compiler.target=22 -Dmaven.compiler.compilerArgs=--enable-preview
 
 # copy install recipe service
 COPY recipe-service/pom.xml recipe-service/pom.xml

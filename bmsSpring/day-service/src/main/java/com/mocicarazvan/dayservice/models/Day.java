@@ -17,4 +17,20 @@ import org.springframework.data.relational.core.mapping.Table;
 @Table("day")
 public class Day extends TitleBody {
     private DayType type;
+
+    @Override
+    public String toString() {
+        return "Day{" +
+                "id=" + getId() +
+                ", userId='" + getUserId() + '\'' +
+                ", title='" + getTitle() + '\'' +
+                ", type=" + type +
+                ", body='" + getBody() + '\'' +
+                ", userLikes=" + getUserLikes() +
+                ", userDislikes=" + getUserDislikes() +
+                ", createdAt=" + getCreatedAt() +
+                ", updatedAt=" + getUpdatedAt() +
+
+                '}';
+    }
 }

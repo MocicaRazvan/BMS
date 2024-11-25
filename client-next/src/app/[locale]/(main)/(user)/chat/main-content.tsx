@@ -153,19 +153,6 @@ export default function ChatMainContent({
     // router.replace(`/chat?${params.toString()}`);
   }, [activeRoomId, searchParams]);
 
-  // useSubscription(`/user/${authUser.email}/chatRooms`, (message) => {
-  //   const newMessage = JSON.parse(message.body);
-  //   setChatRooms((prev) => {
-  //     const isRoomPresent = prev.findIndex((room) => room.id === newMessage.id);
-  //     if (isRoomPresent === -1) {
-  //       return prev;
-  //     }
-  //     // return [...prev.filter((room) => room.id !== newMessage.id), newMessage];
-  //     return prev.map((room) =>
-  //       room.id === newMessage.id ? newMessage : room,
-  //     );
-  //   });
-  // });
   useSubscription(`/queue/chatRooms-${authUser.email}`, (message) => {
     const newMessage = JSON.parse(message.body);
     setChatRooms((prev) => {

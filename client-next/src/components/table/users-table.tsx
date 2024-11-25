@@ -222,7 +222,7 @@ export default function UsersTable({
         accessorKey: "lastName",
         header: () => (
           <p className="font-bold text-lg text-left">
-            {userTableColumnsTexts.email}
+            {userTableColumnsTexts.lastName}
           </p>
         ),
       },

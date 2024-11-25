@@ -17,7 +17,7 @@ import AddToCartBtn, {
 } from "@/components/plans/add-to-cart-btn";
 import useClientNotFound from "@/hoooks/useClientNotFound";
 import React from "react";
-import { useSubscription } from "@/context/subscriptions-context";
+import { usePlansSubscription } from "@/context/subscriptions-context";
 
 export interface UserPlanPageContentTexts {
   elementHeaderTexts: ElementHeaderTexts;
@@ -52,7 +52,7 @@ export default function UserPlanPageContent({
     authUser,
     basePath: `/plans/withUser`,
   });
-  const { isPlanInSubscription } = useSubscription();
+  const { isPlanInSubscription } = usePlansSubscription();
 
   const formatIntl = useFormatter();
   if (error?.status) {

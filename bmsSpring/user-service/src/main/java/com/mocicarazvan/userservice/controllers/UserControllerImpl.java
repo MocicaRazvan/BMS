@@ -117,4 +117,6 @@ public class UserControllerImpl implements UserController {
         return userService.sendEmailAdmin(emailRequest)
                 .then(Mono.fromCallable(() -> ResponseEntity.noContent().build()));
     }
+    
+
 }

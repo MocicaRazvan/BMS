@@ -136,21 +136,21 @@ services:
       - bms
     restart: unless-stopped
 
-  #  stripe-cli:
-  #    image: stripe/stripe-cli:latest
-  #    container_name: stripe-cli-container-bms
-  #    environment:
-  #      STRIPE_API_KEY: ${STRIPE_API_KEY_ENV}
-  #    #     "http://orders:8080/webhook",
-  #
-  #    command:
-  #      [
-  #        "listen",
-  #        "--forward-to",
-  #        "http://host.docker.internal:8080/orders/webhook",
-  #      ]
-  #    network_mode: host
-  #    restart: unless-stopped
+  stripe-cli:
+    image: stripe/stripe-cli:latest
+    container_name: stripe-cli-container-bms
+    environment:
+      STRIPE_API_KEY: ${STRIPE_API_KEY_ENV}
+    #     "http://orders:8080/webhook",
+
+    command:
+      [
+        "listen",
+        "--forward-to",
+        "http://host.docker.internal:8080/orders/webhook",
+      ]
+    network_mode: host
+    restart: unless-stopped
 
   stripe-cli-docker:
     image: stripe/stripe-cli:latest

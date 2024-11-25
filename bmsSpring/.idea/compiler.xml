@@ -10,6 +10,7 @@
         <module name="template-module" />
         <module name="user-service" />
         <module name="file-service" />
+        <module name="redis-cache" />
         <module name="config-server" />
         <module name="ingredient-service" />
         <module name="kanban-service" />
@@ -24,6 +25,10 @@
         <module name="day-service" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="redis-cache.main" target="21" />
+      <module name="redis-cache.test" target="21" />
+    </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
@@ -38,6 +43,7 @@
       <module name="plan-service" options="-parameters" />
       <module name="post-service" options="-parameters" />
       <module name="recipe-service" options="-parameters" />
+      <module name="redis-cache" options="-parameters" />
       <module name="service-registry" options="-parameters" />
       <module name="template-module" options="-parameters" />
       <module name="user-service" options="-parameters" />

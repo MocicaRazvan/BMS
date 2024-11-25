@@ -8,7 +8,7 @@ import { ToastAction } from "@/components/ui/toast";
 import { PlusSquareIcon } from "lucide-react";
 import { useRouter } from "@/navigation";
 import { PlanResponse } from "@/types/dto";
-import { useSubscription } from "@/context/subscriptions-context";
+import { usePlansSubscription } from "@/context/subscriptions-context";
 import PulsatingButton from "@/components/magicui/pulsating-button";
 
 export interface AddToCartBtnTexts {
@@ -35,7 +35,7 @@ export default function AddToCartBtn({
 }: Props) {
   const { addToCartForUser, isInCartForUser, removeFromCartForUser } =
     useCartForUser(authUser.id);
-  const { isPlanInSubscription } = useSubscription();
+  const { isPlanInSubscription } = usePlansSubscription();
   const { toast } = useToast();
   const router = useRouter();
 

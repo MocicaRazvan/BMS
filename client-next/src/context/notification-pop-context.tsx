@@ -46,6 +46,7 @@ import { NotificationPopTexts } from "@/components/nav/notification-pop";
 import { Client } from "@stomp/stompjs";
 import { NotificationState } from "@/context/notification-template-context";
 import { useLocale } from "next-intl";
+import { WithUser } from "@/lib/user";
 
 interface NotificationPopProviderProps {
   children: ReactNode;
@@ -412,29 +413,7 @@ export function NotificationPopProvider({
     locale,
   ]);
 
-  useSubscription(`/queue/chat-changed-${authUser?.email}`, (message) => {
-    const newMessage = JSON.parse(message.body) as ConversationUserResponse;
-
-    // navigate to chat room after it is created
-    if (newMessage.connectedChatRoom?.id) {
-      // router.push(`/chat/?chatId=${newMessage.connectedChatRoom?.id}`);
-      // setActiveChatId(newMessage.connectedChatRoom?.id);
-      // router.push(`/chat`);
-      const sender = newMessage.connectedChatRoom?.users.find(
-        (user) => user.email !== authUser?.email,
-      );
-      if (sender && stompClient && stompClient.connected) {
-        removeBySender({
-          stompClient,
-          senderEmail: sender.email,
-          receiverEmail: authUser?.email || "",
-        });
-        router.push(`/chat/?chatId=${newMessage.connectedChatRoom?.id}`);
-      }
-    }
-  });
-
-  return (
+  const content = (
     <NotificationPopContext.Provider
       value={{
         notificationPopTexts,
@@ -477,6 +456,44 @@ export function NotificationPopProvider({
       {children}
     </NotificationPopContext.Provider>
   );
+  if (!authUser || !authUser.email) return content;
+
+  return <NotificationPopProviderUser authUser={authUser} content={content} />;
+}
+interface NotificationPopProviderUserProps extends WithUser {
+  content: ReactNode;
+}
+
+function NotificationPopProviderUser({
+  authUser,
+  content,
+}: NotificationPopProviderUserProps) {
+  const stompClient = useStompClient();
+  const router = useRouter();
+  const { removeBySender } = useChatNotification();
+  useSubscription(`/queue/chat-changed-${authUser?.email}`, (message) => {
+    const newMessage = JSON.parse(message.body) as ConversationUserResponse;
+
+    // navigate to chat room after it is created
+    if (newMessage.connectedChatRoom?.id) {
+      // router.push(`/chat/?chatId=${newMessage.connectedChatRoom?.id}`);
+      // setActiveChatId(newMessage.connectedChatRoom?.id);
+      // router.push(`/chat`);
+      const sender = newMessage.connectedChatRoom?.users.find(
+        (user) => user.email !== authUser?.email,
+      );
+      if (sender && stompClient && stompClient.connected) {
+        removeBySender({
+          stompClient,
+          senderEmail: sender.email,
+          receiverEmail: authUser?.email || "",
+        });
+        router.push(`/chat/?chatId=${newMessage.connectedChatRoom?.id}`);
+      }
+    }
+  });
+
+  return content;
 }
 
 export function useNotificationPop() {

@@ -6,6 +6,7 @@ import com.mocicarazvan.websocketservice.service.AiChatRoomService;
 import com.mocicarazvan.websocketservice.service.ConversationUserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 
 @Service
@@ -16,6 +17,7 @@ public class AiChatRoomServiceImpl implements AiChatRoomService {
     private final AiChatRoomRepository aiChatRoomRepository;
 
     @Override
+    @Transactional
     public AiChatRoom getOrCreateChatRoomByEmail(String email) {
         return conversationUserService.getOrCreateUserByEmail(email)
                 .map(user -> aiChatRoomRepository.findAllByUserId(user.getId())

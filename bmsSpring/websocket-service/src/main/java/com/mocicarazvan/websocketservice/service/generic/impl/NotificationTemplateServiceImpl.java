@@ -65,20 +65,6 @@ public abstract class NotificationTemplateServiceImpl<R extends IdGenerated, RRE
                 .join();
     }
 
-//    @Transactional(propagation = Propagation.REQUIRES_NEW, isolation = Isolation.READ_COMMITTED)
-//    @Override
-//    @CustomRetryable
-//    public RESPONSE saveNotificationCreateReference(BODY body, BiFunction<BODY, ConversationUser, R> createReference) {
-//        return fromBodyToModel(body, createReference)
-//                .thenApplyAsync(model -> {
-//                            RESPONSE response = notificationTemplateMapper.fromModelToResponse(notificationTemplateRepository.save(model));
-//                            notifyReceiver(response, NotificationNotifyType.ADDED);
-//                            return response;
-//                        },
-//                        asyncExecutor)
-//                .join();
-//    }
-
     @Override
     public void deleteById(Long id) {
         MODEL m = getNotificationById(id);

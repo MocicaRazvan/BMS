@@ -1,7 +1,7 @@
 "use client";
 
 import { ResponseWithUserDtoEntity, TitleBodyImagesUserDto } from "@/types/dto";
-import { ReactNode } from "react";
+import { ReactNode, Suspense } from "react";
 import { cn } from "@/lib/utils";
 
 import { SortDirection } from "@/types/fetch-utils";
@@ -19,6 +19,8 @@ import RadioSort, { RadioSortTexts } from "@/components/common/radio-sort";
 
 import { motion } from "framer-motion";
 import LoadingItemCard from "@/components/list/loading-item-card";
+import noResultsLottie from "@/../public/lottie/noResults.json";
+import Lottie from "react-lottie-player";
 
 export interface SortingOption {
   property: string;
@@ -122,6 +124,16 @@ export default function GridList<T extends TitleBodyImagesUserDto>({
             <div className="w-full items-center justify-center md:col-span-2 lg:col-span-3 text-center mt-10">
               <h2 className="text-4xl tracking-tighter font-bold ">
                 {noResults}
+                <Suspense
+                  fallback={<div className="md:w-1/3 md:h-1/3 mx-auto" />}
+                >
+                  <Lottie
+                    animationData={noResultsLottie}
+                    loop
+                    className="md:w-1/3 md:h-1/3 mx-auto"
+                    play
+                  />
+                </Suspense>
               </h2>
             </div>
           )}

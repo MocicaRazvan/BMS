@@ -3,6 +3,10 @@ package com.mocicarazvan.postservice.conifg;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mocicarazvan.postservice.dtos.PostResponse;
+import com.mocicarazvan.rediscache.aspects.RedisReactiveCacheApprovedAspect;
+import com.mocicarazvan.rediscache.aspects.RedisReactiveCacheApprovedEvictAspect;
+import com.mocicarazvan.rediscache.utils.AspectUtils;
+import com.mocicarazvan.rediscache.utils.RedisApprovedCacheUtils;
 import com.mocicarazvan.templatemodule.cache.FilteredListCaffeineCacheApproveFilterKey;
 import com.mocicarazvan.templatemodule.cache.impl.FilteredListCaffeineCacheApproveFilterKeyImpl;
 import com.mocicarazvan.templatemodule.clients.FileClient;
@@ -21,9 +25,12 @@ import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+import org.springframework.data.redis.core.ReactiveRedisTemplate;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.reactive.function.client.WebClient;
+
+import java.util.concurrent.ExecutorService;
 
 
 @Configuration
@@ -121,5 +128,30 @@ public class BeanConfig {
         return new FilteredListCaffeineCacheApproveFilterKeyImpl<>("postService");
     }
 
+    @Bean
+    public RedisApprovedCacheUtils redisApprovedCacheUtils(ReactiveRedisTemplate<String, Object> reactiveRedisTemplate,
+                                                           AspectUtils aspectUtils) {
+        return new RedisApprovedCacheUtils(aspectUtils, reactiveRedisTemplate);
+    }
+
+    @Bean
+    public RedisReactiveCacheApprovedAspect redisReactiveCacheApprovedAspect(
+            ReactiveRedisTemplate<String, Object> reactiveRedisTemplate,
+            AspectUtils aspectUtils,
+            ObjectMapper objectMapper,
+            ExecutorService executorService,
+            RedisApprovedCacheUtils redisApprovedCacheUtils
+    ) {
+        return new RedisReactiveCacheApprovedAspect(reactiveRedisTemplate, aspectUtils, objectMapper, executorService, redisApprovedCacheUtils);
+    }
+
+    @Bean
+    public RedisReactiveCacheApprovedEvictAspect redisReactiveCacheApprovedEvictAspect(
+            ReactiveRedisTemplate<String, Object> reactiveRedisTemplate,
+            AspectUtils aspectUtils, RedisApprovedCacheUtils redisApprovedCacheUtils
+
+    ) {
+        return new RedisReactiveCacheApprovedEvictAspect(reactiveRedisTemplate, aspectUtils, redisApprovedCacheUtils);
+    }
 
 }

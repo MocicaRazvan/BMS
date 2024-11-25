@@ -22,7 +22,7 @@ import { useRouter } from "@/navigation";
 import { useCallback, useState } from "react";
 import { useFormatter } from "next-intl";
 import { AddToCartBtnTexts } from "@/components/plans/add-to-cart-btn";
-import { useSubscription } from "@/context/subscriptions-context";
+import { usePlansSubscription } from "@/context/subscriptions-context";
 import { useSearchParams } from "next/navigation";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -64,7 +64,7 @@ export default function PlanApprovedPageContent({
 }: Props) {
   const router = useRouter();
   const formatIntl = useFormatter();
-  const { getSubscriptionPlanIds } = useSubscription();
+  const { getSubscriptionPlanIds } = usePlansSubscription();
   const currentSearchParams = useSearchParams();
 
   const initialBuyable = currentSearchParams.get("buyable");

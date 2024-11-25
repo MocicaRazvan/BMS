@@ -4,6 +4,7 @@ import com.mocicarazvan.templatemodule.enums.AuthProvider;
 import com.mocicarazvan.templatemodule.enums.Role;
 import com.mocicarazvan.templatemodule.exceptions.common.UsernameNotFoundException;
 import com.mocicarazvan.userservice.cache.FilteredCacheListCaffeineRoleUserFilterKey;
+import com.mocicarazvan.userservice.cache.redis.annotations.RedisReactiveRoleCacheEvict;
 import com.mocicarazvan.userservice.dtos.auth.requests.CallbackBody;
 import com.mocicarazvan.userservice.dtos.auth.requests.LoginRequest;
 import com.mocicarazvan.userservice.dtos.auth.requests.RegisterRequest;
@@ -45,6 +46,7 @@ public class AuthServiceImpl extends BasicUserProvider implements AuthService {
     }
 
     @Override
+    @RedisReactiveRoleCacheEvict(key = "userService")
     public Mono<AuthResponse> register(RegisterRequest registerRequest) {
         log.error(userMapper.fromRegisterRequestToUserCustom(registerRequest).toString());
         return userRepository.existsByEmail(registerRequest.getEmail())

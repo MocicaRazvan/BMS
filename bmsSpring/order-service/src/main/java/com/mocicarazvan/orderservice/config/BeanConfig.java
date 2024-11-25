@@ -4,6 +4,10 @@ package com.mocicarazvan.orderservice.config;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mocicarazvan.orderservice.dtos.OrderDto;
 import com.mocicarazvan.orderservice.dtos.OrderDtoWithAddress;
+import com.mocicarazvan.rediscache.aspects.RedisReactiveCacheChildAspect;
+import com.mocicarazvan.rediscache.aspects.RedisReactiveChildCacheEvictAspect;
+import com.mocicarazvan.rediscache.utils.AspectUtils;
+import com.mocicarazvan.rediscache.utils.RedisChildCacheUtils;
 import com.mocicarazvan.templatemodule.cache.FilteredListCaffeineCacheChildFilterKey;
 import com.mocicarazvan.templatemodule.cache.impl.FilteredListCaffeineCacheChildFilterKeyImpl;
 import com.mocicarazvan.templatemodule.clients.UserClient;
@@ -26,10 +30,13 @@ import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+import org.springframework.data.redis.core.ReactiveRedisTemplate;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.reactive.function.client.WebClient;
+
+import java.util.concurrent.ExecutorService;
 
 
 @Configuration
@@ -140,6 +147,28 @@ public class BeanConfig {
     @Bean
     public FilteredListCaffeineCacheChildFilterKey<OrderDtoWithAddress> orderDtoWithAddressFilteredListCaffeineCacheChildFilterKey() {
         return new FilteredListCaffeineCacheChildFilterKeyImpl<>("orderService");
+    }
+
+    @Bean
+    public RedisChildCacheUtils redisChildCacheUtils(ReactiveRedisTemplate<String, Object> reactiveRedisTemplate,
+                                                     AspectUtils aspectUtils) {
+        return new RedisChildCacheUtils(aspectUtils, reactiveRedisTemplate);
+    }
+
+    @Bean
+    public RedisReactiveCacheChildAspect redisReactiveCacheApprovedAspect(ReactiveRedisTemplate<String, Object> reactiveRedisTemplate,
+                                                                          AspectUtils aspectUtils,
+                                                                          ObjectMapper objectMapper,
+                                                                          ExecutorService executorService,
+                                                                          RedisChildCacheUtils redisChildUtils) {
+        return new RedisReactiveCacheChildAspect(reactiveRedisTemplate, aspectUtils, objectMapper, executorService, redisChildUtils);
+    }
+
+    @Bean
+    public RedisReactiveChildCacheEvictAspect redisReactiveChildCacheEvictAspect(ReactiveRedisTemplate<String, Object> reactiveRedisTemplate,
+                                                                                 AspectUtils aspectUtils,
+                                                                                 RedisChildCacheUtils redisChildCacheUtils) {
+        return new RedisReactiveChildCacheEvictAspect(reactiveRedisTemplate, aspectUtils, redisChildCacheUtils);
     }
 
 }

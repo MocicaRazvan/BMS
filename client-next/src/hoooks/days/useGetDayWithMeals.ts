@@ -4,13 +4,20 @@ import { CustomEntityModel, DayResponse, MealResponse } from "@/types/dto";
 import useFetchStream from "@/hoooks/useFetchStream";
 import { useMemo } from "react";
 
-export default function useGetDaysWithMeals(
-  dayId: number | string,
-  authUser: NonNullable<Session["user"]>,
-  dayBasePath?: string,
-  mealsBasePath?: string,
+interface Args {
+  dayId: number | string;
+  authUser: NonNullable<Session["user"]>;
+  dayBasePath?: string;
+  mealsBasePath?: string;
+  useAbortController?: boolean;
+}
+export default function useGetDaysWithMeals({
+  dayId,
+  authUser,
+  dayBasePath,
+  mealsBasePath,
   useAbortController = false,
-) {
+}: Args) {
   const {
     itemState: dayState,
     setItemState: setDayState,

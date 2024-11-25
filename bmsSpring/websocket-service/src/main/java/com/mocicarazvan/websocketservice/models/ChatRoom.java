@@ -24,7 +24,11 @@ public class ChatRoom extends IdGenerated implements Transformable<ChatRoom> {
     @JoinTable(
             name = "chat_room_users",
             joinColumns = @JoinColumn(name = "chat_room_id"),
-            inverseJoinColumns = @JoinColumn(name = "user_id")
+            inverseJoinColumns = @JoinColumn(name = "user_id"),
+            indexes = {
+                    @Index(name = "idx_chat_room_id_chat_room", columnList = "chat_room_id"),
+                    @Index(name = "idx_user_id_chat_room", columnList = "user_id")
+            }
     )
     private List<ConversationUser> users;
 

@@ -8,6 +8,7 @@ on:
     paths:
       - 'bmsSpring/comment-service/**'
       - 'bmsSpring/template-module/**'
+      - 'bmsSpring/redis-cache/**'
 jobs:
   build-and-push-comment-service:
     uses: ./.github/workflows/build-and-push.yml

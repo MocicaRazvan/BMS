@@ -55,8 +55,8 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                 .setClientPasscode(rabbitmqPassword)
                 .setUserRegistryBroadcast("/topic/unresolved-user")
                 .setUserDestinationBroadcast("/topic/resolved-user")
-                .setSystemHeartbeatReceiveInterval(10000)
-                .setSystemHeartbeatSendInterval(10000)
+                .setSystemHeartbeatReceiveInterval(30000)
+                .setSystemHeartbeatSendInterval(30000)
                 .setTaskScheduler(threadPoolTaskScheduler);
 
 

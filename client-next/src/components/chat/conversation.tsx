@@ -159,29 +159,6 @@ export default function Conversation({
     totalMessages,
   ]);
 
-  // useSubscription(`/user/${sender.email}/queue/messages`, (message) => {
-  //   const newMessage = JSON.parse(message.body);
-  //   console.log("sender queue", newMessage);
-  //   setTotalMessages((prev) => ++prev);
-  //   setChatMessages((prev) => updateMessages(prev, newMessage));
-  //   setScrollPosition(true);
-  // });
-  // useSubscription(`/user/${receiver.email}/queue/messages`, (message) => {
-  //   const newMessage = JSON.parse(message.body) as ChatMessageResponse;
-  //   console.log("receiver queue", newMessage);
-  //   console.log("rec email", receiver.email);
-  //   console.log("sender email", sender.email);
-  //   console.log("newmsg rec", newMessage.receiver.email);
-  //   console.log("newmsg send", newMessage.sender.email);
-  //   if (
-  //     newMessage.receiver.email === receiver.email &&
-  //     newMessage.sender.email === sender.email
-  //   ) {
-  //     setTotalMessages((prev) => ++prev);
-  //     setChatMessages((prev) => updateMessages(prev, newMessage));
-  //     setScrollPosition(true);
-  //   }
-  // });
   useSubscription(`/topic/messages-${sender.email}`, (message) => {
     const newMessage = JSON.parse(message.body);
     console.log("sender queue", newMessage);
@@ -189,22 +166,7 @@ export default function Conversation({
     setChatMessages((prev) => updateMessages(prev, newMessage));
     setScrollPosition(true);
   });
-  // useSubscription(`/user/${receiver.email}/queue/messages`, (message) => {
-  //   const newMessage = JSON.parse(message.body) as ChatMessageResponse;
-  //   console.log("receiver queue", newMessage);
-  //   console.log("rec email", receiver.email);
-  //   console.log("sender email", sender.email);
-  //   console.log("newmsg rec", newMessage.receiver.email);
-  //   console.log("newmsg send", newMessage.sender.email);
-  //   if (
-  //     newMessage.receiver.email === receiver.email &&
-  //     newMessage.sender.email === sender.email
-  //   ) {
-  //     setTotalMessages((prev) => ++prev);
-  //     setChatMessages((prev) => updateMessages(prev, newMessage));
-  //     setScrollPosition(true);
-  //   }
-  // });
+
   useSubscription(`/topic/messages-${receiver.email}`, (message) => {
     const newMessage = JSON.parse(message.body) as ChatMessageResponse;
     console.log("receiver queue", newMessage);
@@ -272,14 +234,6 @@ export default function Conversation({
                   ))}
                 {/*{totalMessages} {chatMessages.length}*/}
               </div>
-              {/*{chatMessages.length < totalMessages && (*/}
-              {/*  <Button*/}
-              {/*    onClick={() => handleLoadMore()}*/}
-              {/*    className="absolute top-0 right-0 z-10 bg-success hover:bg-muted hover:text-muted-foreground"*/}
-              {/*  >*/}
-              {/*    {isLoading ? loadMoreLoading : loadMore}*/}
-              {/*  </Button>*/}
-              {/*)}*/}
             </div>
           </div>
         </InfiniteScroll>
@@ -323,36 +277,13 @@ const ChatMessageItem = memo(
             dangerouslySetInnerHTML={{ __html: chatMessage.content ?? "" }}
           />
         </div>
-        {/*<img*/}
-        {/*  alt="Avatar"*/}
-        {/*  className="w-10 h-10 rounded-full border"*/}
-        {/*  height="40"*/}
-        {/*  src="/placeholder.svg"*/}
-        {/*  style={{*/}
-        {/*    aspectRatio: "40/40",*/}
-        {/*    objectFit: "cover",*/}
-        {/*  }}*/}
-        {/*  width="40"*/}
-        {/*/>*/}
       </div>
     ) : (
       <div className="flex gap-2.5 items-end ">
-        {/*<img*/}
-        {/*  alt="Avatar"*/}
-        {/*  className="w-10 h-10 rounded-full border"*/}
-        {/*  height="40"*/}
-        {/*  src="/placeholder.svg"*/}
-        {/*  style={{*/}
-        {/*    aspectRatio: "40/40",*/}
-        {/*    objectFit: "cover",*/}
-        {/*  }}*/}
-        {/*  width="40"*/}
-        {/*/>*/}
         <div className="rounded-lg bg-gray-600 dark:bg-white p-4 max-w-[75%] backdrop-blur dark:text-black text-white ">
           <p className="text-xs font-semibold text-gray-100 dark:text-gray-950 ">
             {formatDate(chatMessage.timestamp)}
           </p>
-          {/*<p className="text-sm font-medium">Other {receiver.email}</p>*/}
           <div
             className="prose max-w-none [&_ol]:list-decimal [&_ul]:list-disc dark:prose-invert text-wrap text-white dark:text-black"
             dangerouslySetInnerHTML={{ __html: chatMessage.content ?? "" }}

@@ -36,35 +36,41 @@ public class BytesServiceImpl implements BytesService {
         downloadStream = dataBufferFlux
                 .subscribeOn(Schedulers.boundedElastic())
                 .flatMap(dataBuffer -> {
-                    int dataBufferSize = dataBuffer.readableByteCount();
-                    // skip data until the start of the range
-                    if (rangeStart[0] >= dataBufferSize) {
-                        rangeStart[0] -= dataBufferSize;
-                        rangeEnd[0] -= dataBufferSize;
-                        DataBufferUtils.release(dataBuffer);
-                        return Mono.empty();
-                    }
-
-                    // slice data buffer to fit the start of the range
-                    if (rangeStart[0] > 0) {
-                        int sliceStart = (int) rangeStart[0];
-                        int sliceLength = dataBufferSize - sliceStart;
-                        dataBuffer = dataBuffer.slice(sliceStart, sliceLength);
-                        rangeStart[0] = 0;
-                    }
-
-                    // slice data buffer to fit the end of the range
-                    if (rangeEnd[0] < dataBufferSize) {
-                        int sliceEnd = (int) (rangeEnd[0] - rangeStart[0] + 1);
-                        if (sliceEnd < dataBuffer.readableByteCount()) {
-                            dataBuffer = dataBuffer.slice(0, sliceEnd);
+                    try {
+                        int dataBufferSize = dataBuffer.readableByteCount();
+                        // skip data until the start of the range
+                        if (rangeStart[0] >= dataBufferSize) {
+                            rangeStart[0] -= dataBufferSize;
+                            rangeEnd[0] -= dataBufferSize;
+                            DataBufferUtils.release(dataBuffer);
+                            return Mono.empty();
                         }
-                        rangeEnd[0] = 0;
-                    } else {
-                        rangeEnd[0] -= dataBufferSize;
-                    }
 
-                    return Mono.just(dataBuffer);
+                        // slice data buffer to fit the start of the range
+                        if (rangeStart[0] > 0) {
+                            int sliceStart = (int) rangeStart[0];
+                            int sliceLength = dataBufferSize - sliceStart;
+                            dataBuffer = dataBuffer.slice(sliceStart, sliceLength);
+                            rangeStart[0] = 0;
+                        }
+
+                        // slice data buffer to fit the end of the range
+                        if (rangeEnd[0] < dataBufferSize) {
+                            int sliceEnd = (int) (rangeEnd[0] - rangeStart[0] + 1);
+                            if (sliceEnd < dataBuffer.readableByteCount()) {
+                                dataBuffer = dataBuffer.slice(0, sliceEnd);
+                            }
+                            rangeEnd[0] = 0;
+                        } else {
+                            rangeEnd[0] -= dataBufferSize;
+                        }
+
+                        return Mono.just(dataBuffer);
+                    } catch (Exception e) {
+                        log.error("Error processing video: {}", e.getMessage(), e);
+                        DataBufferUtils.release(dataBuffer);
+                        return Mono.error(e);
+                    }
                 });
         return downloadStream;
     }

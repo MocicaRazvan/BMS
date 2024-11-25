@@ -8,6 +8,7 @@ on:
     paths:
       - 'bmsSpring/kanban-service/**'
       - 'bmsSpring/template-module/**'
+      - 'bmsSpring/redis-cache/**'
 jobs:
   build-and-push-kanban-service:
     uses: ./.github/workflows/build-and-push.yml

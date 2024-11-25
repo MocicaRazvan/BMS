@@ -30,6 +30,7 @@ export default async function SignOutWrapper({
   return (
     <SignOut
       {...texts}
+      locale={locale}
       // buttonSignIn={t("buttonSignIn")}
       // buttonSignOut={t("buttonSignOut")}
       // questionText={t("questionText")}

@@ -16,6 +16,8 @@ import java.util.List;
 
 public interface ManyToOneUserService<MODEL extends ManyToOneUser, BODY, RESPONSE extends WithUserDto,
         S extends ManyToOneUserRepository<MODEL>, M extends DtoMapper<MODEL, BODY, RESPONSE>> {
+    Mono<PageableResponse<ResponseWithUserDto<RESPONSE>>> getPageableWithUser(PageableResponse<RESPONSE> pr);
+
     Mono<RESPONSE> deleteModel(Long id, String userId);
 
     Mono<RESPONSE> getModelById(Long id, String userId);

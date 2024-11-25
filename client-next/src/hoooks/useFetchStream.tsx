@@ -15,6 +15,7 @@ export interface UseFetchStreamProps {
   cache?: RequestCache;
   acceptHeader?: AcceptHeader;
   useAbortController?: boolean;
+  batchSize?: number;
 }
 
 interface UseFetchStreamReturn<T, E> {
@@ -24,7 +25,7 @@ interface UseFetchStreamReturn<T, E> {
   refetch: () => void;
 }
 
-export function useFetchStream<T = any, E extends BaseError = BaseError>({
+export function useFetchStream<T = unknown, E extends BaseError = BaseError>({
   path,
   method = "GET",
   body = null,
@@ -35,6 +36,7 @@ export function useFetchStream<T = any, E extends BaseError = BaseError>({
   arrayQueryParam = {},
   acceptHeader = "application/x-ndjson",
   useAbortController = true,
+  batchSize = 6,
 }: UseFetchStreamProps): UseFetchStreamReturn<T, E> {
   const [messages, setMessages] = useState<T[]>([]);
   const [error, setError] = useState<E | null>(null);
@@ -69,6 +71,7 @@ export function useFetchStream<T = any, E extends BaseError = BaseError>({
       token,
       cache,
       aboveController: abortController,
+      batchSize,
       successArrayCallback: (data) => {
         setMessages((prev) => [...prev, ...data]);
       },
@@ -119,6 +122,7 @@ export function useFetchStream<T = any, E extends BaseError = BaseError>({
     JSON.stringify(queryParams),
     JSON.stringify(arrayQueryParam),
     refetchState,
+    batchSize,
   ]);
 
   // console.log(messages.length);

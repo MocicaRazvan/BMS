@@ -13,7 +13,6 @@ import java.util.List;
 
 public interface ValidIds<M extends ManyToOneUser, R extends ManyToOneUserRepository<M> & CountIds, RESP extends WithUserDto> {
 
-    //    Mono<Void> validIds(List<Long> ids);
     default Mono<Void> validIds(List<Long> ids, R modelRepository, String name) {
         return modelRepository.countByIds(
                         ids.stream().distinct().toList()
@@ -31,6 +30,11 @@ public interface ValidIds<M extends ManyToOneUser, R extends ManyToOneUserReposi
                 .switchIfEmpty(Mono.error(new IllegalActionException(name + " " + ids.toString() + " are not valid")))
                 .log()
                 .then();
+    }
+
+    default Flux<Long> validIdsWrapper(List<Long> ids, R modelRepository, String name) {
+        return validIds(ids, modelRepository, name)
+                .thenMany(Flux.fromIterable(ids));
     }
 
     Flux<RESP> getModelsByIds(List<Long> ids);

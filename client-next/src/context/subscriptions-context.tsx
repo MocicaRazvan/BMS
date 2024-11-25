@@ -94,7 +94,7 @@ export const SubscriptionProvider = ({ children, authUser }: Props) => {
   );
 };
 
-export const useSubscription = () => {
+export const usePlansSubscription = () => {
   const context = useContext(SubscriptionContext);
   if (!context) {
     throw new Error(

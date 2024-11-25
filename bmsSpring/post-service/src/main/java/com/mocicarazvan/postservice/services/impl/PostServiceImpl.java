@@ -11,95 +11,104 @@ import com.mocicarazvan.postservice.models.Post;
 import com.mocicarazvan.postservice.repositories.PostExtendedRepository;
 import com.mocicarazvan.postservice.repositories.PostRepository;
 import com.mocicarazvan.postservice.services.PostService;
-import com.mocicarazvan.templatemodule.adapters.CacheApprovedFilteredToHandlerAdapter;
-import com.mocicarazvan.templatemodule.cache.FilteredListCaffeineCacheApproveFilterKey;
-import com.mocicarazvan.templatemodule.cache.keys.FilterKeyType;
+import com.mocicarazvan.rediscache.annotation.RedisReactiveApprovedCache;
+import com.mocicarazvan.rediscache.annotation.RedisReactiveApprovedCacheEvict;
+import com.mocicarazvan.rediscache.annotation.RedisReactiveCache;
+import com.mocicarazvan.rediscache.annotation.RedisReactiveCacheEvict;
+import com.mocicarazvan.rediscache.enums.BooleanEnum;
 import com.mocicarazvan.templatemodule.clients.FileClient;
 import com.mocicarazvan.templatemodule.clients.UserClient;
 import com.mocicarazvan.templatemodule.dtos.PageableBody;
-import com.mocicarazvan.templatemodule.dtos.response.PageableResponse;
-import com.mocicarazvan.templatemodule.dtos.response.ResponseWithChildList;
-import com.mocicarazvan.templatemodule.dtos.response.ResponseWithUserDto;
+import com.mocicarazvan.templatemodule.dtos.UserDto;
+import com.mocicarazvan.templatemodule.dtos.response.*;
 import com.mocicarazvan.templatemodule.exceptions.notFound.NotFoundEntity;
 import com.mocicarazvan.templatemodule.services.RabbitMqApprovedSenderWrapper;
 import com.mocicarazvan.templatemodule.services.impl.ApprovedServiceImpl;
 import com.mocicarazvan.templatemodule.utils.EntitiesUtils;
 import com.mocicarazvan.templatemodule.utils.PageableUtilsCustom;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.jooq.lambda.function.Function2;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.reactive.TransactionalOperator;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.function.Function6;
-import reactor.function.Function7;
 
 import java.util.List;
 
 
 @Service
 @Slf4j
-public class PostServiceImpl extends ApprovedServiceImpl<Post, PostBody, PostResponse, PostRepository, PostMapper>
+public class PostServiceImpl extends ApprovedServiceImpl<Post, PostBody, PostResponse, PostRepository, PostMapper, PostServiceImpl.PostServiceRedisCacheWrapper>
         implements PostService {
 
     private final CommentClient commentClient;
     private final PostExtendedRepository postExtendedRepository;
-    private final PostServiceCacheHandler postServiceCacheHandler;
     private final RabbitMqApprovedSenderWrapper<PostResponse> rabbitMqSender;
+    private final TransactionalOperator transactionalOperator;
 
 
-    public PostServiceImpl(PostRepository modelRepository, PostMapper modelMapper, PageableUtilsCustom pageableUtils, UserClient userClient, EntitiesUtils entitiesUtils, FileClient fileClient, ObjectMapper objectMapper, CommentClient commentClient, PostExtendedRepository postExtendedRepository, PostServiceCacheHandler postServiceCacheHandler, RabbitMqApprovedSenderWrapper<PostResponse> rabbitMqSender) {
-        super(modelRepository, modelMapper, pageableUtils, userClient, "post", List.of("id", "userId", "title", "createdAt", "updatedAt", "approved"), entitiesUtils, fileClient, objectMapper, postServiceCacheHandler, rabbitMqSender);
+    public PostServiceImpl(PostRepository modelRepository, PostMapper modelMapper, PageableUtilsCustom pageableUtils, UserClient userClient, EntitiesUtils entitiesUtils, FileClient fileClient, ObjectMapper objectMapper, CommentClient commentClient, PostExtendedRepository postExtendedRepository, RabbitMqApprovedSenderWrapper<PostResponse> rabbitMqSender, PostServiceRedisCacheWrapper self, TransactionalOperator transactionalOperator) {
+        super(modelRepository, modelMapper, pageableUtils, userClient, "post", List.of("id", "userId", "title", "createdAt", "updatedAt", "approved"),
+                entitiesUtils, fileClient, objectMapper, rabbitMqSender, self
+        );
         this.commentClient = commentClient;
         this.postExtendedRepository = postExtendedRepository;
-        this.postServiceCacheHandler = postServiceCacheHandler;
         this.rabbitMqSender = rabbitMqSender;
+        this.transactionalOperator = transactionalOperator;
     }
 
-//    @Override
-//    public Mono<ResponseWithUserDto<PostResponse>> approveModel(Long id, String userId, boolean approved) {
-//        return super.approveModelWithCallback(id, userId, approved,
-//                (r, u) -> {
-//                    rabbitMqSender.sendMessage(
-//                            ApproveNotificationBody.builder()
-//                                    .senderEmail(u.getEmail())
-//                                    .receiverEmail(r.getUser().getEmail())
-//                                    .type(approved ? ApprovedNotificationType.APPROVED : ApprovedNotificationType.DISAPPROVED)
-//                                    .referenceId(r.getModel().getId())
-//                                    .content(r.getModel().getTitle())
-//                                    .extraLink(extraLink + r.getModel().getId())
-//                                    .build()
-//                    );
-//                    return null;
-//                }
-//        );
-//    }
+    @Override
+    @RedisReactiveCacheEvict(key = CACHE_KEY_PATH, id = "#id")
+    public Mono<PostResponse> reactToModel(Long id, String type, String userId) {
+        return super.reactToModel(id, type, userId);
+    }
 
     @Override
+    @RedisReactiveCacheEvict(key = CACHE_KEY_PATH, id = "#id")
     public Mono<PostResponse> deleteModel(Long id, String userId) {
         return
-                postServiceCacheHandler.getDeleteModelInvalidate().apply(
-                        userClient.getUser("", userId)
-                                .flatMap(authUser -> getModel(id)
-                                        .flatMap(model -> privateRoute(true, authUser, model.getUserId())
-                                                .then(commentClient.deleteCommentsByPostId(id.toString(), userId))
-                                                .then(modelRepository.delete(model))
-                                                .then(Mono.fromCallable(() -> modelMapper.fromModelToResponse(model)))
-                                        )
-                                ), id, userId);
+                userClient.getUser("", userId)
+                        .flatMap(authUser -> getModel(id)
+                                .flatMap(model ->
+                                        transactionalOperator.transactional(privateRoute(true, authUser, model.getUserId())
+                                                        .then(commentClient.deleteCommentsByPostId(id.toString(), userId))
+                                                        .then(modelRepository.delete(model)))
+                                                .then(Mono.fromCallable(() -> modelMapper.fromModelToResponse(model))
+
+                                                )
+                                )
+                        );
+    }
+
+    @Override
+    public Mono<Pair<PostResponse, Boolean>> deleteModelGetOriginalApproved(Long id, String userId) {
+        return userClient.getUser("", userId)
+                .flatMap(authUser -> getModel(id)
+                        .flatMap(model -> {
+                                    Boolean originalApproved = model.isApproved();
+                                    return transactionalOperator.transactional(privateRoute(true, authUser, model.getUserId())
+                                                    .then(commentClient.deleteCommentsByPostId(id.toString(), userId))
+                                                    .then(modelRepository.delete(model)))
+                                            .then(Mono.fromCallable(() -> modelMapper.fromModelToResponse(model)))
+                                            .map(r -> Pair.of(r, originalApproved))
+                                            .flatMap(self::updateDeleteInvalidate);
+
+                                }
+                        )
+                );
     }
 
     @Override
     public Mono<Void> existsByIdAndApprovedIsTrue(Long id) {
         return
-                postServiceCacheHandler.existsByIdAndApprovedPersist.apply(
-                        modelRepository.existsByIdAndApprovedIsTrue(id)
-                                .doOnNext(e -> log.error("existsByIdAndApprovedIsTrue: " + id))
-                                .filter(Boolean::booleanValue)
-                                .switchIfEmpty(Mono.error(new NotFoundEntity("post", id)))
-                        , id).then();
+                self.existByIdApproved(id)
+                        .doOnNext(e -> log.error("existsByIdAndApprovedIsTrue: " + id))
+                        .filter(Boolean::booleanValue)
+                        .switchIfEmpty(Mono.error(new NotFoundEntity("post", id))
+                        ).then();
 
     }
 
@@ -129,15 +138,7 @@ public class PostServiceImpl extends ApprovedServiceImpl<Post, PostBody, PostRes
         return protectRoute(approvedNotNull, pageableBody, userId)
                 .flatMapMany(
                         pr ->
-                                postServiceCacheHandler.getPostsFilteredPersist.apply(
-                                        pageableUtils.createPageableResponse(
-                                                postExtendedRepository.getPostsFiltered(finalTitle, approved, tags, likedUserId, pr)
-                                                        .doOnNext(post -> log.error("post: " + post))
-                                                        .map(modelMapper::fromModelToResponse),
-                                                postExtendedRepository.countPostsFiltered(finalTitle, approved, tags, likedUserId)
-                                                        .doOnNext(count -> log.error("count: " + count))
-                                                , pr
-                                        ), finalTitle, approved, tags, likedUserId, pageableBody, admin)
+                                self.getPostFilteredBase(finalTitle, approved, tags, likedUserId, admin, pr)
                 );
     }
 
@@ -146,66 +147,106 @@ public class PostServiceImpl extends ApprovedServiceImpl<Post, PostBody, PostRes
         String newTitle = title == null ? "" : title.trim();
         return getModelsAuthor(trainerId, pageableBody, userId, pr ->
 
-                postServiceCacheHandler.getPostsFilteredTrainerPersist.apply(
+                self.getPostFilteredTrainerBase(newTitle, approved, tags, trainerId, pr)
 
-                        (pageableUtils.createPageableResponse(
-                                postExtendedRepository.getPostsFilteredTrainer(newTitle, approved, tags, trainerId, pr).map(modelMapper::fromModelToResponse),
-                                postExtendedRepository.countPostsFilteredTrainer(newTitle, approved, trainerId, tags),
-                                pr
-                        )), newTitle, approved, trainerId, tags, pageableBody
-                )
 
         );
     }
 
-    @EqualsAndHashCode(callSuper = true)
-    @Data
+    @Getter
     @Component
-    public static class PostServiceCacheHandler
-            extends ApprovedServiceImpl.ApprovedServiceCacheHandler<Post, PostBody, PostResponse> {
-        private final FilteredListCaffeineCacheApproveFilterKey<PostResponse> cacheFilter;
+    public static class PostServiceRedisCacheWrapper extends ApprovedServiceRedisCacheWrapper<Post, PostBody, PostResponse, PostRepository, PostMapper> {
 
-        Function7<Flux<PageableResponse<PostResponse>>, String, Boolean, List<String>, Long, PageableBody, Boolean, Flux<PageableResponse<PostResponse>>> getPostsFilteredPersist;
-        Function6<Flux<PageableResponse<PostResponse>>, String, Boolean, Long, List<String>, PageableBody, Flux<PageableResponse<PostResponse>>> getPostsFilteredTrainerPersist;
-        Function2<Mono<Boolean>, Long, Mono<Boolean>> existsByIdAndApprovedPersist;
+        private final PostExtendedRepository postExtendedRepository;
 
-
-        public PostServiceCacheHandler(FilteredListCaffeineCacheApproveFilterKey<PostResponse> cacheFilter) {
-            super();
-            this.cacheFilter = cacheFilter;
-            CacheApprovedFilteredToHandlerAdapter.convert(cacheFilter, this);
-
-            this.getPostsFilteredPersist = (flux, title, approved, tags, likedUserId, pageableBody, admin) -> {
-                FilterKeyType.KeyRouteType keyRouteType = Boolean.TRUE.equals(admin) ? FilterKeyType.KeyRouteType.createForAdmin() : FilterKeyType.KeyRouteType.createForPublic();
-                return cacheFilter.getExtraUniqueFluxCache(
-                        EntitiesUtils.getListOfNotNullObjects(title, approved, tags, likedUserId, pageableBody),
-                        "getPostsFiltered",
-                        m -> m.getContent().getId(),
-                        keyRouteType,
-                        approved, flux
-                );
-            };
-
-
-            this.getPostsFilteredTrainerPersist = (flux, title, approved, trainerId, tags, pageableBody) ->
-                    cacheFilter.getExtraUniqueCacheForTrainer(
-                            EntitiesUtils.getListOfNotNullObjects(title, approved, trainerId, tags, pageableBody),
-                            trainerId,
-                            "getPostsFilteredTrainer" + trainerId,
-                            m -> m.getContent().getId(),
-                            approved,
-                            flux
-                    );
-
-
-            this.existsByIdAndApprovedPersist = (mono, id) -> cacheFilter.getExtraUniqueMonoCacheIndependent(
-                    EntitiesUtils.getListOfNotNullObjects(id),
-                    "existsByIdAndApprovedPersist" + id,
-                    v -> id,
-                    mono
-            );
-
+        public PostServiceRedisCacheWrapper(PostRepository modelRepository, PostMapper modelMapper, PageableUtilsCustom pageableUtils, UserClient userClient, PostExtendedRepository postExtendedRepository) {
+            super(modelRepository, modelMapper, "post", pageableUtils, userClient);
+            this.postExtendedRepository = postExtendedRepository;
         }
+
+        @Override
+        @RedisReactiveApprovedCache(key = CACHE_KEY_PATH, idPath = "entity.id", approved = BooleanEnum.NULL, forWhom = "0")
+        public Flux<MonthlyEntityGroup<PostResponse>> getModelGroupedByMonthBase(int month, UserDto userDto) {
+            return super.getModelGroupedByMonthBase(month, userDto);
+        }
+
+        @Override
+        @RedisReactiveCache(key = CACHE_KEY_PATH, id = "#id")
+        public Mono<Post> getModel(Long id) {
+            return super.getModel(id);
+        }
+
+        @RedisReactiveCache(key = CACHE_KEY_PATH, id = "#id")
+        public Mono<Post> getModelInternal(Long id) {
+            return super.getModel(id);
+        }
+
+
+        @Override
+        @RedisReactiveCache(key = CACHE_KEY_PATH, idPath = "id")
+        public Flux<Post> findAllById(List<Long> ids) {
+            return super.findAllById(ids);
+        }
+
+        @Override
+        @RedisReactiveCache(key = CACHE_KEY_PATH, id = "#id")
+        public Mono<ResponseWithUserDto<PostResponse>> getModelByIdWithUserBase(UserDto authUser, Long id) {
+            return super.getModelByIdWithUserBase(authUser, id);
+        }
+
+        @Override
+        @RedisReactiveCache(key = CACHE_KEY_PATH, id = "#id")
+        public Mono<ResponseWithUserLikesAndDislikes<PostResponse>> getModelByIdWithUserLikesAndDislikesBase(Long id, UserDto authUser) {
+            return super.getModelByIdWithUserLikesAndDislikesBase(id, authUser);
+        }
+
+        @Override
+        @RedisReactiveApprovedCache(key = CACHE_KEY_PATH, approvedArgumentPath = "#approved", idPath = "content.id")
+        public Flux<PageableResponse<PostResponse>> getModelsTitleBase(boolean approved, PageRequest pr, String newTitle) {
+            return super.getModelsTitleBase(approved, pr, newTitle);
+        }
+
+        @Override
+        @RedisReactiveApprovedCacheEvict(key = CACHE_KEY_PATH, forWhomPath = "#r.userId")
+        protected Mono<Pair<PostResponse, Boolean>> createInvalidate(PostResponse r) {
+            return super.createInvalidate(r);
+        }
+
+        @Override
+        @RedisReactiveApprovedCacheEvict(key = CACHE_KEY_PATH, id = "#p.getFirst().getId()", forWhomPath = "#p.getFirst().getUserId()")
+        protected Mono<Pair<PostResponse, Boolean>> updateDeleteInvalidate(Pair<PostResponse, Boolean> p) {
+            return super.updateDeleteInvalidate(p);
+        }
+
+        @RedisReactiveCache(key = CACHE_KEY_PATH, id = "#id")
+        protected Mono<Boolean> existByIdApproved(Long id) {
+            return modelRepository.existsByIdAndApprovedIsTrue(id);
+        }
+
+        @RedisReactiveApprovedCache(key = CACHE_KEY_PATH, idPath = "content.id", approvedArgumentPath = "#approved", forWhom = "#admin?0:-1")
+        public Flux<PageableResponse<PostResponse>> getPostFilteredBase(String finalTitle,
+                                                                        Boolean approved, List<String> tags, Long likedUserId, Boolean admin, PageRequest pr) {
+            return
+                    pageableUtils.createPageableResponse(
+                            postExtendedRepository.getPostsFiltered(finalTitle, approved, tags, likedUserId, pr)
+                                    .doOnNext(post -> log.error("post: " + post))
+                                    .map(modelMapper::fromModelToResponse),
+                            postExtendedRepository.countPostsFiltered(finalTitle, approved, tags, likedUserId)
+                                    .doOnNext(count -> log.error("count: " + count))
+                            , pr
+                    );
+        }
+
+        @RedisReactiveApprovedCache(key = CACHE_KEY_PATH, idPath = "content.id", approvedArgumentPath = "#approved", forWhom = "#trainerId")
+        public Flux<PageableResponse<PostResponse>> getPostFilteredTrainerBase(String newTitle,
+                                                                               Boolean approved, List<String> tags, Long trainerId, PageRequest pr) {
+            return pageableUtils.createPageableResponse(
+                    postExtendedRepository.getPostsFilteredTrainer(newTitle, approved, tags, trainerId, pr).map(modelMapper::fromModelToResponse),
+                    postExtendedRepository.countPostsFilteredTrainer(newTitle, approved, trainerId, tags),
+                    pr);
+        }
+
     }
+
 
 }

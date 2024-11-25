@@ -37,29 +37,6 @@ export default function ChatMainContentWrapper({
 }: ChatMainContentWrapperProps) {
   const currentSearchParams = useSearchParams();
 
-  // const {
-  //   messages: connectedUsers,
-  //   error: uError,
-  //   isFinished: uIsFinished,
-  // } = useFetchStream<ConversationUserResponse[]>({
-  //   path: "/ws-http/getConnectedUsers",
-  //   acceptHeader: "application/json",
-  //   useAbortController: false,
-  //   authToken: true,
-  // });
-  //
-  // const {
-  //   messages: chatRooms,
-  //   error: rError,
-  //   isFinished: rIsFinished,
-  //   refetch: refetchChatRooms,
-  // } = useFetchStream<ChatRoomResponse[]>({
-  //   path: `/ws-http/chatRooms/${authUser.email}`,
-  //   acceptHeader: "application/json",
-  //   useAbortController: false,
-  //   authToken: true,
-  // });
-
   const [filterEmail, setFilterEmail] = useState("");
   const debouncedFilter = useDebounce(filterEmail, 500);
   const [pageInfo, setPageInfo] = useState<PageInfo>({

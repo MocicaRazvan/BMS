@@ -1,19 +1,22 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { signOut } from "next-auth/react";
-import { useRouter } from "@/navigation";
+import { Locale, useRouter } from "@/navigation";
 
 interface SignOutText {
   questionText: string;
   buttonSignOut: string;
   buttonSignIn: string;
 }
-
+interface Props extends SignOutText {
+  locale: Locale;
+}
 export default function SignOut({
   buttonSignOut,
   questionText,
   buttonSignIn,
-}: SignOutText) {
+  locale,
+}: Props) {
   const router = useRouter();
 
   return (
@@ -30,8 +33,13 @@ export default function SignOut({
             if (window && window?.localStorage) {
               window.localStorage.clear();
             }
-            signOut({ redirect: false, callbackUrl: "/auth/signin" }).then(() =>
-              router.push("/auth/signin"),
+            signOut({ redirect: true, callbackUrl: "/auth/signin" }).then(
+              () => {
+                router.push("/auth/signin");
+                // if (window) {
+                //   window.location.href = "/auth/signin";
+                // }
+              },
             );
           }}
         >

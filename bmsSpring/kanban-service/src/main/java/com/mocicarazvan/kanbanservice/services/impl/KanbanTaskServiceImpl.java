@@ -1,6 +1,5 @@
 package com.mocicarazvan.kanbanservice.services.impl;
 
-import com.mocicarazvan.kanbanservice.dtos.columns.KanbanColumnResponse;
 import com.mocicarazvan.kanbanservice.dtos.tasks.GroupedKanbanTask;
 import com.mocicarazvan.kanbanservice.dtos.tasks.KanbanTaskBody;
 import com.mocicarazvan.kanbanservice.dtos.tasks.KanbanTaskResponse;
@@ -9,18 +8,13 @@ import com.mocicarazvan.kanbanservice.models.KanbanTask;
 import com.mocicarazvan.kanbanservice.repositories.KanbanTaskRepository;
 import com.mocicarazvan.kanbanservice.services.KanbanColumnService;
 import com.mocicarazvan.kanbanservice.services.KanbanTaskService;
-import com.mocicarazvan.templatemodule.adapters.CacheChildFilteredToHandlerAdapter;
-import com.mocicarazvan.templatemodule.cache.FilteredListCaffeineCacheChildFilterKey;
-import com.mocicarazvan.templatemodule.cache.keys.ChildFilterKey;
+import com.mocicarazvan.rediscache.annotation.RedisReactiveChildCache;
+import com.mocicarazvan.rediscache.annotation.RedisReactiveChildCacheEvict;
 import com.mocicarazvan.templatemodule.clients.UserClient;
-import com.mocicarazvan.templatemodule.dtos.generic.IdGenerateDto;
 import com.mocicarazvan.templatemodule.services.impl.ManyToOneUserServiceImpl;
 import com.mocicarazvan.templatemodule.utils.EntitiesUtils;
 import com.mocicarazvan.templatemodule.utils.PageableUtilsCustom;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
-import org.jooq.lambda.function.Function2;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
@@ -29,118 +23,93 @@ import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.function.Predicate;
 
 @Service
 @Getter
 public class KanbanTaskServiceImpl
-        extends ManyToOneUserServiceImpl<KanbanTask, KanbanTaskBody, KanbanTaskResponse, KanbanTaskRepository, KanbanTaskMapper>
+        extends ManyToOneUserServiceImpl<KanbanTask, KanbanTaskBody, KanbanTaskResponse, KanbanTaskRepository, KanbanTaskMapper, KanbanTaskServiceImpl.KanbanTaskServiceRedisCacheWrapper>
         implements KanbanTaskService {
 
 
     private final EntitiesUtils entitiesUtils;
     private final KanbanColumnService kanbanColumnService;
-    private final KanbanTaskServiceCacheHandler kanbanTaskServiceCacheHandler;
 
 
-    public KanbanTaskServiceImpl(KanbanTaskRepository modelRepository, KanbanTaskMapper modelMapper, PageableUtilsCustom pageableUtils, UserClient userClient, EntitiesUtils entitiesUtils, KanbanColumnService kanbanColumnService, KanbanTaskServiceCacheHandler kanbanTaskServiceCacheHandler) {
-        super(modelRepository, modelMapper, pageableUtils, userClient, "kanbanTask", List.of("id", "userId", "createdAt", "updatedAt", "orderIndex"), kanbanTaskServiceCacheHandler);
+    public KanbanTaskServiceImpl(KanbanTaskRepository modelRepository, KanbanTaskMapper modelMapper, PageableUtilsCustom pageableUtils, UserClient userClient, EntitiesUtils entitiesUtils, KanbanColumnService kanbanColumnService, KanbanTaskServiceRedisCacheWrapper self) {
+        super(modelRepository, modelMapper, pageableUtils, userClient, "kanbanTask", List.of("id", "userId", "createdAt", "updatedAt", "orderIndex"), self);
         this.entitiesUtils = entitiesUtils;
         this.kanbanColumnService = kanbanColumnService;
-        this.kanbanTaskServiceCacheHandler = kanbanTaskServiceCacheHandler;
     }
 
+    @Override
+    @RedisReactiveChildCacheEvict(key = CACHE_KEY_PATH, masterId = "#kanbanTaskBody.columnId")
+    public Mono<KanbanTaskResponse> createModel(KanbanTaskBody kanbanTaskBody, String userId) {
+        return super.createModel(kanbanTaskBody, userId);
+    }
 
     @Override
+    @RedisReactiveChildCacheEvict(key = CACHE_KEY_PATH, id = "#id", masterPath = "columnId")
+    public Mono<KanbanTaskResponse> deleteModel(Long id, String userId) {
+        return super.deleteModel(id, userId);
+    }
+
+    @Override
+    @RedisReactiveChildCacheEvict(key = CACHE_KEY_PATH, id = "#id", masterPath = "columnId")
+    public Mono<KanbanTaskResponse> updateModel(Long id, KanbanTaskBody kanbanTaskBody, String userId) {
+        return super.updateModel(id, kanbanTaskBody, userId);
+    }
+
+    @Override
+    @RedisReactiveChildCache(key = CACHE_KEY_PATH, masterId = "#columnId", idPath = "id")
     public Flux<KanbanTaskResponse> getByColumnId(Long columnId) {
         Sort sort = Sort.by(Sort.Direction.ASC, "orderIndex");
 
-        return
-                kanbanTaskServiceCacheHandler.getByColumnIdPersist.apply(
-                        modelRepository.findAllByColumnId(columnId, sort)
-                                .map(modelMapper::fromModelToResponse), columnId);
+        return modelRepository.findAllByColumnId(columnId, sort)
+                .map(modelMapper::fromModelToResponse);
     }
 
     @Override
     public Mono<Void> reindex(GroupedKanbanTask groupedKanbanTask, String userId) {
+
         return
-                kanbanTaskServiceCacheHandler.reindexInvalidate.apply(
-                                Flux.fromIterable(groupedKanbanTask.getGroupedTasks().entrySet())
-                                        .flatMap(entry ->
-                                                kanbanColumnService.getModel(entry.getKey())
-                                                        .map(c -> entitiesUtils.checkOwner(c, userId)
+                Flux.fromIterable(groupedKanbanTask.getGroupedTasks().entrySet())
+                        .flatMap(entry ->
+                                kanbanColumnService.getModel(entry.getKey())
+                                        .map(c -> entitiesUtils.checkOwner(c, userId)
+                                        )
+                                        .flatMapMany(c -> Flux.fromIterable(entry.getValue()))
+                                        .flatMap(tr ->
+                                                getModel(tr.getId())
+                                                        .flatMap(t ->
+                                                                entitiesUtils.checkOwner(t, userId)
+                                                                        .then(Mono.fromCallable(() -> {
+                                                                            t.setOrderIndex(tr.getOrderIndex());
+                                                                            t.setUpdatedAt(LocalDateTime.now());
+                                                                            t.setColumnId(entry.getKey());
+                                                                            return t;
+                                                                        }))
+                                                                        .flatMap(self::reindexInvalidate)
                                                         )
-                                                        .flatMapMany(c -> Flux.fromIterable(entry.getValue()))
-                                                        .flatMap(tr ->
-                                                                getModel(tr.getId())
-                                                                        .flatMap(t ->
-                                                                                entitiesUtils.checkOwner(t, userId)
-                                                                                        .then(Mono.fromCallable(() -> {
-                                                                                            t.setOrderIndex(tr.getOrderIndex());
-                                                                                            t.setUpdatedAt(LocalDateTime.now());
-                                                                                            t.setColumnId(entry.getKey());
-                                                                                            return t;
-                                                                                        }))
-                                                                        )
-                                                                        .flatMap(modelRepository::save)
-                                                        )
-                                        ), groupedKanbanTask)
+                                                        .flatMap(modelRepository::save)
+                                        )
+                        )
                         .then();
     }
 
-    ;
 
-
-    @EqualsAndHashCode(callSuper = true)
-    @Data
     @Component
-    public static class KanbanTaskServiceCacheHandler extends
-            ManyToOneUserServiceImpl.ManyToOneUserServiceCacheHandler<KanbanTask, KanbanTaskBody, KanbanTaskResponse> {
-        private final FilteredListCaffeineCacheChildFilterKey<KanbanTaskResponse> cacheFilter;
-        private final KanbanTaskMapper kanbanTaskMapper;
+    @Getter
+    public static class KanbanTaskServiceRedisCacheWrapper extends ManyToOneUserServiceRedisCacheWrapper<KanbanTask, KanbanTaskBody, KanbanTaskResponse, KanbanTaskRepository, KanbanTaskMapper> {
 
-        Function2<Flux<KanbanTaskResponse>, Long, Flux<KanbanTaskResponse>> getByColumnIdPersist;
-        Function2<Flux<KanbanTask>, GroupedKanbanTask, Flux<KanbanTask>> reindexInvalidate;
-        Function2<Mono<KanbanColumnResponse>, Long, Mono<KanbanColumnResponse>> updateByColumnInvalidate;
-        Function2<Mono<KanbanColumnResponse>, Long, Mono<KanbanColumnResponse>> deleteByColumnInvalidate;
+        public KanbanTaskServiceRedisCacheWrapper(KanbanTaskRepository modelRepository, KanbanTaskMapper modelMapper, UserClient userClient) {
+            super(modelRepository, modelMapper, "kanbanTask", userClient);
+        }
 
-        public KanbanTaskServiceCacheHandler(FilteredListCaffeineCacheChildFilterKey<KanbanTaskResponse> cacheFilter, KanbanTaskMapper kanbanTaskMapper) {
-            super();
-            this.cacheFilter = cacheFilter;
-            this.kanbanTaskMapper = kanbanTaskMapper;
-
-            CacheChildFilteredToHandlerAdapter.convertToManyUserHandler(cacheFilter, this,
-                    KanbanTaskResponse::getColumnId, kanbanTaskMapper::fromModelToResponse
-            );
-
-            this.getByColumnIdPersist = (flux, columnId) -> cacheFilter.getExtraUniqueFluxCacheForMasterIndependentOfRouteType(
-                    EntitiesUtils.getListOfNotNullObjects(columnId),
-                    "getByColumnIdPersist" + columnId,
-                    IdGenerateDto::getId,
-                    columnId,
-                    flux
-            );
-            this.reindexInvalidate = (flux, groupedKanbanTask) -> {
-//                Set<Long> colId=groupedKanbanTask.getGroupedTasks().keySet();
-//                Predicate<ChildFilterKey> predicate= key->false;
-//                for (Long id:colId){
-//                    predicate=predicate.or(cacheFilter.byMasterAndIds(id));
-//                }
-                Predicate<ChildFilterKey> predicate = groupedKanbanTask.getGroupedTasks().keySet()
-                        .parallelStream()
-                        .reduce(k -> false,
-                                (p, c) -> p.or(cacheFilter.byMasterAndIds(c)),
-                                Predicate::or
-                        );
-                return cacheFilter.invalidateByWrapper(flux, predicate);
-            };
-
-            this.updateByColumnInvalidate = (mono, ingredientId) ->
-                    cacheFilter.invalidateByWrapper(mono, cacheFilter.byMasterPredicate(ingredientId));
-
-            this.deleteByColumnInvalidate = (mono, ingredientId) ->
-                    cacheFilter.invalidateByWrapper(mono, cacheFilter.byMasterAndIds(ingredientId));
+        @RedisReactiveChildCacheEvict(key = CACHE_KEY_PATH, masterId = "#kanbanTaskResponse.columnId", id = "#kanbanTaskResponse.id")
+        public Mono<KanbanTask> reindexInvalidate(KanbanTask kanbanTaskResponse) {
+            return Mono.just(kanbanTaskResponse);
         }
     }
+
 
 }

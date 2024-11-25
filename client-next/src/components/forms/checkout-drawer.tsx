@@ -93,7 +93,7 @@ export default function CheckoutDrawer({
   const form = useForm<CheckoutSchemaType>({
     resolver: zodResolver(schema),
     defaultValues: {
-      userConfirmedPrice: 0,
+      userConfirmedPrice: totalPrice,
     },
   });
 
@@ -129,48 +129,6 @@ export default function CheckoutDrawer({
       } catch (e) {
         console.log(e);
       }
-
-      // setIsLoading(true);
-      //
-      // try {
-      //   const { messages, error } = await fetchStream<
-      //       CustomEntityModel<OrderResponse>
-      //   >({
-      //     path: "/orders",
-      //     method: "POST",
-      //     token,
-      //     body: {
-      //       shippingAddress: billingAddress,
-      //       payed: false,
-      //       trainings: trainings.map(({ id }) => id),
-      //     },
-      //   });
-      //   if (error?.message || error?.status) {
-      //     setErrorMsg("Something went wrong, please try again.");
-      //   } else {
-      //     clearCartForUser();
-      //     toast({
-      //       title: "Order",
-      //       description: "Order has been placed successfully",
-      //       variant: "success",
-      //       action: (
-      //           <ToastAction
-      //               altText={"View Order"}
-      //               onClick={() =>
-      //                   router.push(`/orders/single/${messages[0].content.id}`)
-      //               }
-      //           >
-      //             View Order
-      //           </ToastAction>
-      //       ),
-      //     });
-      //     router.push(`/users/${userId}/orders`);
-      //   }
-      // } catch (error) {
-      //   console.log(error);
-      // } finally {
-      //   setIsLoading(false);
-      // }
     },
     [],
   );
@@ -192,8 +150,8 @@ export default function CheckoutDrawer({
         </MotionButton>
       </DrawerTrigger>
       <DrawerContent>
-        <div className="mx-auto w-full max-w-sm pb-10">
-          <DrawerHeader>
+        <div className="mx-auto w-full max-w-sm pb-10 ">
+          <DrawerHeader className="p-0 pb-1.5 md:pb-2">
             <DrawerTitle>{title}</DrawerTitle>
             <DrawerDescription>{header}</DrawerDescription>
           </DrawerHeader>
@@ -213,6 +171,7 @@ export default function CheckoutDrawer({
                         placeholder={placeholder}
                         {...field}
                         type="number"
+                        disabled
                       />
                     </FormControl>
                     <FormDescription>{description}</FormDescription>

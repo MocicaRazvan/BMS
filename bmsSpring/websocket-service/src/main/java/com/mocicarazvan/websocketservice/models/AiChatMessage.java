@@ -19,6 +19,11 @@ import org.hibernate.annotations.OnDeleteAction;
 @AllArgsConstructor
 @SuperBuilder
 @Entity
+@Table(
+        indexes = {
+                @Index(name = "idx_chat_ai_chat_message_room_id", columnList = "chat_room_id")
+        }
+)
 public class AiChatMessage extends IdGenerated implements Transformable<AiChatMessage> {
 
     @Column(columnDefinition = "TEXT")

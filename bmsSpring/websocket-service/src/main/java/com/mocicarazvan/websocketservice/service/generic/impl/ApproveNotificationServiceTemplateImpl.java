@@ -72,14 +72,6 @@ public abstract class ApproveNotificationServiceTemplateImpl<R extends ApprovedM
                 }, asyncExecutor).join();
 
 
-//        return fromBodyToApprovedModel(body, appId, reference)
-//                .thenApplyAsync(model -> {
-//                            RESPONSE response = notificationTemplateMapper.fromModelToResponse(notificationTemplateRepository.save(model));
-//                            notifyReceiver(response, NotificationNotifyType.ADDED);
-//                            return response;
-//                        },
-//                        asyncExecutor)
-//                .join();
     }
 
 

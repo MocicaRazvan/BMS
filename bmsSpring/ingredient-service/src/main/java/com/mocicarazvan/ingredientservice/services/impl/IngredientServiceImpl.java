@@ -10,23 +10,22 @@ import com.mocicarazvan.ingredientservice.models.Ingredient;
 import com.mocicarazvan.ingredientservice.repositories.CustomIngredientRepository;
 import com.mocicarazvan.ingredientservice.repositories.IngredientRepository;
 import com.mocicarazvan.ingredientservice.services.IngredientService;
-import com.mocicarazvan.templatemodule.adapters.CacheBaseFilteredToHandlerAdapter;
-import com.mocicarazvan.templatemodule.cache.FilteredListCaffeineCache;
-import com.mocicarazvan.templatemodule.cache.keys.FilterKeyType;
+import com.mocicarazvan.rediscache.annotation.RedisReactiveCache;
+import com.mocicarazvan.rediscache.annotation.RedisReactiveChildCache;
+import com.mocicarazvan.rediscache.annotation.RedisReactiveChildCacheEvict;
 import com.mocicarazvan.templatemodule.clients.UserClient;
 import com.mocicarazvan.templatemodule.dtos.PageableBody;
-import com.mocicarazvan.templatemodule.dtos.generic.IdGenerateDto;
+import com.mocicarazvan.templatemodule.dtos.UserDto;
+import com.mocicarazvan.templatemodule.dtos.response.MonthlyEntityGroup;
 import com.mocicarazvan.templatemodule.dtos.response.PageableResponse;
+import com.mocicarazvan.templatemodule.dtos.response.ResponseWithUserDto;
 import com.mocicarazvan.templatemodule.enums.Role;
 import com.mocicarazvan.templatemodule.exceptions.action.PrivateRouteException;
 import com.mocicarazvan.templatemodule.exceptions.action.SubEntityUsed;
 import com.mocicarazvan.templatemodule.services.impl.ManyToOneUserServiceImpl;
 import com.mocicarazvan.templatemodule.utils.EntitiesUtils;
 import com.mocicarazvan.templatemodule.utils.PageableUtilsCustom;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import org.jooq.lambda.function.Function2;
-import org.jooq.lambda.function.Function6;
+import lombok.Getter;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -37,87 +36,100 @@ import java.util.List;
 @Service
 public class IngredientServiceImpl extends
         ManyToOneUserServiceImpl<
-                Ingredient, IngredientBody, IngredientResponse, IngredientRepository, IngredientMapper>
+                Ingredient, IngredientBody, IngredientResponse, IngredientRepository, IngredientMapper, IngredientServiceImpl.IngredientServiceRedisCacheWrapper>
         implements IngredientService {
 
 
     private final CustomIngredientRepository customIngredientRepository;
     private final EntitiesUtils entitiesUtils;
     private final RecipeClient recipeClient;
-    private final IngredientServiceCacheHandler ingredientServiceCacheHandler;
-    private final NutritionalFactServiceImpl.NutritionalFactServiceCacheHandler nutritionalFactServiceCacheHandler;
 
-    public IngredientServiceImpl(IngredientRepository modelRepository, IngredientMapper modelMapper, PageableUtilsCustom pageableUtils, UserClient userClient, CustomIngredientRepository customIngredientRepository, EntitiesUtils entitiesUtils, RecipeClient recipeClient, IngredientServiceCacheHandler ingredientServiceCacheHandler, NutritionalFactServiceImpl.NutritionalFactServiceCacheHandler nutritionalFactServiceCacheHandler) {
+    private static final String CACHE_KEY_PATH = "#this.modelName";
+
+    public IngredientServiceImpl(IngredientRepository modelRepository, IngredientMapper modelMapper, PageableUtilsCustom pageableUtils, UserClient userClient, CustomIngredientRepository customIngredientRepository, EntitiesUtils entitiesUtils, RecipeClient recipeClient, IngredientServiceRedisCacheWrapper self) {
         super(modelRepository, modelMapper, pageableUtils, userClient, "ingredient", List.of("name", "type", "display", "createdAt", "updatedAt", "id", "fat", "protein",
                 "fat",
                 "carbohydrates",
                 "salt",
                 "sugar",
-                "saturatedFat"), ingredientServiceCacheHandler);
+                "saturatedFat"), self);
         this.customIngredientRepository = customIngredientRepository;
         this.entitiesUtils = entitiesUtils;
         this.recipeClient = recipeClient;
-        this.ingredientServiceCacheHandler = ingredientServiceCacheHandler;
-        this.nutritionalFactServiceCacheHandler = nutritionalFactServiceCacheHandler;
+
+    }
+
+    @RedisReactiveChildCache(key = CACHE_KEY_PATH, idPath = "content.id")
+    public Flux<PageableResponse<IngredientResponse>> getAllModels(PageableBody pageableBody, String userId) {
+        return super.getAllModels(pageableBody, userId);
     }
 
     @Override
+    @RedisReactiveChildCache(key = CACHE_KEY_PATH, idPath = "content.id")
+    public Flux<PageableResponse<IngredientResponse>> getModelsByIdInPageable(List<Long> ids, PageableBody pageableBody) {
+        return super.getModelsByIdInPageable(ids, pageableBody);
+    }
+
+    @Override
+    @RedisReactiveChildCacheEvict(key = CACHE_KEY_PATH, masterId = "#userId")
     public Mono<IngredientResponse> createModel(IngredientBody body, String userId) {
         return
-                ingredientServiceCacheHandler.getCreateModelInvalidate().apply(
-                        modelRepository.existsByNameIgnoreCase(body.getName())
-                                .flatMap(exists -> {
-                                    if (exists) {
-                                        return Mono.error(new NameAlreadyExists("Ingredient with name " + body.getName() + " already exists", body.getName()));
-                                    }
-                                    return super.createModel(body, userId);
-                                }), body, userId);
+
+                modelRepository.existsByNameIgnoreCase(body.getName())
+                        .flatMap(exists -> {
+                            if (exists) {
+                                return Mono.error(new NameAlreadyExists("Ingredient with name " + body.getName() + " already exists", body.getName()));
+                            }
+                            return super.createModel(body, userId);
+                        });
     }
 
     @Override
+    @RedisReactiveChildCacheEvict(key = CACHE_KEY_PATH, id = "#id", masterId = "#userId")
     public Mono<IngredientResponse> updateModel(Long id, IngredientBody body, String userId) {
+
         return
-                nutritionalFactServiceCacheHandler.getUpdateByIngredientInvalidate().apply(
-                        ingredientServiceCacheHandler.getUpdateModelInvalidate().apply(
-                                modelRepository.existsByNameIgnoreCaseAndIdNot(body.getName(), id)
-                                        .flatMap(exists -> {
-                                            if (exists) {
-                                                return Mono.error(new NameAlreadyExists("Ingredient with name " + body.getName() + " already exists", body.getName()));
-                                            }
-                                            return super.updateModel(id, body, userId);
-                                        }), id, body, userId), id);
+                modelRepository.existsByNameIgnoreCaseAndIdNot(body.getName(), id)
+                        .flatMap(exists -> {
+                            if (exists) {
+                                return Mono.error(new NameAlreadyExists("Ingredient with name " + body.getName() + " already exists", body.getName()));
+                            }
+                            return super.updateModel(id, body, userId);
+                        });
     }
 
     @Override
+    @RedisReactiveChildCache(key = CACHE_KEY_PATH, idPath = "content.id")
     public Flux<PageableResponse<IngredientResponse>> getAllModelsFiltered(String name, Boolean display, DietType type, PageableBody pageableBody, Boolean admin) {
         Ingredient example = createIngredientExample(name, display, type);
+
         return pageableUtils.isSortingCriteriaValid(pageableBody.getSortingCriteria(), allowedSortingFields)
                 .then(pageableUtils.createPageRequest(pageableBody))
                 .flatMapMany(pr ->
-                        ingredientServiceCacheHandler.getAllModelsFilteredPersist.apply(
-                                pageableUtils.createPageableResponse(
-                                        customIngredientRepository.findAllByExample(example, pr)
-                                                .map(modelMapper::fromModelToResponse),
-                                        customIngredientRepository.countByExample(example),
-                                        pr
-                                ), name, display, type, pageableBody, admin)
+                        pageableUtils.createPageableResponse(
+                                customIngredientRepository.findAllByExample(example, pr)
+                                        .map(modelMapper::fromModelToResponse),
+                                customIngredientRepository.countByExample(example),
+                                pr
+                        )
 
                 );
     }
 
     @Override
+    @RedisReactiveChildCacheEvict(key = CACHE_KEY_PATH, id = "#id")
     public Mono<IngredientResponse> alterDisplay(Long id, Boolean display, String userId) {
         if (display == null) {
             return Mono.error(new IllegalArgumentException("Display cannot be null"));
         }
+
         return
-                ingredientServiceCacheHandler.getUpdateModelInvalidate().apply(
-                        getModel(id)
-                                .flatMap(ing -> {
-                                    ing.setDisplay(display);
-                                    return modelRepository.save(ing)
-                                            .map(modelMapper::fromModelToResponse);
-                                }), id, new IngredientBody(), userId);
+                getModel(id)
+                        .flatMap(ing -> {
+                            ing.setDisplay(display);
+                            return modelRepository.save(ing)
+                                    .map(modelMapper::fromModelToResponse);
+                        });
     }
 
     private Ingredient createIngredientExample(String name, Boolean display, DietType type) {
@@ -136,26 +148,28 @@ public class IngredientServiceImpl extends
 
     @Override
     public Mono<Void> validIds(List<Long> ids) {
+
         return
-                ingredientServiceCacheHandler.getValidIdsPersist().apply(
-                                this.validIds(ids, modelRepository, modelName)
-                                        .thenReturn(true), ids)
-                        .then();
+                this.validIds(ids, modelRepository, modelName)
+                ;
+
     }
 
     @Override
+    @RedisReactiveCache(key = CACHE_KEY_PATH, idPath = "id")
     public Flux<IngredientResponse> getIngredientsByIds(List<Long> ids) {
+
         return
-                ingredientServiceCacheHandler.getIngredientsByIdsPersist.apply(
-                        modelRepository.findAllByIdIn(ids)
-                                .map(modelMapper::fromModelToResponse), ids);
+                modelRepository.findAllByIdIn(ids)
+                        .map(modelMapper::fromModelToResponse);
     }
 
     @Override
     public Mono<IngredientResponse> getIngredientById(Long id, String userId) {
+
         return userClient.getUser("", userId)
                 .flatMap(userDto ->
-                        getModel(id)
+                        self.getIngredientById(id)
                                 .flatMap(m -> {
                                     if (!m.isDisplay() && !userDto.getRole().equals(Role.ROLE_ADMIN)) {
                                         return Mono.error(new PrivateRouteException());
@@ -167,82 +181,74 @@ public class IngredientServiceImpl extends
 
     @Override
     public Mono<IngredientResponse> getIngredientByIdInternal(Long id) {
-        return getModel(id)
+        return self.getIngredientByIdInternal(id)
                 .map(modelMapper::fromModelToResponse);
     }
 
 
     @Override
+    @RedisReactiveCache(key = CACHE_KEY_PATH, idPath = "id")
     public Flux<IngredientResponse> getModelsByIds(List<Long> ids) {
         return
-                ingredientServiceCacheHandler.getModelsByIdsPersist.apply(
-                        modelRepository.findAllByIdInAndDisplayTrue(ids)
-                                .map(modelMapper::fromModelToResponse), ids);
+                modelRepository.findAllByIdInAndDisplayTrue(ids)
+                        .map(modelMapper::fromModelToResponse);
     }
 
     @Override
+    @RedisReactiveChildCacheEvict(key = CACHE_KEY_PATH, id = "#id")
     public Mono<IngredientResponse> deleteModel(Long id, String userId) {
         return
-                nutritionalFactServiceCacheHandler.getDeleteByIngredientInvalidate().apply(
-                        ingredientServiceCacheHandler.getDeleteModelInvalidate().apply(
-                                recipeClient.getCountInParent(id, userId)
-                                        .flatMap(count -> {
-                                            if (count.getCount() > 0) {
-                                                return Mono.error(new SubEntityUsed(modelName, id));
-                                            }
-                                            return super.deleteModel(id, userId);
-                                        }), id, userId), id);
+                recipeClient.getCountInParent(id, userId)
+                        .flatMap(count -> {
+                            if (count.getCount() > 0) {
+                                return Mono.error(new SubEntityUsed(modelName, id));
+                            }
+                            return super.deleteModel(id, userId);
+                        });
     }
 
-    @EqualsAndHashCode(callSuper = true)
-    @Data
+    @Getter
     @Component
-    public static class IngredientServiceCacheHandler
-            extends ManyToOneUserServiceImpl.ManyToOneUserServiceCacheHandler<Ingredient, IngredientBody, IngredientResponse> {
-        private final FilteredListCaffeineCache<FilterKeyType, IngredientResponse> cacheFilter;
+    public static class IngredientServiceRedisCacheWrapper extends ManyToOneUserServiceImpl.ManyToOneUserServiceRedisCacheWrapper<Ingredient, IngredientBody, IngredientResponse, IngredientRepository, IngredientMapper> {
 
-        Function6<Flux<PageableResponse<IngredientResponse>>, String, Boolean, DietType, PageableBody, Boolean, Flux<PageableResponse<IngredientResponse>>>
-                getAllModelsFilteredPersist;
-        Function2<Mono<Boolean>, List<Long>, Mono<Boolean>> validIdsPersist;
-        Function2<Flux<IngredientResponse>, List<Long>, Flux<IngredientResponse>> getIngredientsByIdsPersist;
-        Function2<Flux<IngredientResponse>, List<Long>, Flux<IngredientResponse>> getModelsByIdsPersist;
+        public IngredientServiceRedisCacheWrapper(IngredientRepository modelRepository, IngredientMapper modelMapper, UserClient userClient) {
+            super(modelRepository, modelMapper, "ingredient", userClient);
+        }
 
-        public IngredientServiceCacheHandler(FilteredListCaffeineCache<FilterKeyType, IngredientResponse> cacheFilter) {
-            super();
-            this.cacheFilter = cacheFilter;
-            CacheBaseFilteredToHandlerAdapter.convertToManyUserHandler(cacheFilter, this);
+        @Override
+        @RedisReactiveChildCache(key = CACHE_KEY_PATH, idPath = "entity.id")
+        public Flux<MonthlyEntityGroup<IngredientResponse>> getModelGroupedByMonthBase(int month, UserDto userDto) {
+            return super.getModelGroupedByMonthBase(month, userDto);
+        }
 
-            this.getAllModelsFilteredPersist = (flux, name, display, type, pageableBody, admin) ->
-            {
-                FilterKeyType.KeyRouteType keyRouteType = Boolean.TRUE.equals(admin) ? FilterKeyType.KeyRouteType.createForAdmin() : FilterKeyType.KeyRouteType.createForPublic();
-                return cacheFilter.getUniqueFluxCache(
-                        EntitiesUtils.getListOfNotNullObjects(name, display, type, pageableBody, admin),
-                        "getAllModelsFilteredPersist",
-                        m -> m.getContent().getId(),
-                        keyRouteType, flux
-                );
-            };
+        @Override
+        @RedisReactiveCache(key = CACHE_KEY_PATH, idPath = "id")
+        public Flux<Ingredient> findAllById(List<Long> ids) {
+            return super.findAllById(ids);
+        }
 
-            this.validIdsPersist = (mono, ids) -> cacheFilter.getUniqueMonoCacheIdListIndependent(
-                    EntitiesUtils.getListOfNotNullObjects(ids),
-                    "validIdsPersist" + ids,
-                    ids,
-                    mono
-            );
+        @Override
+        @RedisReactiveCache(key = CACHE_KEY_PATH, id = "#id")
+        public Mono<Ingredient> getModel(Long id) {
+            return super.getModel(id);
+        }
 
-            this.getIngredientsByIdsPersist = (flux, ids) -> cacheFilter.getUniqueFluxCacheIndependent(
-                    EntitiesUtils.getListOfNotNullObjects(ids),
-                    "getIngredientsByIdsPersist" + ids,
-                    IdGenerateDto::getId,
-                    flux
-            );
-            this.getModelsByIdsPersist = (flux, ids) -> cacheFilter.getUniqueFluxCacheIndependent(
-                    EntitiesUtils.getListOfNotNullObjects(ids),
-                    "getModelsByIdsPersist" + ids,
-                    IdGenerateDto::getId,
-                    flux
-            );
+        @Override
+        @RedisReactiveCache(key = CACHE_KEY_PATH, id = "#id")
+        public Mono<ResponseWithUserDto<IngredientResponse>> getModelByIdWithUserBase(UserDto authUser, Long id) {
+            return super.getModelByIdWithUserBase(authUser, id);
+        }
+
+        @RedisReactiveCache(key = CACHE_KEY_PATH, id = "#id")
+        public Mono<Ingredient> getIngredientById(Long id) {
+            return super.getModel(id);
+        }
+
+        @RedisReactiveCache(key = CACHE_KEY_PATH, id = "#id")
+        public Mono<Ingredient> getIngredientByIdInternal(Long id) {
+            return super.getModel(id);
         }
     }
+
 }
 

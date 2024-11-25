@@ -6,30 +6,28 @@ import com.mocicarazvan.ingredientservice.dtos.IngredientNutritionalFactResponse
 import com.mocicarazvan.ingredientservice.enums.DietType;
 import com.mocicarazvan.ingredientservice.mappers.IngredientNutritionalFactMapper;
 import com.mocicarazvan.ingredientservice.repositories.ExtendedIngredientNutritionalFactRepository;
+import com.mocicarazvan.ingredientservice.repositories.IngredientRepository;
 import com.mocicarazvan.ingredientservice.services.IngredientNutritionalFactService;
 import com.mocicarazvan.ingredientservice.services.IngredientService;
 import com.mocicarazvan.ingredientservice.services.NutritionalFactService;
-import com.mocicarazvan.templatemodule.cache.FilteredListCaffeineCache;
-import com.mocicarazvan.templatemodule.cache.keys.FilterKeyType;
+import com.mocicarazvan.rediscache.annotation.RedisReactiveChildCache;
+import com.mocicarazvan.rediscache.annotation.RedisReactiveChildCacheEvict;
 import com.mocicarazvan.templatemodule.dtos.PageableBody;
 import com.mocicarazvan.templatemodule.dtos.response.PageableResponse;
 import com.mocicarazvan.templatemodule.dtos.response.ResponseWithEntityCount;
-import com.mocicarazvan.templatemodule.utils.EntitiesUtils;
 import com.mocicarazvan.templatemodule.utils.PageableUtilsCustom;
-import lombok.Data;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import org.jooq.lambda.function.Function2;
-import org.jooq.lambda.function.Function7;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
-import java.util.function.Function;
 
 @Service
 @RequiredArgsConstructor
+@Getter
 public class IngredientNutritionalFactServiceImpl implements IngredientNutritionalFactService {
 
     private final IngredientService ingredientService;
@@ -38,6 +36,8 @@ public class IngredientNutritionalFactServiceImpl implements IngredientNutrition
     private final ExtendedIngredientNutritionalFactRepository extendedIngredientNutritionalFactRepository;
     private final PageableUtilsCustom pageableUtilsCustom;
     private final RecipeClient recipeClient;
+    private final String modelName = "ingredientNutritionalFact";
+    private static final String CACHE_KEY_PATH = "#this.modelName";
     private final List<String> allowedSortingFields = List.of("name", "type", "display", "createdAt", "updatedAt", "id", "fat", "protein",
             "fat",
             "carbohydrates",
@@ -45,16 +45,17 @@ public class IngredientNutritionalFactServiceImpl implements IngredientNutrition
             "sugar",
             "saturatedFat");
 
-    private final IngredientNutritionalFactCacheHandler ingredientNutritionalFactCacheHandler;
+    private final IngredientNutritionalFactRedisCacheWrapper self;
 
     @Override
+    @RedisReactiveChildCacheEvict(key = CACHE_KEY_PATH, id = "#id")
     public Mono<IngredientNutritionalFactResponse> deleteModel(Long id, String userId) {
+
         return
-                ingredientNutritionalFactCacheHandler.deleteUpdateModelInvalidate.apply(
-                        nutritionalFactService.findByIngredientIdUserId(id, userId)
-                                .zipWith(ingredientService.deleteModel(id, userId))
-                                .map(t -> ingredientNutritionalFactMapper.fromResponsesToResponse(t.getT2(), t.getT1()))
-                        , id);
+                nutritionalFactService.findByIngredientIdUserId(id, userId)
+                        .zipWith(ingredientService.deleteModel(id, userId))
+                        .map(t -> ingredientNutritionalFactMapper.fromResponsesToResponse(t.getT2(), t.getT1()))
+                ;
     }
 
     @Override
@@ -65,31 +66,23 @@ public class IngredientNutritionalFactServiceImpl implements IngredientNutrition
                         .map(t ->
                                 ingredientNutritionalFactMapper.fromResponsesToResponse(t.getT1(), t.getT2())
                         );
+
     }
 
     @Override
+    @RedisReactiveChildCacheEvict(key = CACHE_KEY_PATH, id = "#id")
     public Mono<IngredientNutritionalFactResponse> updateModel(Long id, IngredientNutritionalFactBody body, String userId) {
+
         return
-                ingredientNutritionalFactCacheHandler.deleteUpdateModelInvalidate.apply(
-                        ingredientService.updateModel(id, body.getIngredient(), userId)
-                                .zipWith(nutritionalFactService.updateModelByIngredient(id, body.getNutritionalFact(), userId))
-                                .map(t -> ingredientNutritionalFactMapper.fromResponsesToResponse(t.getT1(), t.getT2())), id);
+                ingredientService.updateModel(id, body.getIngredient(), userId)
+                        .zipWith(nutritionalFactService.updateModelByIngredient(id, body.getNutritionalFact(), userId))
+                        .map(t -> ingredientNutritionalFactMapper.fromResponsesToResponse(t.getT1(), t.getT2()));
     }
 
     @Override
     public Flux<PageableResponse<IngredientNutritionalFactResponse>> getAllModelsFiltered(String name, Boolean display, DietType type, PageableBody pageableBody, String userId, Boolean admin) {
-        return pageableUtilsCustom.isSortingCriteriaValid(pageableBody.getSortingCriteria(), allowedSortingFields)
-                .then(pageableUtilsCustom.createPageRequest(pageableBody))
-                .flatMapMany(pr ->
-                        ingredientNutritionalFactCacheHandler.getAllModelsFilteredPersist.apply(
-                                pageableUtilsCustom.createPageableResponse(
-                                        extendedIngredientNutritionalFactRepository.getModelsFiltered(name, display, type, pr).map(
-                                                ingredientNutritionalFactMapper::fromModelToResponse
-                                        ),
-                                        extendedIngredientNutritionalFactRepository.countModelsFiltered(name, display, type, pr),
-                                        pr
-                                ), name, display, type, pageableBody, userId, admin)
-                );
+
+        return self.getAllModelsFiltered(name, display, type, pageableBody, userId, admin, allowedSortingFields);
     }
 
     @Override
@@ -104,22 +97,24 @@ public class IngredientNutritionalFactServiceImpl implements IngredientNutrition
     }
 
     @Override
+    @RedisReactiveChildCacheEvict(key = CACHE_KEY_PATH, masterId = "#userId")
     public Mono<IngredientNutritionalFactResponse> createModel(IngredientNutritionalFactBody body, String userId) {
+
         return
-                ingredientNutritionalFactCacheHandler.createModelInvalidate.apply(
-                        ingredientService.createModel(body.getIngredient(), userId)
-                                .flatMap(ing -> nutritionalFactService.createModel(body.getNutritionalFact(), ing.getId(), userId)
-                                        .flatMap(nf -> Mono.just(ingredientNutritionalFactMapper.fromResponsesToResponse(ing, nf))
-                                        )));
+                ingredientService.createModel(body.getIngredient(), userId)
+                        .flatMap(ing -> nutritionalFactService.createModel(body.getNutritionalFact(), ing.getId(), userId)
+                                .flatMap(nf -> Mono.just(ingredientNutritionalFactMapper.fromResponsesToResponse(ing, nf))
+                                ));
     }
 
     @Override
+    @RedisReactiveChildCacheEvict(key = CACHE_KEY_PATH, id = "#id")
     public Mono<IngredientNutritionalFactResponse> alterDisplay(Long id, Boolean display, String userId) {
+
         return
-                ingredientNutritionalFactCacheHandler.deleteUpdateModelInvalidate.apply(
-                        ingredientService.alterDisplay(id, display, userId)
-                                .zipWith(nutritionalFactService.findByIngredientIdUserId(id, userId))
-                                .map(t -> ingredientNutritionalFactMapper.fromResponsesToResponse(t.getT1(), t.getT2())), id);
+                ingredientService.alterDisplay(id, display, userId)
+                        .zipWith(nutritionalFactService.findByIngredientIdUserId(id, userId))
+                        .map(t -> ingredientNutritionalFactMapper.fromResponsesToResponse(t.getT1(), t.getT2()));
     }
 
     @Override
@@ -137,42 +132,39 @@ public class IngredientNutritionalFactServiceImpl implements IngredientNutrition
     }
 
 
-    @Data
     @Component
-    public static class IngredientNutritionalFactCacheHandler {
-        private final FilteredListCaffeineCache<FilterKeyType, IngredientNutritionalFactResponse> cacheFilter;
+    @Getter
+    public static class IngredientNutritionalFactRedisCacheWrapper {
+        private final String modelName = "ingredientNutritionalFact";
+        private final IngredientRepository ingredientRepository;
+        private final PageableUtilsCustom pageableUtilsCustom;
+        private final ExtendedIngredientNutritionalFactRepository extendedIngredientNutritionalFactRepository;
+        private final IngredientNutritionalFactMapper ingredientNutritionalFactMapper;
 
-        Function2<Mono<IngredientNutritionalFactResponse>, Long, Mono<IngredientNutritionalFactResponse>> deleteUpdateModelInvalidate;
-        Function<Mono<IngredientNutritionalFactResponse>, Mono<IngredientNutritionalFactResponse>> createModelInvalidate;
-        Function7<Flux<PageableResponse<IngredientNutritionalFactResponse>>, String, Boolean, DietType, PageableBody, String, Boolean, Flux<PageableResponse<IngredientNutritionalFactResponse>>>
-                getAllModelsFilteredPersist;
-
-        public IngredientNutritionalFactCacheHandler(FilteredListCaffeineCache<FilterKeyType, IngredientNutritionalFactResponse> cacheFilter) {
-            this.cacheFilter = cacheFilter;
-
-            this.deleteUpdateModelInvalidate = (mono, id) -> cacheFilter.invalidateByWrapperCallback(
-                    mono, r -> cacheFilter.updateDeleteBasePredicate(id, r.getIngredient().getUserId())
-            );
-
-            this.createModelInvalidate = (mono) -> cacheFilter.invalidateByWrapperCallback(
-                    mono, r -> cacheFilter.createBasePredicate(r.getIngredient().getUserId())
-            );
-
-            this.getAllModelsFilteredPersist = (flux, name, display, type, pageableBody, userId, admin) ->
-            {
-                FilterKeyType.KeyRouteType keyRouteType = Boolean.TRUE.equals(admin) ? FilterKeyType.KeyRouteType.createForAdmin() : FilterKeyType.KeyRouteType.createForPublic();
-                return cacheFilter.getUniqueFluxCache(
-                        EntitiesUtils.getListOfNotNullObjects(name, display, type, pageableBody, admin),
-                        "getAllModelsFiltered",
-                        m -> m.getContent().getIngredient().getId(),
-                        keyRouteType,
-                        flux
-                );
-            };
-
+        public IngredientNutritionalFactRedisCacheWrapper(IngredientRepository ingredientRepository, PageableUtilsCustom pageableUtilsCustom, ExtendedIngredientNutritionalFactRepository extendedIngredientNutritionalFactRepository, IngredientNutritionalFactMapper ingredientNutritionalFactMapper) {
+            this.ingredientRepository = ingredientRepository;
+            this.pageableUtilsCustom = pageableUtilsCustom;
+            this.extendedIngredientNutritionalFactRepository = extendedIngredientNutritionalFactRepository;
+            this.ingredientNutritionalFactMapper = ingredientNutritionalFactMapper;
         }
 
+        @RedisReactiveChildCache(key = CACHE_KEY_PATH, idPath = "content.ingredient.id")
+        public Flux<PageableResponse<IngredientNutritionalFactResponse>> getAllModelsFiltered(String name, Boolean display, DietType type, PageableBody pageableBody, String userId, Boolean admin,
+                                                                                              List<String> allowedSortingFields
+        ) {
 
+            return pageableUtilsCustom.isSortingCriteriaValid(pageableBody.getSortingCriteria(), allowedSortingFields)
+                    .then(pageableUtilsCustom.createPageRequest(pageableBody))
+                    .flatMapMany(pr ->
+                            pageableUtilsCustom.createPageableResponse(
+                                    extendedIngredientNutritionalFactRepository.getModelsFiltered(name, display, type, pr).map(
+                                            ingredientNutritionalFactMapper::fromModelToResponse
+                                    ),
+                                    extendedIngredientNutritionalFactRepository.countModelsFiltered(name, display, type, pr),
+                                    pr
+                            )
+                    );
+        }
     }
 
 }

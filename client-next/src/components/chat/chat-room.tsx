@@ -73,39 +73,9 @@ export const ChatRoom = memo(
       [searchParams],
     );
 
-    // const fakeRooms = Array.from(
-    //   { length: 20 },
-    //   (_, i) =>
-    //     chatRooms.map((room) => ({ ...room, id: room.id + i })).flat()[0],
-    // );
-
-    // console.log("chat rooms", chatRooms);
     return (
       <ScrollArea className="w-full h-[350px] min-w-[200px] md:h-[calc(1000px-4rem-105px)]  space-y-4 ">
         <div className="w-full h-full space-y-4 pr-4 pb-6 ">
-          {/*<Button*/}
-          {/*  onClick={() => {*/}
-          {/*    if (stompClient && stompClient?.connected) {*/}
-          {/*      baseChat();*/}
-          {/*      stompClient.publish({*/}
-          {/*        destination: "/app/changeRoom",*/}
-          {/*        body: JSON.stringify({*/}
-          {/*          chatId: null,*/}
-          {/*          userEmail: authUser.email,*/}
-          {/*        }),*/}
-          {/*      });*/}
-          {/*      // setActiveRoomId(null);*/}
-          {/*      // setActiveRoom(null);*/}
-          {/*      // setInitialChatId(null);*/}
-          {/*      const params = new URLSearchParams(searchParams.toString());*/}
-          {/*      params.delete("chatId");*/}
-          {/*      // router.push(`/chat?${params.toString()}`);*/}
-          {/*      window.history.pushState(null, "", `?${params.toString()}`);*/}
-          {/*    }*/}
-          {/*  }}*/}
-          {/*>*/}
-          {/*  CCCCC*/}
-          {/*</Button>*/}
           {chatRooms.map((room) => (
             <div key={room.id} className="w-full h-full ">
               <ChatRoomItem

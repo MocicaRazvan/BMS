@@ -23,6 +23,7 @@ import { getAiChatBoxTexts } from "@/texts/components/ai-chat";
 import ValidUserSessionContext from "@/context/valid-user-session";
 import { NotificationPopProvider } from "@/context/notification-pop-context";
 import { AiChatBoxWrapper } from "@/components/ai-chat/ai-chat-box-wrapper";
+import { KanbanRouteChangeProvider } from "@/context/kanban-route-change-context";
 
 const fontSans = FontSans({
   subsets: ["latin"],
@@ -99,12 +100,12 @@ export default async function BaseLayout({
             disableTransitionOnChange
           >
             <NextAuthSessionProvider>
-              <ValidUserSessionContext>
-                <StompProvider
-                  url={spring + "/ws/ws-service"}
-                  authUser={session?.user}
-                >
-                  <ScrollTopProvider>
+              <ScrollTopProvider>
+                <ValidUserSessionContext>
+                  <StompProvider
+                    url={spring + "/ws/ws-service"}
+                    authUser={session?.user}
+                  >
                     <ChatProvider authUser={session?.user}>
                       <ChatMessageNotificationProvider authUser={session?.user}>
                         <PostApproveNotificationProvider
@@ -126,10 +127,12 @@ export default async function BaseLayout({
                                     <SubscriptionProvider
                                       authUser={session?.user}
                                     >
-                                      <>
-                                        {children}
-                                        <AiChatBoxWrapper {...aiTexts} />
-                                      </>
+                                      <KanbanRouteChangeProvider>
+                                        <>
+                                          {children}
+                                          <AiChatBoxWrapper {...aiTexts} />
+                                        </>
+                                      </KanbanRouteChangeProvider>
                                     </SubscriptionProvider>
                                   </CartProvider>
                                 </NotificationPopProvider>
@@ -139,11 +142,11 @@ export default async function BaseLayout({
                         </PostApproveNotificationProvider>
                       </ChatMessageNotificationProvider>
                     </ChatProvider>
-                  </ScrollTopProvider>
-                </StompProvider>
-                <Toaster />
-              </ValidUserSessionContext>
+                  </StompProvider>
+                </ValidUserSessionContext>
+              </ScrollTopProvider>
             </NextAuthSessionProvider>
+            <Toaster />
           </ThemeProvider>
         </NextIntlClientProvider>
       </body>

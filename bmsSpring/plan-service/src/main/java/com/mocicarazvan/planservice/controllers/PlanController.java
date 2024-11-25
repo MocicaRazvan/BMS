@@ -112,7 +112,8 @@ public class PlanController implements ApproveController<Plan, PlanBody, PlanRes
     @Override
     @DeleteMapping(value = "/delete/{id}", produces = {MediaType.APPLICATION_NDJSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
     public Mono<ResponseEntity<CustomEntityModel<PlanResponse>>> deleteModel(@PathVariable Long id, ServerWebExchange exchange) {
-        return planService.deleteModel(id, requestsUtils.extractAuthUser(exchange))
+        return planService.deleteModelGetOriginalApproved(id, requestsUtils.extractAuthUser(exchange))
+                .map(Pair::getFirst)
                 .flatMap(m -> plansReactiveResponseBuilder.toModel(m, PlanController.class))
                 .map(ResponseEntity::ok);
     }

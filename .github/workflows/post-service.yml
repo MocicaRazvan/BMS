@@ -8,6 +8,7 @@ on:
     paths:
       - 'bmsSpring/post-service/**'
       - 'bmsSpring/template-module/**'
+      - 'bmsSpring/redis-cache/**'
 jobs:
   build-and-push-post-service:
     uses: ./.github/workflows/build-and-push.yml

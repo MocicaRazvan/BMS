@@ -10,18 +10,22 @@ import com.mocicarazvan.dayservice.mappers.MealMapper;
 import com.mocicarazvan.dayservice.models.Meal;
 import com.mocicarazvan.dayservice.repositories.MealRepository;
 import com.mocicarazvan.dayservice.services.MealService;
-import com.mocicarazvan.templatemodule.adapters.CacheChildFilteredToHandlerAdapter;
-import com.mocicarazvan.templatemodule.cache.FilteredListCaffeineCacheChildFilterKey;
+import com.mocicarazvan.rediscache.annotation.RedisReactiveCache;
+import com.mocicarazvan.rediscache.annotation.RedisReactiveChildCache;
+import com.mocicarazvan.rediscache.annotation.RedisReactiveChildCacheEvict;
 import com.mocicarazvan.templatemodule.clients.UserClient;
+import com.mocicarazvan.templatemodule.dtos.PageableBody;
+import com.mocicarazvan.templatemodule.dtos.UserDto;
+import com.mocicarazvan.templatemodule.dtos.response.MonthlyEntityGroup;
+import com.mocicarazvan.templatemodule.dtos.response.PageableResponse;
 import com.mocicarazvan.templatemodule.dtos.response.ResponseWithChildList;
+import com.mocicarazvan.templatemodule.dtos.response.ResponseWithUserDto;
 import com.mocicarazvan.templatemodule.exceptions.action.SubEntityUsed;
 import com.mocicarazvan.templatemodule.services.impl.ManyToOneUserServiceImpl;
 import com.mocicarazvan.templatemodule.utils.EntitiesUtils;
 import com.mocicarazvan.templatemodule.utils.PageableUtilsCustom;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.jooq.lambda.function.Function2;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -32,24 +36,37 @@ import java.util.List;
 @Service
 @Slf4j
 public class MealServiceImpl
-        extends ManyToOneUserServiceImpl<Meal, MealBody, MealResponse, MealRepository, MealMapper>
+        extends ManyToOneUserServiceImpl<Meal, MealBody, MealResponse, MealRepository, MealMapper,
+        MealServiceImpl.MealServiceRedisCacheWrapper
+        >
         implements MealService {
 
     private final RecipeClient recipeClient;
     private final PlanClient planClient;
     private final EntitiesUtils entitiesUtils;
-    private final MealServiceCacheHandler mealServiceCacheHandler;
     private final MealRepository mealRepository;
 
-    public MealServiceImpl(MealRepository modelRepository, MealMapper modelMapper, PageableUtilsCustom pageableUtils, UserClient userClient, RecipeClient recipeClient, PlanClient planClient, EntitiesUtils entitiesUtils, MealServiceCacheHandler mealServiceCacheHandler, MealRepository mealRepository) {
-        super(modelRepository, modelMapper, pageableUtils, userClient, "meal", List.of("id", "userId", "period", "title", "createdAt", "updatedAt"), mealServiceCacheHandler);
+
+    public MealServiceImpl(MealRepository modelRepository, MealMapper modelMapper, PageableUtilsCustom pageableUtils, UserClient userClient, RecipeClient recipeClient, PlanClient planClient, EntitiesUtils entitiesUtils, MealRepository mealRepository, MealServiceRedisCacheWrapper self) {
+        super(modelRepository, modelMapper, pageableUtils, userClient, "meal", List.of("id", "userId", "period", "title", "createdAt", "updatedAt"), self);
         this.recipeClient = recipeClient;
         this.planClient = planClient;
         this.entitiesUtils = entitiesUtils;
-        this.mealServiceCacheHandler = mealServiceCacheHandler;
         this.mealRepository = mealRepository;
     }
 
+
+    @RedisReactiveChildCache(key = CACHE_KEY_PATH, idPath = "content.id")
+    public Flux<PageableResponse<MealResponse>> getAllModels(PageableBody pageableBody, String userId) {
+        return super.getAllModels(pageableBody, userId);
+    }
+
+
+    @Override
+    @RedisReactiveChildCache(key = CACHE_KEY_PATH, idPath = "content.id")
+    public Flux<PageableResponse<MealResponse>> getModelsByIdInPageable(List<Long> ids, PageableBody pageableBody) {
+        return super.getModelsByIdInPageable(ids, pageableBody);
+    }
 
     @Override
     public Flux<RecipeResponse> getRecipesByMeal(Long id, String userId) {
@@ -59,7 +76,7 @@ public class MealServiceImpl
 
     @Override
     public Flux<RecipeResponse> getRecipesByMealInternal(Long id, String userId) {
-        return getModel(id)
+        return self.getModelInternal(id)
                 .flatMapMany(model -> recipeClient.getByIds(model.getRecipes().stream().map(Object::toString).toList(), userId));
     }
 
@@ -69,28 +86,28 @@ public class MealServiceImpl
         return
                 userClient.getUser("", userId)
                         .flatMapMany(user ->
-                                mealServiceCacheHandler.getMealsByDayPersist.apply(
-//                                        modelRepository.findAllByDayId(dayId, Sort.by(Sort.Order.asc("period")))
-                                        mealRepository.findAllByDayIdCustomPeriodSort(dayId)
-                                                .flatMap(model -> entitiesUtils.checkEntityOwnerOrAdmin(model, user)
-                                                        .thenReturn(modelMapper.fromModelToResponse(model))), dayId));
+                                mealRepository.findAllByDayIdCustomPeriodSort(dayId)
+                                        .flatMap(model -> entitiesUtils.checkEntityOwnerOrAdmin(model, user)
+                                                .thenReturn(modelMapper.fromModelToResponse(model))));
 
     }
+
 
     @Override
     public Flux<MealResponse> getMealsByDayInternal(Long dayId, String userId) {
+
         return
-                mealServiceCacheHandler.getMealsByDayInternalPersist.apply(
-//                        modelRepository.findAllByDayId(dayId, Sort.by(Sort.Order.asc("period")))
-                        mealRepository.findAllByDayIdCustomPeriodSort(dayId)
-                                .map(modelMapper::fromModelToResponse), dayId);
+
+                self.findAllByDayIdCustomPeriodSort(dayId)
+                        .map(modelMapper::fromModelToResponse);
     }
 
     @Override
+    @RedisReactiveChildCacheEvict(key = CACHE_KEY_PATH, masterId = "#dayId")
     public Mono<Void> deleteAllByDay(Long dayId) {
+
         return
-                mealServiceCacheHandler.deleteAllByDayInvalidate.apply(
-                        modelRepository.deleteAllByDayId(dayId), dayId);
+                modelRepository.deleteAllByDayId(dayId);
     }
 
     @Override
@@ -115,86 +132,96 @@ public class MealServiceImpl
     }
 
     @Override
+    @RedisReactiveChildCacheEvict(key = CACHE_KEY_PATH, masterPath = "dayId")
     public Mono<MealResponse> createModel(MealBody mealBody, String userId) {
+
         return
-                mealServiceCacheHandler.getCreateModelInvalidate().apply(
-                        recipeClient.verifyIds(mealBody.getRecipes().stream().map(Object::toString).toList(), userId)
-                                .then(super.createModel(mealBody, userId)), mealBody, userId);
+                recipeClient.verifyIds(mealBody.getRecipes().stream().map(Object::toString).toList(), userId)
+                        .then(super.createModel(mealBody, userId));
     }
 
     @Override
+    @RedisReactiveChildCacheEvict(key = CACHE_KEY_PATH, masterPath = "dayId")
     public Mono<MealResponse> createModelCustomVerify(MealBody mealBody, List<Long> idsToNotVerify, String userId) {
+
         return
-                mealServiceCacheHandler.getCreateModelInvalidate().apply(
-                        recipeClient.verifyIds(mealBody.getRecipes().stream().filter(r -> !idsToNotVerify.contains(r)).map(Object::toString).toList(),
-                                        userId)
-                                .then(super.createModel(mealBody, userId)), mealBody, userId);
+                recipeClient.verifyIds(mealBody.getRecipes().stream().filter(r -> !idsToNotVerify.contains(r)).map(Object::toString).toList(),
+                                userId)
+                        .then(super.createModel(mealBody, userId));
     }
 
     @Override
+    @RedisReactiveChildCacheEvict(key = CACHE_KEY_PATH, masterPath = "dayId", id = "#id")
     public Mono<MealResponse> updateModel(Long id, MealBody mealBody, String userId) {
+
         return
-                mealServiceCacheHandler.getUpdateModelInvalidate().apply(
-                        getModelById(id, userId)
-                                .map(meal -> mealBody.getRecipes().stream().filter(r -> !meal.getRecipes().contains(r))
-                                        .map(Object::toString).toList())
-                                .flatMap(ids -> recipeClient.verifyIds(ids, userId))
-                                .then(super.updateModel(id, mealBody, userId)), id, mealBody, userId);
+                getModelById(id, userId)
+                        .map(meal -> mealBody.getRecipes().stream().filter(r -> !meal.getRecipes().contains(r))
+                                .map(Object::toString).toList())
+                        .flatMap(ids -> recipeClient.verifyIds(ids, userId))
+                        .then(super.updateModel(id, mealBody, userId));
 
     }
 
     @Override
+    @RedisReactiveChildCacheEvict(key = CACHE_KEY_PATH, masterPath = "dayId", id = "#id")
     public Mono<MealResponse> deleteModel(Long id, String userId) {
+
         return
-                mealServiceCacheHandler.getDeleteModelInvalidate().apply(
-                        planClient.getCountInParent(id, userId)
-                                .flatMap(count -> {
-                                    if (count.getCount() > 0) {
-                                        return Mono.error(new SubEntityUsed("plan", id));
-                                    }
-                                    return super.deleteModel(id, userId);
-                                }), id, userId);
+                planClient.getCountInParent(id, userId)
+                        .flatMap(count -> {
+                            if (count.getCount() > 0) {
+                                return Mono.error(new SubEntityUsed("plan", id));
+                            }
+                            return super.deleteModel(id, userId);
+                        });
     }
 
-
-    @EqualsAndHashCode(callSuper = true)
-    @Data
+    @Getter
     @Component
-    public static class MealServiceCacheHandler
-            extends ManyToOneUserServiceImpl.ManyToOneUserServiceCacheHandler<Meal, MealBody, MealResponse> {
-        private final FilteredListCaffeineCacheChildFilterKey<MealResponse> cacheFilter;
-        private final MealMapper mealMapper;
-        Function2<Flux<MealResponse>, Long, Flux<MealResponse>> getMealsByDayPersist;
-        Function2<Flux<MealResponse>, Long, Flux<MealResponse>> getMealsByDayInternalPersist;
-        Function2<Mono<Void>, Long, Mono<Void>> deleteAllByDayInvalidate;
+    public static class MealServiceRedisCacheWrapper extends ManyToOneUserServiceImpl.ManyToOneUserServiceRedisCacheWrapper<Meal, MealBody, MealResponse, MealRepository, MealMapper> {
 
-        public MealServiceCacheHandler(FilteredListCaffeineCacheChildFilterKey<MealResponse> cacheFilter, MealMapper mealMapper) {
-            super();
-            this.cacheFilter = cacheFilter;
-            this.mealMapper = mealMapper;
-            CacheChildFilteredToHandlerAdapter.convertToManyUserHandler(cacheFilter, this,
-                    MealResponse::getDayId, mealMapper::fromModelToResponse
-            );
-
-            this.getMealsByDayPersist = (flux, dayId) -> cacheFilter.getExtraUniqueFluxCacheForMasterIndependentOfRouteType(
-                    EntitiesUtils.getListOfNotNullObjects(dayId),
-                    "getMealsByDayPersist" + dayId,
-                    MealResponse::getDayId,
-                    dayId,
-                    flux
-            );
-
-            this.getMealsByDayInternalPersist = (flux, dayId) -> cacheFilter.getExtraUniqueFluxCacheForMasterIndependentOfRouteType(
-                    EntitiesUtils.getListOfNotNullObjects(dayId),
-                    "getMealsByDayInternalPersist" + dayId,
-                    MealResponse::getDayId,
-                    dayId,
-                    flux
-            );
-
-            this.deleteAllByDayInvalidate = (mono, dayId) ->
-                    cacheFilter.invalidateByWrapper(mono, cacheFilter.byMasterAndIds(dayId));
+        public MealServiceRedisCacheWrapper(MealRepository modelRepository, MealMapper modelMapper, UserClient userClient) {
+            super(modelRepository, modelMapper, "meal", userClient);
 
         }
+
+        @Override
+        @RedisReactiveChildCache(key = CACHE_KEY_PATH, idPath = "entity.id")
+        public Flux<MonthlyEntityGroup<MealResponse>> getModelGroupedByMonthBase(int month, UserDto userDto) {
+            return super.getModelGroupedByMonthBase(month, userDto);
+        }
+
+        @Override
+        @RedisReactiveCache(key = CACHE_KEY_PATH, idPath = "id")
+        public Flux<Meal> findAllById(List<Long> ids) {
+            return super.findAllById(ids);
+        }
+
+        @Override
+        @RedisReactiveCache(key = CACHE_KEY_PATH, id = "#id")
+        public Mono<Meal> getModel(Long id) {
+            return super.getModel(id);
+        }
+
+        @RedisReactiveCache(key = CACHE_KEY_PATH, id = "#id")
+        public Mono<Meal> getModelInternal(Long id) {
+            return super.getModel(id);
+        }
+
+        @Override
+        @RedisReactiveCache(key = CACHE_KEY_PATH, id = "#id")
+        public Mono<ResponseWithUserDto<MealResponse>> getModelByIdWithUserBase(UserDto authUser, Long id) {
+            return super.getModelByIdWithUserBase(authUser, id);
+        }
+
+        @RedisReactiveChildCache(key = CACHE_KEY_PATH, idPath = "id", masterId = "#dayId")
+        public Flux<Meal> findAllByDayIdCustomPeriodSort(Long dayId) {
+            return modelRepository.findAllByDayIdCustomPeriodSort(dayId);
+        }
+
+
     }
+
+
 }

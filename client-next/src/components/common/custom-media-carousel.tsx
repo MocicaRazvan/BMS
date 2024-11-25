@@ -1,12 +1,13 @@
 "use client";
 import {
   Carousel,
+  CarouselApi,
   CarouselContent,
   CarouselItem,
   CarouselNext,
   CarouselPrevious,
 } from "../ui/carousel";
-import { useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import CustomImage from "@/components/common/custom-image";
 
@@ -22,15 +23,35 @@ interface Props {
 export default function CustomMediaCarousel({ media }: Props) {
   const [isFullScreen, setIsFullScreen] = useState(false);
   const [currentImage, setCurrentImage] = useState<string | null>(null);
-
+  const [carouselApi, setCarouselApi] = useState<CarouselApi>(undefined);
+  const videoRefs = useRef<HTMLVideoElement[]>([]);
   const handleImageClick = (src: string) => {
     setIsFullScreen(true);
     setCurrentImage(src);
   };
 
+  useEffect(() => {
+    if (!carouselApi) return;
+
+    const handleSlideChange = () => {
+      if (!carouselApi) return;
+      videoRefs.current?.forEach((video) => {
+        if (video) {
+          video.pause();
+        }
+      });
+    };
+
+    carouselApi.on("select", handleSlideChange);
+
+    return () => {
+      carouselApi.off("select", handleSlideChange);
+    };
+  }, [carouselApi]);
+
   return (
     <div className="w-full flex justify-center items-center overflow-hidden">
-      <Carousel className="w-full max-w-4xl">
+      <Carousel className="w-full max-w-4xl" setApi={setCarouselApi}>
         <CarouselContent>
           {media.map((item, i) => (
             <CarouselItem key={item.src + i}>
@@ -59,6 +80,11 @@ export default function CustomMediaCarousel({ media }: Props) {
                     controls
                     className="w-full max-w-[1000px] object-cover h-full "
                     preload="auto"
+                    ref={(el) => {
+                      if (el) {
+                        videoRefs.current[i] = el;
+                      }
+                    }}
                   />
                 )}
               </div>

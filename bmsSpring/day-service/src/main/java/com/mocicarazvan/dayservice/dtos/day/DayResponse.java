@@ -15,4 +15,17 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 public class DayResponse extends TitleBodyUserDto {
     private DayType type;
+
+    @Override
+    public String toString() {
+        return "DayResponse{" +
+                "type=" + type +
+                ", id=" + this.getId() +
+                ", title='" + this.getTitle() + '\'' +
+                ", body='" + getBody() + '\'' +
+                ", userId='" + getUserId() + '\'' +
+                ", createdAt=" + getCreatedAt() +
+                ", updatedAt=" + getUpdatedAt() +
+                '}';
+    }
 }

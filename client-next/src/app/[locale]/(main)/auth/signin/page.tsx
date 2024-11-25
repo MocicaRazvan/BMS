@@ -32,6 +32,7 @@ export default async function SignInPageWrapper({
       linkSignUp={t("linkSignUp")}
       linkForgotPassword={t("linkForgotPassword")}
       signInSchemaTexts={signInSchemaTexts}
+      locale={locale}
     />
   );
 }

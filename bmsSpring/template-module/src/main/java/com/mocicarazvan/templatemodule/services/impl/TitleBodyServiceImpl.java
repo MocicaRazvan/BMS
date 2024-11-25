@@ -12,106 +12,117 @@ import com.mocicarazvan.templatemodule.repositories.TitleBodyRepository;
 import com.mocicarazvan.templatemodule.services.TitleBodyService;
 import com.mocicarazvan.templatemodule.utils.EntitiesUtils;
 import com.mocicarazvan.templatemodule.utils.PageableUtilsCustom;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import org.jooq.lambda.function.Function3;
-import org.jooq.lambda.function.Function4;
+import lombok.Getter;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
 
+@Getter
 public abstract class TitleBodyServiceImpl<MODEL extends TitleBody, BODY, RESPONSE extends WithUserDto,
-        S extends TitleBodyRepository<MODEL>, M extends DtoMapper<MODEL, BODY, RESPONSE>>
-        extends ManyToOneUserServiceImpl<MODEL, BODY, RESPONSE, S, M>
+        S extends TitleBodyRepository<MODEL>, M extends DtoMapper<MODEL, BODY, RESPONSE>,
+        CR extends TitleBodyServiceImpl.TitleBodyServiceRedisCacheWrapper<MODEL, BODY, RESPONSE, S, M>
+        >
+        extends ManyToOneUserServiceImpl<MODEL, BODY, RESPONSE, S, M, CR>
         implements TitleBodyService<MODEL, BODY, RESPONSE, S, M> {
 
 
     protected final EntitiesUtils entitiesUtils;
-    protected final TitleBodyServiceCacheHandler<MODEL, BODY, RESPONSE> titleBodyServiceCacheHandler;
 
-    public TitleBodyServiceImpl(S modelRepository, M modelMapper, PageableUtilsCustom pageableUtils, UserClient userClient, String modelName, List<String> allowedSortingFields, EntitiesUtils entitiesUtils, TitleBodyServiceCacheHandler<MODEL, BODY, RESPONSE> titleBodyServiceCacheHandler) {
-        super(modelRepository, modelMapper, pageableUtils, userClient, modelName, allowedSortingFields, titleBodyServiceCacheHandler);
+    public TitleBodyServiceImpl(S modelRepository, M modelMapper, PageableUtilsCustom pageableUtils, UserClient userClient, String modelName, List<String> allowedSortingFields, EntitiesUtils entitiesUtils, CR titleBodyServiceRedisCacheWrapper) {
+        super(modelRepository, modelMapper, pageableUtils, userClient, modelName, allowedSortingFields, titleBodyServiceRedisCacheWrapper);
         this.entitiesUtils = entitiesUtils;
-        this.titleBodyServiceCacheHandler = titleBodyServiceCacheHandler;
     }
+
 
     @Override
     public Mono<RESPONSE> reactToModel(Long id, String type, String userId) {
-        return
-                titleBodyServiceCacheHandler.reactToModelInvalidate.apply(
-                        userClient.getUser("", userId)
-                                .flatMap(authUser -> getModel(id)
-                                        .flatMap(model -> entitiesUtils.setReaction(model, authUser, type)
-                                                .flatMap(modelRepository::save)
-                                                .map(modelMapper::fromModelToResponse)
-                                        )
 
-                                ), id, type, userId);
+        return
+
+                userClient.getUser("", userId)
+                        .flatMap(authUser -> getModel(id)
+                                .flatMap(model -> entitiesUtils.setReaction(model, authUser, type)
+                                        .flatMap(modelRepository::save)
+                                        .map(modelMapper::fromModelToResponse)
+                                )
+
+                        ).flatMap(self::reactToModelInvalidate);
 
     }
 
     @Override
     public Mono<RESPONSE> createModel(BODY body, String userId) {
+
         return
-                titleBodyServiceCacheHandler.createModelInvalidate.apply(
-                        userClient.getUser("", userId)
-                                .flatMap(authUser -> {
-                                    MODEL model = modelMapper.fromBodyToModel(body);
-                                    model.setUserId(authUser.getId());
-                                    if (model.getUserDislikes() == null)
-                                        model.setUserDislikes(List.of());
-                                    if (model.getUserLikes() == null)
-                                        model.setUserLikes(List.of());
-                                    return modelRepository.save(model)
-                                            .map(modelMapper::fromModelToResponse);
-                                }), body, userId);
+                userClient.getUser("", userId)
+                        .flatMap(authUser -> {
+                            MODEL model = modelMapper.fromBodyToModel(body);
+                            model.setUserId(authUser.getId());
+                            if (model.getUserDislikes() == null)
+                                model.setUserDislikes(List.of());
+                            if (model.getUserLikes() == null)
+                                model.setUserLikes(List.of());
+                            return modelRepository.save(model)
+                                    .map(modelMapper::fromModelToResponse);
+                        });
     }
 
     @Override
     public Mono<ResponseWithUserLikesAndDislikes<RESPONSE>> getModelByIdWithUserLikesAndDislikes(Long id, String userId) {
+
         return userClient.getUser("", userId)
                 .flatMap(authUser ->
-                        titleBodyServiceCacheHandler.getModelByIdWithUserLikesAndDislikesPersist.apply(
-                                getModel(id)
-                                        .flatMap(model -> getModelGuardWithLikesAndDislikes(authUser, model, true))
-                                , authUser, id
-                        )
+                        self.getModelByIdWithUserLikesAndDislikesBase(id, authUser)
+
+
                 );
     }
 
     public Mono<ResponseWithUserLikesAndDislikes<RESPONSE>> getModelGuardWithLikesAndDislikes(UserDto authUser, MODEL model, boolean guard) {
-        return getModelGuardWithUser(authUser, model, guard)
-                .zipWith(userClient.getUsersByIdIn("/byIds", model.getUserLikes()).collectList())
-                .zipWith(userClient.getUsersByIdIn("/byIds", model.getUserDislikes()).collectList())
-                .map(tuple -> {
-                    ResponseWithUserDto<RESPONSE> responseWithUserDto = tuple.getT1().getT1();
-                    List<UserDto> userLikes = tuple.getT1().getT2();
-                    List<UserDto> userDislikes = tuple.getT2();
-                    return ResponseWithUserLikesAndDislikes.<RESPONSE>builder()
-                            .model(responseWithUserDto.getModel())
-                            .user(responseWithUserDto.getUser())
-                            .userLikes(userLikes)
-                            .userDislikes(userDislikes)
-                            .build();
-                });
+
+        return self.getModelGuardWithLikesAndDislikesBase(authUser, model, guard);
     }
 
-    @EqualsAndHashCode(callSuper = true)
-    @Data
-//    @SuperBuilder
-    @AllArgsConstructor
-    public static class TitleBodyServiceCacheHandler<MODEL extends TitleBody, BODY, RESPONSE extends WithUserDto>
-            extends ManyToOneUserServiceImpl.ManyToOneUserServiceCacheHandler<MODEL, BODY, RESPONSE> {
 
-        Function4<Mono<RESPONSE>, Long, String, String, Mono<RESPONSE>> reactToModelInvalidate;
-        Function3<Mono<ResponseWithUserLikesAndDislikes<RESPONSE>>, UserDto, Long, Mono<ResponseWithUserLikesAndDislikes<RESPONSE>>> getModelByIdWithUserLikesAndDislikesPersist;
-
-        public TitleBodyServiceCacheHandler() {
-            super();
-            this.reactToModelInvalidate = (mono, id, type, userId) -> mono;
-            this.getModelByIdWithUserLikesAndDislikesPersist = (mono, authUser, id) -> mono;
+    @Getter
+    public static class TitleBodyServiceRedisCacheWrapper<MODEL extends TitleBody, BODY, RESPONSE extends WithUserDto,
+            S extends TitleBodyRepository<MODEL>, M extends DtoMapper<MODEL, BODY, RESPONSE>> extends ManyToOneUserServiceRedisCacheWrapper<MODEL, BODY, RESPONSE, S, M> {
+        public TitleBodyServiceRedisCacheWrapper(S modelRepository, M modelMapper, String modelName, UserClient userClient) {
+            super(modelRepository, modelMapper, modelName, userClient);
         }
+
+        public Mono<ResponseWithUserLikesAndDislikes<RESPONSE>> getModelByIdWithUserLikesAndDislikesBase(Long id, UserDto authUser) {
+
+            return
+                    getModel(id)
+                            .flatMap(model -> getModelGuardWithLikesAndDislikesBase(authUser, model, true)
+
+
+                            );
+        }
+
+        public Mono<RESPONSE> reactToModelInvalidate(RESPONSE r) {
+            return Mono.just(r);
+        }
+
+
+        public Mono<ResponseWithUserLikesAndDislikes<RESPONSE>> getModelGuardWithLikesAndDislikesBase(UserDto authUser, MODEL model, boolean guard) {
+            return getModelGuardWithUserBase(authUser, model, guard)
+                    .zipWith(userClient.getUsersByIdIn("/byIds", model.getUserLikes()).collectList())
+                    .zipWith(userClient.getUsersByIdIn("/byIds", model.getUserDislikes()).collectList())
+                    .map(tuple -> {
+                        ResponseWithUserDto<RESPONSE> responseWithUserDto = tuple.getT1().getT1();
+                        List<UserDto> userLikes = tuple.getT1().getT2();
+                        List<UserDto> userDislikes = tuple.getT2();
+                        return ResponseWithUserLikesAndDislikes.<RESPONSE>builder()
+                                .model(responseWithUserDto.getModel())
+                                .user(responseWithUserDto.getUser())
+                                .userLikes(userLikes)
+                                .userDislikes(userDislikes)
+                                .build();
+                    });
+        }
+
     }
 
 

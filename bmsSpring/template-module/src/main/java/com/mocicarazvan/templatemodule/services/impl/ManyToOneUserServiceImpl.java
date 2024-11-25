@@ -18,12 +18,9 @@ import com.mocicarazvan.templatemodule.models.ManyToOneUser;
 import com.mocicarazvan.templatemodule.repositories.ManyToOneUserRepository;
 import com.mocicarazvan.templatemodule.services.ManyToOneUserService;
 import com.mocicarazvan.templatemodule.utils.PageableUtilsCustom;
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.RequiredArgsConstructor;
-import org.jooq.lambda.function.Function2;
-import org.jooq.lambda.function.Function3;
-import org.jooq.lambda.function.Function4;
+import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -32,10 +29,14 @@ import java.time.YearMonth;
 import java.util.List;
 import java.util.function.Function;
 
-@RequiredArgsConstructor
+@Slf4j
+@Getter
 public abstract class ManyToOneUserServiceImpl<MODEL extends ManyToOneUser, BODY, RESPONSE extends WithUserDto,
-        S extends ManyToOneUserRepository<MODEL>, M extends DtoMapper<MODEL, BODY, RESPONSE>>
+        S extends ManyToOneUserRepository<MODEL>, M extends DtoMapper<MODEL, BODY, RESPONSE>,
+        CR extends ManyToOneUserServiceImpl.ManyToOneUserServiceRedisCacheWrapper<MODEL, BODY, RESPONSE, S, M>
+        >
         implements ManyToOneUserService<MODEL, BODY, RESPONSE, S, M> {
+    protected static final String CACHE_KEY_PATH = "#this.modelName";
 
     protected final S modelRepository;
     protected final M modelMapper;
@@ -43,40 +44,34 @@ public abstract class ManyToOneUserServiceImpl<MODEL extends ManyToOneUser, BODY
     protected final UserClient userClient;
     protected final String modelName;
     protected final List<String> allowedSortingFields;
-    protected final ManyToOneUserServiceCacheHandler<MODEL, BODY, RESPONSE> manyToOneUserServiceCacheHandler;
+    protected final CR self;
+
+    protected ManyToOneUserServiceImpl(S modelRepository, M modelMapper, PageableUtilsCustom pageableUtils, UserClient userClient, String modelName, List<String> allowedSortingFields, CR self) {
+        this.modelRepository = modelRepository;
+        this.modelMapper = modelMapper;
+        this.pageableUtils = pageableUtils;
+        this.userClient = userClient;
+        this.modelName = modelName;
+        this.allowedSortingFields = allowedSortingFields;
+        this.self = self;
+    }
+
 
     @Override
     public Flux<MonthlyEntityGroup<RESPONSE>> getModelGroupedByMonth(int month, String userId) {
+
+
         return
 
                 userClient.getUser("", userId)
                         .flatMapMany(
                                 userDto ->
-                                        manyToOneUserServiceCacheHandler.getModelGroupedByMonthPersist.apply(
-                                                Flux.defer(() -> {
-                                                    if (!userDto.getRole().equals(Role.ROLE_ADMIN)) {
-                                                        return Mono.error(new PrivateRouteException());
-                                                    }
-                                                    LocalDateTime now = LocalDateTime.now();
-                                                    int year = now.getYear();
-                                                    if (month == 1 && now.getMonthValue() == 1) {
-                                                        year -= 1;
-                                                    }
-                                                    return modelRepository.findModelByMonth(month, year)
-                                                            .map(m -> {
-                                                                        YearMonth ym = YearMonth.from(m.getCreatedAt());
-                                                                        return MonthlyEntityGroup.<RESPONSE>builder()
-                                                                                .month(ym.getMonthValue())
-                                                                                .year(ym.getYear())
-                                                                                .entity(modelMapper.fromModelToResponse(m))
-                                                                                .build();
-                                                                    }
-                                                            );
-                                                }), userDto, month)
-                        );
+                                        self.getModelGroupedByMonthBase(month, userDto));
 
     }
 
+
+    @Override
     public Mono<PageableResponse<ResponseWithUserDto<RESPONSE>>> getPageableWithUser(PageableResponse<RESPONSE> pr) {
         return userClient.getUser("", String.valueOf(pr.getContent().getUserId()))
                 .map(userDto -> ResponseWithUserDto.<RESPONSE>builder()
@@ -101,27 +96,28 @@ public abstract class ManyToOneUserServiceImpl<MODEL extends ManyToOneUser, BODY
 
     @Override
     public Mono<RESPONSE> deleteModel(Long id, String userId) {
+
+
         return
-                manyToOneUserServiceCacheHandler.deleteModelInvalidate.apply(
-                        userClient.getUser("", userId)
-                                .flatMap(authUser -> getModel(id)
-                                        .flatMap(model -> privateRoute(true, authUser, model.getUserId())
-                                                .then(modelRepository.delete(model))
-                                                .then(Mono.fromCallable(() -> modelMapper.fromModelToResponse(model)))
-                                        )
-                                ), id, userId);
+                userClient.getUser("", userId)
+                        .flatMap(authUser -> getModel(id)
+                                .flatMap(model -> privateRoute(true, authUser, model.getUserId())
+                                        .then(modelRepository.delete(model))
+                                        .then(Mono.fromCallable(() -> modelMapper.fromModelToResponse(model)))
+                                )
+                        );
     }
 
 
     @Override
     public Mono<RESPONSE> getModelById(Long id, String userId) {
+
+
         return
 
                 userClient.getUser("", userId)
-                        .flatMap(authUser -> manyToOneUserServiceCacheHandler.getModelByIdPersist.apply(getModel(id)
-                                                .flatMap(model -> getResponseGuard(authUser, model, true)),
-                                        authUser, id
-                                )
+                        .flatMap(authUser -> self.getModel(id)
+                                .flatMap(model -> getResponseGuard(authUser, model, true))
                         );
 
     }
@@ -133,42 +129,31 @@ public abstract class ManyToOneUserServiceImpl<MODEL extends ManyToOneUser, BODY
 
     @Override
     public Flux<PageableResponse<RESPONSE>> getAllModels(PageableBody pageableBody, String userId) {
-        return
-                manyToOneUserServiceCacheHandler.getAllModelsPersist.apply(
-                        pageableUtils.isSortingCriteriaValid(pageableBody.getSortingCriteria(), allowedSortingFields)
-                                .then(pageableUtils.createPageRequest(pageableBody))
-                                .flatMapMany(pr -> pageableUtils.createPageableResponse(
-                                                modelRepository.findAllBy(pr).map(modelMapper::fromModelToResponse),
-                                                modelRepository.count(),
-                                                pr
-                                        )
 
-                                ), pageableBody, userId);
+
+        return
+                pageableUtils.isSortingCriteriaValid(pageableBody.getSortingCriteria(), allowedSortingFields)
+                        .then(pageableUtils.createPageRequest(pageableBody))
+                        .flatMapMany(pr -> pageableUtils.createPageableResponse(
+                                        modelRepository.findAllBy(pr).map(modelMapper::fromModelToResponse),
+                                        modelRepository.count(),
+                                        pr
+                                )
+
+                        );
     }
 
 
     @Override
     public Mono<RESPONSE> updateModel(Long id, BODY body, String userId) {
+
         return
-                manyToOneUserServiceCacheHandler.updateModelInvalidate.apply(
-                        updateModelWithSuccess(id, userId, model -> modelMapper.updateModelFromBody(body, model)), id, body, userId);
+                updateModelWithSuccess(id, userId, model -> modelMapper.updateModelFromBody(body, model));
     }
 
 
     protected Mono<RESPONSE> updateModelWithSuccess(Long id, String userId, Function<MODEL, Mono<MODEL>> successCallback) {
-//        return userClient.getUser("", userId)
-//                .flatMap(authUser -> getModel(id)
-//                        .flatMap(model -> isNotAuthor(model, authUser)
-//                                .flatMap(isNotAuthor -> {
-//                                    if (isNotAuthor) {
-//                                        return Mono.error(new PrivateRouteException());
-//                                    } else {
-//                                        return successCallback.apply(model).flatMap(modelRepository::save)
-//                                                .map(modelMapper::fromModelToResponse);
-//                                    }
-//                                })
-//                        )
-//                );
+
 
         return updateModelWithSuccessGeneral(id, userId, model -> successCallback.apply(model).flatMap(modelRepository::save)
                 .map(modelMapper::fromModelToResponse));
@@ -192,50 +177,40 @@ public abstract class ManyToOneUserServiceImpl<MODEL extends ManyToOneUser, BODY
 
     @Override
     public Mono<ResponseWithUserDto<RESPONSE>> getModelByIdWithUser(Long id, String userId) {
-        return
-                userClient.getUser("", userId)
-                        .flatMap(authUser -> manyToOneUserServiceCacheHandler.getModelByIdWithUserPersist.apply(getModel(id)
-                                                .flatMap(model -> getModelGuardWithUser(authUser, model, true)
-                                                )
-                                        , authUser, id
-                                )
-                        );
+
+        return userClient.getUser("", userId)
+                .flatMap(authUser -> self.getModelByIdWithUserBase(authUser, id)
+                );
 
     }
 
     @Override
     public Flux<ResponseWithUserDto<RESPONSE>> getModelsWithUser(List<Long> ids, String userId) {
+
         return
                 userClient.getUser("", userId)
                         .flatMapMany(authUser ->
-                                manyToOneUserServiceCacheHandler.getModelsWithUserPersist.apply(
-                                        modelRepository.findAllById(ids)
-                                                .flatMap(model -> getModelGuardWithUser(authUser, model, false))
-                                        , authUser, ids
-                                )
+                                self.findAllById(ids)
+                                        .flatMap(model -> getModelGuardWithUser(authUser, model, false))
+
+
                         );
     }
 
 
     public Mono<ResponseWithUserDto<RESPONSE>> getModelGuardWithUser(UserDto authUser, MODEL model, boolean guard) {
-        return privateRoute(guard, authUser, model.getUserId())
-                .then(userClient.getUser("", model.getUserId().toString())
-                        .map(user ->
-                                ResponseWithUserDto.<RESPONSE>builder()
-                                        .model(modelMapper.fromModelToResponse(model))
-                                        .user(user)
-                                        .build()
-                        )
 
-                );
+
+        return self.getModelGuardWithUserBase(authUser, model, guard);
     }
 
 
     public Mono<MODEL> getModel(Long id) {
+
         return
-                manyToOneUserServiceCacheHandler.getByIdInternalPersist.apply(
-                        modelRepository.findById(id)
-                                .switchIfEmpty(Mono.error(new NotFoundEntity(modelName, id))), id);
+                modelRepository.findById(id)
+                        .switchIfEmpty(Mono.error(new NotFoundEntity(modelName, id)));
+
     }
 
     public Mono<Boolean> isNotAuthor(MODEL model, UserDto authUser) {
@@ -245,83 +220,147 @@ public abstract class ManyToOneUserServiceImpl<MODEL extends ManyToOneUser, BODY
     }
 
     public Mono<Void> privateRoute(boolean guard, UserDto authUser, Long ownerId) {
-        return userClient.hasPermissionToModifyEntity(authUser, ownerId)
-                .flatMap(perm -> {
-                    if (guard && !perm) {
-                        return Mono.error(new PrivateRouteException());
-                    }
-                    return Mono.empty();
-                });
+
+        return self.privateRouteBase(guard, authUser, ownerId);
     }
 
     @Override
     public Flux<PageableResponse<RESPONSE>> getModelsByIdInPageable(List<Long> ids, PageableBody pageableBody) {
-        return
-                manyToOneUserServiceCacheHandler.getModelsByIdInPageablePersist.apply(
-                        pageableUtils.isSortingCriteriaValid(pageableBody.getSortingCriteria(), allowedSortingFields)
-                                .then(pageableUtils.createPageRequest(pageableBody))
-                                .flatMapMany(pr -> pageableUtils.createPageableResponse(
-                                                modelRepository.findAllByIdIn(ids, pr).map(modelMapper::fromModelToResponse),
-                                                modelRepository.countAllByIdIn(ids),
-                                                pr
-                                        )
 
-                                ), ids, pageableBody);
+        return
+                pageableUtils.isSortingCriteriaValid(pageableBody.getSortingCriteria(), allowedSortingFields)
+                        .then(pageableUtils.createPageRequest(pageableBody))
+                        .flatMapMany(pr -> pageableUtils.createPageableResponse(
+                                        modelRepository.findAllByIdIn(ids, pr).map(modelMapper::fromModelToResponse),
+                                        modelRepository.countAllByIdIn(ids),
+                                        pr
+                                )
+
+                        );
     }
 
     @Override
     public Flux<RESPONSE> getModelsByIdIn(List<Long> ids) {
+
         return
-                manyToOneUserServiceCacheHandler.getModelsByIdInPersist.apply(
-                        modelRepository.findAllByIdIn(ids).map(modelMapper::fromModelToResponse)
-                        , ids
-                );
+                self.findAllById(ids).map(modelMapper::fromModelToResponse);
     }
 
     @Override
     public Mono<RESPONSE> createModel(BODY body, String userId) {
+
         return
-                manyToOneUserServiceCacheHandler.createModelInvalidate.apply(
-                        userClient.getUser("", userId)
-                                .flatMap(authUser -> {
-                                            MODEL model = modelMapper.fromBodyToModel(body);
-                                            model.setUserId(authUser.getId());
-                                            return modelRepository.save(model)
-                                                    .map(modelMapper::fromModelToResponse);
-                                        }
-                                ), body, userId);
+
+                userClient.getUser("", userId)
+                        .flatMap(authUser -> {
+                                    MODEL model = modelMapper.fromBodyToModel(body);
+                                    model.setUserId(authUser.getId());
+                                    return modelRepository.save(model)
+                                            .map(modelMapper::fromModelToResponse);
+                                }
+                        );
     }
 
+
+    // todo NEVER PUT PRIVATE IN THIS FUCKING CLASS
+    // todo never la update delete fol cache
     @Data
-//    @SuperBuilder
-    @AllArgsConstructor
-    public static class ManyToOneUserServiceCacheHandler<MODEL extends ManyToOneUser, BODY, RESPONSE extends WithUserDto> {
+    public static class ManyToOneUserServiceRedisCacheWrapper<MODEL extends ManyToOneUser, BODY, RESPONSE extends WithUserDto,
+            S extends ManyToOneUserRepository<MODEL>, M extends DtoMapper<MODEL, BODY, RESPONSE>> {
+        protected final S modelRepository;
+        protected final M modelMapper;
+        protected final String modelName;
+        protected final UserClient userClient;
 
-        Function3<Flux<MonthlyEntityGroup<RESPONSE>>, UserDto, Integer, Flux<MonthlyEntityGroup<RESPONSE>>> getModelGroupedByMonthPersist;
-        Function3<Mono<RESPONSE>, Long, String, Mono<RESPONSE>> deleteModelInvalidate;
-        Function3<Mono<RESPONSE>, UserDto, Long, Mono<RESPONSE>> getModelByIdPersist;
-        Function2<Mono<MODEL>, Long, Mono<MODEL>> getByIdInternalPersist;
-        Function3<Flux<PageableResponse<RESPONSE>>, PageableBody, String, Flux<PageableResponse<RESPONSE>>> getAllModelsPersist;
-        Function4<Mono<RESPONSE>, Long, BODY, String, Mono<RESPONSE>> updateModelInvalidate;
-        Function3<Mono<ResponseWithUserDto<RESPONSE>>, UserDto, Long, Mono<ResponseWithUserDto<RESPONSE>>> getModelByIdWithUserPersist;
-        Function3<Flux<ResponseWithUserDto<RESPONSE>>, UserDto, List<Long>, Flux<ResponseWithUserDto<RESPONSE>>> getModelsWithUserPersist;
-        Function3<Flux<PageableResponse<RESPONSE>>, List<Long>, PageableBody, Flux<PageableResponse<RESPONSE>>> getModelsByIdInPageablePersist;
-        Function2<Flux<RESPONSE>, List<Long>, Flux<RESPONSE>> getModelsByIdInPersist;
-        Function3<Mono<RESPONSE>, BODY, String, Mono<RESPONSE>> createModelInvalidate;
-
-        public ManyToOneUserServiceCacheHandler() {
-            this.getModelGroupedByMonthPersist = (flux, authUser, month) -> flux;
-            this.deleteModelInvalidate = (mono, id, userId) -> mono;
-            this.getModelByIdPersist = (mono, authUser, id) -> mono;
-            this.getAllModelsPersist = (flux, pageableBody, userId) -> flux;
-            this.updateModelInvalidate = (mono, id, body, userId) -> mono;
-            this.getModelByIdWithUserPersist = (mono, authUser, id) -> mono;
-            this.getModelsWithUserPersist = (flux, authUser, ids) -> flux;
-            this.getModelsByIdInPageablePersist = (flux, ids, pageableBody) -> flux;
-            this.getModelsByIdInPersist = (flux, ids) -> flux;
-            this.createModelInvalidate = (mono, body, userId) -> mono;
-            this.getByIdInternalPersist = (mono, id) -> mono;
+        public ManyToOneUserServiceRedisCacheWrapper(S modelRepository, M modelMapper, String modelName, UserClient userClient) {
+            this.modelRepository = modelRepository;
+            this.modelMapper = modelMapper;
+            this.modelName = modelName;
+            this.userClient = userClient;
         }
+
+        public Flux<MonthlyEntityGroup<RESPONSE>> getModelGroupedByMonthBase(int month, UserDto userDto) {
+            return Flux.defer(() -> {
+                        if (!userDto.getRole().equals(Role.ROLE_ADMIN)) {
+                            return Mono.error(new PrivateRouteException());
+                        }
+                        LocalDateTime now = LocalDateTime.now();
+                        int year = now.getYear();
+                        if (month == 1 && now.getMonthValue() == 1) {
+                            year -= 1;
+                        }
+                        return modelRepository.findModelByMonth(month, year)
+                                .map(m -> {
+                                            YearMonth ym = YearMonth.from(m.getCreatedAt());
+                                            return MonthlyEntityGroup.<RESPONSE>builder()
+                                                    .month(ym.getMonthValue())
+                                                    .year(ym.getYear())
+                                                    .entity(modelMapper.fromModelToResponse(m))
+                                                    .build();
+                                        }
+                                );
+                    }
+            );
+
+
+        }
+
+
+        public Mono<ResponseWithUserDto<RESPONSE>> getModelByIdWithUserBase(UserDto authUser, Long id) {
+
+            return
+                    getModel(id)
+                            .flatMap(model -> getModelGuardWithUserBase(authUser, model, true)
+                            )
+                    ;
+
+        }
+
+        public Mono<MODEL> getModel(Long id) {
+            return
+                    modelRepository.findById(id)
+                            .map(m -> {
+                                log.info("Model " + m.toString());
+                                return m;
+                            })
+                            .switchIfEmpty(Mono.error(new NotFoundEntity(modelName, id)));
+        }
+
+        public Flux<MODEL> findAllById(List<Long> ids) {
+            return modelRepository.findAllById(ids);
+        }
+
+        /// not cache
+        public Mono<ResponseWithUserDto<RESPONSE>> getModelGuardWithUserBase(UserDto authUser, MODEL model, boolean guard) {
+            return privateRouteBase(guard, authUser, model.getUserId())
+                    .then(userClient.getUser("", model.getUserId().toString())
+                            .map(user ->
+                                    ResponseWithUserDto.<RESPONSE>builder()
+                                            .model(modelMapper.fromModelToResponse(model))
+                                            .user(user)
+                                            .build()
+                            )
+
+                    );
+        }
+
+        public Mono<Void> privateRouteBase(boolean guard, UserDto authUser, Long ownerId) {
+            return userClient.hasPermissionToModifyEntity(authUser, ownerId)
+                    .flatMap(perm -> {
+                        if (guard && !perm) {
+                            return Mono.error(new PrivateRouteException());
+                        }
+                        return Mono.empty();
+                    });
+        }
+
+        public Mono<Boolean> isNotAuthor(MODEL model, UserDto authUser) {
+            return Mono.just(
+                    !model.getUserId().equals(authUser.getId())
+            );
+        }
+
+
     }
 
 
