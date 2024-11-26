@@ -19,6 +19,8 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { AnimatePresence, motion } from "framer-motion";
+import { useDebounce } from "react-use";
+import { useDebounceWithCallBack } from "@/hoooks/useDebounceWithCallback";
 
 export interface ChatRoomTexts {
   numberUnread: string;
@@ -123,6 +125,9 @@ const ChatRoomItem = memo(
     const isActive = activeRoom?.id === room.id;
     const { getByReference } = useChatNotification();
     const notifications = getByReference(room.id);
+    const debounceConnectedStatus = useDebounceWithCallBack<
+      ConversationUserResponse["connectedStatus"] | undefined
+    >(otherUser?.connectedStatus, 200);
 
     if (!otherUser) return null;
 
@@ -141,7 +146,7 @@ const ChatRoomItem = memo(
             <div
               className={cn(
                 "w-5 h-5 rounded-full  backdrop-blur ",
-                otherUser.connectedStatus === "ONLINE"
+                debounceConnectedStatus === "ONLINE"
                   ? "supports-[backdrop-filter]:bg-success/75"
                   : "supports-[backdrop-filter]:bg-destructive/75",
               )}

@@ -6,7 +6,7 @@ import {
   ConversationUserResponse,
   PageableResponse,
 } from "@/types/dto";
-import { memo, useCallback, useEffect, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { formatFromUtc, isDeepEqual } from "@/lib/utils";
 import { useSubscription } from "react-stomp-hooks";
 import { compareAsc, format, parseISO } from "date-fns";
@@ -18,6 +18,7 @@ import { fetchStream } from "@/hoooks/fetchStream";
 import { WithUser } from "@/lib/user";
 import Loader from "@/components/ui/spinner";
 import InfiniteScroll from "react-infinite-scroll-component";
+import { useDebounceWithCallBack } from "@/hoooks/useDebounceWithCallback";
 
 export interface ConversationTexts {
   chatMessageFormTexts: ChatMessageFormTexts;
@@ -73,10 +74,15 @@ export default function Conversation({
   const loaderRef = useRef<HTMLDivElement>(null);
   const observerRef = useRef<IntersectionObserver | null>(null);
 
-  const areInTheSameChat =
-    sender?.connectedChatRoom?.id &&
-    receiver?.connectedChatRoom?.id &&
-    sender?.connectedChatRoom?.id === receiver?.connectedChatRoom?.id;
+  const areInTheSameChat = useMemo(
+    () =>
+      sender?.connectedChatRoom?.id &&
+      receiver?.connectedChatRoom?.id &&
+      sender?.connectedChatRoom?.id === receiver?.connectedChatRoom?.id,
+    [receiver?.connectedChatRoom?.id, sender?.connectedChatRoom?.id],
+  );
+
+  const debounceInSameChat = useDebounceWithCallBack(areInTheSameChat, 200);
 
   // console.log("Same chat", areInTheSameChat);
   // console.log("Same chat rec", receiver.connectedChatRoom?.id);
@@ -194,7 +200,7 @@ export default function Conversation({
 
   return (
     <div className="w-full h-full p-2 relative">
-      {areInTheSameChat && (
+      {debounceInSameChat && (
         <div className=" absolute top-0 right-0 bg-opacity-60 z-[1] w-full ">
           <div
             className="w-1/3 py-3 mx-auto border-border/40 bg-background/95 backdrop-blur
