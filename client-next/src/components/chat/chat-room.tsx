@@ -1,16 +1,7 @@
 "use client";
 
 import { ChatRoomResponse, ConversationUserResponse } from "@/types/dto";
-import {
-  Dispatch,
-  memo,
-  SetStateAction,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { Dispatch, memo, SetStateAction, useCallback, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import { cn, isDeepEqual, truncate } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -27,6 +18,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { AnimatePresence, motion } from "framer-motion";
 
 export interface ChatRoomTexts {
   numberUnread: string;
@@ -43,77 +35,69 @@ interface ChatRoomProps extends BaseProps {
   baseChat: () => void;
 }
 
-export const ChatRoom = memo(
-  ({
-    chatRooms,
-    setActiveRoomId,
-    authUser,
-    activeRoom,
-    handleRoomDelete,
-    baseChat,
-    numberUnread,
-  }: ChatRoomProps) => {
-    const router = useRouter();
+export const ChatRoom = ({
+  chatRooms,
+  setActiveRoomId,
+  authUser,
+  activeRoom,
+  handleRoomDelete,
+  baseChat,
+  numberUnread,
+}: ChatRoomProps) => {
+  const router = useRouter();
 
-    const stompClient = useStompClient();
-    const { removeBySender } = useChatNotification();
-    const searchParams = useSearchParams();
-    useCallback(
-      (otherUser: ConversationUserResponse) => {
-        if (stompClient && stompClient.connected) {
-          stompClient.publish({
-            destination:
-              "/app/chatMessageNotification/deleteAllByReceiverEmailSenderEmail",
-            body: JSON.stringify({
-              receiverEmail: authUser.email,
-              senderEmail: otherUser.email,
-            }),
-          });
-          removeBySender({
-            stompClient,
-            senderEmail: otherUser.email,
+  const stompClient = useStompClient();
+  const { removeBySender } = useChatNotification();
+  const searchParams = useSearchParams();
+  useCallback(
+    (otherUser: ConversationUserResponse) => {
+      if (stompClient && stompClient.connected) {
+        stompClient.publish({
+          destination:
+            "/app/chatMessageNotification/deleteAllByReceiverEmailSenderEmail",
+          body: JSON.stringify({
             receiverEmail: authUser.email,
-          });
-        }
-      },
-      [authUser.email, removeBySender, stompClient],
-    );
+            senderEmail: otherUser.email,
+          }),
+        });
+        removeBySender({
+          stompClient,
+          senderEmail: otherUser.email,
+          receiverEmail: authUser.email,
+        });
+      }
+    },
+    [authUser.email, removeBySender, stompClient],
+  );
 
-    const callback = useCallback(
-      (room: ChatRoomResponse, otherUser: ConversationUserResponse) => {
-        const params = new URLSearchParams(searchParams.toString());
-        params.set("chatId", room.id.toString());
-        window.history.pushState(null, "", `?${params.toString()}`);
-      },
-      [searchParams],
-    );
+  const callback = useCallback(
+    (room: ChatRoomResponse, otherUser: ConversationUserResponse) => {
+      const params = new URLSearchParams(searchParams.toString());
+      params.set("chatId", room.id.toString());
+      window.history.pushState(null, "", `?${params.toString()}`);
+    },
+    [searchParams],
+  );
 
-    return (
-      <ScrollArea className="w-full h-[350px] min-w-[200px] md:h-[calc(1000px-4rem-105px)]  space-y-4 ">
-        <div className="w-full h-full space-y-4 pr-4 pb-6 ">
-          {chatRooms.map((room) => (
-            <div key={room.id} className="w-full h-full ">
-              <ChatRoomItem
-                authUser={authUser}
-                callback={callback}
-                activeRoom={activeRoom}
-                room={room}
-                handleRoomDelete={handleRoomDelete}
-                numberUnread={numberUnread}
-              />
-            </div>
-          ))}
-        </div>
-      </ScrollArea>
-    );
-  },
-  (prevProps, nextProps) =>
-    isDeepEqual(prevProps.chatRooms, nextProps.chatRooms) &&
-    isDeepEqual(prevProps.authUser, nextProps.authUser) &&
-    isDeepEqual(prevProps.activeRoom, nextProps.activeRoom),
-);
-
-ChatRoom.displayName = "ChatRoom";
+  return (
+    <ScrollArea className="w-full h-[350px] min-w-[200px] md:h-[calc(1000px-4rem-105px)]  space-y-4 ">
+      <div className="w-full h-full space-y-4 pr-4 pb-6 pt-3">
+        {chatRooms.map((room) => (
+          <div key={room.id} className="w-full h-full ">
+            <ChatRoomItem
+              authUser={authUser}
+              callback={callback}
+              activeRoom={activeRoom}
+              room={room}
+              handleRoomDelete={handleRoomDelete}
+              numberUnread={numberUnread}
+            />
+          </div>
+        ))}
+      </div>
+    </ScrollArea>
+  );
+};
 
 interface ChatRoomItemProps extends BaseProps {
   callback: (
@@ -134,39 +118,13 @@ const ChatRoomItem = memo(
   }: ChatRoomItemProps) => {
     const otherUser = useMemo(
       () => room.users.find(({ email }) => email !== authUser.email),
-      [authUser.email, room.users],
+      [room.users, authUser.email],
     );
     const isActive = activeRoom?.id === room.id;
-    const [debouncedUser, setDebouncedUser] =
-      useState<ConversationUserResponse | null>(null);
-    const previousOtherUserRef = useRef<ConversationUserResponse | null>(null);
-
-    const debounceTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
     const { getByReference } = useChatNotification();
     const notifications = getByReference(room.id);
 
-    useEffect(() => {
-      if (!otherUser) return;
-
-      if (!isDeepEqual(otherUser, previousOtherUserRef.current)) {
-        if (debounceTimeout.current) {
-          clearTimeout(debounceTimeout.current);
-        }
-
-        debounceTimeout.current = setTimeout(() => {
-          setDebouncedUser(otherUser);
-          previousOtherUserRef.current = otherUser;
-        }, 200);
-      }
-
-      return () => {
-        if (debounceTimeout.current) {
-          clearTimeout(debounceTimeout.current);
-        }
-      };
-    }, [otherUser]);
-
-    if (!debouncedUser) return null;
+    if (!otherUser) return null;
 
     return (
       <div
@@ -175,7 +133,7 @@ const ChatRoomItem = memo(
           isActive && "bg-accent text-accent-foreground hover:scale-100",
         )}
         onClick={() => {
-          callback(room, debouncedUser);
+          callback(room, otherUser);
         }}
       >
         <div className="flex flex-col items-between justify-center gap-2 min-h-11">
@@ -183,7 +141,7 @@ const ChatRoomItem = memo(
             <div
               className={cn(
                 "w-5 h-5 rounded-full  backdrop-blur ",
-                debouncedUser.connectedStatus === "ONLINE"
+                otherUser.connectedStatus === "ONLINE"
                   ? "supports-[backdrop-filter]:bg-success/75"
                   : "supports-[backdrop-filter]:bg-destructive/75",
               )}
@@ -193,30 +151,51 @@ const ChatRoomItem = memo(
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <p className=" font-bold">
-                      {truncate(debouncedUser.email, 20)}
+                      {truncate(otherUser.email, 20)}
                     </p>
-                    <TooltipContent>
-                      <p className="font-semibold">{debouncedUser.email}</p>
-                    </TooltipContent>
                   </TooltipTrigger>
+                  <TooltipContent
+                    className="z-10"
+                    side="top"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <p className="font-semibold z-10">{otherUser.email}</p>
+                  </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
-              {debouncedUser.connectedChatRoom?.id !== room.id && (
-                <DeleteChatRoomDialog
-                  receiverEmail={debouncedUser?.email || ""}
-                  handleDelete={() => handleRoomDelete(room.id)}
-                  anchor={
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      className=" transition-all hover:shadow-sm hover:scale-110"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <Trash2 className="w-4 h-7" />
-                    </Button>
-                  }
-                />
-              )}
+              <AnimatePresence>
+                {otherUser?.connectedChatRoom?.id !== room.id && (
+                  <DeleteChatRoomDialog
+                    receiverEmail={otherUser?.email || ""}
+                    handleDelete={() => handleRoomDelete(room.id)}
+                    anchor={
+                      <motion.div
+                        initial={{ scale: 0 }}
+                        animate={{
+                          scale: 1,
+                          transition: { delay: 0.5, duration: 0.3 },
+                        }}
+                        exit={{
+                          scale: 0,
+                          transition: {
+                            delay: 0.0,
+                            duration: 0.07,
+                          },
+                        }}
+                      >
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          className=" transition-all hover:shadow-sm hover:scale-110"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <Trash2 className="w-4 h-6" />
+                        </Button>
+                      </motion.div>
+                    }
+                  />
+                )}
+              </AnimatePresence>
             </div>
           </div>
           <div>
