@@ -38,223 +38,232 @@ interface ConversationProps extends WithUser, ConversationTexts {
 
 const pageSize = 10;
 
-export default function Conversation({
-  initialMessages,
-  sender,
-  receiver,
-  chatRoomId,
-  initialTotalMessages,
-  authUser,
-  userInTheSameChat,
-  chatMessageFormTexts,
-  loadMoreLoading,
-  loadMore,
-}: ConversationProps) {
-  // console.log("initialMessages", initialMessages);
-  const [chatMessages, setChatMessages] = useState<ChatMessageResponse[]>(
-    initialMessages.toReversed(),
-  );
-  const [totalMessages, setTotalMessages] =
-    useState<number>(initialTotalMessages);
-  const [scrollPosition, setScrollPosition] = useState<boolean>(true);
+const Conversation = memo(
+  ({
+    initialMessages,
+    sender,
+    receiver,
+    chatRoomId,
+    initialTotalMessages,
+    authUser,
+    userInTheSameChat,
+    chatMessageFormTexts,
+    loadMoreLoading,
+    loadMore,
+  }: ConversationProps) => {
+    // console.log("initialMessages", initialMessages);
+    const [chatMessages, setChatMessages] = useState<ChatMessageResponse[]>(
+      initialMessages.toReversed(),
+    );
+    const [totalMessages, setTotalMessages] =
+      useState<number>(initialTotalMessages);
+    const [scrollPosition, setScrollPosition] = useState<boolean>(true);
 
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+    const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const [hasMore, setHasMore] = useState<boolean>(
-    initialMessages.length < initialTotalMessages,
-  );
-  //
-  console.log("HAS MORE", hasMore);
-  console.log("HAS MORE chatMessages", chatMessages.length);
-  // console.log("HAS MORE initialMessages", initialMessages.length);
-  // console.log("HAS MORE initialTotalMessages", initialTotalMessages);
+    const [hasMore, setHasMore] = useState<boolean>(
+      initialMessages.length < initialTotalMessages,
+    );
+    //
+    console.log("HAS MORE", hasMore);
+    console.log("HAS MORE chatMessages", chatMessages.length);
+    // console.log("HAS MORE initialMessages", initialMessages.length);
+    // console.log("HAS MORE initialTotalMessages", initialTotalMessages);
 
-  // console.log("chatm leng", chatMessages.length);
-  const chatContainerRef = useRef<HTMLDivElement>(null);
-  const loaderRef = useRef<HTMLDivElement>(null);
-  const observerRef = useRef<IntersectionObserver | null>(null);
+    // console.log("chatm leng", chatMessages.length);
+    const chatContainerRef = useRef<HTMLDivElement>(null);
+    const loaderRef = useRef<HTMLDivElement>(null);
+    const observerRef = useRef<IntersectionObserver | null>(null);
 
-  const areInTheSameChat = useMemo(
-    () =>
-      sender?.connectedChatRoom?.id &&
-      receiver?.connectedChatRoom?.id &&
-      sender?.connectedChatRoom?.id === receiver?.connectedChatRoom?.id,
-    [receiver?.connectedChatRoom?.id, sender?.connectedChatRoom?.id],
-  );
+    const areInTheSameChat = useMemo(
+      () =>
+        sender?.connectedChatRoom?.id &&
+        receiver?.connectedChatRoom?.id &&
+        sender?.connectedChatRoom?.id === receiver?.connectedChatRoom?.id,
+      [receiver?.connectedChatRoom?.id, sender?.connectedChatRoom?.id],
+    );
 
-  const debounceInSameChat = useDebounceWithCallBack(areInTheSameChat, 200);
+    const debounceInSameChat = useDebounceWithCallBack(areInTheSameChat, 300);
 
-  // console.log("Same chat", areInTheSameChat);
-  // console.log("Same chat rec", receiver.connectedChatRoom?.id);
-  // console.log("Same chat send", sender.connectedChatRoom?.id);
-  // console.log("Same chat send email", sender.email);
+    // console.log("Same chat", areInTheSameChat);
+    // console.log("Same chat rec", receiver.connectedChatRoom?.id);
+    // console.log("Same chat send", sender.connectedChatRoom?.id);
+    // console.log("Same chat send email", sender.email);
 
-  // todo remove e useless
-  const updateMessages = (
-    messages: ChatMessageResponse[],
-    newMessage: ChatMessageResponse,
-  ): ChatMessageResponse[] => {
-    if (!newMessage.timestamp) {
-      console.error("New message has invalid timestamp:", newMessage);
-      return messages;
-    }
-
-    const validMessages = messages.filter((m) => m.timestamp);
-    if (validMessages.length !== messages.length) {
-      console.warn(
-        "Some messages have invalid timestamps and were filtered out",
-      );
-    }
-
-    return [...validMessages, newMessage].sort((a, b) => {
-      const dateA = parseISO(a.timestamp);
-      const dateB = parseISO(b.timestamp);
-      if (!dateA || !dateB) {
-        console.error("Invalid date encountered during sorting:", a, b);
+    // todo remove e useless
+    const updateMessages = (
+      messages: ChatMessageResponse[],
+      newMessage: ChatMessageResponse,
+    ): ChatMessageResponse[] => {
+      if (!newMessage.timestamp) {
+        console.error("New message has invalid timestamp:", newMessage);
+        return messages;
       }
-      return compareAsc(dateA, dateB);
-    });
-  };
 
-  const handleLoadMore = useCallback(async () => {
-    console.log("handleLoadMore");
-    if (isLoading || chatMessages.length >= totalMessages) return;
-
-    setIsLoading(true);
-    setScrollPosition(false);
-    const { messages, error, isFinished } = await fetchStream<
-      PageableResponse<ChatMessageResponse[]>
-    >({
-      path: "/ws-http/messages/" + chatRoomId,
-      acceptHeader: "application/json",
-      token: authUser.token,
-      method: "GET",
-      queryParams: {
-        offset: chatMessages.length.toString(),
-        limit:
-          totalMessages - chatMessages.length >= pageSize
-            ? pageSize.toString()
-            : ((totalMessages - chatMessages.length) % pageSize).toString(),
-      },
-    });
-    try {
-      if (error) {
-        console.error("Error fetching messages:", error);
-        return;
-      }
-      if (isFinished && messages.length > 0) {
-        setTotalMessages(messages[0].pageInfo.totalElements);
-        setChatMessages((prev) => [
-          ...messages[0].content.toReversed(),
-          ...prev,
-        ]);
-        setHasMore(
-          chatMessages.length + messages[0].content.length < totalMessages,
+      const validMessages = messages.filter((m) => m.timestamp);
+      if (validMessages.length !== messages.length) {
+        console.warn(
+          "Some messages have invalid timestamps and were filtered out",
         );
       }
-    } catch (e) {
-      console.log("error", e);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [
-    authUser.token,
-    chatMessages.length,
-    chatRoomId,
-    isLoading,
-    totalMessages,
-  ]);
 
-  useSubscription(`/topic/messages-${sender.email}`, (message) => {
-    const newMessage = JSON.parse(message.body);
-    console.log("sender queue", newMessage);
-    setTotalMessages((prev) => ++prev);
-    setChatMessages((prev) => updateMessages(prev, newMessage));
-    setScrollPosition(true);
-  });
+      return [...validMessages, newMessage].sort((a, b) => {
+        const dateA = parseISO(a.timestamp);
+        const dateB = parseISO(b.timestamp);
+        if (!dateA || !dateB) {
+          console.error("Invalid date encountered during sorting:", a, b);
+        }
+        return compareAsc(dateA, dateB);
+      });
+    };
 
-  useSubscription(`/topic/messages-${receiver.email}`, (message) => {
-    const newMessage = JSON.parse(message.body) as ChatMessageResponse;
-    console.log("receiver queue", newMessage);
-    console.log("rec email", receiver.email);
-    console.log("sender email", sender.email);
-    console.log("newmsg rec", newMessage.receiver.email);
-    console.log("newmsg send", newMessage.sender.email);
-    if (
-      newMessage.receiver.email === receiver.email &&
-      newMessage.sender.email === sender.email
-    ) {
+    const handleLoadMore = useCallback(async () => {
+      console.log("handleLoadMore");
+      if (isLoading || chatMessages.length >= totalMessages) return;
+
+      setIsLoading(true);
+      setScrollPosition(false);
+      const { messages, error, isFinished } = await fetchStream<
+        PageableResponse<ChatMessageResponse[]>
+      >({
+        path: "/ws-http/messages/" + chatRoomId,
+        acceptHeader: "application/json",
+        token: authUser.token,
+        method: "GET",
+        queryParams: {
+          offset: chatMessages.length.toString(),
+          limit:
+            totalMessages - chatMessages.length >= pageSize
+              ? pageSize.toString()
+              : ((totalMessages - chatMessages.length) % pageSize).toString(),
+        },
+      });
+      try {
+        if (error) {
+          console.error("Error fetching messages:", error);
+          return;
+        }
+        if (isFinished && messages.length > 0) {
+          setTotalMessages(messages[0].pageInfo.totalElements);
+          setChatMessages((prev) => [
+            ...messages[0].content.toReversed(),
+            ...prev,
+          ]);
+          setHasMore(
+            chatMessages.length + messages[0].content.length < totalMessages,
+          );
+        }
+      } catch (e) {
+        console.log("error", e);
+      } finally {
+        setIsLoading(false);
+      }
+    }, [
+      authUser.token,
+      chatMessages.length,
+      chatRoomId,
+      isLoading,
+      totalMessages,
+    ]);
+
+    useSubscription(`/topic/messages-${sender.email}`, (message) => {
+      const newMessage = JSON.parse(message.body);
+      console.log("sender queue", newMessage);
       setTotalMessages((prev) => ++prev);
       setChatMessages((prev) => updateMessages(prev, newMessage));
       setScrollPosition(true);
-    }
-  });
+    });
 
-  useEffect(() => {
-    if (scrollPosition && chatContainerRef.current) {
-      chatContainerRef.current.scrollTop =
-        chatContainerRef.current.scrollHeight;
-      setScrollPosition(false);
-    }
-  }, [scrollPosition]);
+    useSubscription(`/topic/messages-${receiver.email}`, (message) => {
+      const newMessage = JSON.parse(message.body) as ChatMessageResponse;
+      console.log("receiver queue", newMessage);
+      console.log("rec email", receiver.email);
+      console.log("sender email", sender.email);
+      console.log("newmsg rec", newMessage.receiver.email);
+      console.log("newmsg send", newMessage.sender.email);
+      if (
+        newMessage.receiver.email === receiver.email &&
+        newMessage.sender.email === sender.email
+      ) {
+        setTotalMessages((prev) => ++prev);
+        setChatMessages((prev) => updateMessages(prev, newMessage));
+        setScrollPosition(true);
+      }
+    });
 
-  return (
-    <div className="w-full h-full p-2 relative">
-      {debounceInSameChat && (
-        <div className=" absolute top-0 right-0 bg-opacity-60 z-[1] w-full ">
-          <div
-            className="w-1/3 py-3 mx-auto border-border/40 bg-background/95 backdrop-blur
+    useEffect(() => {
+      if (scrollPosition && chatContainerRef.current) {
+        chatContainerRef.current.scrollTop =
+          chatContainerRef.current.scrollHeight;
+        setScrollPosition(false);
+      }
+    }, [scrollPosition]);
+
+    return (
+      <div className="w-full h-full p-2 relative">
+        {debounceInSameChat && (
+          <div className=" absolute top-0 right-0 bg-opacity-60 z-[1] w-full ">
+            <div
+              className="w-1/3 py-3 mx-auto border-border/40 bg-background/95 backdrop-blur
          supports-[backdrop-filter]:bg-background/60 rounded "
-          >
-            <p className="text-center text-sm font-bold">{userInTheSameChat}</p>
-          </div>
-        </div>
-      )}{" "}
-      <div
-        id="scrollableDiv"
-        className="w-full h-[600px] relative overflow-auto flex flex-col-reverse"
-        // viewportRef={chatContainerRef}
-        ref={chatContainerRef}
-      >
-        <InfiniteScroll
-          dataLength={chatMessages.length}
-          next={handleLoadMore}
-          hasMore={hasMore}
-          inverse={true}
-          loader={<Loader className="mx-auto my-6 h-12 w-12" />}
-          scrollableTarget="scrollableDiv"
-          className="flex flex-col-reverse"
-        >
-          <div className="flex flex-col h-full ">
-            <div className="flex-1 grid w-full p-6 gap-6 flex-col ">
-              <div className="grid gap-2.5">
-                {chatMessages.length > 0 &&
-                  chatMessages.map((chatMessage) => (
-                    <div key={chatMessage.id}>
-                      <ChatMessageItem
-                        chatMessage={chatMessage}
-                        sender={sender}
-                        receiver={receiver}
-                      />
-                    </div>
-                  ))}
-                {/*{totalMessages} {chatMessages.length}*/}
-              </div>
+            >
+              <p className="text-center text-sm font-bold">
+                {userInTheSameChat}
+              </p>
             </div>
           </div>
-        </InfiniteScroll>
+        )}{" "}
+        <div
+          id="scrollableDiv"
+          className="w-full h-[600px] relative overflow-auto flex flex-col-reverse"
+          // viewportRef={chatContainerRef}
+          ref={chatContainerRef}
+        >
+          <InfiniteScroll
+            dataLength={chatMessages.length}
+            next={handleLoadMore}
+            hasMore={hasMore}
+            inverse={true}
+            loader={<Loader className="mx-auto my-6 h-12 w-12" />}
+            scrollableTarget="scrollableDiv"
+            className="flex flex-col-reverse"
+          >
+            <div className="flex flex-col h-full ">
+              <div className="flex-1 grid w-full p-6 gap-6 flex-col ">
+                <div className="grid gap-2.5">
+                  {chatMessages.length > 0 &&
+                    chatMessages.map((chatMessage) => (
+                      <div key={chatMessage.id}>
+                        <ChatMessageItem
+                          chatMessage={chatMessage}
+                          sender={sender}
+                          receiver={receiver}
+                        />
+                      </div>
+                    ))}
+                  {/*{totalMessages} {chatMessages.length}*/}
+                </div>
+              </div>
+            </div>
+          </InfiniteScroll>
+        </div>
+        <div className="flex-1 ">
+          <ChatMessageForm
+            chatRoomId={chatRoomId}
+            sender={sender}
+            receiver={receiver}
+            {...chatMessageFormTexts}
+          />
+        </div>
       </div>
-      <div className="flex-1 ">
-        <ChatMessageForm
-          chatRoomId={chatRoomId}
-          sender={sender}
-          receiver={receiver}
-          {...chatMessageFormTexts}
-        />
-      </div>
-    </div>
-  );
-}
+    );
+  },
+  isDeepEqual,
+);
+
+Conversation.displayName = "Conversation";
+
+export default Conversation;
 
 interface ChatMessageProps {
   chatMessage: ChatMessageResponse;
