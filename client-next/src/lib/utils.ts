@@ -316,3 +316,7 @@ export const appendCreatedAtDesc = (url: string) =>
   url.includes("?")
     ? `${url}&sort=createdAt:desc`
     : `${url}?sort=createdAt:desc`;
+
+export function truncate(text: string, length: number) {
+  return text.length > length ? text.substring(0, length) + "..." : text;
+}

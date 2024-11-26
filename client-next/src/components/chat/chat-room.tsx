@@ -1,9 +1,18 @@
 "use client";
 
 import { ChatRoomResponse, ConversationUserResponse } from "@/types/dto";
-import { Dispatch, memo, SetStateAction, useCallback } from "react";
+import {
+  Dispatch,
+  memo,
+  SetStateAction,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useSearchParams } from "next/navigation";
-import { cn, isDeepEqual } from "@/lib/utils";
+import { cn, isDeepEqual, truncate } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useStompClient } from "react-stomp-hooks";
 import { useChatNotification } from "@/context/chat-message-notification-context";
@@ -12,6 +21,12 @@ import { Trash2 } from "lucide-react";
 import DeleteChatRoomDialog from "@/components/dialogs/chat/delete-chat-room";
 import { WithUser } from "@/lib/user";
 import { useRouter } from "@/navigation";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 export interface ChatRoomTexts {
   numberUnread: string;
@@ -87,7 +102,7 @@ export const ChatRoom = memo(
                 numberUnread={numberUnread}
               />
             </div>
-          ))}{" "}
+          ))}
         </div>
       </ScrollArea>
     );
@@ -117,12 +132,41 @@ const ChatRoomItem = memo(
     handleRoomDelete,
     numberUnread,
   }: ChatRoomItemProps) => {
-    const otherUser = room.users.find(({ email }) => email !== authUser.email);
+    const otherUser = useMemo(
+      () => room.users.find(({ email }) => email !== authUser.email),
+      [authUser.email, room.users],
+    );
     const isActive = activeRoom?.id === room.id;
+    const [debouncedUser, setDebouncedUser] =
+      useState<ConversationUserResponse | null>(null);
+    const previousOtherUserRef = useRef<ConversationUserResponse | null>(null);
+
+    const debounceTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
     const { getByReference } = useChatNotification();
     const notifications = getByReference(room.id);
 
-    if (!otherUser) return null;
+    useEffect(() => {
+      if (!otherUser) return;
+
+      if (!isDeepEqual(otherUser, previousOtherUserRef.current)) {
+        if (debounceTimeout.current) {
+          clearTimeout(debounceTimeout.current);
+        }
+
+        debounceTimeout.current = setTimeout(() => {
+          setDebouncedUser(otherUser);
+          previousOtherUserRef.current = otherUser;
+        }, 200);
+      }
+
+      return () => {
+        if (debounceTimeout.current) {
+          clearTimeout(debounceTimeout.current);
+        }
+      };
+    }, [otherUser]);
+
+    if (!debouncedUser) return null;
 
     return (
       <div
@@ -131,7 +175,7 @@ const ChatRoomItem = memo(
           isActive && "bg-accent text-accent-foreground hover:scale-100",
         )}
         onClick={() => {
-          callback(room, otherUser);
+          callback(room, debouncedUser);
         }}
       >
         <div className="flex flex-col items-between justify-center gap-2 min-h-11">
@@ -139,16 +183,27 @@ const ChatRoomItem = memo(
             <div
               className={cn(
                 "w-5 h-5 rounded-full  backdrop-blur ",
-                otherUser.connectedStatus === "ONLINE"
+                debouncedUser.connectedStatus === "ONLINE"
                   ? "supports-[backdrop-filter]:bg-success/75"
                   : "supports-[backdrop-filter]:bg-destructive/75",
               )}
             />
             <div className="flex flex-1 items-center justify-between">
-              <p className=" font-bold">{otherUser.email}</p>
-              {otherUser.connectedChatRoom?.id !== room.id && (
+              <TooltipProvider delayDuration={1000} skipDelayDuration={500}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <p className=" font-bold">
+                      {truncate(debouncedUser.email, 20)}
+                    </p>
+                    <TooltipContent>
+                      <p className="font-semibold">{debouncedUser.email}</p>
+                    </TooltipContent>
+                  </TooltipTrigger>
+                </Tooltip>
+              </TooltipProvider>
+              {debouncedUser.connectedChatRoom?.id !== room.id && (
                 <DeleteChatRoomDialog
-                  receiverEmail={otherUser?.email || ""}
+                  receiverEmail={debouncedUser?.email || ""}
                   handleDelete={() => handleRoomDelete(room.id)}
                   anchor={
                     <Button
