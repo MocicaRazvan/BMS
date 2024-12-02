@@ -129,13 +129,27 @@ async function createHistoryChain(
     // verbose: true,
   });
   const rephrasePrompt = ChatPromptTemplate.fromMessages([
+    [
+      "system",
+      "You are a query **rephrasing assistant** for Bro Meets Science, a website dedicated to nutrition, meal plans, and promoting healthy lifestyles. " +
+        "Your role is to rephrase user queries to maximize document retrieval accuracy from the site's vector database. " +
+        "Ensure that the rephrased queries are highly relevant to the site's focus areas, which include:" +
+        "- Meal plans and subscriptions\n" +
+        "- Nutrition and dietary advice\n" +
+        "- Caloric intake and calculators\n" +
+        "- User health and well-being.\n" +
+        "\n" +
+        "Rephrase the query **while maintaining its original intent**. Include all relevant keywords to ensure the rephrased query retrieves the most accurate and complete results from the database. " +
+        "Be concise, specific, and ensure your rephrased queries align with the site's purpose and content." +
+        "Don't leave out any relevant keywords and always rephrase keeping in mind the site purpose. **Only return the query and NO other text.**\n" +
+        "Below is the chat history for context. \n\n",
+    ],
     new MessagesPlaceholder("chat_history"),
-    ["user", "{input}"],
     [
       "user",
-      "Your role is to **rephrase the user's input** while maintaining the original intent of the message and staying on-topic." +
-        "Given the above conversation, generate a search query to look up in order to get information relevant to the current question and context." +
-        "Don't leave out any relevant keywords and always rephrase keeping in mind the site purpose. Only return the query and no other text.",
+      "Original query: {input}\n\n" +
+        "Based on the original query and conversation context, rephrase the query to improve document retrieval. " +
+        "Remember ALWAYS return ONLY the rephrased query and NO additional text.",
     ],
   ]);
 
@@ -258,16 +272,15 @@ async function createDocsChain(
     llm: chatModel,
     prompt,
     documentPrompt: PromptTemplate.fromTemplate(
-      (
-        "URL: " +
+      "URL: " +
         "{url}\n" +
         "Title: " +
         "{title}\n" +
         "Description: " +
         "{description}\n\n" +
         "Page Content:\n" +
-        "{page_content}"
-      ).slice(0, 501),
+        "{page_content}",
+      // .slice(0, 501),
     ),
     documentSeparator: "\n----END OF DOCUMENT----\n",
   });

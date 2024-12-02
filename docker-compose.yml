@@ -12,10 +12,11 @@ services:
       - "5544:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./db:/data
     networks:
       - bms
     restart: unless-stopped
-
+  # data/postgres_entry.sh
 
   pgadmin:
     image: dpage/pgadmin4:latest
@@ -60,9 +61,10 @@ services:
       - "27777:27017"
     volumes:
       - mongo_data:/data/db
+      - ./db:/data
     networks:
       - bms
-
+  #  mongorestore --gzip --archive=/data/mongo_export.archive.gz --drop
   #  nginx-mongo-fs:
   #    image: nginx:latest
   #    container_name: nginx-mongo-container-bms
@@ -100,11 +102,12 @@ services:
       PGDATA: /var/lib/postgresql/data
     volumes:
       - postgres_data_vectors:/var/lib/postgresql/data
+      - ./db:/data
     ports:
       - "5546:5432"
     networks:
       - bms
-
+  #      data/postgres_vector_entry.sh
   pgpool-vectors:
     image: bitnami/pgpool:latest
     container_name: pgpool-vectors-container-bms
