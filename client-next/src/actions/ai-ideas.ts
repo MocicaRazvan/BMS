@@ -7,7 +7,7 @@ import {
   AIIdeaActionArgs,
   AiIdeasField,
   TargetedFields,
-} from "@/actions/ai-ideas-types";
+} from "@/types/ai-ideas-types";
 import { createStuffDocumentsChain } from "langchain/chains/combine_documents";
 import { createRetrievalChain } from "langchain/chains/retrieval";
 import { vectorStoreInstance } from "@/lib/langchain";

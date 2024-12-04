@@ -95,7 +95,7 @@ import UploadingProgress, {
   UploadingProgressTexts,
 } from "@/components/forms/uploading-progress";
 import useBaseAICallbackTitleBody from "@/hoooks/useBaseAICallbackTitleBody";
-import { AiIdeasField } from "@/actions/ai-ideas-types";
+import { AiIdeasField } from "@/types/ai-ideas-types";
 
 export interface PlanFormTexts extends AITitleBodyForm {
   titleBodyTexts: TitleBodyTexts;

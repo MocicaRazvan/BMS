@@ -9,7 +9,7 @@ import {
 import { Input } from "@/components/ui/input";
 import Editor from "../editor/editor";
 import { TitleBodyDto } from "@/types/dto";
-import { AiIdeasField } from "@/actions/ai-ideas-types";
+import { AiIdeasField } from "@/types/ai-ideas-types";
 import AIGeneratePop, {
   AIGeneratePopTexts,
   AIPopCallback,

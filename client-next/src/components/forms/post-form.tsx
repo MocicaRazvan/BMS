@@ -36,7 +36,7 @@ import { v4 as uuidv4 } from "uuid";
 import UploadingProgress, {
   UploadingProgressTexts,
 } from "@/components/forms/uploading-progress";
-import { AiIdeasField } from "@/actions/ai-ideas-types";
+import { AiIdeasField } from "@/types/ai-ideas-types";
 import useBaseAICallbackTitleBody from "@/hoooks/useBaseAICallbackTitleBody";
 
 export interface PostFormProps

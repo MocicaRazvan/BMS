@@ -61,7 +61,7 @@ import ErrorMessage from "@/components/forms/error-message";
 import { fetchStream } from "@/hoooks/fetchStream";
 import { toast } from "@/components/ui/use-toast";
 import { useRouter } from "@/navigation";
-import { AiIdeasField } from "@/actions/ai-ideas-types";
+import { AiIdeasField } from "@/types/ai-ideas-types";
 import useBaseAICallbackTitleBody from "@/hoooks/useBaseAICallbackTitleBody";
 
 export interface DayFromTexts extends SingleMealTexts, AITitleBodyForm {

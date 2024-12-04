@@ -11,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import ButtonSubmit, {
   ButtonSubmitTexts,
 } from "@/components/forms/button-submit";
-import { AiIdeasField, TargetedFields } from "@/actions/ai-ideas-types";
+import { AiIdeasField, TargetedFields } from "@/types/ai-ideas-types";
 import ShinyButton from "@/components/magicui/shiny-button";
 import { getToxicity } from "@/actions/toxcity";
 import DOMPurify from "dompurify";

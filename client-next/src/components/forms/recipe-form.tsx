@@ -62,7 +62,7 @@ import useProgressWebSocket from "@/hoooks/useProgressWebSocket";
 import UploadingProgress, {
   UploadingProgressTexts,
 } from "@/components/forms/uploading-progress";
-import { AiIdeasField } from "@/actions/ai-ideas-types";
+import { AiIdeasField } from "@/types/ai-ideas-types";
 import useBaseAICallbackTitleBody from "@/hoooks/useBaseAICallbackTitleBody";
 
 export interface RecipeFormTexts extends SingleChildFormTexts, AITitleBodyForm {
