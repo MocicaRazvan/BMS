@@ -1,6 +1,11 @@
-import { getTranslations } from "next-intl/server";
+import { getTranslations, unstable_setRequestLocale } from "next-intl/server";
+import { Locale } from "@/navigation";
 
-export default async function NotFoundPage() {
+interface Props {
+  params: { locale: Locale };
+}
+export default async function NotFoundPage({ params: { locale } }: Props) {
+  unstable_setRequestLocale(locale);
   const t = await getTranslations("ErrorPage");
   console.log(t);
   return (
