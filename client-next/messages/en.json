@@ -324,6 +324,41 @@
   },
   "components": {
     "forms": {
+      "AIGeneratePopTexts": {
+        "anchorText": "AI",
+        "descriptionText": "Ask AI to help generate a {thing} for the {item}. You can give a small description of what you want. This feature is available only in English!",
+        "toxicError": "The description should not contain toxic language",
+        "englishError": "The description must be in English",
+        "forFunText": "The AI needs some context, you can try anyway for fun!",
+        "forFunBtnText": "I understand, let's try",
+        "placeholder": "Be concise, clear and explicit in your description",
+        "thing": {
+          "title": "title",
+          "body": "body"
+        },
+        "item": {
+          "post": "post",
+          "recipe": "recipe",
+          "plan": "plan",
+          "day": "day"
+        }
+      },
+      "PostFormTexts": {
+        "aiCheckBoxes": {
+          "title": {
+            "field": "title",
+            "description": "Add title to context"
+          },
+          "body": {
+            "field": "body",
+            "description": "Add body to context"
+          },
+          "tags": {
+            "field": "tags",
+            "description": "Add tags to context"
+          }
+        }
+      },
       "UpdateProfileForm": {
         "error": "The profile could not be updated",
         "firstName": "First Name",
@@ -387,7 +422,21 @@
         "quantityChildLabel": "Quantity",
         "dietType": "The diet is:",
         "continueBtn": "Continue",
-        "areIngredientsCompletedButNotSubmitted": "There are some ingredients that are completed but not submitted, if you submit the form they will be lost"
+        "areIngredientsCompletedButNotSubmitted": "There are some ingredients that are completed but not submitted, if you submit the form they will be lost",
+        "aiCheckBoxes": {
+          "title": {
+            "field": "title",
+            "description": "Add title to context"
+          },
+          "body": {
+            "field": "body",
+            "description": "Add body to context"
+          },
+          "ingredients": {
+            "field": "ingredients",
+            "description": "Add ingredients to context"
+          }
+        }
       },
       "PlanFormTexts": {
         "priceLabel": "Price",
@@ -402,6 +451,24 @@
           "GAIN_MASS": "Gain mass",
           "LOSE_WEIGHT": "Lose weight",
           "MAINTAIN_WEIGHT": "Maintain weight"
+        },
+        "aiCheckBoxes": {
+          "title": {
+            "field": "title",
+            "description": "Add title to context"
+          },
+          "body": {
+            "field": "body",
+            "description": "Add body to context"
+          },
+          "objective": {
+            "field": "objective",
+            "description": "Add objective to context"
+          },
+          "days": {
+            "field": "days",
+            "description": "Add days to context"
+          }
         }
       },
       "CheckoutDrawerTexts": {
@@ -460,6 +527,24 @@
           "HIGH_FAT": "High fat",
           "LOW_PROTEIN": "Low protein",
           "BALANCED": "Balanced"
+        },
+        "aiCheckBoxes": {
+          "title": {
+            "field": "title",
+            "description": "Add title to context"
+          },
+          "body": {
+            "field": "body",
+            "description": "Add body to context"
+          },
+          "type": {
+            "field": "type",
+            "description": "Add day type to context"
+          },
+          "recipes": {
+            "field": "recipes",
+            "description": "Add recipes to context"
+          }
         }
       }
     },

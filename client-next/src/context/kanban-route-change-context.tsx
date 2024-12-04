@@ -1,5 +1,4 @@
 "use client";
-import { WithUser } from "@/lib/user";
 import {
   createContext,
   Dispatch,
@@ -8,8 +7,6 @@ import {
   useCallback,
   useContext,
   useEffect,
-  useMemo,
-  useRef,
   useState,
 } from "react";
 import { usePathname } from "@/navigation";

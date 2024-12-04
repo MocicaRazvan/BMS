@@ -9,6 +9,7 @@ import ButtonSubmit, {
 } from "@/components/forms/button-submit";
 import { BaseFormTexts } from "@/texts/components/forms";
 import {
+  AITitleBodyForm,
   BaseFormProps,
   DaySchemaTexts,
   DaySchemaType,
@@ -60,8 +61,10 @@ import ErrorMessage from "@/components/forms/error-message";
 import { fetchStream } from "@/hoooks/fetchStream";
 import { toast } from "@/components/ui/use-toast";
 import { useRouter } from "@/navigation";
+import { AiIdeasField } from "@/actions/ai-ideas-types";
+import useBaseAICallbackTitleBody from "@/hoooks/useBaseAICallbackTitleBody";
 
-export interface DayFromTexts extends SingleMealTexts {
+export interface DayFromTexts extends SingleMealTexts, AITitleBodyForm {
   titleBodyTexts: TitleBodyTexts;
   mealsChildInputMultipleSelectorTexts: ChildInputMultipleSelectorTexts;
   buttonSubmitTexts: ButtonSubmitTexts;
@@ -118,6 +121,9 @@ export default function DayForm({
   areMealsCompletedButNotSubmitted,
   continueBtn,
   dayTypesLabels,
+  aiCheckBoxes,
+  titleAIGeneratedPopTexts,
+  bodyAIGeneratedPopTexts,
 }: DayFormProps) {
   const router = useRouter();
 
@@ -159,6 +165,16 @@ export default function DayForm({
   );
 
   const [isAnyMealNotSubmitted, setIsAnyMealNotSubmitted] = useState(true);
+  const [totalOptions, setTotalOptions] = useState<Option[]>(() => {
+    const options = initialCurrentMeals.flatMap(
+      ({ optionRecipes }) => optionRecipes,
+    );
+    const uniqueByLabel = new Map(
+      options.map((option) => [option.label, option]),
+    );
+
+    return Array.from(uniqueByLabel.values());
+  });
 
   const [isMealCompletedButNotSubmitted, setIsMealCompletedButNotSubmitted] =
     useState<Record<string, boolean>>({});
@@ -179,7 +195,9 @@ export default function DayForm({
       title: existingDay?.title || "",
     },
   });
-
+  const watchTitle = form.watch("title");
+  const watchBody = form.watch("body");
+  const watchType = form.watch("type");
   const handleMealRemove = useCallback(
     (mealId: string) => {
       setIsMealCompletedButNotSubmitted((prev) => {
@@ -197,7 +215,7 @@ export default function DayForm({
   );
 
   const handleMealSubmit = useCallback(
-    (data: MealSchemaType & { id: string }) => {
+    (data: MealSchemaType & { id: string }, selectedOptions: Option[]) => {
       const existingMeal = currentMeals.find((meal) => meal.id === data.id);
       let newMeals;
       if (existingMeal) {
@@ -209,9 +227,68 @@ export default function DayForm({
       }
       setCurrentMeals(newMeals);
       form.setValue("meals", newMeals);
+      setTotalOptions((prev) => {
+        const combined = [...prev, ...selectedOptions];
+
+        const uniqueByLabel = new Map(
+          combined.map((option) => [option.label, option]),
+        );
+
+        return Array.from(uniqueByLabel.values());
+      });
     },
     [currentMeals, form],
   );
+
+  const aiFields: AiIdeasField[] = useMemo(() => {
+    const fields: AiIdeasField[] = [];
+    if (watchTitle.trim()) {
+      fields.push({
+        content: watchTitle,
+        name: "title",
+        isHtml: false,
+        role: "Title of the day in a meal plan",
+      });
+    }
+    if (watchBody.trim()) {
+      fields.push({
+        content: watchBody,
+        name: "body",
+        isHtml: true,
+        role: "Description of the of the day in a meal plan",
+      });
+    }
+    if (watchType) {
+      fields.push({
+        content: watchType,
+        name: "type",
+        isHtml: false,
+        role: "Kind of the day in a meal plan",
+      });
+    }
+
+    if (totalOptions.length) {
+      fields.push({
+        content: totalOptions.map((tag) => tag.label).join(","),
+        name: "recipes",
+        isHtml: false,
+        role: "Recipes of the day in a meal plan",
+      });
+      fields.push({
+        content: dayDietType || "",
+        name: "dietType",
+        isHtml: false,
+        role: "Diet type of the day in a meal plan",
+      });
+    }
+    return fields;
+  }, [
+    dayDietType,
+    JSON.stringify(totalOptions),
+    watchBody,
+    watchTitle,
+    watchType,
+  ]);
 
   const handleMealSubmitChange = useCallback((change: boolean) => {
     setIsAnyMealNotSubmitted(change);
@@ -282,6 +359,8 @@ export default function DayForm({
       toastAction,
     ],
   );
+  const [editorKey, setEditorKey] = useState<number>(0);
+  const baseAICallback = useBaseAICallbackTitleBody(form, setEditorKey);
 
   const handleMealOptionsChange = useCallback((dietType: DietType | null) => {
     if (!dietType) return;
@@ -307,6 +386,16 @@ export default function DayForm({
             <TitleBodyForm<DaySchemaType>
               control={form.control}
               titleBodyTexts={titleBodyTexts}
+              showAIPopDescription
+              showAIPopTitle
+              aiFields={aiFields}
+              editorKey={editorKey}
+              aiDescriptionCallBack={(r) => baseAICallback("body", r)}
+              aiTitleCallBack={(r) => baseAICallback("title", r)}
+              aiItem={"single day of a meal plan"}
+              aiCheckBoxes={aiCheckBoxes}
+              titleAIGeneratedPopTexts={titleAIGeneratedPopTexts}
+              bodyAIGeneratedPopTexts={bodyAIGeneratedPopTexts}
             />
             <FormField
               control={form.control}
@@ -490,7 +579,10 @@ interface SingleMealTexts {
 interface SingleMealProps extends WithUser, SingleMealTexts {
   mealId: string;
   onRemove: (mealId: string) => void;
-  onSubmitCallback: (data: MealSchemaType & { id: string }) => void;
+  onSubmitCallback: (
+    data: MealSchemaType & { id: string },
+    selectedOptions: Option[],
+  ) => void;
   childrenNumber: number;
   submitChangeCallback: (change: boolean) => void;
   currentMeals: CurrentMealType[];
@@ -590,9 +682,9 @@ function SingleMealForm({
     (data: MealSchemaType) => {
       setIsMealCompletedButNotSubmitted(false);
       setWasSubmitted(true);
-      onSubmitCallback({ ...data, id: mealId });
+      onSubmitCallback({ ...data, id: mealId }, selectedOptions);
     },
-    [mealId, onSubmitCallback],
+    [mealId, onSubmitCallback, JSON.stringify(selectedOptions)],
   );
 
   const motionProps = {

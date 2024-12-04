@@ -50,6 +50,9 @@ export default async function UserDuplicatePostPage({
         buttonSubmitTexts,
         baseFormTexts,
         loadedImages,
+        bodyAIGeneratedPopTexts,
+        titleAIGeneratedPopTexts,
+        aiCheckBoxes,
       },
       ...rest
     },
@@ -79,6 +82,9 @@ export default async function UserDuplicatePostPage({
             {...baseFormTexts}
             path={`/posts/createWithImages`}
             loadedImages={loadedImages}
+            aiCheckBoxes={aiCheckBoxes}
+            bodyAIGeneratedPopTexts={bodyAIGeneratedPopTexts}
+            titleAIGeneratedPopTexts={titleAIGeneratedPopTexts}
           />
         </Suspense>
       </main>

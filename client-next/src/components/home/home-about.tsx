@@ -1,11 +1,9 @@
 "use client";
 
-import BoxReveal from "@/components/magicui/box-reveal";
-import { motion } from "framer-motion";
+import { motion, useInView } from "framer-motion";
 import WordPullUp from "@/components/magicui/word-pull-up";
 import { memo, useRef } from "react";
 import { isDeepEqual } from "@/lib/utils";
-import { useInView } from "framer-motion";
 
 export interface HomeAboutTexts {
   title: string;

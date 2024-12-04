@@ -49,6 +49,9 @@ export default async function UpdatePostPage({
         buttonSubmitTexts,
         baseFormTexts,
         loadedImages,
+        aiCheckBoxes,
+        bodyAIGeneratedPopTexts,
+        titleAIGeneratedPopTexts,
       },
       ...rest
     },
@@ -79,6 +82,9 @@ export default async function UpdatePostPage({
             {...baseFormTexts}
             path={`/posts/updateWithImages/${id}`}
             loadedImages={loadedImages}
+            aiCheckBoxes={aiCheckBoxes}
+            bodyAIGeneratedPopTexts={bodyAIGeneratedPopTexts}
+            titleAIGeneratedPopTexts={titleAIGeneratedPopTexts}
           />
         </Suspense>
       </main>

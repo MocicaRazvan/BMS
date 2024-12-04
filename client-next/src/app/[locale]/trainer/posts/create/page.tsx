@@ -46,6 +46,9 @@ export default async function CreatePostPage({ params: { locale } }: Props) {
         buttonSubmitTexts,
         baseFormTexts,
         loadedImages,
+        bodyAIGeneratedPopTexts,
+        titleAIGeneratedPopTexts,
+        aiCheckBoxes,
       },
       ...rest
     },
@@ -76,6 +79,9 @@ export default async function CreatePostPage({ params: { locale } }: Props) {
             {...baseFormTexts}
             authUser={authUser}
             path={"/posts/createWithImages"}
+            titleAIGeneratedPopTexts={titleAIGeneratedPopTexts}
+            bodyAIGeneratedPopTexts={bodyAIGeneratedPopTexts}
+            aiCheckBoxes={aiCheckBoxes}
           />
         </Suspense>
       </main>

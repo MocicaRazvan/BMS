@@ -33,6 +33,7 @@ import { AdminEmailTexts } from "@/components/forms/admin-email";
 import { DayFromTexts } from "@/components/forms/day-form";
 import { DayType, dayTypes, planObjectives } from "@/types/dto";
 import { UploadingProgressTexts } from "@/components/forms/uploading-progress";
+import { AIGeneratePopTexts } from "@/components/forms/ai-generate-pop";
 
 export type FormType = "create" | "update";
 
@@ -145,6 +146,9 @@ export const getPostFormTexts = async (type: FormType) => {
     buttonSubmitTexts,
     baseFormTexts,
     loadedImages,
+    titleAIGeneratedPopTexts,
+    bodyAIGeneratedPopTexts,
+    t,
   ] = await Promise.all([
     getPostSchemaTexts(),
     getInputFileText("image"),
@@ -153,6 +157,9 @@ export const getPostFormTexts = async (type: FormType) => {
     getButtonSubmitTexts(),
     getBaseFormTexts("PostForm", type),
     getUploadingProgressTexts("image"),
+    getAIGeneratePopTexts("post", "title"),
+    getAIGeneratePopTexts("post", "body"),
+    getTranslations("components.forms.PostFormTexts"),
   ]);
   return {
     postSchemaTexts,
@@ -162,6 +169,13 @@ export const getPostFormTexts = async (type: FormType) => {
     buttonSubmitTexts,
     baseFormTexts,
     loadedImages,
+    titleAIGeneratedPopTexts,
+    bodyAIGeneratedPopTexts,
+    aiCheckBoxes: {
+      [t("aiCheckBoxes.title.field")]: t("aiCheckBoxes.title.description"),
+      [t("aiCheckBoxes.body.field")]: t("aiCheckBoxes.body.description"),
+      [t("aiCheckBoxes.tags.field")]: t("aiCheckBoxes.tags.description"),
+    },
   };
 };
 
@@ -319,6 +333,8 @@ export async function getRecipeFormTexts(
     childInputMultipleSelectorTexts,
     loadedImages,
     loadedVideos,
+    titleAIGeneratedPopTexts,
+    bodyAIGeneratedPopTexts,
     t,
   ] = await Promise.all([
     getIngredientQuantitySchemaTexts(),
@@ -332,6 +348,8 @@ export async function getRecipeFormTexts(
     getChildInputMultipleSelectorTexts("ingredients"),
     getUploadingProgressTexts("image"),
     getUploadingProgressTexts("video"),
+    getAIGeneratePopTexts("recipe", "title"),
+    getAIGeneratePopTexts("recipe", "body"),
     getTranslations("components.forms.RecipeFormTexts"),
   ]);
 
@@ -347,6 +365,15 @@ export async function getRecipeFormTexts(
     childInputMultipleSelectorTexts,
     loadedImages,
     loadedVideos,
+    titleAIGeneratedPopTexts,
+    bodyAIGeneratedPopTexts,
+    aiCheckBoxes: {
+      [t("aiCheckBoxes.title.field")]: t("aiCheckBoxes.title.description"),
+      [t("aiCheckBoxes.body.field")]: t("aiCheckBoxes.body.description"),
+      [t("aiCheckBoxes.ingredients.field")]: t(
+        "aiCheckBoxes.ingredients.description",
+      ),
+    },
     error: t("error", { type }),
     addIngredient: t("addIngredient"),
     ingredientsLabel: t("ingredientsLabel"),
@@ -373,6 +400,8 @@ export async function getDayFromTexts(type: FormType): Promise<DayFromTexts> {
     baseFormTexts,
     daySchemaTexts,
     mealSchemaTexts,
+    titleAIGeneratedPopTexts,
+    bodyAIGeneratedPopTexts,
     t,
   ] = await Promise.all([
     getTitleBodyText(),
@@ -382,6 +411,8 @@ export async function getDayFromTexts(type: FormType): Promise<DayFromTexts> {
     getBaseFormTexts("DayForm", type),
     getDaySchemaTexts(),
     getMealSchemaTexts(),
+    getAIGeneratePopTexts("day", "title"),
+    getAIGeneratePopTexts("day", "body"),
     getTranslations("components.forms.DayFormTexts"),
   ]);
 
@@ -415,6 +446,14 @@ export async function getDayFromTexts(type: FormType): Promise<DayFromTexts> {
       (acc, cur) => ({ ...acc, [cur]: t(`dayTypes.${cur}`) }),
       {} as Record<DayType, string>,
     ),
+    titleAIGeneratedPopTexts,
+    bodyAIGeneratedPopTexts,
+    aiCheckBoxes: {
+      [t("aiCheckBoxes.title.field")]: t("aiCheckBoxes.title.description"),
+      [t("aiCheckBoxes.body.field")]: t("aiCheckBoxes.body.description"),
+      [t("aiCheckBoxes.type.field")]: t("aiCheckBoxes.type.description"),
+      [t("aiCheckBoxes.recipes.field")]: t("aiCheckBoxes.recipes.description"),
+    },
   };
 }
 
@@ -427,6 +466,8 @@ export async function getPlanFormTexts(type: FormType): Promise<PlanFormTexts> {
     planSchemaTexts,
     baseFormTexts,
     loadedImages,
+    titleAIGeneratedPopTexts,
+    bodyAIGeneratedPopTexts,
     t,
   ] = await Promise.all([
     getTitleBodyText(),
@@ -436,6 +477,8 @@ export async function getPlanFormTexts(type: FormType): Promise<PlanFormTexts> {
     getPlanSchemaTexts(),
     getBaseFormTexts("PlanForm", type),
     getUploadingProgressTexts("image"),
+    getAIGeneratePopTexts("day", "title"),
+    getAIGeneratePopTexts("day", "body"),
     getTranslations("components.forms.PlanFormTexts"),
   ]);
 
@@ -459,6 +502,16 @@ export async function getPlanFormTexts(type: FormType): Promise<PlanFormTexts> {
       (acc, k) => ({ ...acc, [k]: t(`objectives.${k}`) }),
       {} as Record<(typeof planObjectives)[number], string>,
     ),
+    titleAIGeneratedPopTexts,
+    bodyAIGeneratedPopTexts,
+    aiCheckBoxes: {
+      [t("aiCheckBoxes.title.field")]: t("aiCheckBoxes.title.description"),
+      [t("aiCheckBoxes.body.field")]: t("aiCheckBoxes.body.description"),
+      [t("aiCheckBoxes.objective.field")]: t(
+        "aiCheckBoxes.objective.description",
+      ),
+      [t("aiCheckBoxes.days.field")]: t("aiCheckBoxes.days.description"),
+    },
   };
 }
 
@@ -508,5 +561,27 @@ export async function getAdminEmailTexts(): Promise<AdminEmailTexts> {
         >,
       ),
     },
+  };
+}
+export async function getAIGeneratePopTexts(
+  item: "post" | "recipe" | "plan" | "day",
+  thing: "title" | "body",
+): Promise<AIGeneratePopTexts> {
+  const [buttonSubmitTexts, t] = await Promise.all([
+    getButtonSubmitTexts(),
+    getTranslations("components.forms.AIGeneratePopTexts"),
+  ]);
+  return {
+    buttonSubmitTexts,
+    anchorText: t("anchorText"),
+    descriptionText: t("descriptionText", {
+      item: t("item." + item),
+      thing: t("thing." + thing),
+    }),
+    toxicError: t("toxicError"),
+    englishError: t("englishError"),
+    forFunText: t("forFunText"),
+    forFunBtnText: t("forFunBtnText"),
+    placeholder: t("placeholder"),
   };
 }

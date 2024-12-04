@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  AITitleBodyForm,
   BaseFormProps,
   getPlanSchema,
   PlanSchemaTexts,
@@ -93,8 +94,10 @@ import useProgressWebSocket from "@/hoooks/useProgressWebSocket";
 import UploadingProgress, {
   UploadingProgressTexts,
 } from "@/components/forms/uploading-progress";
+import useBaseAICallbackTitleBody from "@/hoooks/useBaseAICallbackTitleBody";
+import { AiIdeasField } from "@/actions/ai-ideas-types";
 
-export interface PlanFormTexts {
+export interface PlanFormTexts extends AITitleBodyForm {
   titleBodyTexts: TitleBodyTexts;
   childInputMultipleSelectorTexts: ChildInputMultipleSelectorTexts;
   imagesText: FieldInputTexts;
@@ -147,6 +150,9 @@ export default function PlanForm({
   dayIndex,
   objectives,
   loadedImages,
+  aiCheckBoxes,
+  titleAIGeneratedPopTexts,
+  bodyAIGeneratedPopTexts,
 }: PlanFormProps) {
   const planSchema = useMemo(
     () => getPlanSchema(planSchemaTexts),
@@ -166,6 +172,7 @@ export default function PlanForm({
     (Option & { dragId: string })[]
   >(initialOptions || []);
   const [dietType, setDietType] = useState<DietType | null>();
+  const [editorKey, setEditorKey] = useState<number>(0);
 
   const form = useForm<PlanSchemaType>({
     resolver: zodResolver(planSchema),
@@ -181,6 +188,53 @@ export default function PlanForm({
 
   const daysWatch = form.watch("days");
   const watchImages = form.watch("images");
+  const watchTitle = form.watch("title");
+  const watchBody = form.watch("body");
+  const watchObjective = form.watch("objective");
+
+  const baseAICallback = useBaseAICallbackTitleBody(form, setEditorKey);
+
+  const aiFields: AiIdeasField[] = useMemo(() => {
+    const fields: AiIdeasField[] = [];
+    if (watchTitle.trim()) {
+      fields.push({
+        content: watchTitle,
+        name: "title",
+        isHtml: false,
+        role: "Title of the meal plan",
+      });
+    }
+    if (watchBody.trim()) {
+      fields.push({
+        content: watchBody,
+        name: "body",
+        isHtml: true,
+        role: "Description of the of the meal plan",
+      });
+    }
+    if (watchObjective) {
+      fields.push({
+        content: watchObjective,
+        name: "objective",
+        isHtml: false,
+        role: "Objective of the meal plan",
+      });
+    }
+
+    if (selectedOptions.length) {
+      fields.push({
+        content: Array.from(
+          new Map(selectedOptions.map((o) => [o.label, o])).values(),
+        )
+          .map((o) => o.label)
+          .join(","),
+        name: "days",
+        isHtml: false,
+        role: "Days of the meal plan",
+      });
+    }
+    return fields;
+  }, [watchBody, watchObjective, watchTitle, JSON.stringify(selectedOptions)]);
 
   useEffect(() => {
     if (daysWatch.length) {
@@ -325,6 +379,16 @@ export default function PlanForm({
             <TitleBodyForm<PlanSchemaType>
               control={form.control}
               titleBodyTexts={titleBodyTexts}
+              showAIPopDescription
+              showAIPopTitle
+              aiFields={aiFields}
+              editorKey={editorKey}
+              aiDescriptionCallBack={(r) => baseAICallback("body", r)}
+              aiTitleCallBack={(r) => baseAICallback("title", r)}
+              aiItem={"meal plan"}
+              aiCheckBoxes={aiCheckBoxes}
+              titleAIGeneratedPopTexts={titleAIGeneratedPopTexts}
+              bodyAIGeneratedPopTexts={bodyAIGeneratedPopTexts}
             />
 
             <FormField

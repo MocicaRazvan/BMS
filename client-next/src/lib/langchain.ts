@@ -225,7 +225,7 @@ export class VectorStoreSingleton {
     //   );
   }
 
-  private static parseHTMLWithCheerio(htmlContent: string, source: string) {
+  static parseHTMLWithCheerio(htmlContent: string, source: string) {
     const $ = cheerio.load(htmlContent);
     const slugs = source.match(/\[[^\]]*]/g);
 

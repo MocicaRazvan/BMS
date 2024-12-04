@@ -27,6 +27,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import {
+  AITitleBodyForm,
   BaseFormProps,
   getIngredientQuantitySchema,
   getRecipeSchema,
@@ -61,8 +62,10 @@ import useProgressWebSocket from "@/hoooks/useProgressWebSocket";
 import UploadingProgress, {
   UploadingProgressTexts,
 } from "@/components/forms/uploading-progress";
+import { AiIdeasField } from "@/actions/ai-ideas-types";
+import useBaseAICallbackTitleBody from "@/hoooks/useBaseAICallbackTitleBody";
 
-export interface RecipeFormTexts extends SingleChildFormTexts {
+export interface RecipeFormTexts extends SingleChildFormTexts, AITitleBodyForm {
   ingredientQuantitySchemaTexts: IngredientQuantitySchemaTexts;
   recipeSchemaTexts: RecipeSchemaTexts;
   ingredientPieChartTexts: IngredientPieChartTexts;
@@ -125,6 +128,9 @@ export default function RecipeForm({
   continueBtn,
   loadedImages,
   loadedVideos,
+  titleAIGeneratedPopTexts,
+  bodyAIGeneratedPopTexts,
+  aiCheckBoxes,
 }: RecipeFormProps) {
   const initialChildrenKeys = Object.keys(initialChildren);
   const initialChildrenValues = Object.values(initialChildren);
@@ -133,6 +139,7 @@ export default function RecipeForm({
     [recipeSchemaTexts],
   );
   const [clientId] = useState(uuidv4);
+  const [editorKey, setEditorKey] = useState<number>(0);
 
   const [
     isIngredientCompletedButNotSubmitted,
@@ -171,6 +178,10 @@ export default function RecipeForm({
 
   const watchImages = form.watch("images");
   const watchVideos = form.watch("videos");
+  const watchBody = form.watch("body");
+  const watchTitle = form.watch("title");
+
+  const baseAICallback = useBaseAICallbackTitleBody(form, setEditorKey);
 
   const { fileCleanup: imagesCleanup } = useFilesBase64({
     files: images,
@@ -238,7 +249,6 @@ export default function RecipeForm({
         : prev.filter((o) => o.value !== options[0].value),
     );
   }, []);
-
   const disableCallback = useCallback(
     (
       i: PageableResponse<CustomEntityModel<IngredientNutritionalFactResponse>>,
@@ -376,7 +386,43 @@ export default function RecipeForm({
       videosCleanup();
     };
   }, [imagesCleanup, videosCleanup]);
-
+  const aiFields: AiIdeasField[] = useMemo(() => {
+    const fields: AiIdeasField[] = [];
+    if (selectedOptions.length) {
+      fields.push({
+        content: selectedOptions.map((o) => o.label).join(","),
+        name: "ingredients",
+        isHtml: false,
+        role: "Ingredients of the recipe",
+      });
+      fields.push({
+        content:
+          determineMostRestrictiveDiet(
+            selectedOptions.map((o) => o.type as DietType),
+          ) || "OMNIVORE",
+        name: "dietType",
+        isHtml: false,
+        role: "Diet type of the recipe",
+      });
+    }
+    if (watchTitle.trim()) {
+      fields.push({
+        content: watchTitle,
+        name: "title",
+        isHtml: false,
+        role: "Title of the recipe",
+      });
+    }
+    if (watchBody.trim()) {
+      fields.push({
+        content: watchBody,
+        name: "body",
+        isHtml: true,
+        role: "Description of the of the recipe",
+      });
+    }
+    return fields;
+  }, [selectedOptions, watchBody, watchTitle]);
   return (
     <Card className="max-w-7xl w-full sm:px-2 md:px-5 py-6">
       <CardTitle className="font-bold text-2xl text-center capitalize">
@@ -393,6 +439,16 @@ export default function RecipeForm({
             <TitleBodyForm<RecipeSchemaType>
               control={form.control}
               titleBodyTexts={titleBodyTexts}
+              showAIPopDescription
+              showAIPopTitle
+              aiFields={aiFields}
+              editorKey={editorKey}
+              aiDescriptionCallBack={(r) => baseAICallback("body", r)}
+              aiTitleCallBack={(r) => baseAICallback("title", r)}
+              aiItem={"recipe"}
+              aiCheckBoxes={aiCheckBoxes}
+              titleAIGeneratedPopTexts={titleAIGeneratedPopTexts}
+              bodyAIGeneratedPopTexts={bodyAIGeneratedPopTexts}
             />
             <FormField
               control={form.control}

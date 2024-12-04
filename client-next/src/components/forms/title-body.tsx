@@ -9,6 +9,12 @@ import {
 import { Input } from "@/components/ui/input";
 import Editor from "../editor/editor";
 import { TitleBodyDto } from "@/types/dto";
+import { AiIdeasField } from "@/actions/ai-ideas-types";
+import AIGeneratePop, {
+  AIGeneratePopTexts,
+  AIPopCallback,
+} from "@/components/forms/ai-generate-pop";
+import { useMemo } from "react";
 
 export interface TitleBodyTexts {
   title: string;
@@ -23,6 +29,16 @@ interface CustomFieldProps<TFieldValues extends TitleBodyDto> {
   titleBodyTexts: TitleBodyTexts;
   hideTitle?: boolean;
   editorKey?: number;
+  showAIPopTitle?: boolean;
+  showAIPopDescription?: boolean;
+  aiFields?: AiIdeasField[];
+  aiTitleCallBack?: AIPopCallback;
+  aiDescriptionCallBack?: AIPopCallback;
+  aiItem?: string;
+  aiCheckBoxes?: Record<string, string>;
+  titleAIGeneratedPopTexts?: AIGeneratePopTexts;
+  bodyAIGeneratedPopTexts?: AIGeneratePopTexts;
+  extraBodyContext?: number;
 }
 
 export const TitleBodyForm = <TFieldValues extends TitleBodyDto>({
@@ -30,12 +46,34 @@ export const TitleBodyForm = <TFieldValues extends TitleBodyDto>({
   titleBodyTexts: { body, bodyPlaceholder, titlePlaceholder, title },
   hideTitle = false,
   editorKey,
+  showAIPopTitle = false,
+  showAIPopDescription = false,
+  aiFields = [],
+  aiTitleCallBack = (r) => {},
+  aiDescriptionCallBack = (r) => {},
+  aiItem = "",
+  aiCheckBoxes = {},
+  titleAIGeneratedPopTexts,
+  bodyAIGeneratedPopTexts,
+  extraBodyContext = 5,
 }: CustomFieldProps<TFieldValues>) => {
   const { getValues } = useFormContext<TFieldValues>();
 
   if (!["title", "body"].every((k) => k in getValues())) {
     throw new Error(`Invalid field names`);
   }
+  const titleAIFields = useMemo(
+    () =>
+      // .filter((f) => f.name !== "title"),
+      aiFields,
+    [aiFields],
+  );
+  const bodyAIFields = useMemo(
+    () =>
+      // .filter((f) => f.name !== "description"),
+      aiFields,
+    [aiFields],
+  );
 
   return (
     <div className="space-y-8 lg:space-y-12">
@@ -47,7 +85,25 @@ export const TitleBodyForm = <TFieldValues extends TitleBodyDto>({
             <FormItem>
               <FormLabel className="capitalize">{title}</FormLabel>
               <FormControl>
-                <Input placeholder={titlePlaceholder} {...field} />
+                <div className="flex items-center justify-center">
+                  <Input
+                    placeholder={titlePlaceholder}
+                    {...field}
+                    className="flex-1"
+                  />
+                  {showAIPopTitle && titleAIGeneratedPopTexts && (
+                    <div className="ml-2 md:ml-4">
+                      <AIGeneratePop
+                        fields={titleAIFields}
+                        callback={aiTitleCallBack}
+                        targetedField={"title"}
+                        item={aiItem}
+                        checkBoxes={aiCheckBoxes}
+                        {...titleAIGeneratedPopTexts}
+                      />
+                    </div>
+                  )}
+                </div>
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -59,10 +115,24 @@ export const TitleBodyForm = <TFieldValues extends TitleBodyDto>({
         name={"body" as Path<TFieldValues>}
         render={({ field }) => (
           <FormItem>
-            <FormLabel className="capitalize">{body}</FormLabel>
+            <div className="flex items-center justify-between">
+              <FormLabel className="capitalize">{body}</FormLabel>
+              {showAIPopDescription && bodyAIGeneratedPopTexts && (
+                <AIGeneratePop
+                  fields={bodyAIFields}
+                  callback={aiDescriptionCallBack}
+                  targetedField={"description"}
+                  item={aiItem}
+                  checkBoxes={aiCheckBoxes}
+                  extraContext={extraBodyContext}
+                  {...bodyAIGeneratedPopTexts}
+                />
+              )}
+            </div>
             <FormControl>
               {/* <Textarea placeholder={bodyPlaceholder} {...field} />
                */}
+
               <Editor
                 descritpion={field.value as string}
                 onChange={field.onChange}

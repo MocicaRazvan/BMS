@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  AITitleBodyForm,
   BaseFormProps,
   getPostSchema,
   PostSchemaTexts,
@@ -35,11 +36,14 @@ import { v4 as uuidv4 } from "uuid";
 import UploadingProgress, {
   UploadingProgressTexts,
 } from "@/components/forms/uploading-progress";
+import { AiIdeasField } from "@/actions/ai-ideas-types";
+import useBaseAICallbackTitleBody from "@/hoooks/useBaseAICallbackTitleBody";
 
 export interface PostFormProps
   extends Partial<Omit<PostType, "images">>,
     BaseFormTexts,
-    BaseFormProps {
+    BaseFormProps,
+    AITitleBodyForm {
   postSchemaTexts: PostSchemaTexts;
   fieldTexts: FieldInputTexts;
   titleBodyTexts: TitleBodyTexts;
@@ -69,6 +73,9 @@ export default function PostForm({
   path,
   type = "create",
   loadedImages,
+  titleAIGeneratedPopTexts,
+  bodyAIGeneratedPopTexts,
+  aiCheckBoxes,
 }: PostFormProps) {
   const schema = useMemo(
     () => getPostSchema(postSchemaTexts),
@@ -82,6 +89,7 @@ export default function PostForm({
   );
   const { isLoading, setIsLoading, router, errorMsg, setErrorMsg } =
     useLoadingErrorState();
+  const [editorKey, setEditorKey] = useState<number>(0);
 
   console.log("images", images);
 
@@ -96,7 +104,40 @@ export default function PostForm({
   });
 
   const watchImages = form.watch("images");
+  const watchTitle = form.watch("title");
+  const watchBody = form.watch("body");
+  const watchTags = form.watch("tags");
 
+  const baseAICallback = useBaseAICallbackTitleBody(form, setEditorKey);
+
+  const aiFields: AiIdeasField[] = useMemo(() => {
+    const fields: AiIdeasField[] = [];
+    if (watchTitle.trim()) {
+      fields.push({
+        content: watchTitle,
+        name: "title",
+        isHtml: false,
+        role: "Title of the post",
+      });
+    }
+    if (watchBody.trim()) {
+      fields.push({
+        content: watchBody,
+        name: "body",
+        isHtml: true,
+        role: "Description of the of the post",
+      });
+    }
+    if (watchTags.length) {
+      fields.push({
+        content: watchTags.map((tag) => tag.value).join(","),
+        name: "tags",
+        isHtml: false,
+        role: "Tags of the post",
+      });
+    }
+    return fields;
+  }, [watchBody, watchTags, watchTitle]);
   const { fileCleanup } = useFilesBase64({
     files: images,
     fieldName: "images",
@@ -184,6 +225,16 @@ export default function PostForm({
             <TitleBodyForm<PostType>
               control={form.control}
               titleBodyTexts={titleBodyTexts}
+              showAIPopDescription
+              showAIPopTitle
+              aiFields={aiFields}
+              editorKey={editorKey}
+              aiDescriptionCallBack={(r) => baseAICallback("body", r)}
+              aiTitleCallBack={(r) => baseAICallback("title", r)}
+              aiItem={"post"}
+              aiCheckBoxes={aiCheckBoxes}
+              titleAIGeneratedPopTexts={titleAIGeneratedPopTexts}
+              bodyAIGeneratedPopTexts={bodyAIGeneratedPopTexts}
             />
             <InputMultipleSelector
               control={form.control}

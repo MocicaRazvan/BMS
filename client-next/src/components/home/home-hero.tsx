@@ -13,6 +13,7 @@ import picture8 from "../../../public/images/Picture8.jpg";
 import picture9 from "../../../public/images/Picture9.jpg";
 import picture10 from "../../../public/images/Picture10.jpg";
 import { appendCreatedAtDesc } from "@/lib/utils";
+
 export type TitleKeys = `title${1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10}`;
 export interface HomeHeroTexts extends HeroParallaxTexts {
   titles: Record<TitleKeys, string>;

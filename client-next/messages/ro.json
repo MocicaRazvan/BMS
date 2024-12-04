@@ -323,6 +323,41 @@
   },
   "components": {
     "forms": {
+      "AIGeneratePopTexts": {
+        "anchorText": "AI",
+        "descriptionText": "Cere AI-ului să te ajute să generezi un {thing} pentru {item}. Poți oferi o scurtă descriere a ceea ce dorești. Această funcție este disponibilă doar în limba engleză!",
+        "toxicError": "Descrierea nu trebuie să conțină limbaj toxic",
+        "englishError": "Descrierea trebuie să fie în limba engleză",
+        "forFunText": "AI-ul are nevoie de un context, poți încerca oricum, doar pentru distracție!",
+        "forFunBtnText": "Înțeleg, hai să încercăm",
+        "placeholder": "Fi clar, concis și specific în limba engleză",
+        "thing": {
+          "title": "titlu",
+          "body": "conținut"
+        },
+        "item": {
+          "post": "postare",
+          "recipe": "rețetă",
+          "plan": "plan",
+          "day": "zi"
+        }
+      },
+      "PostFormTexts": {
+        "aiCheckBoxes": {
+          "title": {
+            "field": "title",
+            "description": "Adaugă titlu în context"
+          },
+          "body": {
+            "field": "body",
+            "description": "Adaugă corp în context"
+          },
+          "tags": {
+            "field": "tags",
+            "description": "Adaugă etichete în context"
+          }
+        }
+      },
       "UpdateProfileForm": {
         "error": "Profilul nu a putut fi actualizat",
         "firstName": "Prenume",
@@ -386,7 +421,21 @@
         "quantityChildLabel": "Cantitate",
         "dietType": "Rețeta este:",
         "areIngredientsCompletedButNotSubmitted": "Sunt ingrediente completate care nu sunt adăugate, continuați iar ele vor fi ignorate",
-        "continueBtn": "Continuați"
+        "continueBtn": "Continuați",
+        "aiCheckBoxes": {
+          "title": {
+            "field": "title",
+            "description": "Adaugă titlu în context"
+          },
+          "body": {
+            "field": "body",
+            "description": "Adaugă corp în context"
+          },
+          "ingredients": {
+            "field": "ingredients",
+            "description": "Adaugă ingredientele în context"
+          }
+        }
       },
       "PlanFormTexts": {
         "priceLabel": "Preț",
@@ -401,6 +450,24 @@
           "GAIN_MASS": "Câștig masă",
           "LOSE_WEIGHT": "Pierde greutate",
           "MAINTAIN_WEIGHT": "Menține greutatea"
+        },
+        "aiCheckBoxes": {
+          "title": {
+            "field": "title",
+            "description": "Adaugă titlu în context"
+          },
+          "body": {
+            "field": "body",
+            "description": "Adaugă corp în context"
+          },
+          "objective": {
+            "field": "objective",
+            "description": "Adaugă obiectivul în context"
+          },
+          "days": {
+            "field": "days",
+            "description": "Adaugă zilele în context"
+          }
         }
       },
       "CheckoutDrawerTexts": {
@@ -459,6 +526,24 @@
           "HIGH_FAT": "Grăsimi ridicate",
           "LOW_PROTEIN": "Proteine scăzute",
           "BALANCED": "Balansat"
+        },
+        "aiCheckBoxes": {
+          "title": {
+            "field": "title",
+            "description": "Adaugă titlu în context"
+          },
+          "body": {
+            "field": "body",
+            "description": "Adaugă corp în context"
+          },
+          "type": {
+            "field": "type",
+            "description": "Adaugă tipul zilei în context"
+          },
+          "recipes": {
+            "field": "recipes",
+            "description": "Adaugă rețetele în context"
+          }
         }
       }
     },
@@ -1076,7 +1161,8 @@
           "mainSite": "Site principal",
           "groupLabels": {
             "contents": "Conținut",
-            "sales": "Vânzări"
+            "sales": "Vânzări",
+            "settings": "Setări"
           },
           "labels": {
             "dashboard": "Tablou de bord",
@@ -1088,7 +1174,8 @@
             "monthlySales": "Vânzări lunare",
             "dailySales": "Vânzări zilnice",
             "kanban": "Kanban",
-            "days": "Zile"
+            "days": "Zile",
+            "account": "Cont"
           },
           "subLabels": {
             "yourPosts": "Postările tale",

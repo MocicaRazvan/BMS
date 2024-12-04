@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 import { FormType } from "@/texts/components/forms";
 import { dayTypes, planObjectives } from "@/types/dto";
 import DOMPurify from "dompurify";
+import { AIGeneratePopTexts } from "@/components/forms/ai-generate-pop";
 
 export const fileItemSchema = z.object({
   id: z.union([z.string(), z.number()]),
@@ -15,6 +16,11 @@ export interface BaseFormProps {
   path: string;
 }
 
+export interface AITitleBodyForm {
+  titleAIGeneratedPopTexts: AIGeneratePopTexts;
+  bodyAIGeneratedPopTexts: AIGeneratePopTexts;
+  aiCheckBoxes: Record<string, string>;
+}
 export interface EmailSchemaTexts {
   email: string;
 }

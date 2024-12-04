@@ -320,3 +320,20 @@ export const appendCreatedAtDesc = (url: string) =>
 export function truncate(text: string, length: number) {
   return text.length > length ? text.substring(0, length) + "..." : text;
 }
+export function trimString(title: string) {
+  return title
+    .trim()
+    .replace(/^[`"']+/, "")
+    .replace(/^[`"']+/, "")
+    .replace(/^[`"']+/, "")
+    .replace(/(\r\n|\n|\r)/gm, "")
+    .replace(/^'"|"'$/g, "")
+    .replace(/^[`"']+|[`"']+$/g, "")
+    .replace(/^['"]+|['"]+$/g, "")
+    .replace(/"/g, "")
+    .replaceAll('"', "");
+}
+
+export function trimHTML(html: string) {
+  return html.trim().replaceAll("*", "");
+}
