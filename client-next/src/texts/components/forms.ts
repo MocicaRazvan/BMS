@@ -7,6 +7,7 @@ import {
   getAdminEmailSchemaTexts,
   getCommentSchemaTexts,
   getDaySchemaTexts,
+  getDiffusionSchemaTexts,
   getIngredientNutritionalFactSchemaTexts,
   getIngredientQuantitySchemaTexts,
   getMealSchemaTexts,
@@ -34,6 +35,7 @@ import { DayFromTexts } from "@/components/forms/day-form";
 import { DayType, dayTypes, planObjectives } from "@/types/dto";
 import { UploadingProgressTexts } from "@/components/forms/uploading-progress";
 import { AIGeneratePopTexts } from "@/components/forms/ai-generate-pop";
+import { DiffusionImagesFormTexts } from "@/components/forms/diffusion-images-form";
 
 export type FormType = "create" | "update";
 
@@ -148,6 +150,7 @@ export const getPostFormTexts = async (type: FormType) => {
     loadedImages,
     titleAIGeneratedPopTexts,
     bodyAIGeneratedPopTexts,
+    diffusionImagesFormTexts,
     t,
   ] = await Promise.all([
     getPostSchemaTexts(),
@@ -159,6 +162,7 @@ export const getPostFormTexts = async (type: FormType) => {
     getUploadingProgressTexts("image"),
     getAIGeneratePopTexts("post", "title"),
     getAIGeneratePopTexts("post", "body"),
+    getDiffusionImagesFormTexts(),
     getTranslations("components.forms.PostFormTexts"),
   ]);
   return {
@@ -171,6 +175,7 @@ export const getPostFormTexts = async (type: FormType) => {
     loadedImages,
     titleAIGeneratedPopTexts,
     bodyAIGeneratedPopTexts,
+    diffusionImagesFormTexts,
     aiCheckBoxes: {
       [t("aiCheckBoxes.title.field")]: t("aiCheckBoxes.title.description"),
       [t("aiCheckBoxes.body.field")]: t("aiCheckBoxes.body.description"),
@@ -335,6 +340,7 @@ export async function getRecipeFormTexts(
     loadedVideos,
     titleAIGeneratedPopTexts,
     bodyAIGeneratedPopTexts,
+    diffusionImagesFormTexts,
     t,
   ] = await Promise.all([
     getIngredientQuantitySchemaTexts(),
@@ -350,6 +356,7 @@ export async function getRecipeFormTexts(
     getUploadingProgressTexts("video"),
     getAIGeneratePopTexts("recipe", "title"),
     getAIGeneratePopTexts("recipe", "body"),
+    getDiffusionImagesFormTexts(),
     getTranslations("components.forms.RecipeFormTexts"),
   ]);
 
@@ -367,6 +374,7 @@ export async function getRecipeFormTexts(
     loadedVideos,
     titleAIGeneratedPopTexts,
     bodyAIGeneratedPopTexts,
+    diffusionImagesFormTexts,
     aiCheckBoxes: {
       [t("aiCheckBoxes.title.field")]: t("aiCheckBoxes.title.description"),
       [t("aiCheckBoxes.body.field")]: t("aiCheckBoxes.body.description"),
@@ -468,6 +476,7 @@ export async function getPlanFormTexts(type: FormType): Promise<PlanFormTexts> {
     loadedImages,
     titleAIGeneratedPopTexts,
     bodyAIGeneratedPopTexts,
+    diffusionImagesFormTexts,
     t,
   ] = await Promise.all([
     getTitleBodyText(),
@@ -479,6 +488,7 @@ export async function getPlanFormTexts(type: FormType): Promise<PlanFormTexts> {
     getUploadingProgressTexts("image"),
     getAIGeneratePopTexts("day", "title"),
     getAIGeneratePopTexts("day", "body"),
+    getDiffusionImagesFormTexts(),
     getTranslations("components.forms.PlanFormTexts"),
   ]);
 
@@ -490,6 +500,7 @@ export async function getPlanFormTexts(type: FormType): Promise<PlanFormTexts> {
     planSchemaTexts,
     baseFormTexts,
     loadedImages,
+    diffusionImagesFormTexts,
     pricePlaceholder: t("pricePlaceholder"),
     priceLabel: t("priceLabel"),
     dietMessage: t("dietMessage"),
@@ -583,5 +594,29 @@ export async function getAIGeneratePopTexts(
     forFunText: t("forFunText"),
     forFunBtnText: t("forFunBtnText"),
     placeholder: t("placeholder"),
+  };
+}
+
+export async function getDiffusionImagesFormTexts(): Promise<DiffusionImagesFormTexts> {
+  const [schemaTexts, t] = await Promise.all([
+    getDiffusionSchemaTexts(),
+    getTranslations("components.forms.DiffusionImagesFormTexts"),
+  ]);
+  return {
+    schemaTexts,
+    numImagesLabel: t("numImagesLabel"),
+    toxicError: t("toxicError"),
+    negativePromptLabel: t("negativePromptLabel"),
+    buttonSubmitText: {
+      loadingText: t("buttonSubmitText.loadingText"),
+      submitText: t("buttonSubmitText.submitText"),
+    },
+    triggerText: t("triggerText"),
+    promptLabel: t("promptLabel"),
+    promptPlaceholder: t("promptPlaceholder"),
+    promptDescription: t("promptDescription"),
+    negativePromptPlaceholder: t("negativePromptPlaceholder"),
+    negativePromptDescription: t("negativePromptDescription"),
+    englishError: t("englishError"),
   };
 }

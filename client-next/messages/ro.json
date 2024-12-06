@@ -8,6 +8,12 @@
     "description": "Ne pare rău, dar pagina pe care o căutați nu există."
   },
   "zod": {
+    "DiffusionSchemaTexts": {
+      "minPrompt": "Promptul trebuie să aibă cel puțin 20 de caractere",
+      "maxPrompt": "Promptul trebuie să aibă cel mult 100 de caractere",
+      "minNegativePrompt": "Promptul negativ trebuie să aibă cel puțin 20 de caractere",
+      "maxNegativePrompt": "Promptul negativ trebuie să aibă cel mult 100 de caractere"
+    },
     "CommentSchemaTexts": {
       "body": "Comentariul trebuie să aibă cel puțin 20 caractere"
     },
@@ -323,6 +329,22 @@
   },
   "components": {
     "forms": {
+      "DiffusionImagesFormTexts": {
+        "toxicError": "Câmpul nu trebuie să conțină limbaj toxic",
+        "englishError": "Câmpul trebuie să fie în limba engleză",
+        "triggerText": "Generează imagini cu AI",
+        "promptLabel": "Prompt",
+        "negativePromptLabel": "Prompt negativ",
+        "numImagesLabel": "Număr de imagini",
+        "promptPlaceholder": "realistic, chicken salad with avocado",
+        "negativePromptPlaceholder": "low quality, blurry, animated",
+        "promptDescription": "Promptul trebuie să fie o descriere scurtă a imaginii pe care doriți să o generați, elementele trebuie separate prin virgule, păstrați-l simplu și clar",
+        "negativePromptDescription": "Promptul negativ trebuie să fie o descriere scurtă a ceea ce nu doriți în imagine, elementele trebuie separate prin virgule, păstrați-l simplu și clar",
+        "buttonSubmitText": {
+          "loadingText": "AI lucrează foarte intens",
+          "submitText": "Generează Imagini"
+        }
+      },
       "AIGeneratePopTexts": {
         "anchorText": "AI",
         "descriptionText": "Cere AI-ului să te ajute să generezi un {thing} pentru {item}. Poți oferi o scurtă descriere a ceea ce dorești. Această funcție este disponibilă doar în limba engleză!",

@@ -38,6 +38,13 @@ import UploadingProgress, {
 } from "@/components/forms/uploading-progress";
 import { AiIdeasField } from "@/types/ai-ideas-types";
 import useBaseAICallbackTitleBody from "@/hoooks/useBaseAICallbackTitleBody";
+import useGetDiffusionImages, {
+  DiffusionCallback,
+} from "@/hoooks/useGetDiffusionImages";
+import DiffusionImagesForm, {
+  DiffusionImagesFormCallback,
+  DiffusionImagesFormTexts,
+} from "@/components/forms/diffusion-images-form";
 
 export interface PostFormProps
   extends Partial<Omit<PostType, "images">>,
@@ -52,6 +59,7 @@ export interface PostFormProps
   authUser: NonNullable<Session["user"]>;
   images?: string[];
   loadedImages: UploadingProgressTexts;
+  diffusionImagesFormTexts: DiffusionImagesFormTexts;
 }
 
 export default function PostForm({
@@ -76,6 +84,7 @@ export default function PostForm({
   titleAIGeneratedPopTexts,
   bodyAIGeneratedPopTexts,
   aiCheckBoxes,
+  diffusionImagesFormTexts,
 }: PostFormProps) {
   const schema = useMemo(
     () => getPostSchema(postSchemaTexts),
@@ -102,7 +111,7 @@ export default function PostForm({
       title,
     },
   });
-
+  const [isImagesListCollapsed, setIsImagesListCollapsed] = useState(true);
   const watchImages = form.watch("images");
   const watchTitle = form.watch("title");
   const watchBody = form.watch("body");
@@ -144,6 +153,41 @@ export default function PostForm({
     setValue: form.setValue,
     getValues: form.getValues,
   });
+
+  const { invalidateImages, getImages, addImagesCallback } =
+    useGetDiffusionImages({
+      cleanUpArgs: {
+        fieldName: "images",
+        getValues: form.getValues,
+      },
+    });
+
+  const addDiffusionImages: DiffusionImagesFormCallback = useCallback(
+    async ({ numImages, prompt, negativePrompt }) => {
+      await getImages({
+        num_images: numImages,
+        prompt,
+        negative_prompt: negativePrompt,
+        successCallback: (images) => addImagesCallback(images, form),
+      }) //realistic, chicken with tomatoes
+        .catch((e) => {
+          console.log(e);
+        })
+        .then(() => {
+          setTimeout(() => {
+            setIsImagesListCollapsed(false);
+          }, 400);
+        });
+    },
+    [getImages, addImagesCallback, form],
+  );
+
+  useEffect(() => {
+    return () => {
+      invalidateImages();
+    };
+  }, [invalidateImages]);
+
   useEffect(() => {
     return () => {
       fileCleanup();
@@ -247,6 +291,11 @@ export default function PostForm({
               fieldName={"images"}
               fieldTexts={fieldTexts}
               initialLength={images?.length || 0}
+              parentListCollapsed={isImagesListCollapsed}
+            />
+            <DiffusionImagesForm
+              texts={diffusionImagesFormTexts}
+              callback={addDiffusionImages}
             />
             <ErrorMessage message={error} show={!!errorMsg} />
             <ButtonSubmit

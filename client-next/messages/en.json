@@ -8,6 +8,12 @@
     "description": "Sorry, the page you are looking for does not exist."
   },
   "zod": {
+    "DiffusionSchemaTexts": {
+      "minPrompt": "Prompt must be at least 20 characters",
+      "maxPrompt": "Prompt must be at most 100 characters",
+      "minNegativePrompt": "Negative prompt must be at least 20 characters",
+      "maxNegativePrompt": "Negative prompt must be at most 100 characters"
+    },
     "CommentSchemaTexts": {
       "body": "The comment must be at least 20 characters long"
     },
@@ -324,6 +330,22 @@
   },
   "components": {
     "forms": {
+      "DiffusionImagesFormTexts": {
+        "toxicError": "The field should not contain toxic language",
+        "englishError": "The field must be in English",
+        "triggerText": "Generate images with AI",
+        "promptLabel": "Prompt",
+        "negativePromptLabel": "Negative Prompt",
+        "numImagesLabel": "Number of images",
+        "promptPlaceholder": "realistic, chicken salad with avocado",
+        "negativePromptPlaceholder": "low quality, blurry, animated",
+        "promptDescription": "The prompt should be a short description of the image you want to generate, items should be separated by commas, keep it simple and clear",
+        "negativePromptDescription": "The negative prompt should be a short description of what you do not want in the image, items should be separated by commas, keep it simple and clear",
+        "buttonSubmitText": {
+          "loadingText": "The AI is working really hard",
+          "submitText": "Generate Images"
+        }
+      },
       "AIGeneratePopTexts": {
         "anchorText": "AI",
         "descriptionText": "Ask AI to help generate a {thing} for the {item}. You can give a small description of what you want. This feature is available only in English!",

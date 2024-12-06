@@ -53,6 +53,7 @@ export default async function UserDuplicatePostPage({
         bodyAIGeneratedPopTexts,
         titleAIGeneratedPopTexts,
         aiCheckBoxes,
+        diffusionImagesFormTexts,
       },
       ...rest
     },
@@ -85,6 +86,7 @@ export default async function UserDuplicatePostPage({
             aiCheckBoxes={aiCheckBoxes}
             bodyAIGeneratedPopTexts={bodyAIGeneratedPopTexts}
             titleAIGeneratedPopTexts={titleAIGeneratedPopTexts}
+            diffusionImagesFormTexts={diffusionImagesFormTexts}
           />
         </Suspense>
       </main>

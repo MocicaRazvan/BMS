@@ -226,7 +226,7 @@ async function createDocsChain(
         "- Nutrition posts: /" +
         locale +
         "/posts/approved\n" +
-        "- Meal plans page where the user can buy new plans: /" +
+        "- Meal plans page where the user can BUY new plans: /" +
         locale +
         "/plans/approved\n" +
         "- Account login/registration: /" +
@@ -235,7 +235,7 @@ async function createDocsChain(
         "- View orders: /" +
         locale +
         "/orders\n" +
-        "- Manage already purchased meal plans: /" +
+        "- Manage ALREADY purchased meal plans: /" +
         locale +
         "/subscriptions\n" +
         "- Terms of service: /" +
@@ -256,7 +256,10 @@ async function createDocsChain(
         "2. Keep the conversation engaging, informative, and fun.\n" +
         "3. Never provide HTML/JS code or discuss technical details with the user.\n" +
         "4. Never send images to the user, you are a text based chat, but you can send emojis. \n" +
-        "5. Never mention other sites and always focus on the site you are assisting with.\n\n" +
+        "5. Never mention other sites and always focus on the site you are assisting with.\n" +
+        "6. Always include the site's base URL : " +
+        siteNoPort +
+        " in any links you provide.\n" +
         "Context:\n{context}",
     ],
     new MessagesPlaceholder("chat_history"),

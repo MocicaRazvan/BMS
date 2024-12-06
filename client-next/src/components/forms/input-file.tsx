@@ -296,6 +296,7 @@ interface Props<T extends FieldValues> {
   fieldTexts: FieldInputTexts;
   multiple?: boolean;
   initialLength: number;
+  parentListCollapsed?: boolean;
 }
 
 export interface FieldInputItem extends SortableItem {
@@ -342,6 +343,7 @@ export default function InputFile<T extends FieldValues>({
   },
   initialLength = 0,
   multiple = true,
+  parentListCollapsed,
 }: Props<T>) {
   const fieldValue = useWatch({
     control,
@@ -354,6 +356,12 @@ export default function InputFile<T extends FieldValues>({
   if (!(fieldName in getValues())) {
     throw new Error(`Invalid field name: ${fieldName}`);
   }
+
+  useEffect(() => {
+    if (typeof parentListCollapsed === "boolean") {
+      setIsListCollapsed(parentListCollapsed);
+    }
+  }, [parentListCollapsed]);
 
   const onDrop = useCallback(
     (acceptedFiles: File[]) => {

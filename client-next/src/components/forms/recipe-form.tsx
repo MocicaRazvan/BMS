@@ -64,6 +64,13 @@ import UploadingProgress, {
 } from "@/components/forms/uploading-progress";
 import { AiIdeasField } from "@/types/ai-ideas-types";
 import useBaseAICallbackTitleBody from "@/hoooks/useBaseAICallbackTitleBody";
+import DiffusionImagesForm, {
+  DiffusionImagesFormCallback,
+  DiffusionImagesFormTexts,
+} from "@/components/forms/diffusion-images-form";
+import useGetDiffusionImages, {
+  DiffusionCallback,
+} from "@/hoooks/useGetDiffusionImages";
 
 export interface RecipeFormTexts extends SingleChildFormTexts, AITitleBodyForm {
   ingredientQuantitySchemaTexts: IngredientQuantitySchemaTexts;
@@ -83,6 +90,7 @@ export interface RecipeFormTexts extends SingleChildFormTexts, AITitleBodyForm {
   continueBtn: string;
   loadedImages: UploadingProgressTexts;
   loadedVideos: UploadingProgressTexts;
+  diffusionImagesFormTexts: DiffusionImagesFormTexts;
 }
 
 export interface RecipeFormProps
@@ -131,6 +139,7 @@ export default function RecipeForm({
   titleAIGeneratedPopTexts,
   bodyAIGeneratedPopTexts,
   aiCheckBoxes,
+  diffusionImagesFormTexts,
 }: RecipeFormProps) {
   const initialChildrenKeys = Object.keys(initialChildren);
   const initialChildrenValues = Object.values(initialChildren);
@@ -140,6 +149,7 @@ export default function RecipeForm({
   );
   const [clientId] = useState(uuidv4);
   const [editorKey, setEditorKey] = useState<number>(0);
+  const [isImagesListCollapsed, setIsImagesListCollapsed] = useState(true);
 
   const [
     isIngredientCompletedButNotSubmitted,
@@ -210,6 +220,34 @@ export default function RecipeForm({
   );
 
   const [chartItems, setChartItems] = useState<MacroChartElement[]>([]);
+
+  const { invalidateImages, getImages, addImagesCallback } =
+    useGetDiffusionImages({
+      cleanUpArgs: {
+        fieldName: "images",
+        getValues: form.getValues,
+      },
+    });
+
+  const addDiffusionImages: DiffusionImagesFormCallback = useCallback(
+    async ({ numImages, prompt, negativePrompt }) => {
+      await getImages({
+        num_images: numImages,
+        prompt,
+        negative_prompt: negativePrompt,
+        successCallback: (images) => addImagesCallback(images, form),
+      }) //realistic, chicken with tomatoes
+        .catch((e) => {
+          console.log(e);
+        })
+        .then(() => {
+          setTimeout(() => {
+            setIsImagesListCollapsed(false);
+          }, 400);
+        });
+    },
+    [getImages, addImagesCallback, form],
+  );
 
   useEffect(() => {
     const items = ingredients.reduce(
@@ -378,6 +416,11 @@ export default function RecipeForm({
       clientId,
     ],
   );
+  useEffect(() => {
+    return () => {
+      invalidateImages();
+    };
+  }, [invalidateImages]);
 
   useEffect(() => {
     return () => {
@@ -576,6 +619,11 @@ export default function RecipeForm({
               fieldName={"images"}
               fieldTexts={imagesText}
               initialLength={images?.length || 0}
+              parentListCollapsed={isImagesListCollapsed}
+            />
+            <DiffusionImagesForm
+              texts={diffusionImagesFormTexts}
+              callback={addDiffusionImages}
             />
             <InputFile<RecipeSchemaType>
               control={form.control}

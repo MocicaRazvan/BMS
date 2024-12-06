@@ -886,6 +886,47 @@ export const getCommentSchema = (texts: CommentSchemaTexts) =>
     ),
   });
 
+export interface DiffusionSchemaTexts {
+  minPrompt: string;
+  maxPrompt: string;
+  minNegativePrompt: string;
+  maxNegativePrompt: string;
+}
+
+export const getDiffusionSchemaTexts =
+  async (): Promise<DiffusionSchemaTexts> => {
+    const t = await getTranslations("zod.DiffusionSchemaTexts");
+    return {
+      minPrompt: t("minPrompt"),
+      maxPrompt: t("maxPrompt"),
+      minNegativePrompt: t("minNegativePrompt"),
+      maxNegativePrompt: t("maxNegativePrompt"),
+    };
+  };
+
+export const getDiffusionSchema = ({
+  minPrompt,
+  maxPrompt,
+  minNegativePrompt,
+  maxNegativePrompt,
+}: DiffusionSchemaTexts) =>
+  z.object({
+    prompt: z
+      .string()
+      .transform((val) => val.trim().replace(/\s+/g, " "))
+      .refine((val) => val.length >= 20, { message: minPrompt })
+      .refine((val) => val.length <= 100, { message: maxPrompt }),
+    negativePrompt: z
+      .string()
+      .transform((val) => val.trim().replace(/\s+/g, " "))
+      .refine((val) => val.length >= 10, { message: minNegativePrompt })
+      .refine((val) => val.length <= 100, { message: maxNegativePrompt }),
+    numImages: z.coerce.number().min(1).max(3),
+  });
+export type DiffusionSchemaType = z.infer<
+  ReturnType<typeof getDiffusionSchema>
+>;
+
 export type CommentSchemaType = z.infer<ReturnType<typeof getCommentSchema>>;
 
 export type CalculatorSchemaType = z.infer<

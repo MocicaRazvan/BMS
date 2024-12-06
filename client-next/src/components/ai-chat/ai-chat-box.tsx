@@ -206,6 +206,7 @@ export default function AiChatBox({
                 variant="ghost"
                 className="fllex w-10 flex-none items-center justify-center"
                 onClick={() => {
+                  stop();
                   deletePersistedMessages();
                   setMessages([]);
                 }}

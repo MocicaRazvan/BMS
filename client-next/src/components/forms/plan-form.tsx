@@ -96,6 +96,11 @@ import UploadingProgress, {
 } from "@/components/forms/uploading-progress";
 import useBaseAICallbackTitleBody from "@/hoooks/useBaseAICallbackTitleBody";
 import { AiIdeasField } from "@/types/ai-ideas-types";
+import DiffusionImagesForm, {
+  DiffusionImagesFormCallback,
+  DiffusionImagesFormTexts,
+} from "@/components/forms/diffusion-images-form";
+import useGetDiffusionImages from "@/hoooks/useGetDiffusionImages";
 
 export interface PlanFormTexts extends AITitleBodyForm {
   titleBodyTexts: TitleBodyTexts;
@@ -114,6 +119,7 @@ export interface PlanFormTexts extends AITitleBodyForm {
   dayIndex: string;
   objectives: Record<(typeof planObjectives)[number], string>;
   loadedImages: UploadingProgressTexts;
+  diffusionImagesFormTexts: DiffusionImagesFormTexts;
 }
 export interface PlanFormProps
   extends WithUser,
@@ -153,6 +159,7 @@ export default function PlanForm({
   aiCheckBoxes,
   titleAIGeneratedPopTexts,
   bodyAIGeneratedPopTexts,
+  diffusionImagesFormTexts,
 }: PlanFormProps) {
   const planSchema = useMemo(
     () => getPlanSchema(planSchemaTexts),
@@ -167,6 +174,7 @@ export default function PlanForm({
     clientId,
     "IMAGE",
   );
+  const [isImagesListCollapsed, setIsImagesListCollapsed] = useState(true);
 
   const [selectedOptions, setSelectedOptions] = useState<
     (Option & { dragId: string })[]
@@ -258,6 +266,39 @@ export default function PlanForm({
     setValue: form.setValue,
     getValues: form.getValues,
   });
+
+  const { invalidateImages, getImages, addImagesCallback } =
+    useGetDiffusionImages({
+      cleanUpArgs: {
+        fieldName: "images",
+        getValues: form.getValues,
+      },
+    });
+
+  const addDiffusionImages: DiffusionImagesFormCallback = useCallback(
+    async ({ numImages, prompt, negativePrompt }) => {
+      await getImages({
+        num_images: numImages,
+        prompt,
+        negative_prompt: negativePrompt,
+        successCallback: (images) => addImagesCallback(images, form),
+      }) //realistic, chicken with tomatoes
+        .catch((e) => {
+          console.log(e);
+        })
+        .then(() => {
+          setTimeout(() => {
+            setIsImagesListCollapsed(false);
+          }, 400);
+        });
+    },
+    [getImages, addImagesCallback, form],
+  );
+  useEffect(() => {
+    return () => {
+      invalidateImages();
+    };
+  }, [invalidateImages]);
 
   useEffect(() => {
     return () => {
@@ -519,6 +560,11 @@ export default function PlanForm({
               fieldName={"images"}
               fieldTexts={imagesText}
               initialLength={images?.length || 0}
+              parentListCollapsed={isImagesListCollapsed}
+            />
+            <DiffusionImagesForm
+              texts={diffusionImagesFormTexts}
+              callback={addDiffusionImages}
             />
             <ErrorMessage message={error} show={!!errorMsg} />
             <ButtonSubmit

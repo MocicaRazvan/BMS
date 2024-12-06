@@ -52,6 +52,7 @@ export default async function UpdatePostPage({
         aiCheckBoxes,
         bodyAIGeneratedPopTexts,
         titleAIGeneratedPopTexts,
+        diffusionImagesFormTexts,
       },
       ...rest
     },
@@ -85,6 +86,7 @@ export default async function UpdatePostPage({
             aiCheckBoxes={aiCheckBoxes}
             bodyAIGeneratedPopTexts={bodyAIGeneratedPopTexts}
             titleAIGeneratedPopTexts={titleAIGeneratedPopTexts}
+            diffusionImagesFormTexts={diffusionImagesFormTexts}
           />
         </Suspense>
       </main>

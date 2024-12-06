@@ -7,16 +7,9 @@ const url = diffusion_service + "/generate-images";
 
 export async function POST(req: NextRequest) {
   try {
-    // await getUserWithMinRole("ROLE_TRAINER");
+    await getUserWithMinRole("ROLE_TRAINER");
 
     const body = await req.json();
-    // const body = {
-    //   negative_prompt: "blurry, low quality",
-    //   prompt: "salad, chicken, tomatoes, realistic",
-    //   num_images: 5,
-    //   width: 512,
-    //   height: 512,
-    // };
 
     const response = await fetch(url, {
       method: "POST",
@@ -31,8 +24,6 @@ export async function POST(req: NextRequest) {
         status: response.status,
       });
     }
-
-    // const zipBuffer = await response.arrayBuffer();
 
     return new NextResponse(response.body, {
       headers: {

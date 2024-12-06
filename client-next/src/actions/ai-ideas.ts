@@ -37,7 +37,7 @@ const titlePrompt = ChatPromptTemplate.fromMessages([
     6. Ensure the title is relevant for the item type: {item}.
 
     **Final output format:**
-    - A SINGLE line containing only the title and nothing else.
+    - A SINGLE line containing only the title and NOTHING else besides the title.
     - No explanations, commentary, or additional information, keep it concise, short and to the point.
     - Keep in mind the kind of item you are generating the title for: {item}.
     `,

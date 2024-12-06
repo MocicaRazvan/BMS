@@ -49,6 +49,7 @@ export default async function CreatePostPage({ params: { locale } }: Props) {
         bodyAIGeneratedPopTexts,
         titleAIGeneratedPopTexts,
         aiCheckBoxes,
+        diffusionImagesFormTexts,
       },
       ...rest
     },
@@ -82,6 +83,7 @@ export default async function CreatePostPage({ params: { locale } }: Props) {
             titleAIGeneratedPopTexts={titleAIGeneratedPopTexts}
             bodyAIGeneratedPopTexts={bodyAIGeneratedPopTexts}
             aiCheckBoxes={aiCheckBoxes}
+            diffusionImagesFormTexts={diffusionImagesFormTexts}
           />
         </Suspense>
       </main>

@@ -1,0 +1,19 @@
+name: Diffusion Service Docker Image
+
+on:
+  workflow_dispatch: { }
+  push:
+    branches:
+      - main
+    paths:
+      - 'diffusion/**'
+jobs:
+  build-and-push-file-service:
+    uses: ./.github/workflows/build-and-push.yml
+    with:
+      image-name: diffusion-service-bms
+      context: ./diffusion
+      dockerfile: ./diffusion/Dockerfile
+    secrets:
+      DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
