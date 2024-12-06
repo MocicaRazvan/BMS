@@ -1,11 +1,6 @@
-import { getTranslations, unstable_setRequestLocale } from "next-intl/server";
-import { Locale } from "@/navigation";
+import { getTranslations } from "next-intl/server";
 
-interface Props {
-  params: { locale: Locale };
-}
-export default async function NotFoundPage({ params: { locale } }: Props) {
-  unstable_setRequestLocale(locale);
+export default async function NotFoundPage() {
   const t = await getTranslations("ErrorPage");
   return (
     <div className="w-full min-h-[calc(100vh-21rem)] flex flex-col items-center justify-center transition-all gap-10">

@@ -598,6 +598,7 @@ services:
       - NVIDIA_DRIVER_CAPABILITIES=all
       - OLLAMA_KEEP_ALIVE=-1m
       - OLLAMA_DEBUG=true
+      - OLLAMA_FLASH_ATTENTION=1
     ports:
       - "11434:11434"
     # command: ollama run yi:v1.5
@@ -819,39 +820,55 @@ services:
       rabbitmq-plugins enable rabbitmq_web_stomp &&
       rabbitmq-server"
 
-#  nginx-rabbitmq:
-#    image: nginx:latest
-#    container_name: nginx-rabbitmq-proxy
-#    ports:
-#      - "5672:5672" # Expose AMQP proxy
-#      - "61613:61613" # Expose STOMP proxy
-#    volumes:
-#      - ./nginx/rabbitmq.conf:/etc/nginx/nginx.conf # Mount the custom Nginx config for RabbitMQ
-#    networks:
-#      - bms
-#    restart: unless-stopped
-#    depends_on:
-#      - rabbitmq
-#    command: >
-#      /bin/sh -c "
-#      echo 'Updating package list and installing netcat...' &&
-#            apt-get update &&
-#             apt-get install -y sudo &&
-#             apt-get install -y netcat-openbsd &&
-#             apt-get install -y coreutils inetutils-ping &&
-#
-#        echo 'Waiting for RabbitMQ to be ready...' &&
-#        while ! nc -z rabbitmq 5672; do  # Check if RabbitMQ AMQP is ready
-#          echo 'RabbitMQ is not ready yet, retrying in 5 seconds...';
-#          sleep 5;
-#        done &&
-#        while ! nc -z rabbitmq 61613; do  # Check if RabbitMQ STOMP is ready
-#          echo 'RabbitMQ STOMP is not ready yet, retrying in 5 seconds...';
-#          sleep 5;
-#        done &&
-#        echo 'RabbitMQ is ready, starting Nginx...' &&
-#        nginx -g 'daemon off;'"
-
+  #  nginx-rabbitmq:
+  #    image: nginx:latest
+  #    container_name: nginx-rabbitmq-proxy
+  #    ports:
+  #      - "5672:5672" # Expose AMQP proxy
+  #      - "61613:61613" # Expose STOMP proxy
+  #    volumes:
+  #      - ./nginx/rabbitmq.conf:/etc/nginx/nginx.conf # Mount the custom Nginx config for RabbitMQ
+  #    networks:
+  #      - bms
+  #    restart: unless-stopped
+  #    depends_on:
+  #      - rabbitmq
+  #    command: >
+  #      /bin/sh -c "
+  #      echo 'Updating package list and installing netcat...' &&
+  #            apt-get update &&
+  #             apt-get install -y sudo &&
+  #             apt-get install -y netcat-openbsd &&
+  #             apt-get install -y coreutils inetutils-ping &&
+  #
+  #        echo 'Waiting for RabbitMQ to be ready...' &&
+  #        while ! nc -z rabbitmq 5672; do  # Check if RabbitMQ AMQP is ready
+  #          echo 'RabbitMQ is not ready yet, retrying in 5 seconds...';
+  #          sleep 5;
+  #        done &&
+  #        while ! nc -z rabbitmq 61613; do  # Check if RabbitMQ STOMP is ready
+  #          echo 'RabbitMQ STOMP is not ready yet, retrying in 5 seconds...';
+  #          sleep 5;
+  #        done &&
+  #        echo 'RabbitMQ is ready, starting Nginx...' &&
+  #        nginx -g 'daemon off;'"
+  diffusion:
+    build:
+      context: ./diffusion
+      dockerfile: Dockerfile
+    container_name: diffusion-container-bms
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - capabilities: [ gpu ]
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=all
+    ports:
+      - "5000:5000"
+    volumes:
+      - diffusion_fs:/app/models
 volumes:
   postgres_data:
   postgres_data_messages:
@@ -861,6 +878,7 @@ volumes:
   rabbitmq_data:
   ollama_fs:
   pgadmin_data:
+  diffusion_fs:
 networks:
   bms:
     driver: bridge
