@@ -251,6 +251,7 @@ interface ChatMessageProps {
 
 function ChatMessage({ message: { role, content } }: ChatMessageProps) {
   const appUrl = process.env.NEXTAUTH_URL!;
+  const appUrlNoPort = appUrl.replace(/:\d+/, "");
 
   const isAiMessage = role === "assistant";
 
@@ -274,23 +275,29 @@ function ChatMessage({ message: { role, content } }: ChatMessageProps) {
       >
         <ReactMarkdown
           components={{
-            a: ({ node, ref, ...props }) => (
+            a: ({ node, ref, ...props }) => {
               // todo see if its internal link else open in new tab
-              <Link
-                {...props}
-                href={
-                  props.href
-                    ? props.href?.startsWith(appUrl)
-                      ? props.href.replace(/:\d+/, "")
-                      : ""
-                    : ""
-                }
-                className="text-primary hover:underline font-semibold text-opacity-90"
-                target={props.href?.startsWith(appUrl) ? "_self" : "_blank"}
-              >
-                {props.children}
-              </Link>
-            ),
+              const isInternalLink =
+                props.href?.startsWith(appUrl) ||
+                props.href?.startsWith(appUrlNoPort);
+
+              if (props.href?.startsWith(appUrl)) {
+                props.href = props.href.replace(/:\d+/, "");
+              }
+              return (
+                <Link
+                  {...props}
+                  href={
+                    isInternalLink ? (props.href ? props.href : appUrl) : appUrl
+                  }
+                  className="text-primary hover:underline font-semibold text-opacity-90"
+                  target={isInternalLink ? "_self" : "_blank"}
+                  rel={!isInternalLink ? "noopener noreferrer" : undefined}
+                >
+                  {props.children}
+                </Link>
+              );
+            },
             p: ({ node, ...props }) => (
               <p {...props} className="mt-3 first:mt-0" />
             ),
