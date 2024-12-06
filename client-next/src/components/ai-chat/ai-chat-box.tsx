@@ -250,7 +250,7 @@ interface ChatMessageProps {
 }
 
 function ChatMessage({ message: { role, content } }: ChatMessageProps) {
-  const appUrl = process.env.NEXTAUTH_URL!;
+  const appUrl = process.env.NEXT_PUBLIC_NEXTAUTH_URL!;
   const appUrlNoPort = appUrl.replace(/:\d+/, "");
 
   const isAiMessage = role === "assistant";
