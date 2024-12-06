@@ -7,14 +7,45 @@ import zipfile
 import traceback
 from prometheus_flask_exporter import PrometheusMetrics
 from concurrent.futures import ThreadPoolExecutor
+from torch.nn import DataParallel
 
-MODEL_ID = os.getenv("DIFFUSION_MODEL_ID", "CompVis/stable-diffusion-v1-4")
+pipeline = None
+reserved_tensor = None
+
+MODEL_ID = os.getenv("DIFFUSION_MODEL_ID", "CompVis/stable-diffusion-v-1-4")
 LOCAL_MODEL_PATH = (
     os.path.join(os.getenv("DIFFUSION_MODEL_PATH", ""), "./models")
     if "DIFFUSION_MODEL_PATH" in os.environ
-    else "./models/stable_diffusion_v1_4"
+   else "./models/stable_diffusion_v1_4"
+
 )
-DEVICE = "cuda"
+DEVICE = "cuda:0"
+RESERVED_VRAM_GB = os.getenv("RESERVED_VRAM_GB", 1.5)
+
+MEMORY_FRACTION = os.getenv("MEMORY_FRACTION", 0.5)
+
+torch.cuda.set_per_process_memory_fraction(MEMORY_FRACTION, device=0)
+
+def reserve_vram(size_gb=RESERVED_VRAM_GB):
+    """
+    Reserve VRAM by allocating a large tensor.
+    """
+    global reserved_tensor
+    num_elements = int((size_gb * 1024**3) // 2)
+    reserved_tensor = torch.empty((num_elements,), dtype=torch.float16, device=DEVICE)
+    print(f"Reserved ~{size_gb}GB of VRAM.")
+
+def release_vram():
+    """
+    Release the reserved VRAM by deleting the tensor.
+    """
+    global reserved_tensor
+    if reserved_tensor is not None:
+        del reserved_tensor
+        reserved_tensor = None
+        torch.cuda.empty_cache()
+        print("Released reserved VRAM.")
+
 
 
 def get_pipeline() -> StableDiffusionPipeline:
@@ -35,7 +66,13 @@ def get_pipeline() -> StableDiffusionPipeline:
         print(f"Saving model locally to: {LOCAL_MODEL_PATH}")
         pipe.save_pretrained(LOCAL_MODEL_PATH)
 
-    return pipe.to(DEVICE)
+    pipe=pipe.to(DEVICE)
+    pipe.enable_attention_slicing("auto")
+    pipe.unet.enable_gradient_checkpointing()
+#     pipe.enable_model_cpu_offload()
+    pipe.safety_checker = None
+#     pipe.feature_extractor = None
+    return pipe
 
 def process_image_to_bytes(image, idx):
     """Convert a single image to its byte representation."""
@@ -46,6 +83,12 @@ def process_image_to_bytes(image, idx):
 
 # Initialize the Flask app
 
+def clear_cache():
+    if torch.cuda.is_available():
+        print("Clearing CUDA cache on GPU 0...")
+        torch.cuda.set_device(0)
+        torch.cuda.empty_cache()
+
 app = Flask(__name__)
 
 metrics = PrometheusMetrics(app)
@@ -54,6 +97,11 @@ app_name = os.getenv("DIFFUSION_APP_NAME", "diffusion_service")
 app_version = os.getenv("DIFFUSION_APP_VERSION", "1.0.0")
 metrics.info(app_name, "Application info prometheus", version=app_version)
 
+if(pipeline is None):
+    print("Initializing the pipeline...")
+    pipeline = get_pipeline()
+    reserve_vram()
+#     torch.cuda.empty_cache()
 
 @app.route("/")
 def index():
@@ -74,8 +122,9 @@ def generate_images():
         - width (int, optional): Width of images (default: 512).
     """
     try:
-
-        pipeline = get_pipeline()
+        release_vram()
+        clear_cache()
+#         pipeline = get_pipeline()
 
         data = request.get_json(silent=True) or {}
 
@@ -90,14 +139,14 @@ def generate_images():
         print(f"Generating {num_images} image(s) for prompt: '{prompt}'")
 
         images = pipeline(
-            prompt,
-            negative_prompt=negative_prompt,
-            num_inference_steps=num_inference_steps,
-            guidance_scale=guidance_scale,
-            height=height,
-            width=width,
-            num_images_per_prompt=num_images,
-        ).images
+                prompt,
+                negative_prompt=negative_prompt,
+                num_inference_steps=num_inference_steps,
+                guidance_scale=guidance_scale,
+                height=height,
+                width=width,
+                num_images_per_prompt=num_images,
+            ).images
 
         zip_buffer = io.BytesIO()
         with zipfile.ZipFile(zip_buffer, "w", compression=zipfile.ZIP_DEFLATED) as zip_file:
@@ -110,8 +159,10 @@ def generate_images():
 
         zip_buffer.seek(0)
 
-        del pipeline
-        torch.cuda.empty_cache()
+#         del pipeline
+        clear_cache()
+        reserve_vram()
+
         return send_file(
             zip_buffer,
             mimetype="application/zip",
