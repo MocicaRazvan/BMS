@@ -112,3 +112,4 @@ wol.txt
 seed
 
 .idea
+/scrape/node_modules/
