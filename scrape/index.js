@@ -11,7 +11,6 @@ const __dirname = path.dirname(__filename);
 // scrape dupa faci get la /api/chat/pg-admin sa salvezi in bd
 // getul il faci pe localhost !!!
 // todo REFA CU NOILE RUTE SI SCOATELE PE CELE CARE DAU 404 manual
-// todo pt generare embeddings foloseste pe serverel # OLLAMA_EMBEDDING="zylonai/bge-m3" altfel cel de la chatfire
 // todo inainte disable modsecurity
 
 const cookies = [{
@@ -351,11 +350,6 @@ async function visitPage(url, visitedUrls, page, baseURL, outputDir, nextOutputD
 
     console.log('Finished visiting page:', url);
 }
-
-// (async () => {
-//     const paths = await getAutoPaths().then(p => p.concat(manualPaths))
-//     console.log(paths)
-// })()
 
 
 (async () => {

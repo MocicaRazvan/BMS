@@ -113,3 +113,4 @@ seed
 
 .idea
 /scrape/node_modules/
+/scrape/output/
