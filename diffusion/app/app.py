@@ -54,8 +54,10 @@ def get_pipeline() -> StableDiffusionPipeline:
     """
     if os.path.exists(LOCAL_MODEL_PATH):
         print(f"Loading model from local path: {LOCAL_MODEL_PATH}")
+        scheduler = DDIMScheduler.from_pretrained(
+                    LOCAL_MODEL_PATH, subfolder="scheduler", torch_dtype=torch.float16, safety_checker=None)
         pipe = StableDiffusionPipeline.from_pretrained(
-            LOCAL_MODEL_PATH, torch_dtype=torch.float16, safety_checker=None,
+            LOCAL_MODEL_PATH, torch_dtype=torch.float16, safety_checker=None,scheduler=scheduler
         )
     else:
         print(f"Downloading model: {MODEL_ID}")
@@ -64,6 +66,11 @@ def get_pipeline() -> StableDiffusionPipeline:
         )
         print(f"Saving model locally to: {LOCAL_MODEL_PATH}")
         pipe.save_pretrained(LOCAL_MODEL_PATH)
+        scheduler = DDIMScheduler.from_pretrained(
+                            LOCAL_MODEL_PATH, subfolder="scheduler", torch_dtype=torch.float16, safety_checker=None)
+        pipe = StableDiffusionPipeline.from_pretrained(
+                    LOCAL_MODEL_PATH, torch_dtype=torch.float16, safety_checker=None,scheduler=scheduler
+                )
 
     pipe=pipe.to(DEVICE)
     pipe.enable_attention_slicing("auto")
