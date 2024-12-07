@@ -8,7 +8,7 @@ on:
     paths:
       - 'diffusion/**'
 jobs:
-  build-and-push-file-service:
+  build-and-push-diffusion-service:
     uses: ./.github/workflows/build-and-push.yml
     with:
       image-name: diffusion-service-bms
