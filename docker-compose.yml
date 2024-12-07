@@ -865,6 +865,8 @@ services:
     environment:
       - NVIDIA_VISIBLE_DEVICES=all
       - NVIDIA_DRIVER_CAPABILITIES=all
+      - RESERVED_VRAM_GB=1.11
+      - MEMORY_FRACTION=0.4
     ports:
       - "5000:5000"
     volumes:

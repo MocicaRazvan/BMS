@@ -20,9 +20,8 @@ LOCAL_MODEL_PATH = (
 
 )
 DEVICE = "cuda:0"
-RESERVED_VRAM_GB = os.getenv("RESERVED_VRAM_GB", 1.5)
-
-MEMORY_FRACTION = os.getenv("MEMORY_FRACTION", 0.5)
+RESERVED_VRAM_GB = float(os.getenv("RESERVED_VRAM_GB", 1.5))
+MEMORY_FRACTION = float(os.getenv("MEMORY_FRACTION", 0.5))
 
 torch.cuda.set_per_process_memory_fraction(MEMORY_FRACTION, device=0)
 
