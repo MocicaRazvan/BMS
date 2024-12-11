@@ -586,7 +586,7 @@ services:
         condition: service_started
 
   ollama:
-    image: ollama/ollama:latest
+    image: ollama/ollama:0.5.1
     container_name: ollama-container-bms
     deploy:
       resources:
@@ -599,6 +599,7 @@ services:
       - OLLAMA_KEEP_ALIVE=-1m
       - OLLAMA_DEBUG=true
       - OLLAMA_FLASH_ATTENTION=1
+    #      - OLLAMA_KV_CACHE_TYPE=q4_0
     ports:
       - "11434:11434"
     # command: ollama run yi:v1.5

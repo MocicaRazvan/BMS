@@ -28,7 +28,7 @@ const titlePrompt = ChatPromptTemplate.fromMessages([
     Your goal is to produce a SINGLE title that is clear, concise, and relevant to the content, capturing the essence of the given information.
     The title must be attention-grabbing, no more than 15 words, and formatted as a single line with no explanation or commentary. 
 
-    **The title must follow these rules:**
+    **Strict rules for title generation:**
     1. Output a single title with NO explanations, alternate options, or commentary.
     2. The title must be a single line, with no introductions such as "Based on the context" or "Here is the title."
     3. Do not include any formatting like quotation marks, bullet points, or extra text.
@@ -37,14 +37,14 @@ const titlePrompt = ChatPromptTemplate.fromMessages([
     6. Ensure the title is relevant for the item type: {item}.
 
     **Final output format:**
-    - A SINGLE line containing only the title and NOTHING else besides the title.
+    - A SINGLE line containing ONLY the title and NOTHING else besides the title.
     - No explanations, commentary, or additional information, keep it concise, short and to the point.
     - Keep in mind the kind of item you are generating the title for: {item}.
     `,
   ],
   [
     "user",
-    "Here is the context: {context}. Additionally, the user has provided this input: {input}. Based on this, generate a suitable title.",
+    "Here is the context: {context}. Additionally, the user has provided this input: {input}. Based on this, generate a suitable title for the item: {item}.",
   ],
 ]);
 const descriptionPrompt = ChatPromptTemplate.fromMessages([
@@ -55,17 +55,17 @@ const descriptionPrompt = ChatPromptTemplate.fromMessages([
     Your goal is to produce verbose and thorough descriptions that cover all relevant aspects of the topic, leaving no important detail unexplored. 
     Be as detailed and expansive as possible, using rich and vivid language to create a complete and immersive description.
     
-    The description must follow these rules:
-    **Make sure you ONLY give the description and make it as LARGE and VERBOSE as possible, do not worry about the length or time.**
-    **Ensure the output is structured, easy to read, and use the format HTML for the content.**
-    **Never include links or any other format that is not HTML.**
-    **Remember ALWAYS keep in mind that the description is for a {item} and make the description as LARGE and VERBOSE as you can.**
-    **Ensure the description is relevant for the item type: {item}.**
+    **Strict rules for description generation:**
+    - Make sure you ONLY give the description and make it as LARGE and VERBOSE as possible, do not worry about the length or time.
+    - The output MUST be structured in **HTML** format to enhance readability and organization.
+    - NEVER include links or any other format that is not HTML. 
+    - Remember ALWAYS keep in mind that the description is for a {item} and make the description as LARGE and VERBOSE as you can.
+    - Tailor the description to the specific nature of the **{item}**.
     `,
   ],
   [
     "user",
-    "Here is the context: {context}. Additionally, the user has provided this input: {input}. Based on this, generate a verbose and detailed description.",
+    "Here is the context: {context}. Additionally, the user has provided this input: {input}. Based on this, generate a verbose and detailed description for the item: {item}.",
   ],
 ]);
 const placeholderInput =
@@ -78,7 +78,7 @@ const prompts: Record<TargetedFields, ChatPromptTemplate> = {
 export async function getHtmlDocs(field: AiIdeasField) {
   return (
     await RecursiveCharacterTextSplitter.fromLanguage("html", {
-      chunkSize: 500,
+      chunkSize: 512,
       chunkOverlap: 100,
     }).splitText(field.content.trim())
   ).map(
@@ -132,6 +132,9 @@ export async function aiIdea({
       ? parseFloat(process.env.OLLAMA_GENERATE_TEMPERATURE)
       : 0.7,
     cache: false,
+    numCtx: process.env.OLLAMA_NUM_CTX
+      ? parseInt(process.env.OLLAMA_NUM_CTX)
+      : 2048,
   });
   const embeddings = await vectorStoreInstance.getEmbeddings();
 

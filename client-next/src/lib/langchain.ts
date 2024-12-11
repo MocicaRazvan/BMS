@@ -48,7 +48,7 @@ export class VectorStoreSingleton {
   private filter: EmbeddingsFilter | undefined;
   private isInitialized = false;
   private pgVectorStore: PGVectorStore | undefined;
-  public static CHUNK_SIZE = 1000;
+  public static CHUNK_SIZE = 1024;
   public static CHUNK_OVERLAP = 300;
 
   constructor() {

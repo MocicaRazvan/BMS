@@ -126,30 +126,36 @@ async function createHistoryChain(
     keepAlive: "-1m",
     temperature: 0.2,
     cache: false,
+    numCtx: process.env.OLLAMA_NUM_CTX
+      ? parseInt(process.env.OLLAMA_NUM_CTX)
+      : 2048,
     // verbose: true,
   });
   const rephrasePrompt = ChatPromptTemplate.fromMessages([
     [
       "system",
-      "You are a query **rephrasing assistant** for Bro Meets Science, a website dedicated to nutrition, meal plans, and promoting healthy lifestyles. " +
-        "Your role is to rephrase user queries to maximize document retrieval accuracy from the site's vector database. " +
-        "Ensure that the rephrased queries are highly relevant to the site's focus areas, which include:" +
-        "- Meal plans and subscriptions\n" +
+      "You are a query **rephrasing assistant** for Bro Meets Science, a website focused on nutrition, meal plans, and promoting healthy lifestyles. " +
+        "Your primary goal is to rephrase user queries to maximize the accuracy of document retrieval from the site's vector database. " +
+        "Ensure the rephrased queries are highly relevant to the site's core focus areas, which include:\n" +
+        "- **Meal plans** available for purchase\n" +
         "- Nutrition and dietary advice\n" +
         "- Caloric intake and calculators\n" +
-        "- User health and well-being.\n" +
+        "- User health and well-being\n" +
+        "- **Posts** which user can browse\n" +
+        "- Already purchased meal plans\n\n" +
+        "Rephrase the query **while preserving its original intent**. Include all essential keywords to ensure the rephrased query retrieves the most accurate and comprehensive results from the database. " +
+        "Be concise, specific, and ensure the rephrased query aligns with the site's purpose and content. " +
+        "**Never omit relevant keywords** and always rephrase with the site's purpose in mind. " +
+        "**ONLY return the rephrased query without any additional text.**\n" +
         "\n" +
-        "Rephrase the query **while maintaining its original intent**. Include all relevant keywords to ensure the rephrased query retrieves the most accurate and complete results from the database. " +
-        "Be concise, specific, and ensure your rephrased queries align with the site's purpose and content." +
-        "Don't leave out any relevant keywords and always rephrase keeping in mind the site purpose. **Only return the query and NO other text.**\n" +
-        "Below is the chat history for context. \n\n",
+        "Below is the chat history for context.\n\n",
     ],
     new MessagesPlaceholder("chat_history"),
     [
       "user",
       "Original query: {input}\n\n" +
         "Based on the original query and conversation context, rephrase the query to improve document retrieval. " +
-        "Remember ALWAYS return ONLY the rephrased query and NO additional text.",
+        "**ONLY return the rephrased query with no extra text or explanation.**",
     ],
   ]);
 
@@ -195,6 +201,9 @@ async function createDocsChain(
     temperature: process.env.OLLAMA_TEMPERATURE
       ? parseFloat(process.env.OLLAMA_TEMPERATURE)
       : 0.7,
+    numCtx: process.env.OLLAMA_NUM_CTX
+      ? parseInt(process.env.OLLAMA_NUM_CTX)
+      : 2048,
   });
 
   const locale = cookies().get("NEXT_LOCALE")?.value || "en";
@@ -207,9 +216,9 @@ async function createDocsChain(
       "You are Shaormel, the friendly and helpful chatbot for Bro Meets Science, a website focused on nutrition. " +
         "Your primary role is to assist users by providing information related to nutrition, meal plans, and the site’s features. " +
         "Do not discuss any technical aspects, including the site's code or development. " +
-        "Your responses should prioritize user health, well-being, and engagement, delivered in a friendly and approachable manner. " +
+        "Your responses should prioritize user health, well-being, and engagement, delivered in a friendly and approachable manner, but keep the responses short and concise. " +
         "Feel free to use light-hearted humor when appropriate to create a welcoming atmosphere.\n\n" +
-        "When constructing URLs, ** ALWAYS ** replace the placeholder [userId] with the: " +
+        "When constructing URLs, **ALWAYS** replace the placeholder [userId] with the: " +
         (currentUserId || "") +
         ".\n\n" +
         "Always ensure that any URLs you provide are localized according to the user's current language preference. The localization means that links start with the user current locale, the rest of the URL it's not localized! " +
@@ -223,10 +232,10 @@ async function createDocsChain(
         "- Caloric intake calculator: /" +
         locale +
         "/calculator\n" +
-        "- Nutrition posts: /" +
+        "- Nutrition posts where user can browse all the posts: /" +
         locale +
         "/posts/approved\n" +
-        "- Meal plans page where the user can BUY new plans: /" +
+        "- Meal plans page where the user can BUY new plans and browse all plans: /" +
         locale +
         "/plans/approved\n" +
         "- Account login/registration: /" +

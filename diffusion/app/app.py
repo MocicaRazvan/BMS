@@ -1,13 +1,13 @@
-import os
-import torch
-from diffusers import StableDiffusionPipeline, DDIMScheduler, DiffusionPipeline
-from flask import Flask, request, send_file, jsonify
 import io
-import zipfile
+import os
 import traceback
-from prometheus_flask_exporter import PrometheusMetrics
+import zipfile
 from concurrent.futures import ThreadPoolExecutor
-from torch.nn import DataParallel
+
+import torch
+from diffusers import StableDiffusionPipeline, DDIMScheduler
+from flask import Flask, request, send_file, jsonify
+from prometheus_flask_exporter import PrometheusMetrics
 
 pipeline = None
 reserved_tensor = None
@@ -17,8 +17,8 @@ LOCAL_MODEL_PATH = (
     os.path.join(os.getenv("DIFFUSION_MODEL_PATH", ""), "./models")
     if "DIFFUSION_MODEL_PATH" in os.environ
    else "./models/stable_diffusion_v1_4"
-
 )
+
 DEVICE = "cuda:0"
 RESERVED_VRAM_GB = float(os.getenv("RESERVED_VRAM_GB", 1.5))
 MEMORY_FRACTION = float(os.getenv("MEMORY_FRACTION", 0.5))
