@@ -4,6 +4,8 @@ import com.mocicarazvan.dayservice.enums.DayType;
 import com.mocicarazvan.dayservice.mappers.DayMapper;
 import com.mocicarazvan.dayservice.models.Day;
 import com.mocicarazvan.dayservice.repositories.ExtendedDayRepository;
+import com.mocicarazvan.ollamasearch.service.OllamaAPIService;
+import com.mocicarazvan.ollamasearch.utils.OllamaQueryUtils;
 import com.mocicarazvan.templatemodule.utils.PageableUtilsCustom;
 import com.mocicarazvan.templatemodule.utils.RepositoryUtils;
 import lombok.RequiredArgsConstructor;
@@ -24,17 +26,37 @@ public class ExtendedDayRepositoryImpl implements ExtendedDayRepository {
     private final DayMapper modelMapper;
     private final PageableUtilsCustom pageableUtils;
     private final RepositoryUtils repositoryUtils;
+    private final OllamaQueryUtils ollamaQueryUtils;
+    private final OllamaAPIService ollamaAPIService;
 
-    private final String SELECT_ALL = "SELECT * FROM day";
-    private final String COUNT_ALL = "SELECT COUNT(*) FROM day";
+    private final String SELECT_ALL = "SELECT d.* FROM day d join day_embedding e on d.id = e.entity_id ";
+    private final String COUNT_ALL = "SELECT COUNT(d.id) FROM day d join day_embedding e on d.id = e.entity_id ";
 
     @Override
     public Flux<Day> getDaysFiltered(String title, DayType type, PageRequest pageRequest, List<Long> excludeIds) {
+
+        String embeddings = "";
+        if (repositoryUtils.isNotNullOrEmpty(title)) {
+            embeddings = ollamaQueryUtils.getEmbeddingsAsString(
+                    ollamaAPIService.generateEmbedding(title)
+            );
+        }
+
+
         StringBuilder queryBuilder = new StringBuilder(SELECT_ALL);
-        appendWhereClause(queryBuilder, title, type, excludeIds);
+        appendWhereClause(queryBuilder, title, embeddings, type, excludeIds);
 
 //        queryBuilder.append(pageableUtils.createPageRequestQuery(pageRequest));
-        queryBuilder.append(pageableUtils.createPageRequestQuery(pageRequest, repositoryUtils.createExtraOrder(title, "title", ":title")));
+        if (repositoryUtils.isNotNullOrEmpty(embeddings)) {
+            queryBuilder.append(pageableUtils.createPageRequestQuery(pageRequest,
+                    ollamaQueryUtils.addOrder(
+                            embeddings
+                    )
+            ));
+        } else {
+            queryBuilder.append(pageableUtils.createPageRequestQuery(pageRequest));
+        }
+
 
         DatabaseClient.GenericExecuteSpec executeSpec = getGenericExecuteSpec(title, type, excludeIds, queryBuilder);
 
@@ -43,12 +65,26 @@ public class ExtendedDayRepositoryImpl implements ExtendedDayRepository {
 
     @Override
     public Flux<Day> getDaysFilteredTrainer(String title, DayType type, PageRequest pageRequest, List<Long> excludeIds, Long trainerId) {
+        String embeddings = "";
+        if (repositoryUtils.isNotNullOrEmpty(title)) {
+            embeddings = ollamaQueryUtils.getEmbeddingsAsString(
+                    ollamaAPIService.generateEmbedding(title)
+            );
+        }
         StringBuilder queryBuilder = new StringBuilder(SELECT_ALL);
-        appendWhereClause(queryBuilder, title, type, excludeIds);
+        appendWhereClause(queryBuilder, title, embeddings, type, excludeIds);
         repositoryUtils.addNotNullField(trainerId, queryBuilder, new RepositoryUtils.MutableBoolean(queryBuilder.length() > SELECT_ALL.length()),
                 " user_id = :trainerId");
-//        queryBuilder.append(pageableUtils.createPageRequestQuery(pageRequest));
-        queryBuilder.append(pageableUtils.createPageRequestQuery(pageRequest, repositoryUtils.createExtraOrder(title, "title", ":title")));
+
+        if (repositoryUtils.isNotNullOrEmpty(embeddings)) {
+            queryBuilder.append(pageableUtils.createPageRequestQuery(pageRequest,
+                    ollamaQueryUtils.addOrder(
+                            embeddings
+                    )
+            ));
+        } else {
+            queryBuilder.append(pageableUtils.createPageRequestQuery(pageRequest));
+        }
 
         DatabaseClient.GenericExecuteSpec executeSpec = getGenericExecuteSpec(title, type, excludeIds, queryBuilder);
         executeSpec = repositoryUtils.bindNotNullField(trainerId, executeSpec, "trainerId");
@@ -59,7 +95,7 @@ public class ExtendedDayRepositoryImpl implements ExtendedDayRepository {
     @Override
     public Flux<Day> getDaysFilteredByIds(String title, DayType dayType, List<Long> ids, List<Long> excludeIds, PageRequest pageRequest) {
         StringBuilder queryBuilder = new StringBuilder(SELECT_ALL);
-        appendWhereClause(queryBuilder, title, dayType, excludeIds);
+        appendWhereClause(queryBuilder, title, "", dayType, excludeIds);
 
         repositoryUtils.addListField(ids, queryBuilder, new RepositoryUtils.MutableBoolean(queryBuilder.length() > SELECT_ALL.length()),
                 " id IN (:ids)");
@@ -77,8 +113,13 @@ public class ExtendedDayRepositoryImpl implements ExtendedDayRepository {
     @Override
     public Mono<Long> countDayFiltered(String title, DayType type, List<Long> excludeIds) {
         StringBuilder queryBuilder = new StringBuilder(COUNT_ALL);
-
-        appendWhereClause(queryBuilder, title, type, excludeIds);
+        String embeddings = "";
+        if (repositoryUtils.isNotNullOrEmpty(title)) {
+            embeddings = ollamaQueryUtils.getEmbeddingsAsString(
+                    ollamaAPIService.generateEmbedding(title)
+            );
+        }
+        appendWhereClause(queryBuilder, title, embeddings, type, excludeIds);
 
         DatabaseClient.GenericExecuteSpec executeSpec = getGenericExecuteSpec(title, type, excludeIds, queryBuilder);
 
@@ -89,8 +130,13 @@ public class ExtendedDayRepositoryImpl implements ExtendedDayRepository {
     @Override
     public Mono<Long> countDayFilteredTrainer(String title, DayType type, List<Long> excludeIds, Long trainerId) {
         StringBuilder queryBuilder = new StringBuilder(COUNT_ALL);
-
-        appendWhereClause(queryBuilder, title, type, excludeIds);
+        String embeddings = "";
+        if (repositoryUtils.isNotNullOrEmpty(title)) {
+            embeddings = ollamaQueryUtils.getEmbeddingsAsString(
+                    ollamaAPIService.generateEmbedding(title)
+            );
+        }
+        appendWhereClause(queryBuilder, title, embeddings, type, excludeIds);
         repositoryUtils.addNotNullField(trainerId, queryBuilder, new RepositoryUtils.MutableBoolean(queryBuilder.length() > COUNT_ALL.length()),
                 " user_id = :trainerId");
 
@@ -103,7 +149,7 @@ public class ExtendedDayRepositoryImpl implements ExtendedDayRepository {
     @Override
     public Mono<Long> countDayFilteredByIds(String title, DayType dayType, List<Long> ids, List<Long> excludeIds) {
         StringBuilder qStringBuilder = new StringBuilder(COUNT_ALL);
-        appendWhereClause(qStringBuilder, title, dayType, excludeIds);
+        appendWhereClause(qStringBuilder, title, "", dayType, excludeIds);
         repositoryUtils.addListField(ids, qStringBuilder, new RepositoryUtils.MutableBoolean(qStringBuilder.length() > COUNT_ALL.length()),
                 " id IN (:ids)");
 
@@ -125,10 +171,11 @@ public class ExtendedDayRepositoryImpl implements ExtendedDayRepository {
         return executeSpec;
     }
 
-    private void appendWhereClause(StringBuilder queryBuilder, String title, DayType type, List<Long> excludeIds) {
+    private void appendWhereClause(StringBuilder queryBuilder, String title, String embeddings, DayType type, List<Long> excludeIds) {
         RepositoryUtils.MutableBoolean hasPreviousCriteria = new RepositoryUtils.MutableBoolean(false);
 //        repositoryUtils.addStringField(title, queryBuilder, hasPreviousCriteria, " UPPER(title) LIKE UPPER(:title)");
-        repositoryUtils.addStringField(title, queryBuilder, hasPreviousCriteria, "( UPPER(title) LIKE UPPER('%' || :title || '%') OR similarity(title, :title ) > 0.35 )");
+        repositoryUtils.addStringField(title, queryBuilder, hasPreviousCriteria, ollamaQueryUtils.addThresholdFilter(embeddings, " OR title ILIKE '%' || :title || '%'"));
+
         repositoryUtils.addNotNullField(type, queryBuilder, hasPreviousCriteria, " type = :type");
         repositoryUtils.addListField(excludeIds, queryBuilder, hasPreviousCriteria,
                 " id NOT IN (:excludeIds)");

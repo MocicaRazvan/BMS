@@ -355,4 +355,10 @@ public class RecipeController implements ApproveController<Recipe, RecipeBody, R
                         .flatMap(m -> recipeReactiveResponseBuilder.toModelWithUser(m, RecipeController.class)
                         ).map(ResponseEntity::ok);
     }
+
+    @GetMapping(value = "/seedEmbeddings")
+    public Mono<ResponseEntity<List<String>>> seedEmbeddings() {
+        return recipeService.seedEmbeddings()
+                .map(ResponseEntity::ok);
+    }
 }

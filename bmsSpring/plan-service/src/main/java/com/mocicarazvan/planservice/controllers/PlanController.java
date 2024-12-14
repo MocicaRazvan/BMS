@@ -416,4 +416,9 @@ public class PlanController implements ApproveController<Plan, PlanBody, PlanRes
         return planService.getMealsByDayInternal(id, dayId, requestsUtils.extractAuthUser(exchange));
     }
 
+    @GetMapping(value = "/seedEmbeddings")
+    public Mono<ResponseEntity<List<String>>> seedEmbeddings() {
+        return planService.seedEmbeddings()
+                .map(ResponseEntity::ok);
+    }
 }

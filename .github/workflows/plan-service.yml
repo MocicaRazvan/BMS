@@ -9,6 +9,7 @@ on:
       - 'bmsSpring/plan-service/**'
       - 'bmsSpring/template-module/**'
       - 'bmsSpring/redis-cache/**'
+      - 'bmsSpring/ollama-search/**'
 jobs:
   build-and-push-plan-service:
     uses: ./.github/workflows/build-and-push.yml

@@ -27,6 +27,24 @@ public class RepositoryUtils {
         }
     }
 
+    public <T> void addNotNullField(T field, StringBuilder queryBuilder, MutableBoolean hasPreviousCriteria, String clause, Boolean isOr) {
+        if (field != null) {
+            if (hasPreviousCriteria.isValue()) {
+                queryBuilder.append(isOr ? " OR " : " AND ");
+            } else {
+                queryBuilder.append(" WHERE ");
+                hasPreviousCriteria.setValue(true);
+            }
+            queryBuilder.append(clause);
+        }
+    }
+
+    public void addStringField(String field, StringBuilder queryBuilder, MutableBoolean hasPreviousCriteria, String clause, Boolean isOr) {
+        if (field != null && !field.isEmpty()) {
+            addNotNullField(field, queryBuilder, hasPreviousCriteria, clause, isOr);
+        }
+    }
+
     public void addStringField(String field, StringBuilder queryBuilder, MutableBoolean hasPreviousCriteria, String clause) {
         if (field != null && !field.isEmpty()) {
             addNotNullField(field, queryBuilder, hasPreviousCriteria, clause);
@@ -89,5 +107,9 @@ public class RepositoryUtils {
             return executeSpec.bind(name, array);
         }
         return executeSpec;
+    }
+
+    public boolean isNotNullOrEmpty(String field) {
+        return field != null && !field.isEmpty();
     }
 }

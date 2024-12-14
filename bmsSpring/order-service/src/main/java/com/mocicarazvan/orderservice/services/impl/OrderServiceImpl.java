@@ -3,7 +3,6 @@ package com.mocicarazvan.orderservice.services.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-//import com.mocicarazvan.orderservice.cache.OrderCacheServiceHandler;
 import com.mocicarazvan.orderservice.cache.OrderWithAddressCacheHandler;
 import com.mocicarazvan.orderservice.cache.TrainerSummaryCacheHandler;
 import com.mocicarazvan.orderservice.clients.BoughtWebSocketClient;

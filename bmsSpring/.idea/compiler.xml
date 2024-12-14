@@ -18,6 +18,7 @@
         <module name="comment-service" />
         <module name="gateway-service" />
         <module name="plan-service" />
+        <module name="ollama-search" />
         <module name="recipe-service" />
         <module name="order-service" />
         <module name="service-registry" />
@@ -39,6 +40,7 @@
       <module name="gateway-service" options="-parameters" />
       <module name="ingredient-service" options="-parameters" />
       <module name="kanban-service" options="-parameters" />
+      <module name="ollama-search" options="-parameters" />
       <module name="order-service" options="-parameters" />
       <module name="plan-service" options="-parameters" />
       <module name="post-service" options="-parameters" />

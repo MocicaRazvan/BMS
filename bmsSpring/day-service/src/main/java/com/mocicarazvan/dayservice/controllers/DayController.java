@@ -225,4 +225,10 @@ public class DayController implements TitleBodyController<
                 .flatMap(m -> dayReactiveResponseBuilder.toModelWithUser(m, DayController.class))
                 .map(ResponseEntity::ok);
     }
+
+    @GetMapping(value = "/seedEmbeddings")
+    public Mono<ResponseEntity<List<String>>> seedEmbeddings() {
+        return dayService.seedEmbeddings()
+                .map(ResponseEntity::ok);
+    }
 }

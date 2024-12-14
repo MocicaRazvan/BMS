@@ -33,4 +33,21 @@ CREATE INDEX IF NOT EXISTS idx_nutritional_fact_ingredient_id ON nutritional_fac
 CREATE INDEX IF NOT EXISTS idx_nutritional_fact_user_id ON nutritional_fact (user_id);
 
 
+create extension if not exists vector;
 
+-- SET hnsw.ef_search = 200;
+-- SET maintenance_work_mem = '2GB';
+-- SET max_parallel_maintenance_workers = 3;
+-- SET hnsw.iterative_scan = strict_order;
+
+create table if not exists ingredient_embedding
+(
+    id         serial primary key,
+    entity_id  bigint    not null unique references ingredient (id) on delete cascade,
+    embedding  vector(1024),
+    created_at timestamp not null default current_timestamp,
+    updated_at timestamp not null default current_timestamp
+);
+
+CREATE INDEX IF NOT EXISTS hnsw_ingredient
+    ON ingredient_embedding USING hnsw (embedding vector_ip_ops) with (m=16, ef_construction = 64);

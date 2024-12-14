@@ -18,6 +18,13 @@ COPY redis-cache/src redis-cache/src
 RUN mvn -f redis-cache/pom.xml dependency:go-offline -B
 RUN mvn -f redis-cache/pom.xml clean install -DskipTests -Dmaven.compiler.showWarnings=true -Dmaven.compiler.source=22 -Dmaven.compiler.target=22 -Dmaven.compiler.compilerArgs=--enable-preview
 
+# copy install cache module
+COPY ollama-search/pom.xml ollama-search/pom.xml
+COPY ollama-search/src ollama-search/src
+#build ollama module
+RUN mvn -f ollama-search/pom.xml dependency:go-offline -B
+RUN mvn -f ollama-search/pom.xml clean install -DskipTests -Dmaven.compiler.showWarnings=true -Dmaven.compiler.source=22 -Dmaven.compiler.target=22 -Dmaven.compiler.compilerArgs=--enable-preview
+
 
 # copy install day service
 COPY day-service/pom.xml day-service/pom.xml

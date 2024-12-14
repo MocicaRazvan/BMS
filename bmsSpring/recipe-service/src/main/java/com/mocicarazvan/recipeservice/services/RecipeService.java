@@ -21,6 +21,8 @@ import reactor.core.publisher.Mono;
 import java.util.List;
 
 public interface RecipeService extends ApprovedService<Recipe, RecipeBody, RecipeResponse, RecipeRepository, RecipeMapper>, CountInParentService, ValidIds<Recipe, RecipeRepository, RecipeResponse> {
+    Mono<List<String>> seedEmbeddings();
+
     // todo filtered with count for all and for trainer
     Flux<PageableResponse<ResponseWithUserDto<RecipeResponse>>> getRecipesFilteredWithUser(String title, DietType dietType, PageableBody pageableBody, String userId, Boolean approved, Boolean admin);
 

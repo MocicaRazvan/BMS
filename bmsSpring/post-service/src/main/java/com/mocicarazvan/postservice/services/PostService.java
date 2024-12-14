@@ -19,6 +19,8 @@ import java.util.List;
 
 public interface PostService extends ApprovedService<Post, PostBody, PostResponse, PostRepository, PostMapper> {
 
+    Mono<List<String>> seedEmbeddings();
+
     Mono<Void> existsByIdAndApprovedIsTrue(Long id);
 
     Mono<ResponseWithChildList<PostResponse, ResponseWithUserDto<CommentResponse>>>

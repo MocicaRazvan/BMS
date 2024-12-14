@@ -74,7 +74,7 @@ public class RedisReactiveCacheAspect {
     protected Flux<Object> createBaseFlux(String savingKey, Method method) {
         return reactiveRedisTemplate.opsForValue().get(savingKey)
                 .flatMapMany(cr -> Flux.fromIterable((List<?>) cr))
-                .log()
+//                .log()
                 .map(cr -> objectMapper.convertValue(cr, aspectUtils.getTypeReference(method)))
                 .cast(Object.class)
                 .onErrorResume(e -> Flux.empty());
@@ -93,7 +93,7 @@ public class RedisReactiveCacheAspect {
         try {
             return ((Mono<?>) joinPoint.proceed(joinPoint.getArgs()))
                     .doOnNext(methodResponse -> {
-                        log.info("Setting key: " + key + " with value: " + methodResponse);
+//                        log.info("Setting key: " + key + " with value: " + methodResponse);
                         if (saveToCache) {
                             executorService.submit(() -> saveMonoResultToCache(joinPoint, key, savingKey, annId, methodResponse));
                         }
@@ -123,9 +123,9 @@ public class RedisReactiveCacheAspect {
             return ((Flux<Object>) joinPoint.proceed(joinPoint.getArgs()))
                     .index()
                     .doOnNext(indexedValue -> {
-                        log.info("Processing value: index={}, value={}", indexedValue.getT1(), indexedValue.getT2());
+//                        log.info("Processing value: index={}, value={}", indexedValue.getT1(), indexedValue.getT2());
                         indexMap.put(indexedValue.getT1(), indexedValue.getT2());
-                        log.info("Current state of indexMap: {}", indexMap);
+//                        log.info("Current state of indexMap: {}", indexMap);
 
                     })
                     .map(Tuple2::getT2)
@@ -150,7 +150,7 @@ public class RedisReactiveCacheAspect {
                     ids.add(id);
                 })
                 .toList();
-        log.info("Setting key: " + key + " with value: " + sortedList);
+//        log.info("Setting key: " + key + " with value: " + sortedList);
 
         if (sortedList.isEmpty()) {
             return;
@@ -171,7 +171,7 @@ public class RedisReactiveCacheAspect {
         if (id == null) {
             return Mono.empty();
         }
-        log.info("Adding to reverse index: " + key + ":" + id + " value: " + indexKey);
+//        log.info("Adding to reverse index: " + key + ":" + id + " value: " + indexKey);
         String reverseIndexKey = redisCacheUtils.createReverseIndexKey(key, id);
         return
                 reactiveRedisTemplate

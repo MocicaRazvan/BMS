@@ -477,7 +477,7 @@ export default function PlanForm({
                       disabled={false}
                       allowDuplicates={true}
                       path={`/days/trainer/filtered/${authUser.id}`}
-                      sortingCriteria={{ title: "asc" }}
+                      // sortingCriteria={{ title: "asc" }}
                       // extraQueryParams={{ approved: "true" }}
                       pageSize={20}
                       valueKey={"title"}

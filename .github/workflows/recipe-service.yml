@@ -9,6 +9,7 @@ on:
       - 'bmsSpring/recipe-service/**'
       - 'bmsSpring/template-module/**'
       - 'bmsSpring/redis-cache/**'
+      - 'bmsSpring/ollama-search/**'
 jobs:
   build-and-push-recipe-service:
     uses: ./.github/workflows/build-and-push.yml

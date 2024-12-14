@@ -18,6 +18,8 @@ import java.util.List;
 public interface IngredientService extends ManyToOneUserService<
         Ingredient, IngredientBody, IngredientResponse, IngredientRepository, IngredientMapper>, ValidIds<Ingredient, IngredientRepository, IngredientResponse> {
 
+    Mono<List<String>> seedEmbeddings();
+
     Flux<PageableResponse<IngredientResponse>> getAllModelsFiltered(String name, Boolean display, DietType type, PageableBody pageableBody, Boolean admin);
 
     Mono<IngredientResponse> alterDisplay(Long id, Boolean display, String userId);

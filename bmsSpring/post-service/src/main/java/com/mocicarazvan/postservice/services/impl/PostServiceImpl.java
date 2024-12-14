@@ -2,12 +2,15 @@ package com.mocicarazvan.postservice.services.impl;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mocicarazvan.ollamasearch.service.OllamaAPIService;
 import com.mocicarazvan.postservice.clients.CommentClient;
 import com.mocicarazvan.postservice.dtos.PostBody;
 import com.mocicarazvan.postservice.dtos.PostResponse;
 import com.mocicarazvan.postservice.dtos.comments.CommentResponse;
 import com.mocicarazvan.postservice.mappers.PostMapper;
 import com.mocicarazvan.postservice.models.Post;
+import com.mocicarazvan.postservice.models.PostEmbedding;
+import com.mocicarazvan.postservice.repositories.PostEmbeddingRepository;
 import com.mocicarazvan.postservice.repositories.PostExtendedRepository;
 import com.mocicarazvan.postservice.repositories.PostRepository;
 import com.mocicarazvan.postservice.services.PostService;
@@ -30,13 +33,17 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.util.Pair;
+import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.reactive.TransactionalOperator;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.util.function.Tuple2;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 
 
 @Service
@@ -48,9 +55,11 @@ public class PostServiceImpl extends ApprovedServiceImpl<Post, PostBody, PostRes
     private final PostExtendedRepository postExtendedRepository;
     private final RabbitMqApprovedSenderWrapper<PostResponse> rabbitMqSender;
     private final TransactionalOperator transactionalOperator;
+    private final PostEmbeddingRepository postEmbeddingRepository;
+    private final OllamaAPIService ollamaAPIService;
 
 
-    public PostServiceImpl(PostRepository modelRepository, PostMapper modelMapper, PageableUtilsCustom pageableUtils, UserClient userClient, EntitiesUtils entitiesUtils, FileClient fileClient, ObjectMapper objectMapper, CommentClient commentClient, PostExtendedRepository postExtendedRepository, RabbitMqApprovedSenderWrapper<PostResponse> rabbitMqSender, PostServiceRedisCacheWrapper self, TransactionalOperator transactionalOperator) {
+    public PostServiceImpl(PostRepository modelRepository, PostMapper modelMapper, PageableUtilsCustom pageableUtils, UserClient userClient, EntitiesUtils entitiesUtils, FileClient fileClient, ObjectMapper objectMapper, CommentClient commentClient, PostExtendedRepository postExtendedRepository, RabbitMqApprovedSenderWrapper<PostResponse> rabbitMqSender, PostServiceRedisCacheWrapper self, TransactionalOperator transactionalOperator, PostEmbeddingRepository postEmbeddingRepository, OllamaAPIService ollamaAPIService) {
         super(modelRepository, modelMapper, pageableUtils, userClient, "post", List.of("id", "userId", "title", "createdAt", "updatedAt", "approved"),
                 entitiesUtils, fileClient, objectMapper, rabbitMqSender, self
         );
@@ -58,6 +67,23 @@ public class PostServiceImpl extends ApprovedServiceImpl<Post, PostBody, PostRes
         this.postExtendedRepository = postExtendedRepository;
         this.rabbitMqSender = rabbitMqSender;
         this.transactionalOperator = transactionalOperator;
+        this.postEmbeddingRepository = postEmbeddingRepository;
+        this.ollamaAPIService = ollamaAPIService;
+    }
+
+    @Override
+    public Mono<List<String>> seedEmbeddings() {
+        return modelRepository.findAll()
+                .flatMap(post -> postEmbeddingRepository.save(
+                        PostEmbedding.builder()
+                                .entityId(post.getId())
+                                .createdAt(LocalDateTime.now())
+                                .updatedAt(LocalDateTime.now())
+                                .embedding(ollamaAPIService.generateEmbeddingFloat(post.getTitle()))
+                                .build()
+                ).then(Mono.just("Seeded embeddings for post: " + post.getId())))
+                .collectList()
+                .as(transactionalOperator::transactional);
     }
 
     @Override
@@ -75,6 +101,7 @@ public class PostServiceImpl extends ApprovedServiceImpl<Post, PostBody, PostRes
                                 .flatMap(model ->
                                         transactionalOperator.transactional(privateRoute(true, authUser, model.getUserId())
                                                         .then(commentClient.deleteCommentsByPostId(id.toString(), userId))
+                                                        .then(postEmbeddingRepository.deleteByEntityId(id))
                                                         .then(modelRepository.delete(model)))
                                                 .then(Mono.fromCallable(() -> modelMapper.fromModelToResponse(model))
 
@@ -91,6 +118,7 @@ public class PostServiceImpl extends ApprovedServiceImpl<Post, PostBody, PostRes
                                     Boolean originalApproved = model.isApproved();
                                     return transactionalOperator.transactional(privateRoute(true, authUser, model.getUserId())
                                                     .then(commentClient.deleteCommentsByPostId(id.toString(), userId))
+                                                    .then(postEmbeddingRepository.deleteByEntityId(id))
                                                     .then(modelRepository.delete(model)))
                                             .then(Mono.fromCallable(() -> modelMapper.fromModelToResponse(model)))
                                             .map(r -> Pair.of(r, originalApproved))
@@ -149,6 +177,51 @@ public class PostServiceImpl extends ApprovedServiceImpl<Post, PostBody, PostRes
 
                 self.getPostFilteredTrainerBase(newTitle, approved, tags, trainerId, pr)
 
+
+        );
+    }
+
+    @Override
+    public Mono<PostResponse> createModel(Flux<FilePart> images, PostBody postBody, String userId, String clientId) {
+        return
+                super.createModel(images, postBody, userId, clientId)
+                        .flatMap(r -> postEmbeddingRepository.save(
+                                PostEmbedding.builder()
+                                        .entityId(r.getId())
+                                        .createdAt(LocalDateTime.now())
+                                        .updatedAt(LocalDateTime.now())
+                                        .embedding(ollamaAPIService.generateEmbeddingFloat(r.getTitle()))
+                                        .build()
+                        ).then(Mono.just(r))).as(transactionalOperator::transactional);
+    }
+
+    @Override
+    public Mono<Pair<PostResponse, Boolean>> updateModelWithImagesGetOriginalApproved(Flux<FilePart> images, Long id, PostBody postBody, String userId, String clientId) {
+        return super.updateModelWithImagesGetOriginalApproved(images, id, postBody, userId, clientId, (b, origTitle, n) ->
+                {
+
+                    if (!Objects.equals(b.getTitle(), origTitle)) {
+                        return transactionalOperator.transactional(
+                                // have to do like this bc of the conversion error of the vector
+                                postEmbeddingRepository.deleteByEntityId(n.getId())
+                                        .then(
+                                                Mono.zip(
+                                                        Mono.defer(() ->
+                                                                postEmbeddingRepository.save(
+                                                                        PostEmbedding.builder()
+                                                                                .entityId(n.getId())
+                                                                                .updatedAt(LocalDateTime.now())
+                                                                                .embedding(ollamaAPIService.generateEmbeddingFloat(b.getTitle()))
+                                                                                .build()
+                                                                )
+                                                        ),
+                                                        Mono.defer(() -> modelRepository.save(n))
+                                                ).map(Tuple2::getT2)
+                                        )
+                        );
+                    }
+                    return modelRepository.save(n);
+                }
 
         );
     }
@@ -229,10 +302,8 @@ public class PostServiceImpl extends ApprovedServiceImpl<Post, PostBody, PostRes
             return
                     pageableUtils.createPageableResponse(
                             postExtendedRepository.getPostsFiltered(finalTitle, approved, tags, likedUserId, pr)
-                                    .doOnNext(post -> log.error("post: " + post))
                                     .map(modelMapper::fromModelToResponse),
                             postExtendedRepository.countPostsFiltered(finalTitle, approved, tags, likedUserId)
-                                    .doOnNext(count -> log.error("count: " + count))
                             , pr
                     );
         }

@@ -24,6 +24,7 @@
         <option value="$PROJECT_DIR$/kanban-service/pom.xml" />
         <option value="$PROJECT_DIR$/day-service/pom.xml" />
         <option value="$PROJECT_DIR$/redis-cache/pom.xml" />
+        <option value="$PROJECT_DIR$/ollama-search/pom.xml" />
       </list>
     </option>
     <option name="ignoredFiles">

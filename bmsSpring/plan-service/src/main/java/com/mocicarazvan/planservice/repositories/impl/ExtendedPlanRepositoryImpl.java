@@ -1,5 +1,7 @@
 package com.mocicarazvan.planservice.repositories.impl;
 
+import com.mocicarazvan.ollamasearch.service.OllamaAPIService;
+import com.mocicarazvan.ollamasearch.utils.OllamaQueryUtils;
 import com.mocicarazvan.planservice.enums.DietType;
 import com.mocicarazvan.planservice.enums.ObjectiveType;
 import com.mocicarazvan.planservice.mappers.PlanMapper;
@@ -24,20 +26,36 @@ public class ExtendedPlanRepositoryImpl implements ExtendedPlanRepository {
     private final PlanMapper modelMapper;
     private final PageableUtilsCustom pageableUtils;
     private final RepositoryUtils repositoryUtils;
+    private final OllamaQueryUtils ollamaQueryUtils;
+    private final OllamaAPIService ollamaAPIService;
 
-    private static final String SELECT_ALL = "SELECT * FROM plan";
-    private static final String COUNT_ALL = "SELECT COUNT(*) FROM plan";
+    private static final String SELECT_ALL = "SELECT p.* FROM plan p join plan_embedding e on p.id = e.entity_id ";
+    private static final String COUNT_ALL = "SELECT COUNT(p.id) FROM plan p join plan_embedding e on p.id = e.entity_id ";
 
     @Override
     public Flux<Plan> getPlansFiltered(String title, Boolean approved, Boolean display, DietType type, ObjectiveType objective, PageRequest pageRequest, List<Long> excludeIds) {
         StringBuilder queryBuilder = new StringBuilder(SELECT_ALL);
+        String embeddings = "";
+        if (repositoryUtils.isNotNullOrEmpty(title)) {
+            embeddings = ollamaQueryUtils.getEmbeddingsAsString(
+                    ollamaAPIService.generateEmbedding(title)
+            );
+        }
 
-        appendWhereClause(queryBuilder, title, approved, display, type, objective);
+        appendWhereClause(queryBuilder, title, embeddings, approved, display, type, objective);
 
         repositoryUtils.addListField(excludeIds, queryBuilder, new RepositoryUtils.MutableBoolean(queryBuilder.length() > SELECT_ALL.length()),
                 " id NOT IN (:excludeIds)");
 
-        queryBuilder.append(pageableUtils.createPageRequestQuery(pageRequest, repositoryUtils.createExtraOrder(title, "title", ":title")));
+        if (repositoryUtils.isNotNullOrEmpty(embeddings)) {
+            queryBuilder.append(pageableUtils.createPageRequestQuery(pageRequest,
+                    ollamaQueryUtils.addOrder(
+                            embeddings
+                    )
+            ));
+        } else {
+            queryBuilder.append(pageableUtils.createPageRequestQuery(pageRequest));
+        }
 
         DatabaseClient.GenericExecuteSpec executeSpec = getGenericExecuteSpec(title, approved, type, objective, display, queryBuilder);
 
@@ -51,14 +69,27 @@ public class ExtendedPlanRepositoryImpl implements ExtendedPlanRepository {
     public Flux<Plan> getPlansFilteredTrainer(String title, Boolean approved, Boolean display, DietType type, ObjectiveType objective, Long trainerId, PageRequest pageRequest) {
         StringBuilder queryBuilder = new StringBuilder(SELECT_ALL);
 
-        appendWhereClause(queryBuilder, title, approved, display, type, objective);
+        String embeddings = "";
+        if (repositoryUtils.isNotNullOrEmpty(title)) {
+            embeddings = ollamaQueryUtils.getEmbeddingsAsString(
+                    ollamaAPIService.generateEmbedding(title)
+            );
+        }
+        appendWhereClause(queryBuilder, title, embeddings, approved, display, type, objective);
 
 
         repositoryUtils.addNotNullField(trainerId, queryBuilder, new RepositoryUtils.MutableBoolean(queryBuilder.length() > SELECT_ALL.length()),
                 " user_id = :trainerId");
 
-        queryBuilder.append(pageableUtils.createPageRequestQuery(pageRequest, repositoryUtils.createExtraOrder(title, "title", ":title")));
-
+        if (repositoryUtils.isNotNullOrEmpty(embeddings)) {
+            queryBuilder.append(pageableUtils.createPageRequestQuery(pageRequest,
+                    ollamaQueryUtils.addOrder(
+                            embeddings
+                    )
+            ));
+        } else {
+            queryBuilder.append(pageableUtils.createPageRequestQuery(pageRequest));
+        }
         DatabaseClient.GenericExecuteSpec executeSpec = getGenericExecuteSpec(title, approved, type, objective, display, queryBuilder);
 
 
@@ -69,8 +100,13 @@ public class ExtendedPlanRepositoryImpl implements ExtendedPlanRepository {
     @Override
     public Mono<Long> countPlansFiltered(String title, Boolean approved, Boolean display, DietType type, ObjectiveType objective, List<Long> excludeIds) {
         StringBuilder queryBuilder = new StringBuilder(COUNT_ALL);
-
-        appendWhereClause(queryBuilder, title, approved, display, type, objective);
+        String embeddings = "";
+        if (repositoryUtils.isNotNullOrEmpty(title)) {
+            embeddings = ollamaQueryUtils.getEmbeddingsAsString(
+                    ollamaAPIService.generateEmbedding(title)
+            );
+        }
+        appendWhereClause(queryBuilder, title, embeddings, approved, display, type, objective);
 
 
         repositoryUtils.addListField(excludeIds, queryBuilder, new RepositoryUtils.MutableBoolean(queryBuilder.length() > COUNT_ALL.length()),
@@ -88,7 +124,14 @@ public class ExtendedPlanRepositoryImpl implements ExtendedPlanRepository {
     public Mono<Long> countPlansFilteredTrainer(String title, Boolean approved, Boolean display, Long trainerId, DietType type, ObjectiveType objective) {
         StringBuilder queryBuilder = new StringBuilder(COUNT_ALL);
 
-        appendWhereClause(queryBuilder, title, approved, display, type, objective);
+        String embeddings = "";
+        if (repositoryUtils.isNotNullOrEmpty(title)) {
+            embeddings = ollamaQueryUtils.getEmbeddingsAsString(
+                    ollamaAPIService.generateEmbedding(title)
+            );
+        }
+
+        appendWhereClause(queryBuilder, title, embeddings, approved, display, type, objective);
 
 
         repositoryUtils.addNotNullField(trainerId, queryBuilder, new RepositoryUtils.MutableBoolean(queryBuilder.length() > COUNT_ALL.length()),
@@ -105,7 +148,7 @@ public class ExtendedPlanRepositoryImpl implements ExtendedPlanRepository {
     public Flux<Plan> getPlansFilteredByIds(String title, Boolean approved, Boolean display, DietType type, ObjectiveType objective, List<Long> ids, PageRequest pageRequest) {
         StringBuilder queryBuilder = new StringBuilder(SELECT_ALL);
 
-        appendWhereClause(queryBuilder, title, approved, display, type, objective);
+        appendWhereClause(queryBuilder, title, "", approved, display, type, objective);
 
         repositoryUtils.addListField(ids, queryBuilder, new RepositoryUtils.MutableBoolean(queryBuilder.length() > SELECT_ALL.length()),
                 " id IN (:ids)");
@@ -124,7 +167,7 @@ public class ExtendedPlanRepositoryImpl implements ExtendedPlanRepository {
     public Mono<Long> countPlansFilteredByIds(String title, Boolean approved, Boolean display, DietType type, ObjectiveType objective, List<Long> ids) {
         StringBuilder queryBuilder = new StringBuilder(COUNT_ALL);
 
-        appendWhereClause(queryBuilder, title, approved, display, type, objective);
+        appendWhereClause(queryBuilder, title, "", approved, display, type, objective);
 
 
         repositoryUtils.addListField(ids, queryBuilder, new RepositoryUtils.MutableBoolean(queryBuilder.length() > COUNT_ALL.length()),
@@ -156,7 +199,7 @@ public class ExtendedPlanRepositoryImpl implements ExtendedPlanRepository {
         return executeSpec;
     }
 
-    private void appendWhereClause(StringBuilder queryBuilder, String title, Boolean approved, Boolean display, DietType type, ObjectiveType objective) {
+    private void appendWhereClause(StringBuilder queryBuilder, String title, String embeddings, Boolean approved, Boolean display, DietType type, ObjectiveType objective) {
 
         RepositoryUtils.MutableBoolean hasPreviousCriteria = new RepositoryUtils.MutableBoolean(false);
 
@@ -167,8 +210,7 @@ public class ExtendedPlanRepositoryImpl implements ExtendedPlanRepository {
         repositoryUtils.addNotNullField(display, queryBuilder, hasPreviousCriteria, "display = :display");
 
 
-//        repositoryUtils.addStringField(title, queryBuilder, hasPreviousCriteria, " UPPER(title) LIKE UPPER(:title)");
-        repositoryUtils.addStringField(title, queryBuilder, hasPreviousCriteria, "( UPPER(title) LIKE UPPER('%' || :title || '%') OR similarity(title, :title ) > 0.35 )");
+        repositoryUtils.addStringField(title, queryBuilder, hasPreviousCriteria, ollamaQueryUtils.addThresholdFilter(embeddings, " OR title ILIKE '%' || :title || '%'"));
 
         repositoryUtils.addNotNullField(type, queryBuilder, hasPreviousCriteria, " type = :type");
 

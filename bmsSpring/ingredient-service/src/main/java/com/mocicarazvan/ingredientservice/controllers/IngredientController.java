@@ -35,5 +35,10 @@ public class IngredientController implements ValidControllerIds<IngredientRespon
         return ingredientService.getModelsByIds(ids);
     }
 
+    @GetMapping(value = "/seedEmbeddings")
+    public Mono<ResponseEntity<List<String>>> seedEmbeddings() {
+        return ingredientService.seedEmbeddings()
+                .map(ResponseEntity::ok);
+    }
 
 }

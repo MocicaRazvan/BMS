@@ -47,7 +47,7 @@ public class RedisReactiveCacheEvictAspect {
     protected Mono<Object> methodResponse(ProceedingJoinPoint joinPoint) {
         try {
             return ((Mono<Object>) joinPoint.proceed(joinPoint.getArgs()))
-                    .doOnNext(el -> log.info("METHOD RESPONSE: " + el))
+//                    .doOnNext(el -> log.info("METHOD RESPONSE: " + el))
                     ;
         } catch (Throwable throwable) {
             return Mono.error(throwable);

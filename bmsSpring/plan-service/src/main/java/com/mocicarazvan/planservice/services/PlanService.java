@@ -29,6 +29,8 @@ public interface PlanService
         extends ApprovedService<Plan, PlanBody, PlanResponse, PlanRepository, PlanMapper>
         , CountInParentService, ValidIds<Plan, PlanRepository, PlanResponse> {
 
+    Mono<List<String>> seedEmbeddings();
+
     Flux<PageableResponse<ResponseWithUserDto<PlanResponse>>> getPlansFilteredWithUser(String title, Boolean approved, Boolean display, DietType type, ObjectiveType objective, List<Long> excludeIds, PageableBody pageableBody, String userId, Boolean admin);
 
     Flux<PageableResponse<ResponseWithUserDto<PlanResponse>>> getPlansFilteredWithUserByIds(String title, DietType type, ObjectiveType objective, PageableBody pageableBody, List<Long> ids, String userId);

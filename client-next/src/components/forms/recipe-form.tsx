@@ -813,7 +813,7 @@ function SingleChildForm({
                         >
                           disabled={wasSubmitted}
                           path={"/ingredients/filtered"}
-                          sortingCriteria={{ name: "asc" }}
+                          // sortingCriteria={{ name: "asc" }}
                           extraQueryParams={{ display: "true" }}
                           valueKey={"name"}
                           maxSelected={1}

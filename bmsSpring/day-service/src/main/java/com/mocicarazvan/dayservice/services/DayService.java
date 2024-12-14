@@ -25,6 +25,8 @@ public interface DayService extends TitleBodyService<
         Day, DayBody, DayResponse, DayRepository, DayMapper
         >, CountInParentService, ValidIds<Day, DayRepository, DayResponse> {
 
+    Mono<List<String>> seedEmbeddings();
+
     Flux<PageableResponse<DayResponse>> getDaysFiltered(String title, DayType type, List<Long> excludeIds, PageableBody pageableBody, String userId, Boolean admin);
 
     Flux<PageableResponse<ResponseWithUserDto<DayResponse>>> getDaysFilteredWithUser(String title, DayType type, List<Long> excludeIds, PageableBody pageableBody, String userId, Boolean admin);

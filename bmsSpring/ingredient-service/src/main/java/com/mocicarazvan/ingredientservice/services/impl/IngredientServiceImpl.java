@@ -7,9 +7,12 @@ import com.mocicarazvan.ingredientservice.enums.DietType;
 import com.mocicarazvan.ingredientservice.exceptions.NameAlreadyExists;
 import com.mocicarazvan.ingredientservice.mappers.IngredientMapper;
 import com.mocicarazvan.ingredientservice.models.Ingredient;
+import com.mocicarazvan.ingredientservice.models.IngredientEmbedding;
 import com.mocicarazvan.ingredientservice.repositories.CustomIngredientRepository;
+import com.mocicarazvan.ingredientservice.repositories.IngredientEmbeddingRepository;
 import com.mocicarazvan.ingredientservice.repositories.IngredientRepository;
 import com.mocicarazvan.ingredientservice.services.IngredientService;
+import com.mocicarazvan.ollamasearch.service.OllamaAPIService;
 import com.mocicarazvan.rediscache.annotation.RedisReactiveCache;
 import com.mocicarazvan.rediscache.annotation.RedisReactiveChildCache;
 import com.mocicarazvan.rediscache.annotation.RedisReactiveChildCacheEvict;
@@ -28,10 +31,15 @@ import com.mocicarazvan.templatemodule.utils.PageableUtilsCustom;
 import lombok.Getter;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.reactive.TransactionalOperator;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.util.function.Tuple2;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class IngredientServiceImpl extends
@@ -43,10 +51,13 @@ public class IngredientServiceImpl extends
     private final CustomIngredientRepository customIngredientRepository;
     private final EntitiesUtils entitiesUtils;
     private final RecipeClient recipeClient;
+    private final OllamaAPIService ollamaAPIService;
+    private final IngredientEmbeddingRepository ingredientEmbeddingRepository;
+    private final TransactionalOperator transactionalOperator;
 
     private static final String CACHE_KEY_PATH = "#this.modelName";
 
-    public IngredientServiceImpl(IngredientRepository modelRepository, IngredientMapper modelMapper, PageableUtilsCustom pageableUtils, UserClient userClient, CustomIngredientRepository customIngredientRepository, EntitiesUtils entitiesUtils, RecipeClient recipeClient, IngredientServiceRedisCacheWrapper self) {
+    public IngredientServiceImpl(IngredientRepository modelRepository, IngredientMapper modelMapper, PageableUtilsCustom pageableUtils, UserClient userClient, CustomIngredientRepository customIngredientRepository, EntitiesUtils entitiesUtils, RecipeClient recipeClient, IngredientServiceRedisCacheWrapper self, OllamaAPIService ollamaAPIService, IngredientEmbeddingRepository ingredientEmbeddingRepository, TransactionalOperator transactionalOperator) {
         super(modelRepository, modelMapper, pageableUtils, userClient, "ingredient", List.of("name", "type", "display", "createdAt", "updatedAt", "id", "fat", "protein",
                 "fat",
                 "carbohydrates",
@@ -57,7 +68,43 @@ public class IngredientServiceImpl extends
         this.entitiesUtils = entitiesUtils;
         this.recipeClient = recipeClient;
 
+        this.ollamaAPIService = ollamaAPIService;
+        this.ingredientEmbeddingRepository = ingredientEmbeddingRepository;
+        this.transactionalOperator = transactionalOperator;
     }
+
+    public Mono<List<String>> seedEmbeddings() {
+        int batchSize = 20;
+
+        return modelRepository.findAll()
+                .collectList()
+                .flatMapMany(ingredients -> Flux.fromIterable(partitionList(ingredients, batchSize)))
+                .concatMap(batch ->
+                        transactionalOperator.transactional(
+                                Flux.fromIterable(batch)
+                                        .flatMap(ingredient -> ingredientEmbeddingRepository.save(
+                                                        IngredientEmbedding.builder()
+                                                                .entityId(ingredient.getId())
+                                                                .createdAt(LocalDateTime.now())
+                                                                .updatedAt(LocalDateTime.now())
+                                                                .embedding(ollamaAPIService.generateEmbeddingFloat(ingredient.getName()))
+                                                                .build()
+                                                )
+                                        )
+                                        .then(Mono.just("Seeded embeddings for batch of size: " + batch.size()))
+                        )
+                )
+                .collectList();
+    }
+
+    private <T> List<List<T>> partitionList(List<T> list, int batchSize) {
+        List<List<T>> partitions = new ArrayList<>();
+        for (int i = 0; i < list.size(); i += batchSize) {
+            partitions.add(list.subList(i, Math.min(i + batchSize, list.size())));
+        }
+        return partitions;
+    }
+
 
     @RedisReactiveChildCache(key = CACHE_KEY_PATH, idPath = "content.id")
     public Flux<PageableResponse<IngredientResponse>> getAllModels(PageableBody pageableBody, String userId) {
@@ -80,8 +127,34 @@ public class IngredientServiceImpl extends
                             if (exists) {
                                 return Mono.error(new NameAlreadyExists("Ingredient with name " + body.getName() + " already exists", body.getName()));
                             }
-                            return super.createModel(body, userId);
+                            return super.createModel(body, userId)
+                                    .flatMap(ing -> ingredientEmbeddingRepository.save(
+                                                    IngredientEmbedding.builder()
+                                                            .entityId(ing.getId())
+                                                            .createdAt(LocalDateTime.now())
+                                                            .updatedAt(LocalDateTime.now())
+                                                            .embedding(ollamaAPIService.generateEmbeddingFloat(ing.getName()))
+                                                            .build()
+                                            ).thenReturn(ing)
+                                    ).as(transactionalOperator::transactional);
                         });
+    }
+
+    private <R> Mono<R> updateIngredientEmbedding(IngredientBody body, String origName, Long id, Mono<R> mono) {
+        if (!Objects.equals(body.getName(), origName)) {
+            return ingredientEmbeddingRepository.deleteByEntityId(id)
+                    .then(Mono.zip(
+                            Mono.defer(() ->
+                                    ingredientEmbeddingRepository.save(IngredientEmbedding.builder()
+                                            .entityId(id)
+                                            .embedding(ollamaAPIService.generateEmbeddingFloat(body.getName()))
+                                            .updatedAt(LocalDateTime.now())
+                                            .build())),
+                            Mono.defer(() -> mono)
+
+                    ).map(Tuple2::getT2));
+        }
+        return mono;
     }
 
     @Override
@@ -94,7 +167,8 @@ public class IngredientServiceImpl extends
                             if (exists) {
                                 return Mono.error(new NameAlreadyExists("Ingredient with name " + body.getName() + " already exists", body.getName()));
                             }
-                            return super.updateModel(id, body, userId);
+                            return super.updateModelWithSuccess(id, userId, m -> updateIngredientEmbedding(body, m.getName(), id, modelMapper.updateModelFromBody(body, m)))
+                                    .as(transactionalOperator::transactional);
                         });
     }
 

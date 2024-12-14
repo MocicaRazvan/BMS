@@ -1,5 +1,7 @@
 package com.mocicarazvan.recipeservice.repositories.impl;
 
+import com.mocicarazvan.ollamasearch.service.OllamaAPIService;
+import com.mocicarazvan.ollamasearch.utils.OllamaQueryUtils;
 import com.mocicarazvan.recipeservice.enums.DietType;
 import com.mocicarazvan.recipeservice.mappers.RecipeMapper;
 import com.mocicarazvan.recipeservice.models.Recipe;
@@ -24,21 +26,37 @@ public class RecipeExtendedRepositoryImpl implements RecipeExtendedRepository {
     private final RecipeMapper modelMapper;
     private final PageableUtilsCustom pageableUtils;
     private final RepositoryUtils repositoryUtils;
+    private final OllamaQueryUtils ollamaQueryUtils;
+    private final OllamaAPIService ollamaAPIService;
 
-    private static final String SELECT_ALL = "SELECT * FROM recipe";
-    private static final String COUNT_ALL = "SELECT COUNT(*) FROM recipe";
+    private static final String SELECT_ALL = "SELECT r.* FROM recipe r join recipe_embedding e on r.id = e.entity_id ";
+    private static final String COUNT_ALL = "SELECT COUNT(r.id) FROM recipe r join recipe_embedding e on r.id = e.entity_id ";
 
 
     @Override
     public Flux<Recipe> getRecipesFiltered(String title, Boolean approved, DietType type, PageRequest pageRequest) {
         StringBuilder queryBuilder = new StringBuilder(SELECT_ALL);
 
-        appendWhereClause(queryBuilder, title, approved, type);
+        String embeddings = "";
+        if (repositoryUtils.isNotNullOrEmpty(title)) {
+            embeddings = ollamaQueryUtils.getEmbeddingsAsString(
+                    ollamaAPIService.generateEmbedding(title)
+            );
+        }
+
+        appendWhereClause(queryBuilder, title, embeddings, approved, type);
 
 //        queryBuilder.append(pageableUtils.createPageRequestQuery(pageRequest));
 
-        queryBuilder.append(pageableUtils.createPageRequestQuery(pageRequest, repositoryUtils.createExtraOrder(title, "title", ":title")));
-
+        if (repositoryUtils.isNotNullOrEmpty(embeddings)) {
+            queryBuilder.append(pageableUtils.createPageRequestQuery(pageRequest,
+                    ollamaQueryUtils.addOrder(
+                            embeddings
+                    )
+            ));
+        } else {
+            queryBuilder.append(pageableUtils.createPageRequestQuery(pageRequest));
+        }
         DatabaseClient.GenericExecuteSpec executeSpec = getGenericExecuteSpec(title, approved, type, queryBuilder);
 
         return executeSpec.map((row, metadata) -> modelMapper.fromRowToModel(row)).all();
@@ -47,8 +65,13 @@ public class RecipeExtendedRepositoryImpl implements RecipeExtendedRepository {
     @Override
     public Flux<Recipe> getRecipesFilteredTrainer(String title, Boolean approved, DietType type, Long trainerId, PageRequest pageRequest) {
         StringBuilder queryBuilder = new StringBuilder(SELECT_ALL);
-
-        appendWhereClause(queryBuilder, title, approved, type);
+        String embeddings = "";
+        if (repositoryUtils.isNotNullOrEmpty(title)) {
+            embeddings = ollamaQueryUtils.getEmbeddingsAsString(
+                    ollamaAPIService.generateEmbedding(title)
+            );
+        }
+        appendWhereClause(queryBuilder, title, embeddings, approved, type);
 
 //        if (queryBuilder.length() > SELECT_ALL.length()) {
 //            queryBuilder.append(" AND");
@@ -62,7 +85,15 @@ public class RecipeExtendedRepositoryImpl implements RecipeExtendedRepository {
 
 //        queryBuilder.append(pageableUtils.createPageRequestQuery(pageRequest));
 
-        queryBuilder.append(pageableUtils.createPageRequestQuery(pageRequest, repositoryUtils.createExtraOrder(title, "title", ":title")));
+        if (repositoryUtils.isNotNullOrEmpty(embeddings)) {
+            queryBuilder.append(pageableUtils.createPageRequestQuery(pageRequest,
+                    ollamaQueryUtils.addOrder(
+                            embeddings
+                    )
+            ));
+        } else {
+            queryBuilder.append(pageableUtils.createPageRequestQuery(pageRequest));
+        }
 
         DatabaseClient.GenericExecuteSpec executeSpec = getGenericExecuteSpec(title, approved, type, queryBuilder);
 
@@ -76,8 +107,13 @@ public class RecipeExtendedRepositoryImpl implements RecipeExtendedRepository {
     @Override
     public Mono<Long> countRecipesFiltered(String title, Boolean approved, DietType type) {
         StringBuilder queryBuilder = new StringBuilder(COUNT_ALL);
-
-        appendWhereClause(queryBuilder, title, approved, type);
+        String embeddings = "";
+        if (repositoryUtils.isNotNullOrEmpty(title)) {
+            embeddings = ollamaQueryUtils.getEmbeddingsAsString(
+                    ollamaAPIService.generateEmbedding(title)
+            );
+        }
+        appendWhereClause(queryBuilder, title, embeddings, approved, type);
 
         DatabaseClient.GenericExecuteSpec executeSpec = getGenericExecuteSpec(title, approved, type, queryBuilder);
 
@@ -87,8 +123,13 @@ public class RecipeExtendedRepositoryImpl implements RecipeExtendedRepository {
     @Override
     public Mono<Long> countRecipesFilteredTrainer(String title, Boolean approved, Long trainerId, DietType type) {
         StringBuilder queryBuilder = new StringBuilder(COUNT_ALL);
-
-        appendWhereClause(queryBuilder, title, approved, type);
+        String embeddings = "";
+        if (repositoryUtils.isNotNullOrEmpty(title)) {
+            embeddings = ollamaQueryUtils.getEmbeddingsAsString(
+                    ollamaAPIService.generateEmbedding(title)
+            );
+        }
+        appendWhereClause(queryBuilder, title, embeddings, approved, type);
 
 //        if (queryBuilder.length() > COUNT_ALL.length()) {
 //            queryBuilder.append(" AND");
@@ -157,7 +198,7 @@ public class RecipeExtendedRepositoryImpl implements RecipeExtendedRepository {
         return executeSpec;
     }
 
-    private void appendWhereClause(StringBuilder queryBuilder, String title, Boolean approved, DietType type) {
+    private void appendWhereClause(StringBuilder queryBuilder, String title, String embeddings, Boolean approved, DietType type) {
 
         RepositoryUtils.MutableBoolean hasPreviousCriteria = new RepositoryUtils.MutableBoolean(false);
 
@@ -165,8 +206,7 @@ public class RecipeExtendedRepositoryImpl implements RecipeExtendedRepository {
         repositoryUtils.addNotNullField(approved, queryBuilder, hasPreviousCriteria, " approved = :approved");
 
 
-//        repositoryUtils.addStringField(title, queryBuilder, hasPreviousCriteria, " UPPER(title) LIKE UPPER(:title)");
-        repositoryUtils.addStringField(title, queryBuilder, hasPreviousCriteria, "( UPPER(title) LIKE UPPER('%' || :title || '%') OR similarity(title, :title ) > 0.35 )");
+        repositoryUtils.addStringField(title, queryBuilder, hasPreviousCriteria, ollamaQueryUtils.addThresholdFilter(embeddings, " OR title ILIKE '%' || :title || '%'"));
 
 
         repositoryUtils.addNotNullField(type, queryBuilder, hasPreviousCriteria, " type = :type");

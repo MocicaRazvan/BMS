@@ -299,5 +299,10 @@ public class PostController implements ApproveController
                         .map(ResponseEntity::ok);
     }
 
+    @GetMapping(value = "/seedEmbeddings")
+    public Mono<ResponseEntity<List<String>>> seedEmbeddings() {
+        return postService.seedEmbeddings()
+                .map(ResponseEntity::ok);
+    }
 
 }

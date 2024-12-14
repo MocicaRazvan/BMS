@@ -19,7 +19,7 @@ interface Props<R> extends WithUser, ChildInputMultipleSelectorTexts {
   value: Option[];
   disabled: boolean;
   extraQueryParams?: Record<string, string>;
-  sortingCriteria: Record<string, SortDirection>;
+  sortingCriteria?: Record<string, SortDirection>;
   valueKey: string;
   maxSelected?: number;
   giveUnselectedValue?: boolean;
@@ -38,7 +38,7 @@ export default function ChildInputMultipleSelector<R>({
   noResults,
   placeholder,
   extraQueryParams,
-  sortingCriteria,
+  sortingCriteria = {},
   valueKey,
   maxSelected,
   giveUnselectedValue = true,

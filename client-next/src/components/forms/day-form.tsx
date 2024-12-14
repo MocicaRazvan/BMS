@@ -750,7 +750,7 @@ function SingleMealForm({
                   >
                     disabled={wasSubmitted}
                     path={`/recipes/trainer/filtered/${authUser.id}`}
-                    sortingCriteria={{ title: "asc" }}
+                    // sortingCriteria={{ title: "asc" }}
                     extraQueryParams={{ approved: "true" }}
                     valueKey={"title"}
                     pageSize={20}

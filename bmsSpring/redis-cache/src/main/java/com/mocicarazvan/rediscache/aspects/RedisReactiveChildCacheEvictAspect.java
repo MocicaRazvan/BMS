@@ -115,7 +115,7 @@ public class RedisReactiveChildCacheEvictAspect extends RedisReactiveCacheEvictA
         if (masterId != -1L) {
             patterns.add(redisChildCacheUtils.getMasterKey(key, -1L) + "*");
         }
-        log.info("keysToInvalidateByMaster to invalidate: " + patterns);
+//        log.info("keysToInvalidateByMaster to invalidate: " + patterns);
         return Flux.fromIterable(patterns)
                 .flatMap(p -> reactiveRedisTemplate
                         .scan(

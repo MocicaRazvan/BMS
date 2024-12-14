@@ -20,6 +20,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.reactive.TransactionalOperator;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -46,6 +47,7 @@ public class IngredientNutritionalFactServiceImpl implements IngredientNutrition
             "saturatedFat");
 
     private final IngredientNutritionalFactRedisCacheWrapper self;
+    private final TransactionalOperator transactionalOperator;
 
     @Override
     @RedisReactiveChildCacheEvict(key = CACHE_KEY_PATH, id = "#id")
@@ -55,6 +57,7 @@ public class IngredientNutritionalFactServiceImpl implements IngredientNutrition
                 nutritionalFactService.findByIngredientIdUserId(id, userId)
                         .zipWith(ingredientService.deleteModel(id, userId))
                         .map(t -> ingredientNutritionalFactMapper.fromResponsesToResponse(t.getT2(), t.getT1()))
+                        .as(transactionalOperator::transactional)
                 ;
     }
 
@@ -65,7 +68,7 @@ public class IngredientNutritionalFactServiceImpl implements IngredientNutrition
                         .zipWith(nutritionalFactService.findByIngredientId(id))
                         .map(t ->
                                 ingredientNutritionalFactMapper.fromResponsesToResponse(t.getT1(), t.getT2())
-                        );
+                        ).as(transactionalOperator::transactional);
 
     }
 
@@ -76,7 +79,8 @@ public class IngredientNutritionalFactServiceImpl implements IngredientNutrition
         return
                 ingredientService.updateModel(id, body.getIngredient(), userId)
                         .zipWith(nutritionalFactService.updateModelByIngredient(id, body.getNutritionalFact(), userId))
-                        .map(t -> ingredientNutritionalFactMapper.fromResponsesToResponse(t.getT1(), t.getT2()));
+                        .map(t -> ingredientNutritionalFactMapper.fromResponsesToResponse(t.getT1(), t.getT2()))
+                        .as(transactionalOperator::transactional);
     }
 
     @Override
@@ -104,7 +108,7 @@ public class IngredientNutritionalFactServiceImpl implements IngredientNutrition
                 ingredientService.createModel(body.getIngredient(), userId)
                         .flatMap(ing -> nutritionalFactService.createModel(body.getNutritionalFact(), ing.getId(), userId)
                                 .flatMap(nf -> Mono.just(ingredientNutritionalFactMapper.fromResponsesToResponse(ing, nf))
-                                ));
+                                )).as(transactionalOperator::transactional);
     }
 
     @Override

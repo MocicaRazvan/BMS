@@ -93,7 +93,11 @@
             <artifactId>loki-logback-appender</artifactId>
             <version>1.5.2</version>
         </dependency>
-
+        <dependency>
+            <groupId>com.mocicarazvan</groupId>
+            <artifactId>ollama-search</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
     </dependencies>
     <dependencyManagement>
         <dependencies>

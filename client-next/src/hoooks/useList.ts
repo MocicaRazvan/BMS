@@ -152,6 +152,7 @@ export default function useList<T>({
       ...prev,
       currentPage: 0,
     }));
+    setSort([]);
   }, []);
 
   const debouncedFilter = useDebounceWithCallBack(

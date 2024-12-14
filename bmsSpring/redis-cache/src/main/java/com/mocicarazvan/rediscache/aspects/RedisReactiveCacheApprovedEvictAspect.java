@@ -93,7 +93,7 @@ public class RedisReactiveCacheApprovedEvictAspect extends RedisReactiveCacheEvi
             patterns.add(createPattern(key, 0L, BooleanEnum.TRUE));
             patterns.add(createPattern(key, -1L, BooleanEnum.TRUE));
         }
-        log.info("keysToInvalidateByOriginalApproved to invalidate: " + patterns);
+//        log.info("keysToInvalidateByOriginalApproved to invalidate: " + patterns);
         return redisApprovedCacheUtils.getActualKeys(patterns, reactiveRedisTemplate);
     }
 

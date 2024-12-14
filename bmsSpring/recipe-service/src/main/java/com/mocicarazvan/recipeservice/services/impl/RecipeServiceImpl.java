@@ -2,6 +2,7 @@ package com.mocicarazvan.recipeservice.services.impl;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mocicarazvan.ollamasearch.service.OllamaAPIService;
 import com.mocicarazvan.recipeservice.clients.DayClient;
 import com.mocicarazvan.recipeservice.clients.IngredientClient;
 import com.mocicarazvan.recipeservice.dtos.RecipeBody;
@@ -11,6 +12,8 @@ import com.mocicarazvan.recipeservice.enums.DietType;
 import com.mocicarazvan.recipeservice.exceptions.InvalidTypeException;
 import com.mocicarazvan.recipeservice.mappers.RecipeMapper;
 import com.mocicarazvan.recipeservice.models.Recipe;
+import com.mocicarazvan.recipeservice.models.RecipeEmbedding;
+import com.mocicarazvan.recipeservice.repositories.RecipeEmbeddingRepository;
 import com.mocicarazvan.recipeservice.repositories.RecipeExtendedRepository;
 import com.mocicarazvan.recipeservice.repositories.RecipeRepository;
 import com.mocicarazvan.recipeservice.services.IngredientQuantityService;
@@ -39,12 +42,14 @@ import org.springframework.data.util.Pair;
 import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.reactive.TransactionalOperator;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuple2;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Function;
 
 @Service
@@ -57,14 +62,35 @@ public class RecipeServiceImpl extends ApprovedServiceImpl<Recipe, RecipeBody, R
     private final IngredientQuantityService ingredientQuantityService;
     private final RabbitMqApprovedSenderWrapper<RecipeResponse> rabbitMqSender;
     private final DayClient dayClient;
+    private final OllamaAPIService ollamaAPIService;
+    private final RecipeEmbeddingRepository recipeEmbeddingRepository;
+    private final TransactionalOperator transactionalOperator;
 
-    public RecipeServiceImpl(RecipeRepository modelRepository, RecipeMapper modelMapper, PageableUtilsCustom pageableUtils, UserClient userClient, EntitiesUtils entitiesUtils, FileClient fileClient, ObjectMapper objectMapper, RecipeExtendedRepository recipeExtendedRepository, IngredientClient ingredientClient, IngredientQuantityService ingredientQuantityService, RabbitMqApprovedSenderWrapper<RecipeResponse> rabbitMqSender, DayClient dayClient, RecipeServiceRedisCacheWrapper self) {
+    public RecipeServiceImpl(RecipeRepository modelRepository, RecipeMapper modelMapper, PageableUtilsCustom pageableUtils, UserClient userClient, EntitiesUtils entitiesUtils, FileClient fileClient, ObjectMapper objectMapper, RecipeExtendedRepository recipeExtendedRepository, IngredientClient ingredientClient, IngredientQuantityService ingredientQuantityService, RabbitMqApprovedSenderWrapper<RecipeResponse> rabbitMqSender, DayClient dayClient, RecipeServiceRedisCacheWrapper self, OllamaAPIService ollamaAPIService, RecipeEmbeddingRepository recipeEmbeddingRepository, TransactionalOperator transactionalOperator) {
         super(modelRepository, modelMapper, pageableUtils, userClient, "recipe", List.of("id", "userId", "type", "title", "createdAt", "updatedAt", "approved"), entitiesUtils, fileClient, objectMapper, rabbitMqSender, self);
         this.recipeExtendedRepository = recipeExtendedRepository;
         this.ingredientClient = ingredientClient;
         this.ingredientQuantityService = ingredientQuantityService;
         this.rabbitMqSender = rabbitMqSender;
         this.dayClient = dayClient;
+        this.ollamaAPIService = ollamaAPIService;
+        this.recipeEmbeddingRepository = recipeEmbeddingRepository;
+        this.transactionalOperator = transactionalOperator;
+    }
+
+    @Override
+    public Mono<List<String>> seedEmbeddings() {
+        return modelRepository.findAll()
+                .flatMap(recipe -> recipeEmbeddingRepository.save(
+                        RecipeEmbedding.builder()
+                                .entityId(recipe.getId())
+                                .createdAt(LocalDateTime.now())
+                                .updatedAt(LocalDateTime.now())
+                                .embedding(ollamaAPIService.generateEmbeddingFloat(recipe.getTitle()))
+                                .build()
+                ).then(Mono.just("Seeded embeddings for recipe: " + recipe.getId())))
+                .collectList()
+                .as(transactionalOperator::transactional);
     }
 
     @Override
@@ -116,11 +142,35 @@ public class RecipeServiceImpl extends ApprovedServiceImpl<Recipe, RecipeBody, R
                                                     return getModelToBeCreatedWithVideos(images, videos, recipeBody, userId, clientId)
                                                             .flatMap(modelRepository::save)
                                                             .flatMap(m ->
-                                                                    ingredientQuantityService.saveAllFromIngredientList(m.getId(), recipeBody.getIngredients())
+                                                                    Mono.zip(
+                                                                                    Mono.defer(() -> ingredientQuantityService.saveAllFromIngredientList(m.getId(), recipeBody.getIngredients()).then(Mono.just(m))),
+                                                                                    Mono.defer(() -> recipeEmbeddingRepository.save(RecipeEmbedding.builder()
+                                                                                            .entityId(m.getId())
+                                                                                            .createdAt(LocalDateTime.now())
+                                                                                            .updatedAt(LocalDateTime.now())
+                                                                                            .embedding(ollamaAPIService.generateEmbeddingFloat(m.getTitle()))
+                                                                                            .build())))
                                                                             .then(Mono.just(modelMapper.fromModelToResponse(m))));
                                                 }
 
-                                        )).flatMap(self::createInvalidate).map(Pair::getFirst);
+                                        )).flatMap(self::createInvalidate).map(Pair::getFirst).as(transactionalOperator::transactional);
+    }
+
+    private <R> Mono<R> updateRecipeEmbedding(RecipeBody body, String origTitle, Long id, Mono<R> mono) {
+        if (!Objects.equals(body.getTitle(), origTitle)) {
+            return recipeEmbeddingRepository.deleteByEntityId(id)
+                    .then(Mono.zip(
+                            Mono.defer(() ->
+                                    recipeEmbeddingRepository.save(RecipeEmbedding.builder()
+                                            .entityId(id)
+                                            .embedding(ollamaAPIService.generateEmbeddingFloat(body.getTitle()))
+                                            .updatedAt(LocalDateTime.now())
+                                            .build())),
+                            Mono.defer(() -> mono)
+
+                    ).map(Tuple2::getT2)).as(transactionalOperator::transactional);
+        }
+        return mono;
     }
 
     @Override
@@ -130,15 +180,17 @@ public class RecipeServiceImpl extends ApprovedServiceImpl<Recipe, RecipeBody, R
                         .then(updateModelWithSuccess(id, userId, model ->
                                 {
                                     List<String> urls = model.getImages();
+                                    String origTitle = model.getTitle();
                                     urls.addAll(model.getVideos());
                                     return fileClient.deleteFiles(urls)
                                             .then(uploadFiles(images, FileType.IMAGE, clientId)
                                                     .zipWith(uploadFiles(videos, FileType.VIDEO, clientId))
-                                                    .flatMap(t -> modelMapper.updateModelFromBody(recipeBody, model)
-                                                            .flatMap(handleVideos(recipeBody, id, t))));
+                                                    .flatMap(t ->
+                                                            updateRecipeEmbedding(recipeBody, origTitle, model.getId(), modelMapper.updateModelFromBody(recipeBody, model))
+                                                                    .flatMap(handleVideos(recipeBody, id, t))));
 
                                 }
-                        ));
+                        )).as(transactionalOperator::transactional);
     }
 
     @Override
@@ -150,15 +202,19 @@ public class RecipeServiceImpl extends ApprovedServiceImpl<Recipe, RecipeBody, R
                                     Boolean originalApproved = model.isApproved();
                                     List<String> urls = model.getImages();
                                     urls.addAll(model.getVideos());
+                                    String origTitle = model.getTitle();
                                     return fileClient.deleteFiles(urls)
                                             .then(uploadFiles(images, FileType.IMAGE, clientId)
                                                     .zipWith(uploadFiles(videos, FileType.VIDEO, clientId))
-                                                    .flatMap(t -> modelMapper.updateModelFromBody(recipeBody, model)
-                                                            .flatMap(handleVideos(recipeBody, id, t)))).flatMap(modelRepository::save)
+                                                    .flatMap(t ->
+
+                                                            updateRecipeEmbedding(recipeBody, origTitle, model.getId(), modelMapper.updateModelFromBody(recipeBody, model))
+
+                                                                    .flatMap(handleVideos(recipeBody, id, t)))).flatMap(modelRepository::save)
                                             .map(modelMapper::fromModelToResponse).map(r -> Pair.of(r, originalApproved));
 
                                 }
-                        )).flatMap(self::updateDeleteInvalidate);
+                        )).flatMap(self::updateDeleteInvalidate).as(transactionalOperator::transactional);
     }
 
     private Function<Recipe, Mono<? extends Recipe>> handleVideos(RecipeBody recipeBody, Long id, Tuple2<FileUploadResponse, FileUploadResponse> t) {

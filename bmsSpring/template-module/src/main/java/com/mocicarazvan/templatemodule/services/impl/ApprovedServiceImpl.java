@@ -22,6 +22,7 @@ import com.mocicarazvan.templatemodule.services.RabbitMqApprovedSenderWrapper;
 import com.mocicarazvan.templatemodule.utils.EntitiesUtils;
 import com.mocicarazvan.templatemodule.utils.PageableUtilsCustom;
 import lombok.Getter;
+import org.jooq.lambda.function.Function3;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.util.Pair;
 import org.springframework.http.codec.multipart.FilePart;
@@ -190,12 +191,14 @@ public abstract class ApprovedServiceImpl<MODEL extends Approve, BODY extends Ti
 
     }
 
-    @Override
-    public Mono<Pair<RESPONSE, Boolean>> updateModelWithImagesGetOriginalApproved(Flux<FilePart> images, Long id, BODY body, String userId, String clientId) {
+    public Mono<Pair<RESPONSE, Boolean>> updateModelWithImagesGetOriginalApproved(Flux<FilePart> images, Long id, BODY body, String userId, String clientId,
+                                                                                  Function3<BODY, String, MODEL, Mono<MODEL>> callback
+    ) {
 
         return
                 updateModelWithSuccessGeneral(id, userId, model -> {
                     Boolean originalApproved = model.isApproved();
+                    String origTitle = model.getTitle();
                     return fileClient.deleteFiles(model.getImages())
                             .then(uploadFiles(images, FileType.IMAGE, clientId)
                                     .flatMap(fileUploadResponse ->
@@ -206,12 +209,20 @@ public abstract class ApprovedServiceImpl<MODEL extends Approve, BODY extends Ti
                                                         return m;
                                                     })
                                     )
-                            ).flatMap(modelRepository::save)
+                            ).flatMap(m -> callback.apply(body, origTitle, m))
                             .map(modelMapper::fromModelToResponse)
 
                             .map(r -> Pair.of(r, originalApproved));
                 }).flatMap(self::updateDeleteInvalidate)
                 ;
+
+    }
+
+    @Override
+    public Mono<Pair<RESPONSE, Boolean>> updateModelWithImagesGetOriginalApproved(Flux<FilePart> images, Long id, BODY body, String userId, String clientId) {
+
+        return
+                updateModelWithImagesGetOriginalApproved(images, id, body, userId, clientId, (b, model, m) -> modelRepository.save(m));
 
     }
 
