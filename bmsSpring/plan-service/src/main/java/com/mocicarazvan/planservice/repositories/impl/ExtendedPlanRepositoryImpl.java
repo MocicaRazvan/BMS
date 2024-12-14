@@ -45,7 +45,7 @@ public class ExtendedPlanRepositoryImpl implements ExtendedPlanRepository {
         appendWhereClause(queryBuilder, title, embeddings, approved, display, type, objective);
 
         repositoryUtils.addListField(excludeIds, queryBuilder, new RepositoryUtils.MutableBoolean(queryBuilder.length() > SELECT_ALL.length()),
-                " id NOT IN (:excludeIds)");
+                " p.id NOT IN (:excludeIds)");
 
         if (repositoryUtils.isNotNullOrEmpty(embeddings)) {
             queryBuilder.append(pageableUtils.createPageRequestQuery(pageRequest,
@@ -110,7 +110,7 @@ public class ExtendedPlanRepositoryImpl implements ExtendedPlanRepository {
 
 
         repositoryUtils.addListField(excludeIds, queryBuilder, new RepositoryUtils.MutableBoolean(queryBuilder.length() > COUNT_ALL.length()),
-                " id NOT IN (:excludeIds)");
+                " p.id NOT IN (:excludeIds)");
 
         DatabaseClient.GenericExecuteSpec executeSpec = getGenericExecuteSpec(title, approved, type, objective, display, queryBuilder);
 
@@ -151,7 +151,7 @@ public class ExtendedPlanRepositoryImpl implements ExtendedPlanRepository {
         appendWhereClause(queryBuilder, title, "", approved, display, type, objective);
 
         repositoryUtils.addListField(ids, queryBuilder, new RepositoryUtils.MutableBoolean(queryBuilder.length() > SELECT_ALL.length()),
-                " id IN (:ids)");
+                " p.id IN (:ids)");
 
         queryBuilder.append(pageableUtils.createPageRequestQuery(pageRequest));
 
@@ -171,7 +171,7 @@ public class ExtendedPlanRepositoryImpl implements ExtendedPlanRepository {
 
 
         repositoryUtils.addListField(ids, queryBuilder, new RepositoryUtils.MutableBoolean(queryBuilder.length() > COUNT_ALL.length()),
-                " id IN (:ids)");
+                " p.id IN (:ids)");
 
         DatabaseClient.GenericExecuteSpec executeSpec = getGenericExecuteSpec(title, approved, type, objective, display, queryBuilder);
 

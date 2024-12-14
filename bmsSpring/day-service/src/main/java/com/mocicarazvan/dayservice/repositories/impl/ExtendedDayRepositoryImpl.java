@@ -98,7 +98,7 @@ public class ExtendedDayRepositoryImpl implements ExtendedDayRepository {
         appendWhereClause(queryBuilder, title, "", dayType, excludeIds);
 
         repositoryUtils.addListField(ids, queryBuilder, new RepositoryUtils.MutableBoolean(queryBuilder.length() > SELECT_ALL.length()),
-                " id IN (:ids)");
+                " d.id IN (:ids)");
 
         queryBuilder.append(pageableUtils.createPageRequestQuery(pageRequest));
 
@@ -151,7 +151,7 @@ public class ExtendedDayRepositoryImpl implements ExtendedDayRepository {
         StringBuilder qStringBuilder = new StringBuilder(COUNT_ALL);
         appendWhereClause(qStringBuilder, title, "", dayType, excludeIds);
         repositoryUtils.addListField(ids, qStringBuilder, new RepositoryUtils.MutableBoolean(qStringBuilder.length() > COUNT_ALL.length()),
-                " id IN (:ids)");
+                " d.id IN (:ids)");
 
         DatabaseClient.GenericExecuteSpec executeSpec = getGenericExecuteSpec(title, dayType, excludeIds, qStringBuilder);
         executeSpec = repositoryUtils.bindListField(ids, executeSpec, "ids");
@@ -178,6 +178,6 @@ public class ExtendedDayRepositoryImpl implements ExtendedDayRepository {
 
         repositoryUtils.addNotNullField(type, queryBuilder, hasPreviousCriteria, " type = :type");
         repositoryUtils.addListField(excludeIds, queryBuilder, hasPreviousCriteria,
-                " id NOT IN (:excludeIds)");
+                " d.id NOT IN (:excludeIds)");
     }
 }
