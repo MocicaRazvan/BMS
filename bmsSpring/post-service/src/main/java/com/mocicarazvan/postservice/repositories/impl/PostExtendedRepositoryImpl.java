@@ -1,6 +1,7 @@
 package com.mocicarazvan.postservice.repositories.impl;
 
 
+import com.mocicarazvan.ollamasearch.cache.EmbedCache;
 import com.mocicarazvan.ollamasearch.service.OllamaAPIService;
 import com.mocicarazvan.ollamasearch.utils.OllamaQueryUtils;
 import com.mocicarazvan.postservice.mappers.PostMapper;
@@ -29,6 +30,7 @@ public class PostExtendedRepositoryImpl implements PostExtendedRepository {
     private final RepositoryUtils repositoryUtils;
     private final OllamaQueryUtils ollamaQueryUtils;
     private final OllamaAPIService ollamaAPIService;
+    private final EmbedCache embedCache;
 
 
     private static final String SELECT_ALL = "SELECT p.* FROM post p join post_embedding e on p.id = e.entity_id ";
@@ -39,127 +41,131 @@ public class PostExtendedRepositoryImpl implements PostExtendedRepository {
     public Flux<Post> getPostsFiltered(String title, Boolean approved, List<String> tags, Long likedUserId, PageRequest pageRequest) {
 
 
-        String embeddings = "";
-        if (repositoryUtils.isNotNullOrEmpty(title)) {
-            embeddings = ollamaQueryUtils.getEmbeddingsAsString(
-                    ollamaAPIService.generateEmbedding(title)
-            );
-        }
+        Mono<String> embeddingsMono = repositoryUtils.isNotNullOrEmpty(title)
+                ? ollamaAPIService.generateEmbeddingMono(title, embedCache).map(ollamaQueryUtils::getEmbeddingsAsString)
+                : Mono.just("");
 
-        StringBuilder queryBuilder = new StringBuilder(SELECT_ALL);
+        return embeddingsMono.flatMapMany(embeddings -> {
+            StringBuilder queryBuilder = new StringBuilder(SELECT_ALL);
 
-        appendWhereClause(queryBuilder, title, embeddings, approved, tags);
+            appendWhereClause(queryBuilder, title, embeddings, approved, tags);
 
-        repositoryUtils.addNotNullField(likedUserId, queryBuilder, new RepositoryUtils.MutableBoolean(queryBuilder.length() > SELECT_ALL.length()),
-                " :user_like_id = ANY(user_likes) ");
+            repositoryUtils.addNotNullField(likedUserId, queryBuilder, new RepositoryUtils.MutableBoolean(queryBuilder.length() > SELECT_ALL.length()),
+                    " :user_like_id = ANY(user_likes) ");
 
 
-        if (repositoryUtils.isNotNullOrEmpty(embeddings)) {
-            queryBuilder.append(pageableUtils.createPageRequestQuery(pageRequest,
-                    ollamaQueryUtils.addOrder(
-                            embeddings
-                    )
-            ));
-        } else {
-            queryBuilder.append(pageableUtils.createPageRequestQuery(pageRequest));
-        }
+            if (repositoryUtils.isNotNullOrEmpty(embeddings)) {
+                queryBuilder.append(pageableUtils.createPageRequestQuery(pageRequest,
+                        ollamaQueryUtils.addOrder(
+                                embeddings
+                        )
+                ));
+            } else {
+                queryBuilder.append(pageableUtils.createPageRequestQuery(pageRequest));
+            }
 
 
-        DatabaseClient.GenericExecuteSpec executeSpec = getGenericExecuteSpec(title, approved, tags, queryBuilder);
+            DatabaseClient.GenericExecuteSpec executeSpec = getGenericExecuteSpec(title, approved, tags, queryBuilder);
 
-        executeSpec = repositoryUtils.bindNotNullField(likedUserId, executeSpec, "user_like_id");
+            executeSpec = repositoryUtils.bindNotNullField(likedUserId, executeSpec, "user_like_id");
 
-        return executeSpec.map((row, metadata) -> modelMapper.fromRowToModel(row)).all();
+            return executeSpec.map((row, metadata) -> modelMapper.fromRowToModel(row)).all();
+        });
     }
 
     @Override
     public Flux<Post> getPostsFilteredTrainer(String title, Boolean approved, List<String> tags, Long trainerId, PageRequest pageRequest) {
-        StringBuilder queryBuilder = new StringBuilder(SELECT_ALL);
-
-        String embeddings = "";
-        if (repositoryUtils.isNotNullOrEmpty(title)) {
-            embeddings = ollamaQueryUtils.getEmbeddingsAsString(
-                    ollamaAPIService.generateEmbedding(title)
-            );
-        }
-
-        appendWhereClause(queryBuilder, title, embeddings, approved, tags);
 
 
-        repositoryUtils.addNotNullField(trainerId, queryBuilder, new RepositoryUtils.MutableBoolean(queryBuilder.length() > SELECT_ALL.length()),
-                " user_id = :trainerId");
+        Mono<String> embeddingsMono = repositoryUtils.isNotNullOrEmpty(title)
+                ? ollamaAPIService.generateEmbeddingMono(title, embedCache).map(ollamaQueryUtils::getEmbeddingsAsString)
+                : Mono.just("");
+
+        return embeddingsMono.flatMapMany(embeddings -> {
+            StringBuilder queryBuilder = new StringBuilder(SELECT_ALL);
+
+
+            appendWhereClause(queryBuilder, title, embeddings, approved, tags);
+
+
+            repositoryUtils.addNotNullField(trainerId, queryBuilder, new RepositoryUtils.MutableBoolean(queryBuilder.length() > SELECT_ALL.length()),
+                    " user_id = :trainerId");
 
 
 //        queryBuilder.append(pageableUtils.createPageRequestQuery(pageRequest));
 //        queryBuilder.append(pageableUtils.createPageRequestQuery(pageRequest, repositoryUtils.createExtraOrder(title, "title", ":title")));
 
-        if (repositoryUtils.isNotNullOrEmpty(embeddings)) {
-            queryBuilder.append(pageableUtils.createPageRequestQuery(pageRequest,
-                    ollamaQueryUtils.addOrder(
-                            embeddings
-                    )
-            ));
-        } else {
-            queryBuilder.append(pageableUtils.createPageRequestQuery(pageRequest));
-        }
+            if (repositoryUtils.isNotNullOrEmpty(embeddings)) {
+                queryBuilder.append(pageableUtils.createPageRequestQuery(pageRequest,
+                        ollamaQueryUtils.addOrder(
+                                embeddings
+                        )
+                ));
+            } else {
+                queryBuilder.append(pageableUtils.createPageRequestQuery(pageRequest));
+            }
 
-        DatabaseClient.GenericExecuteSpec executeSpec = getGenericExecuteSpec(title, approved, tags, queryBuilder);
+            DatabaseClient.GenericExecuteSpec executeSpec = getGenericExecuteSpec(title, approved, tags, queryBuilder);
 
 //        executeSpec = executeSpec.bind("trainerId", trainerId);
 
-        executeSpec = repositoryUtils.bindNotNullField(trainerId, executeSpec, "trainerId");
+            executeSpec = repositoryUtils.bindNotNullField(trainerId, executeSpec, "trainerId");
 
-        return executeSpec.map((row, metadata) -> modelMapper.fromRowToModel(row)).all();
+            return executeSpec.map((row, metadata) -> modelMapper.fromRowToModel(row)).all();
+        });
     }
 
 
     @Override
     public Mono<Long> countPostsFiltered(String title, Boolean approved, List<String> tags, Long likedUserId) {
-        StringBuilder queryBuilder = new StringBuilder(COUNT_ALL);
+        Mono<String> embeddingsMono = repositoryUtils.isNotNullOrEmpty(title)
+                ? ollamaAPIService.generateEmbeddingMono(title, embedCache).map(ollamaQueryUtils::getEmbeddingsAsString)
+                : Mono.just("");
 
-        String embeddings = "";
-        if (repositoryUtils.isNotNullOrEmpty(title)) {
-            embeddings = ollamaQueryUtils.getEmbeddingsAsString(
-                    ollamaAPIService.generateEmbedding(title)
-            );
-        }
+        return embeddingsMono.flatMap(embeddings -> {
 
-        appendWhereClause(queryBuilder, title, embeddings, approved, tags);
-
-        repositoryUtils.addNotNullField(likedUserId, queryBuilder, new RepositoryUtils.MutableBoolean(queryBuilder.length() > COUNT_ALL.length()),
-                " :user_like_id = ANY(user_likes) ");
-
-        DatabaseClient.GenericExecuteSpec executeSpec = getGenericExecuteSpec(title, approved, tags, queryBuilder);
-
-        executeSpec = repositoryUtils.bindNotNullField(likedUserId, executeSpec, "user_like_id");
+            StringBuilder queryBuilder = new StringBuilder(COUNT_ALL);
 
 
-        return executeSpec.map((row, metadata) -> row.get(0, Long.class)).first();
+            appendWhereClause(queryBuilder, title, embeddings, approved, tags);
+
+            repositoryUtils.addNotNullField(likedUserId, queryBuilder, new RepositoryUtils.MutableBoolean(queryBuilder.length() > COUNT_ALL.length()),
+                    " :user_like_id = ANY(user_likes) ");
+
+            DatabaseClient.GenericExecuteSpec executeSpec = getGenericExecuteSpec(title, approved, tags, queryBuilder);
+
+            executeSpec = repositoryUtils.bindNotNullField(likedUserId, executeSpec, "user_like_id");
+
+
+            return executeSpec.map((row, metadata) -> row.get(0, Long.class)).first();
+        });
     }
 
     @Override
     public Mono<Long> countPostsFilteredTrainer(String title, Boolean approved, Long trainerId, List<String> tags) {
-        StringBuilder queryBuilder = new StringBuilder(COUNT_ALL);
 
-        String embeddings = "";
-        if (repositoryUtils.isNotNullOrEmpty(title)) {
-            embeddings = ollamaQueryUtils.getEmbeddingsAsString(
-                    ollamaAPIService.generateEmbedding(title)
-            );
-        }
+        Mono<String> embeddingsMono = repositoryUtils.isNotNullOrEmpty(title)
+                ? ollamaAPIService.generateEmbeddingMono(title, embedCache).map(ollamaQueryUtils::getEmbeddingsAsString)
+                : Mono.just("");
 
-        appendWhereClause(queryBuilder, title, embeddings, approved, tags);
+        return embeddingsMono.flatMap(embeddings -> {
+
+            StringBuilder queryBuilder = new StringBuilder(COUNT_ALL);
 
 
-        repositoryUtils.addNotNullField(trainerId, queryBuilder, new RepositoryUtils.MutableBoolean(queryBuilder.length() > COUNT_ALL.length()),
-                " user_id = :trainerId");
-
-        DatabaseClient.GenericExecuteSpec executeSpec = getGenericExecuteSpec(title, approved, tags, queryBuilder);
+            appendWhereClause(queryBuilder, title, embeddings, approved, tags);
 
 
-        executeSpec = repositoryUtils.bindNotNullField(trainerId, executeSpec, "trainerId");
+            repositoryUtils.addNotNullField(trainerId, queryBuilder, new RepositoryUtils.MutableBoolean(queryBuilder.length() > COUNT_ALL.length()),
+                    " user_id = :trainerId");
 
-        return executeSpec.map((row, metadata) -> row.get(0, Long.class)).first();
+            DatabaseClient.GenericExecuteSpec executeSpec = getGenericExecuteSpec(title, approved, tags, queryBuilder);
+
+
+            executeSpec = repositoryUtils.bindNotNullField(trainerId, executeSpec, "trainerId");
+
+            return executeSpec.map((row, metadata) -> row.get(0, Long.class)).first();
+        });
     }
 
 

@@ -1,5 +1,6 @@
 package com.mocicarazvan.recipeservice.repositories.impl;
 
+import com.mocicarazvan.ollamasearch.cache.EmbedCache;
 import com.mocicarazvan.ollamasearch.service.OllamaAPIService;
 import com.mocicarazvan.ollamasearch.utils.OllamaQueryUtils;
 import com.mocicarazvan.recipeservice.enums.DietType;
@@ -28,6 +29,8 @@ public class RecipeExtendedRepositoryImpl implements RecipeExtendedRepository {
     private final RepositoryUtils repositoryUtils;
     private final OllamaQueryUtils ollamaQueryUtils;
     private final OllamaAPIService ollamaAPIService;
+    private final EmbedCache embedCache;
+
 
     private static final String SELECT_ALL = "SELECT r.* FROM recipe r join recipe_embedding e on r.id = e.entity_id ";
     private static final String COUNT_ALL = "SELECT COUNT(r.id) FROM recipe r join recipe_embedding e on r.id = e.entity_id ";
@@ -35,43 +38,46 @@ public class RecipeExtendedRepositoryImpl implements RecipeExtendedRepository {
 
     @Override
     public Flux<Recipe> getRecipesFiltered(String title, Boolean approved, DietType type, PageRequest pageRequest) {
+
+        Mono<String> embeddingsMono = repositoryUtils.isNotNullOrEmpty(title)
+                ? ollamaAPIService.generateEmbeddingMono(title, embedCache).map(ollamaQueryUtils::getEmbeddingsAsString)
+                : Mono.just("");
+
         StringBuilder queryBuilder = new StringBuilder(SELECT_ALL);
 
-        String embeddings = "";
-        if (repositoryUtils.isNotNullOrEmpty(title)) {
-            embeddings = ollamaQueryUtils.getEmbeddingsAsString(
-                    ollamaAPIService.generateEmbedding(title)
-            );
-        }
-
-        appendWhereClause(queryBuilder, title, embeddings, approved, type);
+        return embeddingsMono.flatMapMany(embeddings -> {
+            appendWhereClause(queryBuilder, title, embeddings, approved, type);
 
 //        queryBuilder.append(pageableUtils.createPageRequestQuery(pageRequest));
 
-        if (repositoryUtils.isNotNullOrEmpty(embeddings)) {
-            queryBuilder.append(pageableUtils.createPageRequestQuery(pageRequest,
-                    ollamaQueryUtils.addOrder(
-                            embeddings
-                    )
-            ));
-        } else {
-            queryBuilder.append(pageableUtils.createPageRequestQuery(pageRequest));
-        }
-        DatabaseClient.GenericExecuteSpec executeSpec = getGenericExecuteSpec(title, approved, type, queryBuilder);
+            if (repositoryUtils.isNotNullOrEmpty(embeddings)) {
+                queryBuilder.append(pageableUtils.createPageRequestQuery(pageRequest,
+                        ollamaQueryUtils.addOrder(
+                                embeddings
+                        )
+                ));
+            } else {
+                queryBuilder.append(pageableUtils.createPageRequestQuery(pageRequest));
+            }
+            DatabaseClient.GenericExecuteSpec executeSpec = getGenericExecuteSpec(title, approved, type, queryBuilder);
 
-        return executeSpec.map((row, metadata) -> modelMapper.fromRowToModel(row)).all();
+            return executeSpec.map((row, metadata) -> modelMapper.fromRowToModel(row)).all();
+        });
     }
 
     @Override
     public Flux<Recipe> getRecipesFilteredTrainer(String title, Boolean approved, DietType type, Long trainerId, PageRequest pageRequest) {
-        StringBuilder queryBuilder = new StringBuilder(SELECT_ALL);
-        String embeddings = "";
-        if (repositoryUtils.isNotNullOrEmpty(title)) {
-            embeddings = ollamaQueryUtils.getEmbeddingsAsString(
-                    ollamaAPIService.generateEmbedding(title)
-            );
-        }
-        appendWhereClause(queryBuilder, title, embeddings, approved, type);
+
+        Mono<String> embeddingsMono = repositoryUtils.isNotNullOrEmpty(title)
+                ? ollamaAPIService.generateEmbeddingMono(title, embedCache).map(ollamaQueryUtils::getEmbeddingsAsString)
+                : Mono.just("");
+
+        return embeddingsMono.flatMapMany(embeddings -> {
+
+
+            StringBuilder queryBuilder = new StringBuilder(SELECT_ALL);
+
+            appendWhereClause(queryBuilder, title, embeddings, approved, type);
 
 //        if (queryBuilder.length() > SELECT_ALL.length()) {
 //            queryBuilder.append(" AND");
@@ -80,56 +86,61 @@ public class RecipeExtendedRepositoryImpl implements RecipeExtendedRepository {
 //        }
 //        queryBuilder.append(" user_id = :trainerId");
 
-        repositoryUtils.addNotNullField(trainerId, queryBuilder, new RepositoryUtils.MutableBoolean(queryBuilder.length() > SELECT_ALL.length()),
-                " user_id = :trainerId");
+            repositoryUtils.addNotNullField(trainerId, queryBuilder, new RepositoryUtils.MutableBoolean(queryBuilder.length() > SELECT_ALL.length()),
+                    " user_id = :trainerId");
 
 //        queryBuilder.append(pageableUtils.createPageRequestQuery(pageRequest));
 
-        if (repositoryUtils.isNotNullOrEmpty(embeddings)) {
-            queryBuilder.append(pageableUtils.createPageRequestQuery(pageRequest,
-                    ollamaQueryUtils.addOrder(
-                            embeddings
-                    )
-            ));
-        } else {
-            queryBuilder.append(pageableUtils.createPageRequestQuery(pageRequest));
-        }
+            if (repositoryUtils.isNotNullOrEmpty(embeddings)) {
+                queryBuilder.append(pageableUtils.createPageRequestQuery(pageRequest,
+                        ollamaQueryUtils.addOrder(
+                                embeddings
+                        )
+                ));
+            } else {
+                queryBuilder.append(pageableUtils.createPageRequestQuery(pageRequest));
+            }
 
-        DatabaseClient.GenericExecuteSpec executeSpec = getGenericExecuteSpec(title, approved, type, queryBuilder);
+            DatabaseClient.GenericExecuteSpec executeSpec = getGenericExecuteSpec(title, approved, type, queryBuilder);
 
 //        executeSpec = executeSpec.bind("trainerId", trainerId);
 
-        executeSpec = repositoryUtils.bindNotNullField(trainerId, executeSpec, "trainerId");
+            executeSpec = repositoryUtils.bindNotNullField(trainerId, executeSpec, "trainerId");
 
-        return executeSpec.map((row, metadata) -> modelMapper.fromRowToModel(row)).all();
+            return executeSpec.map((row, metadata) -> modelMapper.fromRowToModel(row)).all();
+        });
     }
 
     @Override
     public Mono<Long> countRecipesFiltered(String title, Boolean approved, DietType type) {
-        StringBuilder queryBuilder = new StringBuilder(COUNT_ALL);
-        String embeddings = "";
-        if (repositoryUtils.isNotNullOrEmpty(title)) {
-            embeddings = ollamaQueryUtils.getEmbeddingsAsString(
-                    ollamaAPIService.generateEmbedding(title)
-            );
-        }
-        appendWhereClause(queryBuilder, title, embeddings, approved, type);
+        Mono<String> embeddingsMono = repositoryUtils.isNotNullOrEmpty(title)
+                ? ollamaAPIService.generateEmbeddingMono(title, embedCache).map(ollamaQueryUtils::getEmbeddingsAsString)
+                : Mono.just("");
 
-        DatabaseClient.GenericExecuteSpec executeSpec = getGenericExecuteSpec(title, approved, type, queryBuilder);
+        return embeddingsMono.flatMap(embeddings -> {
 
-        return executeSpec.map((row, metadata) -> row.get(0, Long.class)).first();
+            StringBuilder queryBuilder = new StringBuilder(COUNT_ALL);
+
+            appendWhereClause(queryBuilder, title, embeddings, approved, type);
+
+            DatabaseClient.GenericExecuteSpec executeSpec = getGenericExecuteSpec(title, approved, type, queryBuilder);
+
+            return executeSpec.map((row, metadata) -> row.get(0, Long.class)).first();
+        });
     }
 
     @Override
     public Mono<Long> countRecipesFilteredTrainer(String title, Boolean approved, Long trainerId, DietType type) {
-        StringBuilder queryBuilder = new StringBuilder(COUNT_ALL);
-        String embeddings = "";
-        if (repositoryUtils.isNotNullOrEmpty(title)) {
-            embeddings = ollamaQueryUtils.getEmbeddingsAsString(
-                    ollamaAPIService.generateEmbedding(title)
-            );
-        }
-        appendWhereClause(queryBuilder, title, embeddings, approved, type);
+        Mono<String> embeddingsMono = repositoryUtils.isNotNullOrEmpty(title)
+                ? ollamaAPIService.generateEmbeddingMono(title, embedCache).map(ollamaQueryUtils::getEmbeddingsAsString)
+                : Mono.just("");
+
+        return embeddingsMono.flatMap(embeddings -> {
+
+
+            StringBuilder queryBuilder = new StringBuilder(COUNT_ALL);
+
+            appendWhereClause(queryBuilder, title, embeddings, approved, type);
 
 //        if (queryBuilder.length() > COUNT_ALL.length()) {
 //            queryBuilder.append(" AND");
@@ -138,17 +149,18 @@ public class RecipeExtendedRepositoryImpl implements RecipeExtendedRepository {
 //        }
 //        queryBuilder.append(" user_id = :trainerId");
 
-        repositoryUtils.addNotNullField(trainerId, queryBuilder, new RepositoryUtils.MutableBoolean(queryBuilder.length() > COUNT_ALL.length()),
-                " user_id = :trainerId");
+            repositoryUtils.addNotNullField(trainerId, queryBuilder, new RepositoryUtils.MutableBoolean(queryBuilder.length() > COUNT_ALL.length()),
+                    " user_id = :trainerId");
 
-        DatabaseClient.GenericExecuteSpec executeSpec = getGenericExecuteSpec(title, approved, type, queryBuilder);
+            DatabaseClient.GenericExecuteSpec executeSpec = getGenericExecuteSpec(title, approved, type, queryBuilder);
 
 //        executeSpec = executeSpec.bind("trainerId", trainerId);
 
 
-        executeSpec = repositoryUtils.bindNotNullField(trainerId, executeSpec, "trainerId");
+            executeSpec = repositoryUtils.bindNotNullField(trainerId, executeSpec, "trainerId");
 
-        return executeSpec.map((row, metadata) -> row.get(0, Long.class)).first();
+            return executeSpec.map((row, metadata) -> row.get(0, Long.class)).first();
+        });
     }
 
     @Override

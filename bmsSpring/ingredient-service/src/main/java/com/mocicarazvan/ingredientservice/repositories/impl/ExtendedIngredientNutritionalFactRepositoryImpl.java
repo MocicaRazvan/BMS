@@ -4,6 +4,7 @@ import com.mocicarazvan.ingredientservice.enums.DietType;
 import com.mocicarazvan.ingredientservice.mappers.IngredientNutritionalFactMapper;
 import com.mocicarazvan.ingredientservice.models.IngredientNutritionalFact;
 import com.mocicarazvan.ingredientservice.repositories.ExtendedIngredientNutritionalFactRepository;
+import com.mocicarazvan.ollamasearch.cache.EmbedCache;
 import com.mocicarazvan.ollamasearch.service.OllamaAPIService;
 import com.mocicarazvan.ollamasearch.utils.OllamaQueryUtils;
 import com.mocicarazvan.templatemodule.utils.PageableUtilsCustom;
@@ -26,6 +27,7 @@ public class ExtendedIngredientNutritionalFactRepositoryImpl implements Extended
     private final RepositoryUtils repositoryUtils;
     private final OllamaQueryUtils ollamaQueryUtils;
     private final OllamaAPIService ollamaAPIService;
+    private final EmbedCache embedCache;
 
     private static final String SELECT_ALL = """
             SELECT
@@ -50,47 +52,52 @@ public class ExtendedIngredientNutritionalFactRepositoryImpl implements Extended
 
     @Override
     public Flux<IngredientNutritionalFact> getModelsFiltered(String name, Boolean display, DietType type, PageRequest pageRequest) {
-        StringBuilder queryBuilder = new StringBuilder(SELECT_ALL);
-        String embeddings = "";
-        if (repositoryUtils.isNotNullOrEmpty(name)) {
-            embeddings = ollamaQueryUtils.getEmbeddingsAsString(
-                    ollamaAPIService.generateEmbedding(name)
-            );
-        }
 
-        appendWhereClause(queryBuilder, name, embeddings, display, type);
+        Mono<String> embeddingsMono = repositoryUtils.isNotNullOrEmpty(name)
+                ? ollamaAPIService.generateEmbeddingMono(name, embedCache).map(ollamaQueryUtils::getEmbeddingsAsString)
+                : Mono.just("");
+
+
+        return embeddingsMono.flatMapMany(embeddings -> {
+            StringBuilder queryBuilder = new StringBuilder(SELECT_ALL);
+
+
+            appendWhereClause(queryBuilder, name, embeddings, display, type);
 
 //        queryBuilder.append(pageableUtilsCustom.createPageRequestQuery(pageRequest));
 
-        if (repositoryUtils.isNotNullOrEmpty(embeddings)) {
-            queryBuilder.append(pageableUtilsCustom.createPageRequestQuery(pageRequest,
-                    ollamaQueryUtils.addOrder(
-                            embeddings
-                    )
-            ));
-        } else {
-            queryBuilder.append(pageableUtilsCustom.createPageRequestQuery(pageRequest));
-        }
-        DatabaseClient.GenericExecuteSpec executeSpec = getGenericExecuteSpec(name, display, type, queryBuilder);
+            if (repositoryUtils.isNotNullOrEmpty(embeddings)) {
+                queryBuilder.append(pageableUtilsCustom.createPageRequestQuery(pageRequest,
+                        ollamaQueryUtils.addOrder(
+                                embeddings
+                        )
+                ));
+            } else {
+                queryBuilder.append(pageableUtilsCustom.createPageRequestQuery(pageRequest));
+            }
+            DatabaseClient.GenericExecuteSpec executeSpec = getGenericExecuteSpec(name, display, type, queryBuilder);
 
-        return executeSpec.map((row, metadata) -> ingredientNutritionalFactMapper.fromRowToModel(row)).all();
+            return executeSpec.map((row, metadata) -> ingredientNutritionalFactMapper.fromRowToModel(row)).all();
+        });
     }
 
     @Override
     public Mono<Long> countModelsFiltered(String name, Boolean display, DietType type, PageRequest pageRequest) {
-        StringBuilder queryBuilder = new StringBuilder(COUNT_ALL);
+        Mono<String> embeddingsMono = repositoryUtils.isNotNullOrEmpty(name)
+                ? ollamaAPIService.generateEmbeddingMono(name, embedCache).map(ollamaQueryUtils::getEmbeddingsAsString)
+                : Mono.just("");
 
-        String embeddings = "";
-        if (repositoryUtils.isNotNullOrEmpty(name)) {
-            embeddings = ollamaQueryUtils.getEmbeddingsAsString(
-                    ollamaAPIService.generateEmbedding(name)
-            );
-        }
-        appendWhereClause(queryBuilder, name, embeddings, display, type);
+        return embeddingsMono.flatMap(embeddings -> {
 
-        DatabaseClient.GenericExecuteSpec executeSpec = getGenericExecuteSpec(name, display, type, queryBuilder);
+            StringBuilder queryBuilder = new StringBuilder(COUNT_ALL);
 
-        return executeSpec.map((row, metadata) -> row.get(0, Long.class)).first();
+
+            appendWhereClause(queryBuilder, name, embeddings, display, type);
+
+            DatabaseClient.GenericExecuteSpec executeSpec = getGenericExecuteSpec(name, display, type, queryBuilder);
+
+            return executeSpec.map((row, metadata) -> row.get(0, Long.class)).first();
+        });
     }
 
     private void appendWhereClause(StringBuilder queryBuilder, String name, String embeddings, Boolean display, DietType type) {

@@ -1,5 +1,6 @@
 package com.mocicarazvan.planservice.repositories.impl;
 
+import com.mocicarazvan.ollamasearch.cache.EmbedCache;
 import com.mocicarazvan.ollamasearch.service.OllamaAPIService;
 import com.mocicarazvan.ollamasearch.utils.OllamaQueryUtils;
 import com.mocicarazvan.planservice.enums.DietType;
@@ -28,120 +29,127 @@ public class ExtendedPlanRepositoryImpl implements ExtendedPlanRepository {
     private final RepositoryUtils repositoryUtils;
     private final OllamaQueryUtils ollamaQueryUtils;
     private final OllamaAPIService ollamaAPIService;
+    private final EmbedCache embedCache;
 
     private static final String SELECT_ALL = "SELECT p.* FROM plan p join plan_embedding e on p.id = e.entity_id ";
     private static final String COUNT_ALL = "SELECT COUNT(p.id) FROM plan p join plan_embedding e on p.id = e.entity_id ";
 
     @Override
     public Flux<Plan> getPlansFiltered(String title, Boolean approved, Boolean display, DietType type, ObjectiveType objective, PageRequest pageRequest, List<Long> excludeIds) {
-        StringBuilder queryBuilder = new StringBuilder(SELECT_ALL);
-        String embeddings = "";
-        if (repositoryUtils.isNotNullOrEmpty(title)) {
-            embeddings = ollamaQueryUtils.getEmbeddingsAsString(
-                    ollamaAPIService.generateEmbedding(title)
-            );
-        }
-
-        appendWhereClause(queryBuilder, title, embeddings, approved, display, type, objective);
-
-        repositoryUtils.addListField(excludeIds, queryBuilder, new RepositoryUtils.MutableBoolean(queryBuilder.length() > SELECT_ALL.length()),
-                " p.id NOT IN (:excludeIds)");
-
-        if (repositoryUtils.isNotNullOrEmpty(embeddings)) {
-            queryBuilder.append(pageableUtils.createPageRequestQuery(pageRequest,
-                    ollamaQueryUtils.addOrder(
-                            embeddings
-                    )
-            ));
-        } else {
-            queryBuilder.append(pageableUtils.createPageRequestQuery(pageRequest));
-        }
-
-        DatabaseClient.GenericExecuteSpec executeSpec = getGenericExecuteSpec(title, approved, type, objective, display, queryBuilder);
+        Mono<String> embeddingsMono = repositoryUtils.isNotNullOrEmpty(title)
+                ? ollamaAPIService.generateEmbeddingMono(title, embedCache).map(ollamaQueryUtils::getEmbeddingsAsString)
+                : Mono.just("");
+        return embeddingsMono.flatMapMany(embeddings -> {
+            StringBuilder queryBuilder = new StringBuilder(SELECT_ALL);
 
 
-        executeSpec = repositoryUtils.bindListField(excludeIds, executeSpec, "excludeIds");
+            appendWhereClause(queryBuilder, title, embeddings, approved, display, type, objective);
 
-        return executeSpec.map((row, metadata) -> modelMapper.fromRowToModel(row)).all();
+            repositoryUtils.addListField(excludeIds, queryBuilder, new RepositoryUtils.MutableBoolean(queryBuilder.length() > SELECT_ALL.length()),
+                    " p.id NOT IN (:excludeIds)");
+
+            if (repositoryUtils.isNotNullOrEmpty(embeddings)) {
+                queryBuilder.append(pageableUtils.createPageRequestQuery(pageRequest,
+                        ollamaQueryUtils.addOrder(
+                                embeddings
+                        )
+                ));
+            } else {
+                queryBuilder.append(pageableUtils.createPageRequestQuery(pageRequest));
+            }
+
+            DatabaseClient.GenericExecuteSpec executeSpec = getGenericExecuteSpec(title, approved, type, objective, display, queryBuilder);
+
+
+            executeSpec = repositoryUtils.bindListField(excludeIds, executeSpec, "excludeIds");
+
+            return executeSpec.map((row, metadata) -> modelMapper.fromRowToModel(row)).all();
+        });
     }
 
     @Override
     public Flux<Plan> getPlansFilteredTrainer(String title, Boolean approved, Boolean display, DietType type, ObjectiveType objective, Long trainerId, PageRequest pageRequest) {
-        StringBuilder queryBuilder = new StringBuilder(SELECT_ALL);
 
-        String embeddings = "";
-        if (repositoryUtils.isNotNullOrEmpty(title)) {
-            embeddings = ollamaQueryUtils.getEmbeddingsAsString(
-                    ollamaAPIService.generateEmbedding(title)
-            );
-        }
-        appendWhereClause(queryBuilder, title, embeddings, approved, display, type, objective);
+        Mono<String> embeddingsMono = repositoryUtils.isNotNullOrEmpty(title)
+                ? ollamaAPIService.generateEmbeddingMono(title, embedCache).map(ollamaQueryUtils::getEmbeddingsAsString)
+                : Mono.just("");
 
+        return embeddingsMono.flatMapMany(embeddings -> {
 
-        repositoryUtils.addNotNullField(trainerId, queryBuilder, new RepositoryUtils.MutableBoolean(queryBuilder.length() > SELECT_ALL.length()),
-                " user_id = :trainerId");
-
-        if (repositoryUtils.isNotNullOrEmpty(embeddings)) {
-            queryBuilder.append(pageableUtils.createPageRequestQuery(pageRequest,
-                    ollamaQueryUtils.addOrder(
-                            embeddings
-                    )
-            ));
-        } else {
-            queryBuilder.append(pageableUtils.createPageRequestQuery(pageRequest));
-        }
-        DatabaseClient.GenericExecuteSpec executeSpec = getGenericExecuteSpec(title, approved, type, objective, display, queryBuilder);
+            StringBuilder queryBuilder = new StringBuilder(SELECT_ALL);
 
 
-        executeSpec = repositoryUtils.bindNotNullField(trainerId, executeSpec, "trainerId");
-        return executeSpec.map((row, metadata) -> modelMapper.fromRowToModel(row)).all();
+            appendWhereClause(queryBuilder, title, embeddings, approved, display, type, objective);
+
+
+            repositoryUtils.addNotNullField(trainerId, queryBuilder, new RepositoryUtils.MutableBoolean(queryBuilder.length() > SELECT_ALL.length()),
+                    " user_id = :trainerId");
+
+            if (repositoryUtils.isNotNullOrEmpty(embeddings)) {
+                queryBuilder.append(pageableUtils.createPageRequestQuery(pageRequest,
+                        ollamaQueryUtils.addOrder(
+                                embeddings
+                        )
+                ));
+            } else {
+                queryBuilder.append(pageableUtils.createPageRequestQuery(pageRequest));
+            }
+            DatabaseClient.GenericExecuteSpec executeSpec = getGenericExecuteSpec(title, approved, type, objective, display, queryBuilder);
+
+
+            executeSpec = repositoryUtils.bindNotNullField(trainerId, executeSpec, "trainerId");
+            return executeSpec.map((row, metadata) -> modelMapper.fromRowToModel(row)).all();
+        });
     }
 
     @Override
     public Mono<Long> countPlansFiltered(String title, Boolean approved, Boolean display, DietType type, ObjectiveType objective, List<Long> excludeIds) {
-        StringBuilder queryBuilder = new StringBuilder(COUNT_ALL);
-        String embeddings = "";
-        if (repositoryUtils.isNotNullOrEmpty(title)) {
-            embeddings = ollamaQueryUtils.getEmbeddingsAsString(
-                    ollamaAPIService.generateEmbedding(title)
-            );
-        }
-        appendWhereClause(queryBuilder, title, embeddings, approved, display, type, objective);
+        Mono<String> embeddingsMono = repositoryUtils.isNotNullOrEmpty(title)
+                ? ollamaAPIService.generateEmbeddingMono(title, embedCache).map(ollamaQueryUtils::getEmbeddingsAsString)
+                : Mono.just("");
+
+        return embeddingsMono.flatMap(embeddings -> {
+            StringBuilder queryBuilder = new StringBuilder(COUNT_ALL);
+
+            appendWhereClause(queryBuilder, title, embeddings, approved, display, type, objective);
 
 
-        repositoryUtils.addListField(excludeIds, queryBuilder, new RepositoryUtils.MutableBoolean(queryBuilder.length() > COUNT_ALL.length()),
-                " p.id NOT IN (:excludeIds)");
+            repositoryUtils.addListField(excludeIds, queryBuilder, new RepositoryUtils.MutableBoolean(queryBuilder.length() > COUNT_ALL.length()),
+                    " p.id NOT IN (:excludeIds)");
 
-        DatabaseClient.GenericExecuteSpec executeSpec = getGenericExecuteSpec(title, approved, type, objective, display, queryBuilder);
+            DatabaseClient.GenericExecuteSpec executeSpec = getGenericExecuteSpec(title, approved, type, objective, display, queryBuilder);
 
 
-        executeSpec = repositoryUtils.bindListField(excludeIds, executeSpec, "excludeIds");
+            executeSpec = repositoryUtils.bindListField(excludeIds, executeSpec, "excludeIds");
 
-        return executeSpec.map((row, metadata) -> row.get(0, Long.class)).first();
+            return executeSpec.map((row, metadata) -> row.get(0, Long.class)).first();
+        });
     }
 
     @Override
     public Mono<Long> countPlansFilteredTrainer(String title, Boolean approved, Boolean display, Long trainerId, DietType type, ObjectiveType objective) {
-        StringBuilder queryBuilder = new StringBuilder(COUNT_ALL);
+        Mono<String> embeddingsMono = repositoryUtils.isNotNullOrEmpty(title)
+                ? ollamaAPIService.generateEmbeddingMono(title, embedCache).map(ollamaQueryUtils::getEmbeddingsAsString)
+                : Mono.just("");
 
-        String embeddings = "";
-        if (repositoryUtils.isNotNullOrEmpty(title)) {
-            embeddings = ollamaQueryUtils.getEmbeddingsAsString(
-                    ollamaAPIService.generateEmbedding(title)
-            );
-        }
-
-        appendWhereClause(queryBuilder, title, embeddings, approved, display, type, objective);
+        return embeddingsMono.flatMap(embeddings -> {
 
 
-        repositoryUtils.addNotNullField(trainerId, queryBuilder, new RepositoryUtils.MutableBoolean(queryBuilder.length() > COUNT_ALL.length()),
-                " user_id = :trainerId");
-
-        DatabaseClient.GenericExecuteSpec executeSpec = getGenericExecuteSpec(title, approved, type, objective, display, queryBuilder);
+            StringBuilder queryBuilder = new StringBuilder(COUNT_ALL);
 
 
-        executeSpec = repositoryUtils.bindNotNullField(trainerId, executeSpec, "trainerId");
-        return executeSpec.map((row, metadata) -> row.get(0, Long.class)).first();
+            appendWhereClause(queryBuilder, title, embeddings, approved, display, type, objective);
+
+
+            repositoryUtils.addNotNullField(trainerId, queryBuilder, new RepositoryUtils.MutableBoolean(queryBuilder.length() > COUNT_ALL.length()),
+                    " user_id = :trainerId");
+
+            DatabaseClient.GenericExecuteSpec executeSpec = getGenericExecuteSpec(title, approved, type, objective, display, queryBuilder);
+
+
+            executeSpec = repositoryUtils.bindNotNullField(trainerId, executeSpec, "trainerId");
+            return executeSpec.map((row, metadata) -> row.get(0, Long.class)).first();
+        });
     }
 
     @Override

@@ -1,6 +1,7 @@
 package com.mocicarazvan.ollamasearch.service.impl;
 
 import com.mocicarazvan.ollamasearch.annotations.EmbedRetry;
+import com.mocicarazvan.ollamasearch.cache.EmbedCache;
 import com.mocicarazvan.ollamasearch.exceptions.OllamaEmbedException;
 import com.mocicarazvan.ollamasearch.service.OllamaAPIService;
 import io.github.ollama4j.OllamaAPI;
@@ -11,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Mono;
 
 import java.io.IOException;
 import java.util.List;
@@ -40,11 +42,32 @@ public class OllamaAPIServiceImpl implements OllamaAPIService {
     @Override
     public float[] generateEmbeddingFloat(String text) {
         List<Double> doubleList = generateEmbedding(text).getEmbeddings().getFirst();
+        return getFloats(doubleList);
+    }
+
+    private static float[] getFloats(List<Double> doubleList) {
         float[] floatArray = new float[doubleList.size()];
         for (int i = 0; i < doubleList.size(); i++) {
             floatArray[i] = doubleList.get(i).floatValue();
         }
         return floatArray;
+    }
+
+    @Override
+    public Mono<OllamaEmbedResponseModel> generateEmbeddingMono(String text, EmbedCache embedCache) {
+        return embedCache.getEmbedding(text, this::generateEmbedding);
+    }
+
+    @Override
+    public Mono<Float[]> generateEmbeddingFloatMono(String text, EmbedCache embedCache) {
+        return generateEmbeddingMono(text, embedCache).map(ollamaEmbedResponseModel -> {
+            List<Double> doubleList = ollamaEmbedResponseModel.getEmbeddings().getFirst();
+            Float[] floatArray = new Float[doubleList.size()];
+            for (int i = 0; i < doubleList.size(); i++) {
+                floatArray[i] = doubleList.get(i).floatValue();
+            }
+            return floatArray;
+        });
     }
 
 
@@ -59,5 +82,14 @@ public class OllamaAPIServiceImpl implements OllamaAPIService {
             log.error("Error while embedding: " + e.getMessage());
             throw new OllamaEmbedException("Error while embedding: " + e.getMessage(), e);
         }
+    }
+
+    @Override
+    public float[] convertToFloatPrimitive(Float[] floats) {
+        float[] floatArray = new float[floats.length];
+        for (int i = 0; i < floats.length; i++) {
+            floatArray[i] = floats[i];
+        }
+        return floatArray;
     }
 }
