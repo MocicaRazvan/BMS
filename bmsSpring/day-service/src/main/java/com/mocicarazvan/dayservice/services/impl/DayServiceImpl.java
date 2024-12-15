@@ -11,13 +11,10 @@ import com.mocicarazvan.dayservice.dtos.recipe.RecipeResponse;
 import com.mocicarazvan.dayservice.enums.DayType;
 import com.mocicarazvan.dayservice.mappers.DayMapper;
 import com.mocicarazvan.dayservice.models.Day;
-import com.mocicarazvan.dayservice.models.DayEmbedding;
-import com.mocicarazvan.dayservice.repositories.DayEmbeddingRepository;
 import com.mocicarazvan.dayservice.repositories.DayRepository;
 import com.mocicarazvan.dayservice.repositories.ExtendedDayRepository;
 import com.mocicarazvan.dayservice.services.DayService;
 import com.mocicarazvan.dayservice.services.MealService;
-import com.mocicarazvan.ollamasearch.service.OllamaAPIService;
 import com.mocicarazvan.rediscache.annotation.RedisReactiveCache;
 import com.mocicarazvan.rediscache.annotation.RedisReactiveCacheEvict;
 import com.mocicarazvan.rediscache.annotation.RedisReactiveChildCache;
@@ -38,9 +35,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.reactive.TransactionalOperator;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.util.function.Tuple2;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
@@ -55,31 +50,24 @@ public class DayServiceImpl
     private final ExtendedDayRepository extendedDayRepository;
     private final PlanClient planClient;
     private final RecipeClient recipeClient;
-    private final OllamaAPIService ollamaAPIService;
-    private final DayEmbeddingRepository dayEmbeddingRepository;
+    private final DayEmbedServiceImpl dayEmbedServiceImpl;
 
-    public DayServiceImpl(DayRepository modelRepository, DayMapper modelMapper, PageableUtilsCustom pageableUtils, UserClient userClient, EntitiesUtils entitiesUtils, MealService mealService, TransactionalOperator transactionalOperator, ExtendedDayRepository extendedDayRepository, PlanClient planClient, RecipeClient recipeClient, DayServiceRedisCacheWrapper self, OllamaAPIService ollamaAPIService, DayEmbeddingRepository dayEmbeddingRepository) {
+    public DayServiceImpl(DayRepository modelRepository, DayMapper modelMapper, PageableUtilsCustom pageableUtils, UserClient userClient, EntitiesUtils entitiesUtils, MealService mealService, TransactionalOperator transactionalOperator, ExtendedDayRepository extendedDayRepository, PlanClient planClient, RecipeClient recipeClient, DayServiceRedisCacheWrapper self, DayEmbedServiceImpl dayEmbedServiceImpl) {
         super(modelRepository, modelMapper, pageableUtils, userClient, "day", List.of("id", "userId", "type", "title", "createdAt", "updatedAt"), entitiesUtils, self);
         this.mealService = mealService;
         this.transactionalOperator = transactionalOperator;
         this.extendedDayRepository = extendedDayRepository;
         this.planClient = planClient;
         this.recipeClient = recipeClient;
-        this.ollamaAPIService = ollamaAPIService;
-        this.dayEmbeddingRepository = dayEmbeddingRepository;
+
+        this.dayEmbedServiceImpl = dayEmbedServiceImpl;
     }
 
     @Override
     public Mono<List<String>> seedEmbeddings() {
         return modelRepository.findAll()
-                .flatMap(day -> dayEmbeddingRepository.save(
-                        DayEmbedding.builder()
-                                .entityId(day.getId())
-                                .createdAt(LocalDateTime.now())
-                                .updatedAt(LocalDateTime.now())
-                                .embedding(ollamaAPIService.generateEmbeddingFloat(day.getTitle()))
-                                .build()
-                ).then(Mono.just("Seeded embeddings for day: " + day.getId())))
+                .flatMap(day ->
+                        dayEmbedServiceImpl.saveEmbedding(day.getId(), day.getTitle()).then(Mono.just("Seeded embeddings for day: " + day.getId())))
                 .collectList()
                 .as(transactionalOperator::transactional);
     }
@@ -100,24 +88,8 @@ public class DayServiceImpl
     @Override
     @RedisReactiveChildCacheEvict(key = CACHE_KEY_PATH, id = "#id", masterId = "#userId")
     public Mono<DayResponse> updateModel(Long id, DayBody body, String userId) {
-        return updateModelWithSuccess(id, userId, model -> updateDayEmbedding(body, model, modelMapper.updateModelFromBody(body, model))).as(transactionalOperator::transactional);
-    }
-
-    private <R> Mono<R> updateDayEmbedding(DayBody body, Day model, Mono<R> mono) {
-        if (!Objects.equals(body.getTitle(), model.getTitle())) {
-            return dayEmbeddingRepository.deleteByEntityId(model.getId())
-                    .then(Mono.zip(
-                            Mono.defer(() ->
-                                    dayEmbeddingRepository.save(DayEmbedding.builder()
-                                            .entityId(model.getId())
-                                            .embedding(ollamaAPIService.generateEmbeddingFloat(body.getTitle()))
-                                            .updatedAt(LocalDateTime.now())
-                                            .build())),
-                            Mono.defer(() -> mono)
-
-                    ).map(Tuple2::getT2)).as(transactionalOperator::transactional);
-        }
-        return mono;
+        return updateModelWithSuccess(id, userId, model ->
+                dayEmbedServiceImpl.updateEmbeddingWithZip(body.getTitle(), model.getTitle(), model.getId(), modelMapper.updateModelFromBody(body, model))).as(transactionalOperator::transactional);
     }
 
 
@@ -180,12 +152,7 @@ public class DayServiceImpl
                                 .onErrorMap(e -> {
                                     log.error("Error creating day with meals", e);
                                     return new IllegalActionException("Recipe ids are invalid at creating");
-                                }).flatMap(d -> dayEmbeddingRepository.save(DayEmbedding.builder()
-                                                .entityId(d.getId())
-                                                .embedding(ollamaAPIService.generateEmbeddingFloat(d.getTitle()))
-                                                .updatedAt(LocalDateTime.now())
-                                                .createdAt(LocalDateTime.now())
-                                                .build())
+                                }).flatMap(d -> dayEmbedServiceImpl.saveEmbedding(d.getId(), d.getTitle())
                                         .thenReturn(d)
                                 )
                 );
@@ -204,7 +171,9 @@ public class DayServiceImpl
                                         .collectList()
                                         .flatMap(recipeIds ->
                                                 updateModelWithSuccess(id, userId, day ->
-                                                        updateDayEmbedding(dayBodyWithMeals, day, mealService.deleteAllByDay(day.getId()))
+                                                        dayEmbedServiceImpl.updateEmbeddingWithZip(dayBodyWithMeals.getTitle(),
+                                                                        day.getTitle(), day.getId(),
+                                                                        mealService.deleteAllByDay(day.getId()))
                                                                 .then(modelMapper.updateModelFromBody(dayBodyWithMeals, day)))
                                                         .flatMap(updatedDay ->
                                                                 Flux.fromIterable(dayBodyWithMeals.getMeals())

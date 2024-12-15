@@ -1,7 +1,6 @@
 package com.mocicarazvan.planservice.services.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mocicarazvan.ollamasearch.service.OllamaAPIService;
 import com.mocicarazvan.planservice.clients.DayClient;
 import com.mocicarazvan.planservice.clients.OrderClient;
 import com.mocicarazvan.planservice.dtos.PlanBody;
@@ -15,9 +14,7 @@ import com.mocicarazvan.planservice.enums.DietType;
 import com.mocicarazvan.planservice.enums.ObjectiveType;
 import com.mocicarazvan.planservice.mappers.PlanMapper;
 import com.mocicarazvan.planservice.models.Plan;
-import com.mocicarazvan.planservice.models.PlanEmbedding;
 import com.mocicarazvan.planservice.repositories.ExtendedPlanRepository;
-import com.mocicarazvan.planservice.repositories.PlanEmbeddingRepository;
 import com.mocicarazvan.planservice.repositories.PlanRepository;
 import com.mocicarazvan.planservice.services.PlanService;
 import com.mocicarazvan.rediscache.annotation.RedisReactiveApprovedCache;
@@ -48,11 +45,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.reactive.TransactionalOperator;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.util.function.Tuple2;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Objects;
 
 @Service
 @Slf4j
@@ -65,32 +60,24 @@ public class PlanServiceImpl
     private final DayClient dayClient;
     private final OrderClient orderClient;
     private final RabbitMqApprovedSenderWrapper<PlanResponse> rabbitMqSender;
-    private final PlanEmbeddingRepository planEmbeddingRepository;
-    private final OllamaAPIService ollamaAPIService;
     private final TransactionalOperator transactionalOperator;
+    private final PlanEmbedServiceImpl planEmbedServiceImpl;
 
-    public PlanServiceImpl(PlanRepository modelRepository, PlanMapper modelMapper, PageableUtilsCustom pageableUtils, UserClient userClient, EntitiesUtils entitiesUtils, FileClient fileClient, ObjectMapper objectMapper, ExtendedPlanRepository extendedPlanRepository, DayClient dayClient, OrderClient orderClient, RabbitMqApprovedSenderWrapper<PlanResponse> rabbitMqSender, PlanServiceRedisCacheWrapper self, PlanEmbeddingRepository planEmbeddingRepository, OllamaAPIService ollamaAPIService, TransactionalOperator transactionalOperator) {
+    public PlanServiceImpl(PlanRepository modelRepository, PlanMapper modelMapper, PageableUtilsCustom pageableUtils, UserClient userClient, EntitiesUtils entitiesUtils, FileClient fileClient, ObjectMapper objectMapper, ExtendedPlanRepository extendedPlanRepository, DayClient dayClient, OrderClient orderClient, RabbitMqApprovedSenderWrapper<PlanResponse> rabbitMqSender, PlanServiceRedisCacheWrapper self, TransactionalOperator transactionalOperator, PlanEmbedServiceImpl planEmbedServiceImpl) {
         super(modelRepository, modelMapper, pageableUtils, userClient, "plan", List.of("id", "userId", "type", "title", "createdAt", "updatedAt", "approved", "display"), entitiesUtils, fileClient, objectMapper, rabbitMqSender, self);
         this.extendedPlanRepository = extendedPlanRepository;
         this.dayClient = dayClient;
         this.orderClient = orderClient;
         this.rabbitMqSender = rabbitMqSender;
-        this.planEmbeddingRepository = planEmbeddingRepository;
-        this.ollamaAPIService = ollamaAPIService;
         this.transactionalOperator = transactionalOperator;
+        this.planEmbedServiceImpl = planEmbedServiceImpl;
     }
 
     @Override
     public Mono<List<String>> seedEmbeddings() {
         return modelRepository.findAll()
-                .flatMap(plan -> planEmbeddingRepository.save(
-                        PlanEmbedding.builder()
-                                .entityId(plan.getId())
-                                .createdAt(LocalDateTime.now())
-                                .updatedAt(LocalDateTime.now())
-                                .embedding(ollamaAPIService.generateEmbeddingFloat(plan.getTitle()))
-                                .build()
-                ).then(Mono.just("Seeded embeddings for plan: " + plan.getId())))
+                .flatMap(plan -> planEmbedServiceImpl.saveEmbedding(plan.getId(), plan.getTitle())
+                        .then(Mono.just("Seeded embeddings for plan: " + plan.getId())))
                 .collectList()
                 .as(transactionalOperator::transactional);
     }
@@ -324,36 +311,11 @@ public class PlanServiceImpl
 
                         .then(
                                 super.createModel(images, planBody, userId, clientId))
-                        .flatMap(plan -> planEmbeddingRepository.save(
-                                PlanEmbedding.builder()
-                                        .entityId(plan.getId())
-                                        .createdAt(LocalDateTime.now())
-                                        .updatedAt(LocalDateTime.now())
-                                        .entityId(plan.getId())
-                                        .embedding(ollamaAPIService.generateEmbeddingFloat(plan.getTitle()))
-                                        .build()
-
-                        ).thenReturn(plan))
+                        .flatMap(plan -> planEmbedServiceImpl.saveEmbedding(plan.getId(), plan.getTitle()).thenReturn(plan))
                         .flatMap(self::createInvalidate)
                         .map(Pair::getFirst).as(transactionalOperator::transactional);
     }
 
-    private <R> Mono<R> updatePlanEmbedding(PlanBody body, String origTitle, Long id, Mono<R> mono) {
-        if (!Objects.equals(body.getTitle(), origTitle)) {
-            return planEmbeddingRepository.deleteByEntityId(id)
-                    .then(Mono.zip(
-                            Mono.defer(() ->
-                                    planEmbeddingRepository.save(PlanEmbedding.builder()
-                                            .entityId(id)
-                                            .embedding(ollamaAPIService.generateEmbeddingFloat(body.getTitle()))
-                                            .updatedAt(LocalDateTime.now())
-                                            .build())),
-                            Mono.defer(() -> mono)
-
-                    ).map(Tuple2::getT2)).as(transactionalOperator::transactional);
-        }
-        return mono;
-    }
 
     @Override
     @RedisReactiveCacheEvict(key = CACHE_KEY_PATH, id = "#id")
@@ -370,7 +332,7 @@ public class PlanServiceImpl
         return
                 verifyDayIds(id, planBody, userId)
                         .then(super.updateModelWithImagesGetOriginalApproved(images, id, planBody, userId, clientId,
-                                ((planBody1, s, plan) -> updatePlanEmbedding(planBody1, s, plan.getId(), modelRepository.save(plan)))
+                                ((planBody1, s, plan) -> planEmbedServiceImpl.updateEmbeddingWithZip(planBody1.getTitle(), s, plan.getId(), modelRepository.save(plan)))
                         ))
                         .flatMap(self::updateDeleteInvalidate).as(transactionalOperator::transactional);
     }
