@@ -4,6 +4,7 @@ import com.mocicarazvan.fileservice.service.BytesService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.coobird.thumbnailator.Thumbnails;
+import net.coobird.thumbnailator.geometry.Positions;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.data.mongodb.gridfs.ReactiveGridFsResource;
@@ -133,6 +134,7 @@ public class BytesServiceImpl implements BytesService {
 
         if (width != null && height != null) {
             thumbnailBuilder.size(width, height);
+            thumbnailBuilder.crop(Positions.CENTER);
         } else if (width != null) {
             if (width > 0) {
                 thumbnailBuilder.width(width);

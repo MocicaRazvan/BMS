@@ -1,7 +1,7 @@
 package com.mocicarazvan.recipeservice.repositories.impl;
 
 import com.mocicarazvan.ollamasearch.cache.EmbedCache;
-import com.mocicarazvan.ollamasearch.service.OllamaAPIService;
+import com.mocicarazvan.ollamasearch.services.OllamaAPIService;
 import com.mocicarazvan.ollamasearch.utils.OllamaQueryUtils;
 import com.mocicarazvan.recipeservice.enums.DietType;
 import com.mocicarazvan.recipeservice.mappers.RecipeMapper;

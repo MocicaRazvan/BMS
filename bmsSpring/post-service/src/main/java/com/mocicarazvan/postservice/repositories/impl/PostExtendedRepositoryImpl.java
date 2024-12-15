@@ -2,7 +2,7 @@ package com.mocicarazvan.postservice.repositories.impl;
 
 
 import com.mocicarazvan.ollamasearch.cache.EmbedCache;
-import com.mocicarazvan.ollamasearch.service.OllamaAPIService;
+import com.mocicarazvan.ollamasearch.services.OllamaAPIService;
 import com.mocicarazvan.ollamasearch.utils.OllamaQueryUtils;
 import com.mocicarazvan.postservice.mappers.PostMapper;
 import com.mocicarazvan.postservice.models.Post;

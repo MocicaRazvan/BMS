@@ -1,4 +1,4 @@
-package com.mocicarazvan.ollamasearch.service;
+package com.mocicarazvan.ollamasearch.services;
 
 import com.mocicarazvan.ollamasearch.cache.EmbedCache;
 import io.github.ollama4j.models.embeddings.OllamaEmbedResponseModel;

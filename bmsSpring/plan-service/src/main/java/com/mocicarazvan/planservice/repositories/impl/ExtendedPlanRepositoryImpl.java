@@ -1,7 +1,7 @@
 package com.mocicarazvan.planservice.repositories.impl;
 
 import com.mocicarazvan.ollamasearch.cache.EmbedCache;
-import com.mocicarazvan.ollamasearch.service.OllamaAPIService;
+import com.mocicarazvan.ollamasearch.services.OllamaAPIService;
 import com.mocicarazvan.ollamasearch.utils.OllamaQueryUtils;
 import com.mocicarazvan.planservice.enums.DietType;
 import com.mocicarazvan.planservice.enums.ObjectiveType;
@@ -155,38 +155,48 @@ public class ExtendedPlanRepositoryImpl implements ExtendedPlanRepository {
     @Override
     public Flux<Plan> getPlansFilteredByIds(String title, Boolean approved, Boolean display, DietType type, ObjectiveType objective, List<Long> ids, PageRequest pageRequest) {
         StringBuilder queryBuilder = new StringBuilder(SELECT_ALL);
+        Mono<String> embeddingsMono = repositoryUtils.isNotNullOrEmpty(title)
+                ? ollamaAPIService.generateEmbeddingMono(title, embedCache).map(ollamaQueryUtils::getEmbeddingsAsString)
+                : Mono.just("");
+        return embeddingsMono.flatMapMany(embeddings -> {
+            appendWhereClause(queryBuilder, title, embeddings, approved, display, type, objective);
 
-        appendWhereClause(queryBuilder, title, "", approved, display, type, objective);
+            repositoryUtils.addListField(ids, queryBuilder, new RepositoryUtils.MutableBoolean(queryBuilder.length() > SELECT_ALL.length()),
+                    " p.id IN (:ids)");
 
-        repositoryUtils.addListField(ids, queryBuilder, new RepositoryUtils.MutableBoolean(queryBuilder.length() > SELECT_ALL.length()),
-                " p.id IN (:ids)");
+            queryBuilder.append(pageableUtils.createPageRequestQuery(pageRequest));
 
-        queryBuilder.append(pageableUtils.createPageRequestQuery(pageRequest));
-
-        DatabaseClient.GenericExecuteSpec executeSpec = getGenericExecuteSpec(title, approved, type, objective, display, queryBuilder);
+            DatabaseClient.GenericExecuteSpec executeSpec = getGenericExecuteSpec(title, approved, type, objective, display, queryBuilder);
 
 
-        executeSpec = repositoryUtils.bindListField(ids, executeSpec, "ids");
+            executeSpec = repositoryUtils.bindListField(ids, executeSpec, "ids");
 
-        return executeSpec.map((row, metadata) -> modelMapper.fromRowToModel(row)).all();
+            return executeSpec.map((row, metadata) -> modelMapper.fromRowToModel(row)).all();
+        });
     }
 
     @Override
     public Mono<Long> countPlansFilteredByIds(String title, Boolean approved, Boolean display, DietType type, ObjectiveType objective, List<Long> ids) {
-        StringBuilder queryBuilder = new StringBuilder(COUNT_ALL);
+        Mono<String> embeddingsMono = repositoryUtils.isNotNullOrEmpty(title)
+                ? ollamaAPIService.generateEmbeddingMono(title, embedCache).map(ollamaQueryUtils::getEmbeddingsAsString)
+                : Mono.just("");
+        return embeddingsMono.flatMap(embeddings -> {
 
-        appendWhereClause(queryBuilder, title, "", approved, display, type, objective);
+            StringBuilder queryBuilder = new StringBuilder(COUNT_ALL);
+
+            appendWhereClause(queryBuilder, title, embeddings, approved, display, type, objective);
 
 
-        repositoryUtils.addListField(ids, queryBuilder, new RepositoryUtils.MutableBoolean(queryBuilder.length() > COUNT_ALL.length()),
-                " p.id IN (:ids)");
+            repositoryUtils.addListField(ids, queryBuilder, new RepositoryUtils.MutableBoolean(queryBuilder.length() > COUNT_ALL.length()),
+                    " p.id IN (:ids)");
 
-        DatabaseClient.GenericExecuteSpec executeSpec = getGenericExecuteSpec(title, approved, type, objective, display, queryBuilder);
+            DatabaseClient.GenericExecuteSpec executeSpec = getGenericExecuteSpec(title, approved, type, objective, display, queryBuilder);
 
 
-        executeSpec = repositoryUtils.bindListField(ids, executeSpec, "ids");
+            executeSpec = repositoryUtils.bindListField(ids, executeSpec, "ids");
 
-        return executeSpec.map((row, metadata) -> row.get(0, Long.class)).first();
+            return executeSpec.map((row, metadata) -> row.get(0, Long.class)).first();
+        });
     }
 
     private DatabaseClient.GenericExecuteSpec getGenericExecuteSpec(String title, Boolean approved, DietType type, ObjectiveType objective, Boolean display, StringBuilder queryBuilder) {

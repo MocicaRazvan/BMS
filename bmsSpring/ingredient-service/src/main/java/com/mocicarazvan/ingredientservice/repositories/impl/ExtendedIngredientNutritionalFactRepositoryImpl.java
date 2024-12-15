@@ -5,7 +5,7 @@ import com.mocicarazvan.ingredientservice.mappers.IngredientNutritionalFactMappe
 import com.mocicarazvan.ingredientservice.models.IngredientNutritionalFact;
 import com.mocicarazvan.ingredientservice.repositories.ExtendedIngredientNutritionalFactRepository;
 import com.mocicarazvan.ollamasearch.cache.EmbedCache;
-import com.mocicarazvan.ollamasearch.service.OllamaAPIService;
+import com.mocicarazvan.ollamasearch.services.OllamaAPIService;
 import com.mocicarazvan.ollamasearch.utils.OllamaQueryUtils;
 import com.mocicarazvan.templatemodule.utils.PageableUtilsCustom;
 import com.mocicarazvan.templatemodule.utils.RepositoryUtils;

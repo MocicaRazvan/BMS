@@ -1,9 +1,9 @@
-package com.mocicarazvan.ollamasearch.service.impl;
+package com.mocicarazvan.ollamasearch.services.impl;
 
 import com.mocicarazvan.ollamasearch.annotations.EmbedRetry;
 import com.mocicarazvan.ollamasearch.cache.EmbedCache;
 import com.mocicarazvan.ollamasearch.exceptions.OllamaEmbedException;
-import com.mocicarazvan.ollamasearch.service.OllamaAPIService;
+import com.mocicarazvan.ollamasearch.services.OllamaAPIService;
 import io.github.ollama4j.OllamaAPI;
 import io.github.ollama4j.exceptions.OllamaBaseException;
 import io.github.ollama4j.models.embeddings.OllamaEmbedRequestBuilder;
@@ -73,11 +73,11 @@ public class OllamaAPIServiceImpl implements OllamaAPIService {
 
     @EmbedRetry
     private OllamaEmbedResponseModel embed(List<String> inputs) {
-        String[] texts = inputs.stream().map(t -> t.trim().toLowerCase()).toList().toArray(new String[0]);
+        String[] texts = inputs.stream().map(t -> t.trim().replaceAll("\\s+", " ").toLowerCase()).toList().toArray(new String[0]);
         try {
             return ollamaAPI.embed(OllamaEmbedRequestBuilder.getInstance(
                     model, texts
-            ).withoutTruncate().withKeepAlive(keepAlive).build());
+            ).withKeepAlive(keepAlive).build());
         } catch (IOException | OllamaBaseException | InterruptedException e) {
             log.error("Error while embedding: " + e.getMessage());
             throw new OllamaEmbedException("Error while embedding: " + e.getMessage(), e);

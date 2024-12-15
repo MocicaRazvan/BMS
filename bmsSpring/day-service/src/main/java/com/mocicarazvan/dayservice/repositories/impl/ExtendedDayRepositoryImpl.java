@@ -5,7 +5,7 @@ import com.mocicarazvan.dayservice.enums.DayType;
 import com.mocicarazvan.dayservice.mappers.DayMapper;
 import com.mocicarazvan.dayservice.models.Day;
 import com.mocicarazvan.dayservice.repositories.ExtendedDayRepository;
-import com.mocicarazvan.ollamasearch.service.OllamaAPIService;
+import com.mocicarazvan.ollamasearch.services.OllamaAPIService;
 import com.mocicarazvan.ollamasearch.utils.OllamaQueryUtils;
 import com.mocicarazvan.templatemodule.utils.PageableUtilsCustom;
 import com.mocicarazvan.templatemodule.utils.RepositoryUtils;
@@ -95,19 +95,27 @@ public class ExtendedDayRepositoryImpl implements ExtendedDayRepository {
 
     @Override
     public Flux<Day> getDaysFilteredByIds(String title, DayType dayType, List<Long> ids, List<Long> excludeIds, PageRequest pageRequest) {
-        StringBuilder queryBuilder = new StringBuilder(SELECT_ALL);
-        appendWhereClause(queryBuilder, title, "", dayType, excludeIds);
 
-        repositoryUtils.addListField(ids, queryBuilder, new RepositoryUtils.MutableBoolean(queryBuilder.length() > SELECT_ALL.length()),
-                " d.id IN (:ids)");
+        Mono<String> embeddingsMono = repositoryUtils.isNotNullOrEmpty(title)
+                ? ollamaAPIService.generateEmbeddingMono(title, embedDayCache).map(ollamaQueryUtils::getEmbeddingsAsString)
+                : Mono.just("");
 
-        queryBuilder.append(pageableUtils.createPageRequestQuery(pageRequest));
+        return embeddingsMono.flatMapMany(embeddings -> {
 
-        DatabaseClient.GenericExecuteSpec executeSpec = getGenericExecuteSpec(title, dayType, excludeIds, queryBuilder);
+            StringBuilder queryBuilder = new StringBuilder(SELECT_ALL);
+            appendWhereClause(queryBuilder, title, embeddings, dayType, excludeIds);
 
-        executeSpec = repositoryUtils.bindListField(ids, executeSpec, "ids");
+            repositoryUtils.addListField(ids, queryBuilder, new RepositoryUtils.MutableBoolean(queryBuilder.length() > SELECT_ALL.length()),
+                    " d.id IN (:ids)");
 
-        return executeSpec.map((row, metadata) -> modelMapper.fromRowToModel(row)).all();
+            queryBuilder.append(pageableUtils.createPageRequestQuery(pageRequest));
+
+            DatabaseClient.GenericExecuteSpec executeSpec = getGenericExecuteSpec(title, dayType, excludeIds, queryBuilder);
+
+            executeSpec = repositoryUtils.bindListField(ids, executeSpec, "ids");
+
+            return executeSpec.map((row, metadata) -> modelMapper.fromRowToModel(row)).all();
+        });
     }
 
 
@@ -153,15 +161,21 @@ public class ExtendedDayRepositoryImpl implements ExtendedDayRepository {
 
     @Override
     public Mono<Long> countDayFilteredByIds(String title, DayType dayType, List<Long> ids, List<Long> excludeIds) {
-        StringBuilder qStringBuilder = new StringBuilder(COUNT_ALL);
-        appendWhereClause(qStringBuilder, title, "", dayType, excludeIds);
-        repositoryUtils.addListField(ids, qStringBuilder, new RepositoryUtils.MutableBoolean(qStringBuilder.length() > COUNT_ALL.length()),
-                " d.id IN (:ids)");
+        Mono<String> embeddingsMono = repositoryUtils.isNotNullOrEmpty(title)
+                ? ollamaAPIService.generateEmbeddingMono(title, embedDayCache).map(ollamaQueryUtils::getEmbeddingsAsString)
+                : Mono.just("");
+        return embeddingsMono.flatMap(embeddings -> {
 
-        DatabaseClient.GenericExecuteSpec executeSpec = getGenericExecuteSpec(title, dayType, excludeIds, qStringBuilder);
-        executeSpec = repositoryUtils.bindListField(ids, executeSpec, "ids");
+            StringBuilder qStringBuilder = new StringBuilder(COUNT_ALL);
+            appendWhereClause(qStringBuilder, title, embeddings, dayType, excludeIds);
+            repositoryUtils.addListField(ids, qStringBuilder, new RepositoryUtils.MutableBoolean(qStringBuilder.length() > COUNT_ALL.length()),
+                    " d.id IN (:ids)");
 
-        return executeSpec.map((row, metadata) -> row.get(0, Long.class)).first();
+            DatabaseClient.GenericExecuteSpec executeSpec = getGenericExecuteSpec(title, dayType, excludeIds, qStringBuilder);
+            executeSpec = repositoryUtils.bindListField(ids, executeSpec, "ids");
+
+            return executeSpec.map((row, metadata) -> row.get(0, Long.class)).first();
+        });
 
 
     }
