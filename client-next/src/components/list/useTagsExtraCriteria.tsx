@@ -5,7 +5,6 @@ import MultipleSelector, {
   useDebounce,
 } from "@/components/ui/multiple-selector";
 import { tagsOptions } from "@/lib/constants";
-import { useRouter } from "@/navigation";
 
 export interface UseTagsExtraCriteriaTexts {
   tagsEmpty: string;
@@ -30,8 +29,6 @@ export default function useTagsExtraCriteria({
       : [],
   );
 
-  const router = useRouter();
-
   const debouncedTags = useDebounce(tags, 500);
 
   const extraArrayQueryParam = useMemo(
@@ -42,7 +39,11 @@ export default function useTagsExtraCriteria({
   );
   const extraUpdateSearchParams = useCallback(
     (searchParams: URLSearchParams) => {
-      searchParams.set("tags", tags.map((tag) => tag.value).join(","));
+      if (tags.length == 0) {
+        searchParams.delete("tags");
+      } else {
+        searchParams.set("tags", tags.map((tag) => tag.value).join(","));
+      }
     },
     [tags],
   );

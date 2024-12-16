@@ -191,7 +191,7 @@ public class PostExtendedRepositoryImpl implements PostExtendedRepository {
         RepositoryUtils.MutableBoolean hasPreviousCriteria = new RepositoryUtils.MutableBoolean(false);
 
         repositoryUtils.addNotNullField(approved, queryBuilder, hasPreviousCriteria, "approved = :approved");
-        repositoryUtils.addStringField(title, queryBuilder, hasPreviousCriteria, ollamaQueryUtils.addThresholdFilter(embeddings, " OR title ILIKE '%' || :title || '%'"));
+        repositoryUtils.addStringField(title, queryBuilder, hasPreviousCriteria, ollamaQueryUtils.addThresholdFilter(embeddings, " OR title ILIKE '%' || :title || '%' OR similarity(title, :title ) > 0.35 "));
 
 
 //        if (repositoryUtils.isNotNullOrEmpty(title)) {

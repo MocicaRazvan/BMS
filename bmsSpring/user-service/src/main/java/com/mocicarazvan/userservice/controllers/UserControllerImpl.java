@@ -117,6 +117,11 @@ public class UserControllerImpl implements UserController {
         return userService.sendEmailAdmin(emailRequest)
                 .then(Mono.fromCallable(() -> ResponseEntity.noContent().build()));
     }
-    
+
+    @GetMapping(value = "/seedEmbeddings")
+    public Mono<ResponseEntity<List<String>>> seedEmbeddings() {
+        return userService.seedEmbeddings()
+                .map(ResponseEntity::ok);
+    }
 
 }

@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 public class OllamaQueryUtils {
 
 
-    @Value("${spring.custom.ollama.threshold:0.61}")
+    @Value("${spring.custom.ollama.threshold:0.6}")
     private double threshold;
 
     public String getEmbeddingsAsString(OllamaEmbedResponseModel resp) {

@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.data.redis.connection.DataType;
 import org.springframework.data.redis.core.ReactiveRedisTemplate;
@@ -26,6 +27,9 @@ import java.util.List;
 @ConditionalOnClass({ReactiveRedisTemplate.class, ObjectMapper.class, AspectUtils.class})
 public class RedisReactiveChildCacheEvictAspect extends RedisReactiveCacheEvictAspect {
     protected final RedisChildCacheUtils redisChildCacheUtils;
+
+    @Value("${spring.custom.scan.batch.size:50}")
+    private int scanBatchSize;
 
     public RedisReactiveChildCacheEvictAspect(ReactiveRedisTemplate<String, Object> reactiveRedisTemplate, AspectUtils aspectUtils, RedisChildCacheUtils redisChildCacheUtils) {
         super(reactiveRedisTemplate, aspectUtils, redisChildCacheUtils);
@@ -121,7 +125,7 @@ public class RedisReactiveChildCacheEvictAspect extends RedisReactiveCacheEvictA
                         .scan(
                                 ScanOptions.scanOptions()
                                         .type(DataType.STRING)
-                                        .count(50)
+                                        .count(scanBatchSize)
                                         .match(p).build()
                         ));
     }

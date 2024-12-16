@@ -16,6 +16,8 @@ import java.util.List;
 import java.util.Set;
 
 public interface UserService {
+    Mono<List<String>> seedEmbeddings();
+
     Mono<UserDto> getUser(Long id);
 
     Flux<PageableResponse<UserDto>> getAllUsers(PageableBody pageableBody, String email, Set<Role> roles, Set<AuthProvider> providers, Boolean emailVerified, Boolean admin);

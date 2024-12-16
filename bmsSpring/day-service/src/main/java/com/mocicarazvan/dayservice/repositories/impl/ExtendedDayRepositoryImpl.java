@@ -193,7 +193,7 @@ public class ExtendedDayRepositoryImpl implements ExtendedDayRepository {
     private void appendWhereClause(StringBuilder queryBuilder, String title, String embeddings, DayType type, List<Long> excludeIds) {
         RepositoryUtils.MutableBoolean hasPreviousCriteria = new RepositoryUtils.MutableBoolean(false);
 //        repositoryUtils.addStringField(title, queryBuilder, hasPreviousCriteria, " UPPER(title) LIKE UPPER(:title)");
-        repositoryUtils.addStringField(title, queryBuilder, hasPreviousCriteria, ollamaQueryUtils.addThresholdFilter(embeddings, " OR title ILIKE '%' || :title || '%'"));
+        repositoryUtils.addStringField(title, queryBuilder, hasPreviousCriteria, ollamaQueryUtils.addThresholdFilter(embeddings, " OR title ILIKE '%' || :title || '%' OR similarity(title, :title ) > 0.35  "));
 
         repositoryUtils.addNotNullField(type, queryBuilder, hasPreviousCriteria, " type = :type");
         repositoryUtils.addListField(excludeIds, queryBuilder, hasPreviousCriteria,

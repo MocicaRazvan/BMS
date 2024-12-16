@@ -11,6 +11,7 @@ import com.mocicarazvan.templatemodule.hateos.user.UserDtoAssembler;
 import com.mocicarazvan.templatemodule.jackson.CustomObjectMapper;
 import com.mocicarazvan.templatemodule.utils.EntitiesUtils;
 import com.mocicarazvan.templatemodule.utils.PageableUtilsCustom;
+import com.mocicarazvan.templatemodule.utils.RepositoryUtils;
 import com.mocicarazvan.templatemodule.utils.RequestsUtils;
 import com.mocicarazvan.userservice.controllers.UserControllerImpl;
 import com.mocicarazvan.userservice.email.CustomMailProps;
@@ -114,6 +115,11 @@ public class BeanConfig {
             @Qualifier("fileWebClient") WebClient.Builder fileWebClient
     ) {
         return new FileClient("fileService", fileWebClient, circuitBreakerRegistry, retryRegistry, rateLimiterRegistry);
+    }
+
+    @Bean
+    public RepositoryUtils repositoryUtils() {
+        return new RepositoryUtils();
     }
 
 }

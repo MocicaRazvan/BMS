@@ -4,12 +4,15 @@ import com.mocicarazvan.fileservice.repositories.ImageRedisRepository;
 import io.lettuce.core.RedisCommandExecutionException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.connection.DataType;
 import org.springframework.data.redis.core.ReactiveRedisTemplate;
 import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.Duration;
 import java.util.List;
 
 @Repository
@@ -19,13 +22,17 @@ public class ImageRedisRepositoryImpl implements ImageRedisRepository {
 
     private final ReactiveRedisTemplate<String, byte[]> reactiveByteArrayRedisTemplate;
     private static final String IMAGE_CACHE_KEY_PATTERN = "image:%s:*";
-    private static final int SCAN_BATCH_SIZE = 100;
+    @Value("${spring.custom.scan.batch.size:25}")
+    private int scanBatchSize;
+
+    @Value("${spring.custom.image.cache.expire.minutes:7200}")
+    private Long expireMinutes;
 
 
     @Override
     public Mono<Void> saveImage(String gridId, Integer width, Integer height, Double quality, byte[] imageData) {
         return reactiveByteArrayRedisTemplate.opsForValue()
-                .set(generateCacheKey(gridId, width, height, quality), imageData)
+                .set(generateCacheKey(gridId, width, height, quality), imageData, Duration.ofMinutes(expireMinutes))
                 .filter(Boolean::booleanValue)
                 .switchIfEmpty(Mono.error(new RedisCommandExecutionException("Failed to save image")))
                 .then();
@@ -71,8 +78,11 @@ public class ImageRedisRepositoryImpl implements ImageRedisRepository {
     }
 
     private Flux<Long> scanAndDeleteKeys(String pattern) {
-        return reactiveByteArrayRedisTemplate.scan(ScanOptions.scanOptions().match(pattern).build())
-                .buffer(SCAN_BATCH_SIZE)
+        return reactiveByteArrayRedisTemplate.scan(ScanOptions.scanOptions()
+                        .type(DataType.STRING)
+                        .count(scanBatchSize)
+                        .match(pattern).build())
+                .buffer(scanBatchSize)
                 .flatMap(keys -> reactiveByteArrayRedisTemplate.delete(Flux.fromIterable(keys)));
     }
 }

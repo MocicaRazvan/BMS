@@ -7,6 +7,7 @@ import com.mocicarazvan.templatemodule.exceptions.common.UsernameNotFoundExcepti
 import com.mocicarazvan.userservice.exceptions.EmailAlreadyVerified;
 import com.mocicarazvan.userservice.exceptions.StateNotFound;
 import com.mocicarazvan.userservice.exceptions.UserWithEmailExists;
+import io.jsonwebtoken.MalformedJwtException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -32,6 +33,11 @@ public class AuthAdvice extends BaseExceptionMapping {
     @ExceptionHandler(StateNotFound.class)
     public Mono<ResponseEntity<BaseErrorResponse>> handleStateNotFound(StateNotFound e, ServerWebExchange exchange) {
         return handleWithMessage(HttpStatus.BAD_REQUEST, e, exchange);
+    }
+
+    @ExceptionHandler(MalformedJwtException.class)
+    public Mono<ResponseEntity<BaseErrorResponse>> handleMalformedJwt(MalformedJwtException e, ServerWebExchange exchange) {
+        return handleWithMessage(HttpStatus.UNAUTHORIZED, e, exchange);
     }
 
     @ExceptionHandler(EmailAlreadyVerified.class)

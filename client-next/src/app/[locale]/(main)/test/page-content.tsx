@@ -1,13 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import JSZip from "jszip";
+import { useState } from "react";
 import Image from "next/image";
-import { Button } from "@/components/ui/button";
-import useGetDiffusionImages from "@/hoooks/useGetDiffusionImages";
 import { FieldInputItem } from "@/components/forms/input-file";
 import { DiffusionSchemaTexts } from "@/types/forms";
-import DiffusionImagesForm from "@/components/forms/diffusion-images-form";
 
 interface DiffusionImage {
   name: string;

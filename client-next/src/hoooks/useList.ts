@@ -153,6 +153,7 @@ export default function useList<T>({
       currentPage: 0,
     }));
     setSort([]);
+    setSortValue("");
   }, []);
 
   const debouncedFilter = useDebounceWithCallBack(
@@ -181,15 +182,34 @@ export default function useList<T>({
       const updatedSearchParams = new URLSearchParams(
         currentSearchParams.toString(),
       );
-      updatedSearchParams.set(filterKey, debouncedFilter[filterKey] || "");
+      const curFilter = debouncedFilter[filterKey] || "";
+      updatedSearchParams.set(filterKey, curFilter);
       updatedSearchParams.set("currentPage", pageInfo.currentPage.toString());
       updatedSearchParams.set("pageSize", pageInfo.pageSize.toString());
-      updatedSearchParams.set(
-        "sort",
-        makeSortString(makeSortFetchParams(sort)),
-      );
-      console.log("sorting", makeSortString(makeSortFetchParams(sort)));
-      console.log("sorting", makeSortFetchParams(sort));
+      const curSortParams = makeSortFetchParams(sort);
+
+      if (curFilter === "" && Object.keys(curSortParams).length === 0) {
+        const createdAt = sortingOptions.find(
+          (o) => o.property === "createdAt" && o.direction === "desc",
+        );
+        if (createdAt) {
+          setSort([createdAt]);
+          updatedSearchParams.set(
+            "sort",
+            makeSortString(makeSortFetchParams([createdAt])),
+          );
+        } else {
+          updatedSearchParams.delete("sort");
+        }
+      } else if (Object.keys(curSortParams).length === 0) {
+        updatedSearchParams.delete("sort");
+      } else {
+        updatedSearchParams.set(
+          "sort",
+          makeSortString(makeSortFetchParams(sort)),
+        );
+      }
+
       if (extraUpdateSearchParams) {
         extraUpdateSearchParams(updatedSearchParams);
       }
@@ -209,6 +229,7 @@ export default function useList<T>({
     extraUpdateSearchParams,
     filterKey,
     navigate,
+    sortingOptions,
   ]);
 
   // useEffect(() => {

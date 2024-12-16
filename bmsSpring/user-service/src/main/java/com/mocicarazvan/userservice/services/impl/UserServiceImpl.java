@@ -19,12 +19,12 @@ import com.mocicarazvan.templatemodule.exceptions.action.PrivateRouteException;
 import com.mocicarazvan.templatemodule.exceptions.notFound.NotFoundEntity;
 import com.mocicarazvan.templatemodule.utils.EntitiesUtils;
 import com.mocicarazvan.templatemodule.utils.PageableUtilsCustom;
-import com.mocicarazvan.userservice.cache.FilteredCacheListCaffeineRoleUserFilterKey;
 import com.mocicarazvan.userservice.cache.redis.annotations.RedisReactiveRoleCache;
 import com.mocicarazvan.userservice.cache.redis.annotations.RedisReactiveRoleCacheEvict;
 import com.mocicarazvan.userservice.email.EmailTemplates;
 import com.mocicarazvan.userservice.mappers.UserMapper;
 import com.mocicarazvan.userservice.models.UserCustom;
+import com.mocicarazvan.userservice.repositories.ExtendedUserRepository;
 import com.mocicarazvan.userservice.repositories.UserRepository;
 import com.mocicarazvan.userservice.services.UserService;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +32,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.reactive.TransactionalOperator;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -53,13 +54,24 @@ public class UserServiceImpl implements UserService {
     private final PageableUtilsCustom pageableUtilsCustom;
     private final FileClient fileClient;
     private final ObjectMapper objectMapper;
-    protected final FilteredCacheListCaffeineRoleUserFilterKey cacheHandler;
+    private final ExtendedUserRepository extendedUserRepository;
+    private final UserEmbedServiceImpl userEmbedService;
+    private final TransactionalOperator transactionalOperator;
     private final static String USER_SERVICE_NAME = "userService";
 
 
     @Value("${front.url}")
     private String frontUrl;
     private final EmailUtils emailUtils;
+
+    @Override
+    public Mono<List<String>> seedEmbeddings() {
+        return userRepository.findAll()
+                .flatMap(user ->
+                        userEmbedService.saveEmbedding(user.getId(), user.getEmail()).then(Mono.just("Seeded embeddings for user: " + user.getId())))
+                .collectList()
+                .as(transactionalOperator::transactional);
+    }
 
     @Override
     @RedisReactiveCache(key = USER_SERVICE_NAME, id = "#id")
@@ -84,19 +96,9 @@ public class UserServiceImpl implements UserService {
         return pageableUtilsCustom.isSortingCriteriaValid(pageableBody.getSortingCriteria(), allowedSortingFields)
                 .then(pageableUtilsCustom.createPageRequest(pageableBody))
                 .flatMapMany(pr ->
-
                         pageableUtilsCustom.createPageableResponse(
-                                (emailVerified == null ? userRepository.findAllByEmailContainingIgnoreCaseAndRoleInAndProviderIn(emailToSearch, finalRoles,
-                                        finalProviders, pr) :
-                                        userRepository.findAllByEmailContainingIgnoreCaseAndRoleInAndProviderInAndEmailVerifiedIs(emailToSearch, finalRoles,
-                                                finalProviders, emailVerified, pr))
-                                        .log()
-                                        .map(userMapper::fromUserCustomToUserDto),
-                                (emailVerified == null ? userRepository.countAllByEmailContainingIgnoreCaseAndRoleInAndProviderIn(emailToSearch, finalRoles, finalProviders)
-                                        : userRepository.countAllByEmailContainingIgnoreCaseAndRoleInAndProviderInAndEmailVerifiedIs(emailToSearch, finalRoles, finalProviders, emailVerified)
-                                ),
-
-
+                                extendedUserRepository.getUsersFiltered(pr, emailToSearch, finalRoles, finalProviders, emailVerified).map(userMapper::fromUserCustomToUserDto),
+                                extendedUserRepository.countUsersFiltered(emailToSearch, finalRoles, finalProviders, emailVerified),
                                 pr)
 
 

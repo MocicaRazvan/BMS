@@ -3,6 +3,7 @@ import { getTranslations, unstable_setRequestLocale } from "next-intl/server";
 import NotFoundLottie from "@/app/[locale]/(main)/not-found/not-found-lottie";
 import { Suspense } from "react";
 import { Locale } from "@/navigation";
+
 interface Props {
   params: { locale: Locale };
 }

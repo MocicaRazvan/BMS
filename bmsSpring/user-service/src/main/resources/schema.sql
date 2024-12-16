@@ -47,5 +47,15 @@ CREATE INDEX IF NOT EXISTS idx_user_id_jwt_token ON jwt_token (user_id);
 CREATE INDEX IF NOT EXISTS idx_user_id_otp_token ON otp_token (user_id);
 CREATE EXTENSION IF NOT EXISTS pg_trgm;
 CREATE INDEX IF NOT EXISTS idx_user_custom_email_trgm ON user_custom USING gin (email gin_trgm_ops);
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
 
+create table if not exists user_embedding(
+    id serial primary key ,
+    entity_id bigint not null unique references user_custom(id) on delete cascade,
+    embedding vector(1024),
+    created_at timestamp not null default current_timestamp,
+    updated_at timestamp not null default current_timestamp
+    );
 
+CREATE  INDEX IF NOT EXISTS hnsw_user
+    ON user_embedding USING hnsw (embedding vector_ip_ops) with (m=16, ef_construction =64 );

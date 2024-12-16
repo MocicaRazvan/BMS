@@ -1,7 +1,7 @@
 package com.mocicarazvan.userservice.services.impl;
 
 import com.mocicarazvan.templatemodule.enums.AuthProvider;
-import com.mocicarazvan.userservice.cache.FilteredCacheListCaffeineRoleUserFilterKey;
+import com.mocicarazvan.userservice.cache.redis.annotations.RedisReactiveRoleCacheEvict;
 import com.mocicarazvan.userservice.dtos.auth.response.AuthResponse;
 import com.mocicarazvan.userservice.jwt.JwtUtils;
 import com.mocicarazvan.userservice.mappers.UserMapper;
@@ -11,6 +11,7 @@ import com.mocicarazvan.userservice.repositories.JwtTokenRepository;
 import com.mocicarazvan.userservice.repositories.UserRepository;
 import com.mocicarazvan.userservice.services.HandleUserProvider;
 import lombok.RequiredArgsConstructor;
+import org.springframework.transaction.reactive.TransactionalOperator;
 import reactor.core.publisher.Mono;
 
 
@@ -22,16 +23,27 @@ public class BasicUserProvider implements HandleUserProvider {
     protected final JwtTokenRepository jwtTokenRepository;
     protected final JwtUtils jwtUtil;
     protected final UserMapper userMapper;
-    protected final FilteredCacheListCaffeineRoleUserFilterKey cacheHandler;
+    protected final TransactionalOperator transactionalOperator;
+    protected final UserEmbedServiceImpl userEmbedService;
+    private final CacheCompanion cacheCompanion = new CacheCompanion();
 
+    @RedisReactiveRoleCacheEvict(key = "userService", id = "#user.id", oldRolePath = "role")
     public Mono<AuthResponse> saveOrUpdateUserProvider(AuthProvider provider, UserCustom user) {
         return userRepository.findByEmail(user.getEmail())
                 .log()
+                .flatMap(u -> {
+                    if (!u.getProvider().equals(provider)) {
+                        return cacheCompanion.invalidateOnProviderChange(u, Mono.just(u));
+                    }
+                    return Mono.just(u);
+                })
                 .flatMap(u -> generateResponse(u, u.getProvider()))
                 .switchIfEmpty(userRepository.save(user)
-                        .flatMap(u -> generateResponse(u, provider)))
-                .flatMap(cacheHandler::createUserInvalidate)
-                ;
+                        .flatMap(u -> generateResponse(u, provider))
+                        .flatMap(u -> userEmbedService.saveEmbedding(u.getId(), u.getEmail()).thenReturn(u))
+                )
+                .as(transactionalOperator::transactional);
+
     }
 
     public Mono<AuthResponse> generateResponse(UserCustom user, AuthProvider authProvider) {
@@ -50,8 +62,15 @@ public class BasicUserProvider implements HandleUserProvider {
                                     u.setToken(jwtToken.getToken());
                                     return u;
                                 }
-                        )));
+                        ))).as(transactionalOperator::transactional);
 
     }
 
+
+    private static final class CacheCompanion {
+        @RedisReactiveRoleCacheEvict(key = "userService", id = "#user.id", oldRolePath = "role")
+        public Mono<UserCustom> invalidateOnProviderChange(UserCustom user, Mono<UserCustom> mono) {
+            return mono;
+        }
+    }
 }

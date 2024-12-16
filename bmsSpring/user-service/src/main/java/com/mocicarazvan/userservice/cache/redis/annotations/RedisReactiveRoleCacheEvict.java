@@ -16,8 +16,9 @@ import java.lang.annotation.*;
  * <ul>
  *  <li><b>key</b> - the key to be used for caching. It can be a string or a SPEL with the root this.</li>
  *  <li><b>id</b> - the id of the reverse index to be invalidated</li>
- *  <li><b>newRolePath</b> - the path to the new role for the object</li>
- *  <li><b>useOldRole</b> - if set to true, the cache will also be invalidated with the old role</li>
+ *  <li><b>oldRole</b> - the old role of the object to invalidate</li>
+ *  <li><b>newRole</b> - the new role of the object to invalidate</li>
+ *  <li><b>oldRolePath</b> - the path to the old role in the object</li>
  *  </ul>
  * <p>
  */

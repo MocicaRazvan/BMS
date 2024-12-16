@@ -26,7 +26,7 @@ public class GoogleUserService extends AbstractOauthProvider {
         super(oauthUserInfoFactory, clientId, clientSecret, redirectUri, "https://oauth2.googleapis.com/token",
                 "https://www.googleapis.com/oauth2/v3/userinfo", AuthProvider.GOOGLE,
                 body -> {
-                    log.error("GoogleUserService raw body " + body);
+//                    log.error("GoogleUserService raw body " + body);
                     try {
                         return new ObjectMapper().readValue(body, new TypeReference<Map<String, String>>() {
                         });

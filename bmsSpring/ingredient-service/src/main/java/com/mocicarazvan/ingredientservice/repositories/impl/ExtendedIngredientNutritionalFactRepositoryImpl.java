@@ -105,7 +105,7 @@ public class ExtendedIngredientNutritionalFactRepositoryImpl implements Extended
         RepositoryUtils.MutableBoolean hasPreviousCriteria = new RepositoryUtils.MutableBoolean(false);
 
 
-        repositoryUtils.addStringField(name, queryBuilder, hasPreviousCriteria, ollamaQueryUtils.addThresholdFilter(embeddings, " OR name ILIKE '%' || :name || '%'"));
+        repositoryUtils.addStringField(name, queryBuilder, hasPreviousCriteria, ollamaQueryUtils.addThresholdFilter(embeddings, " OR name ILIKE '%' || :name || '%' OR similarity(name, :name ) > 0.35 "));
 
 
         repositoryUtils.addNotNullField(display, queryBuilder, hasPreviousCriteria, " ingredient.display = :display");

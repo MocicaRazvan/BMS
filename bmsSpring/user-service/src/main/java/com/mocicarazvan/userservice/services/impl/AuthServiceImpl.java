@@ -3,7 +3,6 @@ package com.mocicarazvan.userservice.services.impl;
 import com.mocicarazvan.templatemodule.enums.AuthProvider;
 import com.mocicarazvan.templatemodule.enums.Role;
 import com.mocicarazvan.templatemodule.exceptions.common.UsernameNotFoundException;
-import com.mocicarazvan.userservice.cache.FilteredCacheListCaffeineRoleUserFilterKey;
 import com.mocicarazvan.userservice.cache.redis.annotations.RedisReactiveRoleCacheEvict;
 import com.mocicarazvan.userservice.dtos.auth.requests.CallbackBody;
 import com.mocicarazvan.userservice.dtos.auth.requests.LoginRequest;
@@ -21,6 +20,7 @@ import com.mocicarazvan.userservice.services.AuthService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.reactive.TransactionalOperator;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
@@ -33,16 +33,19 @@ public class AuthServiceImpl extends BasicUserProvider implements AuthService {
     private final PasswordEncoder passwordEncoder;
     private final GithubUserService githubUserService;
     private final GoogleUserService googleUserService;
+    private final UserEmbedServiceImpl userEmbedService;
+    private final TransactionalOperator transactionalOperator;
 
 
-    public AuthServiceImpl(UserRepository userRepository, JwtTokenRepository jwtTokenRepository, JwtUtils jwtUtil, UserMapper userMapper, WebClient.Builder webClient, PasswordEncoder passwordEncoder, GithubUserService githubUserService, GoogleUserService googleUserService
-            , FilteredCacheListCaffeineRoleUserFilterKey cacheFilter
+    public AuthServiceImpl(UserRepository userRepository, JwtTokenRepository jwtTokenRepository, JwtUtils jwtUtil, UserMapper userMapper, WebClient.Builder webClient, PasswordEncoder passwordEncoder, GithubUserService githubUserService, GoogleUserService googleUserService, UserEmbedServiceImpl userEmbedService, TransactionalOperator transactionalOperator
     ) {
-        super(userRepository, jwtTokenRepository, jwtUtil, userMapper, cacheFilter);
+        super(userRepository, jwtTokenRepository, jwtUtil, userMapper, transactionalOperator, userEmbedService);
         this.webClient = webClient;
         this.passwordEncoder = passwordEncoder;
         this.githubUserService = githubUserService;
         this.googleUserService = googleUserService;
+        this.userEmbedService = userEmbedService;
+        this.transactionalOperator = transactionalOperator;
     }
 
     @Override
@@ -55,10 +58,10 @@ public class AuthServiceImpl extends BasicUserProvider implements AuthService {
                         return Mono.error(new UserWithEmailExists(registerRequest.getEmail()));
                     }
                     return userRepository.save(userMapper.fromRegisterRequestToUserCustom(registerRequest))
+                            .flatMap(u -> userEmbedService.saveEmbedding(u.getId(), u.getEmail()).thenReturn(u))
+                            .as(transactionalOperator::transactional)
                             .flatMap(u -> generateResponse(u, AuthProvider.LOCAL));
-                })
-                .flatMap(cacheHandler::createUserInvalidate)
-                ;
+                });
     }
 
     @Override
