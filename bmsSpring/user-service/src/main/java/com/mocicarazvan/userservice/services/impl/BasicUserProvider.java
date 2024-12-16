@@ -28,7 +28,6 @@ public class BasicUserProvider implements HandleUserProvider {
     protected final UserEmbedServiceImpl userEmbedService;
     protected final BasicUserProviderRedisCache basicUserProviderRedisCache;
 
-    @RedisReactiveRoleCacheEvict(key = "userService", id = "#user.id", oldRolePath = "role")
     public Mono<AuthResponse> saveOrUpdateUserProvider(AuthProvider provider, UserCustom user) {
         return userRepository.findByEmail(user.getEmail())
                 .log()
