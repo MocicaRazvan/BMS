@@ -122,13 +122,13 @@ public class ExtendedOrderWithAddressRepositoryImpl implements ExtendedOrderWith
         RepositoryUtils.MutableBoolean hasPreviousCriteria = new RepositoryUtils.MutableBoolean(false);
 
 
-        repositoryUtils.addStringField(city, queryBuilder, hasPreviousCriteria, " ( UPPER(city) LIKE UPPER('%' || :city || '%') OR similarity(city, :city ) > 0.35 )");
+        repositoryUtils.addStringField(city, queryBuilder, hasPreviousCriteria, " ( city ILIKE '%' || :city || '%' OR similarity(city, :city ) > 0.35 )");
 
 
-        repositoryUtils.addStringField(state, queryBuilder, hasPreviousCriteria, "( UPPER(state) LIKE UPPER('%' || :state || '%') OR similarity(state, :state ) > 0.35 )");
+        repositoryUtils.addStringField(state, queryBuilder, hasPreviousCriteria, "( state ILIKE '%' || :state || '%' OR similarity(state, :state ) > 0.35 )");
 
 
-        repositoryUtils.addStringField(country, queryBuilder, hasPreviousCriteria, "( UPPER(country) LIKE UPPER('%' || :country || '%') OR similarity(country, :country ) > 0.35 )");
+        repositoryUtils.addStringField(country, queryBuilder, hasPreviousCriteria, "( country ILIKE '%' || :country || '%' OR similarity(country, :country ) > 0.35 )");
     }
 
 
