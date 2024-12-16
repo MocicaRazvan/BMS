@@ -35,17 +35,19 @@ public class AuthServiceImpl extends BasicUserProvider implements AuthService {
     private final GoogleUserService googleUserService;
     private final UserEmbedServiceImpl userEmbedService;
     private final TransactionalOperator transactionalOperator;
+    private final BasicUserProvider.BasicUserProviderEmbedCacheCompanion embedCacheCompanion;
 
 
-    public AuthServiceImpl(UserRepository userRepository, JwtTokenRepository jwtTokenRepository, JwtUtils jwtUtil, UserMapper userMapper, WebClient.Builder webClient, PasswordEncoder passwordEncoder, GithubUserService githubUserService, GoogleUserService googleUserService, UserEmbedServiceImpl userEmbedService, TransactionalOperator transactionalOperator
+    public AuthServiceImpl(UserRepository userRepository, JwtTokenRepository jwtTokenRepository, JwtUtils jwtUtil, UserMapper userMapper, WebClient.Builder webClient, PasswordEncoder passwordEncoder, GithubUserService githubUserService, GoogleUserService googleUserService, UserEmbedServiceImpl userEmbedService, TransactionalOperator transactionalOperator, BasicUserProvider.BasicUserProviderEmbedCacheCompanion embedCacheCompanion
     ) {
-        super(userRepository, jwtTokenRepository, jwtUtil, userMapper, transactionalOperator, userEmbedService);
+        super(userRepository, jwtTokenRepository, jwtUtil, userMapper, transactionalOperator, userEmbedService, embedCacheCompanion);
         this.webClient = webClient;
         this.passwordEncoder = passwordEncoder;
         this.githubUserService = githubUserService;
         this.googleUserService = googleUserService;
         this.userEmbedService = userEmbedService;
         this.transactionalOperator = transactionalOperator;
+        this.embedCacheCompanion = embedCacheCompanion;
     }
 
     @Override

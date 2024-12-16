@@ -11,6 +11,7 @@ import com.mocicarazvan.userservice.repositories.JwtTokenRepository;
 import com.mocicarazvan.userservice.repositories.UserRepository;
 import com.mocicarazvan.userservice.services.HandleUserProvider;
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.reactive.TransactionalOperator;
 import reactor.core.publisher.Mono;
 
@@ -25,7 +26,7 @@ public class BasicUserProvider implements HandleUserProvider {
     protected final UserMapper userMapper;
     protected final TransactionalOperator transactionalOperator;
     protected final UserEmbedServiceImpl userEmbedService;
-    private final CacheCompanion cacheCompanion = new CacheCompanion();
+    protected final BasicUserProviderEmbedCacheCompanion embedCacheCompanion;
 
     @RedisReactiveRoleCacheEvict(key = "userService", id = "#user.id", oldRolePath = "role")
     public Mono<AuthResponse> saveOrUpdateUserProvider(AuthProvider provider, UserCustom user) {
@@ -33,7 +34,7 @@ public class BasicUserProvider implements HandleUserProvider {
                 .log()
                 .flatMap(u -> {
                     if (!u.getProvider().equals(provider)) {
-                        return cacheCompanion.invalidateOnProviderChange(u, Mono.just(u));
+                        return embedCacheCompanion.invalidateOnProviderChange(u, Mono.just(u));
                     }
                     return Mono.just(u);
                 })
@@ -67,7 +68,8 @@ public class BasicUserProvider implements HandleUserProvider {
     }
 
 
-    private static final class CacheCompanion {
+    @Component
+    public static class BasicUserProviderEmbedCacheCompanion {
         @RedisReactiveRoleCacheEvict(key = "userService", id = "#user.id", oldRolePath = "role")
         public Mono<UserCustom> invalidateOnProviderChange(UserCustom user, Mono<UserCustom> mono) {
             return mono;
