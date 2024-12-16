@@ -26,7 +26,7 @@ public class BasicUserProvider implements HandleUserProvider {
     protected final UserMapper userMapper;
     protected final TransactionalOperator transactionalOperator;
     protected final UserEmbedServiceImpl userEmbedService;
-    protected final BasicUserProviderEmbedCacheCompanion embedCacheCompanion;
+    protected final BasicUserProviderRedisCache basicUserProviderRedisCache;
 
     @RedisReactiveRoleCacheEvict(key = "userService", id = "#user.id", oldRolePath = "role")
     public Mono<AuthResponse> saveOrUpdateUserProvider(AuthProvider provider, UserCustom user) {
@@ -34,7 +34,7 @@ public class BasicUserProvider implements HandleUserProvider {
                 .log()
                 .flatMap(u -> {
                     if (!u.getProvider().equals(provider)) {
-                        return embedCacheCompanion.invalidateOnProviderChange(u, Mono.just(u));
+                        return basicUserProviderRedisCache.invalidateOnProviderChange(u, Mono.just(u));
                     }
                     return Mono.just(u);
                 })
@@ -69,7 +69,7 @@ public class BasicUserProvider implements HandleUserProvider {
 
 
     @Component
-    public static class BasicUserProviderEmbedCacheCompanion {
+    public static class BasicUserProviderRedisCache {
         @RedisReactiveRoleCacheEvict(key = "userService", id = "#user.id", oldRolePath = "role")
         public Mono<UserCustom> invalidateOnProviderChange(UserCustom user, Mono<UserCustom> mono) {
             return mono;
