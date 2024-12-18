@@ -18,7 +18,7 @@ metrics.info(APP_NAME, "Application info prometheus", version=APP_VERSION)
 
 @app.route("/")
 def index():
-    return "Hi baby!"
+    return "OK"
 
 
 @app.route("/generate-images", methods=["POST"])
@@ -87,5 +87,4 @@ def generate_images():
 
 
 if __name__ == "__main__":
-    print("Waiting for pipe and tensor")
     app.run(host="0.0.0.0", port=5000, debug=FLASK_DEBUG)
