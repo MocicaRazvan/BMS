@@ -1,0 +1,19 @@
+import os
+
+# app settings
+APP_NAME = os.getenv("DIFFUSION_APP_NAME", "diffusion_service")
+APP_VERSION = os.getenv("DIFFUSION_APP_VERSION", "1.0.0")
+FLASK_DEBUG = os.getenv("FLASK_DEBUG", "False").lower() == "true"
+
+# model settings
+MODEL_ID = os.getenv("DIFFUSION_MODEL_ID", "CompVis/stable-diffusion-v-1-4")
+LOCAL_MODEL_PATH = (
+    os.path.join(os.getenv("DIFFUSION_MODEL_PATH", ""), "./models")
+    if "DIFFUSION_MODEL_PATH" in os.environ
+    else "./models/stable_diffusion_v1_4"
+)
+
+# cuda settings
+DEVICE = "cuda:0"
+RESERVED_VRAM_GB = float(os.getenv("RESERVED_VRAM_GB", 1.5))
+MEMORY_FRACTION = float(os.getenv("MEMORY_FRACTION", 0.5))
