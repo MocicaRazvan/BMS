@@ -92,7 +92,7 @@ export default function ResetPasswordPage({
         newPassword: password,
       },
     });
-    console.log(messages);
+
     if (isFinished && error) {
       setErrorMsg(errorMsg);
       setIsLoading(false);

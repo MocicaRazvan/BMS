@@ -53,7 +53,6 @@ export default async function UsersRecipesPage({
     userRecipesPageTexts.sortingRecipesSortingOptions,
   );
 
-  // console.log("AUTH", authUser.id, id);
   return (
     <SidebarContentLayout
       navbarProps={{
@@ -78,7 +77,7 @@ export default async function UsersRecipesPage({
             />
           </div>
         </Suspense>
-      </div>{" "}
+      </div>
     </SidebarContentLayout>
   );
 }

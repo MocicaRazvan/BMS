@@ -48,7 +48,6 @@ public abstract class NotificationTemplateServiceImpl<R extends IdGenerated, RRE
     private final CustomConvertAndSendToUser customConvertAndSendToUser;
 
 
-    //    @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Transactional(propagation = Propagation.REQUIRES_NEW, isolation = Isolation.READ_COMMITTED)
     @Override
     @CustomRetryable
@@ -69,13 +68,13 @@ public abstract class NotificationTemplateServiceImpl<R extends IdGenerated, RRE
     public void deleteById(Long id) {
         MODEL m = getNotificationById(id);
         notificationTemplateRepository.delete(m);
-        // todo mai bn stergi din front
+
         notifyReceiver(notificationTemplateMapper.fromModelToResponse(m), NotificationNotifyType.REMOVED);
     }
 
 
     @Override
-//    @Transactional
+
     public List<RESPONSE> getAllBySenderEmailAndType(String senderEmail, E type) {
         Long senderId = conversationUserService.getUserByEmail(senderEmail).getId();
         return (type == null ? notificationTemplateRepository.findAllBySenderId(senderId)
@@ -86,7 +85,6 @@ public abstract class NotificationTemplateServiceImpl<R extends IdGenerated, RRE
 
 
     @Override
-//    @Transactional
 
     public void deleteAllBySenderEmailAndType(String senderEmail, E type) {
         Long senderId = conversationUserService.getUserByEmail(senderEmail).getId();
@@ -95,12 +93,8 @@ public abstract class NotificationTemplateServiceImpl<R extends IdGenerated, RRE
         } else {
             notificationTemplateRepository.deleteAllBySenderIdAndType(senderId, type);
         }
-        // todo mai bn stergi din front
-//        notifyReceiver(null, NotificationNotifyType.REMOVED);
+
     }
-
-
-    //    @Transactional
 
     public CompletableFuture<MODEL> fromBodyToModel(BODY body) {
 
@@ -135,7 +129,6 @@ public abstract class NotificationTemplateServiceImpl<R extends IdGenerated, RRE
 
     public void notifyReceiver(RESPONSE response, NotificationNotifyType notificationNotifyType) {
         String type = notificationNotifyType.name().toLowerCase();
-//        messagingTemplate.convertAndSendToUser(response.getReceiver().getEmail(), "/queue/notification/" + notificationName + "/" + type, response);
         customConvertAndSendToUser.sendToUser(response.getReceiver().getEmail(), "/queue/notification-" + notificationName + "-" + type, response);
 
 
@@ -154,22 +147,19 @@ public abstract class NotificationTemplateServiceImpl<R extends IdGenerated, RRE
 
 
     @Override
-//    @Transactional
     @Transactional(isolation = Isolation.READ_COMMITTED)
     @CustomRetryable
     public void deleteAllByReceiverEmailAndType(String senderEmail, E type) {
-//        log.info("Deleting all notifications for receiver email: {}", senderEmail);
         Long receiverId = conversationUserService.getUserByEmail(senderEmail).getId();
         if (type == null) {
             notificationTemplateRepository.deleteAllByReceiverId(receiverId);
         } else {
             notificationTemplateRepository.deleteAllByReceiverIdAndType(receiverId, type);
         }
-        // todo mai bn stergi din front
+
     }
 
     @Override
-//    @Transactional
     @Transactional(isolation = Isolation.READ_COMMITTED)
     @CustomRetryable
     public void deleteAllByReceiverEmailAndTypeRemoveReference(String senderEmail, E type, Long referenceId) {
@@ -179,7 +169,6 @@ public abstract class NotificationTemplateServiceImpl<R extends IdGenerated, RRE
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, isolation = Isolation.READ_COMMITTED)
-//    @Transactional
     @CustomRetryable
     public void deleteAllByReceiverEmailSenderEmailAndType(String senderEmail, String receiverEmail, E type) {
         CompletableFuture<ConversationUser> senderFuture = conversationUserService.getUserByEmailAsync(senderEmail);
@@ -214,7 +203,6 @@ public abstract class NotificationTemplateServiceImpl<R extends IdGenerated, RRE
                 .runAsync(() -> CompletableFuture.allOf(
                         receiverEmails.stream()
                                 .map(email -> CompletableFuture.runAsync(() ->
-//                                        messagingTemplate.convertAndSendToUser(email, "/queue/notification/" + notificationName + "/removed", referenceId.toString()), asyncExecutor))
                                         customConvertAndSendToUser.sendToUser(email, "/queue/notification-" + notificationName + "-removed", referenceId.toString()), asyncExecutor))
                                 .toArray(CompletableFuture[]::new)
                 ).join(), asyncExecutor);

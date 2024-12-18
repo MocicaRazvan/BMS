@@ -58,7 +58,6 @@ export const useRecipeApproveNotification = () => {
     NotificationRecipeResponse,
     ApproveRecipeNotificationResponse
   >(RecipeApproveNotificationContext, approveRecipeNotificationName);
-  // const notificationName = "approveRecipeNotification" as const;
 
   const removeNotificationRecipe = useCallback(
     (p: RecipePayloadStomp) =>

@@ -23,12 +23,6 @@ export async function generateMetadata({
 }
 
 export default async function ChatPage({ searchParams }: Props) {
-  console.log("chatIdS p", searchParams);
-  // const session = await getServerSession(authOptions);
-  // if (!session?.user) {
-  //   return null;
-  // }
-
   const [authUser, chatMainContentWrapperTexts] = await Promise.all([
     getUser(),
     getChatMainContentWrapperTexts(),

@@ -18,10 +18,8 @@ export function useGetTitleBodyUser<T extends TitleBodyUserDto>({
 }: Args) {
   const [itemState, setItemState] = useState<T | null>(null);
   const { id } = useParams();
-  // const session = useSession();
   const router = useRouter();
 
-  // const authUser = session.data?.user;
   const { messages, error, isFinished } = useFetchStream<
     ResponseWithUserDtoEntity<T>,
     BaseError
@@ -50,7 +48,6 @@ export function useGetTitleBodyUser<T extends TitleBodyUserDto>({
     setItemState,
     messages,
     error,
-    // authUser,
     item,
     user,
     router,
@@ -58,6 +55,5 @@ export function useGetTitleBodyUser<T extends TitleBodyUserDto>({
     isFinished,
     isLiked,
     isDisliked,
-    // session,
   };
 }

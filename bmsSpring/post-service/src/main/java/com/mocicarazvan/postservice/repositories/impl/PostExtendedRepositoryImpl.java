@@ -41,11 +41,7 @@ public class PostExtendedRepositoryImpl implements PostExtendedRepository {
     public Flux<Post> getPostsFiltered(String title, Boolean approved, List<String> tags, Long likedUserId, PageRequest pageRequest) {
 
 
-        Mono<String> embeddingsMono = repositoryUtils.isNotNullOrEmpty(title)
-                ? ollamaAPIService.generateEmbeddingMono(title, embedCache).map(ollamaQueryUtils::getEmbeddingsAsString)
-                : Mono.just("");
-
-        return embeddingsMono.flatMapMany(embeddings -> {
+        return ollamaAPIService.getEmbedding(title, embedCache).flatMapMany(embeddings -> {
             StringBuilder queryBuilder = new StringBuilder(SELECT_ALL);
 
             appendWhereClause(queryBuilder, title, embeddings, approved, tags);
@@ -54,15 +50,7 @@ public class PostExtendedRepositoryImpl implements PostExtendedRepository {
                     " :user_like_id = ANY(user_likes) ");
 
 
-            if (repositoryUtils.isNotNullOrEmpty(embeddings)) {
-                queryBuilder.append(pageableUtils.createPageRequestQuery(pageRequest,
-                        ollamaQueryUtils.addOrder(
-                                embeddings
-                        )
-                ));
-            } else {
-                queryBuilder.append(pageableUtils.createPageRequestQuery(pageRequest));
-            }
+            pageableUtils.appendPageRequestQueryCallbackIfFieldIsNotEmpty(queryBuilder, pageRequest, embeddings, ollamaQueryUtils::addOrder);
 
 
             DatabaseClient.GenericExecuteSpec executeSpec = getGenericExecuteSpec(title, approved, tags, queryBuilder);
@@ -77,11 +65,7 @@ public class PostExtendedRepositoryImpl implements PostExtendedRepository {
     public Flux<Post> getPostsFilteredTrainer(String title, Boolean approved, List<String> tags, Long trainerId, PageRequest pageRequest) {
 
 
-        Mono<String> embeddingsMono = repositoryUtils.isNotNullOrEmpty(title)
-                ? ollamaAPIService.generateEmbeddingMono(title, embedCache).map(ollamaQueryUtils::getEmbeddingsAsString)
-                : Mono.just("");
-
-        return embeddingsMono.flatMapMany(embeddings -> {
+        return ollamaAPIService.getEmbedding(title, embedCache).flatMapMany(embeddings -> {
             StringBuilder queryBuilder = new StringBuilder(SELECT_ALL);
 
 
@@ -92,22 +76,11 @@ public class PostExtendedRepositoryImpl implements PostExtendedRepository {
                     " user_id = :trainerId");
 
 
-//        queryBuilder.append(pageableUtils.createPageRequestQuery(pageRequest));
-//        queryBuilder.append(pageableUtils.createPageRequestQuery(pageRequest, repositoryUtils.createExtraOrder(title, "title", ":title")));
+            pageableUtils.appendPageRequestQueryCallbackIfFieldIsNotEmpty(queryBuilder, pageRequest, embeddings, ollamaQueryUtils::addOrder);
 
-            if (repositoryUtils.isNotNullOrEmpty(embeddings)) {
-                queryBuilder.append(pageableUtils.createPageRequestQuery(pageRequest,
-                        ollamaQueryUtils.addOrder(
-                                embeddings
-                        )
-                ));
-            } else {
-                queryBuilder.append(pageableUtils.createPageRequestQuery(pageRequest));
-            }
 
             DatabaseClient.GenericExecuteSpec executeSpec = getGenericExecuteSpec(title, approved, tags, queryBuilder);
 
-//        executeSpec = executeSpec.bind("trainerId", trainerId);
 
             executeSpec = repositoryUtils.bindNotNullField(trainerId, executeSpec, "trainerId");
 
@@ -118,11 +91,7 @@ public class PostExtendedRepositoryImpl implements PostExtendedRepository {
 
     @Override
     public Mono<Long> countPostsFiltered(String title, Boolean approved, List<String> tags, Long likedUserId) {
-        Mono<String> embeddingsMono = repositoryUtils.isNotNullOrEmpty(title)
-                ? ollamaAPIService.generateEmbeddingMono(title, embedCache).map(ollamaQueryUtils::getEmbeddingsAsString)
-                : Mono.just("");
-
-        return embeddingsMono.flatMap(embeddings -> {
+        return ollamaAPIService.getEmbedding(title, embedCache).flatMap(embeddings -> {
 
             StringBuilder queryBuilder = new StringBuilder(COUNT_ALL);
 
@@ -144,11 +113,7 @@ public class PostExtendedRepositoryImpl implements PostExtendedRepository {
     @Override
     public Mono<Long> countPostsFilteredTrainer(String title, Boolean approved, Long trainerId, List<String> tags) {
 
-        Mono<String> embeddingsMono = repositoryUtils.isNotNullOrEmpty(title)
-                ? ollamaAPIService.generateEmbeddingMono(title, embedCache).map(ollamaQueryUtils::getEmbeddingsAsString)
-                : Mono.just("");
-
-        return embeddingsMono.flatMap(embeddings -> {
+        return ollamaAPIService.getEmbedding(title, embedCache).flatMap(embeddings -> {
 
             StringBuilder queryBuilder = new StringBuilder(COUNT_ALL);
 
@@ -192,13 +157,6 @@ public class PostExtendedRepositoryImpl implements PostExtendedRepository {
 
         repositoryUtils.addNotNullField(approved, queryBuilder, hasPreviousCriteria, "approved = :approved");
         repositoryUtils.addStringField(title, queryBuilder, hasPreviousCriteria, ollamaQueryUtils.addThresholdFilter(embeddings, " OR title ILIKE '%' || :title || '%' OR similarity(title, :title ) > 0.35 "));
-
-
-//        if (repositoryUtils.isNotNullOrEmpty(title)) {
-//            repositoryUtils.addStringField(title, queryBuilder, hasPreviousCriteria, ollamaQueryUtils.addThresholdFilter(embeddings, " OR title ILIKE '%' || :title || '%'"));
-//        } else {
-//            repositoryUtils.addStringField(embeddings, queryBuilder, hasPreviousCriteria, ollamaQueryUtils.addThresholdFilter(embeddings));
-//        }
 
 
         if (tags != null && !tags.isEmpty()) {

@@ -53,12 +53,6 @@ export default function ChatMessageForm({
 }: ChatMessageFormProps) {
   const stompClient = useStompClient();
   const [editorKey, setEditorKey] = useState(Math.random());
-  // const form = useForm<ConversationMessageType>({
-  //   resolver: zodResolver(conversationMessageSchema),
-  //   defaultValues: {
-  //     content: "",
-  //   },
-  // });
 
   const schema = useMemo(
     () => getTitleBodySchema(titleBodySchemaTexts),
@@ -76,45 +70,6 @@ export default function ChatMessageForm({
   const { isLoading, setIsLoading, router, errorMsg, setErrorMsg } =
     useLoadingErrorState();
 
-  //
-  // const onSubmit = useCallback(
-  //   async ({ content }: ConversationMessageType) => {
-  //     form.setValue("content", "");
-  //     setEditorKey(Math.random());
-  //     if (stompClient && content && stompClient.connected) {
-  //       stompClient.publish({
-  //         destination: "/app/sendMessage",
-  //         body: JSON.stringify({
-  //           content,
-  //           chatRoomId,
-  //           senderEmail: sender.email,
-  //           receiverEmail: receiver.email,
-  //         }),
-  //       });
-  //       console.log("sending notification");
-  //       console.log("receiverchatId", receiver.connectedChatRoom?.id);
-  //       console.log("connectedChatRoom", chatRoomId);
-  //       if (
-  //         !receiver.connectedChatRoom?.id ||
-  //         receiver.connectedChatRoom.id !== chatRoomId
-  //       ) {
-  //         const body: ChatMessageNotificationBody = {
-  //           senderEmail: sender.email,
-  //           receiverEmail: receiver.email,
-  //           type: "NEW_MESSAGE",
-  //           referenceId: chatRoomId,
-  //           content: "New message from " + sender.email,
-  //           extraLink: "",
-  //         };
-  //         stompClient.publish({
-  //           destination: "/app/chatMessageNotification/sendNotification",
-  //           body: JSON.stringify(body),
-  //         });
-  //       }
-  //     }
-  //   },
-  //   [chatRoomId, form, receiver, sender, stompClient],
-  // );
   const onSubmit = useCallback(
     async ({ body }: TitleBodyType) => {
       setIsLoading(true);
@@ -178,21 +133,12 @@ export default function ChatMessageForm({
           onSubmit={form.handleSubmit(onSubmit)}
           className={" w-full h-full"}
         >
-          {/*<TitleBodyForm<TitleBodyType>*/}
-          {/*  control={form.control}*/}
-          {/*  titleBodyTexts={titleBodyTexts}*/}
-          {/*  hideTitle={true}*/}
-          {/*  editorKey={editorKey}*/}
-          {/*/>*/}
           <FormField
             control={form.control}
             name={"body" as Path<TitleBodyType>}
             render={({ field }) => (
               <FormItem>
-                {/*<FormLabel className="capitalize">{body}</FormLabel>*/}
                 <FormControl>
-                  {/* <Textarea placeholder={bodyPlaceholder} {...field} />
-                   */}
                   <Editor
                     descritpion={field.value as string}
                     onChange={field.onChange}

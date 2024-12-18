@@ -222,8 +222,6 @@ export default function CommentAccordion({
                         {body}
                       </FormLabel>
                       <FormControl>
-                        {/* <Textarea placeholder={bodyPlaceholder} {...field} />
-                         */}
                         <Editor
                           descritpion={field.value as string}
                           onChange={field.onChange}

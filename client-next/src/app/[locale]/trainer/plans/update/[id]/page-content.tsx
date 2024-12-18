@@ -16,27 +16,6 @@ export default function UpdatePlanPageContent({
   authUser,
   ...props
 }: Props) {
-  // const {
-  //   messages: plan,
-  //   error: planError,
-  //   isFinished: planFinished,
-  // } = useFetchStream<CustomEntityModel<PlanResponse>, BaseError>({
-  //   path: `/plans/${id}`,
-  //   method: "GET",
-  //   authToken: true,
-  //   useAbortController: false,
-  // });
-  //
-  // const {
-  //   messages: days,
-  //   error: dayError,
-  //   isFinished: dayFinished,
-  // } = useFetchStream<DayResponse, BaseError>({
-  //   path: `/plans/days/${id}`,
-  //   method: "GET",
-  //   authToken: true,
-  //   useAbortController: false,
-  // });
   const {
     plan,
     planError,
@@ -47,18 +26,6 @@ export default function UpdatePlanPageContent({
     initialOptions,
   } = useGetPlanWithDays(id);
   const { navigateToNotFound } = useClientNotFound();
-
-  // const initialOptions: (Option & { dragId: string })[] = useMemo(
-  //   () =>
-  //     days.length == 0
-  //       ? []
-  //       : days.map(({ id, title }, i) => ({
-  //           label: title,
-  //           value: id.toString(),
-  //           dragId: id + "_" + i,
-  //         })),
-  //   [days],
-  // );
 
   if (!planFinished || !dayFinished) return <LoadingSpinner />;
 
@@ -81,7 +48,6 @@ export default function UpdatePlanPageContent({
   if (React.isValidElement(ownerReturn)) {
     return ownerReturn;
   }
-  //initialOptions?.map((o, i) => ({ ...o, dragId: o.value + "_" + i }))
 
   console.log("plans", plan);
   console.log("days", days);

@@ -53,12 +53,8 @@ public class ExtendedIngredientNutritionalFactRepositoryImpl implements Extended
     @Override
     public Flux<IngredientNutritionalFact> getModelsFiltered(String name, Boolean display, DietType type, PageRequest pageRequest) {
 
-        Mono<String> embeddingsMono = repositoryUtils.isNotNullOrEmpty(name)
-                ? ollamaAPIService.generateEmbeddingMono(name, embedCache).map(ollamaQueryUtils::getEmbeddingsAsString)
-                : Mono.just("");
 
-
-        return embeddingsMono.flatMapMany(embeddings -> {
+        return ollamaAPIService.getEmbedding(name, embedCache).flatMapMany(embeddings -> {
             StringBuilder queryBuilder = new StringBuilder(SELECT_ALL);
 
 
@@ -66,15 +62,8 @@ public class ExtendedIngredientNutritionalFactRepositoryImpl implements Extended
 
 //        queryBuilder.append(pageableUtilsCustom.createPageRequestQuery(pageRequest));
 
-            if (repositoryUtils.isNotNullOrEmpty(embeddings)) {
-                queryBuilder.append(pageableUtilsCustom.createPageRequestQuery(pageRequest,
-                        ollamaQueryUtils.addOrder(
-                                embeddings
-                        )
-                ));
-            } else {
-                queryBuilder.append(pageableUtilsCustom.createPageRequestQuery(pageRequest));
-            }
+            pageableUtilsCustom.appendPageRequestQueryCallbackIfFieldIsNotEmpty(queryBuilder, pageRequest, embeddings, ollamaQueryUtils::addOrder);
+
             DatabaseClient.GenericExecuteSpec executeSpec = getGenericExecuteSpec(name, display, type, queryBuilder);
 
             return executeSpec.map((row, metadata) -> ingredientNutritionalFactMapper.fromRowToModel(row)).all();
@@ -83,11 +72,7 @@ public class ExtendedIngredientNutritionalFactRepositoryImpl implements Extended
 
     @Override
     public Mono<Long> countModelsFiltered(String name, Boolean display, DietType type, PageRequest pageRequest) {
-        Mono<String> embeddingsMono = repositoryUtils.isNotNullOrEmpty(name)
-                ? ollamaAPIService.generateEmbeddingMono(name, embedCache).map(ollamaQueryUtils::getEmbeddingsAsString)
-                : Mono.just("");
-
-        return embeddingsMono.flatMap(embeddings -> {
+        return ollamaAPIService.getEmbedding(name, embedCache).flatMap(embeddings -> {
 
             StringBuilder queryBuilder = new StringBuilder(COUNT_ALL);
 

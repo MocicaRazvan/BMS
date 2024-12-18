@@ -25,6 +25,7 @@ interface Props<R> extends WithUser, ChildInputMultipleSelectorTexts {
   giveUnselectedValue?: boolean;
   allowDuplicates?: boolean;
   pageSize?: number;
+  addNameSortWhenSearchingInputEmpty?: boolean;
 }
 
 export default function ChildInputMultipleSelector<R>({
@@ -44,9 +45,14 @@ export default function ChildInputMultipleSelector<R>({
   giveUnselectedValue = true,
   allowDuplicates = false,
   pageSize = 10,
+  addNameSortWhenSearchingInputEmpty = true,
 }: Props<R>) {
   const fetchData = useCallback(
     async (value: string): Promise<Option[]> => {
+      const extraSortingCriteria: typeof sortingCriteria = {};
+      if (addNameSortWhenSearchingInputEmpty && value === "") {
+        extraSortingCriteria[valueKey] = "asc";
+      }
       const res = await fetchStream<R>({
         path,
         token: authUser.token,
@@ -58,14 +64,18 @@ export default function ChildInputMultipleSelector<R>({
         body: {
           page: 0,
           size: pageSize,
-          sortingCriteria,
+          sortingCriteria: {
+            ...extraSortingCriteria,
+            ...sortingCriteria,
+          },
         },
         acceptHeader: "application/x-ndjson",
       });
-      // console.log("RES", res);
+
       return res.messages.map(mapping);
     },
     [
+      addNameSortWhenSearchingInputEmpty,
       authUser.token,
       extraQueryParams,
       mapping,
@@ -79,11 +89,7 @@ export default function ChildInputMultipleSelector<R>({
   return (
     <div className="w-full">
       <MultipleSelector
-        onSearch={async (value) => {
-          const data = await fetchData(value);
-          // console.log("DATA", data);
-          return data;
-        }}
+        onSearch={fetchData}
         disabled={disabled}
         value={value}
         onChange={onChange}

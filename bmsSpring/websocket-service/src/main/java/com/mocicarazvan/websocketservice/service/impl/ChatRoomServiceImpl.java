@@ -23,7 +23,6 @@ import com.mocicarazvan.websocketservice.utils.PageableUtilsCustom;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
@@ -44,7 +43,6 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     private final ChatRoomRepository chatRoomRepository;
     private final ChatRoomMapper chatRoomMapper;
     private final ConversationUserService conversationUserService;
-    private final SimpMessagingTemplate messagingTemplate;
     private final CustomConvertAndSendToUser customConvertAndSendToUser;
     private final SimpleAsyncTaskExecutor asyncExecutor;
     private final ChatMessageNotificationService chatMessageNotificationService;
@@ -85,33 +83,17 @@ public class ChatRoomServiceImpl implements ChatRoomService {
                 });
     }
 
-    // todo scoate transactional
-//    @Transactional
+
     @Override
     public List<ChatRoom> getRoomsByUsers(Set<String> emails) {
-//        var rooms = chatRoomRepository.findByUsers(emails
-//                , emails.size());
-////        log.error("Rooms: {}", rooms);
-//        return rooms;
         return chatRoomRepository.findByUsers(emails, emails.size());
     }
 
-    // todo scoate transactional
-//    @Transactional
+
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
     @CustomRetryable
     public List<ChatRoomResponse> getChatRooms(String email) {
-//        log.error("Email: {}", email);
-//        var initial = chatRoomRepository.findChatRoomsByUserEmail(email);
-////        log.error("Initial: {}", initial.toString());
-//        var rooms = initial
-//                .stream()
-//                .map(chatRoomMapper::fromModelToResponse)
-//                .collect(Collectors.toList());
-////        log.error("Rooms : {}", rooms.toString());
-//        return rooms;
-
         return chatRoomRepository.findChatRoomsByUserEmail(email)
                 .stream()
                 .map(chatRoomMapper::fromModelToResponse)
@@ -122,14 +104,6 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     @Transactional(propagation = Propagation.REQUIRES_NEW, isolation = Isolation.READ_COMMITTED)
     @CustomRetryable
     public PageableResponse<List<ChatRoomResponse>> getChatRoomsFiltered(String email, String filterEmail, PageableBody pageableBody) {
-
-//        //todo remove
-//        var v = chatRoomRepository.findFilteredChatRooms(email, filterEmail,
-//                pageableUtilsCustom.createPageRequest(pageableBody));
-//
-//        log.error("Email: {}", email);
-//        log.error("Filter email: {}", filterEmail);
-//        log.error("Chat rooms {} , {}", v.getTotalElements(), v.getContent());
 
         return
                 pageableUtilsCustom.createPageableResponse(
@@ -143,7 +117,6 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     @CustomRetryable
     @Override
     public void deleteChatRoom(Long id, String senderEmail) {
-//        log.error("Delete chat room id: {} sender email: {}", id, senderEmail);
         CompletableFuture<ChatRoom> chatRoomCompletableFuture = getChatRoomByIdAsync(id);
         CompletableFuture<ConversationUser> conversationUserCompletableFuture = conversationUserService.getUserByEmailAsync(senderEmail);
 
@@ -166,15 +139,10 @@ public class ChatRoomServiceImpl implements ChatRoomService {
                                 .toList();
 
                         return CompletableFuture.allOf(
-//                                deleteMessagesByChatRoomId(id),
                                 chatMessageNotificationService.notifyDeleteByReferenceId(id, receiverEmails),
                                 deleteChatRoomById(id)
                         ).thenRunAsync(() -> {
-//                            notifyUsersModel(
-//                                    new HashSet<>(chatRoom.getUsers()),
-//                                    chatRoomMapper.fromModelToResponse(chatRoom),
-//                                    "/delete"
-//                            );
+
                             notifyUsersModel(
                                     new HashSet<>(chatRoom.getUsers()),
                                     chatRoomMapper.fromModelToResponse(chatRoom),
@@ -196,13 +164,11 @@ public class ChatRoomServiceImpl implements ChatRoomService {
         return chatRoomMapper.fromModelToResponse(rooms.get(0));
     }
 
-    //    @Transactional
 
     public ChatRoom getChatRoomById(Long id) {
         return chatRoomRepository.findById(id).orElseThrow(() -> new NoChatRoomFound(id));
     }
 
-    //    @Transactional
 
     public CompletableFuture<ChatRoom> getChatRoomByIdAsync(Long id) {
         return CompletableFuture.supplyAsync(() -> getChatRoomById(id), asyncExecutor);
@@ -225,13 +191,11 @@ public class ChatRoomServiceImpl implements ChatRoomService {
 
 
     public void notifyUsers(Set<ConversationUserBase> users, ChatRoomResponse chatRoomResponse, String path) {
-//        users.forEach(u -> messagingTemplate.convertAndSendToUser(u.getEmail(), "/chatRooms" + path, chatRoomResponse));
         users.forEach(u -> customConvertAndSendToUser.sendToUser(u.getEmail(), "/queue/chatRooms" + path, chatRoomResponse));
     }
 
 
     public void notifyUsersModel(Set<ConversationUser> users, ChatRoomResponse chatRoomResponse, String path) {
-//        users.forEach(u -> messagingTemplate.convertAndSendToUser(u.getEmail(), "/chatRooms" + path, chatRoomResponse));
         users.forEach(u -> customConvertAndSendToUser.sendToUser(u.getEmail(), "/queue/chatRooms" + path, chatRoomResponse));
     }
 

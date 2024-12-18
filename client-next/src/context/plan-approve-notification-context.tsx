@@ -57,7 +57,6 @@ export const usePlanApproveNotification = () => {
     NotificationPlanResponse,
     ApprovePlanNotificationResponse
   >(PlanApproveNotificationContext, approvePlanNotification);
-  // const notificationName = "approvePlanNotification" as const;
 
   const removeNotificationPlan = useCallback(
     (p: PlanPayloadStomp) =>

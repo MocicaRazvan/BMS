@@ -27,13 +27,5 @@ export default async function SignOutWrapper({
     redirect("/auth/signin");
   }
 
-  return (
-    <SignOut
-      {...texts}
-      locale={locale}
-      // buttonSignIn={t("buttonSignIn")}
-      // buttonSignOut={t("buttonSignOut")}
-      // questionText={t("questionText")}
-    />
-  );
+  return <SignOut {...texts} locale={locale} />;
 }

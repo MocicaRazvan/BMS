@@ -47,29 +47,15 @@ export default function ChatMainContent({
 
   const { getNotificationState, removeBySender } = useChatNotification();
 
-  // const [convUsers, setConvUsers] = useState<ConversationUserResponse[]>(
-  //   initialConnectedUsers,
-  // );
   const [chatRooms, setChatRooms] =
     useState<ChatRoomResponse[]>(initialChatRooms);
 
   const [activeRoom, setActiveRoom] = useState<ChatRoomResponse | null>(null);
-  // const { activeChatId, setActiveChatId } = useChatContext();
   const [activeRoomId, setActiveRoomId] = useState<number | null>(
     chatId ? parseQueryParamAsInt(chatId, null) : null,
-    // activeChatId,
-    // null,
   );
 
-  console.log("chatIdSARI", activeRoomId);
   const [initialChatId, setInitialChatId] = useState<number | null>(null);
-  console.log("chatIdSINIT", initialChatId);
-  console.log("chatIdSROOM", activeRoom);
-  console.log("chatIdSROOMSender", authUser.email);
-  console.log(
-    "chatIdSROOMUsers",
-    activeRoom?.users.map((user) => user.email),
-  );
 
   useEffect(() => {
     if (email) {
@@ -93,13 +79,7 @@ export default function ChatMainContent({
         }
       });
     }
-  }, [
-    authUser.email,
-    authUser.token,
-    email,
-    // searchParams,
-    JSON.stringify(chatRooms),
-  ]);
+  }, [authUser.email, authUser.token, email, JSON.stringify(chatRooms)]);
 
   useEffect(() => {
     const initialId = searchParams.get("chatId");
@@ -121,10 +101,6 @@ export default function ChatMainContent({
           },
         ] as ConversationUserResponse[];
 
-        console.log(
-          "rue",
-          room.users.map((user) => user?.connectedChatRoom?.id),
-        );
         setActiveRoom({ ...room, users });
       } else {
         setActiveRoom(null);
@@ -137,8 +113,6 @@ export default function ChatMainContent({
 
   useEffect(() => {
     const params = new URLSearchParams(searchParams.toString());
-
-    console.log("chatIdS params", params.toString());
 
     if (activeRoomId) {
       params.set("chatId", activeRoomId.toString());
@@ -160,16 +134,13 @@ export default function ChatMainContent({
       if (isRoomPresent === -1) {
         return prev;
       }
-      // return [...prev.filter((room) => room.id !== newMessage.id), newMessage];
+
       return prev.map((room) =>
         room.id === newMessage.id ? newMessage : room,
       );
     });
   });
-  // useSubscription(`/user/${authUser.email}/chatRooms/delete`, (message) => {
-  //   const newMessage = JSON.parse(message.body);
-  //   setChatRooms((prev) => prev.filter((room) => room.id !== newMessage.id));
-  // });
+
   useSubscription(`/queue/chatRooms-delete-${authUser.email}`, (message) => {
     const newMessage = JSON.parse(message.body);
     setChatRooms((prev) => prev.filter((room) => room.id !== newMessage.id));
@@ -231,7 +202,6 @@ export default function ChatMainContent({
   ]);
 
   useEffect(() => {
-    // console.log("USE2: useEffect triggered " + chatId);
     if (stompClient && stompClient.connected && chatId) {
       const roomId = parseQueryParamAsInt(chatId, null);
       const room = chatRooms.find((r) => r.id === roomId);
@@ -273,7 +243,6 @@ export default function ChatMainContent({
     chatId,
     JSON.stringify(chatRooms),
     removeBySender,
-    // setActiveChatId,
     !!stompClient?.connected,
     activeRoomId,
   ]);
@@ -304,14 +273,8 @@ export default function ChatMainContent({
 
   return (
     <div className=" min-h-[1000px] w-full ">
-      {/*<h1 className="text-4xl font-bold tracking-tighter mb-10 text-center">*/}
-      {/*  Chat*/}
-      {/*</h1>*/}
-      {/*<h1>Connected Users</h1>*/}
-      {/*<UserList users={convUsers} authUser={authUser} />*/}
       <div className="flex md:flex-row flex-col justify-center items-center md:items-start w-full gap-6 h-full ">
         <div className="flex-1 md:flex-1 h-full border-2 p-4 rounded-md py-6 ">
-          {/*<Link href={"/chat"}>CHAT</Link>*/}
           <h1
             className="font-bold text-xl tracking-tighter text-center h-[40px] "
             onClick={() => {
@@ -329,13 +292,8 @@ export default function ChatMainContent({
                 });
 
                 const params = new URLSearchParams(searchParams.toString());
-                //
-                // console.log("searchParams SET");
-                // params.set("random", Math.random().toString());
-                // params.set("random", "null");
+
                 params.delete("chatId");
-                // router.push("/chat?" + params.toString());
-                // router.push(`/chat?${params.toString()}`);
 
                 window.history.pushState(null, "", `?${params.toString()}`);
               }

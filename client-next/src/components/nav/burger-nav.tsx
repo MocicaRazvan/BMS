@@ -70,7 +70,6 @@ const BurgerNav = memo<Props>(
               </Link>
             </div>
 
-            {/*/>*/}
             {authUser && (
               <>
                 <div className="mt-5 transition-all ps-2 hover:scale-[1.02] text-lg">
@@ -201,10 +200,6 @@ const BurgerNav = memo<Props>(
   },
   (prevProps, nextProps) =>
     isDeepEqual(prevProps.authUser, nextProps.authUser) &&
-    // linksEqual(prevProps.postsLinks, nextProps.postsLinks) &&
-    // linksEqual(prevProps.exercisesLinks, nextProps.exercisesLinks) &&
-    // linksEqual(prevProps.trainingsLinks, nextProps.trainingsLinks) &&
-    // linksEqual(prevProps.ordersLinks, nextProps.ordersLinks) &&
     prevProps.isAdminOrTrainer === nextProps.isAdminOrTrainer &&
     prevProps.isUser === nextProps.isUser &&
     prevProps.isTrainer === nextProps.isTrainer &&

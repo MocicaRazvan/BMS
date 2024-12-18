@@ -56,14 +56,6 @@ export const ChatProvider: React.FC<{
       stompClient?.connected &&
       authUser?.email
     ) {
-      // console.log("USE CC: Disconnecting user:", authUser.email);
-      // stompClient.publish({
-      //   destination: `/app/disconnectUser/${authUser.email}`,
-      //   body: JSON.stringify({
-      //     email: authUser.email,
-      //   }),
-      // });
-      // setActiveChatId(null);
       handleDisconnect();
     }
 

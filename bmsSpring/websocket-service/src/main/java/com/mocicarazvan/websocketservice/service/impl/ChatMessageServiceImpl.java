@@ -18,9 +18,7 @@ import com.mocicarazvan.websocketservice.utils.ChunkRequest;
 import com.mocicarazvan.websocketservice.utils.PageableUtilsCustom;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.data.domain.Sort;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
@@ -39,15 +37,12 @@ public class ChatMessageServiceImpl implements ChatMessageService {
     private final ChatRoomService chatRoomService;
     private final ChatMessageRepository chatMessageRepository;
     private final ChatMessageMapper chatMessageMapper;
-    private final SimpMessagingTemplate messagingTemplate;
     private final ConversationUserService conversationUserService;
-    private final SimpleAsyncTaskExecutor asyncExecutor;
     private final PageableUtilsCustom pageableUtilsCustom;
     private final CustomConvertAndSendToUser customConvertAndSendToUser;
 
 
     @Override
-//    @Transactional
     @Transactional(isolation = Isolation.READ_COMMITTED, propagation = Propagation.REQUIRES_NEW)
     @CustomRetryable
     public ChatMessageResponse sendMessage(ChatMessagePayload chatMessagePayload) {
@@ -67,25 +62,10 @@ public class ChatMessageServiceImpl implements ChatMessageService {
                     return cm;
                 }).map(chatMessageRepository::save)
                 .map(c -> {
-//                    log.error("Chat msg payload: {}", chatMessagePayload);
                     ChatMessageResponse cmr = chatMessageMapper.fromModelToResponse(c);
-
-                    // the front subscribes to both queues
-                    // to make sure that the messages are sent for the sender also and not to make a fake ws on the front
-                    // we make like this
-//                    if (c.getReceiver().getConnectedChatRoom() == null ||
-//                            !Objects.equals(c.getReceiver().getConnectedChatRoom().getId(), c.getChatRoom().getId())) {
-//                        messagingTemplate.convertAndSendToUser(chatMessagePayload.getSenderEmail(), "/queue/messages", cmr);
-//                    } else {
-//                        messagingTemplate.convertAndSendToUser(chatMessagePayload.getReceiverEmail(), "/queue/messages", cmr);
-//                    }
-
                     // todo make the check bette
                     // extra safe check just to be sure
-                    // sometimes the front in dev mode navigates before the stomp publish  message is processed
-//                    log.error("Sender is {} , receiver chat is {}",
-//                            c.getSender().getConnectedChatRoom() != null ? c.getSender().getConnectedChatRoom().getId() : null,
-//                            c.getReceiver().getConnectedChatRoom() != null ? c.getReceiver().getConnectedChatRoom().getId() : null);
+
                     if (c.getSender().getConnectedChatRoom() == null && c.getChatRoom() != null) {
                         c.getSender().setConnectedChatRoom(c.getChatRoom());
                         c.getSender().setConnectedStatus(ConnectedStatus.ONLINE);
@@ -95,12 +75,10 @@ public class ChatMessageServiceImpl implements ChatMessageService {
                     if (c.getReceiver().getConnectedChatRoom() != null &&
                             c.getReceiver().getConnectedChatRoom().getId().equals(
                                     Objects.requireNonNull(c.getSender().getConnectedChatRoom()).getId())) {
-//                        log.error("Sending to receiver " + c.getReceiver().getEmail());
-//                        messagingTemplate.convertAndSendToUser(chatMessagePayload.getReceiverEmail(), "/queue/messages", cmr);
+
                         customConvertAndSendToUser.sendToUser(chatMessagePayload.getReceiverEmail(), "/topic/messages", cmr);
                     } else {
-//                        log.error("Sending to sender" + c.getSender().getEmail());
-//                        messagingTemplate.convertAndSendToUser(chatMessagePayload.getSenderEmail(), "/queue/messages", cmr);
+
                         customConvertAndSendToUser.sendToUser(chatMessagePayload.getSenderEmail(), "/topic/messages", cmr);
                     }
 
@@ -110,7 +88,6 @@ public class ChatMessageServiceImpl implements ChatMessageService {
     }
 
     @Override
-//    @Transactional
     public PageableResponse<List<ChatMessageResponse>> getMessages(Long chatRoomId, int offset, int limit) {
 
         return pageableUtilsCustom.createPageableResponse(

@@ -19,14 +19,15 @@ public class AsyncConfig {
 //    @Bean
 //    @Primary
 //    public Executor taskExecutor() {
-////        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-////        executor.setCorePoolSize(4);
-////        executor.setMaxPoolSize(8);
-////        executor.setQueueCapacity(150);
-////        executor.setKeepAliveSeconds(60);
-////        executor.setThreadNamePrefix("WSExecutor-");
-////        executor.initialize();
-////        return executor;
+
+    /// /        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+    /// /        executor.setCorePoolSize(4);
+    /// /        executor.setMaxPoolSize(8);
+    /// /        executor.setQueueCapacity(150);
+    /// /        executor.setKeepAliveSeconds(60);
+    /// /        executor.setThreadNamePrefix("WSExecutor-");
+    /// /        executor.initialize();
+    /// /        return executor;
 //
 //        ThreadFactory virtualThreadFactory = Thread.ofVirtual()
 //                .name("WSExecutor-", 0)
@@ -35,8 +36,6 @@ public class AsyncConfig {
 //
 //        return Executors.newThreadPerTaskExecutor(virtualThreadFactory);
 //    }
-    //todo push and test locally
-
     @Bean("scheduledExecutorService")
     @Primary
     public SimpleAsyncTaskExecutor scheduledExecutorService() {

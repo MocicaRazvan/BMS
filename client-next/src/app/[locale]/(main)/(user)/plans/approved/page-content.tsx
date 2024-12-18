@@ -97,74 +97,17 @@ export default function PlanApprovedPageContent({
     noFilterLabel: objectiveDropDownTexts.noFilterLabel,
   });
 
-  // const extraContent = useCallback(
-  //   ({ model: { content } }: ResponseWithUserDtoEntity<PlanResponse>) => (
-  //     <div className="mt-10">
-  //       <AddToCartBtn
-  //         authUser={authUser}
-  //         plan={content}
-  //         {...addToCartBtnTexts}
-  //       />
-  //     </div>
-  //   ),
-  //   [authUser, addToCartBtnTexts],
-  // );
-
   const extraContent = useCallback(
     (item: ResponseWithUserDtoEntity<PlanResponse>) =>
       PlanExtraContent(item, authUser, addToCartBtnTexts),
     [addToCartBtnTexts, authUser],
   );
 
-  // const extraHeader = useCallback(
-  //   ({
-  //     model: {
-  //       content: { price },
-  //     },
-  //   }: ResponseWithUserDtoEntity<PlanResponse>) => (
-  //     <span className="font-bold">
-  //       {formatIntl.number(price, {
-  //         style: "currency",
-  //         currency: "EUR",
-  //         maximumFractionDigits: 2,
-  //       })}
-  //     </span>
-  //   ),
-  //   [formatIntl],
-  // );
-
   const extraHeader = useCallback(
     (item: ResponseWithUserDtoEntity<PlanResponse>) =>
       PlanExtraHeader(item, formatIntl.number),
     [formatIntl.number],
   );
-
-  // const imageOverlay = useCallback(
-  //   (item: ResponseWithUserDtoEntity<PlanResponse>) => {
-  //     const colorMap = {
-  //       VEGAN: "success",
-  //       OMNIVORE: "secondary",
-  //       VEGETARIAN: "accent",
-  //     };
-  //     return (
-  //       <div className="absolute top-2 w-full flex items-center justify-between  px-3 py-1 flex-wrap">
-  //         <div className="text-lg font-bold bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/70 p-1 rounded-md">
-  //           {objectiveDropDownTexts.labels[item.model.content.objective]}
-  //         </div>
-  //         <div
-  //           className={cn(
-  //             ` bg-${colorMap[item.model.content.type]} text-${colorMap[item.model.content.type]}-foreground rounded-full font-bold w-fit text-lg
-  //           p-1
-  //           `,
-  //           )}
-  //         >
-  //           {item.model.content.type}
-  //         </div>
-  //       </div>
-  //     );
-  //   },
-  //   [objectiveDropDownTexts.labels],
-  // );
 
   const imageOverlay = useCallback(
     (item: ResponseWithUserDtoEntity<PlanResponse>) =>

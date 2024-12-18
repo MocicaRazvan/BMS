@@ -275,11 +275,6 @@ async function createDocsChain(
     ["user", "{input}"],
   ]);
 
-  // {
-  //           pageContent: pageContentTrimmed,
-  //           metadata: { scope },
-  //         };
-
   return await createStuffDocumentsChain({
     llm: chatModel,
     prompt,

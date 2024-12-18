@@ -28,8 +28,6 @@ export default function ConfirmEmailPage({
     useAbortController: false,
   });
 
-  console.log(messages, isFinished, error);
-
   if (!token || !email || !userId) {
     return navigateToNotFound();
   }

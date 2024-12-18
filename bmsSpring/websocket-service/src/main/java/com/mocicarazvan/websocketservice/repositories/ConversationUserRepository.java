@@ -9,11 +9,9 @@ import java.util.Optional;
 
 public interface ConversationUserRepository extends IdGeneratedRepository<ConversationUser> {
 
-    //    @Lock(LockModeType.PESSIMISTIC_READ)
     Optional<ConversationUser> findByEmail(String email);
 
     boolean existsByEmail(String email);
 
-    //    @Lock(LockModeType.PESSIMISTIC_READ)
     List<ConversationUser> findAllByConnectedStatusIs(ConnectedStatus connectedStatus);
 }

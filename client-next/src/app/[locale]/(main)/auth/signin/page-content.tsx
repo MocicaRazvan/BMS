@@ -89,8 +89,6 @@ export default function SingIn({
         await logError("Authentication error", result.error);
         setErrorMsg(errorMessages);
       } else {
-        console.log("Sign-in successful:", result);
-        // todo
         // router.push("/", {});
         if (window) {
           window.location.href = "/" + locale + "/";
@@ -98,7 +96,6 @@ export default function SingIn({
       }
     } catch (error) {
       console.error("Unexpected error during sign-in:", error);
-      // await logError("Unexpected error during sign-in", error);
       setErrorMsg("An unexpected error occurred. Please try again later.");
       setIsLoading(false);
     }

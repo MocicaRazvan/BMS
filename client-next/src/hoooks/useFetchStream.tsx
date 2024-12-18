@@ -75,9 +75,6 @@ export function useFetchStream<T = unknown, E extends BaseError = BaseError>({
       successArrayCallback: (data) => {
         setMessages((prev) => [...prev, ...data]);
       },
-      // successCallback: (data) => {
-      //   setMessages((prev) => [...prev, data]);
-      // },
       acceptHeader,
     };
 
@@ -125,7 +122,6 @@ export function useFetchStream<T = unknown, E extends BaseError = BaseError>({
     batchSize,
   ]);
 
-  // console.log(messages.length);
   return { messages, error, isFinished, refetch };
 }
 

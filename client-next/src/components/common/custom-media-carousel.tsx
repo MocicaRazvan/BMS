@@ -72,7 +72,6 @@ export default function CustomMediaCarousel({ media }: Props) {
                     fill={true}
                     className="w-full max-w-[1000px] object-cover h-full"
                     priority={i === 0}
-                    // width={1000}
                   />
                 ) : (
                   <video

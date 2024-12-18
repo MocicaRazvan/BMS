@@ -1,10 +1,10 @@
 package com.mocicarazvan.dayservice.repositories.impl;
 
-import com.mocicarazvan.dayservice.cache.EmbedDayCache;
 import com.mocicarazvan.dayservice.enums.DayType;
 import com.mocicarazvan.dayservice.mappers.DayMapper;
 import com.mocicarazvan.dayservice.models.Day;
 import com.mocicarazvan.dayservice.repositories.ExtendedDayRepository;
+import com.mocicarazvan.ollamasearch.cache.EmbedCache;
 import com.mocicarazvan.ollamasearch.services.OllamaAPIService;
 import com.mocicarazvan.ollamasearch.utils.OllamaQueryUtils;
 import com.mocicarazvan.templatemodule.utils.PageableUtilsCustom;
@@ -29,7 +29,7 @@ public class ExtendedDayRepositoryImpl implements ExtendedDayRepository {
     private final RepositoryUtils repositoryUtils;
     private final OllamaQueryUtils ollamaQueryUtils;
     private final OllamaAPIService ollamaAPIService;
-    private final EmbedDayCache embedDayCache;
+    private final EmbedCache embedCache;
 
     private final String SELECT_ALL = "SELECT d.* FROM day d join day_embedding e on d.id = e.entity_id ";
     private final String COUNT_ALL = "SELECT COUNT(d.id) FROM day d join day_embedding e on d.id = e.entity_id ";
@@ -37,24 +37,12 @@ public class ExtendedDayRepositoryImpl implements ExtendedDayRepository {
     @Override
     public Flux<Day> getDaysFiltered(String title, DayType type, PageRequest pageRequest, List<Long> excludeIds) {
 
-        Mono<String> embeddingsMono = repositoryUtils.isNotNullOrEmpty(title)
-                ? ollamaAPIService.generateEmbeddingMono(title, embedDayCache).map(ollamaQueryUtils::getEmbeddingsAsString)
-                : Mono.just("");
 
-        return embeddingsMono.flatMapMany(embeddings -> {
+        return ollamaAPIService.getEmbedding(title, embedCache).flatMapMany(embeddings -> {
             StringBuilder queryBuilder = new StringBuilder(SELECT_ALL);
             appendWhereClause(queryBuilder, title, embeddings, type, excludeIds);
 
-//        queryBuilder.append(pageableUtils.createPageRequestQuery(pageRequest));
-            if (repositoryUtils.isNotNullOrEmpty(embeddings)) {
-                queryBuilder.append(pageableUtils.createPageRequestQuery(pageRequest,
-                        ollamaQueryUtils.addOrder(
-                                embeddings
-                        )
-                ));
-            } else {
-                queryBuilder.append(pageableUtils.createPageRequestQuery(pageRequest));
-            }
+            pageableUtils.appendPageRequestQueryCallbackIfFieldIsNotEmpty(queryBuilder, pageRequest, embeddings, ollamaQueryUtils::addOrder);
 
 
             DatabaseClient.GenericExecuteSpec executeSpec = getGenericExecuteSpec(title, type, excludeIds, queryBuilder);
@@ -65,26 +53,14 @@ public class ExtendedDayRepositoryImpl implements ExtendedDayRepository {
 
     @Override
     public Flux<Day> getDaysFilteredTrainer(String title, DayType type, PageRequest pageRequest, List<Long> excludeIds, Long trainerId) {
-        Mono<String> embeddingsMono = repositoryUtils.isNotNullOrEmpty(title)
-                ? ollamaAPIService.generateEmbeddingMono(title, embedDayCache).map(ollamaQueryUtils::getEmbeddingsAsString)
-                : Mono.just("");
-
-
-        return embeddingsMono.flatMapMany(embeddings -> {
+        return ollamaAPIService.getEmbedding(title, embedCache).flatMapMany(embeddings -> {
             StringBuilder queryBuilder = new StringBuilder(SELECT_ALL);
             appendWhereClause(queryBuilder, title, embeddings, type, excludeIds);
             repositoryUtils.addNotNullField(trainerId, queryBuilder, new RepositoryUtils.MutableBoolean(queryBuilder.length() > SELECT_ALL.length()),
                     " user_id = :trainerId");
 
-            if (repositoryUtils.isNotNullOrEmpty(embeddings)) {
-                queryBuilder.append(pageableUtils.createPageRequestQuery(pageRequest,
-                        ollamaQueryUtils.addOrder(
-                                embeddings
-                        )
-                ));
-            } else {
-                queryBuilder.append(pageableUtils.createPageRequestQuery(pageRequest));
-            }
+            pageableUtils.appendPageRequestQueryCallbackIfFieldIsNotEmpty(queryBuilder, pageRequest, embeddings, ollamaQueryUtils::addOrder);
+
 
             DatabaseClient.GenericExecuteSpec executeSpec = getGenericExecuteSpec(title, type, excludeIds, queryBuilder);
             executeSpec = repositoryUtils.bindNotNullField(trainerId, executeSpec, "trainerId");
@@ -96,11 +72,7 @@ public class ExtendedDayRepositoryImpl implements ExtendedDayRepository {
     @Override
     public Flux<Day> getDaysFilteredByIds(String title, DayType dayType, List<Long> ids, List<Long> excludeIds, PageRequest pageRequest) {
 
-        Mono<String> embeddingsMono = repositoryUtils.isNotNullOrEmpty(title)
-                ? ollamaAPIService.generateEmbeddingMono(title, embedDayCache).map(ollamaQueryUtils::getEmbeddingsAsString)
-                : Mono.just("");
-
-        return embeddingsMono.flatMapMany(embeddings -> {
+        return ollamaAPIService.getEmbedding(title, embedCache).flatMapMany(embeddings -> {
 
             StringBuilder queryBuilder = new StringBuilder(SELECT_ALL);
             appendWhereClause(queryBuilder, title, embeddings, dayType, excludeIds);
@@ -122,11 +94,7 @@ public class ExtendedDayRepositoryImpl implements ExtendedDayRepository {
     @Override
     public Mono<Long> countDayFiltered(String title, DayType type, List<Long> excludeIds) {
 
-        Mono<String> embeddingsMono = repositoryUtils.isNotNullOrEmpty(title)
-                ? ollamaAPIService.generateEmbeddingMono(title, embedDayCache).map(ollamaQueryUtils::getEmbeddingsAsString)
-                : Mono.just("");
-
-        return embeddingsMono.flatMap(embeddings -> {
+        return ollamaAPIService.getEmbedding(title, embedCache).flatMap(embeddings -> {
             StringBuilder queryBuilder = new StringBuilder(COUNT_ALL);
 
             appendWhereClause(queryBuilder, title, embeddings, type, excludeIds);
@@ -141,13 +109,8 @@ public class ExtendedDayRepositoryImpl implements ExtendedDayRepository {
     @Override
     public Mono<Long> countDayFilteredTrainer(String title, DayType type, List<Long> excludeIds, Long trainerId) {
 
-        Mono<String> embeddingsMono = repositoryUtils.isNotNullOrEmpty(title)
-                ? ollamaAPIService.generateEmbeddingMono(title, embedDayCache).map(ollamaQueryUtils::getEmbeddingsAsString)
-                : Mono.just("");
-
-
         StringBuilder queryBuilder = new StringBuilder(COUNT_ALL);
-        return embeddingsMono.flatMap(embeddings -> {
+        return ollamaAPIService.getEmbedding(title, embedCache).flatMap(embeddings -> {
             appendWhereClause(queryBuilder, title, embeddings, type, excludeIds);
             repositoryUtils.addNotNullField(trainerId, queryBuilder, new RepositoryUtils.MutableBoolean(queryBuilder.length() > COUNT_ALL.length()),
                     " user_id = :trainerId");
@@ -161,10 +124,7 @@ public class ExtendedDayRepositoryImpl implements ExtendedDayRepository {
 
     @Override
     public Mono<Long> countDayFilteredByIds(String title, DayType dayType, List<Long> ids, List<Long> excludeIds) {
-        Mono<String> embeddingsMono = repositoryUtils.isNotNullOrEmpty(title)
-                ? ollamaAPIService.generateEmbeddingMono(title, embedDayCache).map(ollamaQueryUtils::getEmbeddingsAsString)
-                : Mono.just("");
-        return embeddingsMono.flatMap(embeddings -> {
+        return ollamaAPIService.getEmbedding(title, embedCache).flatMap(embeddings -> {
 
             StringBuilder qStringBuilder = new StringBuilder(COUNT_ALL);
             appendWhereClause(qStringBuilder, title, embeddings, dayType, excludeIds);

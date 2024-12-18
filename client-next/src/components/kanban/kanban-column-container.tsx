@@ -97,17 +97,6 @@ function KanbanColumnContainer({
     [column, createTask],
   );
 
-  // if (isDragging) {
-  //   return (
-  //     <div
-  //       ref={setNodeRef}
-  //       style={style}
-  //       className="w-full h-[600px] rounded  flex flex-col  shadow bg-accent bg-opacity-60 border-2 border-destructive/75
-  //     "
-  //     ></div>
-  //   );
-  // }
-  //
   const variants = cva(
     "w-full h-[660px] rounded-xl   flex flex-col  shadow-xl bg-primary-foreground border-2 border-transparent snap-center",
     {

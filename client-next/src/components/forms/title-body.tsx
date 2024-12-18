@@ -25,7 +25,6 @@ export interface TitleBodyTexts {
 
 interface CustomFieldProps<TFieldValues extends TitleBodyDto> {
   control: Control<TFieldValues>;
-  //   field: ControllerRenderProps<TFieldValues, Path<TFieldValues>>;
   titleBodyTexts: TitleBodyTexts;
   hideTitle?: boolean;
   editorKey?: number;
@@ -130,9 +129,6 @@ export const TitleBodyForm = <TFieldValues extends TitleBodyDto>({
               )}
             </div>
             <FormControl>
-              {/* <Textarea placeholder={bodyPlaceholder} {...field} />
-               */}
-
               <Editor
                 descritpion={field.value as string}
                 onChange={field.onChange}

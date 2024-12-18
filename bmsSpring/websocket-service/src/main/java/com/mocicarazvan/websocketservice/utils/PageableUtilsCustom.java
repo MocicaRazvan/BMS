@@ -59,30 +59,4 @@ public class PageableUtilsCustom {
     }
 
 
-//    public <T> Flux<PageableResponse<T>> createPageableResponse(Flux<T> content, Mono<Long> count, Pageable pageable) {
-//
-//
-//        return count.flatMapMany(totalElements -> {
-//            PageInfo pi = PageInfo.builder()
-//                    .currentPage(pageable.getPageNumber())
-//                    .pageSize(pageable.getPageSize())
-//                    .totalElements(totalElements)
-//                    .totalPages((int) Math.ceil((double) totalElements / pageable.getPageSize()))
-//                    .build();
-//            return content.map(c -> PageableResponse.<T>builder()
-//                    .pageInfo(pi)
-//                    .content(c)
-//                    .build());
-//        });
-//
-//    }
-//
-//    public <T> Mono<PageInfo> createPageInfo(Page<T> page) {
-//        return Mono.just(PageInfo.builder()
-//                .currentPage(page.getNumber())
-//                .pageSize(page.getSize())
-//                .totalElements(page.getTotalElements())
-//                .totalPages(page.getTotalPages())
-//                .build());
-//    }
 }

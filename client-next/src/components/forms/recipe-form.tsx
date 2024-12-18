@@ -236,7 +236,7 @@ export default function RecipeForm({
         prompt,
         negative_prompt: negativePrompt,
         successCallback: (images) => addImagesCallback(images, form),
-      }) //realistic, chicken with tomatoes
+      })
         .catch((e) => {
           console.log(e);
         })
@@ -302,16 +302,11 @@ export default function RecipeForm({
       const option = selectedOptions.find(
         (o) => o.childId === childId.toString(),
       );
-      console.log("childId", childId);
-      console.log("childIdOP", option);
-      console.log("childIdSO", selectedOptions);
+
       setSelectedOptions((prev) =>
         prev.filter((o) => o.childId !== childId.toString()),
       );
       if (option) {
-        // setSubmittedChildren((prev) =>
-        //   prev.filter((o) => o.id !== parseInt(option.value)),
-        // );
         const newIngredients = ingredients.filter(
           (i) => i.id !== parseInt(option.value),
         );
@@ -337,7 +332,6 @@ export default function RecipeForm({
 
   const submitCallback = useCallback(
     (data: IngredientQuantitySchemaType) => {
-      // setSubmittedChildren((prev) => [...prev, data]);
       form.clearErrors("ingredients");
       const newIngredients = [...ingredients, data];
       form.setValue("ingredients", newIngredients);
@@ -382,17 +376,6 @@ export default function RecipeForm({
           title: data.title,
           description: baseFormTexts.descriptionToast,
           variant: "success",
-          // action: (
-          //   <ToastAction
-          //     altText={baseFormTexts.altToast}
-          //     onClick={() =>
-          //       // todo fix, on click goes to home
-          //       router.push(`/trainer/recipes/single/${res.content.id}`)
-          //     }
-          //   >
-          //     {baseFormTexts.toastAction}
-          //   </ToastAction>
-          // ),
         });
         router.push(`/trainer/recipes/single/${res.content.id}`);
       } catch (e) {
@@ -518,7 +501,6 @@ export default function RecipeForm({
                     <div className="w-full">
                       <AnimatePresence>
                         {children.map((childId, i) => (
-                          // <div key={childId} className="w-full">
                           <SingleChildForm
                             key={childId}
                             childId={childId}
@@ -554,7 +536,6 @@ export default function RecipeForm({
                               );
                             }}
                           />
-                          // </div>
                         ))}
                       </AnimatePresence>
                     </div>
@@ -774,13 +755,6 @@ function SingleChildForm({
         }
       : {};
 
-  // const motionProps = {
-  //   initial: { opacity: 0, height: 0 },
-  //   animate: { opacity: 1, height: "auto" },
-  //   exit: { opacity: 0, height: 0 },
-  //   transition: { duration: 0.5 },
-  // };
-
   return (
     <motion.div
       {...motionProps}
@@ -789,13 +763,7 @@ function SingleChildForm({
       <div className="flex-1 flex items-start justify-center ">
         <div className="flex-1 ">
           <Form {...form}>
-            <div
-              // onSubmit={(e) => {
-              //   e.stopPropagation();
-              //   form.handleSubmit(onSubmit)(e);
-              // }}
-              className="space-y-8 lg:space-y-12 w-full"
-            >
+            <div className="space-y-8 lg:space-y-12 w-full">
               <div className="w-full flex flex-col lg:flex-row gap-5">
                 <FormField
                   control={form.control}
@@ -856,11 +824,6 @@ function SingleChildForm({
                         />
                       </FormControl>
                       <FormMessage />
-                      {/*<FormDescription*/}
-                      {/*  className={cn(selectorValue.length === 0 && "hidden")}*/}
-                      {/*>*/}
-                      {/*  {selectorValue[0]?.unit || ""}*/}
-                      {/*</FormDescription>*/}
                     </FormItem>
                   )}
                 />
@@ -931,7 +894,7 @@ function SingleChildForm({
                 </div>
               </div>
             </div>
-          </Form>{" "}
+          </Form>
         </div>
       </div>
     </motion.div>

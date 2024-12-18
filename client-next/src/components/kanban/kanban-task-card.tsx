@@ -69,16 +69,6 @@ function KanbanTaskCard({
     transform: CSS.Transform.toString(transform),
   };
 
-  // if (isDragging) {
-  //   return (
-  //     <div
-  //       ref={setNodeRef}
-  //       style={style}
-  //       className="min-h-[100px] rounded  flex flex-col  shadow bg-accent bg-opacity-60 border-2 border-destructive/75
-  //     "
-  //     ></div>
-  //   );
-  // }
   const variants = cva(
     `min-h-[120px] flex flex-col gap-2 justify-between  border-2 cursor-grab relative shadow
   p-2 text-left rounded-xl  overflow-y-auto  bg-background hover:scale-[1.02] transition-transform `,

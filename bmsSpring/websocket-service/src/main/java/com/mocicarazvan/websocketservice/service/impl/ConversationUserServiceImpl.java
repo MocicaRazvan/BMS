@@ -58,7 +58,6 @@ public class ConversationUserServiceImpl implements ConversationUserService {
         return conversationUserRepository.findByEmail(email)
                 .map(cur -> {
                     cur.setConnectedStatus(connectedStatus);
-//                    cur.setConnectedChatRoom(null);
                     if (connectedStatus == ConnectedStatus.OFFLINE)
                         cur.setConnectedChatRoom(null);
                     return cur;
@@ -69,9 +68,6 @@ public class ConversationUserServiceImpl implements ConversationUserService {
     }
 
     @Override
-//    @Transactional
-//    @Transactional(propagation = Propagation.REQUIRES_NEW)
-//    @CustomRetryable
     public ConversationUser getUserByEmail(String email) {
         return conversationUserRepository.findByEmail(email)
                 .orElseThrow(() -> new ConversationUserNotFound(email));
@@ -79,7 +75,6 @@ public class ConversationUserServiceImpl implements ConversationUserService {
 
     @Override
     @Transactional
-//    @CustomRetryable
     public ConversationUser getOrCreateUserByEmail(String email) {
         return conversationUserRepository.findByEmail(email)
                 .orElseGet(() -> saveUser(ConversationUser.builder().email(email)
@@ -89,17 +84,14 @@ public class ConversationUserServiceImpl implements ConversationUserService {
     }
 
     @Override
-//    @Transactional
-//    @Transactional
-//    @CustomRetryable
+    @CustomRetryable
     public CompletableFuture<ConversationUser> getUserByEmailAsync(String email) {
         return getUserByEmail(email).
                 map(CompletableFuture::completedFuture);
     }
 
     @Override
-//    @Transactional
-//    @CustomRetryable
+    @CustomRetryable
     public ConversationUser saveUser(ConversationUser conversationUser) {
         return
                 conversationUserRepository.findByEmail(conversationUser.getEmail())
@@ -109,8 +101,7 @@ public class ConversationUserServiceImpl implements ConversationUserService {
     }
 
     @Override
-//    @Transactional
-//    @CustomRetryable
+    @CustomRetryable
     public ConversationUser saveUserByEmailIfNotExist(String email) {
         return conversationUserRepository.findByEmail(email)
                 .orElseGet(() -> conversationUserRepository.save(ConversationUser.builder().email(email)
@@ -119,7 +110,6 @@ public class ConversationUserServiceImpl implements ConversationUserService {
     }
 
     @Override
-//    @Transactional
     @Transactional(propagation = Propagation.REQUIRES_NEW, isolation = Isolation.READ_COMMITTED)
     @CustomRetryable
     public List<ConversationUserResponse> getConnectedUsers() {
@@ -151,7 +141,6 @@ public class ConversationUserServiceImpl implements ConversationUserService {
                 .map(this::mapToResponseAndNotify);
     }
 
-    //    @Transactional
     @Transactional(isolation = Isolation.READ_COMMITTED)
     @CustomRetryable
     public ConversationUserResponse mapToResponseAndNotify(ConversationUser conversationUser) {

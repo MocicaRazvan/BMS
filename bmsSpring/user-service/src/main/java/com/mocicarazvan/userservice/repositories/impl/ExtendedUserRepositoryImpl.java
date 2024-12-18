@@ -1,12 +1,12 @@
 package com.mocicarazvan.userservice.repositories.impl;
 
+import com.mocicarazvan.ollamasearch.cache.EmbedCache;
 import com.mocicarazvan.ollamasearch.services.OllamaAPIService;
 import com.mocicarazvan.ollamasearch.utils.OllamaQueryUtils;
 import com.mocicarazvan.templatemodule.enums.AuthProvider;
 import com.mocicarazvan.templatemodule.enums.Role;
 import com.mocicarazvan.templatemodule.utils.PageableUtilsCustom;
 import com.mocicarazvan.templatemodule.utils.RepositoryUtils;
-import com.mocicarazvan.userservice.cache.embedding.EmbedUserCache;
 import com.mocicarazvan.userservice.mappers.UserMapper;
 import com.mocicarazvan.userservice.models.UserCustom;
 import com.mocicarazvan.userservice.repositories.ExtendedUserRepository;
@@ -31,29 +31,20 @@ public class ExtendedUserRepositoryImpl implements ExtendedUserRepository {
     private final RepositoryUtils repositoryUtils;
     private final OllamaQueryUtils ollamaQueryUtils;
     private final OllamaAPIService ollamaAPIService;
-    private final EmbedUserCache embedUserCache;
+    private final EmbedCache embedCache;
     private final DatabaseClient databaseClient;
 
     @Override
     public Flux<UserCustom> getUsersFiltered(PageRequest pageRequest, String email, Set<Role> roles, Set<AuthProvider> providers, Boolean emailVerified) {
         List<String> roleList = List.copyOf(roles).stream().map(Role::name).toList();
         List<String> providerList = List.copyOf(providers).stream().map(AuthProvider::name).toList();
-        Mono<String> embeddingsMono = getEmbeddingsMono(email);
 
-        return embeddingsMono.flatMapMany(embeddings -> {
+        return ollamaAPIService.getEmbedding(email, embedCache).flatMapMany(embeddings -> {
             StringBuilder queryBuilder = new StringBuilder(SELECT_ALL);
             appendWhereClause(queryBuilder, email, embeddings, roleList, providerList, emailVerified);
 
 
-            if (repositoryUtils.isNotNullOrEmpty(embeddings)) {
-                queryBuilder.append(pageableUtils.createPageRequestQuery(pageRequest,
-                        ollamaQueryUtils.addOrder(
-                                embeddings
-                        )
-                ));
-            } else {
-                queryBuilder.append(pageableUtils.createPageRequestQuery(pageRequest));
-            }
+            pageableUtils.appendPageRequestQueryCallbackIfFieldIsNotEmpty(queryBuilder, pageRequest, embeddings, ollamaQueryUtils::addOrder);
 
 
             DatabaseClient.GenericExecuteSpec executeSpec = getGenericExecuteSpec(queryBuilder, email, roleList, providerList, emailVerified);
@@ -66,9 +57,9 @@ public class ExtendedUserRepositoryImpl implements ExtendedUserRepository {
     public Mono<Long> countUsersFiltered(String email, Set<Role> roles, Set<AuthProvider> providers, Boolean emailVerified) {
         List<String> roleList = List.copyOf(roles).stream().map(Role::name).toList();
         List<String> providerList = List.copyOf(providers).stream().map(AuthProvider::name).toList();
-        Mono<String> embeddingsMono = getEmbeddingsMono(email);
 
-        return embeddingsMono.flatMap(embeddings -> {
+
+        return ollamaAPIService.getEmbedding(email, embedCache).flatMap(embeddings -> {
             StringBuilder queryBuilder = new StringBuilder(COUNT_ALL);
             appendWhereClause(queryBuilder, email, embeddings, roleList, providerList, emailVerified);
 
@@ -78,11 +69,6 @@ public class ExtendedUserRepositoryImpl implements ExtendedUserRepository {
         });
     }
 
-    private Mono<String> getEmbeddingsMono(String email) {
-        return repositoryUtils.isNotNullOrEmpty(email)
-                ? ollamaAPIService.generateEmbeddingMono(email, embedUserCache).map(ollamaQueryUtils::getEmbeddingsAsString)
-                : Mono.just("");
-    }
 
     private DatabaseClient.GenericExecuteSpec getGenericExecuteSpec(StringBuilder queryBuilder, String email, List<String> roleList, List<String> providerList, Boolean emailVerified) {
         DatabaseClient.GenericExecuteSpec executeSpec = databaseClient.sql(queryBuilder.toString());

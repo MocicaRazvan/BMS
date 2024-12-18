@@ -282,7 +282,7 @@ export default function PlanForm({
         prompt,
         negative_prompt: negativePrompt,
         successCallback: (images) => addImagesCallback(images, form),
-      }) //realistic, chicken with tomatoes
+      })
         .catch((e) => {
           console.log(e);
         })
@@ -357,7 +357,6 @@ export default function PlanForm({
           BaseError,
           CustomEntityModel<PlanResponse>
         >({
-          // path: "/plans/createWithImages",
           path,
           token: authUser.token,
           data: {
@@ -370,16 +369,6 @@ export default function PlanForm({
           title: data.title,
           description: descriptionToast,
           variant: "success",
-          // action: (
-          //   <ToastAction
-          //     altText={altToast}
-          //     onClick={() =>
-          //       router.push(`/trainer/plans/single/${res.content.id}`)
-          //     }
-          //   >
-          //     {toastAction}
-          //   </ToastAction>
-          // ),
         });
         router.push(`/trainer/plans/single/${res.content.id}`);
       } catch (e) {
@@ -408,7 +397,6 @@ export default function PlanForm({
     <Card className="max-w-7xl w-full sm:px-2 md:px-5 py-6">
       <CardTitle className="font-bold text-2xl text-center capitalize">
         {header}
-        {/*{title && <p className="inline ms-2">{title}</p>}*/}
       </CardTitle>
       <CardContent className="w-full">
         <Form {...form}>
@@ -512,7 +500,6 @@ export default function PlanForm({
                   <FormMessage />
                   {selectedOptions.length > 0 && dietType && (
                     <FormDescription className="tex-lg">
-                      {/*The diet will be for{" "}*/}
                       {dietMessage}
                       <span className="text-xl font-semibold ms-2">
                         {dietType}
@@ -528,13 +515,7 @@ export default function PlanForm({
               deleteItem={deleteDay}
               dayIndex={dayIndex}
             />
-            {/*{selectedOptions.length > 0 && (*/}
-            {/*  <span className="text-2xl font-semibold ms-2">*/}
-            {/*    {determineMostRestrictiveDiet(*/}
-            {/*      selectedOptions.map((o) => o.type as DietType),*/}
-            {/*    )}*/}
-            {/*  </span>*/}
-            {/*)}*/}
+
             <FormField
               control={form.control}
               name={"price"}
@@ -545,9 +526,7 @@ export default function PlanForm({
                     <Input
                       placeholder={pricePlaceholder}
                       type={"number"}
-                      // min={1}
                       {...field}
-                      // value={field.value || ""}
                     />
                   </FormControl>
                   <FormMessage />
@@ -640,9 +619,6 @@ function DaySortableList({
       const overIndex = items.findIndex((item) => item.dragId === over.id);
 
       if (activeIndex !== overIndex) {
-        // setItems((prev) =>
-        //   arrayMove<SortableItem>(prev, activeIndex, overIndex),
-        // );
         moveItems(items, activeIndex, overIndex);
       }
       setActiveItem(undefined);
@@ -734,13 +710,6 @@ const SortableDayItem = memo(
     };
 
     return (
-      // <div ref={setNodeRef} style={styles} {...props}>
-      //   <div {...attributes} {...listeners}>
-      //     <Grip />
-      //   </div>
-      //   Day Item
-      // </div>
-
       <DayItem
         item={item}
         ref={setNodeRef}

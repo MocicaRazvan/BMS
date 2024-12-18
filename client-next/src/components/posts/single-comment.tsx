@@ -255,8 +255,6 @@ export const SingleComment = memo<Props>(
                           <FormItem className="space-y-0">
                             <FormLabel>{editCommentLabel}</FormLabel>
                             <FormControl>
-                              {/* <Textarea placeholder={bodyPlaceholder} {...field} />
-                               */}
                               <Editor
                                 descritpion={field.value as string}
                                 onChange={field.onChange}

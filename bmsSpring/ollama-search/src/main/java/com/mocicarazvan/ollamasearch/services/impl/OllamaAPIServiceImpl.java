@@ -4,6 +4,7 @@ import com.mocicarazvan.ollamasearch.annotations.EmbedRetry;
 import com.mocicarazvan.ollamasearch.cache.EmbedCache;
 import com.mocicarazvan.ollamasearch.exceptions.OllamaEmbedException;
 import com.mocicarazvan.ollamasearch.services.OllamaAPIService;
+import com.mocicarazvan.ollamasearch.utils.OllamaQueryUtils;
 import io.github.ollama4j.OllamaAPI;
 import io.github.ollama4j.exceptions.OllamaBaseException;
 import io.github.ollama4j.models.embeddings.OllamaEmbedRequestBuilder;
@@ -27,6 +28,7 @@ public class OllamaAPIServiceImpl implements OllamaAPIService {
     @Value("${spring.custom.ollama.keepalive:-1m}")
     private String keepAlive;
     private final OllamaAPI ollamaAPI;
+    private final OllamaQueryUtils ollamaQueryUtils;
 
 
     @Override
@@ -91,5 +93,17 @@ public class OllamaAPIServiceImpl implements OllamaAPIService {
             floatArray[i] = floats[i];
         }
         return floatArray;
+    }
+
+    @Override
+    public Mono<String> getEmbedding(String text, EmbedCache embedCache) {
+        return isNotNullOrEmpty(text)
+                ? generateEmbeddingMono(text, embedCache).map(ollamaQueryUtils::getEmbeddingsAsString)
+                : Mono.just("");
+    }
+
+    @Override
+    public boolean isNotNullOrEmpty(String text) {
+        return text != null && !text.isEmpty();
     }
 }

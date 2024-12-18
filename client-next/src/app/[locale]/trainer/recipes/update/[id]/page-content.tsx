@@ -15,27 +15,6 @@ export default function UpdateRecipePageContent({
   authUser,
   ...props
 }: Props) {
-  // const {
-  //   messages: recipeMessage,
-  //   error: recipeError,
-  //   isFinished: recipeIsFinished,
-  // } = useFetchStream<CustomEntityModel<RecipeResponse>>({
-  //   path: `/recipes/${id}`,
-  //   method: "GET",
-  //   authToken: true,
-  //   // useAbortController: false,
-  // });
-  //
-  // const {
-  //   messages: IQMessage,
-  //   error: IQError,
-  //   isFinished: IQIsFinished,
-  // } = useFetchStream<IngredientNutritionalFactResponseWithCount>({
-  //   path: `/recipes/ingredients/${id}`,
-  //   method: "GET",
-  //   authToken: true,
-  //   // useAbortController: false,
-  // });
   const {
     recipeIsFinished,
     recipeMessage,
@@ -46,12 +25,6 @@ export default function UpdateRecipePageContent({
     children,
   } = useGetRecipeWithNF(id);
   const { navigateToNotFound } = useClientNotFound();
-
-  console.log("HERE", recipeIsFinished, recipeMessage, recipeError);
-  console.log("HEREIQ", IQIsFinished, IQMessage, IQError, IQMessage.length);
-
-  // const children: Record<string, Option & { quantity: number }> =
-  //   useGetRecipeChildrenOptions(IQMessage);
 
   if (!recipeIsFinished || !IQIsFinished) return <LoadingSpinner />;
 

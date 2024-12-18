@@ -364,20 +364,6 @@ export default function IngredientsTable({
         ),
       },
 
-      // {
-      //   id: ingredientTableColumnTexts.createdAt,
-      //   accessorKey: "ingredient.createdAt",
-      //   header: () => (
-      //     <p className="font-bold text-lg text-left">
-      //       {ingredientTableColumnTexts.createdAt}
-      //     </p>
-      //   ),
-      //   cell: ({ row }) => (
-      //     <p>
-      //       {format(parseISO(row.original.ingredient.createdAt), "dd/MM/yyyy")}
-      //     </p>
-      //   ),
-      // },
       forWhom === "admin"
         ? {
             id: "actions",

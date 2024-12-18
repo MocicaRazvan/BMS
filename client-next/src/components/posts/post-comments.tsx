@@ -170,19 +170,7 @@ export default function PostComments({
           {...commentAccordionTexts}
         />
       </div>
-      {/*{comments.map(({ model: { content }, user: { email, id: userId } }) => (*/}
-      {/*  <div key={content.id} className="w-full">*/}
-      {/*    <SingleComment*/}
-      {/*      content={content}*/}
-      {/*      deleteCommentCallback={deleteCommentCallback}*/}
-      {/*      userId={userId}*/}
-      {/*      react={react}*/}
-      {/*      email={email}*/}
-      {/*      authorText={author}*/}
-      {/*      authUser={authUser}*/}
-      {/*    />*/}
-      {/*  </div>*/}
-      {/*))}*/}
+
       {isFinished && comments.length > 0 && (
         <div className="flex items-center justify-start w-full">
           <DropdownMenu>

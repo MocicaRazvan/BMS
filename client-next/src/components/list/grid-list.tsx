@@ -139,9 +139,6 @@ export default function GridList<T extends TitleBodyImagesUserDto>({
           )}
           {items.length === 0 &&
             !isFinished &&
-            // <section className="mt-10 w-full md:col-span-2 lg:col-span-3 ">
-            //   <LoadingSpinner />
-            // </section>
             Array.from({ length: sizeOptions?.[0] || 6 }).map((_, i) => (
               <LoadingItemCard key={i + "loading"} />
             ))}

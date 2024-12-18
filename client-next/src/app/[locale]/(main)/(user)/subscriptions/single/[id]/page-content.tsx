@@ -58,7 +58,6 @@ export default function SingleSubscriptionPageContent({
 
   const react = useCallback(
     async (type: "like" | "dislike") => {
-      // if (!planState?.approved) return;
       try {
         const resp = await fetchStream<CustomEntityModel<PlanResponse>>({
           path: `/plans/${type}/${id}`,

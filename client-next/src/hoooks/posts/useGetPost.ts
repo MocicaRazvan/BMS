@@ -9,10 +9,8 @@ import { WithUser } from "@/lib/user";
 export function useGetPost({ authUser }: WithUser) {
   const [postState, setPostState] = useState<PostResponse | null>(null);
   const { id } = useParams();
-  // const session = useSession();
   const router = useRouter();
 
-  // const authUser = session.data?.user;
   const { messages, error, isFinished } = useFetchStream<
     ResponseWithUserDtoEntity<PostResponse>,
     BaseError
@@ -36,7 +34,6 @@ export function useGetPost({ authUser }: WithUser) {
     setPostState,
     messages,
     error,
-    // authUser,
     post,
     user,
     router,
@@ -44,6 +41,5 @@ export function useGetPost({ authUser }: WithUser) {
     isFinished,
     isLiked,
     isDisliked,
-    // session,
   };
 }

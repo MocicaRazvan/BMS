@@ -36,10 +36,7 @@ public class ExtendedPlanRepositoryImpl implements ExtendedPlanRepository {
 
     @Override
     public Flux<Plan> getPlansFiltered(String title, Boolean approved, Boolean display, DietType type, ObjectiveType objective, PageRequest pageRequest, List<Long> excludeIds) {
-        Mono<String> embeddingsMono = repositoryUtils.isNotNullOrEmpty(title)
-                ? ollamaAPIService.generateEmbeddingMono(title, embedCache).map(ollamaQueryUtils::getEmbeddingsAsString)
-                : Mono.just("");
-        return embeddingsMono.flatMapMany(embeddings -> {
+        return ollamaAPIService.getEmbedding(title, embedCache).flatMapMany(embeddings -> {
             StringBuilder queryBuilder = new StringBuilder(SELECT_ALL);
 
 
@@ -48,15 +45,8 @@ public class ExtendedPlanRepositoryImpl implements ExtendedPlanRepository {
             repositoryUtils.addListField(excludeIds, queryBuilder, new RepositoryUtils.MutableBoolean(queryBuilder.length() > SELECT_ALL.length()),
                     " p.id NOT IN (:excludeIds)");
 
-            if (repositoryUtils.isNotNullOrEmpty(embeddings)) {
-                queryBuilder.append(pageableUtils.createPageRequestQuery(pageRequest,
-                        ollamaQueryUtils.addOrder(
-                                embeddings
-                        )
-                ));
-            } else {
-                queryBuilder.append(pageableUtils.createPageRequestQuery(pageRequest));
-            }
+            pageableUtils.appendPageRequestQueryCallbackIfFieldIsNotEmpty(queryBuilder, pageRequest, embeddings, ollamaQueryUtils::addOrder);
+
 
             DatabaseClient.GenericExecuteSpec executeSpec = getGenericExecuteSpec(title, approved, type, objective, display, queryBuilder);
 
@@ -70,11 +60,7 @@ public class ExtendedPlanRepositoryImpl implements ExtendedPlanRepository {
     @Override
     public Flux<Plan> getPlansFilteredTrainer(String title, Boolean approved, Boolean display, DietType type, ObjectiveType objective, Long trainerId, PageRequest pageRequest) {
 
-        Mono<String> embeddingsMono = repositoryUtils.isNotNullOrEmpty(title)
-                ? ollamaAPIService.generateEmbeddingMono(title, embedCache).map(ollamaQueryUtils::getEmbeddingsAsString)
-                : Mono.just("");
-
-        return embeddingsMono.flatMapMany(embeddings -> {
+        return ollamaAPIService.getEmbedding(title, embedCache).flatMapMany(embeddings -> {
 
             StringBuilder queryBuilder = new StringBuilder(SELECT_ALL);
 
@@ -85,15 +71,8 @@ public class ExtendedPlanRepositoryImpl implements ExtendedPlanRepository {
             repositoryUtils.addNotNullField(trainerId, queryBuilder, new RepositoryUtils.MutableBoolean(queryBuilder.length() > SELECT_ALL.length()),
                     " user_id = :trainerId");
 
-            if (repositoryUtils.isNotNullOrEmpty(embeddings)) {
-                queryBuilder.append(pageableUtils.createPageRequestQuery(pageRequest,
-                        ollamaQueryUtils.addOrder(
-                                embeddings
-                        )
-                ));
-            } else {
-                queryBuilder.append(pageableUtils.createPageRequestQuery(pageRequest));
-            }
+            pageableUtils.appendPageRequestQueryCallbackIfFieldIsNotEmpty(queryBuilder, pageRequest, embeddings, ollamaQueryUtils::addOrder);
+
             DatabaseClient.GenericExecuteSpec executeSpec = getGenericExecuteSpec(title, approved, type, objective, display, queryBuilder);
 
 
@@ -104,11 +83,7 @@ public class ExtendedPlanRepositoryImpl implements ExtendedPlanRepository {
 
     @Override
     public Mono<Long> countPlansFiltered(String title, Boolean approved, Boolean display, DietType type, ObjectiveType objective, List<Long> excludeIds) {
-        Mono<String> embeddingsMono = repositoryUtils.isNotNullOrEmpty(title)
-                ? ollamaAPIService.generateEmbeddingMono(title, embedCache).map(ollamaQueryUtils::getEmbeddingsAsString)
-                : Mono.just("");
-
-        return embeddingsMono.flatMap(embeddings -> {
+        return ollamaAPIService.getEmbedding(title, embedCache).flatMap(embeddings -> {
             StringBuilder queryBuilder = new StringBuilder(COUNT_ALL);
 
             appendWhereClause(queryBuilder, title, embeddings, approved, display, type, objective);
@@ -128,11 +103,7 @@ public class ExtendedPlanRepositoryImpl implements ExtendedPlanRepository {
 
     @Override
     public Mono<Long> countPlansFilteredTrainer(String title, Boolean approved, Boolean display, Long trainerId, DietType type, ObjectiveType objective) {
-        Mono<String> embeddingsMono = repositoryUtils.isNotNullOrEmpty(title)
-                ? ollamaAPIService.generateEmbeddingMono(title, embedCache).map(ollamaQueryUtils::getEmbeddingsAsString)
-                : Mono.just("");
-
-        return embeddingsMono.flatMap(embeddings -> {
+        return ollamaAPIService.getEmbedding(title, embedCache).flatMap(embeddings -> {
 
 
             StringBuilder queryBuilder = new StringBuilder(COUNT_ALL);
@@ -155,10 +126,7 @@ public class ExtendedPlanRepositoryImpl implements ExtendedPlanRepository {
     @Override
     public Flux<Plan> getPlansFilteredByIds(String title, Boolean approved, Boolean display, DietType type, ObjectiveType objective, List<Long> ids, PageRequest pageRequest) {
         StringBuilder queryBuilder = new StringBuilder(SELECT_ALL);
-        Mono<String> embeddingsMono = repositoryUtils.isNotNullOrEmpty(title)
-                ? ollamaAPIService.generateEmbeddingMono(title, embedCache).map(ollamaQueryUtils::getEmbeddingsAsString)
-                : Mono.just("");
-        return embeddingsMono.flatMapMany(embeddings -> {
+        return ollamaAPIService.getEmbedding(title, embedCache).flatMapMany(embeddings -> {
             appendWhereClause(queryBuilder, title, embeddings, approved, display, type, objective);
 
             repositoryUtils.addListField(ids, queryBuilder, new RepositoryUtils.MutableBoolean(queryBuilder.length() > SELECT_ALL.length()),
@@ -177,10 +145,7 @@ public class ExtendedPlanRepositoryImpl implements ExtendedPlanRepository {
 
     @Override
     public Mono<Long> countPlansFilteredByIds(String title, Boolean approved, Boolean display, DietType type, ObjectiveType objective, List<Long> ids) {
-        Mono<String> embeddingsMono = repositoryUtils.isNotNullOrEmpty(title)
-                ? ollamaAPIService.generateEmbeddingMono(title, embedCache).map(ollamaQueryUtils::getEmbeddingsAsString)
-                : Mono.just("");
-        return embeddingsMono.flatMap(embeddings -> {
+        return ollamaAPIService.getEmbedding(title, embedCache).flatMap(embeddings -> {
 
             StringBuilder queryBuilder = new StringBuilder(COUNT_ALL);
 

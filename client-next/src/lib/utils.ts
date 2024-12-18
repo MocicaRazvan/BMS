@@ -43,26 +43,6 @@ export function makeSortString(sort: Record<string | number | symbol, string>) {
     .join(",");
 }
 
-// export function parseSortString<T extends string>(
-//   sortStr: string,
-//   validKeys: T[],
-// ) {
-//   return sortStr
-//     .split(",")
-//     .map((part) => part.split(":") as [T, SortDirection])
-//     .filter(
-//       ([key, value]) =>
-//         validKeys.includes(key) && sortDirections.includes(value),
-//     )
-//     .reduce<Record<(typeof validKeys)[number], SortDirection>>(
-//       (acc, [key, value]) => {
-//         acc[key] = value;
-//         return acc;
-//       },
-//       {} as Record<(typeof validKeys)[number], SortDirection>,
-//     );
-// }
-
 export function parseSortString<T extends string>(
   sortStr: string | null,
   options: SortingOption[],

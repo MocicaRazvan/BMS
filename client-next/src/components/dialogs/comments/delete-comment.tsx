@@ -81,9 +81,6 @@ export default function AlertDialogDeleteComment({
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>{title}</AlertDialogTitle>
-          {/*<AlertDialogDescription>*/}
-          {/*  {dialogDeleteTexts.description}*/}
-          {/*</AlertDialogDescription>*/}
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>{dialogDeleteTexts.cancel}</AlertDialogCancel>
@@ -94,15 +91,4 @@ export default function AlertDialogDeleteComment({
       </AlertDialogContent>
     </AlertDialog>
   );
-
-  // return (
-  //   <AlertDialogDelete
-  //     callBack={callBack}
-  //     model={comment}
-  //     token={token}
-  //     path="comments"
-  //     title={title}
-  //     anchor={anchor}
-  //   />
-  // );
 }

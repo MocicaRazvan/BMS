@@ -81,20 +81,6 @@ export default function GeographyChart({
 
   const customValueFormat = useCallback(
     (value: number) => {
-      // if (value >= 1e6) {
-      //   return new Intl.NumberFormat(locale, {
-      //     notation: "compact",
-      //     maximumFractionDigits: 1,
-      //   }).format(value);
-      // } else if (value >= 1e3) {
-      //   return new Intl.NumberFormat(locale, {
-      //     notation: "compact",
-      //     maximumFractionDigits: 1,
-      //   }).format(value);
-      // } else {
-      //   return value.toString();
-      // }
-
       return nrFormater.format(value);
     },
     [nrFormater],

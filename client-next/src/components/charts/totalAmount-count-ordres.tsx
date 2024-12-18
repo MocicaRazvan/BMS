@@ -148,7 +148,6 @@ export function TotalAmountCountOrders({
         className="aspect-auto h-[450px] w-full "
       >
         {!debounceDataAvailable ? (
-          // <Loader className="mx-auto" />
           <Skeleton className={"w-full h-full"} />
         ) : data.length === 0 ? (
           <motion.div
@@ -177,7 +176,6 @@ export function TotalAmountCountOrders({
               tickLine={false}
               axisLine={false}
               tickMargin={8}
-              // tickCount={8}
               tickFormatter={(tick) => (Number.isInteger(tick) ? tick : "")}
               interval={"preserveStartEnd"}
               domain={[0, "dataMax"]}
@@ -233,7 +231,6 @@ export function TotalAmountCountOrders({
               tickLine={false}
               axisLine={false}
               tickMargin={8}
-              // tickCount={8}
               tickFormatter={(tick) => (Number.isInteger(tick) ? tick : "")}
               interval={"preserveStartEnd"}
               domain={[

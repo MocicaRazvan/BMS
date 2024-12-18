@@ -17,6 +17,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Component
@@ -198,5 +199,19 @@ public class PageableUtilsCustom {
                 .totalElements(page.getTotalElements())
                 .totalPages(page.getTotalPages())
                 .build());
+    }
+
+    public void appendPageRequestQueryCallbackIfFieldIsNotEmpty(StringBuilder queryBuilder, PageRequest pageRequest, String field, Function<String, String> callback) {
+        if (isNotNullOrEmpty(field)) {
+            queryBuilder.append(createPageRequestQuery(pageRequest,
+                    callback.apply(field)
+            ));
+        } else {
+            queryBuilder.append(createPageRequestQuery(pageRequest));
+        }
+    }
+
+    public boolean isNotNullOrEmpty(String field) {
+        return field != null && !field.isEmpty();
     }
 }

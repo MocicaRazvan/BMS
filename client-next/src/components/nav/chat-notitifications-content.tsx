@@ -72,14 +72,6 @@ function ChatNotificationItem({
   locale,
   texts,
 }: ItemProps) {
-  // const [texts, setTexts] = useState<ChatMessageNotificationContentTexts>({
-  //   content: "",
-  // });
-  //
-  // useEffect(() => {
-  //   getChatMessageNotificationContentTexts(notif.length, sender).then(setTexts);
-  // }, [notif.length, sender]);
-
   return (
     <div
       className="grid gap-4 cursor-pointer hover:bg-accent p-2 rounded transition-all hover:shadow-lg hover:scale-[1.02] mb-3 min-h-20"

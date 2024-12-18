@@ -40,10 +40,6 @@ export default function ConversationWrapper({
     },
   });
 
-  // if (!sender) {
-  //   window.location.replace(`/${locale}/chat`);
-  // }
-
   if (isFinished && error) {
     console.error("Error fetching messages:", error);
     return (
@@ -55,9 +51,6 @@ export default function ConversationWrapper({
   if (!isFinished) return <LoadingSpinner />;
 
   if (!session.data?.user) return null;
-
-  console.log("convm", messages);
-  console.log("convm", messages?.[0].content.toReversed());
 
   return (
     <div className="h-full  w-full rounded-lg border-2 ">

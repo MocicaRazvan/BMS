@@ -45,7 +45,6 @@ function createIntakeSubtitle(
   week: string,
 ) {
   const v = isImperial ? valueKg * 2.20462262 : valueKg;
-  // const convV = valueKg * (1 - 0.546408 * Number(isImperial));
 
   const formattedValue = Number.isInteger(v) ? v.toFixed(0) : v.toFixed(2);
 

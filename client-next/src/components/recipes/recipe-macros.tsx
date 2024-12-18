@@ -72,15 +72,6 @@ export default function RecipeMacros({
       <div className="h-[350px] lg:h-[400px]">
         <IngredientMacrosPieChart
           innerRadius={85}
-          // items={[
-          //   { macro: "protein", value: nutritionalFact.protein },
-          //   { macro: "fat", value: nutritionalFact.fat },
-          //   {
-          //     macro: "carbohydrates",
-          //     value: nutritionalFact.carbohydrates,
-          //   },
-          //   { macro: "salt", value: nutritionalFact.salt },
-          // ]}
           items={[
             {
               macro: "protein",

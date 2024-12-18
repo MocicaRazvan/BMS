@@ -8,7 +8,6 @@ public class ChunkRequest implements Pageable {
     private final int offset;
     private final int limit;
 
-    // this attribute can be let out if you don't need it
     private Sort sort;
 
     public ChunkRequest(int offset, int limit, Sort sort) {

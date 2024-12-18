@@ -10,10 +10,6 @@ export default async function handleOauthCall(
   const { searchParams } = new URL(req.url);
   const code = searchParams.get("code");
 
-  console.log("OAuth Code:", code);
-  console.log("State:", state);
-  console.log("OAuth URL:", url);
-
   if (!code) {
     return new Response(JSON.stringify({ error: "No code provided" }), {
       status: 400,
@@ -51,10 +47,6 @@ export default async function handleOauthCall(
       const url = nextAuthUrl ? new URL(nextAuthUrl) : new URL("/");
       const secure =
         process.env.NODE_ENV === "production" && url.protocol === "https:";
-
-      console.log("Redirect Oauth URL:", url);
-
-      console.log("Secure:", secure);
 
       const nextAuthCookieName = secure
         ? "__Secure-next-auth.session-token"

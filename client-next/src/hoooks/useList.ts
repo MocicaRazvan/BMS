@@ -24,7 +24,6 @@ import {
 import { FetchStreamProps } from "@/hoooks/fetchStream";
 import { useDebounceWithCallBack } from "@/hoooks/useDebounceWithCallback";
 
-// import { FilterAndPaginationArgs } from "@/hoooks/useFiltersAndPagination";
 export interface UseListProps {
   sortingOptions: SortingOption[];
   path: string;
@@ -232,13 +231,6 @@ export default function useList<T>({
     sortingOptions,
   ]);
 
-  // useEffect(() => {
-  //   setPageInfo((prev) => ({
-  //     ...prev,
-  //     currentPage: 0,
-  //   }));
-  // }, [JSON.stringify(sort), JSON.stringify(debouncedFilter)]);
-
   const resetCurrentPage = useCallback(() => {
     setPageInfo((prev) => ({
       ...prev,
@@ -266,14 +258,12 @@ export default function useList<T>({
     });
   }, []);
 
-  // todo rename
   const updateFilterValue = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
       setFilter({ [filterKey]: e.target.value });
     },
     [filterKey],
   );
-  // todo rename
 
   const clearFilterValue = useCallback(() => {
     setFilter({ [filterKey]: "" });

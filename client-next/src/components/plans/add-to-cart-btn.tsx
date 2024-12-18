@@ -45,11 +45,6 @@ export default function AddToCartBtn({
     <div className="flex items-center justify-center px-2 ">
       {!isPlanInSubscription(plan.id) ? (
         !isInCartForUser({ id: plan.id }) ? (
-          // <ShineBorder
-          //   className="p-5 m-0 bg-transparent min-h-fit min-w-fit"
-          //   color={["#A07CFE", "#FE8FB5", "#FFBE7B"]}
-          //   borderWidth={4}
-          // >
           <BtnComponent
             size="lg"
             className="inline-flex"
@@ -75,7 +70,6 @@ export default function AddToCartBtn({
             </div>
           </BtnComponent>
         ) : (
-          // </ShineBorder>
           <PulsatingButton onClick={() => router.push("/cart")}>
             {finishOrder}
           </PulsatingButton>

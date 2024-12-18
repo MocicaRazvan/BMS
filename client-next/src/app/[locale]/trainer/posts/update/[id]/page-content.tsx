@@ -34,8 +34,6 @@ export default function UpdatePostPageContent({
 
   if (!isFinished) return <LoadingSpinner />;
 
-  console.log("HERE", isFinished, messages, error);
-
   if (error || !messages[0]?.content) {
     console.log("HERE");
     return navigateToNotFound();

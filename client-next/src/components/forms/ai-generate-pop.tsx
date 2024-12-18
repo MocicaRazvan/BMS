@@ -100,7 +100,6 @@ export default function AIGeneratePop({
       extraContext,
     });
     setIsLoading(false);
-    // setResp(resp?.answer || resp?.error);
     callback(resp);
     setPopOpen(false);
   }, [input, hasContext, sentFields]);
@@ -195,15 +194,6 @@ export default function AIGeneratePop({
         {inputErr && (
           <p className="text-destructive font-semibold">{inputErr}</p>
         )}
-        {/*<p>*/}
-        {/*  {fields.map((f) => f.content.trim()).join("") + (input || "")}*/}
-        {/*  {sentFields.map((f) => f.content.trim()).join("") + (input || "")}*/}
-        {/*  {*/}
-        {/*    (sentFields.map((f) => f.content.trim()).join("") + (input || ""))*/}
-        {/*      .length*/}
-        {/*  }*/}
-        {/*</p>*/}
-        {/*{JSON.stringify(checkBoxes)}*/}
       </PopoverContent>
     </Popover>
   );

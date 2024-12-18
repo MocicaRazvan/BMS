@@ -77,13 +77,6 @@ export default function ChatMainContentWrapper({
     }
   }, [JSON.stringify(messages)]);
 
-  // if (uError || rError) {
-  //   console.error("Error fetching messages:", uError || rError);
-  //   return <div>Error loading messages.</div>;
-  // }
-  //
-  // if (!uIsFinished || !rIsFinished) return <LoadingSpinner />;
-
   const handleChangeSearch = useCallback((e: ChangeEvent<HTMLInputElement>) => {
     setPageInfo((prev) => ({ ...prev, currentPage: 0 }));
     setFilterEmail(e.target.value);
@@ -105,8 +98,6 @@ export default function ChatMainContentWrapper({
       </div>
     );
   }
-
-  // return null;
 
   return (
     <Suspense fallback={<LoadingSpinner />}>

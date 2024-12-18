@@ -31,7 +31,7 @@ export function HomeHero({ titles, ...rest }: HomeHeroTexts) {
     picture9,
     picture10,
   ];
-  console.log("titles", titles);
+
   const products = Array.from({ length: 10 }).map((_, i) => ({
     title: titles[`titles.title${i + 1}` as TitleKeys],
     link: appendCreatedAtDesc(i % 2 ? "/plans/approved" : "/posts/approved"),

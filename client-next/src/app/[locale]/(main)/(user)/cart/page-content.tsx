@@ -204,13 +204,6 @@ export default function CartPageContent({
                       checkoutSchemaTexts={checkoutSchemaTexts}
                     />
                   )}
-                  {/*<CheckoutDrawer*/}
-                  {/*  userId={user.id}*/}
-                  {/*  totalPrice={usersCartTotalPrice}*/}
-                  {/*  trainings={usersCart.trainings}*/}
-                  {/*  token={user.token}*/}
-                  {/*  clearCartForUser={clearCartForUser}*/}
-                  {/*/>*/}
                 </div>
               </div>
             </Card>

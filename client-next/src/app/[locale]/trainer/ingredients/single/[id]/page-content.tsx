@@ -132,76 +132,11 @@ export default function SingleIngredientPageContent({
         )}
 
         <NutritionalTable ing={ing} {...nutritionalTableTexts} />
-        {/*<Table className={`hidden lg:table`}>*/}
-        {/*  <TableCaption className="mt-2">{tableCaption}</TableCaption>*/}
-        {/*  <TableHeader>*/}
-        {/*    <TableRow>*/}
-        {/*      {tableCols.map((col) => (*/}
-        {/*        <TableHead key={col}>*/}
-        {/*          {" "}*/}
-        {/*          {ingredientColumnTexts[col] as string}{" "}*/}
-        {/*        </TableHead>*/}
-        {/*      ))}*/}
-        {/*    </TableRow>*/}
-        {/*  </TableHeader>*/}
-        {/*  <TableBody>*/}
-        {/*    {tableColsKeys.map((col) => (*/}
-        {/*      <TableCell key={col}>{nutritionalFact[col]}</TableCell>*/}
-        {/*    ))}*/}
-        {/*    <TableCell>{getCalories(ing)}</TableCell>*/}
-        {/*    <TableCell>*/}
-        {/*      {" "}*/}
-        {/*      <Badge*/}
-        {/*        variant={*/}
-        {/*          nutritionalFact.unit === "GRAM" ? "secondary" : "default"*/}
-        {/*        }*/}
-        {/*      >*/}
-        {/*        {nutritionalFact.unit}*/}
-        {/*      </Badge>*/}
-        {/*    </TableCell>*/}
-        {/*  </TableBody>*/}
-        {/*</Table>*/}
-        {/*<div className="lg:hidden space-y-8 px-6 w-full">*/}
-        {/*  <p className="mt-4 text-sm text-muted-foreground">{tableCaption}</p>*/}
 
-        {/*  {tableColsKeys.map((col) => (*/}
-        {/*    <>*/}
-        {/*      <div key={col} className="flex justify-between">*/}
-        {/*        <p>{ingredientColumnTexts[col] as string}</p>*/}
-        {/*        <p>{nutritionalFact[col]}</p>*/}
-        {/*      </div>*/}
-        {/*      <hr className="border" />*/}
-        {/*    </>*/}
-        {/*  ))}*/}
-        {/*  <div className="flex justify-between">*/}
-        {/*    <p>{ingredientColumnTexts.calories}</p>*/}
-        {/*    <p>{getCalories(ing)}</p>*/}
-        {/*  </div>*/}
-        {/*  <hr className="border" />*/}
-        {/*  <div className="flex justify-between">*/}
-        {/*    <p>{ingredientColumnTexts.unit}</p>*/}
-        {/*    <Badge*/}
-        {/*      variant={*/}
-        {/*        nutritionalFact.unit === "GRAM" ? "secondary" : "default"*/}
-        {/*      }*/}
-        {/*    >*/}
-        {/*      {nutritionalFact.unit}*/}
-        {/*    </Badge>*/}
-        {/*  </div>*/}
-        {/*</div>*/}
         <div className="h-[350px] lg:h-[400px]">
           {debouncedFinish && (
             <IngredientMacrosPieChart
               innerRadius={85}
-              // items={[
-              //   { macro: "protein", value: nutritionalFact.protein },
-              //   { macro: "fat", value: nutritionalFact.fat },
-              //   {
-              //     macro: "carbohydrates",
-              //     value: nutritionalFact.carbohydrates,
-              //   },
-              //   { macro: "salt", value: nutritionalFact.salt },
-              // ]}
               items={chartItems as MacroChartElement[]}
               texts={ingredientPieChartTexts}
             />

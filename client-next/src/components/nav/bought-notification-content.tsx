@@ -34,12 +34,6 @@ export default function BoughtNotificationContent({
         className="grid gap-4 cursor-pointer hover:bg-accent p-2 rounded transition-all hover:shadow-lg hover:scale-[1.02] mb-3"
         key={item?.id + i}
         onClick={() => {
-          // if (stompClient && stompClient?.connected) {
-          //   deleteCallback(item.id, stompClient);
-          //   if (item?.extraLink) {
-          //     router.push("/sales");
-          //   }
-          // }
           if (stompClient && stompClient?.connected) {
             deleteCallback({ stompClient, payload: item });
             if (item?.reference?.appId) {

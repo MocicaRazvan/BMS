@@ -76,10 +76,7 @@ export default function KanbanBoard({
 }: Props) {
   const [columns, setColumns] = useState<KanbanColumn[]>([]);
   const [groupedTasks, setGroupedTasks] = useState<GroupedKanbanTasks>([]);
-  const pathName = usePathname();
-  // const [reindexState, setReindexState] = useState<
-  //   Record<"column" | "task", number>
-  // >({ column: 0, task: 0 });
+
   const handleUpdate = useCallback(
     (rs: ReindexState) => {
       if (rs.task > 0) {
@@ -122,33 +119,6 @@ export default function KanbanBoard({
   useEffect(() => {
     setGroupedTasks(initialGroupedTasks);
   }, [initialGroupedTasks]);
-
-  // useEffect(() => {
-  //   console.log("REINDEX TASK", JSON.stringify(groupedTasks));
-  //   if (debounceReindex.task > 0) {
-  //     fetchStream({
-  //       path: "/kanban/task/reindex",
-  //       method: "POST",
-  //       token: authUser.token,
-  //       body: {
-  //         groupedTasks,
-  //       },
-  //     }).catch((e) => console.log("REINDEX TASK", e));
-  //   }
-  // }, [debounceReindex.task]);
-  //
-  // useEffect(() => {
-  //   if (debounceReindex.column > 0) {
-  //     fetchStream({
-  //       path: "/kanban/column/reindex",
-  //       method: "POST",
-  //       token: authUser.token,
-  //       body: {
-  //         columns,
-  //       },
-  //     }).catch((e) => console.log("REINDEX COLUMN", e));
-  //   }
-  // }, [debounceReindex.column]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -272,7 +242,6 @@ export default function KanbanBoard({
         if (error) {
           console.log("Error", error);
         }
-        // setTasks((prev) => prev.filter((t) => t.columnId !== column.id));
       } catch (e) {
         console.log("Error", e);
       }
@@ -323,20 +292,6 @@ export default function KanbanBoard({
 
   const createTask = useCallback(
     async (column: KanbanColumn, content: string, type: KanbanTaskType) => {
-      // const id = generateUniqueNumber();
-      // const newTask: KanbanTask = {
-      //   id,
-      //   columnId: column.id,
-      //   content,
-      //   createdAt: new Date().toString(),
-      //   userId: parseInt(authUser.id),
-      //   updatedAt: new Date().toString(),
-      //   orderIndex: groupedTasks[column.id]?.length || 0,
-      //   type,
-      //   dndId: `task-${id}`,
-      // };
-      // setTasks((prev) => [...prev, newTask]);
-
       const task: KanbanTaskBody = {
         type,
         content,
@@ -371,18 +326,12 @@ export default function KanbanBoard({
       } catch (e) {
         console.log("Error", e);
       }
-      // setGroupedTasksOrdered((prev) => ({
-      //   ...prev,
-      //   [column.id]: [...(prev[column.id] || []), newTask],
-      // }));
     },
     [authUser.token, groupedTasks],
   );
 
   const deleteTask = useCallback(
     async (task: KanbanTask) => {
-      // setTasks((prev) => prev.filter((t) => t.id !== task.id));
-
       try {
         const { messages, error } = await fetchStream<
           CustomEntityModel<KanbanTaskResponse>
@@ -413,9 +362,6 @@ export default function KanbanBoard({
 
   const updateTask = useCallback(
     async (task: KanbanTask, content: string, type: KanbanTaskType) => {
-      // setTasks((prev) =>
-      //   prev.map((t) => (t.id === task.id ? { ...t, content } : t)),
-      // );
       try {
         const body: KanbanTaskBody = {
           type,

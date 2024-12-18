@@ -317,26 +317,12 @@ export default function DayForm({
           method: "POST",
         });
         if (res.error) {
-          // console.log("res", res);
           handleBaseError(res.error, setErrorMsg, error);
         } else {
-          // console.log("res", res);
           toast({
             title: data.title,
             description: descriptionToast,
             variant: "success",
-            // action: (
-            //   <ToastAction
-            //     altText={altToast}
-            //     onClick={() =>
-            //       router.push(
-            //         `/trainer/days/single/${res?.messages?.[0]?.content.id}`,
-            //       )
-            //     }
-            //   >
-            //     {toastAction}
-            //   </ToastAction>
-            // ),
           });
 
           router.push(`/trainer/days/single/${res?.messages?.[0]?.content.id}`);
@@ -450,7 +436,7 @@ export default function DayForm({
                     </div>
                   </FormLabel>
                   <FormControl>
-                    <div className="w-full">
+                    <div className="w-full py-1 md:py-2">
                       <AnimatePresence>
                         {childrenMeals.map((cm) => (
                           <SingleMealForm

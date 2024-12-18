@@ -51,7 +51,6 @@ const Conversation = memo(
     loadMoreLoading,
     loadMore,
   }: ConversationProps) => {
-    // console.log("initialMessages", initialMessages);
     const [chatMessages, setChatMessages] = useState<ChatMessageResponse[]>(
       initialMessages.toReversed(),
     );
@@ -64,13 +63,7 @@ const Conversation = memo(
     const [hasMore, setHasMore] = useState<boolean>(
       initialMessages.length < initialTotalMessages,
     );
-    //
-    console.log("HAS MORE", hasMore);
-    console.log("HAS MORE chatMessages", chatMessages.length);
-    // console.log("HAS MORE initialMessages", initialMessages.length);
-    // console.log("HAS MORE initialTotalMessages", initialTotalMessages);
 
-    // console.log("chatm leng", chatMessages.length);
     const chatContainerRef = useRef<HTMLDivElement>(null);
     const loaderRef = useRef<HTMLDivElement>(null);
     const observerRef = useRef<IntersectionObserver | null>(null);
@@ -83,12 +76,7 @@ const Conversation = memo(
       [receiver?.connectedChatRoom?.id, sender?.connectedChatRoom?.id],
     );
 
-    const debounceInSameChat = useDebounceWithCallBack(areInTheSameChat, 300);
-
-    // console.log("Same chat", areInTheSameChat);
-    // console.log("Same chat rec", receiver.connectedChatRoom?.id);
-    // console.log("Same chat send", sender.connectedChatRoom?.id);
-    // console.log("Same chat send email", sender.email);
+    const debounceInSameChat = useDebounceWithCallBack(areInTheSameChat, 600);
 
     // todo remove e useless
     const updateMessages = (
@@ -216,7 +204,6 @@ const Conversation = memo(
         <div
           id="scrollableDiv"
           className="w-full h-[600px] relative overflow-auto flex flex-col-reverse"
-          // viewportRef={chatContainerRef}
           ref={chatContainerRef}
         >
           <InfiniteScroll
@@ -241,7 +228,6 @@ const Conversation = memo(
                         />
                       </div>
                     ))}
-                  {/*{totalMessages} {chatMessages.length}*/}
                 </div>
               </div>
             </div>
@@ -286,7 +272,6 @@ const ChatMessageItem = memo(
           <p className="text-xs font-semibold text-gray-500 dark:text-gray-400">
             {formatDate(chatMessage.timestamp)}
           </p>
-          {/*<p className="text-sm font-medium">You, {sender.email}</p>*/}
           <div
             className="prose max-w-none [&_ol]:list-decimal [&_ul]:list-disc dark:prose-invert text-wrap"
             dangerouslySetInnerHTML={{ __html: chatMessage.content ?? "" }}

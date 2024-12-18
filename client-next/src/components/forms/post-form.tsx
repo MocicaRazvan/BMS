@@ -100,8 +100,6 @@ export default function PostForm({
     useLoadingErrorState();
   const [editorKey, setEditorKey] = useState<number>(0);
 
-  console.log("images", images);
-
   const form = useForm<PostType>({
     resolver: zodResolver(schema),
     defaultValues: {
@@ -169,7 +167,7 @@ export default function PostForm({
         prompt,
         negative_prompt: negativePrompt,
         successCallback: (images) => addImagesCallback(images, form),
-      }) //realistic, chicken with tomatoes
+      })
         .catch((e) => {
           console.log(e);
         })
@@ -221,16 +219,6 @@ export default function PostForm({
           title: data.title,
           description: descriptionToast,
           variant: "success",
-          // action: (
-          //   <ToastAction
-          //     altText={altToast}
-          //     onClick={() =>
-          //       router.push(`/trainer/posts/single/${res.content.id}`)
-          //     }
-          //   >
-          //     {toastAction}
-          //   </ToastAction>
-          // ),
         });
         router.push(`/trainer/posts/single/${res.content.id}`);
       } catch (e) {

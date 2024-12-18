@@ -75,7 +75,6 @@ export interface IngredientFormTexts extends BaseFormTexts {
   disableTooltip: string;
 }
 
-// BaseFormTexts
 interface Props
   extends WithUser,
     Partial<IngredientNutritionalFactType>,
@@ -302,7 +301,6 @@ export default function IngredientForm({
         else {
           console.log("res", res.error);
           if (res.error.status === 409 && res.error?.name) {
-            // todo intl
             form.setError("ingredient.name", {
               message: titleTaken,
             });
@@ -310,7 +308,6 @@ export default function IngredientForm({
               title: titleTaken,
               variant: "destructive",
             });
-            // setErrorMsg(titleTaken);
           } else if (error) {
             handleBaseError(res.error, setErrorMsg, error);
           }

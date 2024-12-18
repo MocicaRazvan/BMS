@@ -87,9 +87,6 @@ export default function SortableList({
       const overIndex = items.findIndex((item) => item.id === over.id);
 
       if (activeIndex !== overIndex) {
-        // setItems((prev) =>
-        //   arrayMove<SortableItem>(prev, activeIndex, overIndex),
-        // );
         moveItems(items, activeIndex, overIndex);
       }
       setActiveItem(undefined);

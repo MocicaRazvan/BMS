@@ -126,7 +126,7 @@ const ChatRoomItem = memo(
     const notifications = getByReference(room.id);
     const debounceConnectedStatus = useDebounceWithCallBack<
       ConversationUserResponse["connectedStatus"] | undefined
-    >(otherUser?.connectedStatus, 200);
+    >(otherUser?.connectedStatus, 600);
 
     if (!otherUser) return null;
 
@@ -211,7 +211,6 @@ const ChatRoomItem = memo(
             >
               {numberUnread}{" "}
               <span className="font-normal">{notifications.length}</span>
-              {/*{notifications.length > 0 && notifications.length} unread messages*/}
             </p>
           </div>
         </div>

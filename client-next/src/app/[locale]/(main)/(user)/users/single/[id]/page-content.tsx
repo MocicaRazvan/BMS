@@ -125,8 +125,6 @@ export default function UserPageContent({
     [emailSent, errorText],
   );
 
-  // console.log("user", messages, error, isFinished);
-
   const handleStartChat = useCallback(
     (recUser: UserDto) => {
       if (stompClient && stompClient?.connected && recUser && authUser) {
@@ -156,7 +154,7 @@ export default function UserPageContent({
   const isOwner = authUser.email === user.email;
   const isUser = user.role === "ROLE_USER";
   const isAuthAdmin = authUser.role === "ROLE_ADMIN";
-  console.log(user);
+
   return (
     <section className="w-full min-h-[calc(100vh-4rem)] pb-14 flex items-center justify-center transition-all mt-4">
       <div className=" w-full mx-2 md:mx-0 md:w-2/3  border rounded-xl px-6 py-8 space-y-8 lg:space-y-12">
@@ -166,7 +164,6 @@ export default function UserPageContent({
         <div className="flex items-center justify-center gap-4">
           <Avatar className="w-16 h-16">
             <AvatarImage src={user?.image || noImg} alt={user?.email} />
-            {/* <AvatarFallback>{stateUser?.email}</AvatarFallback> */}
           </Avatar>
 
           <h3 className="text-lg lg:text-xl font-bold text-center">

@@ -302,19 +302,6 @@ export function NotificationPopProvider({
   ]);
 
   useEffect(() => {
-    // console.error(
-    //   "Fetching post notifications...",
-    //   postMessageNotificationsTexts,
-    // );
-    // console.error("Prev Post", previousPostNotifications.current);
-    // console.error(
-    //   "isEqual",
-    //   isEqual(
-    //     getPostNotificationState().notifications,
-    //     previousPostNotifications.current,
-    //   ),
-    // );
-    // console.error("Current Post", getPostNotificationState().notifications);
     if (
       postMessageNotificationsTexts === null ||
       previousPostNotifications.current === null ||
@@ -323,7 +310,6 @@ export function NotificationPopProvider({
         previousPostNotifications.current,
       )
     ) {
-      // console.error("Setting post notifications...");
       previousPostNotifications.current =
         getPostNotificationState().notifications;
 
@@ -331,7 +317,6 @@ export function NotificationPopProvider({
         "post",
         getPostNotificationState().notifications,
       ).then((texts) => {
-        // console.error("TEXTS post", texts);
         setPostMessageNotificationsTexts(texts);
       });
     }
@@ -476,9 +461,6 @@ function NotificationPopProviderUser({
 
     // navigate to chat room after it is created
     if (newMessage.connectedChatRoom?.id) {
-      // router.push(`/chat/?chatId=${newMessage.connectedChatRoom?.id}`);
-      // setActiveChatId(newMessage.connectedChatRoom?.id);
-      // router.push(`/chat`);
       const sender = newMessage.connectedChatRoom?.users.find(
         (user) => user.email !== authUser?.email,
       );

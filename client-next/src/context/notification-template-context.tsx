@@ -151,12 +151,6 @@ const initialState: NotificationState<any, any, any> = {
   totalBySender: {},
 };
 
-// export const NotificationContext = React.createContext<NotificationContextType<
-//   any,
-//   any,
-//   any
-// > | null>(null);
-
 export const notificationReducer = <
   R extends IdGenerateDto,
   E extends string,
@@ -376,11 +370,6 @@ export interface NotificationProviderProps {
   NotificationContext: ReactNotificationType;
 }
 
-// export const NotificationContext = React.createContext<NotificationContextType<
-//   any,
-//   any,
-//   any
-// > | null>(null);
 export const NotificationTemplateProvider = <
   R extends IdGenerateDto,
   E extends string,
@@ -391,7 +380,6 @@ export const NotificationTemplateProvider = <
   authUser,
   NotificationContext,
 }: NotificationProviderProps) => {
-  // console.log("total creating", notificationName);
   const [state, dispatch] = React.useReducer(
     notificationReducer as React.Reducer<
       NotificationState<R, E, T>,
@@ -492,7 +480,6 @@ const NotificationTemplateAuthUser = <
 
   React.useEffect(() => {
     if (isFinished && !error && messages && messages?.[0]?.length > 0) {
-      // console.log("total init", notificationName);
       dispatch({ type: "INIT_MULTIPLE", payload: messages[0] });
     }
   }, [isFinished, JSON.stringify(messages), error]);
@@ -503,7 +490,6 @@ const NotificationTemplateAuthUser = <
     // return children;
   }
 
-  // const ContextProvider = createNotificationTemplateContext<R, E, T>();
   return (
     <NotificationContext.Provider value={{ state, dispatch }}>
       {children}

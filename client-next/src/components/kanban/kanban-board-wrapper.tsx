@@ -75,13 +75,6 @@ export default function KanbanBoardWrapper({ authUser, ...props }: Props) {
     });
   }, [JSON.stringify(columnsIds)]);
 
-  console.log("WRAPPER ERROR", error);
-  console.log("WRAPPER isFinished", isFinished);
-
-  console.log("WRAPPER groupedTasks", groupedTasks);
-  console.log("WRAPPER groupedTasksFinished", groupedTasksFinished);
-  console.log("WRAPPER columns", columnsIds);
-
   return (
     <>
       <KanbanBoard

@@ -13,32 +13,21 @@ const ids = ["register", "posts", "plans"] as const;
 export type HomeCardsText = Record<(typeof ids)[number], CardTexts>;
 const cards: {
   id: (typeof ids)[number];
-  // title: string;
-  // description: string;
   href: string;
   icon: React.ReactNode;
 }[] = [
   {
     id: "register",
-    // title: "Register",
-    // description:
-    //   "Register to get access to all the features of our platform, and become a part of our community.",
     href: "/auth/signin",
     icon: <User2 size={64} className="w-full mx-auto" />,
   },
   {
     id: "posts",
-    // title: "Read Posts",
-    // description:
-    //   "Read posts to gain knowledge and insights about different topics written by professionals.",
     href: "/posts/approved",
     icon: <Newspaper size={64} className="w-full mx-auto" />,
   },
   {
     id: "plans",
-    // title: "Buy Plans",
-    // description:
-    //   "Buy plans to improve yourself and get the full experience of our platform. We offer a wide range of plans according to your needs.",
     href: "/plans/approved",
     icon: <Beef size={64} className="w-full mx-auto" />,
   },
@@ -97,16 +86,8 @@ export function HomeCard({ index, title, description, icon, href }: Props) {
         gradientSize={180}
       >
         <Link href={href} className="h-full w-full block py-2  px-3">
-          <div
-            className="w-full h-full rounded-lg py-4 px-2 flex flex-col justify-between items-stretch gap-10
-         "
-          >
-            <AnimatedShinyText
-              className="text-3xl tracking-tighter font-bold text-center
-
-
-            "
-            >
+          <div className="w-full h-full rounded-lg py-4 px-2 flex flex-col justify-between items-stretch gap-10">
+            <AnimatedShinyText className="text-3xl tracking-tighter font-bold text-center">
               {title}
             </AnimatedShinyText>
             <div className="w-full"> {icon}</div>

@@ -37,8 +37,6 @@ export const authOptions: NextAuthOptions = {
 
           const user = await resp.json();
 
-          // console.log(user);
-
           if (!user) {
             return { error: "Invalid credentials" };
           }
@@ -65,7 +63,7 @@ export const authOptions: NextAuthOptions = {
       if (user) {
         token.user = { ...user, emailVerified: !!user.emailVerified };
       }
-      // console.log("token", token);
+
       return token;
     },
     async session({ session, token }) {

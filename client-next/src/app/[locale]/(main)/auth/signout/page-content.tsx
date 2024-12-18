@@ -36,18 +36,12 @@ export default function SignOut({
             signOut({ redirect: true, callbackUrl: "/auth/signin" }).then(
               () => {
                 router.push("/auth/signin");
-                // if (window) {
-                //   window.location.href = "/auth/signin";
-                // }
               },
             );
           }}
         >
           {buttonSignOut}
         </Button>
-        {/*<Link href="/auth/signin" className="italic hover:underline">*/}
-        {/*  {buttonSignIn}*/}
-        {/*</Link>*/}
       </div>
     </main>
   );

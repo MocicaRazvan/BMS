@@ -19,4 +19,8 @@ public interface OllamaAPIService {
     Mono<Float[]> generateEmbeddingFloatMono(String text, EmbedCache embedCache);
 
     float[] convertToFloatPrimitive(Float[] floats);
+
+    Mono<String> getEmbedding(String text, EmbedCache embedCache);
+
+    boolean isNotNullOrEmpty(String text);
 }

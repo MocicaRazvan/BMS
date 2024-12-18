@@ -57,7 +57,6 @@ export const usePostApproveNotification = () => {
     NotificationPostResponse,
     ApprovePostNotificationResponse
   >(PostApproveNotificationContext, approvePostNotificationName);
-  // const notificationName = "approvePostNotification" as const;
 
   const removeNotificationPost = useCallback(
     (p: PostPayloadStomp) =>
