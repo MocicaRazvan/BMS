@@ -6,10 +6,18 @@ from concurrent.futures import ThreadPoolExecutor
 from flask import Flask, request, send_file, jsonify
 from prometheus_flask_exporter.multiprocess import GunicornInternalPrometheusMetrics
 
-from config import APP_NAME, APP_VERSION, FLASK_DEBUG
+from config import APP_NAME, APP_VERSION, FLASK_DEBUG, ZIPKIN_SAMPLE_RATE, ZIPKIN_URL
 from logger import logger
 from model import get_pipeline, reserve_vram, release_vram, clear_cache
 from utils import process_image_to_bytes
+
+from opentelemetry import trace
+from opentelemetry.instrumentation.flask import FlaskInstrumentor
+from opentelemetry.sdk.resources import Resource
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
+from opentelemetry.exporter.zipkin.json import ZipkinExporter
+from opentelemetry.sdk.trace.sampling import ParentBased, TraceIdRatioBased
 
 app = Flask(__name__)
 metrics = GunicornInternalPrometheusMetrics(
@@ -19,8 +27,18 @@ metrics = GunicornInternalPrometheusMetrics(
 
 metrics.info(APP_NAME, "Application info prometheus", version=APP_VERSION)
 
+provider = TracerProvider(resource=Resource(attributes={"service.name": APP_NAME}),
+                          sampler=ParentBased(TraceIdRatioBased(ZIPKIN_SAMPLE_RATE)))
+zipkin_exporter = ZipkinExporter(endpoint=ZIPKIN_URL, timeout=30)
+provider.add_span_processor(
+    BatchSpanProcessor(span_exporter=zipkin_exporter, max_queue_size=2048, schedule_delay_millis=10000,
+                       max_export_batch_size=512))
+trace.set_tracer_provider(provider)
 
-@app.route("/")
+FlaskInstrumentor().instrument_app(app, excluded_urls="/metrics,/healthz")
+
+
+@app.route("/healthz")
 def index():
     return "OK"
 
