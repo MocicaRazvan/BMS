@@ -12,7 +12,10 @@ from model import get_pipeline, reserve_vram, release_vram, clear_cache
 from utils import process_image_to_bytes
 
 app = Flask(__name__)
-metrics = GunicornInternalPrometheusMetrics(app)
+metrics = GunicornInternalPrometheusMetrics(
+    app,
+    default_labels={"application": APP_NAME}
+)
 
 metrics.info(APP_NAME, "Application info prometheus", version=APP_VERSION)
 
