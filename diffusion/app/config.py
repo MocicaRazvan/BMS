@@ -21,5 +21,5 @@ MEMORY_FRACTION = float(os.getenv("MEMORY_FRACTION", 0.5))
 RESERVED_TENSOR = os.getenv("RESERVED_TENSOR", "True").lower() == "true"
 
 # zipkin settings
-ZIPKIN_SAMPLE_RATE = float(os.getenv("ZIPKIN_SAMPLE_RATE", 0.05))
+ZIPKIN_SAMPLE_RATE = float(os.getenv("ZIPKIN_SAMPLE_RATE", 0.1))
 ZIPKIN_URL = os.getenv("ZIPKIN_URL", "")

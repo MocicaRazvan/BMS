@@ -3,7 +3,10 @@ import { ZipkinExporter } from "@opentelemetry/exporter-zipkin";
 import { ATTR_SERVICE_NAME } from "@opentelemetry/semantic-conventions";
 import { BatchSpanProcessor } from "@opentelemetry/sdk-trace-node";
 import { getNodeAutoInstrumentations } from "@opentelemetry/auto-instrumentations-node";
-import { TraceIdRatioBasedSampler } from "@opentelemetry/sdk-trace-base";
+import {
+  TraceIdRatioBasedSampler,
+  ParentBasedSampler,
+} from "@opentelemetry/sdk-trace-base";
 import {
   browserDetector,
   detectResourcesSync,
@@ -24,9 +27,6 @@ import {
   SimpleLogRecordProcessor,
 } from "@opentelemetry/sdk-logs";
 import { OTLPLogExporter } from "@opentelemetry/exporter-logs-otlp-http";
-
-console.log("NEXT_SERVICE_NAME:", process.env.NEXT_SERVICE_NAME);
-console.log("NEXT_ZIPKIN_URL:", process.env.NEXT_ZIPKIN_URL);
 
 if (
   !process.env.NEXT_SERVICE_NAME ||
@@ -85,10 +85,10 @@ const sdk = new NodeSDK({
         serviceName: process.env.NEXT_SERVICE_NAME,
       }),
       {
-        maxQueueSize: 10,
-        maxExportBatchSize: 10,
-        scheduledDelayMillis: 500,
-        exportTimeoutMillis: 1000,
+        maxQueueSize: 2048,
+        maxExportBatchSize: 512,
+        scheduledDelayMillis: 10000,
+        exportTimeoutMillis: 50000,
       },
     ),
   ],
@@ -101,7 +101,7 @@ const sdk = new NodeSDK({
               url: process.env.NEXT_LOKI_URL,
             }),
             {
-              scheduledDelayMillis: 1500,
+              scheduledDelayMillis: 3000,
               maxExportBatchSize: 512,
               exportTimeoutMillis: 30000,
               maxQueueSize: 2048,
@@ -110,9 +110,11 @@ const sdk = new NodeSDK({
         ]
       : []),
   ],
-  sampler: new TraceIdRatioBasedSampler(
-    parseFloat(process.env.NEXT_TRACING_PROBABILITY || "0.1"),
-  ),
+  sampler: new ParentBasedSampler({
+    root: new TraceIdRatioBasedSampler(
+      parseFloat(process.env.NEXT_TRACING_PROBABILITY || "0.1"),
+    ),
+  }),
   // metricReader: prometheusExporter,
 });
 
