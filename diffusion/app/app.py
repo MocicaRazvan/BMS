@@ -4,14 +4,15 @@ import zipfile
 from concurrent.futures import ThreadPoolExecutor
 
 from flask import Flask, request, send_file, jsonify
-from prometheus_flask_exporter import PrometheusMetrics
+from prometheus_flask_exporter.multiprocess import GunicornInternalPrometheusMetrics
 
 from config import APP_NAME, APP_VERSION, FLASK_DEBUG
+from logger import logger
 from model import get_pipeline, reserve_vram, release_vram, clear_cache
 from utils import process_image_to_bytes
 
 app = Flask(__name__)
-metrics = PrometheusMetrics(app)
+metrics = GunicornInternalPrometheusMetrics(app)
 
 metrics.info(APP_NAME, "Application info prometheus", version=APP_VERSION)
 
@@ -48,7 +49,7 @@ def generate_images():
         height = data.get("height", 512)
         width = data.get("width", 512)
 
-        print(f"Generating {num_images} image(s) for prompt: '{prompt}'")
+        logger.info(f"Generating {num_images} image(s) for prompt: '{prompt}'")
 
         pipe = get_pipeline()
         images = pipe(
@@ -82,7 +83,7 @@ def generate_images():
         )
 
     except Exception as e:
-        print("Error Traceback:", traceback.format_exc())
+        logger.exception("Error Traceback:", traceback.format_exc())
         return jsonify({"error": str(e)}), 500
 
 

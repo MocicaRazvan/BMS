@@ -21,13 +21,14 @@ COPY --from=builder /usr/local/lib/python3.10/site-packages /usr/local/lib/pytho
 COPY --from=builder /usr/local/bin/gunicorn /usr/local/bin/gunicorn
 COPY ./app .
 
-RUN mkdir -p /models
 
 ENV PYTHONUNBUFFERED=1
 ENV PORT=5000
 ENV WORKER_PROCESSES=1
 ENV PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
+ENV PROMETHEUS_MULTIPROC_DIR=/tmp
+ENV prometheus_multiproc_dir=/tmp
 
 EXPOSE ${PORT}
 
-CMD ["sh", "-c", "gunicorn -w $WORKER_PROCESSES -b 0.0.0.0:$PORT --timeout 6000 app:app"]
+CMD ["sh", "-c", "gunicorn -c gunicorn_conf.py -w $WORKER_PROCESSES -b 0.0.0.0:$PORT --timeout 6000 app:app"]

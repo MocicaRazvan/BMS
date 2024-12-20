@@ -1,8 +1,11 @@
 import os
+import threading
+
 import torch
 from diffusers import StableDiffusionPipeline, DDIMScheduler
-from config import MODEL_ID, LOCAL_MODEL_PATH, DEVICE, RESERVED_VRAM_GB, MEMORY_FRACTION
-import threading
+
+from config import MODEL_ID, LOCAL_MODEL_PATH, DEVICE, RESERVED_VRAM_GB, MEMORY_FRACTION, RESERVED_TENSOR
+from logger import logger
 
 pipeline_lock = threading.Lock()
 tensor_lock = threading.Lock()
@@ -15,27 +18,33 @@ if torch.cuda.is_available():
 
 def reserve_vram(size_gb=RESERVED_VRAM_GB):
     """Reserve VRAM by allocating a large tensor."""
+    if not RESERVED_TENSOR:
+        logger.info("No tensor is reserved")
+        return
     global reserved_tensor
     with tensor_lock:
         num_elements = int((size_gb * 1024 ** 3) // 2)
         reserved_tensor = torch.empty((num_elements,), dtype=torch.float16, device=DEVICE)
-        print(f"Reserved ~{size_gb}GB of VRAM.")
+        logger.info(f"Reserved ~{size_gb}GB of VRAM.")
 
 
 def release_vram():
     """Release the reserved VRAM by deleting the tensor."""
+    if not RESERVED_TENSOR:
+        logger.info("No tensor was reserved")
+        return
     global reserved_tensor
     with tensor_lock:
         if reserved_tensor is not None:
             del reserved_tensor
             reserved_tensor = None
             torch.cuda.empty_cache()
-            print("Released reserved VRAM.")
+            logger.info("Released reserved VRAM.")
 
 
 def clear_cache():
     if torch.cuda.is_available():
-        print("Clearing CUDA cache on GPU 0...")
+        logger.info("Clearing CUDA cache on GPU 0...")
         torch.cuda.set_device(0)
         torch.cuda.empty_cache()
 
@@ -54,18 +63,18 @@ def get_pipeline() -> StableDiffusionPipeline:
         if pipeline is not None:
             return pipeline
         if os.path.exists(LOCAL_MODEL_PATH):
-            print(f"Loading model from local path: {LOCAL_MODEL_PATH}")
+            logger.info(f"Loading model from local path: {LOCAL_MODEL_PATH}")
             scheduler = DDIMScheduler.from_pretrained(
                 LOCAL_MODEL_PATH, subfolder="scheduler", torch_dtype=torch.float16, safety_checker=None)
             pipe = StableDiffusionPipeline.from_pretrained(
                 LOCAL_MODEL_PATH, torch_dtype=torch.float16, safety_checker=None, scheduler=scheduler
             )
         else:
-            print(f"Downloading model: {MODEL_ID}")
+            logger.info(f"Downloading model: {MODEL_ID}")
             pipe = StableDiffusionPipeline.from_pretrained(
                 MODEL_ID, torch_dtype=torch.float16
             )
-            print(f"Saving model locally to: {LOCAL_MODEL_PATH}")
+            logger.info(f"Saving model locally to: {LOCAL_MODEL_PATH}")
             pipe.save_pretrained(LOCAL_MODEL_PATH)
             scheduler = DDIMScheduler.from_pretrained(
                 LOCAL_MODEL_PATH, subfolder="scheduler", torch_dtype=torch.float16, safety_checker=None)
@@ -85,7 +94,7 @@ def get_pipeline() -> StableDiffusionPipeline:
 
 def init_model():
     if pipeline is None:
-        print("Loading model pipeline...")
+        logger.info("Loading model pipeline...")
         get_pipeline()
     if reserved_tensor is None:
         reserve_vram()
