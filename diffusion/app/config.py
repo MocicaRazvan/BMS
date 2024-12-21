@@ -19,6 +19,8 @@ DEVICE = "cuda:0"
 RESERVED_VRAM_GB = float(os.getenv("RESERVED_VRAM_GB", 1.5))
 MEMORY_FRACTION = float(os.getenv("MEMORY_FRACTION", 0.5))
 RESERVED_TENSOR = os.getenv("RESERVED_TENSOR", "True").lower() == "true"
+PIPE_ENABLE_GRADIENT_CHECKPOINTING = os.getenv("PIPE_ENABLE_GRADIENT_CHECKPOINTING", "True").lower() == "true"
+PIPE_DISABLE_SAFETY_CHECKER = os.getenv("PIPE_DISABLE_SAFETY_CHECKER", "True").lower() == "true"
 
 # zipkin settings
 ZIPKIN_SAMPLE_RATE = float(os.getenv("ZIPKIN_SAMPLE_RATE", 0.1))

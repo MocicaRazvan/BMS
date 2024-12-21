@@ -4,20 +4,19 @@ import zipfile
 from concurrent.futures import ThreadPoolExecutor
 
 from flask import Flask, request, send_file, jsonify
+from opentelemetry import trace
+from opentelemetry.exporter.zipkin.json import ZipkinExporter
+from opentelemetry.instrumentation.flask import FlaskInstrumentor
+from opentelemetry.sdk.resources import Resource
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
+from opentelemetry.sdk.trace.sampling import ParentBased, TraceIdRatioBased
 from prometheus_flask_exporter.multiprocess import GunicornInternalPrometheusMetrics
 
 from config import APP_NAME, APP_VERSION, FLASK_DEBUG, ZIPKIN_SAMPLE_RATE, ZIPKIN_URL
 from logger import logger
 from model import get_pipeline, reserve_vram, release_vram, clear_cache
 from utils import process_image_to_bytes
-
-from opentelemetry import trace
-from opentelemetry.instrumentation.flask import FlaskInstrumentor
-from opentelemetry.sdk.resources import Resource
-from opentelemetry.sdk.trace import TracerProvider
-from opentelemetry.sdk.trace.export import BatchSpanProcessor
-from opentelemetry.exporter.zipkin.json import ZipkinExporter
-from opentelemetry.sdk.trace.sampling import ParentBased, TraceIdRatioBased
 
 app = Flask(__name__)
 metrics = GunicornInternalPrometheusMetrics(
@@ -35,11 +34,11 @@ provider.add_span_processor(
                        max_export_batch_size=512))
 trace.set_tracer_provider(provider)
 
-FlaskInstrumentor().instrument_app(app, excluded_urls="/metrics,/healthz")
+FlaskInstrumentor().instrument_app(app, excluded_urls="metrics,healthz")
 
 
 @app.route("/healthz")
-def index():
+def healthz():
     return "OK"
 
 
@@ -104,6 +103,8 @@ def generate_images():
         )
 
     except Exception as e:
+        clear_cache()
+        reserve_vram()
         logger.exception("Error Traceback:", traceback.format_exc())
         return jsonify({"error": str(e)}), 500
 

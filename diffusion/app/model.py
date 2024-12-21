@@ -4,7 +4,8 @@ import threading
 import torch
 from diffusers import StableDiffusionPipeline, DDIMScheduler
 
-from config import MODEL_ID, LOCAL_MODEL_PATH, DEVICE, RESERVED_VRAM_GB, MEMORY_FRACTION, RESERVED_TENSOR
+from config import MODEL_ID, LOCAL_MODEL_PATH, DEVICE, RESERVED_VRAM_GB, MEMORY_FRACTION, RESERVED_TENSOR, \
+    PIPE_DISABLE_SAFETY_CHECKER, PIPE_ENABLE_GRADIENT_CHECKPOINTING
 from logger import logger
 
 pipeline_lock = threading.Lock()
@@ -22,6 +23,9 @@ def reserve_vram(size_gb=RESERVED_VRAM_GB):
         logger.info("No tensor is reserved")
         return
     global reserved_tensor
+    if reserved_tensor is not None:
+        logger.info("VRAM already reserved.")
+        return
     with tensor_lock:
         num_elements = int((size_gb * 1024 ** 3) // 2)
         reserved_tensor = torch.empty((num_elements,), dtype=torch.float16, device=DEVICE)
@@ -62,13 +66,12 @@ def get_pipeline() -> StableDiffusionPipeline:
     with pipeline_lock:
         if pipeline is not None:
             return pipeline
+
+        safety_checker = None if PIPE_DISABLE_SAFETY_CHECKER else True
+
         if os.path.exists(LOCAL_MODEL_PATH):
             logger.info(f"Loading model from local path: {LOCAL_MODEL_PATH}")
-            scheduler = DDIMScheduler.from_pretrained(
-                LOCAL_MODEL_PATH, subfolder="scheduler", torch_dtype=torch.float16, safety_checker=None)
-            pipe = StableDiffusionPipeline.from_pretrained(
-                LOCAL_MODEL_PATH, torch_dtype=torch.float16, safety_checker=None, scheduler=scheduler
-            )
+            pipe = load_from_local(safety_checker)
         else:
             logger.info(f"Downloading model: {MODEL_ID}")
             pipe = StableDiffusionPipeline.from_pretrained(
@@ -76,20 +79,39 @@ def get_pipeline() -> StableDiffusionPipeline:
             )
             logger.info(f"Saving model locally to: {LOCAL_MODEL_PATH}")
             pipe.save_pretrained(LOCAL_MODEL_PATH)
-            scheduler = DDIMScheduler.from_pretrained(
-                LOCAL_MODEL_PATH, subfolder="scheduler", torch_dtype=torch.float16, safety_checker=None)
-            pipe = StableDiffusionPipeline.from_pretrained(
-                LOCAL_MODEL_PATH, torch_dtype=torch.float16, safety_checker=None, scheduler=scheduler
-            )
+            pipe = load_from_local(safety_checker)
 
         pipe = pipe.to(DEVICE)
         pipe.enable_attention_slicing("auto")
-        pipe.unet.enable_gradient_checkpointing()
-        #     pipe.enable_model_cpu_offload()
-        pipe.safety_checker = None
-        #     pipe.feature_extractor = None
+
+        if PIPE_ENABLE_GRADIENT_CHECKPOINTING:
+            pipe.unet.enable_gradient_checkpointing()
+            logger.info("Gradient checkpointing enabled.")
+
+        if safety_checker is None:
+            pipe.safety_checker = None
+            logger.info("Safety checker disabled.")
+
         pipeline = pipe
         return pipeline
+
+
+def load_from_local(safety_checker):
+    if safety_checker is None:
+        scheduler = DDIMScheduler.from_pretrained(
+            LOCAL_MODEL_PATH, subfolder="scheduler", torch_dtype=torch.float16, safety_checker=None)
+        pipe = StableDiffusionPipeline.from_pretrained(
+            LOCAL_MODEL_PATH, torch_dtype=torch.float16, safety_checker=None, scheduler=scheduler
+        )
+        logger.info("Safety checker disabled for local model.")
+    else:
+        scheduler = DDIMScheduler.from_pretrained(
+            LOCAL_MODEL_PATH, subfolder="scheduler", torch_dtype=torch.float16)
+        pipe = StableDiffusionPipeline.from_pretrained(
+            LOCAL_MODEL_PATH, torch_dtype=torch.float16, scheduler=scheduler
+        )
+        logger.info("Safety checker enabled for local model.")
+    return pipe
 
 
 def init_model():
