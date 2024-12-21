@@ -2,7 +2,7 @@ package com.mocicarazvan.ollamasearch.config;
 
 
 import io.github.ollama4j.OllamaAPI;
-import org.springframework.beans.factory.annotation.Value;
+import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -10,14 +10,14 @@ import org.springframework.retry.annotation.EnableRetry;
 
 @Configuration
 @EnableRetry
+@RequiredArgsConstructor
 public class OllamaAPIConfig {
 
-    @Value("${spring.custom.ollama.url}")
-    private String url;
+    private final OllamaPropertiesConfig ollamaPropertiesConfig;
 
     @Bean
     @ConditionalOnMissingBean
     public OllamaAPI ollamaAPI() {
-        return new OllamaAPI(url);
+        return new OllamaAPI(ollamaPropertiesConfig.getUrl());
     }
 }

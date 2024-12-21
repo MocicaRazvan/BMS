@@ -2,6 +2,7 @@ package com.mocicarazvan.ollamasearch.services.impl;
 
 import com.mocicarazvan.ollamasearch.annotations.EmbedRetry;
 import com.mocicarazvan.ollamasearch.cache.EmbedCache;
+import com.mocicarazvan.ollamasearch.config.OllamaPropertiesConfig;
 import com.mocicarazvan.ollamasearch.exceptions.OllamaEmbedException;
 import com.mocicarazvan.ollamasearch.services.OllamaAPIService;
 import com.mocicarazvan.ollamasearch.utils.OllamaQueryUtils;
@@ -9,30 +10,21 @@ import io.github.ollama4j.OllamaAPI;
 import io.github.ollama4j.exceptions.OllamaBaseException;
 import io.github.ollama4j.models.embeddings.OllamaEmbedRequestBuilder;
 import io.github.ollama4j.models.embeddings.OllamaEmbedResponseModel;
-import io.github.ollama4j.utils.Options;
 import io.github.ollama4j.utils.OptionsBuilder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class OllamaAPIServiceImpl implements OllamaAPIService {
 
-    @Value("${spring.custom.ollama.embedding.model}")
-    private String model;
-    @Value("${spring.custom.ollama.keepalive:-1m}")
-    private String keepAlive;
-    @Value("${spring.custom.embeddings.numCtx:2048}")
-    private int numCtx;
-
+    private final OllamaPropertiesConfig ollamaPropertiesConfig;
     private final OllamaAPI ollamaAPI;
     private final OllamaQueryUtils ollamaQueryUtils;
 
@@ -83,11 +75,11 @@ public class OllamaAPIServiceImpl implements OllamaAPIService {
     private OllamaEmbedResponseModel embed(List<String> inputs) {
         String[] texts = inputs.stream().map(t -> t.trim().replaceAll("\\s+", " ").toLowerCase()).toList().toArray(new String[0]);
         OptionsBuilder optionsBuilder = new OptionsBuilder();
-        optionsBuilder.setNumCtx(numCtx);
+        optionsBuilder.setNumCtx(ollamaPropertiesConfig.getNumCtx());
         try {
             return ollamaAPI.embed(OllamaEmbedRequestBuilder.getInstance(
-                    model, texts
-            ).withOptions(optionsBuilder.build()).withKeepAlive(keepAlive).build());
+                    ollamaPropertiesConfig.getEmbeddingModel(), texts
+            ).withOptions(optionsBuilder.build()).withKeepAlive(ollamaPropertiesConfig.getKeepalive()).build());
         } catch (IOException | OllamaBaseException | InterruptedException e) {
             log.error("Error while embedding: " + e.getMessage());
             throw new OllamaEmbedException("Error while embedding: " + e.getMessage(), e);
