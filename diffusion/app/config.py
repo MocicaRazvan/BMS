@@ -5,6 +5,7 @@ APP_NAME = os.getenv("DIFFUSION_APP_NAME", "diffusion_service")
 APP_VERSION = os.getenv("DIFFUSION_APP_VERSION", "1.0.0")
 FLASK_DEBUG = os.getenv("FLASK_DEBUG", "False").lower() == "true"
 LOKI_URL = os.getenv("LOKI_URL", "")
+MAX_IMAGE_THREADS = int(os.getenv("MAX_IMAGE_THREADS", 4))
 
 # model settings
 MODEL_ID = os.getenv("DIFFUSION_MODEL_ID", "CompVis/stable-diffusion-v1-4")

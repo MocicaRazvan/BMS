@@ -13,7 +13,7 @@ from opentelemetry.sdk.trace.export import BatchSpanProcessor
 from opentelemetry.sdk.trace.sampling import ParentBased, TraceIdRatioBased
 from prometheus_flask_exporter.multiprocess import GunicornInternalPrometheusMetrics
 
-from config import APP_NAME, APP_VERSION, FLASK_DEBUG, ZIPKIN_SAMPLE_RATE, ZIPKIN_URL
+from config import APP_NAME, APP_VERSION, FLASK_DEBUG, ZIPKIN_SAMPLE_RATE, ZIPKIN_URL, MAX_IMAGE_THREADS
 from logger import logger
 from model import get_pipeline, reserve_vram, release_vram, clear_cache
 from utils import process_image_to_bytes
@@ -84,7 +84,9 @@ def generate_images():
 
         zip_buffer = io.BytesIO()
         with zipfile.ZipFile(zip_buffer, "w", compression=zipfile.ZIP_DEFLATED) as zip_file:
-            with ThreadPoolExecutor() as executor:
+            with ThreadPoolExecutor(max_workers=MAX_IMAGE_THREADS,
+                                    thread_name_prefix="image_processing_thread"
+                                    ) as executor:
                 results = executor.map(process_image_to_bytes, images, range(len(images)))
 
                 for file_name, img_data in results:
