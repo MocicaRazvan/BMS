@@ -66,8 +66,9 @@ export class VectorStoreSingleton {
           keepAlive,
           requestOptions: {
             keepAlive,
-            numCtx: VectorStoreSingleton.CHUNK_SIZE,
-            // numCtx: 2048,
+            numCtx: process.env.OLLAMA_EMBEDDING_NUM_CTX
+              ? parseInt(process.env.OLLAMA_EMBEDDING_NUM_CTX)
+              : 2048,
           },
         });
       }
