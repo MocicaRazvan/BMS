@@ -67,34 +67,32 @@ export async function POST(req: NextRequest) {
 
     const messages = body.messages satisfies VercelMessage[];
 
-    const chatCount = process.env.OLLAMA_CHAT_COUNT
-      ? -(parseInt(process.env.OLLAMA_CHAT_COUNT) + 1)
-      : -21;
-    const chatHistory = messages
-      .slice(chatCount, -1) // last 20 messages
-      .map((m: VercelMessage) =>
-        m.role === "user"
-          ? new HumanMessage(m.content)
-          : new AIMessage(m.content),
-      );
-
     const currentMessageContent = messages[messages.length - 1].content;
 
     const { stream, handlers } = LangChainStream();
     const newHandlers: ReturnType<typeof LangChainStream>["handlers"] = {
       ...handlers,
       handleLLMEnd: (output, id) => {
-        console.error("LLMEND", JSON.stringify(output), id);
+        // console.error("LLMEND", JSON.stringify(output), id);
         return handlers.handleLLMEnd(output, id);
       },
     };
     // retrievers and documents
-    const [historyAwareRetrieverChain, combineDocsChain] = await Promise.all([
+    const [
+      historyAwareRetrieverChain,
+      combineDocsChain,
+      [chatHistory, userChatHistory],
+    ] = await Promise.all([
       createHistoryChain(vectorStore, vectorFilter),
       createDocsChain(newHandlers, currentUserRole, currentUserId),
+      getChatHistory(messages),
     ]);
 
     console.log("RETRIVER DONE");
+    console.log(
+      "UserChatHistory",
+      userChatHistory.map((m) => m.content),
+    );
 
     const retrievalChain = await createRetrievalChain({
       combineDocsChain,
@@ -104,6 +102,7 @@ export async function POST(req: NextRequest) {
     retrievalChain.invoke({
       input: currentMessageContent,
       chat_history: chatHistory,
+      user_chat_history: userChatHistory,
     });
 
     return new StreamingTextResponse(stream);
@@ -114,6 +113,26 @@ export async function POST(req: NextRequest) {
       { status: 500 },
     );
   }
+}
+
+async function getChatHistory(messages: VercelMessage[]) {
+  const chatCount = process.env.OLLAMA_CHAT_COUNT
+    ? -(parseInt(process.env.OLLAMA_CHAT_COUNT) + 1)
+    : -21;
+  return (async () => messages.slice(chatCount, -1))().then((slicedMessages) =>
+    Promise.all([
+      (async () =>
+        slicedMessages.map((m: VercelMessage) =>
+          m.role === "user"
+            ? new HumanMessage(m.content)
+            : new AIMessage(m.content),
+        ))(),
+      (async () =>
+        slicedMessages
+          .filter((m) => m.role === "user")
+          .map((m: VercelMessage) => new HumanMessage(m.content)))(),
+    ]),
+  );
 }
 
 async function createHistoryChain(
@@ -148,9 +167,9 @@ async function createHistoryChain(
         "**Never omit relevant keywords** and always rephrase with the site's purpose in mind. " +
         "**ONLY return the rephrased query without any additional text.**\n" +
         "\n" +
-        "Below is the chat history for context.\n\n",
+        "Below are the previous user questions.\n\n",
     ],
-    new MessagesPlaceholder("chat_history"),
+    new MessagesPlaceholder("user_chat_history"),
     [
       "user",
       "Original query: {input}\n\n" +
