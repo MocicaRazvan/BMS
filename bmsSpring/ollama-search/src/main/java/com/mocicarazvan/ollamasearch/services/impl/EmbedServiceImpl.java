@@ -7,7 +7,6 @@ import com.mocicarazvan.ollamasearch.services.OllamaAPIService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.transaction.reactive.TransactionalOperator;
 import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Schedulers;
 import reactor.util.function.Tuple2;
 
 import java.time.LocalDateTime;
@@ -29,7 +28,6 @@ public abstract class EmbedServiceImpl<T extends EmbedModel, M extends EmbedMode
         t.setCreatedAt(LocalDateTime.now());
         t.setUpdatedAt(LocalDateTime.now());
         return Mono.fromCallable(() -> ollamaAPIService.generateEmbeddingFloat(embedText))
-                .subscribeOn(Schedulers.boundedElastic())
                 .flatMap(embeddings -> {
                     t.setEmbedding(embeddings);
                     return embedRepository.save(t);

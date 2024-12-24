@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/auth-options";
-import { vectorStoreInstance } from "@/lib/langchain";
+import { vectorStoreInstance } from "@/lib/langchain/langchain";
 import { emitInfo } from "@/logger";
 
 export async function GET(req: NextRequest) {

@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 public class BoughtPlansQueListener {
     private final BoughtNotificationService boughtNotificationService;
 
-    @RabbitListener(queues = "#{@environment['plan.bought.queue.name']}")
+    @RabbitListener(queues = "#{@environment['plan.bought.queue.name']}", executor = "threadPoolTaskScheduler")
     public void listen(InternalBoughtBody internalBoughtBody) {
         boughtNotificationService.saveInternalNotifications(internalBoughtBody);
     }

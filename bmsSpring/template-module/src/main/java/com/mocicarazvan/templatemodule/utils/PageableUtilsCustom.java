@@ -212,6 +212,6 @@ public class PageableUtilsCustom {
     }
 
     public boolean isNotNullOrEmpty(String field) {
-        return field != null && !field.isEmpty();
+        return field != null && !field.isBlank();
     }
 }

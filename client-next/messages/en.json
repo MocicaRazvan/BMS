@@ -1835,55 +1835,55 @@
     "LocaleLayout": {
       "title": "Bro Meets Science",
       "description": "Bro Meets Science is a platform that offers a wide range of plans, recipes, and posts to help you improve your health and lifestyle. Join us and start your journey to a healthier life!",
-      "keywords": "health, nutrition, recipes, plans, posts, lifestyle, fitness, diet, food, ingredients, platform, community, trainers, professionals, knowledge, insights, journey, progress, improvement, life, experience, company, science, bro, meals, cooking, eating, habits, goals, achievements, success, motivation, inspiration, support, community, platform, company, trainers, professionals, knowledge, insights, journey, progress, improvement, life, experience, company, science, bro, meals, cooking, eating, habits, goals, achievements, success, motivation, inspiration, support, community"
+      "keywords": "health, nutrition, recipes, plans, posts, lifestyle, fitness, diet, food, ingredients, platform, community, trainers, professionals,  journey, progress, improvement, life, experience, company, science, bro, meals, cooking, eating, habits, goals, achievements, success, motivation, inspiration, support, community, platform, company, trainers, professionals, knowledge, insights,  journey, progress, improvement, life, experience, company, science, bro, meals, cooking, eating, habits, goals, achievements, success, motivation, inspiration, support, community"
     },
     "auth": {
       "SignIn": {
         "title": "Sign In",
         "description": "Sign in to Bro Meets Science to get access to all the features of our platform and become a part of our community.",
-        "keywords": "sign in, login, google, github, email, password, account, platform, community, features, access, bro meets science, health, nutrition, recipes, plans, posts, lifestyle, fitness, diet, food, ingredients, platform, community, trainers, professionals, knowledge, insights, journey, progress, improvement, life, experience, company, science, bro, meals, cooking, eating, habits, goals, achievements, success, motivation, inspiration, support, community"
+        "keywords": "sign in, login, google, github, email, password, account, access"
       },
       "SignUp": {
         "title": "Sign Up",
         "description": "Sign up to Bro Meets Science to get access to all the features of our platform and become a part of our community.",
-        "keywords": "sign up, register, email, password, account, platform, community, features, access, bro meets science, health, nutrition, recipes, plans, posts, lifestyle, fitness, diet, food, ingredients, platform, community, trainers, professionals, knowledge, insights, journey, progress, improvement, life, experience, company, science, bro, meals, cooking, eating, habits, goals, achievements, success, motivation, inspiration, support, community"
+        "keywords": "sign up, register, email, password, account, access"
       },
       "ConfirmEmail": {
         "title": "Confirm Email",
         "description": "Confirm your email",
-        "keywords": "confirm email, email, account, platform, community, features, access, bro meets science, health, nutrition, recipes, plans, posts, lifestyle, fitness, diet, food, ingredients, platform, community, trainers, professionals, knowledge, insights, journey, progress, improvement, life, experience, company, science, bro, meals, cooking, eating, habits, goals, achievements, success, motivation, inspiration, support, community"
+        "keywords": "confirm email, email, account, access"
       },
       "ForgotPassword": {
         "title": "Forgot Password",
         "description": "Forgot your password? No worries, we will help you to reset it.",
-        "keywords": "forgot password, email, account, platform, community, features, access, bro meets science, health, nutrition, recipes, plans, posts, lifestyle, fitness, diet, food, ingredients, platform, community, trainers, professionals, knowledge, insights, journey, progress, improvement, life, experience, company, science, bro, meals, cooking, eating, habits, goals, achievements, success, motivation, inspiration, support, community"
+        "keywords": "forgot password, email, account, access"
       },
       "ResetPassword": {
         "title": "Reset Password",
         "description": "Reset your password",
-        "keywords": "reset password, email, account, platform, community, features, access, bro meets science, health, nutrition, recipes, plans, posts, lifestyle, fitness, diet, food, ingredients, platform, community, trainers, professionals, knowledge, insights, journey, progress, improvement, life, experience, company, science, bro, meals, cooking, eating, habits, goals, achievements, success, motivation, inspiration, support, community"
+        "keywords": "reset password, email, account, access"
       },
       "SignOut": {
         "title": "Sign Out",
         "description": "Sign out from Bro Meets Science",
-        "keywords": "sign out, logout, account, platform, community, features, access, bro meets science, health, nutrition, recipes, plans, posts, lifestyle, fitness, diet, food, ingredients, platform, community, trainers, professionals, knowledge, insights, journey, progress, improvement, life, experience, company, science, bro, meals, cooking, eating, habits, goals, achievements, success, motivation, inspiration, support, community"
+        "keywords": "sign out, logout, account"
       }
     },
     "user": {
       "Cart": {
         "title": "Cart",
         "description": "Your cart on Bro Meets Science",
-        "keywords": "cart, plans, orders, total, subtotal, finish order, remove, clear all, undo, plans, orders, total, subtotal, finish order, remove, clear all, undo, plans, orders, total, subtotal, finish order, remove, clear all, undo, plans, orders, total, subtotal, finish order, remove, clear all, undo"
+        "keywords": "cart, plans, orders, total, subtotal, finish order"
       },
       "Chat": {
         "title": "Chat",
         "description": "Chat with other users on Bro Meets Science",
-        "keywords": "chat, messages, conversation, chat rooms, users, chat, messages, conversation, chat rooms, users, chat, messages, conversation, chat rooms, users, chat, messages, conversation, chat rooms, users"
+        "keywords": "chat, messages, conversations, users"
       },
       "Kanban": {
         "title": "Kanban",
         "description": "See and manage the tasks you have created",
-        "keywords": "kanban, tasks, board, columns, tasks, board, columns, tasks, board, columns, tasks, board, columns"
+        "keywords": "kanban, tasks, board"
       },
       "OrderComplete": {
         "title": "Order Complete",
@@ -1893,7 +1893,7 @@
       "Orders": {
         "title": "Orders",
         "description": "Your orders on Bro Meets Science",
-        "keywords": "orders, plans, bought, view, invoice"
+        "keywords": "orders, plans, bought, view, invoice, search, filter"
       },
       "SingleOrder": {
         "title": "Single Order",
@@ -1903,27 +1903,27 @@
       "ApprovedPlans": {
         "title": "Nutritional Plans",
         "description": "Buy nutritional plans to improve yourself and get the full experience of our platform. We offer a wide range of plans according to your needs.",
-        "keywords": "plans, approved, buy, add, cart, finish, order"
+        "keywords": "plans, buy, add, cart, order, search, filter"
       },
       "SinglePlan": {
         "title": "Nutritional Plan",
         "description": "Single plan on Bro Meets Science",
-        "keywords": "plan, nutrition, buy, add, cart, finish, order"
+        "keywords": "plan, buy, add, cart, order"
       },
       "ApprovedPosts": {
         "title": "Posts",
         "description": "Read posts to gain knowledge and insights about different nutritional topics written by professionals.",
-        "keywords": "posts, read, knowledge, insights, topics, professionals, free, platform"
+        "keywords": "posts, read, free, search, filter"
       },
       "SinglePost": {
         "title": "Post",
         "description": "Single post on Bro Meets Science",
-        "keywords": "post, read, knowledge, insights, topics, professionals, free, platform"
+        "keywords": "post, read, free, comment"
       },
       "Subscriptions": {
         "title": "Bought Plans",
         "description": "Your bought plans on Bro Meets Science",
-        "keywords": "plans, bought, view"
+        "keywords": "plans, bought, view, search, filter, yours"
       },
       "SingleSubscription": {
         "title": "Bought Plan",
@@ -1933,286 +1933,286 @@
       "UserProfile": {
         "title": "User Profile",
         "description": "User profile on Bro Meets Science",
-        "keywords": "user, profile, view, edit, verify, email, change, password, start, chat"
+        "keywords": "user, profile, view, chat"
       },
       "Calculator": {
         "title": "Calorie Calculator",
         "description": "Calculate your daily calorie intake",
-        "keywords": "calorie, calculator, daily, intake, calculate, nutrition"
+        "keywords": "calorie, calculator, daily, intake, calculate"
       }
     },
     "trainer": {
       "Ingredients": {
         "title": "Ingredients",
         "description": "All the ingredients on Bro Meets Science",
-        "keywords": "ingredients, nutrition, facts, calories, fat, protein, carbohydrates, sugar, salt, display, toggle"
+        "keywords": "ingredients, nutrition, facts, calories, fat, protein, carbohydrates, sugar, salt, search, filter, trainer"
       },
       "SingleIngredient": {
         "title": "Ingredient",
         "description": "Single ingredient on Bro Meets Science",
-        "keywords": "ingredient, nutrition, facts, calories, fat, protein, carbohydrates, sugar, salt, display, toggle"
+        "keywords": "ingredient, nutrition, facts, calories, fat, protein, carbohydrates, sugar, salt, trainer"
       },
       "CreatePlan": {
         "title": "Create Nutritional Plan",
         "description": "Create a new nutritional plan on Bro Meets Science",
-        "keywords": "create, plan, nutrition, facts, calories, fat, protein, carbohydrates, sugar, salt, display, toggle"
+        "keywords": "create, plan, nutrition, write, trainer"
       },
       "SinglePlan": {
         "title": "View Your Plan",
         "description": "View your plan on Bro Meets Science",
-        "keywords": "view, plan, nutrition, facts, calories, fat, protein, carbohydrates, sugar, salt, display, toggle"
+        "keywords": "view, plan, nutrition, read, trainer"
       },
       "UpdatePlan": {
         "title": "Update Your Plan",
         "description": "Update your plan on Bro Meets Science",
-        "keywords": "update, plan, nutrition, facts, calories, fat, protein, carbohydrates, sugar, salt, display, toggle"
+        "keywords": "update, plan, nutrition, modify, trainer"
       },
       "DuplicatePlan": {
         "title": "Create Plan",
         "description": "Create a new plan on Bro Meets Science by duplicating an existing one",
-        "keywords": "create, plan, nutrition, facts, calories, fat, protein, carbohydrates, sugar, salt, display, toggle"
+        "keywords": "create, plan, nutrition, write, duplicate, trainer"
       },
       "CreatePost": {
         "title": "Create Post",
         "description": "Create a new post on Bro Meets Science",
-        "keywords": "create, post, write, knowledge, insights, topics, professionals, free, platform"
+        "keywords": "create, post, write, topics, trainer"
       },
       "UpdatePost": {
         "title": "Update Your Post",
         "description": "Update your post on Bro Meets Science",
-        "keywords": "update, post, write, knowledge, insights, topics, professionals, free, platform"
+        "keywords": "update, post, write, topics, trainer"
       },
       "DuplicatePost": {
         "title": "Create Post",
         "description": "Create a new post on Bro Meets Science by duplicating an existing one",
-        "keywords": "create, post, write, knowledge, insights, topics, professionals, free, platform"
+        "keywords": "create, post, write, topics, duplicate, trainer"
       },
       "CreateRecipe": {
         "title": "Create Recipe",
         "description": "Create a new recipe on Bro Meets Science",
-        "keywords": "create, recipe, write, knowledge, insights, topics, professionals, free, platform"
+        "keywords": "create, recipe, write, topics, trainer"
       },
       "SingleRecipe": {
         "title": "Your Recipe",
         "description": "Your recipe on Bro Meets Science",
-        "keywords": "view, recipe, write, knowledge, insights, topics, professionals, free, platform"
+        "keywords": "view, recipe, read, trainer"
       },
       "UpdateRecipe": {
         "title": "Update Your Recipe",
         "description": "Update your recipe on Bro Meets Science",
-        "keywords": "update, recipe, write, knowledge, insights, topics, professionals, free, platform"
+        "keywords": "update, recipe, write, topics, trainer"
       },
       "DuplicateRecipe": {
         "title": "Create Recipe",
         "description": "Create a new recipe on Bro Meets Science by duplicating an existing one",
-        "keywords": "create, recipe, write, knowledge, insights, topics, professionals, free, platform"
+        "keywords": "create, recipe, write, topics, duplicate, trainer"
       },
       "TrainerPlans": {
         "title": "Your Nutrition Plans",
         "description": "Your nutrition plans on Bro Meets Science",
-        "keywords": "view, plans, nutrition, facts, calories, fat, protein, carbohydrates, sugar, salt, display, toggle"
+        "keywords": "view, plans, nutrition, search, filter, trainer, display, manage"
       },
       "DailySales": {
         "title": "Your Daily Sales",
         "description": "Your daily sales on Bro Meets Science",
-        "keywords": "daily, sales, view, platform, community, features, access, bro meets science, health, nutrition, recipes, plans, posts, lifestyle, fitness, diet, food, ingredients, platform, community, trainers, professionals, knowledge, insights, journey, progress, improvement, life, experience, company, science, bro, meals, cooking, eating, habits, goals, achievements, success, motivation, inspiration, support, community"
+        "keywords": "daily, sales, view, access, trainer"
       },
       "MonthlySales": {
         "title": "Your Monthly Sales",
         "description": "Your monthly sales on Bro Meets Science",
-        "keywords": "monthly, sales, view, platform, community, features, access, bro meets science, health, nutrition, recipes, plans, posts, lifestyle, fitness, diet, food, ingredients, platform, community, trainers, professionals, knowledge, insights, journey, progress, improvement, life, experience, company, science, bro, meals, cooking, eating, habits, goals, achievements, success, motivation, inspiration, support, community"
+        "keywords": "monthly, sales, view, access, trainer"
       },
       "TrainerPosts": {
         "title": "Your Posts",
         "description": "Your posts on Bro Meets Science",
-        "keywords": "view, posts, write, knowledge, insights, topics, professionals, free, platform"
+        "keywords": "view, posts, topics, search, filter, trainer, manage"
       },
       "TrainerRecipes": {
         "title": "Your Recipes",
         "description": "Your recipes on Bro Meets Science",
-        "keywords": "view, recipes, write, knowledge, insights, topics, professionals, free, platform"
+        "keywords": "view, recipes, search, filter, trainer, manage"
       },
       "CreateDay": {
         "title": "Create Day",
         "description": "Create a new day on Bro Meets Science",
-        "keywords": "create, day, write, knowledge, insights, topics, professionals, free, platform"
+        "keywords": "create, day, write, trainer"
       },
       "UpdateDay": {
         "title": "Update Your Day",
         "description": "Update your day on Bro Meets Science",
-        "keywords": "update, day, write, knowledge, insights, topics, professionals, free, platform"
+        "keywords": "update, day, write, trainer"
       },
       "SingleDay": {
         "title": "Your Day",
         "description": "Your day on Bro Meets Science",
-        "keywords": "view, day, write, knowledge, insights, topics, professionals, free, platform"
+        "keywords": "view, day, write, trainer"
       },
       "Kanban": {
         "title": "Kanban",
         "description": "See and manage the tasks you have created",
-        "keywords": "kanban, tasks, board, columns"
+        "keywords": "kanban, tasks, board, trainer"
       },
       "SinglePost": {
         "title": "Your Post",
         "description": "Your post on Bro Meets Science",
-        "keywords": "view, post, write, knowledge, insights, topics, professionals, free, platform"
+        "keywords": "view, post, write, trainer"
       },
       "TrainerDays": {
         "title": "Your Days",
         "description": "Your days on Bro Meets Science",
-        "keywords": "view, days, write, knowledge, insights, topics, professionals, free, platform"
+        "keywords": "view, days, write, search, filter, trainer, manage"
       },
       "Account": {
         "title": "Account",
         "description": "User's account on Bro Meets Science",
-        "keywords": "user, profile, view, edit, verify, email, change, password, start, chat, trainer, trainer dashboard"
+        "keywords": "user, profile, view, edit, verify, email, change, password, trainer, trainer dashboard, manage"
       },
       "SignOut": {
         "title": "Sign Out",
         "description": "Sign out from Bro Meets Science",
-        "keywords": "sign out, logout, account, platform, community, trainer, trainer dashboard"
+        "keywords": "sign out, logout, account, platform, community, trainer, trainer dashboard, manage"
       }
     },
     "admin": {
       "Countries": {
         "title": "Orders by countries",
         "description": "Stats by countries for the orders on Bro Meets Science",
-        "keywords": "countries, stats, orders, platform"
+        "keywords": "countries, stats, orders, platform, admin"
       },
       "DailySales": {
         "title": "Daily Sales",
         "description": "Daily sales on Bro Meets Science",
-        "keywords": "daily, sales, view, platform, community, features, access"
+        "keywords": "daily, sales, view, access, admin"
       },
       "Dashboard": {
         "title": "Dashboard",
         "description": "Summary of the platform on Bro Meets Science",
-        "keywords": "summary, platform, community, features, access"
+        "keywords": "summary, access, overview, admin"
       },
       "Email": {
         "title": "Send Email",
         "description": "Send an email from the company on Bro Meets Science",
-        "keywords": "send, email, company, platform, community, features, access"
+        "keywords": "send, email, company, admin"
       },
       "CreateIngredient": {
         "title": "Create Ingredient",
         "description": "Create a new ingredient on Bro Meets Science",
-        "keywords": "create, ingredient, nutrition, facts, calories, fat, protein, carbohydrates, sugar, salt, display"
+        "keywords": "create, ingredient, nutrition, facts, calories, fat, protein, carbohydrates, sugar, salt, admin"
       },
       "UpdateIngredient": {
         "title": "Update Ingredient",
         "description": "Update an ingredient on Bro Meets Science",
-        "keywords": "update, ingredient, nutrition, facts, calories, fat, protein, carbohydrates, sugar, salt, display"
+        "keywords": "update, ingredient, nutrition, facts, calories, fat, protein, carbohydrates, sugar, salt, admin"
       },
       "DuplicateIngredient": {
         "title": "Create Ingredient",
         "description": "Create a new ingredient on Bro Meets Science by duplicating an existing one",
-        "keywords": "create, ingredient, nutrition, facts, calories, fat, protein, carbohydrates, sugar, salt, display"
+        "keywords": "create, ingredient, nutrition, facts, calories, fat, protein, carbohydrates, sugar, salt, duplicate, admin"
       },
       "SingleIngredient": {
         "title": "Ingredient",
         "description": "Single ingredient on Bro Meets Science",
-        "keywords": "ingredient, nutrition, facts, calories, fat, protein, carbohydrates, sugar, salt, display"
+        "keywords": "view, ingredient, nutrition, facts, calories, fat, protein, carbohydrates, sugar, salt, admin"
       },
       "Ingredients": {
         "title": "Ingredients",
         "description": "Manage the ingredients on Bro Meets Science",
-        "keywords": "ingredients, nutrition, facts, calories, fat, protein, carbohydrates, sugar, salt, display"
+        "keywords": "ingredients, nutrition, facts, calories, fat, protein, carbohydrates, sugar, salt, display, admin, search, filter, display, manage"
       },
       "Kanban": {
         "title": "Kanban",
         "description": "See and manage the tasks you have created",
-        "keywords": "kanban, tasks, board, columns"
+        "keywords": "kanban, tasks, board, admin"
       },
       "MonthlySales": {
         "title": "Monthly Sales",
         "description": "Monthly sales on Bro Meets Science",
-        "keywords": "monthly, sales, view, platform, community, features, access"
+        "keywords": "monthly, sales, view, admin"
       },
       "Orders": {
         "title": "Orders",
         "description": "All the orders on Bro Meets Science",
-        "keywords": "orders, plans, bought, view, invoice"
+        "keywords": "orders, plans, bought, view, invoice, search, filter, admin"
       },
       "SingleOrder": {
         "title": "Single Order",
         "description": "Single order on Bro Meets Science",
-        "keywords": "order, plans, bought, view, invoice"
+        "keywords": "order, view, admin"
       },
       "Plans": {
         "title": "Nutritional Plans",
         "description": "Manage all the nutritional plans on Bro Meets Science",
-        "keywords": "plans, nutrition, facts, calories, fat, protein, carbohydrates, sugar, salt, display"
+        "keywords": "plans, nutrition, search, filter, approve, admin, manage"
       },
       "SinglePlan": {
         "title": "Nutritional Plan",
         "description": "Single plan on Bro Meets Science",
-        "keywords": "plan, nutrition, facts, calories, fat, protein, carbohydrates, sugar, salt, display"
+        "keywords": "plan, nutrition, read, admin"
       },
       "Posts": {
         "title": "Posts",
         "description": "Manage all the posts on Bro Meets Science",
-        "keywords": "posts, read, knowledge, insights, topics, professionals, free, platform"
+        "keywords": "posts, view, topics, approve, admin, manage"
       },
       "SinglePost": {
         "title": "Post",
         "description": "Single post on Bro Meets Science",
-        "keywords": "post, read, knowledge, insights, topics, professionals, free, platform"
+        "keywords": "post, read,  topics, admin"
       },
       "Recipes": {
         "title": "Recipes",
         "description": "Manage all the recipes on Bro Meets Science",
-        "keywords": "recipes, read, knowledge, insights, topics, professionals, free, platform"
+        "keywords": "recipes, view, approve, admin, manage"
       },
       "SingleRecipe": {
         "title": "Recipe",
         "description": "Single recipe on Bro Meets Science",
-        "keywords": "recipe, read, knowledge, insights, topics, professionals, free, platform"
+        "keywords": "recipe, read, admin"
       },
       "Users": {
         "title": "Users",
         "description": "Manage all the users on Bro Meets Science",
-        "keywords": "users, manage, view, edit, delete"
+        "keywords": "users, manage, search, filter, admin"
       },
       "UserDailySales": {
         "title": "Daily Sales For User",
         "description": "Daily sales for the user on Bro Meets Science",
-        "keywords": "daily, sales, view, platform, community, features, access"
+        "keywords": "daily, sales, view, users, admin"
       },
       "UserMonthlySales": {
         "title": "Monthly Sales For User",
         "description": "Monthly sales for the user on Bro Meets Science",
-        "keywords": "monthly, sales, view, platform, community, features, access"
+        "keywords": "monthly, sales, view, users, admin"
       },
       "UserOrders": {
         "title": "Orders For User",
         "description": "Orders for the user on Bro Meets Science",
-        "keywords": "orders, plans, bought, view, invoice"
+        "keywords": "orders, view, users, admin"
       },
       "UserPlans": {
         "title": "Nutritional Plans For User",
         "description": "Nutritional plans for the user on Bro Meets Science",
-        "keywords": "plans, nutrition, facts, calories, fat, protein, carbohydrates, sugar, salt, display"
+        "keywords": "plans, view, users, admin, manage"
       },
       "UserPosts": {
         "title": "Posts For User",
         "description": "Posts for the user on Bro Meets Science",
-        "keywords": "posts, read, knowledge, insights, topics, professionals, free, platform"
+        "keywords": "posts, view, users, admin, manage"
       },
       "UserRecipes": {
         "title": "Recipes For User",
         "description": "Recipes for the user on Bro Meets Science",
-        "keywords": "recipes, read, knowledge, insights, topics, professionals, free, platform"
+        "keywords": "recipes, view, users, admin, manage"
       },
       "Account": {
         "title": "Account",
         "description": "User's account on Bro Meets Science",
-        "keywords": "user, profile, view, edit, verify, email, change, password, start, chat, admin, admin dashboard"
+        "keywords": "user, profile, view, edit, verify, email, change, password, manage, admin"
       },
       "SignOut": {
         "title": "Sign Out",
         "description": "Sign out from Bro Meets Science",
-        "keywords": "sign out, logout, account, platform, community, admin, admin dashboard"
+        "keywords": "sign out, logout, account, admin"
       }
     },
     "terms-of-service": {

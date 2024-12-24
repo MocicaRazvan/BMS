@@ -1840,39 +1840,39 @@
       "SignIn": {
         "title": "Sign In",
         "description": "Conectează-te la Bro Meets Science pentru a avea acces la toate funcțiile platformei noastre și pentru a deveni parte din comunitatea noastră.",
-        "keywords": "conectare, autentificare, google, github, email, parolă, cont, platformă, comunitate, funcții, acces, bro meets science, sănătate, nutriție, rețete, planuri, postări, stil de viață, fitness, dietă, alimente, ingrediente, platformă, comunitate, antrenori, profesioniști, cunoștințe, perspective, călătorie, progres, îmbunătățire, viață, experiență, companie, știință, bro, mese, gătit, alimentație, obiceiuri, obiective, realizări, succes, motivație, inspirație, sprijin, comunitate"
+        "keywords": "conectare, autentificare, google, github, email, parolă, cont"
       },
       "SignUp": {
         "title": "Înregistrare",
         "description": "Înregistrează-te la Bro Meets Science pentru a avea acces la toate funcțiile platformei noastre și pentru a deveni parte din comunitatea noastră.",
-        "keywords": "înregistrare, cont nou, email, parolă, cont, platformă, comunitate, funcții, acces, bro meets science, sănătate, nutriție, rețete, planuri, postări, stil de viață, fitness, dietă, alimente, ingrediente, platformă, comunitate, antrenori, profesioniști, cunoștințe, perspective, călătorie, progres, îmbunătățire, viață, experiență, companie, știință, bro, mese, gătit, alimentație, obiceiuri, obiective, realizări, succes, motivație, inspirație, sprijin, comunitate"
+        "keywords": "înregistrare, cont nou, email, parolă, cont"
       },
       "ConfirmEmail": {
         "title": "Confirmă Emailul",
         "description": "Confirmă adresa ta de email",
-        "keywords": "confirmă email, email, cont, platformă, comunitate, funcții, acces, bro meets science, sănătate, nutriție, rețete, planuri, postări, stil de viață, fitness, dietă, alimente, ingrediente, platformă, comunitate, antrenori, profesioniști, cunoștințe, perspective, călătorie, progres, îmbunătățire, viață, experiență, companie, știință, bro, mese, gătit, alimentație, obiceiuri, obiective, realizări, succes, motivație, inspirație, sprijin, comunitate"
+        "keywords": "confirmă email, email, cont"
       },
       "ForgotPassword": {
         "title": "Parolă Uitata",
         "description": "Ai uitat parola? Nu-ți face griji, te vom ajuta să o resetezi.",
-        "keywords": "parolă uitată, email, cont, platformă, comunitate, funcții, acces, bro meets science, sănătate, nutriție, rețete, planuri, postări, stil de viață, fitness, dietă, alimente, ingrediente, platformă, comunitate, antrenori, profesioniști, cunoștințe, perspective, călătorie, progres, îmbunătățire, viață, experiență, companie, știință, bro, mese, gătit, alimentație, obiceiuri, obiective, realizări, succes, motivație, inspirație, sprijin, comunitate"
+        "keywords": "parolă uitată, email, cont"
       },
       "ResetPassword": {
         "title": "Resetează Parola",
         "description": "Resetează parola contului tău",
-        "keywords": "resetează parola, email, cont, platformă, comunitate, funcții, acces, bro meets science, sănătate, nutriție, rețete, planuri, postări, stil de viață, fitness, dietă, alimente, ingrediente, platformă, comunitate, antrenori, profesioniști, cunoștințe, perspective, călătorie, progres, îmbunătățire, viață, experiență, companie, știință, bro, mese, gătit, alimentație, obiceiuri, obiective, realizări, succes, motivație, inspirație, sprijin, comunitate"
+        "keywords": "resetează parola, email, cont"
       },
       "SignOut": {
         "title": "Sign Out",
         "description": "Deconectează-te de la Bro Meets Science",
-        "keywords": "deconectare, sign out, cont, platformă, comunitate, funcții, acces, bro meets science, sănătate, nutriție, rețete, planuri, postări, stil de viață, fitness, dietă, alimente, ingrediente, platformă, comunitate, antrenori, profesioniști, cunoștințe, perspective, călătorie, progres, îmbunătățire, viață, experiență, companie, știință, bro, mese, gătit, alimentație, obiceiuri, obiective, realizări, succes, motivație, inspirație, sprijin, comunitate"
+        "keywords": "deconectare, sign out, cont"
       }
     },
     "user": {
       "Cart": {
         "title": "Coșul Tău",
         "description": "Aici poți vedea și gestiona toate planurile pe care le-ai adăugat în coș.",
-        "keywords": "coș, planuri, cumpărături, adăugare, eliminare, gestiune, coșul tău, platformă, comunitate, funcții, acces, bro meets science, sănătate, nutriție, rețete, planuri, postări, stil de viață, fitness, dietă, alimente, ingrediente, platformă, comunitate, antrenori, profesioniști, cunoștințe, perspective, călătorie, progres, îmbunătățire, viață, experiență, companie, știință, bro, mese, gătit, alimentație, obiceiuri, obiective, realizări, succes, motivație, inspirație, sprijin, comunitate"
+        "keywords": "coș, planuri, cumpărături, adăugare, eliminare, gestiune, coșul tău"
       },
       "Chat": {
         "title": "Chat",
@@ -2014,12 +2014,12 @@
       "DailySales": {
         "title": "Vânzările Tale Zilnice",
         "description": "Vânzările tale zilnice pe Bro Meets Science",
-        "keywords": "zilnic, vânzări, vizualizează, platformă, comunitate, funcții, acces, bro meets science, sănătate, nutriție, rețete, planuri, postări, stil de viață, fitness, dietă, alimente, ingrediente, platformă, comunitate, antrenori, profesioniști, cunoștințe, perspective, călătorie, progres, îmbunătățire, viață, experiență, companie, știință, bro, mese, gătit, alimentație, obiceiuri, obiective, realizări, succes, motivație, inspirație, sprijin, comunitate"
+        "keywords": "zilnic, vânzări, vizualizează"
       },
       "MonthlySales": {
         "title": "Vânzările Tale Lunare",
         "description": "Vânzările tale lunare pe Bro Meets Science",
-        "keywords": "lunar, vânzări, vizualizează, platformă, comunitate, funcții, acces, bro meets science, sănătate, nutriție, rețete, planuri, postări, stil de viață, fitness, dietă, alimente, ingrediente, platformă, comunitate, antrenori, profesioniști, cunoștințe, perspective, călătorie, progres, îmbunătățire, viață, experiență, companie, știință, bro, mese, gătit, alimentație, obiceiuri, obiective, realizări, succes, motivație, inspirație, sprijin, comunitate"
+        "keywords": "lunar, vânzări, vizualizează"
       },
       "TrainerPosts": {
         "title": "Postările Tale",

@@ -1,24 +1,24 @@
 package com.mocicarazvan.ollamasearch.utils;
 
 
+import com.mocicarazvan.ollamasearch.config.OllamaPropertiesConfig;
 import io.github.ollama4j.models.embeddings.OllamaEmbedResponseModel;
-import org.springframework.beans.factory.annotation.Value;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.stream.Collectors;
 
 @Component
+@RequiredArgsConstructor
 public class OllamaQueryUtils {
 
 
-    @Value("${spring.custom.ollama.threshold:0.6}")
-    private double threshold;
+    private final OllamaPropertiesConfig ollamaPropertiesConfig;
 
     public String getEmbeddingsAsString(OllamaEmbedResponseModel resp) {
         return "[" +
                 resp.getEmbeddings().getFirst().stream()
-                        .map(Double::floatValue)
-                        .map(String::valueOf)
+                        .map(e -> String.valueOf(e.floatValue()))
                         .collect(Collectors.joining(", ")) +
                 "]";
     }
@@ -37,11 +37,11 @@ public class OllamaQueryUtils {
 
 
     public String addThresholdFilter(String vector) {
-        return addThresholdFilter(vector, threshold);
+        return addThresholdFilter(vector, ollamaPropertiesConfig.getThreshold());
     }
 
     public String addThresholdFilter(String vector, String extraFilter) {
-        return addThresholdFilter(vector, threshold, extraFilter);
+        return addThresholdFilter(vector, ollamaPropertiesConfig.getThreshold(), extraFilter);
     }
 
     public String addThresholdFilter(String vector, double threshold) {
@@ -60,6 +60,6 @@ public class OllamaQueryUtils {
     }
 
     public boolean isNullOrEmpty(String field) {
-        return field == null || field.isEmpty();
+        return field == null || field.isBlank();
     }
 }

@@ -40,13 +40,13 @@ public class RepositoryUtils {
     }
 
     public void addStringField(String field, StringBuilder queryBuilder, MutableBoolean hasPreviousCriteria, String clause, Boolean isOr) {
-        if (field != null && !field.isEmpty()) {
+        if (isNotNullOrEmpty(field)) {
             addNotNullField(field, queryBuilder, hasPreviousCriteria, clause, isOr);
         }
     }
 
     public void addStringField(String field, StringBuilder queryBuilder, MutableBoolean hasPreviousCriteria, String clause) {
-        if (field != null && !field.isEmpty()) {
+        if (isNotNullOrEmpty(field)) {
             addNotNullField(field, queryBuilder, hasPreviousCriteria, clause);
         }
     }
@@ -59,7 +59,7 @@ public class RepositoryUtils {
     }
 
     public String createExtraOrder(String field, String fieldName, String clause) {
-        if (field != null && !field.isEmpty()) {
+        if (isNotNullOrEmpty(field)) {
             return " similarity(" + fieldName + " , " + clause + " ) DESC ";
         }
         return "";
@@ -74,7 +74,7 @@ public class RepositoryUtils {
     }
 
     public DatabaseClient.GenericExecuteSpec bindStringField(String field, DatabaseClient.GenericExecuteSpec executeSpec, String name) {
-        if (field != null && !field.isEmpty()) {
+        if (isNotNullOrEmpty(field)) {
             return bindNotNullField(field, executeSpec, name);
         }
         return executeSpec;
@@ -88,7 +88,7 @@ public class RepositoryUtils {
     }
 
     public DatabaseClient.GenericExecuteSpec bindStringSearchField(String field, DatabaseClient.GenericExecuteSpec executeSpec, String name) {
-        if (field != null && !field.isEmpty()) {
+        if (isNotNullOrEmpty(field)) {
             return executeSpec.bind(name, "%" + field + "%");
         }
         return executeSpec;
@@ -101,6 +101,7 @@ public class RepositoryUtils {
         return executeSpec;
     }
 
+    @SuppressWarnings("unchecked")
     public <T> DatabaseClient.GenericExecuteSpec bindArrayField(List<?> field, DatabaseClient.GenericExecuteSpec executeSpec, String name, Class<T> arrayClass) {
         if (field != null && !field.isEmpty()) {
             T[] array = field.toArray((T[]) Array.newInstance(arrayClass, field.size()));
@@ -110,6 +111,6 @@ public class RepositoryUtils {
     }
 
     public boolean isNotNullOrEmpty(String field) {
-        return field != null && !field.isEmpty();
+        return field != null && !field.isBlank();
     }
 }

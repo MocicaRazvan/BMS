@@ -11,10 +11,9 @@ import {
   PromptTemplate,
 } from "@langchain/core/prompts";
 import { createStuffDocumentsChain } from "langchain/chains/combine_documents";
-import { createHistoryAwareRetriever } from "langchain/chains/history_aware_retriever";
 import { createRetrievalChain } from "langchain/chains/retrieval";
-import { AIMessage, HumanMessage } from "@langchain/core/messages";
-import { vectorStoreInstance } from "@/lib/langchain";
+import { AIMessage, HumanMessage, ToolMessage } from "@langchain/core/messages";
+import { vectorStoreInstance } from "@/lib/langchain/langchain";
 import { ContextualCompressionRetriever } from "langchain/retrievers/contextual_compression";
 import { EmbeddingsFilter } from "langchain/retrievers/document_compressors/embeddings_filter";
 import { VectorStore } from "@langchain/core/vectorstores";
@@ -22,6 +21,11 @@ import { cookies } from "next/headers";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/auth-options";
 import { ScoreThresholdRetriever } from "langchain/retrievers/score_threshold";
+import { getMultiQueryRetriever } from "@/lib/langchain/langhcain-multi-query-retriver";
+import { LLMChain } from "langchain/chains";
+import { getToolsForInput } from "@/app/api/chat/tool-call-wrapper";
+import { generateToolsForUser } from "@/app/api/chat/get-item-tool";
+import { Locale } from "@/navigation";
 
 const modelName = process.env.OLLAMA_MODEL;
 const ollamaBaseUrl = process.env.OLLAMA_BASE_URL;
@@ -68,6 +72,10 @@ export async function POST(req: NextRequest) {
     const messages = body.messages satisfies VercelMessage[];
 
     const currentMessageContent = messages[messages.length - 1].content;
+    const token = session?.user?.token;
+    const locale = (cookies().get("NEXT_LOCALE")?.value || "en") as Locale;
+
+    const siteNoPort = siteUrl?.replace(/:\d+/, "") as string;
 
     const { stream, handlers } = LangChainStream();
     const newHandlers: ReturnType<typeof LangChainStream>["handlers"] = {
@@ -78,21 +86,26 @@ export async function POST(req: NextRequest) {
       },
     };
     // retrievers and documents
-    const [
-      historyAwareRetrieverChain,
-      combineDocsChain,
-      [chatHistory, userChatHistory],
-    ] = await Promise.all([
-      createHistoryChain(vectorStore, vectorFilter),
-      createDocsChain(newHandlers, currentUserRole, currentUserId),
+    const [chatHistory, userChatHistory] = await getChatHistory(messages);
+
+    const toolMessages = await getToolsForInput({
+      input: currentMessageContent,
+      tools: token ? generateToolsForUser(token, siteNoPort, locale) : [],
+      userChatHistory,
+    });
+    console.log("toolMessages", toolMessages);
+    const [historyAwareRetrieverChain, combineDocsChain] = await Promise.all([
+      createHistoryChain(vectorStore, vectorFilter, userChatHistory),
+      createDocsChain(
+        newHandlers,
+        currentUserRole,
+        currentUserId,
+        toolMessages,
+        siteNoPort,
+        locale,
+      ),
       getChatHistory(messages),
     ]);
-
-    console.log("RETRIVER DONE");
-    console.log(
-      "UserChatHistory",
-      userChatHistory.map((m) => m.content),
-    );
 
     const retrievalChain = await createRetrievalChain({
       combineDocsChain,
@@ -103,6 +116,7 @@ export async function POST(req: NextRequest) {
       input: currentMessageContent,
       chat_history: chatHistory,
       user_chat_history: userChatHistory,
+      question: currentMessageContent, // bc multi query is fucked
     });
 
     return new StreamingTextResponse(stream);
@@ -118,19 +132,22 @@ export async function POST(req: NextRequest) {
 async function getChatHistory(messages: VercelMessage[]) {
   const chatCount = process.env.OLLAMA_CHAT_COUNT
     ? -(parseInt(process.env.OLLAMA_CHAT_COUNT) + 1)
-    : -21;
+    : -11;
   return (async () => messages.slice(chatCount, -1))().then((slicedMessages) =>
     Promise.all([
       (async () =>
         slicedMessages.map((m: VercelMessage) =>
           m.role === "user"
-            ? new HumanMessage(m.content)
-            : new AIMessage(m.content),
+            ? new HumanMessage(m.content.replace(/\s+/g, " ").trim())
+            : new AIMessage(m.content.replace(/\s+/g, " ").trim()),
         ))(),
       (async () =>
         slicedMessages
           .filter((m) => m.role === "user")
-          .map((m: VercelMessage) => new HumanMessage(m.content)))(),
+          .map(
+            (m: VercelMessage) =>
+              new HumanMessage(m.content.replace(/\s+/g, " ").trim()),
+          ))(),
     ]),
   );
 }
@@ -138,6 +155,7 @@ async function getChatHistory(messages: VercelMessage[]) {
 async function createHistoryChain(
   vectorStore: VectorStore,
   vectorFilter: EmbeddingsFilter,
+  userChatHistory: HumanMessage[],
 ) {
   const rephrasingModel = new ChatOllama({
     model: modelName,
@@ -153,28 +171,55 @@ async function createHistoryChain(
   const rephrasePrompt = ChatPromptTemplate.fromMessages([
     [
       "system",
-      "You are a query **rephrasing assistant** for Bro Meets Science, a website focused on nutrition, meal plans, and promoting healthy lifestyles. " +
-        "Your primary goal is to rephrase user queries to maximize the accuracy of document retrieval from the site's vector database. " +
-        "Ensure the rephrased queries are highly relevant to the site's core focus areas, which include:\n" +
-        "- **Meal plans** available for purchase\n" +
+      "You are a highly skilled **query rephrasing assistant** for Bro Meets Science, a website dedicated to nutrition, meal plans, and promoting healthy lifestyles. " +
+        "Your role is to rephrase user queries to maximize the accuracy and relevance of document retrieval from the site's vector database. " +
+        "Your rephrased queries must align with the site's core focus areas, which include:\n\n" +
+        "- **Meal plans** available for buying\n" +
         "- Nutrition and dietary advice\n" +
         "- Caloric intake and calculators\n" +
         "- User health and well-being\n" +
-        "- **Posts** which user can browse\n" +
-        "- Already purchased meal plans\n\n" +
-        "Rephrase the query **while preserving its original intent**. Include all essential keywords to ensure the rephrased query retrieves the most accurate and comprehensive results from the database. " +
-        "Be concise, specific, and ensure the rephrased query aligns with the site's purpose and content. " +
-        "**Never omit relevant keywords** and always rephrase with the site's purpose in mind. " +
-        "**ONLY return the rephrased query without any additional text.**\n" +
-        "\n" +
-        "Below are the previous user questions.\n\n",
+        "- **Posts** that users can browse\n" +
+        "- Previously bought meal plans\n\n" +
+        "### Guidelines for Rephrasing Queries\n" +
+        "1. **Preserve Original Intent**: Ensure the rephrased query captures the user's intent without losing meaning.\n" +
+        "2. **Incorporate Essential Keywords**: Include all critical keywords to ensure accurate and comprehensive document retrieval.\n" +
+        "3. **Be Concise and Specific**: Avoid unnecessary verbosity while maintaining clarity.\n" +
+        "4. **Align with the Site's Purpose**: Focus on topics relevant to Bro Meets Science, and avoid straying from its core themes.\n" +
+        "5. **Limit the Number of Rephrased Queries**: Generate exactly **{queryCount}** rephrased queries and no more.\n\n" +
+        "### Formatting Instructions\n" +
+        "Your output **must strictly follow the XML format**. Provide the rephrased queries in the following structure:\n\n" +
+        "<inputs>\n" +
+        "Input 1\n" +
+        "Input 2\n" +
+        "Input 3\n" +
+        "</inputs>\n\n" +
+        "### Important Notes\n" +
+        "- **Always include the original user query as the last entry.**\n" +
+        "- Do not include any additional commentary, explanations, or unnecessary information.\n" +
+        "- Ensure all rephrased queries align with the website's focus areas and maintain their original intent.",
     ],
-    new MessagesPlaceholder("user_chat_history"),
+    ...userChatHistory,
     [
       "user",
-      "Original query: {input}\n\n" +
-        "Based on the original query and conversation context, rephrase the query to improve document retrieval. " +
-        "**ONLY return the rephrased query with no extra text or explanation.**",
+      `##Original input##: {question}
+    
+    Keep the intent of the original input.
+    
+    Based on the **original input**, **previous user inputs**, and the **website's focus areas**.
+    
+    Generate exactly **{queryCount}** rephrased queries.
+    
+    Ensure the original query is included as the last entry in the output.
+    
+    Provide the output in the required XML format as shown below:
+    
+    <inputs>
+    Input 1
+    Input 2
+    Input 3
+    </inputs>
+    
+    Do not include anything else.`,
     ],
   ]);
 
@@ -184,23 +229,29 @@ async function createHistoryChain(
       searchType: "mmr",
       // low similarly because the vectors are from html pages
       // lower from embeddings model to get more results (pg store is not as good as the embeddings model)
-      minSimilarityScore: 0.3, // similarity threshold
-      maxK: 20, // at most 20 results
+      minSimilarityScore: process.env.OLLAMA_MIN_SIMILARITY_SCORE
+        ? parseInt(process.env.OLLAMA_MIN_SIMILARITY_SCORE)
+        : 0.4,
+      maxK: process.env.OLLAMA_MAX_K_CHAT
+        ? parseInt(process.env.OLLAMA_MAX_K_CHAT)
+        : 10, // max number of results
       kIncrement: 2, // increment by 2
-      verbose: true,
+      // verbose: true,
     },
   );
 
-  const compressionRetriever = new ContextualCompressionRetriever({
-    baseRetriever: thresholdRetriever,
-    baseCompressor: vectorFilter,
-    verbose: true,
+  const multiQueryRetriever = getMultiQueryRetriever({
+    retriever: thresholdRetriever,
+    llmChain: new LLMChain({
+      llm: rephrasingModel,
+      prompt: rephrasePrompt,
+    }),
   });
 
-  return await createHistoryAwareRetriever({
-    llm: rephrasingModel,
-    retriever: compressionRetriever,
-    rephrasePrompt,
+  return new ContextualCompressionRetriever({
+    baseRetriever: multiQueryRetriever,
+    baseCompressor: vectorFilter,
+    // verbose: true,
   });
 }
 
@@ -208,6 +259,9 @@ async function createDocsChain(
   handlers: ReturnType<typeof LangChainStream>["handlers"],
   currentUserRole: string,
   currentUserId: string | undefined,
+  toolsMessages: ToolMessage[],
+  siteNoPort: string,
+  locale: Locale,
 ) {
   const chatModel = new ChatOllama({
     model: modelName,
@@ -224,11 +278,7 @@ async function createDocsChain(
       ? parseInt(process.env.OLLAMA_NUM_CTX)
       : 2048,
   });
-
-  const locale = cookies().get("NEXT_LOCALE")?.value || "en";
-
-  console.log("CurrentUserId", currentUserId);
-  const siteNoPort = siteUrl?.replace(/:\d+/, "");
+  toolsMessages = toolsMessages.filter((t) => t.content.length > 0);
   const prompt = ChatPromptTemplate.fromMessages([
     [
       "system",
@@ -279,18 +329,22 @@ async function createDocsChain(
             ? "As a 'trainer', provide information relevant to both general users and trainers. However, do not share details related to admin features.\n"
             : "As an 'admin', provide information relevant to users, trainers, and admins as necessary.") +
         "\n\n" +
-        +"**Key guidelines for interaction**:\n" +
+        "When ##TOOLS## are used to assist you in answering a query, their output will be included in your response. " +
+        "Always integrate the tools' output directly and appropriately into your answer when they are present." +
+        "**Key guidelines for interaction**:\n" +
         "1. Focus on user experience, health, and well-being.\n" +
         "2. Keep the conversation engaging, informative, and fun.\n" +
         "3. Never provide HTML/JS code or discuss technical details with the user.\n" +
         "4. Never send images to the user, you are a text based chat, but you can send emojis. \n" +
         "5. Never mention other sites and always focus on the site you are assisting with.\n" +
-        "6. Always include the site's base URL : " +
+        "6. Include the tools output in your response, if they are present.\n" +
+        "7. Always include the site's base URL : " +
         siteNoPort +
         " in any links you provide.\n" +
         "Context:\n{context}",
     ],
     new MessagesPlaceholder("chat_history"),
+    ...toolsMessages,
     ["user", "{input}"],
   ]);
 

@@ -4,28 +4,30 @@ import { TextLoader } from "langchain/document_loaders/fs/text";
 import { DocumentInterface } from "@langchain/core/documents";
 import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
 import { EmbeddingsFilter } from "langchain/retrievers/document_compressors/embeddings_filter";
-import { CustomOllamaEmbeddings } from "@/lib/custom-ollama-embeddings";
-import { PoolConfig } from "pg";
+import { CustomOllamaEmbeddings } from "@/lib/langchain/custom-ollama-embeddings";
+import { Pool } from "pg";
 import {
   DistanceStrategy,
   PGVectorStore,
 } from "@langchain/community/vectorstores/pgvector";
 import * as cheerio from "cheerio";
+import { HtmlToTextTransformer } from "@langchain/community/document_transformers/html_to_text";
 
 const ollamaBaseUrl = process.env.OLLAMA_BASE_URL;
 const embeddingModel = process.env.OLLAMA_EMBEDDING;
 const siteUrl = process.env.NEXTAUTH_URL;
 const keepAlive = "-1m";
 
+const pool = new Pool({
+  host: process.env.POSTGRES_HOST,
+  port: parseInt(process.env.POSTGRES_PORT || "5432"),
+  user: process.env.POSTGRES_USER,
+  password: process.env.POSTGRES_PASSWORD,
+  database: process.env.POSTGRES_DB,
+});
+
 const pgConfig = {
-  postgresConnectionOptions: {
-    type: "postgres",
-    host: process.env.POSTGRES_HOST,
-    port: parseInt(process.env.POSTGRES_PORT || "5432"),
-    user: process.env.POSTGRES_USER,
-    password: process.env.POSTGRES_PASSWORD,
-    database: process.env.POSTGRES_DB,
-  } as PoolConfig,
+  pool,
   tableName: "langchain_vector_store",
   columns: {
     idColumnName: "id",
@@ -48,8 +50,8 @@ export class VectorStoreSingleton {
   private filter: EmbeddingsFilter | undefined;
   private isInitialized = false;
   private pgVectorStore: PGVectorStore | undefined;
-  public static CHUNK_SIZE = 1024;
-  public static CHUNK_OVERLAP = 300;
+  public static CHUNK_SIZE = 2000;
+  public static CHUNK_OVERLAP = 700; // large overlap of html
 
   constructor() {
     //
@@ -86,13 +88,20 @@ export class VectorStoreSingleton {
           ...pgConfig,
           chunkSize: VectorStoreSingleton.CHUNK_SIZE,
         });
+        await this.pgVectorStore.createHnswIndex({
+          dimensions: 1024,
+          m: 32,
+          efConstruction: 128,
+        });
       }
 
       if (!this.filter || reset) {
         this.filter = new EmbeddingsFilter({
           embeddings: this.embeddings,
           // low similarly because the vectors are from html pages
-          similarityThreshold: 0.6,
+          similarityThreshold: process.env.EMBEDDINGS_SIMILARITY_THRESHOLD
+            ? parseFloat(process.env.EMBEDDINGS_SIMILARITY_THRESHOLD)
+            : 0.5,
           // k: 25,
           k: undefined,
         });
@@ -234,7 +243,7 @@ export class VectorStoreSingleton {
     const metaDescription = $('meta[name="description"]').attr("content") || "";
     let canonical = $('link[rel="canonical"]').attr("href") || "";
     const keywords = $('meta[name="keywords"]').attr("content") || "";
-    const bodyContent = $("body").text().trim();
+    const bodyContent = $("body").html() || "";
 
     let numberCount = 0;
     // sa pastram url im51.go.ro:3443
@@ -267,9 +276,19 @@ export class VectorStoreSingleton {
           doc.pageContent,
           doc.metadata.source,
         );
-
       return {
-        pageContent: bodyContent,
+        pageContent: bodyContent
+          .replace(/<script[^>]*>([\s\S]*?)<\/script>/gi, " ")
+          .replace(/<style[^>]*>([\s\S]*?)<\/style>/gi, " ")
+          .replace(/\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b/g, " ")
+          .replace(/(Toggle dark mode|dark mode|Made by)/gi, " ")
+          .replace(/€\d+\.\d+\d{2}\/\d{2}\/\d{4}/g, " ")
+          .replace(/€-?\d+(\.\d+)?/g, " ")
+          .replace(/\d+\/\d+\/\d+/g, " ")
+          .replace(/\d+\/\d+/g, " ")
+          .replace(/\/\d+\/\d+/g, " ")
+          .replace(/\s+/g, " ")
+          .trim(),
         metadata: {
           scope: "Part of parsed HTML page of the website",
           // source: doc.metadata.source,
@@ -284,29 +303,27 @@ export class VectorStoreSingleton {
     });
 
     // chunkSize should be less than the embedding model's context length
-    // chunkOverlap can be any value,oo but doesn't affect the size of each chunk
+    // chunkOverlap can be any value, but doesn't affect the size of each chunk
 
-    // const splitter = RecursiveCharacterTextSplitter.fromLanguage("html", {
-    //   chunkSize: VectorStoreSingleton.CHUNK_SIZE,
-    //   chunkOverlap: VectorStoreSingleton.CHUNK_OVERLAP,
-    // });
-    const splitter = new RecursiveCharacterTextSplitter({
+    const splitter = RecursiveCharacterTextSplitter.fromLanguage("html", {
       chunkSize: VectorStoreSingleton.CHUNK_SIZE,
       chunkOverlap: VectorStoreSingleton.CHUNK_OVERLAP,
+      keepSeparator: false,
     });
-    const splitDocs = (await splitter.splitDocuments(docs)).map((doc, i) => ({
+    const transformer = new HtmlToTextTransformer({ wordwrap: false });
+    const sequence = splitter.pipe(transformer);
+
+    const splitDocs = (await sequence.invoke(docs)).map((doc, i) => ({
       ...doc,
       title: doc.metadata.title,
       description: doc.metadata.description,
       url: doc.metadata.url,
       id: i.toString() + "_" + doc.metadata.scope + "_" + doc.metadata.source,
+      pageContent: doc.pageContent.trim(),
     }));
 
-    console.log(splitDocs.map((d) => d.id));
     console.log("Split docs size", splitDocs.length);
     console.log("Embeddings generated");
-    const docsWithoutSource = splitDocs.filter((d) => !d.metadata.source);
-    console.log("Docs without source", docsWithoutSource.length);
 
     return splitDocs;
   }

@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 import java.io.IOException;
 import java.util.List;
@@ -55,7 +56,8 @@ public class OllamaAPIServiceImpl implements OllamaAPIService {
 
     @Override
     public Mono<OllamaEmbedResponseModel> generateEmbeddingMono(String text, EmbedCache embedCache) {
-        return embedCache.getEmbedding(text, this::generateEmbedding);
+        return embedCache.getEmbedding(text, this::generateEmbedding)
+                .subscribeOn(Schedulers.boundedElastic());
     }
 
     @Override

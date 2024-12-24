@@ -10,8 +10,9 @@ import {
 } from "@/types/ai-ideas-types";
 import { createStuffDocumentsChain } from "langchain/chains/combine_documents";
 import { createRetrievalChain } from "langchain/chains/retrieval";
-import { vectorStoreInstance } from "@/lib/langchain";
+import { vectorStoreInstance } from "@/lib/langchain/langchain";
 import { MemoryVectorStore } from "langchain/vectorstores/memory";
+import { getMultiQueryRetriever } from "@/lib/langchain/langhcain-multi-query-retriver";
 
 const modelName = process.env.OLLAMA_MODEL;
 const ollamaBaseUrl = process.env.OLLAMA_BASE_URL;
@@ -68,6 +69,7 @@ const descriptionPrompt = ChatPromptTemplate.fromMessages([
     "Here is the context: {context}. Additionally, the user has provided this input: {input}. Based on this, generate a verbose and detailed description for the item: {item}.",
   ],
 ]);
+
 const placeholderInput =
   "health, wellness, lifestyle, fitness, nutrition, mental health, self-care, well-being, healthy living";
 const prompts: Record<TargetedFields, ChatPromptTemplate> = {
@@ -156,21 +158,30 @@ export async function aiIdea({
     llm,
     prompt,
   });
+  const vectorDbRetriever = vectorDb.asRetriever({
+    searchType: "mmr",
+    searchKwargs: {
+      fetchK: 30,
+    },
+    k:
+      (process.env.OLLAMA_GENERATE_K
+        ? parseInt(process.env.OLLAMA_GENERATE_K)
+        : 10) + extraContext,
+  });
+  const multiQueryRetriever = getMultiQueryRetriever({
+    retriever: vectorDbRetriever,
+  });
   const retrievalChain = await createRetrievalChain({
     combineDocsChain,
-    retriever: vectorDb.asRetriever({
-      searchType: "mmr",
-      k:
-        (process.env.OLLAMA_GENERATE_K
-          ? parseInt(process.env.OLLAMA_GENERATE_K)
-          : 10) + extraContext,
-    }),
+    retriever: multiQueryRetriever,
   });
 
   const resp = await retrievalChain.invoke({
     input: input || placeholderInput,
     item,
+    question: input || placeholderInput,
   });
+
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
   vectorDb = null;

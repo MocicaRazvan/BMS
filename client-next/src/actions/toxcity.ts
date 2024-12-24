@@ -36,7 +36,6 @@ export async function loadGlobalModel(): Promise<toxicity.ToxicityClassifier> {
   return globalModel;
 }
 export async function getToxicity(text: string) {
-  console.log("TEXT", text);
   const lang = franc(text, { minLength: 2 }) === "eng";
   const tangDet = lngDetector.detect(text, 5).some((l) => l[0] === "english");
   const tinyDet = detect(text) === "en";

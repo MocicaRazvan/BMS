@@ -18,7 +18,7 @@ import { SubscriptionProvider } from "@/context/subscriptions-context";
 import { BoughtNotificationProvider } from "@/context/bought-notification-context";
 import ScrollTopProvider from "@/providers/scroll-top";
 import { loadGlobalModel } from "@/actions/toxcity";
-import { vectorStoreInstance } from "@/lib/langchain";
+import { vectorStoreInstance } from "@/lib/langchain/langchain";
 import { getAiChatBoxTexts } from "@/texts/components/ai-chat";
 import ValidUserSessionContext from "@/context/valid-user-session";
 import { NotificationPopProvider } from "@/context/notification-pop-context";
@@ -29,21 +29,6 @@ const fontSans = FontSans({
   subsets: ["latin"],
   variable: "--font-sans",
 });
-
-// export async function generateMetadata(): Promise<Metadata> {
-//   const url = process.env.NEXTAUTH_URL;
-//   if (!url) {
-//     throw new Error("NEXTAUTH_URL must be set in the environment");
-//   }
-//   const languages = locales.reduce((acc, l) => ({ ...acc, [l]: `/${l}` }), {});
-//   return {
-//     alternates: {
-//       // canonical: "/",
-//       languages,
-//     },
-//     metadataBase: new URL(url),
-//   };
-// }
 
 interface Props {
   children: React.ReactNode;
@@ -73,8 +58,9 @@ export default async function BaseLayout({
     session = sessionP;
     aiTexts = aiTextsP;
   } else {
-    const [sessionP, aiTextsP] = await Promise.all([
+    const [sessionP, lg, aiTextsP] = await Promise.all([
       getServerSession(authOptions),
+      vectorStoreInstance.initialize(false, false),
       getAiChatBoxTexts(),
     ]);
     session = sessionP;
@@ -89,10 +75,7 @@ export default async function BaseLayout({
           fontSans.variable,
         )}
       >
-        <NextIntlClientProvider
-          // messages={messages.NotFoundPage as AbstractIntlMessages}
-          locale={locale}
-        >
+        <NextIntlClientProvider locale={locale}>
           <ThemeProvider
             attribute="class"
             defaultTheme="system"

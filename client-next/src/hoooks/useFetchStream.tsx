@@ -59,8 +59,6 @@ export function useFetchStream<T = unknown, E extends BaseError = BaseError>({
     const token = authToken && session?.user?.token ? session.user.token : "";
     const abortController = new AbortController();
 
-    console.log("QP", queryParams);
-
     const fetchProps: FetchStreamProps<T> = {
       path,
       method,
