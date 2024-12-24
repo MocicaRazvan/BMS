@@ -38,7 +38,11 @@ const nextConfig = {
   },
   experimental: {
     instrumentationHook: true,
-    serverComponentsExternalPackages: ["@opentelemetry/instrumentation"],
+    serverComponentsExternalPackages: [
+      "@opentelemetry/instrumentation",
+      "langchain",
+      "@langchain/core",
+    ],
   },
 
   // reactStrictMode: false
