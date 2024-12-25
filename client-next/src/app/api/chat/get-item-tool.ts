@@ -49,8 +49,8 @@ export async function getItemTool<T extends TitleBodyUserDto>(
       i,
     ) => {
       acc +=
-        `Item: ${i + 1} ` +
-        `Title: ${content.title} ` +
+        `Item: ${i + 1} \t ` +
+        `Title: ${content.title} \t ` +
         `Link: ${siteUrl}/${locale}/${modelName}/single/${content.id} \n`;
       if (i === response.messages[0].length - 1) {
         acc += `\n`;

@@ -13,6 +13,7 @@ import { createRetrievalChain } from "langchain/chains/retrieval";
 import { vectorStoreInstance } from "@/lib/langchain/langchain";
 import { MemoryVectorStore } from "langchain/vectorstores/memory";
 import { getMultiQueryRetriever } from "@/lib/langchain/langhcain-multi-query-retriver";
+import { ContextualCompressionRetriever } from "langchain/retrievers/contextual_compression";
 
 const modelName = process.env.OLLAMA_MODEL;
 const ollamaBaseUrl = process.env.OLLAMA_BASE_URL;
@@ -138,13 +139,17 @@ export async function aiIdea({
       ? parseInt(process.env.OLLAMA_NUM_CTX)
       : 2048,
   });
-  const embeddings = await vectorStoreInstance.getEmbeddings();
+  const [embeddings, vectorFilter] = await Promise.all([
+    vectorStoreInstance.getEmbeddings(),
+    vectorStoreInstance.getFilter(),
+  ]);
 
-  if (!embeddings) {
+  if (!embeddings || !vectorFilter) {
     return {
-      error: "Error getting embeddings",
+      error: "Error getting vector store",
     };
   }
+
   const prompt = prompts[targetedField];
   const docs = (
     await Promise.all(
@@ -171,9 +176,13 @@ export async function aiIdea({
   const multiQueryRetriever = getMultiQueryRetriever({
     retriever: vectorDbRetriever,
   });
+  const compressionRetriever = new ContextualCompressionRetriever({
+    baseRetriever: multiQueryRetriever,
+    baseCompressor: vectorFilter,
+  });
   const retrievalChain = await createRetrievalChain({
     combineDocsChain,
-    retriever: multiQueryRetriever,
+    retriever: compressionRetriever,
   });
 
   const resp = await retrievalChain.invoke({
