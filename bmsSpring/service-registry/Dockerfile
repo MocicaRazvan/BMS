@@ -1,4 +1,4 @@
-FROM jelastic/maven:3.9.8-openjdk-22.0.2-almalinux-9 AS build
+FROM jelastic/maven:3.9.9-openjdk-22.0.2-almalinux-9 AS build
 WORKDIR /app
 
 COPY pom.xml .
