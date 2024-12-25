@@ -40,8 +40,8 @@ const nextConfig = {
     instrumentationHook: true,
     serverComponentsExternalPackages: [
       "@opentelemetry/instrumentation",
-      "langchain",
-      "@langchain/core",
+      // "langchain",
+      // "@langchain/core",
     ],
   },
 
