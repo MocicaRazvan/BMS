@@ -158,6 +158,7 @@ export default function CommentAccordion({
             setErrorMsg(fError.message);
           }
           setErrorMsg(error);
+          setIsLoading(false);
         } else {
           refetch();
           // form.reset();

@@ -12,6 +12,7 @@ import ShineBorder from "@/components/magicui/shine-border";
 import Logo from "@/components/logo/logo";
 import { ChatScrollAnchor } from "@/components/ai-chat/chat-scroll-anchor";
 import useAiChatPersist from "@/hoooks/useAiChatPersist";
+import remarkGfm from "remark-gfm";
 
 export interface AiChatBoxTexts {
   loadingContent: string;
@@ -309,6 +310,7 @@ function ChatMessage({ message: { role, content } }: ChatMessageProps) {
             ),
             li: ({ node, ...props }) => <li {...props} className="mt-1" />,
           }}
+          remarkPlugins={[remarkGfm]}
         >
           {content}
         </ReactMarkdown>

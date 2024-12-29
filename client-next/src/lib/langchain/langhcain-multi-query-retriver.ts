@@ -1,16 +1,18 @@
-import { PromptTemplate } from "@langchain/core/prompts";
+import { ChatPromptTemplate } from "@langchain/core/prompts";
 import { BaseOutputParser } from "@langchain/core/output_parsers";
 import { ChatOllama } from "@langchain/ollama";
 import { MultiQueryRetriever } from "langchain/retrievers/multi_query";
 import { LLMChain } from "langchain/chains";
 import { BaseRetrieverInterface } from "@langchain/core/retrievers";
+import { SystemMessage } from "@langchain/core/messages";
 type LineList = {
   lines: string[];
 };
 const modelName = process.env.OLLAMA_MODEL;
 const ollamaBaseUrl = process.env.OLLAMA_BASE_URL;
-const multiQueryRetrieverPrompt = PromptTemplate.fromTemplate(`
-        You are an AI language model assistant. Your task is
+
+function getMultiQuerySystemPrompt(extraQuestion?: string) {
+  return `You are an AI language model assistant. Your task is
         to generate ##{queryCount}## different versions of the given user
         input to retrieve relevant documents from a vector database.
         By generating multiple perspectives on the user input,
@@ -37,8 +39,9 @@ const multiQueryRetrieverPrompt = PromptTemplate.fromTemplate(`
         **Always make sure to include the original input at the end.**
         **Do not include any additional information or commentary.**
         
-        ##Original input##: {question}
-`);
+        ##Original input##: {question}${extraQuestion ? extraQuestion : ""}`;
+}
+
 export class LineListOutputParser extends BaseOutputParser<LineList> {
   static lc_name() {
     return "LineListOutputParser";
@@ -70,11 +73,13 @@ interface MultiQueryRetrieverArgs {
   retriever: BaseRetrieverInterface;
   queryCount?: number;
   llmChain?: LLMChain<LineList, ChatOllama>;
+  extraQuestion?: string;
 }
 export function getMultiQueryRetriever({
   retriever,
   queryCount = 3,
   llmChain,
+  extraQuestion,
 }: MultiQueryRetrieverArgs) {
   if (!llmChain) {
     const llm = new ChatOllama({
@@ -87,6 +92,9 @@ export function getMultiQueryRetriever({
         ? parseInt(process.env.OLLAMA_NUM_CTX)
         : 2048,
     });
+    const multiQueryRetrieverPrompt = ChatPromptTemplate.fromMessages([
+      ["system", getMultiQuerySystemPrompt(extraQuestion)],
+    ]);
     llmChain = new LLMChain({
       llm,
       prompt: multiQueryRetrieverPrompt,

@@ -5,12 +5,20 @@ import {
   SystemMessage,
   ToolMessage,
 } from "@langchain/core/messages";
+import { z } from "zod";
+import { getRedisCache } from "@/lib/langchain/redis-cache";
+import { normalizeText } from "@/lib/utils";
+import Promise from "lie";
+import { v4 as uuidv4 } from "uuid";
+import { emitError } from "@/logger";
+import { getFixingParser } from "@/lib/langchain/fixing-parser";
 
 interface ToolCallWrapperArgs {
   tools: DynamicTool[];
   input: string;
   userChatHistory: HumanMessage[];
 }
+
 const modelName = process.env.OLLAMA_MODEL;
 const ollamaBaseUrl = process.env.OLLAMA_BASE_URL;
 
@@ -19,11 +27,147 @@ if (!modelName || !ollamaBaseUrl) {
     "OLLAMA_MODEL and OLLAMA_BASE_URL must be set in the environment",
   );
 }
+const toolCallSchema = z.array(
+  z.object({
+    tool_name: z
+      .enum(["get_posts_by_title", "get_meal_plans_by_title", "no_op"])
+      .describe("The name of the function to call"),
+    input: z.string().describe("The input for the function"),
+  }),
+);
+
+type ToolCall = z.infer<typeof toolCallSchema>[number];
+
+const formatInstructions = `Respond only in valid JSON. The JSON object you return should match the following schema:
+{[{ tool_name: "string", input: "string" }]}
+
+An array of JSON objects: Where the tool_name is one of the following: "get_posts_by_title", "get_meal_plans_by_title", "no_op", and the input is a string for the tool.
+`;
+
+const systemMessage = new SystemMessage(`
+### Task:
+You are an AI model designed to select the **all the most relevant functions** based on the user's query and chat history.  
+Your primary objective is to identify ALL the functions that best fulfill the user's intent by analyzing their query and the chat history.  
+You MUST fix typos in the query, but do not alter its original intent.
+You MUST infer words or collocations of words like "some", "any", "it", etc. from the context when making a decision. Use the chat history to determine the most relevant substitute and use the substitution when making a decision. Enhance words: "post", "plan" in the inference, the more RECENT the better.
+
+### Instructions:
+- The output MUST follow this specific instructions:\n${formatInstructions}.\n DO NOT ADD ANY ADDITIONAL INFORMATION.
+- DO NOT include any additional information or explanations.
+- Always base your decision on the **explicit query** and the **context from the chat history**.
+- Enhance the most recent chat history to ensure accurate decisions.
+- Infer words or collocations of words like "some", "any", "it", etc. from the context. Enhance words: "post", "plan" in the inference, the more RECENT the better.
+
+### Functions Available:
+1. **get_posts_by_title**:
+   - **Description**: __Searches for a POST__ about **nutrition, health, or well-being** by its TITLE and returns relevant content.
+   - **Input**: A clean and concise search input fot the post title extracted from the query.
+   - **When to Use**: Use this function ONLY if the query suggests a **SEARCHING post by title** or **SEARCHING post by a specific criteria**. related to the specified topics. Do not use for general queries.
+   - **Important**: Bad calls are EXPENSIVE! Be certain the query fits the criteria before choosing this function. Use it ONLY for SEARCHING posts, NOT general questions about posts.
+   - **Key Word**: "post" 
+   
+2. **get_meal_plans_by_title**:
+   - **Description**: __Searches for a MEAL PLAN__ related to nutrition by its TITLE and returns relevant content.
+   - **Input**: A clean and concise search input fot the plan title extracted from the query.
+   - **When to Use**: Use this function ONLY if the context suggests a **SEARCHING plan by title**,**SEARCHING plan by an objective**, or **SEARCHING plan by a specific criteria**. Do not use for general queries.
+   - **Important**: Bad calls are EXPENSIVE! Only use this when sure the query fits the criteria before choosing this function. Use it ONLY for SEARCHING plans, NOT general questions about plans.
+   - **Key Word**: "plan" 
+
+3. **no_op**:
+   - **Description**: A fallback or default function when NO other function is relevant.
+   - **Input**: A dummy input.
+   - **When to Use**: Use this function if none of the above functions apply. This is a CHEAP option and should be the default for uncertainty.
+
+### Guidelines for Selection:
+- **Fix typos**: Correct typos in the query, but do not change the original intent.
+- **Infer words**: Use the chat history to infer words or collocations of words like "some", "any", "it", etc. when making a decision. Enhance words: "post", "plan" in the inference, the more RECENT the better.
+- **Be certain**: Choose **get_posts_by_title** or **get_meal_plans_by_title** only when the has a clear intent for searching for the relevant content, not general questions about posts or plans.
+- **Default to no_op**: When in doubt, or when no function fits the query, use **no_op**.
+- **Keep input concise**: Extract only the relevant title from the query for the function input.
+- **Purpose**: the functions "get_posts_by_title" and "get_meal_plans_by_title" are for searching. NEVER use them for general inquiries about posts or plans.
+- **Hint words**: If you see the word "post" or "plan" in the query, it is a good hint to use the corresponding function.
+- **Think**: Do not blindly just choose base on the words "post" or "plan", think about the context and the user's intent.
+- **Select ALL relevant functions**: Choose ALL functions that are relevant to the query and context. You can select more than one function if necessary.
+
+### Important: The output MUST follow this specific instructions:\n${formatInstructions}.\n DO NOT ADD ANY ADDITIONAL INFORMATION.
+
+### User Chat History:
+Below is the user chat history for context:
+`);
+
+function getHumanMessage(input: string) {
+  return new HumanMessage(`
+### Current Query:
+The current query is: "${input}"
+
+### Reminders:
+1. You MUST fix typos in the query, but do not change its original intent.
+2. Use both the **chat history** and **query context** to understand the whole context at a deeper level do not blindly just follow the words "post" or "plan" and determine the most relevant functions.
+3. Extract **only the relevant part of the query** for the functions input. Never put in the input words like "search", "find", "post", "plan", "read" or any punctuation.
+4. You MUST infer words or collocations of words like "some", "any", "it", etc from the context. Enhance words: "post", "plan" in the inference, the more RECENT the better.
+5. You can select **ALL relevant functions** that are applicable to the query and context.
+6. When in doubt, default to the **no_op** function.
+7. The output MUST follow this specific instructions:\n${formatInstructions}.\n DO NOT ADD ANY ADDITIONAL INFORMATION.
+
+    `);
+}
+
+const toolModel = new ChatOllama({
+  model: modelName,
+  baseUrl: ollamaBaseUrl,
+  streaming: false,
+  keepAlive: "-1m",
+  cache: getRedisCache(),
+  temperature: 0,
+  numCtx: process.env.OLLAMA_NUM_CTX
+    ? parseInt(process.env.OLLAMA_NUM_CTX)
+    : 2048,
+}).pipe(getFixingParser(toolCallSchema));
+// .withStructuredOutput(toolCallSchema);
+// .bindTools(tools);
+function mapToResponse(toolsByName: Record<string, DynamicTool>, t: ToolCall) {
+  const tool = toolsByName[t.tool_name];
+  const sanitizedInput = t.input
+    .toLowerCase()
+    .replace(/[?!]/g, " ")
+    .replace(/[^\w\s]/g, " ")
+    .replace(
+      /\b(some|any|post|plan|posts|plans|buy\w*|search\w*|find\w*|read\w*|filter\w*|browse\w*|purchase\w*|meal\w*|see\w*)\b/gi,
+      " ",
+    )
+    .normalize("NFKC")
+    .replace(/\s+/g, " ")
+    .trim();
+  console.log("Sanitized Input: ", sanitizedInput);
+  return {
+    tool,
+    sanitizedInput,
+  };
+}
+
+function mapToToolMessage(t: { tool: DynamicTool; result: string }) {
+  return new ToolMessage({
+    content: t.result,
+    name: t.tool.name,
+    id: uuidv4(),
+    tool_call_id: t.tool.name,
+    status: "success",
+    response_metadata: {
+      timestamp: new Date().getTime(),
+    },
+  });
+}
+
 export async function getToolsForInput({
   tools,
   input,
   userChatHistory,
 }: ToolCallWrapperArgs): Promise<ToolMessage[]> {
+  input = normalizeText(input);
+  userChatHistory = userChatHistory.map((t) => {
+    t.content = normalizeText(t.content);
+    return t;
+  });
   const toolsByName = tools.reduce<Record<string, DynamicTool>>((acc, t) => {
     acc[t.name] = t;
     return acc;
@@ -31,171 +175,36 @@ export async function getToolsForInput({
   if (tools.length === 0) {
     return [];
   }
-  const toolModel = new ChatOllama({
-    model: modelName,
-    baseUrl: ollamaBaseUrl,
-    streaming: true,
-    // verbose: true,
-    keepAlive: "-1m",
-    cache: false,
-    temperature: 0,
-    numCtx: process.env.OLLAMA_NUM_CTX
-      ? parseInt(process.env.OLLAMA_NUM_CTX)
-      : 2048,
-  }).bindTools(tools);
-  const messages = [
-    new SystemMessage(`
-### Task:
-You are an AI model designed to decide and execute a **tool call** based on the user's query and chat history.  
-Your primary objective is to identify the most relevant tool to fulfill the user's intent and execute the call __if necessary__.  
-You must call the tool directly and provide no other response or explanation.  
-You must ensure that the chat history and the user's query are considered when making the tool call.
 
-### Instructions:
-- __Do not__ call tools if they are not relevant to the user's query or context, your job is not to always make a call.
-- IT IS BETTER TO SKIP A CALL THAN TO MAKE AN INCORRECT ONE.
-- TOOL CALLS ARE EXPENSIVE AND SHOULD BE USED JUDICIOUSLY.
-- If you are unsure about the relevance of a tool, avoid making a tool call.
-- Do not use tools for general inquiries, definitions, or unrelated questions.
-- You can make slight adjustments to the input for clarity or to fix minor typos, but do not alter the original intent.
+  const messages = [systemMessage, ...userChatHistory, getHumanMessage(input)];
 
-### Important Notes:
-- Always base your decision on the user's **explicit query** and the **context provided by the chat history**.
-- Only execute the relevant **tool call**.  
-- If no tool is relevant to the user's query or context, refrain from selecting or executing any tool. You are not obligated to make a selection in every instance.  
-- Do not provide any explanation, justification, or extra response when making a tool call.
-- If you are unsure about the relevance of a tool, it is __better to avoid making a tool call__.
-- Tool calls are expensive you should be SURE when calling them.
-- ALWAYS enhance the most recent chat history when making a decision.
-
-
-### Takeaway:
-- **Select the most relevant tool based on the query and the chat history.**
-- **Make the tool call directly without any additional response.**
-- **Do not make unnecessary tool calls.**
-
-### User History:
- Below is the user chat history:
-`),
-    ...userChatHistory,
-    new HumanMessage(`
-    The current query is: "${input}".
-    
-    **Remember**:
-    - You can fix typos in the query but do not alter the original intent.
-    - Based on the query and the chat history, select the most relevant tool and make the call. 
-    - You are NOT obligated to make a selection in every instance, it is BETTER to avoid making a tool call if you are unsure about the relevance of a tool.
-    - Tools are EXPENSIVE and should be used JUDICIOUSLY, DO NOT make unnecessary calls.
-    - Use the chat history and the query to determine the most relevant tool.
-    - Do not use tools for general inquiries, definitions, or unrelated questions.
-    `),
-  ];
-  const toolResp = await toolModel.invoke(messages);
-  if (!toolResp.tool_calls) {
-    return [];
-  }
-  console.log("TOOL RESPONSE", toolResp);
   try {
-    return await Promise.all(
-      toolResp.tool_calls.map(async (t) => {
-        console.log(`Calling the ${t.name} tool.`);
-        const selectedTool = toolsByName[t.name];
-        return await selectedTool.invoke(t);
-      }),
-    );
+    const toolResp = await toolModel.invoke(messages);
+    console.log("Tool Response: ", toolResp);
+    if (!Array.isArray(toolResp)) {
+      return [];
+    }
+    return (
+      await Promise.all(
+        toolResp
+          .filter((t) => t.tool_name !== "no_op")
+          .map((t) => mapToResponse(toolsByName, t))
+          .filter(
+            (t) => t.sanitizedInput.length > 0 && t.sanitizedInput !== " ",
+          )
+          .map(async ({ tool, sanitizedInput }) => ({
+            tool,
+            result: await tool.invoke(sanitizedInput),
+          })),
+      )
+    )
+      .filter((t) => typeof t.result === "string" && t.result.length > 0)
+      .map(mapToToolMessage);
   } catch (e) {
     console.error(e);
+    if (e instanceof Error) {
+      emitError(e);
+    }
     return [];
   }
 }
-`
----
-
-### Tools Available:
-1. **get_posts_by_title**:
-   - **Purpose**: Search for a post related to nutrition, health, or well-being by its title and return the content.
-   - **When to Use**: If the query and the context suggest a search for a a post by title.
-   - **Important**: Expensive tool call, use judiciously.
-
-2. **get_meal_plans_by_title**:
-   - **Purpose**: Search for a meal plan by its title and return the content.
-   - **When to Use**: If the query and the context suggest a search for a meal plan by title.
-   - **Important**: Expensive tool call, use judiciously.
----
-
-### Decision Rules:
-1. **Determine Intent and Context**:
-   - Analyze the query and the chat history to understand the user's intent.
-   - Consider the user's query and the context provided by the chat history when selecting a tool.
-
-2. **Match Query to Tool**:
-   - Use **get_posts_by_title** for queries about posts and their titles.
-   - Use **get_meal_plans_by_title** for queries about meal plans and their titles.
-
-3. **Input Optimization**:
-   - Make slight adjustments to the input for clarity or to fix minor typos, but do not alter the original intent.
-
-4. **When Not to Use a Tool**:
-   - If the query and the history do not align with the purpose of any tool, DO NOT make any tool call.
-   - For general inquiries, definitions, or unrelated questions, AVOID selecting a tool.
-   - Examples of unrelated queries: "Tell me a joke", "What is your favorite color?", "Who is the president?"
-   
-5. **Execution Without Additional Response**:
-   - If a tool is selected, execute the tool call immediately without adding explanations, extra text, or commentary.
-
-6. **Err on the Side of Caution**:
-   - If you are unsure about whether a tool is relevant, do not make a tool call. It is better to skip the call than to make an incorrect one.
-
-### Examples:
-
-**Example 1: Query Matches Tool**
-- **Query**: "Find the meal plan titled 'Keto Beginner Guide.'"
-- **Tool Selection**: "get_meal_plans_by_title"
-
-**Example 2: Query Matches Tool**
-- **Query**: "Search for the post titled 'Healthy Eating Tips.'"
-- **Tool Selection**: "get_posts_by_title"
-
-**Example 3: Query Matches Tool**
-- **Query**: "Are there any plans for 'gaining mass'?"
-- **Tool Selection**: "get_meal_plans_by_title"
-
-**Example 4: Query Matches Tool**
-- **Query**: "Are posts available for 'weight loss'?"
-- **Tool Selection**: "get_posts_by_title"
-
-**Example 5: Query Matches Tool**
-- **History1**: "How to buy plans?"
-- **Query**: " Are there some plans for 'weight loss'?"
-- **Tool Selection**: "get_meal_plans_by_title"
-
-**Example 5: Query Matches Tool**
-- **History1**: "Does the site have posts?"
-- **Query**: "Is one for 'kids'?"
-- **Tool Selection**: "get_posts_by_title"
-
-**Example 6: No Tool Needed**
-- **Query**: "How to buy plans?"
-- **Tool Selection**: NONE
-
-**Example 7: No Tool Needed**
-- **Query**: "What is a meal plan?"
-- **Tool Selection**: NONE
-
-**Example 8: No Tool Needed**
-- **Query**: "tell me a joke"
-- **Tool Selection**: NONE
-
-**Example 9: Query Matches Tool**
-- **History1**: "What are meal plans?"
-- **History2**: "Are there any about 'veganism'?"
-- **Query**: "How to calculate macros?"
-- **Tool Selection**: NONE
-
-**Example 10: Query Matches Tool**
-- **History1**: "Do you have posts on the site?"
-- **History2**: "About 'healthy eating'?"
-- **Query**: "Tell me a joke"
-- **Tool Selection**: NONE
-
----`;

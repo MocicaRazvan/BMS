@@ -1,20 +1,28 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getUserWithMinRole } from "@/lib/user";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/auth-options";
 
-const diffusion_service =
-  process.env.DIFFUSION_SERVICE_URL || "http://localhost:5000";
-const url = diffusion_service + "/generate-images";
+const springUrl = process.env.NEXT_PUBLIC_SPRING!;
 
 export async function POST(req: NextRequest) {
   try {
     await getUserWithMinRole("ROLE_TRAINER");
 
-    const body = await req.json();
+    const [session, body] = await Promise.all([
+      getServerSession(authOptions),
+      await req.json(),
+    ]);
 
-    const response = await fetch(url, {
+    if (!session || !session?.user?.token) {
+      return new NextResponse("Unauthorized", { status: 401 });
+    }
+
+    const response = await fetch(springUrl + "/diffusion/generate-images", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        Authorization: `Bearer ${session.user.token}`,
       },
       body: JSON.stringify(body),
     });

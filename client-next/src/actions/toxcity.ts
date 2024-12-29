@@ -1,11 +1,8 @@
 "use server";
 import * as toxicity from "@tensorflow-models/toxicity";
-import LanguageDetect from "languagedetect";
-import { franc } from "franc-min";
 import { detect } from "tinyld";
 import { emitInfo } from "@/logger";
-
-const lngDetector = new LanguageDetect();
+import lande from "lande";
 
 const threshold = 0.35;
 let globalModel: toxicity.ToxicityClassifier | null = null;
@@ -36,15 +33,12 @@ export async function loadGlobalModel(): Promise<toxicity.ToxicityClassifier> {
   return globalModel;
 }
 export async function getToxicity(text: string) {
-  const lang = franc(text, { minLength: 2 }) === "eng";
-  const tangDet = lngDetector.detect(text, 5).some((l) => l[0] === "english");
   const tinyDet = detect(text) === "en";
+  const landeDet = lande(text)[0][0] === "eng";
 
-  // console.log("LANG", franc(text, { minLength: 2 }));
-  // console.log("DETECT", lngDetector.detect(text, 5));
-  // console.log("TINY", detect(text));
-  // console.log("text.length", text.length);
-  if (!lang && !tangDet && !tinyDet && text.length > 10) {
+  const isOneEnglish = tinyDet || landeDet;
+
+  if (!isOneEnglish && text.length > 10) {
     return {
       failure: true,
       reason: TOXIC_REASON.LANGUAGE,
@@ -53,7 +47,6 @@ export async function getToxicity(text: string) {
   }
   const model = await loadGlobalModel();
   const predictions = await model.classify(text);
-  // console.log("PREDICTIONS", JSON.stringify(predictions, null, 2));
 
   const isToxic = predictions.some((p) => p.results[0].match);
   if (isToxic) {

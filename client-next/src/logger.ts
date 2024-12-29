@@ -23,6 +23,16 @@ export function emitInfo(body: AnyValue) {
   emit(SeverityNumber.INFO, body);
 }
 
-export function emitError(body: AnyValue) {
-  emit(SeverityNumber.ERROR, body);
+export function emitError(body: AnyValue): void;
+export function emitError(error: Error): void;
+export function emitError(param: AnyValue | Error): void {
+  if (param instanceof Error) {
+    emitError({
+      message: param.message,
+      stack: param.stack,
+      name: param.name,
+    });
+  } else {
+    emit(SeverityNumber.ERROR, param);
+  }
 }

@@ -33,20 +33,21 @@ const titlePrompt = ChatPromptTemplate.fromMessages([
     **Strict rules for title generation:**
     1. Output a single title with NO explanations, alternate options, or commentary.
     2. The title must be a single line, with no introductions such as "Based on the context" or "Here is the title."
-    3. Do not include any formatting like quotation marks, bullet points, or extra text.
+    3. Do not include any formatting like quotation marks, bullet points, or extra text, or emojis.
     4. Make a single option and do not provide multiple titles.
     5. Make the title at most 15 words.
     6. Ensure the title is relevant for the item type: {item}.
 
     **Final output format:**
-    - A SINGLE line containing ONLY the title and NOTHING else besides the title.
+    - A SINGLE line containing ONLY the title content and NOTHING else besides.
     - No explanations, commentary, or additional information, keep it concise, short and to the point.
     - Keep in mind the kind of item you are generating the title for: {item}.
     `,
   ],
   [
     "user",
-    "Here is the context: {context}. Additionally, the user has provided this input: {input}. Based on this, generate a suitable title for the item: {item}.",
+    "Here is the context: {context}.\n" +
+      "Additionally, the user has provided this input: {input}. Based on this, generate a suitable title for the item: {item}.",
   ],
 ]);
 const descriptionPrompt = ChatPromptTemplate.fromMessages([
@@ -59,15 +60,16 @@ const descriptionPrompt = ChatPromptTemplate.fromMessages([
     
     **Strict rules for description generation:**
     - Make sure you ONLY give the description and make it as LARGE and VERBOSE as possible, do not worry about the length or time.
-    - The output MUST be structured in **HTML** format to enhance readability and organization.
-    - NEVER include links or any other format that is not HTML. 
+    - The output MUST be structured in **HTML** format to enhance readability and organization
+    - NEVER include links or emojis or any other format that is not HTML. 
     - Remember ALWAYS keep in mind that the description is for a {item} and make the description as LARGE and VERBOSE as you can.
     - Tailor the description to the specific nature of the **{item}**.
     `,
   ],
   [
     "user",
-    "Here is the context: {context}. Additionally, the user has provided this input: {input}. Based on this, generate a verbose and detailed description for the item: {item}.",
+    "Here is the context: {context}.\n" +
+      "Additionally, the user has provided this input: {input}. Based on this, generate a verbose and detailed description for the item: {item}.",
   ],
 ]);
 
@@ -119,7 +121,18 @@ export async function getTextDoc(field: AiIdeasField) {
     }),
   ];
 }
-
+const llm = new ChatOllama({
+  model: modelName,
+  baseUrl: ollamaBaseUrl,
+  keepAlive: "-1m",
+  temperature: process.env.OLLAMA_GENERATE_TEMPERATURE
+    ? parseFloat(process.env.OLLAMA_GENERATE_TEMPERATURE)
+    : 0.7,
+  cache: false,
+  numCtx: process.env.OLLAMA_NUM_CTX
+    ? parseInt(process.env.OLLAMA_NUM_CTX)
+    : 2048,
+});
 export async function aiIdea({
   targetedField,
   fields,
@@ -127,18 +140,6 @@ export async function aiIdea({
   item,
   extraContext = 0,
 }: AIIdeaActionArgs) {
-  const llm = new ChatOllama({
-    model: modelName,
-    baseUrl: ollamaBaseUrl,
-    keepAlive: "-1m",
-    temperature: process.env.OLLAMA_GENERATE_TEMPERATURE
-      ? parseFloat(process.env.OLLAMA_GENERATE_TEMPERATURE)
-      : 0.7,
-    cache: false,
-    numCtx: process.env.OLLAMA_NUM_CTX
-      ? parseInt(process.env.OLLAMA_NUM_CTX)
-      : 2048,
-  });
   const [embeddings, vectorFilter] = await Promise.all([
     vectorStoreInstance.getEmbeddings(),
     vectorStoreInstance.getFilter(),
@@ -173,9 +174,15 @@ export async function aiIdea({
         ? parseInt(process.env.OLLAMA_GENERATE_K)
         : 10) + extraContext,
   });
+  const extraQuestion = input
+    ? ", also keep in mind " + placeholderInput
+    : undefined;
+
   const multiQueryRetriever = getMultiQueryRetriever({
     retriever: vectorDbRetriever,
+    extraQuestion,
   });
+
   const compressionRetriever = new ContextualCompressionRetriever({
     baseRetriever: multiQueryRetriever,
     baseCompressor: vectorFilter,
@@ -195,6 +202,6 @@ export async function aiIdea({
   // @ts-ignore
   vectorDb = null;
   return {
-    answer: resp.answer,
+    answer: resp.answer.replace(/```html|```|`|"/g, "").trim(),
   };
 }
