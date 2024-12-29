@@ -17,6 +17,7 @@ import com.mocicarazvan.templatemodule.mappers.DtoMapper;
 import com.mocicarazvan.templatemodule.models.ManyToOneUser;
 import com.mocicarazvan.templatemodule.repositories.ManyToOneUserRepository;
 import com.mocicarazvan.templatemodule.services.ManyToOneUserService;
+import com.mocicarazvan.templatemodule.services.RabbitMqUpdateDeleteService;
 import com.mocicarazvan.templatemodule.utils.PageableUtilsCustom;
 import lombok.Data;
 import lombok.Getter;
@@ -45,8 +46,10 @@ public abstract class ManyToOneUserServiceImpl<MODEL extends ManyToOneUser, BODY
     protected final String modelName;
     protected final List<String> allowedSortingFields;
     protected final CR self;
+    protected final RabbitMqUpdateDeleteService<MODEL> rabbitMqUpdateDeleteService;
 
-    protected ManyToOneUserServiceImpl(S modelRepository, M modelMapper, PageableUtilsCustom pageableUtils, UserClient userClient, String modelName, List<String> allowedSortingFields, CR self) {
+
+    protected ManyToOneUserServiceImpl(S modelRepository, M modelMapper, PageableUtilsCustom pageableUtils, UserClient userClient, String modelName, List<String> allowedSortingFields, CR self, RabbitMqUpdateDeleteService<MODEL> rabbitMqUpdateDeleteService) {
         this.modelRepository = modelRepository;
         this.modelMapper = modelMapper;
         this.pageableUtils = pageableUtils;
@@ -54,6 +57,7 @@ public abstract class ManyToOneUserServiceImpl<MODEL extends ManyToOneUser, BODY
         this.modelName = modelName;
         this.allowedSortingFields = allowedSortingFields;
         this.self = self;
+        this.rabbitMqUpdateDeleteService = rabbitMqUpdateDeleteService;
     }
 
 
@@ -103,9 +107,11 @@ public abstract class ManyToOneUserServiceImpl<MODEL extends ManyToOneUser, BODY
                         .flatMap(authUser -> getModel(id)
                                 .flatMap(model -> privateRoute(true, authUser, model.getUserId())
                                         .then(modelRepository.delete(model))
+                                        .doOnSuccess(_ -> rabbitMqUpdateDeleteService.sendDeleteMessage(model))
                                         .then(Mono.fromCallable(() -> modelMapper.fromModelToResponse(model)))
                                 )
                         );
+
     }
 
 
@@ -167,7 +173,8 @@ public abstract class ManyToOneUserServiceImpl<MODEL extends ManyToOneUser, BODY
                                     if (isNotAuthor) {
                                         return Mono.error(new PrivateRouteException());
                                     } else {
-                                        return successCallback.apply(model);
+                                        return successCallback.apply(model)
+                                                .doOnSuccess(_ -> rabbitMqUpdateDeleteService.sendUpdateMessage(model));
                                     }
                                 })
                         )

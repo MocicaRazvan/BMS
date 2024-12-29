@@ -19,6 +19,7 @@ import com.mocicarazvan.templatemodule.models.Approve;
 import com.mocicarazvan.templatemodule.repositories.ApprovedRepository;
 import com.mocicarazvan.templatemodule.services.ApprovedService;
 import com.mocicarazvan.templatemodule.services.RabbitMqApprovedSenderWrapper;
+import com.mocicarazvan.templatemodule.services.RabbitMqUpdateDeleteService;
 import com.mocicarazvan.templatemodule.utils.EntitiesUtils;
 import com.mocicarazvan.templatemodule.utils.PageableUtilsCustom;
 import lombok.Getter;
@@ -44,8 +45,8 @@ public abstract class ApprovedServiceImpl<MODEL extends Approve, BODY extends Ti
 
     protected final RabbitMqApprovedSenderWrapper<RESPONSE> rabbitMqApprovedSenderWrapper;
 
-    public ApprovedServiceImpl(S modelRepository, M modelMapper, PageableUtilsCustom pageableUtils, UserClient userClient, String modelName, List<String> allowedSortingFields, EntitiesUtils entitiesUtils, FileClient fileClient, ObjectMapper objectMapper, RabbitMqApprovedSenderWrapper<RESPONSE> rabbitMqApprovedSenderWrapper, CR self) {
-        super(modelRepository, modelMapper, pageableUtils, userClient, modelName, allowedSortingFields, entitiesUtils, fileClient, objectMapper, self);
+    public ApprovedServiceImpl(S modelRepository, M modelMapper, PageableUtilsCustom pageableUtils, UserClient userClient, String modelName, List<String> allowedSortingFields, EntitiesUtils entitiesUtils, FileClient fileClient, ObjectMapper objectMapper, RabbitMqApprovedSenderWrapper<RESPONSE> rabbitMqApprovedSenderWrapper, CR self, RabbitMqUpdateDeleteService<MODEL> rabbitMqUpdateDeleteService) {
+        super(modelRepository, modelMapper, pageableUtils, userClient, modelName, allowedSortingFields, entitiesUtils, fileClient, objectMapper, self, rabbitMqUpdateDeleteService);
         this.rabbitMqApprovedSenderWrapper = rabbitMqApprovedSenderWrapper;
     }
 
@@ -250,6 +251,7 @@ public abstract class ApprovedServiceImpl<MODEL extends Approve, BODY extends Ti
                                             .flatMap(m -> fileClient.deleteFiles(m.getImages()))
                                             .then(modelRepository.delete(model))
                                             .then(Mono.fromCallable(() -> modelMapper.fromModelToResponse(model)))
+                                            .doOnSuccess(_ -> rabbitMqUpdateDeleteService.sendDeleteMessage(model))
                                             .map(r -> Pair.of(r, originalApproved))
                                             .flatMap(self::updateDeleteInvalidate);
                                 }

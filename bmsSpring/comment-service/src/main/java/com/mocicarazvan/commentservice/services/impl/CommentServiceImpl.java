@@ -22,6 +22,7 @@ import com.mocicarazvan.templatemodule.dtos.response.ResponseWithUserDto;
 import com.mocicarazvan.templatemodule.dtos.response.ResponseWithUserLikesAndDislikes;
 import com.mocicarazvan.templatemodule.enums.Role;
 import com.mocicarazvan.templatemodule.exceptions.action.PrivateRouteException;
+import com.mocicarazvan.templatemodule.services.RabbitMqUpdateDeleteService;
 import com.mocicarazvan.templatemodule.services.impl.TitleBodyServiceImpl;
 import com.mocicarazvan.templatemodule.utils.EntitiesUtils;
 import com.mocicarazvan.templatemodule.utils.PageableUtilsCustom;
@@ -49,8 +50,8 @@ public class CommentServiceImpl extends TitleBodyServiceImpl<Comment, CommentBod
     private final Map<CommentReferenceType, ReferenceClient> referenceClients;
 
 
-    public CommentServiceImpl(CommentRepository modelRepository, CommentMapper modelMapper, PageableUtilsCustom pageableUtils, UserClient userClient, EntitiesUtils entitiesUtils, Map<CommentReferenceType, ReferenceClient> referenceClients, CommentServiceRedisCacheWrapper self) {
-        super(modelRepository, modelMapper, pageableUtils, userClient, "comment", List.of("id", "userId", "postId", "title", "createdAt"), entitiesUtils, self);
+    public CommentServiceImpl(CommentRepository modelRepository, CommentMapper modelMapper, PageableUtilsCustom pageableUtils, UserClient userClient, EntitiesUtils entitiesUtils, Map<CommentReferenceType, ReferenceClient> referenceClients, CommentServiceRedisCacheWrapper self, RabbitMqUpdateDeleteService<Comment> rabbitMqUpdateDeleteService) {
+        super(modelRepository, modelMapper, pageableUtils, userClient, "comment", List.of("id", "userId", "postId", "title", "createdAt"), entitiesUtils, self, rabbitMqUpdateDeleteService);
         this.referenceClients = referenceClients;
     }
 
@@ -162,7 +163,12 @@ public class CommentServiceImpl extends TitleBodyServiceImpl<Comment, CommentBod
                                                 )) {
                                                     return Mono.error(new PrivateRouteException());
                                                 }
-                                                return modelRepository.deleteAllByReferenceIdEqualsAndReferenceType(referenceId, referenceType);
+                                                return
+                                                        modelRepository.findAllByReferenceIdAndReferenceType(referenceId, referenceType)
+                                                                .collectList()
+                                                                .doOnSuccess(rabbitMqUpdateDeleteService::sendBatchDeleteMessage)
+                                                                .then(
+                                                                        modelRepository.deleteAllByReferenceIdEqualsAndReferenceType(referenceId, referenceType));
                                             });
                         })
                         .then();
@@ -183,6 +189,7 @@ public class CommentServiceImpl extends TitleBodyServiceImpl<Comment, CommentBod
                                             return Mono.empty();
                                         })
                                         .then(modelRepository.delete(model))
+                                        .doOnSuccess(_ -> rabbitMqUpdateDeleteService.sendDeleteMessage(model))
                                         .thenReturn(modelMapper.fromModelToResponse(model))
                                 )
                         );

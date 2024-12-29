@@ -19,6 +19,7 @@
         <module name="gateway-service" />
         <module name="plan-service" />
         <module name="ollama-search" />
+        <module name="archive-service" />
         <module name="recipe-service" />
         <module name="order-service" />
         <module name="service-registry" />
@@ -33,6 +34,7 @@
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="archive-service" options="-parameters" />
       <module name="comment-service" options="-parameters" />
       <module name="config-server" options="-parameters" />
       <module name="day-service" options="-parameters" />

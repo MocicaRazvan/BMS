@@ -34,8 +34,6 @@ import java.util.concurrent.ExecutorService;
 @Configuration
 public class BeanConfig {
 
-//    @Value("${user-service.url}")
-//    private String userServiceUrl;
 
     @Bean
     public ObjectMapper customObjectMapper(final Jackson2ObjectMapperBuilder builder) {

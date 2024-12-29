@@ -17,6 +17,7 @@ import com.mocicarazvan.templatemodule.enums.Role;
 import com.mocicarazvan.templatemodule.exceptions.action.IllegalActionException;
 import com.mocicarazvan.templatemodule.exceptions.action.PrivateRouteException;
 import com.mocicarazvan.templatemodule.exceptions.notFound.NotFoundEntity;
+import com.mocicarazvan.templatemodule.services.RabbitMqUpdateDeleteService;
 import com.mocicarazvan.templatemodule.utils.EntitiesUtils;
 import com.mocicarazvan.templatemodule.utils.PageableUtilsCustom;
 import com.mocicarazvan.userservice.cache.redis.annotations.RedisReactiveRoleCache;
@@ -46,7 +47,7 @@ import java.util.Set;
 @Slf4j
 public class UserServiceImpl implements UserService {
 
-    private final List<String> allowedSortingFields = List.of("firstName", "lastName", "email");
+    private final List<String> allowedSortingFields = List.of("firstName", "lastName", "email", "createdAt", "updatedAt");
 
     private final UserMapper userMapper;
     private final UserRepository userRepository;
@@ -58,6 +59,7 @@ public class UserServiceImpl implements UserService {
     private final UserEmbedServiceImpl userEmbedService;
     private final TransactionalOperator transactionalOperator;
     private final static String USER_SERVICE_NAME = "userService";
+    private final RabbitMqUpdateDeleteService<UserCustom> rabbitMqUpdateDeleteService;
 
 
     @Value("${front.url}")
@@ -130,7 +132,9 @@ public class UserServiceImpl implements UserService {
                                 return Mono.error(new IllegalActionException("User is trainer!"));
                             }
                             user.setRole(Role.ROLE_TRAINER);
-                            return userRepository.save(user).map(userMapper::fromUserCustomToUserDto);
+                            return userRepository.save(user)
+                                    .doOnSuccess(rabbitMqUpdateDeleteService::sendDeleteMessage)
+                                    .map(userMapper::fromUserCustomToUserDto);
                         });
     }
 
@@ -181,7 +185,9 @@ public class UserServiceImpl implements UserService {
 
                                 )
 
-                        ).flatMap(userRepository::save).map(userMapper::fromUserCustomToUserDto);
+                        ).flatMap(userRepository::save)
+                        .doOnSuccess(rabbitMqUpdateDeleteService::sendUpdateMessage)
+                        .map(userMapper::fromUserCustomToUserDto);
 
     }
 

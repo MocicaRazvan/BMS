@@ -18,6 +18,7 @@ import com.mocicarazvan.templatemodule.dtos.response.PageableResponse;
 import com.mocicarazvan.templatemodule.dtos.response.ResponseWithUserDto;
 import com.mocicarazvan.templatemodule.exceptions.action.PrivateRouteException;
 import com.mocicarazvan.templatemodule.exceptions.notFound.NotFoundEntity;
+import com.mocicarazvan.templatemodule.services.RabbitMqUpdateDeleteService;
 import com.mocicarazvan.templatemodule.services.impl.ManyToOneUserServiceImpl;
 import com.mocicarazvan.templatemodule.utils.PageableUtilsCustom;
 import lombok.Getter;
@@ -37,10 +38,10 @@ public class NutritionalFactServiceImpl extends
         implements NutritionalFactService {
 
 
-    public NutritionalFactServiceImpl(NutritionalFactRepository modelRepository, NutritionalFactMapper modelMapper, PageableUtilsCustom pageableUtils, UserClient userClient, NutritionalFactRedisCacheWrapper self, IngredientService ingredientService) {
+    public NutritionalFactServiceImpl(NutritionalFactRepository modelRepository, NutritionalFactMapper modelMapper, PageableUtilsCustom pageableUtils, UserClient userClient, NutritionalFactRedisCacheWrapper self, IngredientService ingredientService, RabbitMqUpdateDeleteService<NutritionalFact> rabbitMqUpdateDeleteService) {
         super(modelRepository, modelMapper, pageableUtils, userClient, "nutritionalFact", List.of("createdAt", "updatedAt", "id", "fat", "saturated_fat",
                 "carbohydrates", "sugar", "protein", "salt", "unit", "ingredient_id"
-        ), self);
+        ), self, rabbitMqUpdateDeleteService);
         this.ingredientService = ingredientService;
     }
 
@@ -118,6 +119,7 @@ public class NutritionalFactServiceImpl extends
                 userClient.getUser("", userId)
                         .flatMap(authUser -> getModelByIngredientId(ingredientId)
                                 .flatMap(model -> self.updateByIngredientInvalidate(modelBody, authUser, model)
+                                        .doOnSuccess(_ -> rabbitMqUpdateDeleteService.sendUpdateMessage(model))
                                 )
                         );
     }

@@ -770,7 +770,7 @@ services:
       rabbitmq-plugins enable rabbitmq_web_stomp &&
       rabbitmq-server"
   
-
+  
   diffusion:
     build:
       context: ./diffusion
@@ -797,6 +797,25 @@ services:
       - diffusion_fs:/app/models
     networks:
       - bms
+
+  archive-service:
+    container_name: archive-service-container-bms
+    build:
+      context: ./bmsSpring/archive-service
+      dockerfile: Dockerfile
+    environment:
+      SPRING_PROFILES_ACTIVE: server
+      EUREKA_CLIENT_SERVICE_URL_DEFAULT_ZONE: http://host.docker.internal:8761/eureka/
+      EUREKA_CLIENT_REGISTER_WITH_EUREKA: false
+      EUREKA_CLIENT_FETCH_REGISTRY: false
+      SPRING_CLOUD_DISCOVERY_ENABLED: false
+      SPRING_CONFIG_IMPORT: configserver:http://host.docker.internal:8888
+    ports:
+      - "8092:8092"
+    networks:
+      - bms
+#    restart: unless-stopped
+
 volumes:
   postgres_data:
   postgres_data_messages:

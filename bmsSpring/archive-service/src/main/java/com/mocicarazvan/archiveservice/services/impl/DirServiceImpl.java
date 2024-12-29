@@ -1,0 +1,55 @@
+package com.mocicarazvan.archiveservice.services.impl;
+
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mocicarazvan.archiveservice.services.DirService;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+
+import java.io.File;
+import java.io.IOException;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.UUID;
+
+@Service
+@RequiredArgsConstructor
+@Slf4j
+public class DirServiceImpl implements DirService {
+
+
+    public static final String ROOT_DIR_PATH = "archive/data".replace("/", File.separator);
+    private final ObjectMapper objectMapper;
+
+    public File createRootDirIfNotExists() {
+        File rootDir = new File(ROOT_DIR_PATH);
+        if (!rootDir.exists() && rootDir.mkdirs()) {
+            log.info("Root directory created: {}", rootDir.getAbsolutePath());
+        }
+        return rootDir;
+    }
+
+    public File createDirIfNotExists(File rootDir, String dirName) {
+        File dir = new File(rootDir, dirName);
+        if (!dir.exists() && dir.mkdirs()) {
+            log.info("Directory created: {}", dir.getAbsolutePath());
+        }
+        return dir;
+    }
+
+    @Override
+    public <T> void saveBatchToDisk(List<T> items, String name) throws IOException {
+        File dir = createDirIfNotExists(createRootDirIfNotExists(), name);
+        File batchFile = new File(dir, getCurrentTime() + "_" + UUID.randomUUID() + ".json");
+        objectMapper.writerWithDefaultPrettyPrinter().writeValue(batchFile, items);
+    }
+
+    public String getCurrentTime() {
+        return ZonedDateTime.now(ZoneId.of("UTC"))
+                .format(DateTimeFormatter.ofPattern("yyyy_MM_dd_HH_mm_ss"));
+
+    }
+}

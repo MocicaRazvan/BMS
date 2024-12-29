@@ -2,10 +2,14 @@ package com.mocicarazvan.recipeservice.conifg;
 
 
 import com.mocicarazvan.recipeservice.dtos.RecipeResponse;
+import com.mocicarazvan.recipeservice.models.Recipe;
 import com.mocicarazvan.templatemodule.services.RabbitMqApprovedSenderWrapper;
 import com.mocicarazvan.templatemodule.services.RabbitMqSender;
+import com.mocicarazvan.templatemodule.services.RabbitMqUpdateDeleteService;
 import com.mocicarazvan.templatemodule.services.impl.RabbitMqApprovedSenderWrapperImpl;
 import com.mocicarazvan.templatemodule.services.impl.RabbitMqSenderImpl;
+import com.mocicarazvan.templatemodule.services.impl.RabbitMqUpdateDeleteServiceImpl;
+import com.mocicarazvan.templatemodule.utils.SimpleAsyncTaskExecutorInstance;
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;
 import org.springframework.amqp.core.DirectExchange;
@@ -33,6 +37,18 @@ public class RabbitMqConfig {
     @Value("${recipe.extraLink}")
     private String extraLink;
 
+    @Value("${recipe.delete.queue.name}")
+    private String recipeDeleteQueueName;
+
+    @Value("${recipe.update.queue.name}")
+    private String recipeUpdateQueueName;
+
+    @Value("${recipe.delete.routing.key}")
+    private String recipeDeleteRoutingKey;
+
+    @Value("${recipe.update.routing.key}")
+    private String recipeUpdateRoutingKey;
+
     @Bean
     public Queue recipeQueue() {
         return new Queue(recipeQueueName, true);
@@ -57,6 +73,7 @@ public class RabbitMqConfig {
     public RabbitTemplate rabbitTemplate(ConnectionFactory connectionFactory) {
         RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
         rabbitTemplate.setMessageConverter(jsonMessageConverter());
+        rabbitTemplate.setTaskExecutor(new SimpleAsyncTaskExecutorInstance().initialize());
         return rabbitTemplate;
     }
 
@@ -68,5 +85,35 @@ public class RabbitMqConfig {
     @Bean
     public RabbitMqApprovedSenderWrapper<RecipeResponse> recipeResponseRabbitMqApprovedSenderWrapper(RabbitMqSender rabbitMqSender) {
         return new RabbitMqApprovedSenderWrapperImpl<>(extraLink, rabbitMqSender);
+    }
+
+    @Bean
+    public Queue recipeDeleteQueue() {
+        return new Queue(recipeDeleteQueueName, true);
+    }
+
+    @Bean
+    public Queue recipeUpdateQueue() {
+        return new Queue(recipeUpdateQueueName, true);
+    }
+
+    @Bean
+    public Binding recipeDeleteBinding(DirectExchange recipeExchange) {
+        return BindingBuilder.bind(recipeDeleteQueue())
+                .to(recipeExchange).with(recipeDeleteRoutingKey);
+    }
+
+    @Bean
+    public Binding recipeUpdateBinding(DirectExchange recipeExchange) {
+        return BindingBuilder.bind(recipeUpdateQueue())
+                .to(recipeExchange).with(recipeUpdateRoutingKey);
+    }
+
+    @Bean
+    public RabbitMqUpdateDeleteService<Recipe> recipeRabbitMqUpdateDeleteService(RabbitTemplate rabbitTemplate) {
+        return RabbitMqUpdateDeleteServiceImpl.<Recipe>builder()
+                .deleteSender(new RabbitMqSenderImpl(recipeExchangeName, recipeDeleteRoutingKey, rabbitTemplate))
+                .updateSender(new RabbitMqSenderImpl(recipeExchangeName, recipeUpdateRoutingKey, rabbitTemplate))
+                .build();
     }
 }

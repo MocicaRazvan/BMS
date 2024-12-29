@@ -1,7 +1,11 @@
 package com.mocicarazvan.orderservice.config;
 
+import com.mocicarazvan.orderservice.models.Order;
 import com.mocicarazvan.templatemodule.services.RabbitMqSender;
+import com.mocicarazvan.templatemodule.services.RabbitMqUpdateDeleteService;
 import com.mocicarazvan.templatemodule.services.impl.RabbitMqSenderImpl;
+import com.mocicarazvan.templatemodule.services.impl.RabbitMqUpdateDeleteNoOpServiceImpl;
+import com.mocicarazvan.templatemodule.utils.SimpleAsyncTaskExecutorInstance;
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;
 import org.springframework.amqp.core.DirectExchange;
@@ -49,6 +53,7 @@ public class RabbitMqConfig {
     public RabbitTemplate rabbitTemplate(ConnectionFactory connectionFactory) {
         RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
         rabbitTemplate.setMessageConverter(jsonMessageConverter());
+        rabbitTemplate.setTaskExecutor(new SimpleAsyncTaskExecutorInstance().initialize());
         return rabbitTemplate;
     }
 
@@ -56,5 +61,11 @@ public class RabbitMqConfig {
     public RabbitMqSender rabbitMqSender(RabbitTemplate rabbitTemplate) {
         return new RabbitMqSenderImpl(planBoughtExchangeName, planBoughtRoutingKey, rabbitTemplate);
     }
+
+    @Bean
+    public RabbitMqUpdateDeleteService<Order> kanbanColumnRabbitMqUpdateDeleteService() {
+        return new RabbitMqUpdateDeleteNoOpServiceImpl<>();
+    }
+
 
 }

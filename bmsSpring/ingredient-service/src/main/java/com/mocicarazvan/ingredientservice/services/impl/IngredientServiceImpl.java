@@ -22,6 +22,7 @@ import com.mocicarazvan.templatemodule.dtos.response.ResponseWithUserDto;
 import com.mocicarazvan.templatemodule.enums.Role;
 import com.mocicarazvan.templatemodule.exceptions.action.PrivateRouteException;
 import com.mocicarazvan.templatemodule.exceptions.action.SubEntityUsed;
+import com.mocicarazvan.templatemodule.services.RabbitMqUpdateDeleteService;
 import com.mocicarazvan.templatemodule.services.impl.ManyToOneUserServiceImpl;
 import com.mocicarazvan.templatemodule.utils.EntitiesUtils;
 import com.mocicarazvan.templatemodule.utils.PageableUtilsCustom;
@@ -50,13 +51,13 @@ public class IngredientServiceImpl extends
 
     private static final String CACHE_KEY_PATH = "#this.modelName";
 
-    public IngredientServiceImpl(IngredientRepository modelRepository, IngredientMapper modelMapper, PageableUtilsCustom pageableUtils, UserClient userClient, CustomIngredientRepository customIngredientRepository, EntitiesUtils entitiesUtils, RecipeClient recipeClient, IngredientServiceRedisCacheWrapper self, TransactionalOperator transactionalOperator, IngredientEmbedServiceImpl ingredientEmbedServiceImpl) {
+    public IngredientServiceImpl(IngredientRepository modelRepository, IngredientMapper modelMapper, PageableUtilsCustom pageableUtils, UserClient userClient, CustomIngredientRepository customIngredientRepository, EntitiesUtils entitiesUtils, RecipeClient recipeClient, IngredientServiceRedisCacheWrapper self, TransactionalOperator transactionalOperator, IngredientEmbedServiceImpl ingredientEmbedServiceImpl, RabbitMqUpdateDeleteService<Ingredient> rabbitMqUpdateDeleteService) {
         super(modelRepository, modelMapper, pageableUtils, userClient, "ingredient", List.of("name", "type", "display", "createdAt", "updatedAt", "id", "fat", "protein",
                 "fat",
                 "carbohydrates",
                 "salt",
                 "sugar",
-                "saturatedFat"), self);
+                "saturatedFat"), self, rabbitMqUpdateDeleteService);
         this.customIngredientRepository = customIngredientRepository;
         this.entitiesUtils = entitiesUtils;
         this.recipeClient = recipeClient;

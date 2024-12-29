@@ -46,4 +46,6 @@ public interface MealRepository extends ManyToOneUserRepository<Meal> {
                 CAST(SPLIT_PART(period, ':', 2) AS int)
             """)
     Flux<Meal> findAllByDayIdCustomPeriodSort(Long dayId);
+
+    Flux<Meal> findAllByDayId(Long dayId);
 }

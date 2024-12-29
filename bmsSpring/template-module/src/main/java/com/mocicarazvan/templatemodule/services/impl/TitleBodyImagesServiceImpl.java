@@ -10,6 +10,7 @@ import com.mocicarazvan.templatemodule.enums.FileType;
 import com.mocicarazvan.templatemodule.mappers.DtoMapper;
 import com.mocicarazvan.templatemodule.models.TitleBodyImages;
 import com.mocicarazvan.templatemodule.repositories.TitleBodyImagesRepository;
+import com.mocicarazvan.templatemodule.services.RabbitMqUpdateDeleteService;
 import com.mocicarazvan.templatemodule.services.TitleBodyImagesService;
 import com.mocicarazvan.templatemodule.utils.EntitiesUtils;
 import com.mocicarazvan.templatemodule.utils.PageableUtilsCustom;
@@ -32,8 +33,8 @@ public abstract class TitleBodyImagesServiceImpl<MODEL extends TitleBodyImages, 
     protected final FileClient fileClient;
     protected final ObjectMapper objectMapper;
 
-    public TitleBodyImagesServiceImpl(S modelRepository, M modelMapper, PageableUtilsCustom pageableUtils, UserClient userClient, String modelName, List<String> allowedSortingFields, EntitiesUtils entitiesUtils, FileClient fileClient, ObjectMapper objectMapper, CR self) {
-        super(modelRepository, modelMapper, pageableUtils, userClient, modelName, allowedSortingFields, entitiesUtils, self);
+    public TitleBodyImagesServiceImpl(S modelRepository, M modelMapper, PageableUtilsCustom pageableUtils, UserClient userClient, String modelName, List<String> allowedSortingFields, EntitiesUtils entitiesUtils, FileClient fileClient, ObjectMapper objectMapper, CR self, RabbitMqUpdateDeleteService<MODEL> rabbitMqUpdateDeleteService) {
+        super(modelRepository, modelMapper, pageableUtils, userClient, modelName, allowedSortingFields, entitiesUtils, self, rabbitMqUpdateDeleteService);
         this.fileClient = fileClient;
         this.objectMapper = objectMapper;
     }
@@ -75,6 +76,7 @@ public abstract class TitleBodyImagesServiceImpl<MODEL extends TitleBodyImages, 
                                 .flatMap(model -> privateRoute(true, authUser, model.getUserId()).thenReturn(model)
                                         .flatMap(m -> fileClient.deleteFiles(m.getImages()))
                                         .then(modelRepository.delete(model))
+                                        .doOnSuccess(_ -> rabbitMqUpdateDeleteService.sendDeleteMessage(model))
                                         .then(Mono.fromCallable(() -> modelMapper.fromModelToResponse(model)))
                                 )
                         );

@@ -21,6 +21,7 @@ import com.mocicarazvan.templatemodule.dtos.response.PageableResponse;
 import com.mocicarazvan.templatemodule.dtos.response.ResponseWithChildList;
 import com.mocicarazvan.templatemodule.dtos.response.ResponseWithUserDto;
 import com.mocicarazvan.templatemodule.exceptions.action.SubEntityUsed;
+import com.mocicarazvan.templatemodule.services.RabbitMqUpdateDeleteService;
 import com.mocicarazvan.templatemodule.services.impl.ManyToOneUserServiceImpl;
 import com.mocicarazvan.templatemodule.utils.EntitiesUtils;
 import com.mocicarazvan.templatemodule.utils.PageableUtilsCustom;
@@ -47,8 +48,8 @@ public class MealServiceImpl
     private final MealRepository mealRepository;
 
 
-    public MealServiceImpl(MealRepository modelRepository, MealMapper modelMapper, PageableUtilsCustom pageableUtils, UserClient userClient, RecipeClient recipeClient, PlanClient planClient, EntitiesUtils entitiesUtils, MealRepository mealRepository, MealServiceRedisCacheWrapper self) {
-        super(modelRepository, modelMapper, pageableUtils, userClient, "meal", List.of("id", "userId", "period", "title", "createdAt", "updatedAt"), self);
+    public MealServiceImpl(MealRepository modelRepository, MealMapper modelMapper, PageableUtilsCustom pageableUtils, UserClient userClient, RecipeClient recipeClient, PlanClient planClient, EntitiesUtils entitiesUtils, MealRepository mealRepository, MealServiceRedisCacheWrapper self, RabbitMqUpdateDeleteService<Meal> rabbitMqUpdateDeleteService) {
+        super(modelRepository, modelMapper, pageableUtils, userClient, "meal", List.of("id", "userId", "period", "title", "createdAt", "updatedAt"), self, rabbitMqUpdateDeleteService);
         this.recipeClient = recipeClient;
         this.planClient = planClient;
         this.entitiesUtils = entitiesUtils;
@@ -107,7 +108,11 @@ public class MealServiceImpl
     public Mono<Void> deleteAllByDay(Long dayId) {
 
         return
-                modelRepository.deleteAllByDayId(dayId);
+                mealRepository.findAllByDayId(dayId)
+                        .collectList()
+                        .doOnSuccess(rabbitMqUpdateDeleteService::sendBatchDeleteMessage)
+                        .then(
+                                modelRepository.deleteAllByDayId(dayId));
     }
 
     @Override

@@ -1,0 +1,19 @@
+name: Archive Service Docker Image
+
+on:
+  workflow_dispatch: { }
+  push:
+    branches:
+      - main
+    paths:
+      - 'bmsSpring/archive-service/**'
+jobs:
+  build-and-push-websocket-service:
+    uses: ./.github/workflows/build-and-push.yml
+    with:
+      image-name: archive-service-bms
+      context: ./bmsSpring/archive-service
+      dockerfile: ./bmsSpring/archive-service/Dockerfile
+    secrets:
+      DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}

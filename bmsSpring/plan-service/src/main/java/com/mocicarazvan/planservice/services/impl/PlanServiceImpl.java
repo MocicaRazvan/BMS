@@ -32,6 +32,7 @@ import com.mocicarazvan.templatemodule.exceptions.action.PrivateRouteException;
 import com.mocicarazvan.templatemodule.exceptions.action.SubEntityUsed;
 import com.mocicarazvan.templatemodule.hateos.CustomEntityModel;
 import com.mocicarazvan.templatemodule.services.RabbitMqApprovedSenderWrapper;
+import com.mocicarazvan.templatemodule.services.RabbitMqUpdateDeleteService;
 import com.mocicarazvan.templatemodule.services.impl.ApprovedServiceImpl;
 import com.mocicarazvan.templatemodule.utils.EntitiesUtils;
 import com.mocicarazvan.templatemodule.utils.PageableUtilsCustom;
@@ -63,8 +64,8 @@ public class PlanServiceImpl
     private final TransactionalOperator transactionalOperator;
     private final PlanEmbedServiceImpl planEmbedServiceImpl;
 
-    public PlanServiceImpl(PlanRepository modelRepository, PlanMapper modelMapper, PageableUtilsCustom pageableUtils, UserClient userClient, EntitiesUtils entitiesUtils, FileClient fileClient, ObjectMapper objectMapper, ExtendedPlanRepository extendedPlanRepository, DayClient dayClient, OrderClient orderClient, RabbitMqApprovedSenderWrapper<PlanResponse> rabbitMqSender, PlanServiceRedisCacheWrapper self, TransactionalOperator transactionalOperator, PlanEmbedServiceImpl planEmbedServiceImpl) {
-        super(modelRepository, modelMapper, pageableUtils, userClient, "plan", List.of("id", "userId", "type", "title", "createdAt", "updatedAt", "approved", "display"), entitiesUtils, fileClient, objectMapper, rabbitMqSender, self);
+    public PlanServiceImpl(PlanRepository modelRepository, PlanMapper modelMapper, PageableUtilsCustom pageableUtils, UserClient userClient, EntitiesUtils entitiesUtils, FileClient fileClient, ObjectMapper objectMapper, ExtendedPlanRepository extendedPlanRepository, DayClient dayClient, OrderClient orderClient, RabbitMqApprovedSenderWrapper<PlanResponse> rabbitMqSender, PlanServiceRedisCacheWrapper self, TransactionalOperator transactionalOperator, PlanEmbedServiceImpl planEmbedServiceImpl, RabbitMqUpdateDeleteService<Plan> rabbitMqUpdateDeleteService) {
+        super(modelRepository, modelMapper, pageableUtils, userClient, "plan", List.of("id", "userId", "type", "title", "createdAt", "updatedAt", "approved", "display"), entitiesUtils, fileClient, objectMapper, rabbitMqSender, self, rabbitMqUpdateDeleteService);
         this.extendedPlanRepository = extendedPlanRepository;
         this.dayClient = dayClient;
         this.orderClient = orderClient;

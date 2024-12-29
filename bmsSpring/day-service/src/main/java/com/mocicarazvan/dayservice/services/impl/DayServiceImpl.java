@@ -24,6 +24,7 @@ import com.mocicarazvan.templatemodule.dtos.PageableBody;
 import com.mocicarazvan.templatemodule.dtos.UserDto;
 import com.mocicarazvan.templatemodule.dtos.response.*;
 import com.mocicarazvan.templatemodule.exceptions.action.IllegalActionException;
+import com.mocicarazvan.templatemodule.services.RabbitMqUpdateDeleteService;
 import com.mocicarazvan.templatemodule.services.ValidIds;
 import com.mocicarazvan.templatemodule.services.impl.TitleBodyServiceImpl;
 import com.mocicarazvan.templatemodule.utils.EntitiesUtils;
@@ -52,8 +53,8 @@ public class DayServiceImpl
     private final RecipeClient recipeClient;
     private final DayEmbedServiceImpl dayEmbedServiceImpl;
 
-    public DayServiceImpl(DayRepository modelRepository, DayMapper modelMapper, PageableUtilsCustom pageableUtils, UserClient userClient, EntitiesUtils entitiesUtils, MealService mealService, TransactionalOperator transactionalOperator, ExtendedDayRepository extendedDayRepository, PlanClient planClient, RecipeClient recipeClient, DayServiceRedisCacheWrapper self, DayEmbedServiceImpl dayEmbedServiceImpl) {
-        super(modelRepository, modelMapper, pageableUtils, userClient, "day", List.of("id", "userId", "type", "title", "createdAt", "updatedAt"), entitiesUtils, self);
+    public DayServiceImpl(DayRepository modelRepository, DayMapper modelMapper, PageableUtilsCustom pageableUtils, UserClient userClient, EntitiesUtils entitiesUtils, MealService mealService, TransactionalOperator transactionalOperator, ExtendedDayRepository extendedDayRepository, PlanClient planClient, RecipeClient recipeClient, DayServiceRedisCacheWrapper self, DayEmbedServiceImpl dayEmbedServiceImpl, RabbitMqUpdateDeleteService<Day> rabbitMqUpdateDeleteService) {
+        super(modelRepository, modelMapper, pageableUtils, userClient, "day", List.of("id", "userId", "type", "title", "createdAt", "updatedAt"), entitiesUtils, self, rabbitMqUpdateDeleteService);
         this.mealService = mealService;
         this.transactionalOperator = transactionalOperator;
         this.extendedDayRepository = extendedDayRepository;

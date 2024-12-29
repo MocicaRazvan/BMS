@@ -9,6 +9,7 @@ import com.mocicarazvan.templatemodule.dtos.response.ResponseWithUserLikesAndDis
 import com.mocicarazvan.templatemodule.mappers.DtoMapper;
 import com.mocicarazvan.templatemodule.models.TitleBody;
 import com.mocicarazvan.templatemodule.repositories.TitleBodyRepository;
+import com.mocicarazvan.templatemodule.services.RabbitMqUpdateDeleteService;
 import com.mocicarazvan.templatemodule.services.TitleBodyService;
 import com.mocicarazvan.templatemodule.utils.EntitiesUtils;
 import com.mocicarazvan.templatemodule.utils.PageableUtilsCustom;
@@ -28,8 +29,9 @@ public abstract class TitleBodyServiceImpl<MODEL extends TitleBody, BODY, RESPON
 
     protected final EntitiesUtils entitiesUtils;
 
-    public TitleBodyServiceImpl(S modelRepository, M modelMapper, PageableUtilsCustom pageableUtils, UserClient userClient, String modelName, List<String> allowedSortingFields, EntitiesUtils entitiesUtils, CR titleBodyServiceRedisCacheWrapper) {
-        super(modelRepository, modelMapper, pageableUtils, userClient, modelName, allowedSortingFields, titleBodyServiceRedisCacheWrapper);
+
+    public TitleBodyServiceImpl(S modelRepository, M modelMapper, PageableUtilsCustom pageableUtils, UserClient userClient, String modelName, List<String> allowedSortingFields, EntitiesUtils entitiesUtils, CR titleBodyServiceRedisCacheWrapper, RabbitMqUpdateDeleteService<MODEL> rabbitMqUpdateDeleteService) {
+        super(modelRepository, modelMapper, pageableUtils, userClient, modelName, allowedSortingFields, titleBodyServiceRedisCacheWrapper, rabbitMqUpdateDeleteService);
         this.entitiesUtils = entitiesUtils;
     }
 

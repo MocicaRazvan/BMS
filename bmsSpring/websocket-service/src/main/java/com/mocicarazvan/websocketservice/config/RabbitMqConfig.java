@@ -1,5 +1,6 @@
 package com.mocicarazvan.websocketservice.config;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -8,8 +9,10 @@ import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
 @Configuration
+@RequiredArgsConstructor
 public class RabbitMqConfig {
     @Value("${plan.queue.name}")
     private String planQueueName;
@@ -23,6 +26,8 @@ public class RabbitMqConfig {
     @Value("${plan.bought.queue.name}")
     private String planBoughtQueueName;
 
+
+    private final ThreadPoolTaskScheduler taskScheduler;
 
     @Bean
     public Queue planQueue() {
@@ -53,6 +58,7 @@ public class RabbitMqConfig {
     public RabbitTemplate rabbitTemplate(final ConnectionFactory connectionFactory) {
         RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
         rabbitTemplate.setMessageConverter(jsonMessageConverter());
+        rabbitTemplate.setTaskExecutor(taskScheduler);
         return rabbitTemplate;
     }
 }

@@ -26,6 +26,8 @@ public interface CommentRepository extends TitleBodyRepository<Comment> {
 
     Mono<Void> deleteAllByReferenceIdEqualsAndReferenceType(Long referenceId, CommentReferenceType referenceType);
 
+    Flux<Comment> findAllByReferenceIdEqualsAndReferenceType(Long referenceId, CommentReferenceType referenceType);
+
     @Query("""
             SELECT * FROM comment
             WHERE EXTRACT(MONTH FROM created_at) = :month

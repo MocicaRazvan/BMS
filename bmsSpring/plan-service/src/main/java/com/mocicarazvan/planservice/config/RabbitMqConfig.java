@@ -1,10 +1,14 @@
 package com.mocicarazvan.planservice.config;
 
 import com.mocicarazvan.planservice.dtos.PlanResponse;
+import com.mocicarazvan.planservice.models.Plan;
 import com.mocicarazvan.templatemodule.services.RabbitMqApprovedSenderWrapper;
 import com.mocicarazvan.templatemodule.services.RabbitMqSender;
+import com.mocicarazvan.templatemodule.services.RabbitMqUpdateDeleteService;
 import com.mocicarazvan.templatemodule.services.impl.RabbitMqApprovedSenderWrapperImpl;
 import com.mocicarazvan.templatemodule.services.impl.RabbitMqSenderImpl;
+import com.mocicarazvan.templatemodule.services.impl.RabbitMqUpdateDeleteServiceImpl;
+import com.mocicarazvan.templatemodule.utils.SimpleAsyncTaskExecutorInstance;
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;
 import org.springframework.amqp.core.DirectExchange;
@@ -31,6 +35,18 @@ public class RabbitMqConfig {
     @Value("${plan.extraLink}")
     private String extraLink;
 
+    @Value("${plan.delete.queue.name}")
+    private String planDeleteQueueName;
+
+    @Value("${plan.update.queue.name}")
+    private String planUpdateQueueName;
+
+    @Value("${plan.delete.routing.key}")
+    private String planDeleteRoutingKey;
+
+    @Value("${plan.update.routing.key}")
+    private String planUpdateRoutingKey;
+
     @Bean
     public Queue planQueue() {
         return new Queue(planQueueName, true);
@@ -55,6 +71,7 @@ public class RabbitMqConfig {
     public RabbitTemplate rabbitTemplate(ConnectionFactory connectionFactory) {
         RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
         rabbitTemplate.setMessageConverter(jsonMessageConverter());
+        rabbitTemplate.setTaskExecutor(new SimpleAsyncTaskExecutorInstance().initialize());
         return rabbitTemplate;
     }
 
@@ -66,5 +83,35 @@ public class RabbitMqConfig {
     @Bean
     public RabbitMqApprovedSenderWrapper<PlanResponse> planResponseRabbitMqApprovedSenderWrapper(RabbitMqSender rabbitMqSender) {
         return new RabbitMqApprovedSenderWrapperImpl<>(extraLink, rabbitMqSender);
+    }
+
+    @Bean
+    public Queue planDeleteQueue() {
+        return new Queue(planDeleteQueueName, true);
+    }
+
+    @Bean
+    public Queue planUpdateQueue() {
+        return new Queue(planUpdateQueueName, true);
+    }
+
+    @Bean
+    public Binding planDeleteBinding(DirectExchange planExchange) {
+        return BindingBuilder.bind(planDeleteQueue())
+                .to(planExchange).with(planDeleteRoutingKey);
+    }
+
+    @Bean
+    public Binding planUpdateBinding(DirectExchange planExchange) {
+        return BindingBuilder.bind(planUpdateQueue())
+                .to(planExchange).with(planUpdateRoutingKey);
+    }
+
+    @Bean
+    public RabbitMqUpdateDeleteService<Plan> planRabbitMqUpdateDeleteService(RabbitTemplate rabbitTemplate) {
+        return RabbitMqUpdateDeleteServiceImpl.<Plan>builder()
+                .deleteSender(new RabbitMqSenderImpl(planExchangeName, planDeleteRoutingKey, rabbitTemplate))
+                .updateSender(new RabbitMqSenderImpl(planExchangeName, planUpdateRoutingKey, rabbitTemplate))
+                .build();
     }
 }

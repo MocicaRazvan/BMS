@@ -23,6 +23,7 @@ import com.mocicarazvan.templatemodule.dtos.UserDto;
 import com.mocicarazvan.templatemodule.dtos.response.*;
 import com.mocicarazvan.templatemodule.exceptions.notFound.NotFoundEntity;
 import com.mocicarazvan.templatemodule.services.RabbitMqApprovedSenderWrapper;
+import com.mocicarazvan.templatemodule.services.RabbitMqUpdateDeleteService;
 import com.mocicarazvan.templatemodule.services.impl.ApprovedServiceImpl;
 import com.mocicarazvan.templatemodule.utils.EntitiesUtils;
 import com.mocicarazvan.templatemodule.utils.PageableUtilsCustom;
@@ -52,9 +53,9 @@ public class PostServiceImpl extends ApprovedServiceImpl<Post, PostBody, PostRes
     private final PostEmbedServiceImpl postEmbedServiceImpl;
 
 
-    public PostServiceImpl(PostRepository modelRepository, PostMapper modelMapper, PageableUtilsCustom pageableUtils, UserClient userClient, EntitiesUtils entitiesUtils, FileClient fileClient, ObjectMapper objectMapper, CommentClient commentClient, PostExtendedRepository postExtendedRepository, RabbitMqApprovedSenderWrapper<PostResponse> rabbitMqSender, PostServiceRedisCacheWrapper self, TransactionalOperator transactionalOperator, PostEmbedServiceImpl postEmbedServiceImpl) {
+    public PostServiceImpl(PostRepository modelRepository, PostMapper modelMapper, PageableUtilsCustom pageableUtils, UserClient userClient, EntitiesUtils entitiesUtils, FileClient fileClient, ObjectMapper objectMapper, CommentClient commentClient, PostExtendedRepository postExtendedRepository, RabbitMqApprovedSenderWrapper<PostResponse> rabbitMqSender, PostServiceRedisCacheWrapper self, TransactionalOperator transactionalOperator, PostEmbedServiceImpl postEmbedServiceImpl, RabbitMqUpdateDeleteService<Post> rabbitMqUpdateDeleteService) {
         super(modelRepository, modelMapper, pageableUtils, userClient, "post", List.of("id", "userId", "title", "createdAt", "updatedAt", "approved"),
-                entitiesUtils, fileClient, objectMapper, rabbitMqSender, self
+                entitiesUtils, fileClient, objectMapper, rabbitMqSender, self, rabbitMqUpdateDeleteService
         );
         this.commentClient = commentClient;
         this.postExtendedRepository = postExtendedRepository;
@@ -88,6 +89,7 @@ public class PostServiceImpl extends ApprovedServiceImpl<Post, PostBody, PostRes
                                                         .then(commentClient.deleteCommentsByPostId(id.toString(), userId))
                                                         .then(postEmbedServiceImpl.deleteEmbedding(id))
                                                         .then(modelRepository.delete(model)))
+                                                .doOnSuccess(_ -> rabbitMqUpdateDeleteService.sendDeleteMessage(model))
                                                 .then(Mono.fromCallable(() -> modelMapper.fromModelToResponse(model))
 
                                                 )
@@ -105,6 +107,7 @@ public class PostServiceImpl extends ApprovedServiceImpl<Post, PostBody, PostRes
                                                     .then(commentClient.deleteCommentsByPostId(id.toString(), userId))
                                                     .then(postEmbedServiceImpl.deleteEmbedding(id))
                                                     .then(modelRepository.delete(model)))
+                                            .doOnSuccess(_ -> rabbitMqUpdateDeleteService.sendDeleteMessage(model))
                                             .then(Mono.fromCallable(() -> modelMapper.fromModelToResponse(model)))
                                             .map(r -> Pair.of(r, originalApproved))
                                             .flatMap(self::updateDeleteInvalidate);

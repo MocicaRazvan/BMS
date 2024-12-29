@@ -14,10 +14,12 @@ import com.mocicarazvan.templatemodule.controllers.ApproveController;
 import com.mocicarazvan.templatemodule.dtos.PageableBody;
 import com.mocicarazvan.templatemodule.dtos.response.*;
 import com.mocicarazvan.templatemodule.hateos.CustomEntityModel;
+import com.mocicarazvan.templatemodule.services.impl.RabbitMqSenderImpl;
 import com.mocicarazvan.templatemodule.utils.RequestsUtils;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.data.util.Pair;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -43,6 +45,7 @@ public class PostController implements ApproveController
     private final PostReactiveResponseBuilder postReactiveResponseBuilder;
     private final RequestsUtils requestsUtils;
     private final ObjectMapper objectMapper;
+    private final RabbitTemplate rabbitTemplate;
 
     @Override
     @PatchMapping(value = "/approved", produces = {MediaType.APPLICATION_NDJSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
@@ -266,12 +269,6 @@ public class PostController implements ApproveController
             @RequestPart("body") String body,
             @RequestParam("clientId") String clientId,
             ServerWebExchange exchange) {
-//        PostBody postBody = null;
-//        try {
-//            postBody = objectMapper.readValue(body, PostBody.class);
-//        } catch (JsonProcessingException e) {
-//            return Mono.error(e);
-//        }
 
         return requestsUtils.getBodyFromJson(body, PostBody.class, objectMapper)
                 .flatMap(postBody -> postService.createModel(files, postBody, requestsUtils.extractAuthUser(exchange), clientId)
@@ -304,5 +301,21 @@ public class PostController implements ApproveController
         return postService.seedEmbeddings()
                 .map(ResponseEntity::ok);
     }
+
+
+    @GetMapping("/testQueue")
+    public Mono<String> testQeue() {
+        var sender = new RabbitMqSenderImpl("post-exchange", "post-update-routing-key", rabbitTemplate);
+        for (int i = 0; i < 100; i++) {
+            sender.sendMessage(Post.builder()
+                    .id((long) i)
+                    .title("title" + i)
+                    .build());
+        }
+        ;
+
+        return Mono.just("ok");
+    }
+
 
 }

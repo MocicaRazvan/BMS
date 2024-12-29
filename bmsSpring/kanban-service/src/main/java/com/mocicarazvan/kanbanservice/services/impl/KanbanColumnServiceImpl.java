@@ -10,6 +10,7 @@ import com.mocicarazvan.kanbanservice.services.KanbanColumnService;
 import com.mocicarazvan.rediscache.annotation.RedisReactiveChildCache;
 import com.mocicarazvan.rediscache.annotation.RedisReactiveChildCacheEvict;
 import com.mocicarazvan.templatemodule.clients.UserClient;
+import com.mocicarazvan.templatemodule.services.RabbitMqUpdateDeleteService;
 import com.mocicarazvan.templatemodule.services.impl.ManyToOneUserServiceImpl;
 import com.mocicarazvan.templatemodule.utils.EntitiesUtils;
 import com.mocicarazvan.templatemodule.utils.PageableUtilsCustom;
@@ -36,9 +37,10 @@ public class KanbanColumnServiceImpl
     private final EntitiesUtils entitiesUtils;
 
 
-    public KanbanColumnServiceImpl(KanbanColumnRepository modelRepository, KanbanColumnMapper modelMapper, PageableUtilsCustom pageableUtils, UserClient userClient, EntitiesUtils entitiesUtils, KanbanColumnServiceRedisCacheWrapper self) {
+    public KanbanColumnServiceImpl(KanbanColumnRepository modelRepository, KanbanColumnMapper modelMapper, PageableUtilsCustom pageableUtils, UserClient userClient, EntitiesUtils entitiesUtils, KanbanColumnServiceRedisCacheWrapper self
+            , RabbitMqUpdateDeleteService<KanbanColumn> rabbitMqUpdateDeleteService) {
         super(modelRepository, modelMapper, pageableUtils, userClient, "kanbanColumn", List.of("id", "userId", "title", "createdAt", "updatedAt", "orderIndex"),
-                self);
+                self, rabbitMqUpdateDeleteService);
         this.entitiesUtils = entitiesUtils;
 
     }
