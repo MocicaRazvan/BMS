@@ -4,8 +4,8 @@ package com.mocicarazvan.postservice.cache;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mocicarazvan.ollamasearch.cache.EmbedCache;
+import com.mocicarazvan.ollamasearch.dtos.embed.OllamaEmbedResponseModel;
 import com.mocicarazvan.rediscache.services.impl.SaveObjectToCacheImpl;
-import io.github.ollama4j.models.embeddings.OllamaEmbedResponseModel;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.ReactiveRedisTemplate;
 import org.springframework.stereotype.Component;
@@ -25,7 +25,7 @@ public class EmbedPostCache extends SaveObjectToCacheImpl implements EmbedCache 
     }
 
     @Override
-    public Mono<OllamaEmbedResponseModel> getEmbedding(String text, Function<String, OllamaEmbedResponseModel> cacheMissFunction) {
+    public Mono<OllamaEmbedResponseModel> getEmbedding(String text, Function<String, Mono<OllamaEmbedResponseModel>> cacheMissFunction) {
         return getOrSaveObject(text, expireMinutes, cacheMissFunction, (t) -> getEmbeddingKey("postEmbedding", t), new TypeReference<>() {
         });
     }

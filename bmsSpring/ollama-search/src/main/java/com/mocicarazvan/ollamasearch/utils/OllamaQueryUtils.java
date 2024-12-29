@@ -2,7 +2,7 @@ package com.mocicarazvan.ollamasearch.utils;
 
 
 import com.mocicarazvan.ollamasearch.config.OllamaPropertiesConfig;
-import io.github.ollama4j.models.embeddings.OllamaEmbedResponseModel;
+import com.mocicarazvan.ollamasearch.dtos.embed.OllamaEmbedResponseModel;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 

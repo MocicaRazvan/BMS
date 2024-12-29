@@ -6,6 +6,6 @@ import reactor.core.publisher.Mono;
 import java.util.function.Function;
 
 public interface SaveObjectToCache {
-    <V, I> Mono<V> getOrSaveObject(I item, Long expireMinutes, Function<I, V> cacheMissFunction, Function<I, String> keyFunction, TypeReference<V> typeReference);
+    <V, I> Mono<V> getOrSaveObject(I item, Long expireMinutes, Function<I, Mono<V>> cacheMissFunction, Function<I, String> keyFunction, TypeReference<V> typeReference);
 
 }

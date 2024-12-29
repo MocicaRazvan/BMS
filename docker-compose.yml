@@ -787,6 +787,7 @@ services:
       - RESERVED_VRAM_GB=1.11
       - MEMORY_FRACTION=0.4
       - ZIPKIN_URL=http://zipkin:9411/api/v2/spans
+      - PIPE_ENABLE_GRADIENT_CHECKPOINTING=false
       #      - ZIPKIN_SAMPLE_RATE=1
       #      - LOKI_URL=http://host.docker.internal:3100/loki/api/v1/push
       #      - HUGGING_FACE_HUB_TOKEN=${HUGGING_FACE_HUB_TOKEN}
@@ -809,3 +810,5 @@ volumes:
 networks:
   bms:
     driver: bridge
+#net stop winnat
+#net start winnat

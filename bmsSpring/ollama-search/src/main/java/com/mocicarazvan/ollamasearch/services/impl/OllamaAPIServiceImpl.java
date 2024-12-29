@@ -1,23 +1,19 @@
 package com.mocicarazvan.ollamasearch.services.impl;
 
-import com.mocicarazvan.ollamasearch.annotations.EmbedRetry;
 import com.mocicarazvan.ollamasearch.cache.EmbedCache;
+import com.mocicarazvan.ollamasearch.clients.OllamaAPI;
 import com.mocicarazvan.ollamasearch.config.OllamaPropertiesConfig;
-import com.mocicarazvan.ollamasearch.exceptions.OllamaEmbedException;
+import com.mocicarazvan.ollamasearch.dtos.OllamaOptions;
+import com.mocicarazvan.ollamasearch.dtos.embed.OllamaEmbedRequestModel;
+import com.mocicarazvan.ollamasearch.dtos.embed.OllamaEmbedResponseModel;
 import com.mocicarazvan.ollamasearch.services.OllamaAPIService;
 import com.mocicarazvan.ollamasearch.utils.OllamaQueryUtils;
-import io.github.ollama4j.OllamaAPI;
-import io.github.ollama4j.exceptions.OllamaBaseException;
-import io.github.ollama4j.models.embeddings.OllamaEmbedRequestBuilder;
-import io.github.ollama4j.models.embeddings.OllamaEmbedResponseModel;
-import io.github.ollama4j.utils.OptionsBuilder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
-import java.io.IOException;
 import java.util.List;
 
 @Service
@@ -31,20 +27,15 @@ public class OllamaAPIServiceImpl implements OllamaAPIService {
 
 
     @Override
-    public OllamaEmbedResponseModel generateEmbedding(String text) {
+    public Mono<OllamaEmbedResponseModel> generateEmbedding(String text) {
         return embed(List.of(text));
     }
 
     @Override
-    public OllamaEmbedResponseModel generateEmbeddings(List<String> texts) {
+    public Mono<OllamaEmbedResponseModel> generateEmbeddings(List<String> texts) {
         return embed(texts);
     }
 
-    @Override
-    public float[] generateEmbeddingFloat(String text) {
-        List<Double> doubleList = generateEmbedding(text).getEmbeddings().getFirst();
-        return getFloats(doubleList);
-    }
 
     private static float[] getFloats(List<Double> doubleList) {
         float[] floatArray = new float[doubleList.size()];
@@ -55,37 +46,51 @@ public class OllamaAPIServiceImpl implements OllamaAPIService {
     }
 
     @Override
-    public Mono<OllamaEmbedResponseModel> generateEmbeddingMono(String text, EmbedCache embedCache) {
+    public Mono<OllamaEmbedResponseModel> generateEmbeddingWithCache(String text, EmbedCache embedCache) {
         return embedCache.getEmbedding(text, this::generateEmbedding)
                 .subscribeOn(Schedulers.boundedElastic());
     }
 
     @Override
-    public Mono<Float[]> generateEmbeddingFloatMono(String text, EmbedCache embedCache) {
-        return generateEmbeddingMono(text, embedCache).map(ollamaEmbedResponseModel -> {
+    public Mono<Float[]> generateEmbeddingFloatMonoWithCache(String text, EmbedCache embedCache) {
+        return generateEmbeddingWithCache(text, embedCache).map(ollamaEmbedResponseModel -> {
             List<Double> doubleList = ollamaEmbedResponseModel.getEmbeddings().getFirst();
-            Float[] floatArray = new Float[doubleList.size()];
-            for (int i = 0; i < doubleList.size(); i++) {
-                floatArray[i] = doubleList.get(i).floatValue();
-            }
-            return floatArray;
+            return convertToFloat(doubleList);
         });
     }
 
+    @Override
+    public Mono<Float[]> generateEmbeddingFloatMono(String text) {
+        return generateEmbedding(text).map(ollamaEmbedResponseModel -> convertToFloat(ollamaEmbedResponseModel.getEmbeddings().getFirst()));
+    }
 
-    @EmbedRetry
-    private OllamaEmbedResponseModel embed(List<String> inputs) {
-        String[] texts = inputs.stream().map(t -> t.trim().replaceAll("\\s+", " ").toLowerCase()).toList().toArray(new String[0]);
-        OptionsBuilder optionsBuilder = new OptionsBuilder();
-        optionsBuilder.setNumCtx(ollamaPropertiesConfig.getNumCtx());
-        try {
-            return ollamaAPI.embed(OllamaEmbedRequestBuilder.getInstance(
-                    ollamaPropertiesConfig.getEmbeddingModel(), texts
-            ).withOptions(optionsBuilder.build()).withKeepAlive(ollamaPropertiesConfig.getKeepalive()).build());
-        } catch (IOException | OllamaBaseException | InterruptedException e) {
-            log.error("Error while embedding: " + e.getMessage());
-            throw new OllamaEmbedException("Error while embedding: " + e.getMessage(), e);
+    private Float[] convertToFloat(List<Double> doubleList) {
+        Float[] floatArray = new Float[doubleList.size()];
+        for (int i = 0; i < doubleList.size(); i++) {
+            floatArray[i] = doubleList.get(i).floatValue();
         }
+        return floatArray;
+    }
+
+
+    private Mono<OllamaEmbedResponseModel> embed(List<String> inputs) {
+        String[] texts = inputs.stream().map(t -> t.toLowerCase().replaceAll("\\s+", " ").trim()).toList().toArray(new String[0]);
+        OllamaEmbedRequestModel.builder()
+                .fromConfig(ollamaPropertiesConfig)
+                .input(texts)
+                .options(OllamaOptions.builder()
+                        .fromConfig(ollamaPropertiesConfig)
+                        .build())
+                .build();
+
+        return ollamaAPI.embed(OllamaEmbedRequestModel.builder()
+                .fromConfig(ollamaPropertiesConfig)
+                .input(texts)
+                .options(OllamaOptions.builder()
+                        .fromConfig(ollamaPropertiesConfig)
+                        .build())
+                .build());
+
     }
 
     @Override
@@ -100,7 +105,7 @@ public class OllamaAPIServiceImpl implements OllamaAPIService {
     @Override
     public Mono<String> getEmbedding(String text, EmbedCache embedCache) {
         return isNotNullOrEmpty(text)
-                ? generateEmbeddingMono(text, embedCache).map(ollamaQueryUtils::getEmbeddingsAsString)
+                ? generateEmbeddingWithCache(text, embedCache).map(ollamaQueryUtils::getEmbeddingsAsString)
                 : Mono.just("");
     }
 

@@ -13,6 +13,8 @@ public class OllamaPropertiesConfig {
     private String embeddingModel;
     private String keepalive = "-1m";
     private int numCtx = 2048;
-    private double threshold = 0.6;
+
+
+    private double threshold = 0.55;
 
 }

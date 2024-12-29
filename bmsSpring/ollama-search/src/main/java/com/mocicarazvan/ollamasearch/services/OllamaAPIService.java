@@ -1,22 +1,22 @@
 package com.mocicarazvan.ollamasearch.services;
 
 import com.mocicarazvan.ollamasearch.cache.EmbedCache;
-import io.github.ollama4j.models.embeddings.OllamaEmbedResponseModel;
+import com.mocicarazvan.ollamasearch.dtos.embed.OllamaEmbedResponseModel;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
 
 public interface OllamaAPIService {
 
-    OllamaEmbedResponseModel generateEmbedding(String text);
+    Mono<OllamaEmbedResponseModel> generateEmbedding(String text);
 
-    OllamaEmbedResponseModel generateEmbeddings(List<String> texts);
+    Mono<OllamaEmbedResponseModel> generateEmbeddings(List<String> texts);
 
-    float[] generateEmbeddingFloat(String text);
+    Mono<OllamaEmbedResponseModel> generateEmbeddingWithCache(String text, EmbedCache embedCache);
 
-    Mono<OllamaEmbedResponseModel> generateEmbeddingMono(String text, EmbedCache embedCache);
+    Mono<Float[]> generateEmbeddingFloatMonoWithCache(String text, EmbedCache embedCache);
 
-    Mono<Float[]> generateEmbeddingFloatMono(String text, EmbedCache embedCache);
+    Mono<Float[]> generateEmbeddingFloatMono(String text);
 
     float[] convertToFloatPrimitive(Float[] floats);
 

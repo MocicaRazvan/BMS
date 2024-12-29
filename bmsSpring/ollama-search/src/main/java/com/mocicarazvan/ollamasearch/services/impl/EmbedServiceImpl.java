@@ -27,9 +27,9 @@ public abstract class EmbedServiceImpl<T extends EmbedModel, M extends EmbedMode
         t.setEntityId(entityId);
         t.setCreatedAt(LocalDateTime.now());
         t.setUpdatedAt(LocalDateTime.now());
-        return Mono.fromCallable(() -> ollamaAPIService.generateEmbeddingFloat(embedText))
+        return ollamaAPIService.generateEmbeddingFloatMono(embedText)
                 .flatMap(embeddings -> {
-                    t.setEmbedding(embeddings);
+                    t.setEmbedding(ollamaAPIService.convertToFloatPrimitive(embeddings));
                     return embedRepository.save(t);
                 });
 

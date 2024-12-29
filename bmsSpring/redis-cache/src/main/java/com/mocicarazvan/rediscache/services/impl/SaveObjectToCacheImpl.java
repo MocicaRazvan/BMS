@@ -17,16 +17,13 @@ public class SaveObjectToCacheImpl implements SaveObjectToCache {
 
 
     @Override
-    public <V, I> Mono<V> getOrSaveObject(I item, Long expireMinutes, Function<I, V> cacheMissFunction, Function<I, String> keyFunction, TypeReference<V> typeReference) {
+    public <V, I> Mono<V> getOrSaveObject(I item, Long expireMinutes, Function<I, Mono<V>> cacheMissFunction, Function<I, String> keyFunction, TypeReference<V> typeReference) {
         String key = keyFunction.apply(item);
         return reactiveRedisTemplate.opsForValue()
                 .get(key)
                 .map(result -> objectMapper.convertValue(result, typeReference))
-                .switchIfEmpty(Mono.defer(() -> {
-                    V result = cacheMissFunction.apply(item);
-                    return reactiveRedisTemplate.opsForValue()
-                            .set(key, result, Duration.ofMinutes(expireMinutes))
-                            .thenReturn(result);
-                }));
+                .switchIfEmpty(cacheMissFunction.apply(item).flatMap(result -> reactiveRedisTemplate.opsForValue()
+                        .set(key, result, Duration.ofMinutes(expireMinutes))
+                        .thenReturn(result)));
     }
 }

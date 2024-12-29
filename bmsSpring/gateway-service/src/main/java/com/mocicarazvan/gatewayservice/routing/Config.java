@@ -1,6 +1,8 @@
 package com.mocicarazvan.gatewayservice.routing;
 
+import com.mocicarazvan.gatewayservice.config.ExternalServicesConfig;
 import com.mocicarazvan.gatewayservice.filters.AuthFilter;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.gateway.route.Route;
 import org.springframework.cloud.gateway.route.RouteLocator;
@@ -20,7 +22,11 @@ import java.util.Arrays;
 import java.util.function.Function;
 
 @Configuration
+@RequiredArgsConstructor
 public class Config {
+
+    private final ExternalServicesConfig externalServicesConfig;
+
     @Bean
     public CorsWebFilter corsFilter(
             @Value("${front.url}") String frontUrl
@@ -100,7 +106,12 @@ public class Config {
                 .route("day-service", r -> r.path("/days/**", "/meals/**")
                         .filters(f -> f.filter(authFilter))
                         .uri("lb://day-service"))
-
+                .route("diffusion-service", r -> r.path("/diffusion/**")
+                        .filters(f -> f
+                                .stripPrefix(1)
+                                .filter(authFilter)
+                                .dedupeResponseHeader("Access-Control-Allow-Origin", "RETAIN_UNIQUE"))
+                        .uri(externalServicesConfig.getDiffusion()))
 
                 .route("user-openapi", r -> r.path("/user-service/v3/api-docs")
                         .uri("lb://user-service"))
@@ -183,6 +194,12 @@ public class Config {
                 .route("day-service", r -> r.path("/days/**", "/meals/**")
                         .filters(f -> f.filter(authFilter))
                         .uri("http://day-service:8091"))
+                .route("diffusion-service", r -> r.path("/diffusion/**")
+                        .filters(f -> f
+                                .stripPrefix(1)
+                                .filter(authFilter)
+                                .dedupeResponseHeader("Access-Control-Allow-Origin", "RETAIN_UNIQUE"))
+                        .uri(externalServicesConfig.getDiffusion()))
 
 
                 .route("user-openapi", r -> r.path("/user-service/v3/api-docs")
