@@ -14,7 +14,6 @@ import { vectorStoreInstance } from "@/lib/langchain/langchain";
 import { MemoryVectorStore } from "langchain/vectorstores/memory";
 import { getMultiQueryRetriever } from "@/lib/langchain/langhcain-multi-query-retriver";
 import { ContextualCompressionRetriever } from "langchain/retrievers/contextual_compression";
-import * as DOMPurify from "dompurify";
 import removeMd from "remove-markdown";
 
 const modelName = process.env.OLLAMA_MODEL;
@@ -200,11 +199,7 @@ export async function aiIdea({
     question: input || placeholderInput,
   });
   if (targetedField === "title") {
-    resp.answer = removeMd(
-      DOMPurify.sanitize(resp.answer, {
-        ALLOWED_TAGS: [],
-      }),
-    );
+    resp.answer = removeMd(resp.answer);
   }
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
