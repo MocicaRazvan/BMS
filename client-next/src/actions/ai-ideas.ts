@@ -14,6 +14,8 @@ import { vectorStoreInstance } from "@/lib/langchain/langchain";
 import { MemoryVectorStore } from "langchain/vectorstores/memory";
 import { getMultiQueryRetriever } from "@/lib/langchain/langhcain-multi-query-retriver";
 import { ContextualCompressionRetriever } from "langchain/retrievers/contextual_compression";
+import * as DOMPurify from "dompurify";
+import removeMd from "remove-markdown";
 
 const modelName = process.env.OLLAMA_MODEL;
 const ollamaBaseUrl = process.env.OLLAMA_BASE_URL;
@@ -28,10 +30,10 @@ const titlePrompt = ChatPromptTemplate.fromMessages([
     `You are an advanced AI language model tasked with assisting users in generating highly engaging and accurate titles based on the provided context for **{item}**. 
     You are on a nutritional site and the output must always be related to health, wellness, lifestyle, fitness, nutrition, mental health, self-care, well-being, or healthy living.
     Your goal is to produce a SINGLE title that is clear, concise, and relevant to the content, capturing the essence of the given information.
-    The title must be attention-grabbing, no more than 15 words, and formatted as a single line with no explanation or commentary. 
+    The title must be attention-grabbing, no more than 15 words, and formatted as a single text line with no explanation or commentary. 
 
     **Strict rules for title generation:**
-    1. Output a single title with NO explanations, alternate options, or commentary.
+    1. Output a single title as a text with NO explanations, alternate options, or commentary.
     2. The title must be a single line, with no introductions such as "Based on the context" or "Here is the title."
     3. Do not include any formatting like quotation marks, bullet points, or extra text, or emojis.
     4. Make a single option and do not provide multiple titles.
@@ -39,7 +41,7 @@ const titlePrompt = ChatPromptTemplate.fromMessages([
     6. Ensure the title is relevant for the item type: {item}.
 
     **Final output format:**
-    - A SINGLE line containing ONLY the title content and NOTHING else besides.
+    - A SINGLE line containing ONLY the title as text content and NOTHING else besides.
     - No explanations, commentary, or additional information, keep it concise, short and to the point.
     - Keep in mind the kind of item you are generating the title for: {item}.
     `,
@@ -69,7 +71,7 @@ const descriptionPrompt = ChatPromptTemplate.fromMessages([
   [
     "user",
     "Here is the context: {context}.\n" +
-      "Additionally, the user has provided this input: {input}. Based on this, generate a verbose and detailed description for the item: {item}.",
+      "Additionally, the user has provided this input: {input}. Based on this, generate a **verbose and detailed** description for the item: {item}.",
   ],
 ]);
 
@@ -197,7 +199,13 @@ export async function aiIdea({
     item,
     question: input || placeholderInput,
   });
-
+  if (targetedField === "title") {
+    resp.answer = removeMd(
+      DOMPurify.sanitize(resp.answer, {
+        ALLOWED_TAGS: [],
+      }),
+    );
+  }
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
   vectorDb = null;
