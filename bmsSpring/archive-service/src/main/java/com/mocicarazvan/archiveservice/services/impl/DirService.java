@@ -2,7 +2,7 @@ package com.mocicarazvan.archiveservice.services.impl;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mocicarazvan.archiveservice.services.DirService;
+import com.mocicarazvan.archiveservice.services.SaveBatchMessages;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -18,7 +18,8 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class DirServiceImpl implements DirService {
+// todo implement this well its just a placeholder
+public class DirService implements SaveBatchMessages {
 
 
     public static final String ROOT_DIR_PATH = "archive/data".replace("/", File.separator);
@@ -41,7 +42,7 @@ public class DirServiceImpl implements DirService {
     }
 
     @Override
-    public <T> void saveBatchToDisk(List<T> items, String name) throws IOException {
+    public <T> void saveBatch(List<T> items, String name) throws IOException {
         File dir = createDirIfNotExists(createRootDirIfNotExists(), name);
         File batchFile = new File(dir, getCurrentTime() + "_" + UUID.randomUUID() + ".json");
         objectMapper.writerWithDefaultPrettyPrinter().writeValue(batchFile, items);

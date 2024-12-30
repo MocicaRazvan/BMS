@@ -2,7 +2,7 @@ package com.mocicarazvan.archiveservice.listeners;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mocicarazvan.archiveservice.config.QueuesPropertiesConfig;
-import com.mocicarazvan.archiveservice.services.DirService;
+import com.mocicarazvan.archiveservice.services.SaveBatchMessages;
 import com.rabbitmq.client.Channel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,13 +18,12 @@ import java.util.List;
 
 @RequiredArgsConstructor
 @Slf4j
-// todo implement this well its just a placeholder
 public class ChannelAwareBatchMessageListenerImpl<T> implements ChannelAwareBatchMessageListener {
 
     private final ObjectMapper objectMapper;
     private final Class<T> clazz;
     private final String queueName;
-    private final DirService dirService;
+    private final SaveBatchMessages saveBatchMessages;
     private final QueuesPropertiesConfig queuesPropertiesConfig;
 
 
@@ -36,7 +35,7 @@ public class ChannelAwareBatchMessageListenerImpl<T> implements ChannelAwareBatc
             Flux.fromIterable(messages)
                     .map(this::deserializeMessage)
                     .bufferTimeout(queuesPropertiesConfig.getBatchSize(), Duration.ofSeconds(queuesPropertiesConfig.getSavingBufferSeconds()))
-                    .flatMap(this::saveBatchToDisk)
+                    .flatMap(this::sendBatchToBeSaved)
                     .doOnError(e -> {
                         log.error("Error during processing: {}", e.getMessage());
                         rejectBatch(messages, channel);
@@ -61,10 +60,10 @@ public class ChannelAwareBatchMessageListenerImpl<T> implements ChannelAwareBatc
         });
     }
 
-    private Mono<Void> saveBatchToDisk(List<T> batch) {
+    private Mono<Void> sendBatchToBeSaved(List<T> batch) {
 
         return Mono.fromCallable(() -> {
-                    dirService.saveBatchToDisk(batch, queueName);
+                    saveBatchMessages.saveBatch(batch, queueName);
                     return null;
                 })
                 .subscribeOn(Schedulers.boundedElastic())
