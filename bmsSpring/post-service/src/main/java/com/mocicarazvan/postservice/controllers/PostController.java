@@ -31,6 +31,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
+import java.util.stream.IntStream;
 
 @RestController
 @RequestMapping("/posts")
@@ -304,15 +305,15 @@ public class PostController implements ApproveController
 
 
     @GetMapping("/testQueue")
-    public Mono<String> testQeue() {
+    public Mono<String> testQeue(@RequestParam(required = false, defaultValue = "100") Integer nr) {
         var sender = new RabbitMqSenderImpl("post-exchange", "post-update-routing-key", rabbitTemplate);
-        for (int i = 0; i < 100; i++) {
-            sender.sendMessage(Post.builder()
-                    .id((long) i)
-                    .title("title" + i)
-                    .build());
-        }
-        ;
+        var posts = IntStream.range(0, nr)
+                .mapToObj(i -> Post.builder()
+                        .id((long) i)
+                        .title("title" + i)
+                        .build())
+                .toList();
+        sender.sendBatchMessage(posts);
 
         return Mono.just("ok");
     }
