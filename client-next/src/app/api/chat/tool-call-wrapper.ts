@@ -12,6 +12,7 @@ import Promise from "lie";
 import { v4 as uuidv4 } from "uuid";
 import { emitError } from "@/logger";
 import { getFixingParser } from "@/lib/langchain/fixing-parser";
+import removeMd from "remove-markdown";
 
 interface ToolCallWrapperArgs {
   tools: DynamicTool[];
@@ -127,17 +128,18 @@ const toolModel = new ChatOllama({
 // .bindTools(tools);
 function mapToResponse(toolsByName: Record<string, DynamicTool>, t: ToolCall) {
   const tool = toolsByName[t.tool_name];
-  const sanitizedInput = t.input
-    .toLowerCase()
-    .replace(/[?!]/g, " ")
-    .replace(/[^\w\s]/g, " ")
-    .replace(
-      /\b(some|any|post|plan|posts|plans|buy\w*|search\w*|find\w*|read\w*|filter\w*|browse\w*|purchase\w*|meal\w*|see\w*)\b/gi,
-      " ",
-    )
-    .normalize("NFKC")
-    .replace(/\s+/g, " ")
-    .trim();
+  const sanitizedInput = removeMd(
+    t.input
+      .toLowerCase()
+      .replace(/[?!]/g, " ")
+      .replace(/[^\w\s]/g, " ")
+      .replace(
+        /\b(some|any|post|plan|posts|plans|buy\w*|search\w*|find\w*|read\w*|filter\w*|browse\w*|purchase\w*|meal\w*|see\w*)\b/gi,
+        " ",
+      )
+      .normalize("NFKC")
+      .replace(/\s+/g, " "),
+  ).trim();
   console.log("Sanitized Input: ", sanitizedInput);
   return {
     tool,
