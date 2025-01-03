@@ -88,6 +88,7 @@ const AlertDialogApprove = memo(
           <Button
             variant="outline"
             className={cn(
+              "w-full",
               approved
                 ? "border-success text-success"
                 : "border-destructive text-destructive",

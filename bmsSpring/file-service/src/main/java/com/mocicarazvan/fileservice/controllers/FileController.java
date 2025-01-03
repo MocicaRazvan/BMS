@@ -26,6 +26,7 @@ import reactor.core.publisher.SignalType;
 import reactor.core.scheduler.Schedulers;
 
 import java.net.URI;
+import java.nio.ByteBuffer;
 import java.util.List;
 
 
@@ -36,8 +37,7 @@ import java.util.List;
 public class FileController {
     private final MediaService mediaService;
     private final ObjectMapper objectMapper;
-    private final BytesService bytesService;
-    private final ImageRedisRepository imageRedisRepository;
+
 
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public Mono<ResponseEntity<FileUploadResponse>> uploadFiles(
@@ -58,101 +58,11 @@ public class FileController {
                                                    @RequestParam(required = false) Double quality,
                                                    ServerWebExchange exchange) {
         boolean shouldCheckCache = (width != null || height != null || quality != null);
-        Mono<ServerHttpResponse> responseMono = shouldCheckCache ?
-                imageRedisRepository.getImage(gridId, width, height, quality).flatMap(
-                                cachedImage -> {
-                                    log.info("Image found in cache");
-                                    ServerHttpResponse response = exchange.getResponse();
-                                    response.getHeaders().set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + gridId + "\"");
-                                    response.getHeaders().set(HttpHeaders.CONTENT_TYPE, "image/**");
-                                    response.getHeaders().setContentLength(cachedImage.length);
-                                    return response.writeWith(Mono.just(response.bufferFactory().wrap(cachedImage)))
-                                            .thenReturn(response)
-                                            .onErrorResume(e -> {
-                                                response.setStatusCode(HttpStatus.FOUND);
-                                                response.getHeaders().setLocation(URI.create("/files/download/" + gridId));
-                                                return response.setComplete()
-                                                        .thenReturn(response);
-                                            });
-                                }
-                        )
-                        .switchIfEmpty(fetchFileAndProcessFromGridFS(gridId, width, height, quality, exchange)) :
-                fetchFileAndProcessFromGridFS(gridId, width, height, quality, exchange);
-
         return
-                responseMono.doOnError(e -> log.error("Error getting file", e))
+                mediaService.getResponseForFile(gridId, width, height, quality, exchange, shouldCheckCache).doOnError(e -> log.error("Error getting file", e))
                         .flatMap(response -> Mono.just(new ResponseEntity<>(response.getStatusCode() != null ? response.getStatusCode() : HttpStatus.NOT_FOUND)));
     }
 
-
-    private Mono<ServerHttpResponse> fetchFileAndProcessFromGridFS(String gridId, Integer width, Integer height, Double quality, ServerWebExchange exchange) {
-        return mediaService.getFile(gridId)
-                .subscribeOn(Schedulers.boundedElastic())
-                .flatMap(file -> file.getGridFSFile()
-                        .flatMap(gridFSFile -> {
-                            FileType fileType = FileType.valueOf(file.getOptions().getMetadata().getString("fileType"));
-                            log.info("File type: {}", fileType);
-                            ServerHttpRequest request = exchange.getRequest();
-                            ServerHttpResponse response = exchange.getResponse();
-
-                            response.getHeaders().set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getFilename() + "\"");
-                            response.getHeaders().set(HttpHeaders.ACCEPT_RANGES, "bytes");
-
-                            if (fileType.equals(FileType.VIDEO)) {
-                                response.getHeaders().set(HttpHeaders.CONTENT_TYPE, "video/mp4");
-                            } else if (fileType.equals(FileType.IMAGE)) {
-                                response.getHeaders().set(HttpHeaders.CONTENT_TYPE, "image/**");
-                            }
-                            List<HttpRange> httpRanges = request.getHeaders().getRange();
-                            Flux<DataBuffer> downloadStream = file.getDownloadStream();
-                            long fileLength = gridFSFile.getLength();
-                            log.info("Range: " + httpRanges);
-
-                            if (fileType.equals(FileType.IMAGE) && (width != null || height != null || quality != null)) {
-                                log.info("file name: {}", file.getFilename());
-                                downloadStream =
-                                        bytesService.convertWithThumblinator(width, height, quality, downloadStream, response
-                                                )
-                                                .flatMap(dataBuffer -> {
-                                                    response.getHeaders().setContentLength(dataBuffer.readableByteCount());
-                                                    return imageRedisRepository.saveImage(gridId, width, height, quality, dataBuffer.toByteBuffer().array())
-                                                            .thenReturn(dataBuffer);
-                                                });
-                            } else if (fileType.equals(FileType.VIDEO) && !httpRanges.isEmpty()) {
-                                HttpRange range = httpRanges.getFirst();
-                                long start = range.getRangeStart(fileLength);
-                                long end = range.getRangeEnd(fileLength);
-                                response.getHeaders().add(HttpHeaders.CONTENT_RANGE, "bytes " + start + "-" + end + "/" + fileLength);
-                                response.getHeaders().setContentLength(end - start + 1);
-
-
-                                final long[] rangeStart = {start};
-                                final long[] rangeEnd = {end};
-
-                                downloadStream = bytesService.getVideoByRange(file, rangeStart, rangeEnd)
-                                        .doOnNext(_ -> {
-                                            response.setStatusCode(HttpStatus.PARTIAL_CONTENT);
-                                        });
-                            } else {
-                                response.getHeaders().setContentLength(fileLength);
-                            }
-
-                            Flux<DataBuffer> finalDownloadStream = downloadStream
-                                    .doFinally(signalType -> {
-                                        if (signalType == SignalType.ON_ERROR || signalType == SignalType.CANCEL) {
-                                            log.warn("Stream terminated with signal: {}", signalType);
-                                        }
-                                    }).doOnDiscard(DataBuffer.class, DataBufferUtils::release);
-                            return response.writeWith(finalDownloadStream)
-                                    .thenReturn(response)
-                                    .onErrorResume(e -> {
-                                        response.setStatusCode(HttpStatus.FOUND);
-                                        response.getHeaders().setLocation(URI.create("/files/download/" + gridId));
-                                        return response.setComplete()
-                                                .thenReturn(response);
-                                    });
-                        }));
-    }
 
     @GetMapping("/info/{gridId}")
     public Mono<ResponseEntity<GridFSFile>> getFileInfo(@PathVariable String gridId) {
@@ -165,8 +75,9 @@ public class FileController {
 
     @DeleteMapping("/delete")
     public Mono<ResponseEntity<Void>> deleteFiles(@RequestBody GridIdsDto ids) {
-        return mediaService.deleteFiles(ids.getGridFsIds())
-                .then(imageRedisRepository.deleteAllImagesByGridIds(ids.getGridFsIds()))
+        return mediaService.deleteFileWithCacheInvalidate(ids)
                 .then(Mono.just(ResponseEntity.noContent().build()));
     }
+
+
 }

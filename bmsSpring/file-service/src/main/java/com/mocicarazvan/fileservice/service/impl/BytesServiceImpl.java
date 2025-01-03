@@ -5,13 +5,16 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.coobird.thumbnailator.Thumbnails;
 import net.coobird.thumbnailator.geometry.Positions;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.data.mongodb.gridfs.ReactiveGridFsResource;
 import org.springframework.http.server.reactive.ServerHttpResponse;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
 
 import javax.imageio.ImageIO;
@@ -21,13 +24,21 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.util.Iterator;
+import java.util.concurrent.Executor;
 
 @Service
-@RequiredArgsConstructor
 @Slf4j
 public class BytesServiceImpl implements BytesService {
+
+    private final Scheduler thumbnailScheduler;
+
+    public BytesServiceImpl(@Qualifier("threadPoolTaskScheduler") ThreadPoolTaskScheduler threadPoolTaskScheduler) {
+        this.thumbnailScheduler = Schedulers.fromExecutor(threadPoolTaskScheduler.getScheduledExecutor());
+
+    }
 
 
     public Flux<DataBuffer> getVideoByRange(ReactiveGridFsResource file, long[] rangeStart, long[] rangeEnd) {
@@ -103,10 +114,8 @@ public class BytesServiceImpl implements BytesService {
                             }
 
 
-                            ByteArrayOutputStream outputStream = new ByteArrayOutputStream(1024);
-                            configureThumblinator(width, height, quality, image, reader, outputStream);
-                            DataBuffer buffer = response.bufferFactory().wrap(outputStream.toByteArray());
-                            return Mono.just(buffer);
+                            return Mono.fromCallable(() -> processWithThumblinator(width, height, quality, response, image, reader))
+                                    .subscribeOn(thumbnailScheduler);
                         } catch (IOException e) {
                             log.error("Error processing image: {}", e.getMessage(), e);
                             return Flux.error(new IOException("Failed to process the image"));
@@ -123,10 +132,28 @@ public class BytesServiceImpl implements BytesService {
                 });
     }
 
-    private void configureThumblinator(Integer width, Integer height, Double quality, BufferedImage image, ImageReader reader, ByteArrayOutputStream outputStream) throws IOException {
+    private DataBuffer processWithThumblinator(Integer width, Integer height, Double quality, ServerHttpResponse response, BufferedImage image, ImageReader reader) throws IOException {
+        DataBuffer dataBuffer = response.bufferFactory().allocateBuffer(getInitialThumblinatorBufferSize(width, height, image));
+        try (OutputStream outputStream = dataBuffer.asOutputStream()) {
+            configureThumblinator(width, height, quality, image, reader, outputStream);
+            return dataBuffer;
+        } catch (Exception e) {
+            DataBufferUtils.release(dataBuffer);
+            throw e;
+        }
+    }
+
+    private int getInitialThumblinatorBufferSize(Integer width, Integer height, BufferedImage image) {
+        int outputWidth = (width != null && width > 0) ? width : image.getWidth();
+        int outputHeight = (height != null && height > 0) ? height : image.getHeight();
+        return (int) (outputWidth * outputHeight * 4 * 1.2);
+    }
+
+
+    private void configureThumblinator(Integer width, Integer height, Double quality, BufferedImage image, ImageReader reader, OutputStream outputStream) throws IOException {
         Thumbnails.Builder<BufferedImage> thumbnailBuilder = Thumbnails.of(image);
         String formatName = reader.getFormatName();
-        log.info("Image format: {}", formatName);
+//        log.info("Image format: {}", formatName);
 
         if (formatName != null) {
             thumbnailBuilder.outputFormat(formatName);
