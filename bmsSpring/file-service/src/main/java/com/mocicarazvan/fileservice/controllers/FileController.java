@@ -5,29 +5,18 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mocicarazvan.fileservice.dtos.FileUploadResponse;
 import com.mocicarazvan.fileservice.dtos.GridIdsDto;
 import com.mocicarazvan.fileservice.dtos.MetadataDto;
-import com.mocicarazvan.fileservice.enums.FileType;
-import com.mocicarazvan.fileservice.repositories.ImageRedisRepository;
-import com.mocicarazvan.fileservice.service.BytesService;
 import com.mocicarazvan.fileservice.service.MediaService;
 import com.mongodb.client.gridfs.model.GridFSFile;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DataBufferUtils;
-import org.springframework.http.*;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.codec.multipart.FilePart;
-import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.core.publisher.SignalType;
-import reactor.core.scheduler.Schedulers;
-
-import java.net.URI;
-import java.nio.ByteBuffer;
-import java.util.List;
 
 
 @RestController

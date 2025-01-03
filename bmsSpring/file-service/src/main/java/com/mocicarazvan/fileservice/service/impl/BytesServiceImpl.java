@@ -1,7 +1,6 @@
 package com.mocicarazvan.fileservice.service.impl;
 
 import com.mocicarazvan.fileservice.service.BytesService;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.coobird.thumbnailator.Thumbnails;
 import net.coobird.thumbnailator.geometry.Positions;
@@ -27,7 +26,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.util.Iterator;
-import java.util.concurrent.Executor;
 
 @Service
 @Slf4j
