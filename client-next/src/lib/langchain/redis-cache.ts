@@ -5,7 +5,7 @@ let redisCache: RedisCache | null = null;
 
 const redisDb = process.env.LANGCHAIN_CACHE_REDIS_DB
   ? parseInt(process.env.LANGCHAIN_CACHE_REDIS_DB)
-  : 10;
+  : 11;
 const redisPort = process.env.LANGCHAIN_CACHE_REDIS_PORT
   ? parseInt(process.env.LANGCHAIN_CACHE_REDIS_PORT)
   : 6379;
