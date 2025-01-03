@@ -169,6 +169,11 @@ public class MealServiceImpl
     }
 
     @Override
+    public Meal cloneModel(Meal meal) {
+        return meal.clone();
+    }
+
+    @Override
     @RedisReactiveChildCacheEvict(key = CACHE_KEY_PATH, masterPath = "dayId", id = "#id")
     public Mono<MealResponse> deleteModel(Long id, String userId) {
 

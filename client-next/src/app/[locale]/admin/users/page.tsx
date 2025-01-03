@@ -13,6 +13,9 @@ import { sortingUsersSortingOptionsKeys } from "@/texts/components/list";
 import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
 import { Metadata } from "next";
 import { getIntlMetadata } from "@/texts/metadata";
+import ArchiveQueueCards, {
+  ArchiveQueueCardsTexts,
+} from "@/components/common/archive-queue-card";
 
 interface Props {
   params: { locale: Locale };
@@ -25,6 +28,7 @@ export interface AdminUsersPageTexts {
   header: string;
   title: string;
   menuTexts: SidebarMenuTexts;
+  archiveUsersTexts: ArchiveQueueCardsTexts;
 }
 export async function generateMetadata({
   params: { locale },
@@ -42,6 +46,7 @@ export default async function AdminUsersPage({ params: { locale } }: Props) {
       title,
       header,
       menuTexts,
+      archiveUsersTexts,
     },
     authUser,
   ] = await Promise.all([
@@ -67,7 +72,7 @@ export default async function AdminUsersPage({ params: { locale } }: Props) {
       <div className="w-full bg-background">
         <Heading title={title} header={header} />
         <Suspense fallback={<LoadingSpinner />}>
-          <div className="mt-10">
+          <div className="mt-10 h-full space-y-10">
             <UsersTable
               path={"/users"}
               forWhom={"admin"}
@@ -78,6 +83,13 @@ export default async function AdminUsersPage({ params: { locale } }: Props) {
               extraQueryParams={{
                 admin: "true",
               }}
+            />
+            <ArchiveQueueCards
+              prefix={"user"}
+              locale={locale}
+              showHeader={true}
+              {...archiveUsersTexts}
+              authUser={authUser}
             />
           </div>
         </Suspense>

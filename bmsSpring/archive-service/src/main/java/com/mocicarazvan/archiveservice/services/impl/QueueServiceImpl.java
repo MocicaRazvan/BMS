@@ -1,0 +1,82 @@
+package com.mocicarazvan.archiveservice.services.impl;
+
+
+import com.mocicarazvan.archiveservice.config.QueuesPropertiesConfig;
+import com.mocicarazvan.archiveservice.containers.ContainerScheduler;
+import com.mocicarazvan.archiveservice.dtos.QueueInformationWithTimestamp;
+import com.mocicarazvan.archiveservice.exceptions.QueueNameNotValid;
+import com.mocicarazvan.archiveservice.services.QueueService;
+import com.mocicarazvan.archiveservice.services.SimpleRedisCache;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.rabbit.core.RabbitAdmin;
+import org.springframework.stereotype.Service;
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
+
+import java.util.Map;
+
+@Service
+@RequiredArgsConstructor
+@Slf4j
+public class QueueServiceImpl implements QueueService {
+    private final RabbitAdmin rabbitAdmin;
+    private final QueuesPropertiesConfig queuesPropertiesConfig;
+    private final Map<String, ContainerScheduler> containerSchedulers;
+    private final SimpleRedisCache simpleRedisCache;
+
+
+    @Override
+    public Mono<QueueInformationWithTimestamp> getQueueInfo(String queueName, boolean refresh) {
+        if (refresh) {
+            return fetchQueueInfoFromSource(queueName)
+                    .flatMap(queueInfo -> simpleRedisCache.putCachedValue(queueName, queueInfo)
+                            .thenReturn(queueInfo));
+        }
+
+        return simpleRedisCache.getCachedValue(queueName)
+                .cast(QueueInformationWithTimestamp.class)
+                .switchIfEmpty(fetchQueueInfoFromSource(queueName)
+                        .flatMap(queueInfo -> simpleRedisCache.putCachedValue(queueName, queueInfo)
+                                .thenReturn(queueInfo)));
+    }
+
+    @Override
+    public Mono<String> evictCache(String queueName) {
+        return simpleRedisCache.evictCachedValue(queueName)
+                .thenReturn(queueName);
+    }
+
+    @Override
+    public Mono<QueueInformationWithTimestamp> scheduleContainer(String queueName, long aliveMillis) {
+        ContainerScheduler containerScheduler = containerSchedulers.get(queueName);
+        if (containerScheduler == null) {
+            return Mono.error(new QueueNameNotValid("Queue name not valid"));
+        }
+
+        containerScheduler.startContainerForFixedTime(aliveMillis);
+
+        return getQueueInfo(queueName, true);
+    }
+
+
+    @Override
+    public Mono<QueueInformationWithTimestamp> stopContainer(String queueName) {
+        ContainerScheduler containerScheduler = containerSchedulers.get(queueName);
+        if (containerScheduler == null) {
+            return Mono.error(new QueueNameNotValid("Queue name not valid"));
+        }
+
+        containerScheduler.stopContainerManually();
+
+        return getQueueInfo(queueName, true);
+    }
+
+
+    private Mono<QueueInformationWithTimestamp> fetchQueueInfoFromSource(String queueName) {
+        return Mono.justOrEmpty(rabbitAdmin.getQueueInfo(queueName))
+                .switchIfEmpty(Mono.error(new QueueNameNotValid("Queue name not valid")))
+                .map(qi -> QueueInformationWithTimestamp.fromQueueInformation(qi, queuesPropertiesConfig.getQueueJob(queueName)))
+                .subscribeOn(Schedulers.boundedElastic());
+    }
+}

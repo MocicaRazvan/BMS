@@ -38,7 +38,12 @@ public class RabbitMqSenderImpl implements RabbitMqSender {
         if (message == null || message.isEmpty()) {
             throw new IllegalArgumentException("Message cannot be null or empty");
         }
-        message.parallelStream().forEach(m -> rabbitTemplate.convertAndSend(exchangeName, routingKey, m));
+
+        rabbitTemplate.invoke(rabbitOperations -> {
+            message.parallelStream()
+                    .forEach(m -> rabbitOperations.convertAndSend(exchangeName, routingKey, m));
+            return null;
+        });
     }
 
 }

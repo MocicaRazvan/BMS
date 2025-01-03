@@ -14,6 +14,9 @@ import AdminPlansPageContent from "@/app/[locale]/admin/plans/page-content";
 import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
 import { Metadata } from "next";
 import { getIntlMetadata } from "@/texts/metadata";
+import ArchiveQueueCards, {
+  ArchiveQueueCardsTexts,
+} from "@/components/common/archive-queue-card";
 
 interface Props {
   params: { locale: Locale };
@@ -26,6 +29,8 @@ export interface AdminPlansPageTexts {
   title: string;
   header: string;
   menuTexts: SidebarMenuTexts;
+  archivePlansTexts: ArchiveQueueCardsTexts;
+  archiveDayTexts: ArchiveQueueCardsTexts;
 }
 
 export async function generateMetadata({
@@ -44,6 +49,7 @@ export default async function AdminPlansPage({ params: { locale } }: Props) {
       header,
       title,
       menuTexts,
+      archivePlansTexts,
     },
     authUser,
   ] = await Promise.all([
@@ -69,7 +75,7 @@ export default async function AdminPlansPage({ params: { locale } }: Props) {
       <div className="w-full h-full bg-background">
         <Heading title={title} header={header} />
         <Suspense fallback={<LoadingSpinner />}>
-          <div className="mt-10 h-full">
+          <div className="mt-10 h-full space-y-10">
             <AdminPlansPageContent
               path={"/plans/filteredWithCount"}
               forWhom={"admin"}
@@ -82,6 +88,22 @@ export default async function AdminPlansPage({ params: { locale } }: Props) {
                 admin: "true",
               }}
             />
+            <div className="space-y-5">
+              <ArchiveQueueCards
+                prefix={"plan"}
+                locale={locale}
+                showHeader={true}
+                {...archivePlansTexts}
+                authUser={authUser}
+              />
+              <ArchiveQueueCards
+                prefix={"day"}
+                locale={locale}
+                showHeader={false}
+                {...archivePlansTexts}
+                authUser={authUser}
+              />
+            </div>
           </div>
         </Suspense>
       </div>

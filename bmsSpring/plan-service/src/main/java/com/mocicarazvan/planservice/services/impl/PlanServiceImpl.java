@@ -31,7 +31,7 @@ import com.mocicarazvan.templatemodule.exceptions.action.IllegalActionException;
 import com.mocicarazvan.templatemodule.exceptions.action.PrivateRouteException;
 import com.mocicarazvan.templatemodule.exceptions.action.SubEntityUsed;
 import com.mocicarazvan.templatemodule.hateos.CustomEntityModel;
-import com.mocicarazvan.templatemodule.services.RabbitMqApprovedSenderWrapper;
+import com.mocicarazvan.templatemodule.services.RabbitMqApprovedSender;
 import com.mocicarazvan.templatemodule.services.RabbitMqUpdateDeleteService;
 import com.mocicarazvan.templatemodule.services.impl.ApprovedServiceImpl;
 import com.mocicarazvan.templatemodule.utils.EntitiesUtils;
@@ -60,11 +60,11 @@ public class PlanServiceImpl
     private final ExtendedPlanRepository extendedPlanRepository;
     private final DayClient dayClient;
     private final OrderClient orderClient;
-    private final RabbitMqApprovedSenderWrapper<PlanResponse> rabbitMqSender;
+    private final RabbitMqApprovedSender<PlanResponse> rabbitMqSender;
     private final TransactionalOperator transactionalOperator;
     private final PlanEmbedServiceImpl planEmbedServiceImpl;
 
-    public PlanServiceImpl(PlanRepository modelRepository, PlanMapper modelMapper, PageableUtilsCustom pageableUtils, UserClient userClient, EntitiesUtils entitiesUtils, FileClient fileClient, ObjectMapper objectMapper, ExtendedPlanRepository extendedPlanRepository, DayClient dayClient, OrderClient orderClient, RabbitMqApprovedSenderWrapper<PlanResponse> rabbitMqSender, PlanServiceRedisCacheWrapper self, TransactionalOperator transactionalOperator, PlanEmbedServiceImpl planEmbedServiceImpl, RabbitMqUpdateDeleteService<Plan> rabbitMqUpdateDeleteService) {
+    public PlanServiceImpl(PlanRepository modelRepository, PlanMapper modelMapper, PageableUtilsCustom pageableUtils, UserClient userClient, EntitiesUtils entitiesUtils, FileClient fileClient, ObjectMapper objectMapper, ExtendedPlanRepository extendedPlanRepository, DayClient dayClient, OrderClient orderClient, RabbitMqApprovedSender<PlanResponse> rabbitMqSender, PlanServiceRedisCacheWrapper self, TransactionalOperator transactionalOperator, PlanEmbedServiceImpl planEmbedServiceImpl, RabbitMqUpdateDeleteService<Plan> rabbitMqUpdateDeleteService) {
         super(modelRepository, modelMapper, pageableUtils, userClient, "plan", List.of("id", "userId", "type", "title", "createdAt", "updatedAt", "approved", "display"), entitiesUtils, fileClient, objectMapper, rabbitMqSender, self, rabbitMqUpdateDeleteService);
         this.extendedPlanRepository = extendedPlanRepository;
         this.dayClient = dayClient;
@@ -356,6 +356,11 @@ public class PlanServiceImpl
                             }
                             return super.deleteModel(id, userId);
                         });
+    }
+
+    @Override
+    public Plan cloneModel(Plan plan) {
+        return plan.clone();
     }
 
 

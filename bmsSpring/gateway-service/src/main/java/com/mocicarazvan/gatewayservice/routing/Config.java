@@ -106,6 +106,8 @@ public class Config {
                 .route("day-service", r -> r.path("/days/**", "/meals/**")
                         .filters(f -> f.filter(authFilter))
                         .uri("lb://day-service"))
+                .route("archive-service", r -> r.path("/archive/**")
+                        .uri("lb://archive-service"))
                 .route("diffusion-service", r -> r.path("/diffusion/**")
                         .filters(f -> f
                                 .stripPrefix(1)
@@ -137,7 +139,8 @@ public class Config {
                         .uri("lb://kanban-service"))
                 .route("day-openapi", r -> r.path("/day-service/v3/api-docs")
                         .uri("lb://day-service"))
-
+                .route("archive-openapi", r -> r.path("/archive-service/v3/api-docs")
+                        .uri("lb://archive-service"))
 
                 .build();
     }
@@ -194,6 +197,8 @@ public class Config {
                 .route("day-service", r -> r.path("/days/**", "/meals/**")
                         .filters(f -> f.filter(authFilter))
                         .uri("http://day-service:8091"))
+                .route("archive-service", r -> r.path("/archive/**")
+                        .uri("http://archive-service:8092"))
                 .route("diffusion-service", r -> r.path("/diffusion/**")
                         .filters(f -> f
                                 .stripPrefix(1)
@@ -226,7 +231,8 @@ public class Config {
                         .uri("http://kanban-service:8088"))
                 .route("day-openapi", r -> r.path("/day-service/v3/api-docs")
                         .uri("http://day-service:8091"))
-
+                .route("archive-openapi", r -> r.path("/archive-service/v3/api-docs")
+                        .uri("http://archive-service:8092"))
 
                 .build();
     }

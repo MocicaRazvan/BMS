@@ -30,6 +30,7 @@ import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.IntStream;
 
@@ -305,17 +306,26 @@ public class PostController implements ApproveController
 
 
     @GetMapping("/testQueue")
-    public Mono<String> testQeue(@RequestParam(required = false, defaultValue = "100") Integer nr) {
+    public Mono<String> testQueue(@RequestParam(required = false, defaultValue = "100") Integer nr) {
         var sender = new RabbitMqSenderImpl("post-exchange", "post-update-routing-key", rabbitTemplate);
-        var posts = IntStream.range(0, nr)
-                .mapToObj(i -> Post.builder()
-                        .id((long) i)
-                        .title("title" + i)
-                        .build())
-                .toList();
-        sender.sendBatchMessage(posts);
+        var max = Math.ceil(nr / 250.0);
+        IntStream.range(0, (int) max).parallel().forEach(i -> {
+            var posts = IntStream.range(0, 250)
+                    .mapToObj(j -> Post.builder().id((long) j).title("title" + j)
+                            .body("body" + j)
+                            .approved(true)
+                            .createdAt(LocalDateTime.now())
+                            .updatedAt(LocalDateTime.now())
+                            .userId(1L)
+                            .tags(List.of())
+                            .build())
+                    .toList();
+            sender.sendBatchMessage(posts);
+            log.info("sent batch {} of {} ", i, (int) max);
+        });
 
-        return Mono.just("ok");
+
+        return Mono.just("ok added: " + nr);
     }
 
 

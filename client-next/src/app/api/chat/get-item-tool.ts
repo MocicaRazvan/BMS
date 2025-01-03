@@ -29,7 +29,9 @@ export async function getItemTool<T extends TitleBodyUserDto>(
     acceptHeader: "application/json",
     body: {
       page: 0,
-      size: 3,
+      size: process.env.OLLAMA_TOOL_PAGE_SIZE
+        ? parseInt(process.env.OLLAMA_TOOL_PAGE_SIZE)
+        : 3,
     },
     queryParams: {
       title: input.trim(),

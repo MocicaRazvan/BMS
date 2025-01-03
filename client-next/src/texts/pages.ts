@@ -1,4 +1,6 @@
 import {
+  getAllArchiveQueueCardsTexts,
+  getArchiveQueueCardsTexts,
   getElementHeaderTexts,
   getNutritionalTableTexts,
 } from "@/texts/components/common";
@@ -457,12 +459,16 @@ export async function getAdminPostsPageTexts(): Promise<AdminPostsPageTexts> {
     sortingPostsSortingOptions,
     themeSwitchTexts,
     menuTexts,
+    archivePostsTexts,
+    archiveCommentsTexts,
   ] = await Promise.all([
     getTranslations("pages.admin.AdminPostsPageTexts"),
     getPostTableTexts(),
     getSortingItemSortingOptions("posts", sortingPostsSortingOptionsKeys),
     getThemeSwitchTexts(),
     getSidebarMenuTexts("admin", adminGroupLabels, adminLabels, adminSubLabels),
+    getArchiveQueueCardsTexts("post"),
+    getArchiveQueueCardsTexts("comment"),
   ]);
 
   return {
@@ -472,6 +478,8 @@ export async function getAdminPostsPageTexts(): Promise<AdminPostsPageTexts> {
     sortingPostsSortingOptions,
     themeSwitchTexts,
     menuTexts,
+    archivePostsTexts,
+    archiveCommentsTexts,
   };
 }
 
@@ -482,12 +490,16 @@ export async function getAdminRecipesPageTexts(): Promise<AdminRecipesPageTexts>
     sortingRecipesSortingOptions,
     themeSwitchTexts,
     menuTexts,
+    archiveRecipesTexts,
+    archiveMealsTexts,
   ] = await Promise.all([
     getTranslations("pages.admin.AdminRecipesPageTexts"),
     getRecipeTableTexts(),
     getSortingItemSortingOptions("recipes", sortingRecipesSortingOptionsKeys),
     getThemeSwitchTexts(),
     getSidebarMenuTexts("admin", adminGroupLabels, adminLabels, adminSubLabels),
+    getArchiveQueueCardsTexts("recipe"),
+    getArchiveQueueCardsTexts("meal"),
   ]);
 
   return {
@@ -497,6 +509,8 @@ export async function getAdminRecipesPageTexts(): Promise<AdminRecipesPageTexts>
     sortingRecipesSortingOptions,
     themeSwitchTexts,
     menuTexts,
+    archiveRecipesTexts,
+    archiveMealsTexts,
   };
 }
 
@@ -532,12 +546,14 @@ export async function getAdminUsersPageTexts(): Promise<AdminUsersPageTexts> {
     userSortingOptionsTexts,
     t,
     menuTexts,
+    archiveUsersTexts,
   ] = await Promise.all([
     getUserTableTexts(),
     getThemeSwitchTexts(),
     getSortingItemSortingOptions("users", sortingUsersSortingOptionsKeys),
     getTranslations("pages.admin.AdminUsersPageTexts"),
     getSidebarMenuTexts("admin", adminGroupLabels, adminLabels, adminSubLabels),
+    getArchiveQueueCardsTexts("user"),
   ]);
   return {
     userTableTexts,
@@ -546,6 +562,7 @@ export async function getAdminUsersPageTexts(): Promise<AdminUsersPageTexts> {
     header: t("header"),
     title: t("title"),
     menuTexts,
+    archiveUsersTexts,
   };
 }
 
@@ -840,6 +857,7 @@ export async function getAdminIngredientsPageTexts(): Promise<AdminIngredientsPa
     themeSwitchTexts,
     t,
     menuTexts,
+    archiveIngredientsTexts,
   ] = await Promise.all([
     getIngredientTableTexts(),
     getSortingItemSortingOptions(
@@ -849,6 +867,7 @@ export async function getAdminIngredientsPageTexts(): Promise<AdminIngredientsPa
     getThemeSwitchTexts(),
     getTranslations("pages.admin.AdminIngredientsPageTexts"),
     getSidebarMenuTexts("admin", adminGroupLabels, adminLabels, adminSubLabels),
+    getArchiveQueueCardsTexts("ingredient"),
   ]);
 
   return {
@@ -858,6 +877,7 @@ export async function getAdminIngredientsPageTexts(): Promise<AdminIngredientsPa
     title: t("title"),
     header: t("header"),
     menuTexts,
+    archiveIngredientsTexts,
   };
 }
 
@@ -1021,12 +1041,16 @@ export async function getAdminPlansPageTexts(): Promise<AdminPlansPageTexts> {
     sortingPlansSortingOptions,
     themeSwitchTexts,
     menuTexts,
+    archivePlansTexts,
+    archiveDayTexts,
   ] = await Promise.all([
     getTranslations("pages.admin.AdminPlansPageTexts"),
     getPlanTableTexts(),
     getSortingItemSortingOptions("plans", sortingPlansSortingOptionsKeys),
     getThemeSwitchTexts(),
     getSidebarMenuTexts("admin", adminGroupLabels, adminLabels, adminSubLabels),
+    getArchiveQueueCardsTexts("plan"),
+    getArchiveQueueCardsTexts("day"),
   ]);
 
   return {
@@ -1036,6 +1060,8 @@ export async function getAdminPlansPageTexts(): Promise<AdminPlansPageTexts> {
     sortingPlansSortingOptions,
     themeSwitchTexts,
     menuTexts,
+    archivePlansTexts,
+    archiveDayTexts,
   };
 }
 
@@ -1310,12 +1336,14 @@ export async function getAdminDashboardPageTexts(): Promise<AdminDashboardPageTe
     themeSwitchTexts,
     relativeItemsSummaryTexts,
     menuTexts,
+    archiveTexts,
   ] = await Promise.all([
     getTranslations("pages.admin.AdminDashboardPageTexts"),
     getAllRelativeItemTexts(),
     getThemeSwitchTexts(),
     getRelativeItemsSummaryTexts(),
     getSidebarMenuTexts("admin", adminGroupLabels, adminLabels, adminSubLabels),
+    getAllArchiveQueueCardsTexts(),
   ]);
 
   return {
@@ -1325,6 +1353,8 @@ export async function getAdminDashboardPageTexts(): Promise<AdminDashboardPageTe
     themeSwitchTexts,
     relativeItemsSummaryTexts,
     menuTexts,
+    archiveTexts,
+    archiveTitle: t("archiveTitle"),
   };
 }
 

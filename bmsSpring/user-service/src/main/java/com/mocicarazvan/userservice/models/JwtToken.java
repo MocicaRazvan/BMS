@@ -15,7 +15,7 @@ import org.springframework.data.relational.core.mapping.Table;
 @AllArgsConstructor
 @SuperBuilder
 @Table(name = "jwt_token")
-public class JwtToken extends IdGenerated {
+public class JwtToken extends IdGenerated implements Cloneable {
 
     @Column("token")
     private String token;
@@ -25,4 +25,9 @@ public class JwtToken extends IdGenerated {
 
     @Column("user_id")
     private Long userId;
+
+    @Override
+    public JwtToken clone() {
+        return (JwtToken) super.clone();
+    }
 }

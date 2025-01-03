@@ -19,7 +19,7 @@ public class PlanApproveQueListener
         super(approvePlanNotificationService);
     }
 
-    @RabbitListener(queues = "#{@environment['plan.queue.name']}", executor = "threadPoolTaskScheduler")
+    @RabbitListener(queues = "#{@environment['plan.queue.name']}", executor = "scheduledExecutorService")
     public void listen(ApprovePlanNotificationBody message) {
         super.listen(message);
     }

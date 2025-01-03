@@ -22,7 +22,7 @@ import com.mocicarazvan.templatemodule.dtos.PageableBody;
 import com.mocicarazvan.templatemodule.dtos.UserDto;
 import com.mocicarazvan.templatemodule.dtos.response.*;
 import com.mocicarazvan.templatemodule.exceptions.notFound.NotFoundEntity;
-import com.mocicarazvan.templatemodule.services.RabbitMqApprovedSenderWrapper;
+import com.mocicarazvan.templatemodule.services.RabbitMqApprovedSender;
 import com.mocicarazvan.templatemodule.services.RabbitMqUpdateDeleteService;
 import com.mocicarazvan.templatemodule.services.impl.ApprovedServiceImpl;
 import com.mocicarazvan.templatemodule.utils.EntitiesUtils;
@@ -48,12 +48,12 @@ public class PostServiceImpl extends ApprovedServiceImpl<Post, PostBody, PostRes
 
     private final CommentClient commentClient;
     private final PostExtendedRepository postExtendedRepository;
-    private final RabbitMqApprovedSenderWrapper<PostResponse> rabbitMqSender;
+    private final RabbitMqApprovedSender<PostResponse> rabbitMqSender;
     private final TransactionalOperator transactionalOperator;
     private final PostEmbedServiceImpl postEmbedServiceImpl;
 
 
-    public PostServiceImpl(PostRepository modelRepository, PostMapper modelMapper, PageableUtilsCustom pageableUtils, UserClient userClient, EntitiesUtils entitiesUtils, FileClient fileClient, ObjectMapper objectMapper, CommentClient commentClient, PostExtendedRepository postExtendedRepository, RabbitMqApprovedSenderWrapper<PostResponse> rabbitMqSender, PostServiceRedisCacheWrapper self, TransactionalOperator transactionalOperator, PostEmbedServiceImpl postEmbedServiceImpl, RabbitMqUpdateDeleteService<Post> rabbitMqUpdateDeleteService) {
+    public PostServiceImpl(PostRepository modelRepository, PostMapper modelMapper, PageableUtilsCustom pageableUtils, UserClient userClient, EntitiesUtils entitiesUtils, FileClient fileClient, ObjectMapper objectMapper, CommentClient commentClient, PostExtendedRepository postExtendedRepository, RabbitMqApprovedSender<PostResponse> rabbitMqSender, PostServiceRedisCacheWrapper self, TransactionalOperator transactionalOperator, PostEmbedServiceImpl postEmbedServiceImpl, RabbitMqUpdateDeleteService<Post> rabbitMqUpdateDeleteService) {
         super(modelRepository, modelMapper, pageableUtils, userClient, "post", List.of("id", "userId", "title", "createdAt", "updatedAt", "approved"),
                 entitiesUtils, fileClient, objectMapper, rabbitMqSender, self, rabbitMqUpdateDeleteService
         );
@@ -95,6 +95,11 @@ public class PostServiceImpl extends ApprovedServiceImpl<Post, PostBody, PostRes
                                                 )
                                 )
                         );
+    }
+
+    @Override
+    public Post cloneModel(Post post) {
+        return post.clone();
     }
 
     @Override

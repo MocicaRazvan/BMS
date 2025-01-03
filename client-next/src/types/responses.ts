@@ -1,4 +1,8 @@
-import { IngredientNutritionalFactResponse } from "@/types/dto";
+import {
+  ArchiveQueue,
+  ArchiveQueuePrefix,
+  IngredientNutritionalFactResponse,
+} from "@/types/dto";
 
 export interface BaseError {
   message: string;
@@ -60,4 +64,8 @@ export function calculateRecipeCaloriesPer100(
   const caloriesPer100Grams = (totalCalories / totalQuantity) * 100;
 
   return Math.ceil(caloriesPer100Grams);
+}
+
+export function getArchiveQueuesNameByPrefix(prefix: ArchiveQueuePrefix) {
+  return Object.values(ArchiveQueue).filter((q) => q.startsWith(prefix));
 }

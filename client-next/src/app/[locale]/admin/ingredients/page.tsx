@@ -14,6 +14,9 @@ import AdminIngredientsCreatePageContent from "@/app/[locale]/admin/ingredients/
 import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
 import { Metadata } from "next";
 import { getIntlMetadata } from "@/texts/metadata";
+import ArchiveQueueCards, {
+  ArchiveQueueCardsTexts,
+} from "@/components/common/archive-queue-card";
 
 interface Props {
   params: { locale: Locale };
@@ -26,6 +29,7 @@ export interface AdminIngredientsPageTexts {
   title: string;
   header: string;
   menuTexts: SidebarMenuTexts;
+  archiveIngredientsTexts: ArchiveQueueCardsTexts;
 }
 export async function generateMetadata({
   params: { locale },
@@ -49,6 +53,7 @@ export default async function AdminIngredientsPage({
       sortingIngredientsSortingOptions,
       header,
       menuTexts,
+      archiveIngredientsTexts,
     },
     authUser,
   ] = await Promise.all([
@@ -74,7 +79,7 @@ export default async function AdminIngredientsPage({
       <div className="w-full h-full bg-background ">
         <Heading title={title} header={header} />
         <Suspense fallback={<LoadingSpinner />}>
-          <div className="mt-10 h-full w-full">
+          <div className="mt-10 h-full w-full space-y-10">
             <AdminIngredientsCreatePageContent
               path={"/ingredients/filtered"}
               {...ingredientTableTexts}
@@ -85,6 +90,13 @@ export default async function AdminIngredientsPage({
               extraQueryParams={{
                 admin: "true",
               }}
+            />
+            <ArchiveQueueCards
+              prefix={"ingredient"}
+              locale={locale}
+              showHeader={true}
+              {...archiveIngredientsTexts}
+              authUser={authUser}
             />
           </div>
         </Suspense>

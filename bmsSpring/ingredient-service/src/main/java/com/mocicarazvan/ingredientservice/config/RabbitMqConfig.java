@@ -5,7 +5,7 @@ import com.mocicarazvan.ingredientservice.models.NutritionalFact;
 import com.mocicarazvan.templatemodule.services.RabbitMqUpdateDeleteService;
 import com.mocicarazvan.templatemodule.services.impl.RabbitMqSenderImpl;
 import com.mocicarazvan.templatemodule.services.impl.RabbitMqUpdateDeleteServiceImpl;
-import com.mocicarazvan.templatemodule.utils.SimpleAsyncTaskExecutorInstance;
+import com.mocicarazvan.templatemodule.utils.SimpleTaskExecutorsInstance;
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;
 import org.springframework.amqp.core.DirectExchange;
@@ -50,6 +50,8 @@ public class RabbitMqConfig {
     @Value("${nutritionalFact.update.routing.key}")
     private String nutritionalFactUpdateRoutingKey;
 
+    @Value("${spring.custom.rabbit.thread.pool.executorAsyncConcurrencyLimit:128}")
+    private int executorAsyncConcurrencyLimit;
 
     @Bean
     public Queue ingredientDeleteQueue() {
@@ -87,7 +89,7 @@ public class RabbitMqConfig {
     public RabbitTemplate rabbitTemplate(ConnectionFactory connectionFactory) {
         RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
         rabbitTemplate.setMessageConverter(jsonMessageConverter());
-        rabbitTemplate.setTaskExecutor(new SimpleAsyncTaskExecutorInstance().initialize());
+        rabbitTemplate.setTaskExecutor(new SimpleTaskExecutorsInstance().initializeVirtual(executorAsyncConcurrencyLimit));
         return rabbitTemplate;
     }
 

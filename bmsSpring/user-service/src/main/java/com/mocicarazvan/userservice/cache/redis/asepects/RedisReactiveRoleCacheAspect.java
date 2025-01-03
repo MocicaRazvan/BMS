@@ -11,14 +11,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.data.redis.core.ReactiveRedisTemplate;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.lang.reflect.Method;
-import java.util.concurrent.ExecutorService;
 
 @Slf4j
 @Aspect
@@ -27,8 +28,8 @@ import java.util.concurrent.ExecutorService;
 public class RedisReactiveRoleCacheAspect extends RedisReactiveCacheAspect {
     private final RedisRoleCacheUtils redisRoleCacheUtils;
 
-    public RedisReactiveRoleCacheAspect(ReactiveRedisTemplate<String, Object> reactiveRedisTemplate, AspectUtils aspectUtils, ObjectMapper objectMapper, ExecutorService executorService, RedisRoleCacheUtils redisRoleCacheUtils) {
-        super(reactiveRedisTemplate, aspectUtils, objectMapper, executorService, redisRoleCacheUtils);
+    public RedisReactiveRoleCacheAspect(ReactiveRedisTemplate<String, Object> reactiveRedisTemplate, AspectUtils aspectUtils, ObjectMapper objectMapper, @Qualifier("redisAsyncTaskExecutor") SimpleAsyncTaskExecutor asyncTaskExecutor, RedisRoleCacheUtils redisRoleCacheUtils) {
+        super(reactiveRedisTemplate, aspectUtils, objectMapper, asyncTaskExecutor, redisRoleCacheUtils);
         this.redisRoleCacheUtils = redisRoleCacheUtils;
     }
 

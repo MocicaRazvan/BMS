@@ -28,7 +28,7 @@ import com.mocicarazvan.templatemodule.dtos.response.*;
 import com.mocicarazvan.templatemodule.enums.FileType;
 import com.mocicarazvan.templatemodule.exceptions.action.IllegalActionException;
 import com.mocicarazvan.templatemodule.exceptions.action.SubEntityUsed;
-import com.mocicarazvan.templatemodule.services.RabbitMqApprovedSenderWrapper;
+import com.mocicarazvan.templatemodule.services.RabbitMqApprovedSender;
 import com.mocicarazvan.templatemodule.services.RabbitMqUpdateDeleteService;
 import com.mocicarazvan.templatemodule.services.impl.ApprovedServiceImpl;
 import com.mocicarazvan.templatemodule.utils.EntitiesUtils;
@@ -57,12 +57,12 @@ public class RecipeServiceImpl extends ApprovedServiceImpl<Recipe, RecipeBody, R
     private final RecipeExtendedRepository recipeExtendedRepository;
     private final IngredientClient ingredientClient;
     private final IngredientQuantityService ingredientQuantityService;
-    private final RabbitMqApprovedSenderWrapper<RecipeResponse> rabbitMqSender;
+    private final RabbitMqApprovedSender<RecipeResponse> rabbitMqSender;
     private final DayClient dayClient;
     private final TransactionalOperator transactionalOperator;
     private final RecipeEmbedServiceImpl recipeEmbedServiceImpl;
 
-    public RecipeServiceImpl(RecipeRepository modelRepository, RecipeMapper modelMapper, PageableUtilsCustom pageableUtils, UserClient userClient, EntitiesUtils entitiesUtils, FileClient fileClient, ObjectMapper objectMapper, RecipeExtendedRepository recipeExtendedRepository, IngredientClient ingredientClient, IngredientQuantityService ingredientQuantityService, RabbitMqApprovedSenderWrapper<RecipeResponse> rabbitMqSender, DayClient dayClient, RecipeServiceRedisCacheWrapper self, TransactionalOperator transactionalOperator, RecipeEmbedServiceImpl recipeEmbedServiceImpl, RabbitMqUpdateDeleteService<Recipe> recipeRabbitMqUpdateDeleteService) {
+    public RecipeServiceImpl(RecipeRepository modelRepository, RecipeMapper modelMapper, PageableUtilsCustom pageableUtils, UserClient userClient, EntitiesUtils entitiesUtils, FileClient fileClient, ObjectMapper objectMapper, RecipeExtendedRepository recipeExtendedRepository, IngredientClient ingredientClient, IngredientQuantityService ingredientQuantityService, RabbitMqApprovedSender<RecipeResponse> rabbitMqSender, DayClient dayClient, RecipeServiceRedisCacheWrapper self, TransactionalOperator transactionalOperator, RecipeEmbedServiceImpl recipeEmbedServiceImpl, RabbitMqUpdateDeleteService<Recipe> recipeRabbitMqUpdateDeleteService) {
         super(modelRepository, modelMapper, pageableUtils, userClient, "recipe", List.of("id", "userId", "type", "title", "createdAt", "updatedAt", "approved"), entitiesUtils, fileClient, objectMapper, rabbitMqSender, self, recipeRabbitMqUpdateDeleteService);
         this.recipeExtendedRepository = recipeExtendedRepository;
         this.ingredientClient = ingredientClient;
@@ -154,8 +154,7 @@ public class RecipeServiceImpl extends ApprovedServiceImpl<Recipe, RecipeBody, R
                                                     .zipWith(uploadFiles(videos, FileType.VIDEO, clientId))
                                                     .flatMap(t ->
                                                             recipeEmbedServiceImpl.updateEmbeddingWithZip(recipeBody.getTitle(), origTitle, model.getId(), modelMapper.updateModelFromBody(recipeBody, model))
-                                                                    .flatMap(handleVideos(recipeBody, id, t))))
-                                            .doOnSuccess(rabbitMqUpdateDeleteService::sendUpdateMessage);
+                                                                    .flatMap(handleVideos(recipeBody, id, t))));
 
                                 }
                         )).as(transactionalOperator::transactional);
@@ -179,7 +178,6 @@ public class RecipeServiceImpl extends ApprovedServiceImpl<Recipe, RecipeBody, R
                                                             recipeEmbedServiceImpl.updateEmbeddingWithZip(recipeBody.getTitle(), origTitle, model.getId(), modelMapper.updateModelFromBody(recipeBody, model))
 
                                                                     .flatMap(handleVideos(recipeBody, id, t)))).flatMap(modelRepository::save)
-                                            .doOnSuccess(rabbitMqUpdateDeleteService::sendUpdateMessage)
                                             .map(modelMapper::fromModelToResponse).map(r -> Pair.of(r, originalApproved));
 
                                 }
@@ -269,6 +267,11 @@ public class RecipeServiceImpl extends ApprovedServiceImpl<Recipe, RecipeBody, R
                                 .flatMap(m -> self.updateDeleteInvalidate(Pair.of(m, m.isApproved())))
                                 .map(Pair::getFirst)
                         );
+    }
+
+    @Override
+    public Recipe cloneModel(Recipe recipe) {
+        return recipe.clone();
     }
 
     private Mono<Recipe> getModelToBeCreatedWithVideos(Flux<FilePart> images, Flux<FilePart> videos, RecipeBody recipeBody, String userId, String clientId) {

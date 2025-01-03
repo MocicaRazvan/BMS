@@ -18,7 +18,7 @@ public class PostApproveQueListener
         super(approvePostNotificationService);
     }
 
-    @RabbitListener(queues = "#{@environment['post.queue.name']}", executor = "threadPoolTaskScheduler")
+    @RabbitListener(queues = "#{@environment['post.queue.name']}", executor = "scheduledExecutorService")
     public void listen(ApprovePostNotificationBody message) {
         super.listen(message);
     }

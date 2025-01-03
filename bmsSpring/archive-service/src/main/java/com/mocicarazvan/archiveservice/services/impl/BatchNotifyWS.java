@@ -1,0 +1,140 @@
+package com.mocicarazvan.archiveservice.services.impl;
+
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mocicarazvan.archiveservice.config.QueuesPropertiesConfig;
+import com.mocicarazvan.archiveservice.dtos.websocket.NotifyBatchUpdate;
+import com.mocicarazvan.archiveservice.services.BatchNotify;
+import com.mocicarazvan.archiveservice.services.SimpleRedisCache;
+import com.mocicarazvan.archiveservice.websocket.BatchHandler;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.ReactiveRedisTemplate;
+import org.springframework.scheduling.concurrent.SimpleAsyncTaskScheduler;
+import org.springframework.scheduling.support.PeriodicTrigger;
+import org.springframework.stereotype.Service;
+import reactor.core.publisher.Mono;
+
+import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ScheduledFuture;
+
+@Slf4j
+@Service
+public class BatchNotifyWS implements BatchNotify {
+
+    private final ObjectMapper objectMapper;
+    private final ReactiveRedisTemplate<String, String> redisTemplate;
+    private final ConcurrentHashMap<String, Long> queueMap;
+    private final ConcurrentHashMap<String, ScheduledFuture<?>> scheduledTasks;
+    private final ConcurrentHashMap<String, Instant> lastReceived;
+    private final SimpleAsyncTaskScheduler taskExecutor;
+    private final SimpleRedisCache simpleRedisCache;
+//    private final AtomicLong globalCnt = new AtomicLong(0);
+
+    @Value("${spring.custom.batch.notify.timeout:15}")
+    private int notifyTimeout;
+
+    @Value("${spring.custom.bath.update.period:3}")
+    private int updatePeriod;
+
+
+    public BatchNotifyWS(ObjectMapper objectMapper, ReactiveRedisTemplate<String, String> redisTemplate, QueuesPropertiesConfig queuesPropertiesConfig, @Qualifier("redisSimpleAsyncTaskScheduler") SimpleAsyncTaskScheduler taskExecutor, SimpleRedisCache simpleRedisCache) {
+        this.objectMapper = objectMapper;
+        this.redisTemplate = redisTemplate;
+        this.taskExecutor = taskExecutor;
+        this.queueMap = new ConcurrentHashMap<>(
+                queuesPropertiesConfig.getQueues().size()
+        );
+        this.scheduledTasks = new ConcurrentHashMap<>(
+                queuesPropertiesConfig.getQueues().size()
+        );
+        this.lastReceived = new ConcurrentHashMap<>(
+                queuesPropertiesConfig.getQueues().size()
+        );
+        this.simpleRedisCache = simpleRedisCache;
+    }
+
+    @Override
+    public <T> void notifyBatchUpdate(List<T> items, String queueName) {
+
+//        queueMap.put(queueName, queueMap.getOrDefault(queueName, 0L) + items.size());
+
+        queueMap.merge(queueName, (long) items.size(), Long::sum);
+        lastReceived.put(queueName, Instant.now());
+
+        startScheduledTaskIfNotStarted(queueName);
+//        log.info("Sending update global notifyBatchUpdate count is {}", globalCnt);
+
+    }
+
+
+    private void startScheduledTaskIfNotStarted(String queueName) {
+//        log.info("Sending update global outside count is {}", globalCnt);
+        if (scheduledTasks.get(queueName) == null || scheduledTasks.get(queueName).isCancelled()) {
+            ScheduledFuture<?> scheduledFuture = taskExecutor.schedule(() -> handleScheduledTask(queueName),
+                    new PeriodicTrigger(Duration.ofSeconds(updatePeriod)));
+            assert scheduledFuture != null;
+            scheduledTasks.put(queueName, scheduledFuture);
+        }
+    }
+
+    private void handleScheduledTask(String queueName) {
+        Long count = queueMap.getOrDefault(queueName, 0L);
+        if (count > 0) {
+//                    globalCnt.addAndGet(count);
+//                    log.info("Sending update global sending count is {}", globalCnt);
+            sendUpdateBatchToRedis(queueName, count, false);
+
+        }
+        unscheduleQueue(queueName);
+        if (queueMap.getOrDefault(queueName, 0L) > 0) {
+            queueMap.put(queueName, 0L);
+        }
+    }
+
+    private void unscheduleQueue(String queueName) {
+        Instant lastUpdateTime = lastReceived.get(queueName);
+        if (lastUpdateTime != null && lastUpdateTime.isBefore(Instant.now().minusSeconds(notifyTimeout))) {
+            log.info("Last received is {}", lastReceived.get(queueName));
+            queueMap.put(queueName, 0L);
+            stopScheduledTask(queueName);
+            sendUpdateBatchToRedis(queueName, 0L, true);
+//            globalCnt.set(0);
+            log.info("Stopped task for queue {}", queueName);
+
+        }
+    }
+
+    private void sendUpdateBatchToRedis(String queueName, Long count, boolean finished) {
+        try {
+            Mono.zip(simpleRedisCache.evictCachedValue(queueName),
+                            redisTemplate.convertAndSend(BatchHandler.getChannelName(),
+                                    objectMapper.writeValueAsString(NotifyBatchUpdate.builder()
+                                            .numberProcessed(count)
+                                            .queueName(queueName)
+                                            .id(UUID.randomUUID().toString())
+                                            .timestamp(LocalDateTime.now())
+                                            .finished(finished)
+                                            .build())))
+                    .subscribe();
+//            log.info("Sending update global count in redis is {}", globalCnt);
+        } catch (Exception e) {
+            throw new RuntimeException("Error sending message to redis", e);
+        }
+    }
+
+
+    private void stopScheduledTask(String queueName) {
+        ScheduledFuture<?> scheduledFuture = scheduledTasks.get(queueName);
+        if (scheduledFuture != null && !scheduledFuture.isCancelled()) {
+            scheduledFuture.cancel(true);
+            scheduledTasks.remove(queueName);
+        }
+    }
+}

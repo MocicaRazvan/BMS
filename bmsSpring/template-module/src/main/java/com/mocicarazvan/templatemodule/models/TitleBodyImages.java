@@ -13,6 +13,13 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @SuperBuilder
-public abstract class TitleBodyImages extends TitleBody {
+public abstract class TitleBodyImages extends TitleBody implements Cloneable {
     private List<String> images;
+
+    @Override
+    public TitleBodyImages clone() {
+        TitleBodyImages clone = (TitleBodyImages) super.clone();
+        clone.setImages(List.copyOf(images));
+        return clone;
+    }
 }

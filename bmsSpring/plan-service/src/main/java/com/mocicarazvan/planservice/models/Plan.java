@@ -18,7 +18,7 @@ import java.util.List;
 @AllArgsConstructor
 @SuperBuilder
 @Table("plan")
-public class Plan extends Approve {
+public class Plan extends Approve implements Cloneable {
     private double price;
 
     private List<Long> days;
@@ -28,4 +28,11 @@ public class Plan extends Approve {
     private boolean display;
 
     private ObjectiveType objective;
+
+    @Override
+    public Plan clone() {
+        Plan clone = (Plan) super.clone();
+        clone.setDays(List.copyOf(days));
+        return clone;
+    }
 }

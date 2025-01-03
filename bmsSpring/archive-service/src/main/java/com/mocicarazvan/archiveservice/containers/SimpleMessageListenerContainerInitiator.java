@@ -7,7 +7,7 @@ import org.springframework.amqp.core.AcknowledgeMode;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
 import org.springframework.amqp.rabbit.listener.api.ChannelAwareBatchMessageListener;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
+import org.springframework.scheduling.concurrent.SimpleAsyncTaskScheduler;
 
 
 @RequiredArgsConstructor
@@ -15,7 +15,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 public class SimpleMessageListenerContainerInitiator {
     private final ConnectionFactory connectionFactory;
     private final String queueName;
-    private final ThreadPoolTaskScheduler executor;
+    private final SimpleAsyncTaskScheduler executor;
     private final QueuesPropertiesConfig queuesPropertiesConfig;
     private final ChannelAwareBatchMessageListener channelAwareBatchMessageListener;
 
@@ -27,10 +27,10 @@ public class SimpleMessageListenerContainerInitiator {
         container.setBatchSize(queuesPropertiesConfig.getBatchSize());
         container.setPrefetchCount(queuesPropertiesConfig.getBatchSize());
         container.setAcknowledgeMode(AcknowledgeMode.MANUAL);
-        container.setStartConsumerMinInterval(30000);
-        container.setConsumerStartTimeout(200000);
+        container.setStartConsumerMinInterval(15000);
+        container.setConsumerStartTimeout(150000);
         container.setShutdownTimeout(5000);
-        container.setReceiveTimeout(5000);
+        container.setReceiveTimeout(2500);
         container.setConcurrency(queuesPropertiesConfig.getConcurrency());
         container.setTaskExecutor(executor);
         container.setAcknowledgeMode(AcknowledgeMode.MANUAL);

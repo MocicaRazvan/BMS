@@ -12,7 +12,12 @@ import org.springframework.data.relational.core.mapping.Column;
 @NoArgsConstructor
 @AllArgsConstructor
 @SuperBuilder
-public abstract class ManyToOneUser extends IdGenerated {
+public abstract class ManyToOneUser extends IdGenerated implements Cloneable {
     @Column("user_id")
     private Long userId;
+
+    @Override
+    public ManyToOneUser clone() {
+        return (ManyToOneUser) super.clone();
+    }
 }

@@ -11,7 +11,11 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @AllArgsConstructor
 @SuperBuilder
-public abstract class Approve extends TitleBodyImages {
+public abstract class Approve extends TitleBodyImages implements Cloneable {
     private boolean approved;
 
+    @Override
+    public Approve clone() {
+        return (Approve) super.clone();
+    }
 }

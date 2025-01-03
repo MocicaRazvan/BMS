@@ -9,7 +9,6 @@ export function useDebounceWithCallBack<T>(
   const [debouncedValue, setDebouncedValue] = useState<T>(value);
 
   useEffect(() => {
-    console.log("IN DEB");
     const timer = setTimeout(() => {
       setDebouncedValue(value);
       if (isFirstRun.current) {

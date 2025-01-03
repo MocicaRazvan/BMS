@@ -10,13 +10,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.data.redis.core.ReactiveRedisTemplate;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.lang.reflect.Method;
-import java.util.concurrent.ExecutorService;
 
 @Slf4j
 @Aspect
@@ -26,8 +27,9 @@ import java.util.concurrent.ExecutorService;
 public class RedisReactiveCacheApprovedAspect extends RedisReactiveCacheAspect {
     private final RedisApprovedCacheUtils redisApprovedCacheUtils;
 
-    public RedisReactiveCacheApprovedAspect(ReactiveRedisTemplate<String, Object> reactiveRedisTemplate, AspectUtils aspectUtils, ObjectMapper objectMapper, ExecutorService executorService, RedisApprovedCacheUtils redisApprovedCacheUtils) {
-        super(reactiveRedisTemplate, aspectUtils, objectMapper, executorService, redisApprovedCacheUtils);
+    public RedisReactiveCacheApprovedAspect(ReactiveRedisTemplate<String, Object> reactiveRedisTemplate, AspectUtils aspectUtils, ObjectMapper objectMapper,
+                                            @Qualifier("redisAsyncTaskExecutor") SimpleAsyncTaskExecutor asyncTaskExecutor, RedisApprovedCacheUtils redisApprovedCacheUtils) {
+        super(reactiveRedisTemplate, aspectUtils, objectMapper, asyncTaskExecutor, redisApprovedCacheUtils);
         this.redisApprovedCacheUtils = redisApprovedCacheUtils;
     }
 

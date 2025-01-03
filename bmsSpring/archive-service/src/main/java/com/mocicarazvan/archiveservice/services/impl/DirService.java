@@ -42,8 +42,8 @@ public class DirService implements SaveBatchMessages {
     }
 
     @Override
-    public <T> void saveBatch(List<T> items, String name) throws IOException {
-        File dir = createDirIfNotExists(createRootDirIfNotExists(), name);
+    public <T> void saveBatch(List<T> items, String queueName) throws IOException {
+        File dir = createDirIfNotExists(createRootDirIfNotExists(), queueName);
         File batchFile = new File(dir, getCurrentTime() + "_" + UUID.randomUUID() + ".json");
         objectMapper.writerWithDefaultPrettyPrinter().writeValue(batchFile, items);
     }

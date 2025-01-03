@@ -26,6 +26,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.util.function.Tuple2;
 
 import java.util.List;
 
@@ -63,6 +64,11 @@ public class NutritionalFactServiceImpl extends
     @RedisReactiveChildCacheEvict(key = CACHE_KEY_PATH, id = "#id", masterPath = "ingredientId")
     public Mono<NutritionalFactResponse> updateModel(Long id, NutritionalFactBody body, String userId) {
         return super.updateModel(id, body, userId);
+    }
+
+    @Override
+    public NutritionalFact cloneModel(NutritionalFact nutritionalFact) {
+        return nutritionalFact.clone();
     }
 
     @Override
@@ -118,10 +124,13 @@ public class NutritionalFactServiceImpl extends
         return
                 userClient.getUser("", userId)
                         .flatMap(authUser -> getModelByIngredientId(ingredientId)
-                                .flatMap(model -> self.updateByIngredientInvalidate(modelBody, authUser, model)
-                                        .doOnSuccess(_ -> rabbitMqUpdateDeleteService.sendUpdateMessage(model))
-                                )
-                        );
+                                .flatMap(model ->
+                                        Mono.zip(
+                                                        Mono.fromRunnable(() -> rabbitMqUpdateDeleteService.sendUpdateMessage(cloneModel(model))).thenReturn(true),
+                                                        self.updateByIngredientInvalidate(modelBody, authUser, model)
+                                                )
+                                                .map(Tuple2::getT2)
+                                ));
     }
 
 

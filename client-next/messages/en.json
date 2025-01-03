@@ -728,6 +728,47 @@
       }
     },
     "common": {
+      "ArchiveQueueCardsTexts": {
+        "description": "Elements waiting to be archived",
+        "types": {
+          "comment": "Comments",
+          "day": "Days",
+          "ingredient": "Ingredients",
+          "meal": "Meals",
+          "post": "Posts",
+          "plan": "Plans",
+          "recipe": "Recipes",
+          "user": "Users"
+        },
+        "currentConsumers": "Currently running: ",
+        "title": {
+          "delete": "{type} Deleted",
+          "update": "{type} Updated"
+        },
+        "badgeText": {
+          "high": "High",
+          "medium": "Medium",
+          "low": "Low"
+        },
+        "refreshButtonText": "Refresh",
+        "errorTitle": "Error",
+        "errorDescription": "There was an error while fetching the queue",
+        "header": "Archive Status",
+        "lastRefresh": "Last refresh: ",
+        "managePopTexts": {
+          "manageBtn": "Manage",
+          "selectLabel": "Alive period",
+          "scheduleBtn": "Schedule consumers",
+          "scheduleBtnLoading": "Scheduling consumers...",
+          "stopBtn": "Stop consumers",
+          "stopBtnLoading": "Stopping consumers...",
+          "stopTooltip": "No consumers to stop",
+          "toastSchedule": "Consumers are scheduled for ",
+          "toastStop": "Consumers are stopped",
+          "scheduleTooltip": "Consumers are already scheduled",
+          "consumerStoppedDescription": "The consumers are stopped"
+        }
+      },
       "ElementHeaderTexts": {
         "notApproved": "Not approved",
         "approved": "Approved"
@@ -1759,7 +1800,8 @@
       },
       "AdminDashboardPageTexts": {
         "title": "Dashboard",
-        "header": "Here you can see a summary of the platform."
+        "header": "Here you can see a summary of the platform.",
+        "archiveTitle": "Archive Current Statistics"
       },
       "AdminMonthlySalesTexts": {
         "title": "Monthly Sales",

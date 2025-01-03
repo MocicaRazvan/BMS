@@ -14,5 +14,5 @@ import org.springframework.stereotype.Component;
 @Data
 public class SecretProperties extends com.mocicarazvan.templatemodule.email.config.SecretProperties {
 
-    
+
 }

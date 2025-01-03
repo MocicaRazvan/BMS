@@ -18,7 +18,7 @@ export interface UseFetchStreamProps {
   batchSize?: number;
 }
 
-interface UseFetchStreamReturn<T, E> {
+export interface UseFetchStreamReturn<T, E> {
   messages: T[];
   error: E | null;
   isFinished: boolean;

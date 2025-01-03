@@ -25,14 +25,13 @@ import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.data.redis.core.ReactiveRedisTemplate;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.transaction.ReactiveTransactionManager;
 import org.springframework.transaction.reactive.TransactionalOperator;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.reactive.function.client.WebClient;
-
-import java.util.concurrent.ExecutorService;
 
 
 @Configuration
@@ -156,7 +155,7 @@ public class BeanConfig {
             ReactiveRedisTemplate<String, Object> reactiveRedisTemplate,
             AspectUtils aspectUtils,
             ObjectMapper objectMapper,
-            ExecutorService executorService,
+            @Qualifier("redisAsyncTaskExecutor") SimpleAsyncTaskExecutor executorService,
             RedisApprovedCacheUtils redisApprovedCacheUtils
     ) {
         return new RedisReactiveCacheApprovedAspect(reactiveRedisTemplate, aspectUtils, objectMapper, executorService, redisApprovedCacheUtils);

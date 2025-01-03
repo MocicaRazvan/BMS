@@ -16,9 +16,15 @@ import org.springframework.data.relational.core.mapping.Table;
 @AllArgsConstructor
 @SuperBuilder
 @Table(name = "comment")
-public class Comment extends TitleBody {
+public class Comment extends TitleBody implements Cloneable {
     @Column("reference_id")
     private Long referenceId;
     @Column("reference_type")
     private CommentReferenceType referenceType;
+
+    @Override
+    public Comment clone() {
+        return (Comment) super.clone();
+
+    }
 }

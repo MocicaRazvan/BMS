@@ -17,7 +17,7 @@ import java.util.List;
 @AllArgsConstructor
 @SuperBuilder
 @Table("custom_order")
-public class Order extends ManyToOneUser {
+public class Order extends ManyToOneUser implements Cloneable {
     @Column("address_id")
     private Long addressId;
     @Column("plan_ids")
@@ -27,4 +27,11 @@ public class Order extends ManyToOneUser {
 
     @Column("stripe_invoice_id")
     private String stripeInvoiceId;
+
+    @Override
+    public Order clone() {
+        Order clone = (Order) super.clone();
+        clone.setPlanIds(List.copyOf(planIds));
+        return clone;
+    }
 }

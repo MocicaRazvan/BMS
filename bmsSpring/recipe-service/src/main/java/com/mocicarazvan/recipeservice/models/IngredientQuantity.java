@@ -15,7 +15,7 @@ import org.springframework.data.relational.core.mapping.Table;
 @AllArgsConstructor
 @SuperBuilder
 @Table("ingredient_quantity")
-public class IngredientQuantity extends IdGenerated {
+public class IngredientQuantity extends IdGenerated implements Cloneable {
     private double quantity;
 
     @Column("ingredient_id")
@@ -23,4 +23,9 @@ public class IngredientQuantity extends IdGenerated {
 
     @Column("recipe_id")
     private Long recipeId;
+
+    @Override
+    public IngredientQuantity clone() {
+        return (IngredientQuantity) super.clone();
+    }
 }

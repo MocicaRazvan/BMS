@@ -2,7 +2,7 @@ package com.mocicarazvan.archiveservice.listeners;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mocicarazvan.archiveservice.config.QueuesPropertiesConfig;
-import com.mocicarazvan.archiveservice.services.SaveBatchMessages;
+import com.mocicarazvan.archiveservice.factories.SaveMessagesHandler;
 import com.rabbitmq.client.Channel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,14 +23,15 @@ public class ChannelAwareBatchMessageListenerImpl<T> implements ChannelAwareBatc
     private final ObjectMapper objectMapper;
     private final Class<T> clazz;
     private final String queueName;
-    private final SaveBatchMessages saveBatchMessages;
+    private final SaveMessagesHandler saveMessagesHandler;
     private final QueuesPropertiesConfig queuesPropertiesConfig;
 
 
     @Override
     public void onMessageBatch(List<Message> messages, Channel channel) {
-        log.info("Processing for class: " + clazz.getName());
-        log.info("Processing batch of messages: " + messages.size());
+//        log.info("Processing for class: {}", clazz.getName());
+//        log.info("Processing batch of messages: {}", messages.size());
+//        log.info("Thread name is {} and virtual thread is {}", Thread.currentThread().getName(), Thread.currentThread().isVirtual());
         try {
             Flux.fromIterable(messages)
                     .map(this::deserializeMessage)
@@ -40,10 +41,14 @@ public class ChannelAwareBatchMessageListenerImpl<T> implements ChannelAwareBatc
                         log.error("Error during processing: {}", e.getMessage());
                         rejectBatch(messages, channel);
                     })
-                    .doOnComplete(() -> acknowledgeBatch(messages, channel))
+                    .doOnComplete(() ->
+                    {
+                        acknowledgeBatch(messages, channel);
+                        saveMessagesHandler.getBatchNotify().notifyBatchUpdate(messages, queueName);
+                    })
                     .subscribe();
         } catch (Exception e) {
-            log.error("Error processing batch of messages: " + e.getMessage());
+            log.error("Error processing batch of messages: {}", e.getMessage());
             rejectBatch(messages, channel);
         }
     }
@@ -53,22 +58,27 @@ public class ChannelAwareBatchMessageListenerImpl<T> implements ChannelAwareBatc
             try {
                 long deliveryTag = message.getMessageProperties().getDeliveryTag();
                 channel.basicReject(deliveryTag, true);
-                log.info("Rejected message with delivery tag: " + deliveryTag);
+//                log.info("Rejected message with delivery tag: {}", deliveryTag);
             } catch (IOException ex) {
-                log.error("Error rejecting message: " + ex.getMessage());
+                log.error("Error rejecting message: {}", ex.getMessage());
             }
         });
     }
 
     private Mono<Void> sendBatchToBeSaved(List<T> batch) {
 
-        return Mono.fromCallable(() -> {
-                    saveBatchMessages.saveBatch(batch, queueName);
-                    return null;
-                })
-                .subscribeOn(Schedulers.boundedElastic())
-                .doOnSuccess(ignored -> log.info("Saved {} messages to disk for queue {}", batch.size(), queueName))
-                .then();
+        return
+                Mono.fromCallable(() -> {
+                            saveMessagesHandler.getSaveBatchMessages().saveBatch(batch, queueName);
+                            return null;
+                        }).subscribeOn(Schedulers.boundedElastic())
+
+                        .doOnSuccess(ignored ->
+                                {
+//                                    log.info("Saved {} messages to disk for queue {}", batch.size(), queueName);
+                                }
+                        )
+                        .then();
     }
 
     private T deserializeMessage(Message message) {
@@ -83,7 +93,7 @@ public class ChannelAwareBatchMessageListenerImpl<T> implements ChannelAwareBatc
         try {
             long lastDeliveryTag = messages.getLast().getMessageProperties().getDeliveryTag();
             channel.basicAck(lastDeliveryTag, true);
-            log.info("Acknowledged messages up to {}", lastDeliveryTag);
+//            log.info("Acknowledged messages up to {}", lastDeliveryTag);
         } catch (Exception e) {
             log.error("Error acknowledging messages: {}", e.getMessage());
         }

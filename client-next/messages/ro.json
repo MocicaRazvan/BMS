@@ -728,6 +728,47 @@
       }
     },
     "common": {
+      "ArchiveQueueCardsTexts": {
+        "description": "Elemente care așteaptă să fie arhivate",
+        "types": {
+          "comment": "Comentarii",
+          "day": "Zile",
+          "ingredient": "Ingrediente",
+          "meal": "Mese",
+          "post": "Postări",
+          "plan": "Planuri",
+          "recipe": "Rețete",
+          "user": "Utilizatori"
+        },
+        "currentConsumers": "Consumatori actuali: ",
+        "title": {
+          "delete": "{type, select, Utilizatori {Utilizatori Șterși} other {{type} Șterse}}",
+          "update": "{type, select, Utilizatori {Utilizatori Actualizați} other {{type} Actualizate}}"
+        },
+        "badgeText": {
+          "high": "Ridicat",
+          "medium": "Mediu",
+          "low": "Scăzut"
+        },
+        "refreshButtonText": "Reîmprospătează",
+        "errorTitle": "Eroare",
+        "errorDescription": "A apărut o eroare în timp ce se încărca coada",
+        "header": "Stare arhivare",
+        "lastRefresh": "Ultima actualizare: ",
+        "managePopTexts": {
+          "manageBtn": "Gestionează",
+          "selectLabel": "Timpul de viață",
+          "scheduleBtn": "Programează Consumatori",
+          "scheduleBtnLoading": "Se programează consumatorii...",
+          "stopBtn": "Oprește consumatorii",
+          "stopBtnLoading": "Se opresc consumatorii...",
+          "stopTooltip": "Niciun consumator activ",
+          "toastSchedule": "Consumatorii sunt programați pentru ",
+          "toastStop": "Consumatorii sunt opriți",
+          "scheduleTooltip": "Consumatorii sunt deja programați",
+          "consumerStoppedDescription": "Consumatorii sunt opriți"
+        }
+      },
       "ElementHeaderTexts": {
         "notApproved": "Neaprobat",
         "approved": "Aprobat"
@@ -1758,7 +1799,8 @@
       },
       "AdminDashboardPageTexts": {
         "title": "Panou de administrare",
-        "header": "Aici poți vedea un sumar al activității de pe platformă."
+        "header": "Aici poți vedea un sumar al activității de pe platformă.",
+        "archiveTitle": "Statisticile curente ale arhivării"
       },
       "AdminMonthlySalesTexts": {
         "title": "Vânzări lunare",

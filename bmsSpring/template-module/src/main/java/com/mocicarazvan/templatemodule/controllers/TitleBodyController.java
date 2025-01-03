@@ -1,7 +1,6 @@
 package com.mocicarazvan.templatemodule.controllers;
 
 
-
 import com.mocicarazvan.templatemodule.dtos.generic.WithUserDto;
 import com.mocicarazvan.templatemodule.dtos.response.ResponseWithUserLikesAndDislikesEntity;
 import com.mocicarazvan.templatemodule.hateos.CustomEntityModel;

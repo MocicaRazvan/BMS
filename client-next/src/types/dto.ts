@@ -490,3 +490,67 @@ export interface AiChatMessagePayload extends BaseAiChatMessage {
 export interface AiChatMessageResponse
   extends BaseAiChatMessage,
     IdGenerateDto {}
+
+export enum ArchiveQueue {
+  COMMENT_UPDATE_QUEUE = "comment-update-queue",
+  COMMENT_DELETE_QUEUE = "comment-delete-queue",
+  DAY_DELETE_QUEUE = "day-delete-queue",
+  DAY_UPDATE_QUEUE = "day-update-queue",
+  INGREDIENT_DELETE_QUEUE = "ingredient-delete-queue",
+  INGREDIENT_UPDATE_QUEUE = "ingredient-update-queue",
+  MEAL_DELETE_QUEUE = "meal-delete-queue",
+  MEAL_UPDATE_QUEUE = "meal-update-queue",
+  PLAN_DELETE_QUEUE = "plan-delete-queue",
+  PLAN_UPDATE_QUEUE = "plan-update-queue",
+  POST_DELETE_QUEUE = "post-delete-queue",
+  POST_UPDATE_QUEUE = "post-update-queue",
+  RECIPE_DELETE_QUEUE = "recipe-delete-queue",
+  RECIPE_UPDATE_QUEUE = "recipe-update-queue",
+  USER_DELETE_QUEUE = "user-delete-queue",
+  USER_UPDATE_QUEUE = "user-update-queue",
+}
+export type ArchiveQueuePrefix =
+  | "comment"
+  | "day"
+  | "ingredient"
+  | "meal"
+  | "plan"
+  | "post"
+  | "recipe"
+  | "user";
+
+export const archiveQueuePrefixes = [
+  "comment",
+  "day",
+  "ingredient",
+  "meal",
+  "plan",
+  "post",
+  "recipe",
+  "user",
+] as const;
+export interface QueueInformation {
+  name: ArchiveQueue;
+  messageCount: number;
+  consumerCount: number;
+  timestamp: string;
+  cronExpression: string;
+}
+interface BaseWSDto {
+  queueName: ArchiveQueue;
+  id: string;
+  timestamp: string;
+}
+export interface NotifyBatchUpdate extends BaseWSDto {
+  numberProcessed: number;
+  finished: boolean;
+}
+export enum ContainerAction {
+  START_CRON = "START_CRON",
+  START_MANUAL = "START_MANUAL",
+  STOP = "STOP",
+}
+
+export interface NotifyContainerAction extends BaseWSDto {
+  action: ContainerAction;
+}

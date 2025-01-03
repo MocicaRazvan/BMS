@@ -77,6 +77,11 @@ public class CommentServiceImpl extends TitleBodyServiceImpl<Comment, CommentBod
         return super.updateModel(id, body, userId);
     }
 
+    @Override
+    public Comment cloneModel(Comment comment) {
+        return comment.clone();
+    }
+
 
     @Override
     @RedisReactiveChildCache(key = CACHE_KEY_PATH, idPath = "content.id")

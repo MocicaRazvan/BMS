@@ -16,7 +16,7 @@ import org.springframework.data.relational.core.mapping.Table;
 @AllArgsConstructor
 @SuperBuilder
 @Table("nutritional_fact")
-public class NutritionalFact extends ManyToOneUser {
+public class NutritionalFact extends ManyToOneUser implements Cloneable {
     @Column("fat")
     private double fat;
 
@@ -41,4 +41,8 @@ public class NutritionalFact extends ManyToOneUser {
     @Column("ingredient_id")
     private Long ingredientId;
 
+    @Override
+    public NutritionalFact clone() {
+        return (NutritionalFact) super.clone();
+    }
 }

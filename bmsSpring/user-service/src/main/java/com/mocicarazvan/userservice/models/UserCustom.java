@@ -24,7 +24,7 @@ import java.util.List;
 @AllArgsConstructor
 @SuperBuilder
 @Table(name = "user_custom")
-public class UserCustom extends IdGenerated {
+public class UserCustom extends IdGenerated implements Cloneable {
     @Column("first_name")
     private String firstName;
     @Column("last_name")
@@ -52,4 +52,8 @@ public class UserCustom extends IdGenerated {
         return email;
     }
 
+    @Override
+    public UserCustom clone() {
+        return (UserCustom) super.clone();
+    }
 }

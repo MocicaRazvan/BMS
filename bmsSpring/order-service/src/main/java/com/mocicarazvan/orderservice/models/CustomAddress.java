@@ -16,7 +16,7 @@ import org.springframework.data.relational.core.mapping.Table;
 @AllArgsConstructor
 @SuperBuilder
 @Table("address")
-public class CustomAddress extends IdGenerated {
+public class CustomAddress extends IdGenerated implements Cloneable {
     @Column("city")
     private String city;
     @Column("country")
@@ -39,5 +39,10 @@ public class CustomAddress extends IdGenerated {
                 .postalCode(address.getPostalCode())
                 .state(address.getState())
                 .build();
+    }
+
+    @Override
+    public CustomAddress clone() {
+        return (CustomAddress) super.clone();
     }
 }

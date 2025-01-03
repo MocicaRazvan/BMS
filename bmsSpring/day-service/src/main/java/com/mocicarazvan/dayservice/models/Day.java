@@ -15,7 +15,7 @@ import org.springframework.data.relational.core.mapping.Table;
 @AllArgsConstructor
 @SuperBuilder
 @Table("day")
-public class Day extends TitleBody {
+public class Day extends TitleBody implements Cloneable {
     private DayType type;
 
     @Override
@@ -32,5 +32,10 @@ public class Day extends TitleBody {
                 ", updatedAt=" + getUpdatedAt() +
 
                 '}';
+    }
+
+    @Override
+    public Day clone() {
+        return (Day) super.clone();
     }
 }

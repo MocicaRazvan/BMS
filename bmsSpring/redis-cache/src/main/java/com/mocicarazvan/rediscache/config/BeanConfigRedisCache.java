@@ -6,9 +6,11 @@ import com.mocicarazvan.rediscache.utils.AspectUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.task.SimpleAsyncTaskExecutorBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.data.redis.connection.ReactiveRedisConnectionFactory;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
@@ -16,9 +18,6 @@ import org.springframework.data.redis.core.ReactiveRedisTemplate;
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
-
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 @Configuration
 public class BeanConfigRedisCache {
@@ -32,6 +31,8 @@ public class BeanConfigRedisCache {
     @Value("${spring.custom.cache.redis.database:0}")
     private int redisDatabase;
 
+    @Value("${spring.custom.executor.redis.async.concurrency.limit:128}")
+    private int executorAsyncConcurrencyLimit;
 
     @Bean
     @ConditionalOnMissingBean
@@ -75,8 +76,13 @@ public class BeanConfigRedisCache {
     }
 
     @Bean
-    public ExecutorService executorService() {
-        return Executors.newCachedThreadPool();
+    @ConditionalOnMissingBean(name = "redisAsyncTaskExecutor")
+    public SimpleAsyncTaskExecutor redisAsyncTaskExecutor() {
+        return new SimpleAsyncTaskExecutorBuilder()
+                .virtualThreads(true)
+                .threadNamePrefix("SimpleAsyncTaskRedisExecutorInstance-")
+                .concurrencyLimit(executorAsyncConcurrencyLimit)
+                .build();
     }
 }
 

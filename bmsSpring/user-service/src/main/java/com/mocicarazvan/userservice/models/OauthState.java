@@ -14,8 +14,13 @@ import org.springframework.data.relational.core.mapping.Table;
 @AllArgsConstructor
 @SuperBuilder
 @Table(name = "oauth_state")
-public class OauthState extends IdGenerated {
+public class OauthState extends IdGenerated implements Cloneable {
 
     private String state;
     private String codeVerifier;
+
+    @Override
+    public OauthState clone() {
+        return (OauthState) super.clone();
+    }
 }

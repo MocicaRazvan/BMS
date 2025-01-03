@@ -36,6 +36,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.reactive.TransactionalOperator;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.util.function.Tuple2;
 
 import java.util.EnumSet;
 import java.util.List;
@@ -153,17 +154,22 @@ public class UserServiceImpl implements UserService {
                         .flatMap(tuple -> {
                             UserCustom user = tuple.getT1();
                             UserCustom authUser = tuple.getT2();
+                            return Mono.zip(Mono.fromRunnable(() ->
+                                            rabbitMqUpdateDeleteService.sendUpdateMessage(user.clone())
+                                    ).thenReturn(true)
+                                    , Mono.defer(() -> {
+                                        if (!user.getId().equals(authUser.getId())) {
+                                            return Mono.error(new PrivateRouteException());
+                                        }
+                                        user.setLastName(userBody.getLastName());
+                                        user.setFirstName(userBody.getFirstName());
 
-                            if (!user.getId().equals(authUser.getId())) {
-                                return Mono.error(new PrivateRouteException());
-                            }
-                            user.setLastName(userBody.getLastName());
-                            user.setFirstName(userBody.getFirstName());
-
-                            if (user.getImage() != null) {
-                                return fileClient.deleteFiles(List.of(user.getImage())).thenReturn(user);
-                            }
-                            return Mono.just(user);
+                                        if (user.getImage() != null) {
+                                            return fileClient.deleteFiles(List.of(user.getImage())).thenReturn(user);
+                                        }
+                                        return Mono.just(user);
+                                    })
+                            ).map(Tuple2::getT2);
                         }).flatMap(user ->
 
                                 finalFiles.hasElements().flatMap(ha -> {
@@ -186,7 +192,6 @@ public class UserServiceImpl implements UserService {
                                 )
 
                         ).flatMap(userRepository::save)
-                        .doOnSuccess(rabbitMqUpdateDeleteService::sendUpdateMessage)
                         .map(userMapper::fromUserCustomToUserDto);
 
     }

@@ -19,7 +19,7 @@ public class RecipeApproveQueListener
         super(approveRecipeNotificationService);
     }
 
-    @RabbitListener(queues = "#{@environment['recipe.queue.name']}", executor = "threadPoolTaskScheduler")
+    @RabbitListener(queues = "#{@environment['recipe.queue.name']}", executor = "scheduledExecutorService")
     public void listen(ApproveRecipeNotificationBody message) {
         super.listen(message);
     }

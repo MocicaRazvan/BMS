@@ -61,6 +61,11 @@ public class KanbanTaskServiceImpl
     }
 
     @Override
+    public KanbanTask cloneModel(KanbanTask kanbanTask) {
+        return kanbanTask.clone();
+    }
+
+    @Override
     @RedisReactiveChildCache(key = CACHE_KEY_PATH, masterId = "#columnId", idPath = "id")
     public Flux<KanbanTaskResponse> getByColumnId(Long columnId) {
         Sort sort = Sort.by(Sort.Direction.ASC, "orderIndex");

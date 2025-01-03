@@ -27,6 +27,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
+import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.data.redis.connection.ReactiveRedisConnectionFactory;
 import org.springframework.data.redis.core.ReactiveRedisTemplate;
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
@@ -38,7 +39,6 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
 
 
 @Configuration
@@ -117,7 +117,7 @@ public class BeanConfig {
     public RedisReactiveCacheChildAspect redisReactiveCacheApprovedAspect(ReactiveRedisTemplate<String, Object> reactiveRedisTemplate,
                                                                           AspectUtils aspectUtils,
                                                                           Jackson2ObjectMapperBuilder builder,
-                                                                          ExecutorService executorService,
+                                                                          @Qualifier("redisAsyncTaskExecutor") SimpleAsyncTaskExecutor executorService,
                                                                           RedisChildCacheUtils redisChildUtils) {
         return new RedisReactiveCacheChildAspect(reactiveRedisTemplate, aspectUtils,
                 new CustomObjectMapper(builder).customObjectMapper()

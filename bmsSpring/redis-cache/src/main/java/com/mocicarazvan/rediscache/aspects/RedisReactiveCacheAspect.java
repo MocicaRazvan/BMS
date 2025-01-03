@@ -12,6 +12,7 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.data.redis.core.ReactiveRedisTemplate;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -23,7 +24,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ExecutorService;
 
 @Slf4j
 @Aspect
@@ -35,7 +35,7 @@ public class RedisReactiveCacheAspect {
     protected final ReactiveRedisTemplate<String, Object> reactiveRedisTemplate;
     protected final AspectUtils aspectUtils;
     protected final ObjectMapper objectMapper;
-    protected final ExecutorService executorService;
+    protected final SimpleAsyncTaskExecutor asyncTaskExecutor;
     protected final RedisCacheUtils redisCacheUtils;
 
     @Value("${spring.custom.cache.redis.expire.minutes:30}")
@@ -95,7 +95,7 @@ public class RedisReactiveCacheAspect {
                     .doOnNext(methodResponse -> {
 //                        log.info("Setting key: " + key + " with value: " + methodResponse);
                         if (saveToCache) {
-                            executorService.submit(() -> saveMonoResultToCache(joinPoint, key, savingKey, annId, methodResponse));
+                            asyncTaskExecutor.submit(() -> saveMonoResultToCache(joinPoint, key, savingKey, annId, methodResponse));
                         }
                     });
         } catch (Throwable e) {
@@ -131,7 +131,7 @@ public class RedisReactiveCacheAspect {
                     .map(Tuple2::getT2)
                     .doOnComplete(() -> {
                         if (saveToCache) {
-                            executorService.submit(() -> saveFluxResultToCache(joinPoint, key, savingKey, idPath, indexMap));
+                            asyncTaskExecutor.submit(() -> saveFluxResultToCache(joinPoint, key, savingKey, idPath, indexMap));
                         }
                     });
         } catch (Throwable e) {
@@ -161,7 +161,11 @@ public class RedisReactiveCacheAspect {
                 .flatMapMany(s -> Flux.fromIterable(ids)
                         .flatMap(id -> addToReverseIndex(key, id, savingKey)))
                 .subscribe(
-                        success -> log.info("Key: " + savingKey + " set successfully"), // Log success
+                        success ->
+                        {
+//                            log.info("Key: " + savingKey + " set successfully");
+                            return;
+                        },// Log success
                         error -> log.error("Failed to set key: " + savingKey, error) // Log errors
                 );
     }
@@ -179,7 +183,10 @@ public class RedisReactiveCacheAspect {
                         .add(reverseIndexKey, indexKey)
                         .flatMap(v -> reactiveRedisTemplate.expire(reverseIndexKey, Duration.ofMinutes(expireMinutes + 1))
                                 .thenReturn(v))
-                        .doOnNext(success -> log.info("Added to reverse index: " + key + ":" + id + " value: " + indexKey))
+                        .doOnNext(success -> {
+                            log.info("Added to reverse index: " + key + ":" + id + " value: " + indexKey);
+                            return;
+                        })
                         .doOnError(error -> log.error("Failed to add to reverse index: " + key + ":" + id + " value: " + indexKey, error));
     }
 

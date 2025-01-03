@@ -17,11 +17,15 @@ import org.springframework.data.relational.core.mapping.Table;
 @AllArgsConstructor
 @SuperBuilder
 @Table("otp_token")
-public class OTPToken extends ManyToOneUser {
+public class OTPToken extends ManyToOneUser implements Cloneable {
     private String token;
     @Column("expires_in_seconds")
     private long expiresInSeconds;
 
     private OTPType type;
 
+    @Override
+    public OTPToken clone() {
+        return (OTPToken) super.clone();
+    }
 }

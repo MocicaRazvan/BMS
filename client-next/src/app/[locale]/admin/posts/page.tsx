@@ -13,6 +13,9 @@ import { sortingPostsSortingOptionsKeys } from "@/texts/components/list";
 import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
 import { Metadata } from "next";
 import { getIntlMetadata } from "@/texts/metadata";
+import ArchiveQueueCards, {
+  ArchiveQueueCardsTexts,
+} from "@/components/common/archive-queue-card";
 
 interface Props {
   params: { locale: Locale };
@@ -25,6 +28,8 @@ export interface AdminPostsPageTexts {
   title: string;
   header: string;
   menuTexts: SidebarMenuTexts;
+  archivePostsTexts: ArchiveQueueCardsTexts;
+  archiveCommentsTexts: ArchiveQueueCardsTexts;
 }
 export async function generateMetadata({
   params: { locale },
@@ -42,6 +47,8 @@ export default async function AdminPostsPage({ params: { locale } }: Props) {
       sortingPostsSortingOptions,
       header,
       menuTexts,
+      archivePostsTexts,
+      archiveCommentsTexts,
     },
     authUser,
   ] = await Promise.all([
@@ -66,7 +73,7 @@ export default async function AdminPostsPage({ params: { locale } }: Props) {
       <div className="w-full h-full bg-background">
         <Heading title={title} header={header} />
         <Suspense fallback={<LoadingSpinner />}>
-          <div className="mt-10 h-full">
+          <div className="mt-10 h-full space-y-10">
             <PostsTable
               path={`/posts/tags`}
               forWhom="admin"
@@ -79,6 +86,22 @@ export default async function AdminPostsPage({ params: { locale } }: Props) {
                 admin: "true",
               }}
             />
+            <div className="space-y-5">
+              <ArchiveQueueCards
+                prefix={"post"}
+                locale={locale}
+                showHeader={true}
+                {...archivePostsTexts}
+                authUser={authUser}
+              />
+              <ArchiveQueueCards
+                prefix={"comment"}
+                locale={locale}
+                showHeader={false}
+                {...archiveCommentsTexts}
+                authUser={authUser}
+              />
+            </div>
           </div>
         </Suspense>
       </div>

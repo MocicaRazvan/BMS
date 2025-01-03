@@ -70,7 +70,7 @@ const descriptionPrompt = ChatPromptTemplate.fromMessages([
   [
     "user",
     "Here is the context: {context}.\n" +
-      "Additionally, the user has provided this input: {input}. Based on this, generate a **verbose and detailed** description for the item: {item}.",
+      "Additionally, the user has provided this input: {input}. Based on this, generate a **verbose, large and detailed** description for the item: {item}.",
   ],
 ]);
 
@@ -199,12 +199,12 @@ export async function aiIdea({
     question: input || placeholderInput,
   });
   if (targetedField === "title") {
-    resp.answer = removeMd(resp.answer);
+    resp.answer = removeMd(resp.answer).replace(/["`]/g, "");
   }
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
   vectorDb = null;
   return {
-    answer: resp.answer.replace(/```html|```|`|"/g, "").trim(),
+    answer: resp.answer.replace(/```html|```/gi, "").trim(),
   };
 }

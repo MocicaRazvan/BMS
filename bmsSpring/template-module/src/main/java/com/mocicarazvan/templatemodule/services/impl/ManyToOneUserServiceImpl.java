@@ -24,6 +24,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.util.function.Tuple2;
 
 import java.time.LocalDateTime;
 import java.time.YearMonth;
@@ -165,6 +166,8 @@ public abstract class ManyToOneUserServiceImpl<MODEL extends ManyToOneUser, BODY
                 .map(modelMapper::fromModelToResponse));
     }
 
+    public abstract MODEL cloneModel(MODEL model);
+
     protected <G> Mono<G> updateModelWithSuccessGeneral(Long id, String userId, Function<MODEL, Mono<G>> successCallback) {
         return userClient.getUser("", userId)
                 .flatMap(authUser -> getModel(id)
@@ -173,8 +176,15 @@ public abstract class ManyToOneUserServiceImpl<MODEL extends ManyToOneUser, BODY
                                     if (isNotAuthor) {
                                         return Mono.error(new PrivateRouteException());
                                     } else {
-                                        return successCallback.apply(model)
-                                                .doOnSuccess(_ -> rabbitMqUpdateDeleteService.sendUpdateMessage(model));
+
+                                        return
+                                                Mono.zip(Mono.fromRunnable(() ->
+                                                                rabbitMqUpdateDeleteService.sendUpdateMessage(cloneModel(model))
+
+                                                        ).thenReturn(true), successCallback.apply(model))
+                                                        .map(Tuple2::getT2);
+
+
                                     }
                                 })
                         )

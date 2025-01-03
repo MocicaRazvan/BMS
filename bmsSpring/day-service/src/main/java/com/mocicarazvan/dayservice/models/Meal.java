@@ -16,8 +16,15 @@ import java.util.List;
 @AllArgsConstructor
 @SuperBuilder
 @Table("meal")
-public class Meal extends ManyToOneUser {
+public class Meal extends ManyToOneUser implements Cloneable {
     private List<Long> recipes;
     private Long dayId;
     private String period;
+
+    @Override
+    public Meal clone() {
+        Meal clone = (Meal) super.clone();
+        clone.setRecipes(List.copyOf(recipes));
+        return clone;
+    }
 }

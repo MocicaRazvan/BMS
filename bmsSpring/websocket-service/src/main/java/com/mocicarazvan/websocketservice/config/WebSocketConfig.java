@@ -2,15 +2,15 @@ package com.mocicarazvan.websocketservice.config;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.converter.DefaultContentTypeResolver;
 import org.springframework.messaging.converter.MappingJackson2MessageConverter;
 import org.springframework.messaging.converter.MessageConverter;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
+import org.springframework.scheduling.concurrent.SimpleAsyncTaskScheduler;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
@@ -22,7 +22,6 @@ import java.util.List;
 @Configuration
 @EnableWebSocketMessageBroker
 @Slf4j
-@RequiredArgsConstructor
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     private final ObjectMapper objectMapper;
@@ -42,7 +41,12 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Value("${spring.rabbitmq.password}")
     private String rabbitmqPassword;
 
-    private final ThreadPoolTaskScheduler threadPoolTaskScheduler;
+    private final SimpleAsyncTaskScheduler simpleAsyncTaskScheduler;
+
+    public WebSocketConfig(ObjectMapper objectMapper, @Qualifier("simpleAsyncTaskScheduler") SimpleAsyncTaskScheduler simpleAsyncTaskScheduler) {
+        this.objectMapper = objectMapper;
+        this.simpleAsyncTaskScheduler = simpleAsyncTaskScheduler;
+    }
 
 
     @Override
@@ -57,7 +61,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                 .setUserDestinationBroadcast("/topic/resolved-user")
                 .setSystemHeartbeatReceiveInterval(30000)
                 .setSystemHeartbeatSendInterval(30000)
-                .setTaskScheduler(threadPoolTaskScheduler);
+                .setTaskScheduler(simpleAsyncTaskScheduler);
 
 
         registry.setApplicationDestinationPrefixes("/app");

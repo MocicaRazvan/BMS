@@ -2,13 +2,13 @@ package com.mocicarazvan.planservice.config;
 
 import com.mocicarazvan.planservice.dtos.PlanResponse;
 import com.mocicarazvan.planservice.models.Plan;
-import com.mocicarazvan.templatemodule.services.RabbitMqApprovedSenderWrapper;
+import com.mocicarazvan.templatemodule.services.RabbitMqApprovedSender;
 import com.mocicarazvan.templatemodule.services.RabbitMqSender;
 import com.mocicarazvan.templatemodule.services.RabbitMqUpdateDeleteService;
-import com.mocicarazvan.templatemodule.services.impl.RabbitMqApprovedSenderWrapperImpl;
+import com.mocicarazvan.templatemodule.services.impl.RabbitMqApprovedSenderImpl;
 import com.mocicarazvan.templatemodule.services.impl.RabbitMqSenderImpl;
 import com.mocicarazvan.templatemodule.services.impl.RabbitMqUpdateDeleteServiceImpl;
-import com.mocicarazvan.templatemodule.utils.SimpleAsyncTaskExecutorInstance;
+import com.mocicarazvan.templatemodule.utils.SimpleTaskExecutorsInstance;
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;
 import org.springframework.amqp.core.DirectExchange;
@@ -47,6 +47,9 @@ public class RabbitMqConfig {
     @Value("${plan.update.routing.key}")
     private String planUpdateRoutingKey;
 
+    @Value("${spring.custom.rabbit.thread.pool.executorAsyncConcurrencyLimit:128}")
+    private int executorAsyncConcurrencyLimit;
+
     @Bean
     public Queue planQueue() {
         return new Queue(planQueueName, true);
@@ -71,7 +74,7 @@ public class RabbitMqConfig {
     public RabbitTemplate rabbitTemplate(ConnectionFactory connectionFactory) {
         RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
         rabbitTemplate.setMessageConverter(jsonMessageConverter());
-        rabbitTemplate.setTaskExecutor(new SimpleAsyncTaskExecutorInstance().initialize());
+        rabbitTemplate.setTaskExecutor(new SimpleTaskExecutorsInstance().initializeVirtual(executorAsyncConcurrencyLimit));
         return rabbitTemplate;
     }
 
@@ -81,8 +84,8 @@ public class RabbitMqConfig {
     }
 
     @Bean
-    public RabbitMqApprovedSenderWrapper<PlanResponse> planResponseRabbitMqApprovedSenderWrapper(RabbitMqSender rabbitMqSender) {
-        return new RabbitMqApprovedSenderWrapperImpl<>(extraLink, rabbitMqSender);
+    public RabbitMqApprovedSender<PlanResponse> planResponseRabbitMqApprovedSenderWrapper(RabbitMqSender rabbitMqSender) {
+        return new RabbitMqApprovedSenderImpl<>(extraLink, rabbitMqSender);
     }
 
     @Bean

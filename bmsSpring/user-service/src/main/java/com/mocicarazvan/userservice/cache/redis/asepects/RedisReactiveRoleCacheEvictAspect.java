@@ -11,7 +11,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.data.redis.core.ReactiveRedisTemplate;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Component;
@@ -21,19 +23,18 @@ import reactor.core.publisher.Mono;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
 
 @Slf4j
 @Aspect
 @Component
 @ConditionalOnClass({ReactiveRedisTemplate.class, AspectUtils.class, RedisApprovedCacheUtils.class})
 public class RedisReactiveRoleCacheEvictAspect extends RedisReactiveCacheEvictAspect {
-    protected final ExecutorService executorService;
+    protected final SimpleAsyncTaskExecutor asyncTaskExecutor;
     private final RedisRoleCacheUtils redisRoleCacheUtils;
 
-    public RedisReactiveRoleCacheEvictAspect(ReactiveRedisTemplate<String, Object> reactiveRedisTemplate, AspectUtils aspectUtils, RedisRoleCacheUtils redisRoleCacheUtils, ExecutorService executorService) {
+    public RedisReactiveRoleCacheEvictAspect(ReactiveRedisTemplate<String, Object> reactiveRedisTemplate, AspectUtils aspectUtils, RedisRoleCacheUtils redisRoleCacheUtils, @Qualifier("redisAsyncTaskExecutor") SimpleAsyncTaskExecutor asyncTaskExecutor) {
         super(reactiveRedisTemplate, aspectUtils, redisRoleCacheUtils);
-        this.executorService = executorService;
+        this.asyncTaskExecutor = asyncTaskExecutor;
         this.redisRoleCacheUtils = redisRoleCacheUtils;
     }
 
@@ -67,7 +68,7 @@ public class RedisReactiveRoleCacheEvictAspect extends RedisReactiveCacheEvictAs
         try {
             return ((Mono<?>) joinPoint.proceed(joinPoint.getArgs()))
                     .doOnNext(methodResponse -> {
-                        executorService.submit(() -> invalidateMonoByRoles(joinPoint, key, idSpel, newRole, oldRolePath, methodResponse));
+                        asyncTaskExecutor.submit(() -> invalidateMonoByRoles(joinPoint, key, idSpel, newRole, oldRolePath, methodResponse));
 
                     });
 

@@ -93,6 +93,11 @@ public class DayServiceImpl
                 dayEmbedServiceImpl.updateEmbeddingWithZip(body.getTitle(), model.getTitle(), model.getId(), modelMapper.updateModelFromBody(body, model))).as(transactionalOperator::transactional);
     }
 
+    @Override
+    public Day cloneModel(Day day) {
+        return day.clone();
+    }
+
 
     // todo admin route
     @Override

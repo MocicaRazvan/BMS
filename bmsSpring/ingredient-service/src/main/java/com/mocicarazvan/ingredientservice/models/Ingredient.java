@@ -15,10 +15,15 @@ import org.springframework.data.relational.core.mapping.Table;
 @AllArgsConstructor
 @SuperBuilder
 @Table("ingredient")
-public class Ingredient extends ManyToOneUser {
+public class Ingredient extends ManyToOneUser implements Cloneable {
     private String name;
 
     private DietType type;
-    
+
     private boolean display;
+
+    @Override
+    public Ingredient clone() {
+        return (Ingredient) super.clone();
+    }
 }

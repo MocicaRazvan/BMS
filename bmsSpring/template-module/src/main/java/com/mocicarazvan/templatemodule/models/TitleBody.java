@@ -14,7 +14,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @SuperBuilder
-public abstract class TitleBody extends ManyToOneUser {
+public abstract class TitleBody extends ManyToOneUser implements Cloneable {
     private String body;
     private String title;
 
@@ -22,4 +22,12 @@ public abstract class TitleBody extends ManyToOneUser {
     private List<Long> userLikes;
     @Column("user_dislikes")
     private List<Long> userDislikes;
+
+    @Override
+    public TitleBody clone() {
+        TitleBody clone = (TitleBody) super.clone();
+        clone.setUserLikes(List.copyOf(userLikes));
+        clone.setUserDislikes(List.copyOf(userDislikes));
+        return clone;
+    }
 }

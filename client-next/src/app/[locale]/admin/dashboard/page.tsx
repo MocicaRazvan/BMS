@@ -40,7 +40,11 @@ export default async function AdminDashboard({ params: { locale } }: Props) {
         <Heading {...texts} />
         <Suspense fallback={<LoadingSpinner />}>
           <div className="mt-10 h-full">
-            <AdminDashboardPageContent authUser={authUser} {...texts} />
+            <AdminDashboardPageContent
+              authUser={authUser}
+              {...texts}
+              locale={locale}
+            />
           </div>
         </Suspense>
       </div>

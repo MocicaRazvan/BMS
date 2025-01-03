@@ -137,6 +137,11 @@ public class IngredientServiceImpl extends
     }
 
     @Override
+    public Ingredient cloneModel(Ingredient ingredient) {
+        return ingredient.clone();
+    }
+
+    @Override
     @RedisReactiveChildCache(key = CACHE_KEY_PATH, idPath = "content.id")
     public Flux<PageableResponse<IngredientResponse>> getAllModelsFiltered(String name, Boolean display, DietType type, PageableBody pageableBody, Boolean admin) {
         Ingredient example = createIngredientExample(name, display, type);

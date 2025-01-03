@@ -15,6 +15,9 @@ import LoadingSpinner from "@/components/common/loading-spinner";
 import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
 import { Metadata } from "next";
 import { getIntlMetadata } from "@/texts/metadata";
+import ArchiveQueueCards, {
+  ArchiveQueueCardsTexts,
+} from "@/components/common/archive-queue-card";
 
 interface Props {
   params: { locale: Locale };
@@ -27,6 +30,8 @@ export interface AdminRecipesPageTexts {
   title: string;
   header: string;
   menuTexts: SidebarMenuTexts;
+  archiveRecipesTexts: ArchiveQueueCardsTexts;
+  archiveMealsTexts: ArchiveQueueCardsTexts;
 }
 export async function generateMetadata({
   params: { locale },
@@ -43,6 +48,8 @@ export default async function AdminRecipesPage({ params: { locale } }: Props) {
       sortingRecipesSortingOptions,
       header,
       menuTexts,
+      archiveRecipesTexts,
+      archiveMealsTexts,
     },
     authUser,
   ] = await Promise.all([
@@ -67,7 +74,7 @@ export default async function AdminRecipesPage({ params: { locale } }: Props) {
       <div className="w-full h-full bg-background">
         <Heading title={title} header={header} />
         <Suspense fallback={<LoadingSpinner />}>
-          <div className="mt-10 h-full">
+          <div className="mt-10 h-full space-y-10">
             <RecipeTable
               path={`/recipes/filteredWithCount`}
               forWhom="admin"
@@ -80,6 +87,22 @@ export default async function AdminRecipesPage({ params: { locale } }: Props) {
                 admin: "true",
               }}
             />
+            <div className="space-y-5">
+              <ArchiveQueueCards
+                prefix={"recipe"}
+                locale={locale}
+                showHeader={true}
+                {...archiveRecipesTexts}
+                authUser={authUser}
+              />
+              <ArchiveQueueCards
+                prefix={"meal"}
+                locale={locale}
+                showHeader={false}
+                {...archiveMealsTexts}
+                authUser={authUser}
+              />
+            </div>
           </div>
         </Suspense>
       </div>

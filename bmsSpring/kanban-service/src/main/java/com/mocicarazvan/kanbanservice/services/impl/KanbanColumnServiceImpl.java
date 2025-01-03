@@ -60,6 +60,11 @@ public class KanbanColumnServiceImpl
     }
 
     @Override
+    public KanbanColumn cloneModel(KanbanColumn kanbanColumn) {
+        return kanbanColumn.clone();
+    }
+
+    @Override
     @RedisReactiveChildCacheEvict(key = CACHE_KEY_PATH, id = "#id", masterId = "#userId")
     public Mono<KanbanColumnResponse> deleteModel(Long id, String userId) {
 

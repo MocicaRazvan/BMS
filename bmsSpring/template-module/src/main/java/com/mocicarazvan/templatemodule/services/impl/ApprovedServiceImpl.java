@@ -18,7 +18,7 @@ import com.mocicarazvan.templatemodule.mappers.DtoMapper;
 import com.mocicarazvan.templatemodule.models.Approve;
 import com.mocicarazvan.templatemodule.repositories.ApprovedRepository;
 import com.mocicarazvan.templatemodule.services.ApprovedService;
-import com.mocicarazvan.templatemodule.services.RabbitMqApprovedSenderWrapper;
+import com.mocicarazvan.templatemodule.services.RabbitMqApprovedSender;
 import com.mocicarazvan.templatemodule.services.RabbitMqUpdateDeleteService;
 import com.mocicarazvan.templatemodule.utils.EntitiesUtils;
 import com.mocicarazvan.templatemodule.utils.PageableUtilsCustom;
@@ -43,11 +43,11 @@ public abstract class ApprovedServiceImpl<MODEL extends Approve, BODY extends Ti
         extends TitleBodyImagesServiceImpl<MODEL, BODY, RESPONSE, S, M, CR>
         implements ApprovedService<MODEL, BODY, RESPONSE, S, M> {
 
-    protected final RabbitMqApprovedSenderWrapper<RESPONSE> rabbitMqApprovedSenderWrapper;
+    protected final RabbitMqApprovedSender<RESPONSE> rabbitMqApprovedSender;
 
-    public ApprovedServiceImpl(S modelRepository, M modelMapper, PageableUtilsCustom pageableUtils, UserClient userClient, String modelName, List<String> allowedSortingFields, EntitiesUtils entitiesUtils, FileClient fileClient, ObjectMapper objectMapper, RabbitMqApprovedSenderWrapper<RESPONSE> rabbitMqApprovedSenderWrapper, CR self, RabbitMqUpdateDeleteService<MODEL> rabbitMqUpdateDeleteService) {
+    public ApprovedServiceImpl(S modelRepository, M modelMapper, PageableUtilsCustom pageableUtils, UserClient userClient, String modelName, List<String> allowedSortingFields, EntitiesUtils entitiesUtils, FileClient fileClient, ObjectMapper objectMapper, RabbitMqApprovedSender<RESPONSE> rabbitMqApprovedSender, CR self, RabbitMqUpdateDeleteService<MODEL> rabbitMqUpdateDeleteService) {
         super(modelRepository, modelMapper, pageableUtils, userClient, modelName, allowedSortingFields, entitiesUtils, fileClient, objectMapper, self, rabbitMqUpdateDeleteService);
-        this.rabbitMqApprovedSenderWrapper = rabbitMqApprovedSenderWrapper;
+        this.rabbitMqApprovedSender = rabbitMqApprovedSender;
     }
 
 
@@ -69,7 +69,7 @@ public abstract class ApprovedServiceImpl<MODEL extends Approve, BODY extends Ti
                                                     );
                                         }
 
-                                ).doOnSuccess(r -> rabbitMqApprovedSenderWrapper.sendMessage(approved, r, authUser))
+                                ).doOnSuccess(r -> rabbitMqApprovedSender.sendMessage(approved, r, authUser))
                         );
 
     }

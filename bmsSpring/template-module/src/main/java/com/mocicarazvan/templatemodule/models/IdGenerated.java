@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @SuperBuilder
-public abstract class IdGenerated {
+public abstract class IdGenerated implements Cloneable {
     @Id
     private Long id;
 
@@ -27,4 +27,12 @@ public abstract class IdGenerated {
     @LastModifiedDate
     private LocalDateTime updatedAt;
 
+    @Override
+    public IdGenerated clone() {
+        try {
+            return (IdGenerated) super.clone();
+        } catch (CloneNotSupportedException e) {
+            throw new AssertionError();
+        }
+    }
 }

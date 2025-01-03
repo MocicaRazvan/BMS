@@ -15,9 +15,14 @@ import org.springframework.data.relational.core.mapping.Table;
 @AllArgsConstructor
 @SuperBuilder
 @Table("kanban_column")
-public class KanbanColumn extends ManyToOneUser {
+public class KanbanColumn extends ManyToOneUser implements Cloneable {
     private String title;
 
     @Column("order_index")
     private int orderIndex;
+
+    @Override
+    public KanbanColumn clone() {
+        return (KanbanColumn) super.clone();
+    }
 }

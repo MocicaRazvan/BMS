@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { Button, ButtonProps } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { ButtonHTMLAttributes, ReactNode } from "react";
 import { cn } from "@/lib/utils";
@@ -10,12 +10,13 @@ export interface ButtonSubmitTexts {
   loadingText: string | ReactNode;
 }
 
-interface Props extends ButtonHTMLAttributes<HTMLButtonElement> {
-  isLoading: boolean;
-  disable: boolean;
-  buttonSubmitTexts: ButtonSubmitTexts;
-  size?: "default" | "sm" | "lg" | "icon" | null | undefined;
-}
+type Props = ButtonHTMLAttributes<HTMLButtonElement> &
+  Omit<ButtonProps, "size"> & {
+    isLoading: boolean;
+    disable: boolean;
+    buttonSubmitTexts: ButtonSubmitTexts;
+    size?: "default" | "sm" | "lg" | "icon" | null | undefined;
+  };
 
 export default function ButtonSubmit({
   isLoading,

@@ -16,6 +16,13 @@ import java.util.List;
 @AllArgsConstructor
 @SuperBuilder
 @Table("post")
-public class Post extends Approve {
+public class Post extends Approve implements Cloneable {
     public List<String> tags;
+
+    @Override
+    public Post clone() {
+        Post clone = (Post) super.clone();
+        clone.setTags(List.copyOf(tags));
+        return clone;
+    }
 }

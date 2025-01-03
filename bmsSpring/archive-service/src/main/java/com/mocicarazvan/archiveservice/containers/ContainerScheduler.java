@@ -2,14 +2,19 @@ package com.mocicarazvan.archiveservice.containers;
 
 
 import com.mocicarazvan.archiveservice.config.QueuesPropertiesConfig;
+import com.mocicarazvan.archiveservice.services.ContainerNotify;
+import com.mocicarazvan.archiveservice.triggers.AfterMillisTrigger;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
+import org.springframework.scheduling.concurrent.SimpleAsyncTaskScheduler;
 import org.springframework.scheduling.support.CronTrigger;
 
+import java.time.Duration;
 import java.util.Arrays;
+import java.util.Objects;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 @RequiredArgsConstructor
@@ -17,74 +22,119 @@ import java.util.concurrent.TimeUnit;
 @Getter
 public class ContainerScheduler {
     private final SimpleMessageListenerContainer simpleMessageListenerContainer;
-    private final ThreadPoolTaskScheduler threadPoolTaskScheduler;
+    private final SimpleAsyncTaskScheduler simpleAsyncTaskScheduler;
     private final QueuesPropertiesConfig queuesPropertiesConfig;
+    private final ContainerNotify containerNotify;
+    private ScheduledFuture<?> stopTask;
 
     public void scheduleContainer() {
-        String queueName = simpleMessageListenerContainer.getQueueNames()[0];
-        CronTrigger cronTrigger = new CronTrigger(queuesPropertiesConfig.getQueueJob(queueName));
-
-        threadPoolTaskScheduler.schedule(
-                this::handleContainerLifecycle,
-                cronTrigger
+        simpleAsyncTaskScheduler.schedule(
+                this::scheduleCron,
+                new CronTrigger(queuesPropertiesConfig.getQueueJob(simpleMessageListenerContainer.getQueueNames()[0]))
         );
 
     }
 
 
-    private void handleContainerLifecycle() {
+    private void scheduleCron() {
         String queueName = simpleMessageListenerContainer.getQueueNames()[0];
-        try {
-            log.info("Starting container for queue: " + queueName);
-            simpleMessageListenerContainer.start();
 
+        stopPrevious(queueName);
+        stopContainerGracefully();
+//        if (simpleMessageListenerContainer.isRunning()) {
+//            // for * cron expression
+////            return;
+//        }
 
-            Thread.sleep(queuesPropertiesConfig.getSchedulerAliveMillis());
+        log.info("Starting container for queue: {}", queueName);
+        simpleMessageListenerContainer.start();
 
-            log.info("Stopping container for queue: " + queueName);
-            stopContainerGracefully();
-        } catch (InterruptedException e) {
-            log.error("Error handling container lifecycle: " + e.getMessage());
-            Thread.currentThread().interrupt();
-            e.printStackTrace();
+        containerNotify.notifyContainersStartCron(queueName);
+
+        stopTask = simpleAsyncTaskScheduler.schedule(
+                this::stopContainerGracefully,
+                new AfterMillisTrigger(queuesPropertiesConfig.getSchedulerAliveMillis())
+        );
+
+        log.info("Container will be stopped after {} s", Objects.requireNonNull(stopTask).getDelay(TimeUnit.SECONDS));
+    }
+
+    public void startContainerForFixedTime(long aliveMillis) {
+        String queueName = simpleMessageListenerContainer.getQueueNames()[0];
+        stopPrevious(queueName);
+        stopContainerGracefully();
+
+        log.info("Manually starting container for queue: {} for {} s", queueName, Duration.ofMillis(aliveMillis).getSeconds());
+        simpleMessageListenerContainer.start();
+
+        containerNotify.notifyContainersStartManual(queueName);
+
+        stopTask = simpleAsyncTaskScheduler.schedule(
+                this::stopContainerGracefully,
+                new AfterMillisTrigger(aliveMillis)
+        );
+    }
+
+    public void stopContainerManually() {
+        String queueName = simpleMessageListenerContainer.getQueueNames()[0];
+        log.info("Manually stopping container for queue: {}", queueName);
+
+        stopPrevious(queueName);
+        stopContainerGracefully();
+    }
+
+    private void stopPrevious(String queueName) {
+        if (stopTask != null && !stopTask.isDone()) {
+            stopTask.cancel(false);
+            log.info("Cancelled previously scheduled stop task for queue: {}", queueName);
         }
     }
 
     private void stopContainerGracefully() {
-        simpleMessageListenerContainer.stop();
-        int maxWaitTimeMillis = 100000;
-        int waitIntervalMillis = 200;
-        int waitedTime = 0;
-
-        while (simpleMessageListenerContainer.isRunning() && waitedTime < maxWaitTimeMillis) {
-            try {
-                Thread.sleep(waitIntervalMillis);
-                waitedTime += waitIntervalMillis;
-            } catch (InterruptedException e) {
-                log.error("Interrupted while stopping container for queue: " + Arrays.toString(simpleMessageListenerContainer.getQueueNames()), e);
-                Thread.currentThread().interrupt();
-                break;
-            }
-        }
-        if (simpleMessageListenerContainer.isRunning()) {
-            log.warn("Container did not stop gracefully within the timeout. Forcing stop: " + Arrays.toString(simpleMessageListenerContainer.getQueueNames()));
-
-            simpleMessageListenerContainer.shutdown();
-            try {
-
-                Thread.sleep(TimeUnit.SECONDS.toMillis(25));
-            } catch (InterruptedException e) {
-                log.error("Interrupted while stopping container for queue: " + Arrays.toString(simpleMessageListenerContainer.getQueueNames()), e);
-                Thread.currentThread().interrupt();
-            }
-        }
-
         if (!simpleMessageListenerContainer.isRunning()) {
-            log.info("Container stopped gracefully: " + Arrays.toString(simpleMessageListenerContainer.getQueueNames()));
-        } else {
-
-            log.warn("Container did not stop within the expected time: " + Arrays.toString(simpleMessageListenerContainer.getQueueNames()));
+            log.info("Container is not running. Skipping stop operation.");
+            return;
         }
+
+        String queueName = simpleMessageListenerContainer.getQueueNames()[0];
+        log.info("Stopping container gracefully for queue: {}", queueName);
+
+        try {
+            simpleMessageListenerContainer.stop();
+
+            boolean stopped = waitForContainerToStop(150, 500); // 150 iterations, 500ms interval
+            if (stopped) {
+                log.info("Container stopped gracefully for queue: {}", queueName);
+            } else {
+                log.warn("Container did not stop gracefully within the timeout. Forcing shutdown for queue: {}", queueName);
+                simpleMessageListenerContainer.shutdown();
+            }
+        } catch (Exception e) {
+            log.error("Error while stopping container for queue: {}", queueName, e);
+            Thread.currentThread().interrupt();
+        }
+        if (!simpleMessageListenerContainer.isRunning()) {
+            log.info("Container stopped gracefully: {}", Arrays.toString(simpleMessageListenerContainer.getQueueNames()));
+            containerNotify.notifyContainersStop(queueName);
+        } else {
+            log.warn("Container did not stop within the expected time: {}", Arrays.toString(simpleMessageListenerContainer.getQueueNames()));
+        }
+    }
+
+    private boolean waitForContainerToStop(int maxAttempts, int intervalMillis) {
+        for (int i = 0; i < maxAttempts; i++) {
+            if (!simpleMessageListenerContainer.isRunning()) {
+                return true;
+            }
+            try {
+                Thread.sleep(intervalMillis);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                log.error("Interrupted while waiting for container to stop.");
+                return false;
+            }
+        }
+        return false;
     }
 
 
