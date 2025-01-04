@@ -11,7 +11,7 @@ public interface QueueService {
     Mono<String> evictCache(String queueName);
 
 
-    Mono<QueueInformationWithTimestamp> scheduleContainer(String queueName, long aliveMillis);
+    Mono<QueueInformationWithTimestamp> startContainerForFixedTime(String queueName, long aliveMillis);
 
     Mono<QueueInformationWithTimestamp> stopContainer(String queueName);
 }

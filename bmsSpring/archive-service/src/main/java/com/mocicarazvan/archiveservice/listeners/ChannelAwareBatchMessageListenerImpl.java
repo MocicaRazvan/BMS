@@ -2,7 +2,7 @@ package com.mocicarazvan.archiveservice.listeners;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mocicarazvan.archiveservice.config.QueuesPropertiesConfig;
-import com.mocicarazvan.archiveservice.factories.SaveMessagesHandler;
+import com.mocicarazvan.archiveservice.services.SaveMessagesAggregator;
 import com.rabbitmq.client.Channel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,7 +23,7 @@ public class ChannelAwareBatchMessageListenerImpl<T> implements ChannelAwareBatc
     private final ObjectMapper objectMapper;
     private final Class<T> clazz;
     private final String queueName;
-    private final SaveMessagesHandler saveMessagesHandler;
+    private final SaveMessagesAggregator saveMessagesAggregator;
     private final QueuesPropertiesConfig queuesPropertiesConfig;
 
 
@@ -44,7 +44,7 @@ public class ChannelAwareBatchMessageListenerImpl<T> implements ChannelAwareBatc
                     .doOnComplete(() ->
                     {
                         acknowledgeBatch(messages, channel);
-                        saveMessagesHandler.getBatchNotify().notifyBatchUpdate(messages, queueName);
+                        saveMessagesAggregator.getBatchNotify().notifyBatchUpdate(messages, queueName);
                     })
                     .subscribe();
         } catch (Exception e) {
@@ -69,7 +69,7 @@ public class ChannelAwareBatchMessageListenerImpl<T> implements ChannelAwareBatc
 
         return
                 Mono.fromCallable(() -> {
-                            saveMessagesHandler.getSaveBatchMessages().saveBatch(batch, queueName);
+                            saveMessagesAggregator.getSaveBatchMessages().saveBatch(batch, queueName);
                             return null;
                         }).subscribeOn(Schedulers.boundedElastic())
 

@@ -36,15 +36,15 @@ public class ArchiveController {
     }
 
     @PatchMapping("/container/schedule")
-    public Mono<ResponseEntity<QueueInformationWithTimestamp>> scheduleQueue(
+    public Mono<ResponseEntity<QueueInformationWithTimestamp>> startQueueContainer(
             @RequestParam(value = "queueName") @Valid @ValidQueueName String queueName,
             @RequestParam(value = "alive") @Valid @Min(0) @Max(1000000) long alive
     ) {
-        return queueService.scheduleContainer(queueName, alive).map(ResponseEntity::ok);
+        return queueService.startContainerForFixedTime(queueName, alive).map(ResponseEntity::ok);
     }
 
     @PatchMapping("/container/stop")
-    public Mono<ResponseEntity<QueueInformationWithTimestamp>> stopQueue(
+    public Mono<ResponseEntity<QueueInformationWithTimestamp>> stopQueueContainer(
             @RequestParam(value = "queueName") @Valid @ValidQueueName String queueName
     ) {
         return queueService.stopContainer(queueName).map(ResponseEntity::ok);

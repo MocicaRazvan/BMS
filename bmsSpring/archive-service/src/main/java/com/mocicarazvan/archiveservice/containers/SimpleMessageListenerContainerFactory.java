@@ -5,8 +5,8 @@ import com.mocicarazvan.archiveservice.config.QueuesPropertiesConfig;
 import com.mocicarazvan.archiveservice.dtos.*;
 import com.mocicarazvan.archiveservice.exceptions.QueueNameNotValid;
 import com.mocicarazvan.archiveservice.exceptions.QueuePrefixNotFound;
-import com.mocicarazvan.archiveservice.factories.SaveMessagesHandler;
 import com.mocicarazvan.archiveservice.listeners.ChannelAwareBatchMessageListenerImpl;
+import com.mocicarazvan.archiveservice.services.SaveMessagesAggregator;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -22,7 +22,7 @@ public class SimpleMessageListenerContainerFactory {
     private final ConnectionFactory connectionFactory;
     private final QueuesPropertiesConfig queuesPropertiesConfig;
     private final ObjectMapper objectMapper;
-    private final SaveMessagesHandler saveMessagesHandler;
+    private final SaveMessagesAggregator saveMessagesAggregator;
 
     private static final List<String> queuePrefixes = List.of("user", "comment", "day", "ingredient", "meal", "plan", "post", "recipe", "nutritionalFact");
     private static final Map<String, Class<?>> queueToClassMap = Map.of(
@@ -37,12 +37,12 @@ public class SimpleMessageListenerContainerFactory {
             "nutritionalFact", NutritionalFact.class
     );
 
-    public SimpleMessageListenerContainerFactory(@Qualifier("containerLifecycleSimpleAsyncTaskScheduler") SimpleAsyncTaskScheduler executor, ConnectionFactory connectionFactory, QueuesPropertiesConfig queuesPropertiesConfig, ObjectMapper objectMapper, SaveMessagesHandler saveMessagesHandler) {
+    public SimpleMessageListenerContainerFactory(@Qualifier("containerLifecycleSimpleAsyncTaskScheduler") SimpleAsyncTaskScheduler executor, ConnectionFactory connectionFactory, QueuesPropertiesConfig queuesPropertiesConfig, ObjectMapper objectMapper, SaveMessagesAggregator saveMessagesAggregator) {
         this.executor = executor;
         this.connectionFactory = connectionFactory;
         this.queuesPropertiesConfig = queuesPropertiesConfig;
         this.objectMapper = objectMapper;
-        this.saveMessagesHandler = saveMessagesHandler;
+        this.saveMessagesAggregator = saveMessagesAggregator;
     }
 
     public SimpleMessageListenerContainer createContainer(String queueName) {
@@ -55,7 +55,7 @@ public class SimpleMessageListenerContainerFactory {
                 .queueName(queueName)
                 .executor(executor)
                 .queuesPropertiesConfig(queuesPropertiesConfig)
-                .channelAwareBatchMessageListener(new ChannelAwareBatchMessageListenerImpl<>(objectMapper, clazz, queueName, saveMessagesHandler, queuesPropertiesConfig))
+                .channelAwareBatchMessageListener(new ChannelAwareBatchMessageListenerImpl<>(objectMapper, clazz, queueName, saveMessagesAggregator, queuesPropertiesConfig))
                 .build()
                 .initContainer();
     }

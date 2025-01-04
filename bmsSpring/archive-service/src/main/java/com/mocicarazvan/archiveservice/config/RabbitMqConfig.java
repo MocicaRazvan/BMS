@@ -1,7 +1,7 @@
 package com.mocicarazvan.archiveservice.config;
 
-import com.mocicarazvan.archiveservice.containers.ContainerScheduler;
 import com.mocicarazvan.archiveservice.containers.SimpleMessageListenerContainerFactory;
+import com.mocicarazvan.archiveservice.schedulers.ContainerScheduler;
 import com.mocicarazvan.archiveservice.services.ContainerNotify;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;

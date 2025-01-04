@@ -1,9 +1,10 @@
-package com.mocicarazvan.archiveservice.containers;
+package com.mocicarazvan.archiveservice.schedulers;
 
 
 import com.mocicarazvan.archiveservice.config.QueuesPropertiesConfig;
 import com.mocicarazvan.archiveservice.services.ContainerNotify;
 import com.mocicarazvan.archiveservice.triggers.AfterMillisTrigger;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,12 +21,15 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 @Slf4j
 @Getter
+@AllArgsConstructor
 public class ContainerScheduler {
     private final SimpleMessageListenerContainer simpleMessageListenerContainer;
     private final SimpleAsyncTaskScheduler simpleAsyncTaskScheduler;
     private final QueuesPropertiesConfig queuesPropertiesConfig;
     private final ContainerNotify containerNotify;
     private ScheduledFuture<?> stopTask;
+    private int maxAttempts = 150;
+    private int intervalMillis = 500;
 
     public void scheduleContainer() {
         simpleAsyncTaskScheduler.schedule(
@@ -102,7 +106,7 @@ public class ContainerScheduler {
         try {
             simpleMessageListenerContainer.stop();
 
-            boolean stopped = waitForContainerToStop(150, 500); // 150 iterations, 500ms interval
+            boolean stopped = waitForContainerToStop();
             if (stopped) {
                 log.info("Container stopped gracefully for queue: {}", queueName);
             } else {
@@ -121,7 +125,7 @@ public class ContainerScheduler {
         }
     }
 
-    private boolean waitForContainerToStop(int maxAttempts, int intervalMillis) {
+    private boolean waitForContainerToStop() {
         for (int i = 0; i < maxAttempts; i++) {
             if (!simpleMessageListenerContainer.isRunning()) {
                 return true;

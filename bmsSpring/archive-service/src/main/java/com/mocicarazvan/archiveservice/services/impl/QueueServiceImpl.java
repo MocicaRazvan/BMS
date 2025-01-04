@@ -2,9 +2,9 @@ package com.mocicarazvan.archiveservice.services.impl;
 
 
 import com.mocicarazvan.archiveservice.config.QueuesPropertiesConfig;
-import com.mocicarazvan.archiveservice.containers.ContainerScheduler;
 import com.mocicarazvan.archiveservice.dtos.QueueInformationWithTimestamp;
 import com.mocicarazvan.archiveservice.exceptions.QueueNameNotValid;
+import com.mocicarazvan.archiveservice.schedulers.ContainerScheduler;
 import com.mocicarazvan.archiveservice.services.QueueService;
 import com.mocicarazvan.archiveservice.services.SimpleRedisCache;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +15,7 @@ import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
 import java.util.Map;
+import java.util.function.Consumer;
 
 @Service
 @RequiredArgsConstructor
@@ -48,26 +49,25 @@ public class QueueServiceImpl implements QueueService {
     }
 
     @Override
-    public Mono<QueueInformationWithTimestamp> scheduleContainer(String queueName, long aliveMillis) {
-        ContainerScheduler containerScheduler = containerSchedulers.get(queueName);
-        if (containerScheduler == null) {
-            return Mono.error(new QueueNameNotValid("Queue name not valid"));
-        }
+    public Mono<QueueInformationWithTimestamp> startContainerForFixedTime(String queueName, long aliveMillis) {
 
-        containerScheduler.startContainerForFixedTime(aliveMillis);
-
-        return getQueueInfo(queueName, true);
+        return operateContainer(queueName,
+                containerScheduler -> containerScheduler.startContainerForFixedTime(aliveMillis));
     }
 
 
     @Override
     public Mono<QueueInformationWithTimestamp> stopContainer(String queueName) {
+        return operateContainer(queueName, ContainerScheduler::stopContainerManually);
+    }
+
+    private Mono<QueueInformationWithTimestamp> operateContainer(String queueName, Consumer<ContainerScheduler> operation) {
         ContainerScheduler containerScheduler = containerSchedulers.get(queueName);
         if (containerScheduler == null) {
             return Mono.error(new QueueNameNotValid("Queue name not valid"));
         }
 
-        containerScheduler.stopContainerManually();
+        operation.accept(containerScheduler);
 
         return getQueueInfo(queueName, true);
     }
