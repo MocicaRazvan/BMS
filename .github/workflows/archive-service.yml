@@ -8,7 +8,7 @@ on:
     paths:
       - 'bmsSpring/archive-service/**'
 jobs:
-  build-and-push-websocket-service:
+  build-and-push-archive-service:
     uses: ./.github/workflows/build-and-push.yml
     with:
       image-name: archive-service-bms
