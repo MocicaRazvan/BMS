@@ -76,7 +76,7 @@ public class BatchNotifyWS implements BatchNotify {
 //        log.info("Sending update global outside count is {}", globalCnt);
         if (scheduledTasks.get(queueName) == null || scheduledTasks.get(queueName).isCancelled()) {
             PeriodicTrigger trigger = new PeriodicTrigger(Duration.ofSeconds(updatePeriod));
-            trigger.setInitialDelay(Duration.ofSeconds(updatePeriod));
+            trigger.setInitialDelay(Duration.ofSeconds(updatePeriod / 2));
             ScheduledFuture<?> scheduledFuture = taskExecutor.schedule(() -> handleScheduledTask(queueName),
                     trigger);
             assert scheduledFuture != null;

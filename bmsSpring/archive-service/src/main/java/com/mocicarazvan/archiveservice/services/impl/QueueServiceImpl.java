@@ -9,6 +9,7 @@ import com.mocicarazvan.archiveservice.services.QueueService;
 import com.mocicarazvan.archiveservice.services.SimpleRedisCache;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.core.QueueInformation;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
@@ -75,7 +76,7 @@ public class QueueServiceImpl implements QueueService {
 
     private Mono<QueueInformationWithTimestamp> fetchQueueInfoFromSource(String queueName) {
         return Mono.justOrEmpty(rabbitAdmin.getQueueInfo(queueName))
-                .switchIfEmpty(Mono.error(new QueueNameNotValid("Queue name not valid")))
+                .switchIfEmpty(Mono.just(new QueueInformation(queueName, 0, 0)))
                 .map(qi -> QueueInformationWithTimestamp.fromQueueInformation(qi, queuesPropertiesConfig.getQueueJob(queueName)))
                 .subscribeOn(Schedulers.boundedElastic());
     }
