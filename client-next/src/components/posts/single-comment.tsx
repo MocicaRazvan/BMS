@@ -193,9 +193,9 @@ export const SingleComment = memo<Props>(
               />
             </div>
             <div className="flex items-center justify-center gap-3">
-              {content.createdAt !== content.updatedAt && (
-                <p className="text-sm text-muted-foreground">{edited}</p>
-              )}
+              {/*{content.createdAt !== content.updatedAt && (*/}
+              {/*  <p className="text-sm text-muted-foreground">{edited}</p>*/}
+              {/*)}*/}
               {(parseInt(authUser.id ?? "") === userId ||
                 authUser.role === "ROLE_ADMIN") && (
                 <AlertDialogDeleteComment

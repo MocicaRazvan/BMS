@@ -1819,7 +1819,18 @@
       "AdminDashboardPageTexts": {
         "title": "Panou de administrare",
         "header": "Aici poți vedea un sumar al activității de pe platformă.",
-        "archiveTitle": "Statisticile curente ale arhivării"
+        "archiveTitle": "Statisticile curente ale arhivării",
+        "selectItems": {
+          "comment": "Comentarii",
+          "day": "Zile",
+          "ingredient": "Ingrediente",
+          "meal": "Mese",
+          "plan": "Planuri",
+          "post": "Postări",
+          "recipe": "Rețete",
+          "user": "Utilizatori",
+          "all": "Toate"
+        }
       },
       "AdminMonthlySalesTexts": {
         "title": "Vânzări lunare",

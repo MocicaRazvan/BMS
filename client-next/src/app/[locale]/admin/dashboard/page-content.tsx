@@ -1,9 +1,7 @@
 "use client";
 
 import { WithUser } from "@/lib/user";
-import ArchiveQueueCards, {
-  ArchiveQueueCardsTexts,
-} from "@/components/common/archive-queue-card";
+import { ArchiveQueueCardsTexts } from "@/components/common/archive-queue-card";
 import RelativeItem, {
   relativeItems,
   RelativeItems,
@@ -15,8 +13,11 @@ import { ThemeSwitchTexts } from "@/texts/components/nav";
 import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
-import { ArchiveQueuePrefix, archiveQueuePrefixes } from "@/types/dto";
+import { ArchiveQueuePrefix } from "@/types/dto";
 import { Locale } from "@/navigation";
+import ArchiveContent, {
+  AugmentedArchiveQueuePrefix,
+} from "@/app/[locale]/admin/dashboard/archive-content";
 
 export interface AdminDashboardPageTexts {
   title: string;
@@ -27,6 +28,7 @@ export interface AdminDashboardPageTexts {
   menuTexts: SidebarMenuTexts;
   archiveTexts: Record<ArchiveQueuePrefix, ArchiveQueueCardsTexts>;
   archiveTitle: string;
+  selectItems: Record<AugmentedArchiveQueuePrefix, string>;
 }
 
 interface Props extends WithUser, AdminDashboardPageTexts {
@@ -40,6 +42,7 @@ export default function AdminDashboardPageContent({
   archiveTexts,
   locale,
   archiveTitle,
+  selectItems,
 }: Props) {
   const [relativeItemsCount, setRelativeItemsCount] = useState<
     Record<RelativeItems, number>
@@ -107,25 +110,14 @@ export default function AdminDashboardPageContent({
           />
         </motion.div>
       </div>
-      <div className="w-full h-full space-y-2 md:space-y-5 mt-5 md:mt-10">
-        <motion.h2
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          className="text-2xl lg:text-3xl font-bold tracking-tight mb-12 capitalize"
-        >
-          {archiveTitle}
-        </motion.h2>
-        {archiveQueuePrefixes.map((p) => (
-          <div key={p} className="w-full h-full">
-            <ArchiveQueueCards
-              prefix={p}
-              locale={locale}
-              {...archiveTexts[p]}
-              authUser={authUser}
-            />
-          </div>
-        ))}
+      <div className="w-full h-full mt-5 md:mt-12">
+        <ArchiveContent
+          locale={locale}
+          archiveTexts={archiveTexts}
+          archiveTitle={archiveTitle}
+          authUser={authUser}
+          selectItems={selectItems}
+        />
       </div>
     </>
   );

@@ -26,6 +26,8 @@ interface FormProps {
 }
 export function useNavigationGuardI18nForm({ form }: FormProps) {
   useNavigationGuardI18n({
-    enabled: Object.keys(form.formState.dirtyFields).length > 0,
+    enabled:
+      !form.formState.isSubmitting &&
+      Object.keys(form.formState.dirtyFields).length > 0,
   });
 }

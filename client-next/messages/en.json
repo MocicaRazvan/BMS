@@ -1820,7 +1820,18 @@
       "AdminDashboardPageTexts": {
         "title": "Dashboard",
         "header": "Here you can see a summary of the platform.",
-        "archiveTitle": "Archive Current Statistics"
+        "archiveTitle": "Archive Current Statistics",
+        "selectItems": {
+          "comment": "Comments",
+          "day": "Days",
+          "ingredient": "Ingredients",
+          "meal": "Meals",
+          "plan": "Plans",
+          "post": "Posts",
+          "recipe": "Recipes",
+          "user": "Users",
+          "all": "All"
+        }
       },
       "AdminMonthlySalesTexts": {
         "title": "Monthly Sales",

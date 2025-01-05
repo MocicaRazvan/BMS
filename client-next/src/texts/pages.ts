@@ -1355,6 +1355,17 @@ export async function getAdminDashboardPageTexts(): Promise<AdminDashboardPageTe
     menuTexts,
     archiveTexts,
     archiveTitle: t("archiveTitle"),
+    selectItems: {
+      comment: t("selectItems.comment"),
+      day: t("selectItems.day"),
+      ingredient: t("selectItems.ingredient"),
+      meal: t("selectItems.meal"),
+      plan: t("selectItems.plan"),
+      post: t("selectItems.post"),
+      recipe: t("selectItems.recipe"),
+      user: t("selectItems.user"),
+      all: t("selectItems.all"),
+    },
   };
 }
 
