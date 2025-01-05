@@ -68,7 +68,7 @@ const ToggleDisplayDialog = memo(
       }
     };
 
-    if (!texts) return <LoadingDialogAnchor />;
+    if (!texts) return <LoadingDialogAnchor className="w-full h-full" />;
 
     return (
       <AlertDialog>
@@ -76,6 +76,7 @@ const ToggleDisplayDialog = memo(
           <Button
             variant="outline"
             className={cn(
+              "w-full",
               !model.display
                 ? "border-success text-success"
                 : "border-destructive text-destructive",

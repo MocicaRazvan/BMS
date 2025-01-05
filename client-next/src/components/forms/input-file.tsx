@@ -256,7 +256,7 @@ export default function InputFile<T extends FieldValues>({
                                 damping: 20,
                               }}
                               className={cn(
-                                "relative group-hover/file:shadow-2xl z-40 bg-background supports-[backdrop-filter]:bg-primary/20  flex items-center justify-center h-36 mt-4 w-full max-w-[12rem] mx-auto rounded-md",
+                                "relative group-hover/file:shadow-2xl z-[35] bg-background supports-[backdrop-filter]:bg-primary/20  flex items-center justify-center h-36 mt-4 w-full max-w-[12rem] mx-auto rounded-md",
                                 "shadow-[0px_10px_50px_rgba(0,0,0,0.1)]",
                               )}
                             >

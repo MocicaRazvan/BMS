@@ -127,7 +127,6 @@ export default function SingleTrainerPlanPageContent({
         <div className="flex justify-center items-center w-full gap-2">
           <span>{price} </span>
           <span className="font-bold">
-            {" "}
             {formatIntl.number(plan.price, {
               style: "currency",
               currency: "EUR",
@@ -136,6 +135,7 @@ export default function SingleTrainerPlanPageContent({
           </span>
         </div>
       </div>
+      <div className="md:mt-[-5rem] mt-1.5" />
       <div className="w-3/4 mx-auto flex flex-col md:flex-row items-center justify-between gap-10 md:gap-20 mb-2 ">
         <div className="order-1 flex items-center justify-center gap-3">
           <div className="flex flex-row md:flex-col items-center justify-center gap-4 flex-1">

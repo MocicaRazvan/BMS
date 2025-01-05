@@ -12,6 +12,7 @@ import LoadingSpinner from "@/components/common/loading-spinner";
 import { Suspense } from "react";
 import { Metadata } from "next";
 import { getIntlMetadata } from "@/texts/metadata";
+import ScrollProgress from "@/components/common/scroll-progress";
 
 export interface AdminRecipePageTexts {
   themeSwitchTexts: ThemeSwitchTexts;
@@ -51,6 +52,7 @@ export default async function AdminRecipePage({
         mappingKey: "admin",
       }}
     >
+      <ScrollProgress />
       <div className="w-full bg-background ">
         <Suspense fallback={<LoadingSpinner />}>
           <div className="mt-5">

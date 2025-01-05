@@ -12,6 +12,7 @@ import { getIntlMetadata } from "@/texts/metadata";
 import { ThemeSwitchTexts } from "@/texts/components/nav";
 import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
 import SidebarContentLayout from "@/components/sidebar/sidebar-content-layout";
+import ScrollProgress from "@/components/common/scroll-progress";
 
 interface Props {
   params: { locale: Locale; id: string };
@@ -51,6 +52,7 @@ export default async function SingleTrainerPlanPage({
         mappingKey: "trainer",
       }}
     >
+      <ScrollProgress />
       <div className="w-full bg-background ">
         <Suspense fallback={<LoadingSpinner />}>
           <SingleTrainerPlanPageContent

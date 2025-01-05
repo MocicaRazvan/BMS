@@ -81,7 +81,8 @@ const AlertDialogApprove = memo(
       }
     };
 
-    if (!dialogApproveTexts) return <LoadingDialogAnchor />;
+    if (!dialogApproveTexts)
+      return <LoadingDialogAnchor className="w-full h-full" />;
     return (
       <AlertDialog>
         <AlertDialogTrigger asChild>

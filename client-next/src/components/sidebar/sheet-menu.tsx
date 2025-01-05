@@ -47,7 +47,7 @@ export function SheetMenu({ texts, mappingKey, authUser }: Props) {
           </Button>
         </SheetHeader>
         <Menu
-          isOpen
+          isOpen={true}
           texts={texts}
           mappingKey={mappingKey}
           authUser={authUser}

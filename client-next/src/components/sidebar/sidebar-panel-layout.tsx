@@ -34,7 +34,7 @@ export default function SidebarPanelLayout({
       />
       <main
         className={cn(
-          "min-h-[calc(100vh_-_56px)]  transition-[margin-left] ease-in-out duration-300 overflow-x-hidden",
+          "min-h-[calc(100vh_-_56px)] transition-[margin-left] ease-in-out duration-300 overflow-x-visible",
           !isOpen ? "lg:ml-[90px]" : "lg:ml-72",
         )}
       >

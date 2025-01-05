@@ -90,7 +90,7 @@ export default function UserPlanPageContent({
     VEGETARIAN: "accent",
   };
   return (
-    <section className="w-full mx-auto max-w-[1500px] min-h-[calc(100vh-4rem)] flex-col items-center justify-center transition-all px-1 md:px-6 py-5 relative ">
+    <section className="w-full mx-auto max-w-[1500px] min-h-[calc(100vh-4rem)] flex-col items-center justify-center transition-all px-1 md:px-6  relative ">
       <div
         className="sticky top-[4rem] z-10 shadow-sm p-4 w-[200px] rounded-xl
       bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 overflow-hidden
@@ -100,7 +100,6 @@ export default function UserPlanPageContent({
         <div className="flex justify-center items-center w-full gap-2">
           <span>{price} </span>
           <span className="font-bold">
-            {" "}
             {formatIntl.number(plan.price, {
               style: "currency",
               currency: "EUR",
@@ -122,13 +121,14 @@ export default function UserPlanPageContent({
           </p>
         </div>
       </div>
+      <div className="md:mt-[-5rem] mt-3" />
       <ElementHeader
         elementState={planState}
         isLiked={isLiked}
         isDisliked={isDisliked}
         likesDisabled={true}
         {...elementHeaderTexts}
-      />{" "}
+      />
       {plan?.images.length > 0 && (
         <div className="mt-10">
           <CustomImageCarousel images={plan?.images} />

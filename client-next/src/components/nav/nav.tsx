@@ -84,6 +84,7 @@ export default function Nav({
       className="min-h-10 md:flex items-center justify-between px-2.5 py-2 border-b sticky top-0 bg-opacity-60 z-[49]
     w-full border-border/40 bg-background/95 backdrop-blur
      supports-[backdrop-filter]:bg-background/60 flex-wrap 2xl:border-l 2xl:border-r"
+      id="top-item"
     >
       <div className="hidden xl:flex items-center justify-between w-full">
         <div className="flex items-center justify-center gap-1.5 me-1.5">

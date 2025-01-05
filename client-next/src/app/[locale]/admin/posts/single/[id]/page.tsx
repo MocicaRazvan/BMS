@@ -12,6 +12,7 @@ import SidebarContentLayout from "@/components/sidebar/sidebar-content-layout";
 import { Suspense } from "react";
 import { Metadata } from "next";
 import { getIntlMetadata } from "@/texts/metadata";
+import ScrollProgress from "@/components/common/scroll-progress";
 
 interface Props {
   params: { locale: Locale; id: string };
@@ -49,6 +50,7 @@ export default async function AdminPostPage({ params: { locale, id } }: Props) {
         mappingKey: "admin",
       }}
     >
+      <ScrollProgress />
       <div className="w-full bg-background ">
         <Suspense fallback={<LoadingSpinner />}>
           <div className="mt-5">
