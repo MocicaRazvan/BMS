@@ -1154,7 +1154,7 @@
       },
       "RelativeItemsSummaryTexts": {
         "items": "items",
-        "description": "Total created items on the platform for month: "
+        "description": "Total created items on the platform for this month: "
       },
       "TotalAmountCountOrdersTexts": {
         "type": {
