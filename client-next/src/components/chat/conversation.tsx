@@ -76,9 +76,8 @@ const Conversation = memo(
       [receiver?.connectedChatRoom?.id, sender?.connectedChatRoom?.id],
     );
 
-    const debounceInSameChat = useDebounceWithCallBack(areInTheSameChat, 600);
+    const debounceInSameChat = useDebounceWithCallBack(areInTheSameChat, 1000);
 
-    // todo remove e useless
     const updateMessages = (
       messages: ChatMessageResponse[],
       newMessage: ChatMessageResponse,

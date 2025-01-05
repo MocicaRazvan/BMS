@@ -126,7 +126,7 @@ const ChatRoomItem = memo(
     const notifications = getByReference(room.id);
     const debounceConnectedStatus = useDebounceWithCallBack<
       ConversationUserResponse["connectedStatus"] | undefined
-    >(otherUser?.connectedStatus, 600);
+    >(otherUser?.connectedStatus, 1000);
 
     if (!otherUser) return null;
 
