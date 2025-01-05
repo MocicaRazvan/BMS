@@ -86,7 +86,8 @@ export default function RelativeItem<M extends WithUserDto>({
 }: Props) {
   const currMonth: string = (new Date().getMonth() + 1).toString();
   const currYear: string = new Date().getFullYear().toString();
-  const prevMonth: string = new Date().getMonth().toString();
+  const prevMonth: string =
+    currMonth === "1" ? "12" : new Date().getMonth().toString();
   const prevYear: string =
     currMonth === "1" ? (new Date().getFullYear() - 1).toString() : currYear;
 
