@@ -7,6 +7,7 @@ import com.mocicarazvan.archiveservice.services.BatchNotify;
 import com.mocicarazvan.archiveservice.services.SimpleRedisCache;
 import com.mocicarazvan.archiveservice.utils.MonoWrapper;
 import com.mocicarazvan.archiveservice.websocket.BatchHandler;
+import jakarta.annotation.PreDestroy;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -74,23 +75,23 @@ public class BatchNotifyWS implements BatchNotify {
     private void startScheduledTaskIfNotStarted(String queueName) {
 //        log.info("Sending update global outside count is {}", globalCnt);
         if (scheduledTasks.get(queueName) == null || scheduledTasks.get(queueName).isCancelled()) {
+            PeriodicTrigger trigger = new PeriodicTrigger(Duration.ofSeconds(updatePeriod));
+            trigger.setInitialDelay(Duration.ofSeconds(updatePeriod));
             ScheduledFuture<?> scheduledFuture = taskExecutor.schedule(() -> handleScheduledTask(queueName),
-                    new PeriodicTrigger(Duration.ofSeconds(updatePeriod)));
+                    trigger);
             assert scheduledFuture != null;
             scheduledTasks.put(queueName, scheduledFuture);
         }
     }
 
     private void handleScheduledTask(String queueName) {
-        Long count = queueMap.getOrDefault(queueName, 0L);
-        if (count > 0) {
-            sendUpdateBatchToRedis(queueName, count, false);
-
-        }
+        queueMap.computeIfPresent(queueName, (_, count) -> {
+            if (count > 0L) {
+                sendUpdateBatchToRedis(queueName, count, false);
+            }
+            return 0L;
+        });
         unscheduleQueue(queueName);
-        if (queueMap.getOrDefault(queueName, 0L) > 0) {
-            queueMap.put(queueName, 0L);
-        }
     }
 
     private void unscheduleQueue(String queueName) {
@@ -131,5 +132,15 @@ public class BatchNotifyWS implements BatchNotify {
             scheduledFuture.cancel(true);
             scheduledTasks.remove(queueName);
         }
+    }
+
+    @PreDestroy
+    public void shutdown() {
+        scheduledTasks.values().forEach(task -> {
+            if (!task.isCancelled()) {
+                task.cancel(true);
+            }
+        });
+        scheduledTasks.clear();
     }
 }
