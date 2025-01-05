@@ -1,6 +1,5 @@
 package com.mocicarazvan.templatemodule.services.impl;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mocicarazvan.templatemodule.clients.FileClient;
 import com.mocicarazvan.templatemodule.clients.UserClient;
 import com.mocicarazvan.templatemodule.dtos.files.MetadataDto;
@@ -31,12 +30,10 @@ public abstract class TitleBodyImagesServiceImpl<MODEL extends TitleBodyImages, 
         implements TitleBodyImagesService<MODEL, BODY, RESPONSE, S, M> {
 
     protected final FileClient fileClient;
-    protected final ObjectMapper objectMapper;
 
-    public TitleBodyImagesServiceImpl(S modelRepository, M modelMapper, PageableUtilsCustom pageableUtils, UserClient userClient, String modelName, List<String> allowedSortingFields, EntitiesUtils entitiesUtils, FileClient fileClient, ObjectMapper objectMapper, CR self, RabbitMqUpdateDeleteService<MODEL> rabbitMqUpdateDeleteService) {
+    public TitleBodyImagesServiceImpl(S modelRepository, M modelMapper, PageableUtilsCustom pageableUtils, UserClient userClient, String modelName, List<String> allowedSortingFields, EntitiesUtils entitiesUtils, FileClient fileClient, CR self, RabbitMqUpdateDeleteService<MODEL> rabbitMqUpdateDeleteService) {
         super(modelRepository, modelMapper, pageableUtils, userClient, modelName, allowedSortingFields, entitiesUtils, self, rabbitMqUpdateDeleteService);
         this.fileClient = fileClient;
-        this.objectMapper = objectMapper;
     }
 
 
@@ -88,7 +85,7 @@ public abstract class TitleBodyImagesServiceImpl<MODEL extends TitleBodyImages, 
         metadataDto.setName(fileType.toString() + " " + modelName);
         metadataDto.setFileType(fileType);
         metadataDto.setClientId(clientId);
-        return fileClient.uploadFiles(files, metadataDto, objectMapper);
+        return fileClient.uploadFiles(files, metadataDto);
     }
 
     protected Mono<MODEL> getModelToBeCreatedWithImages(Flux<FilePart> images, BODY body, String userId, String clientId) {

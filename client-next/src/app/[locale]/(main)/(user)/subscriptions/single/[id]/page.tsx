@@ -5,6 +5,7 @@ import { getSingleSubscriptionTexts } from "@/texts/pages";
 import { getUser } from "@/lib/user";
 import { Metadata } from "next";
 import { getIntlMetadata } from "@/texts/metadata";
+import ScrollProgress from "@/components/common/scroll-progress";
 
 interface Props {
   params: { locale: Locale; id: string };
@@ -30,5 +31,10 @@ export default async function SingleSubscriptionPage({
     getUser(),
   ]);
 
-  return <SingleSubscriptionPageContent id={id} authUser={user} {...texts} />;
+  return (
+    <>
+      <ScrollProgress />
+      <SingleSubscriptionPageContent id={id} authUser={user} {...texts} />
+    </>
+  );
 }

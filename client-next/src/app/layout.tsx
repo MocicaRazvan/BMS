@@ -24,6 +24,7 @@ import ValidUserSessionContext from "@/context/valid-user-session";
 import { NotificationPopProvider } from "@/context/notification-pop-context";
 import { AiChatBoxWrapper } from "@/components/ai-chat/ai-chat-box-wrapper";
 import { KanbanRouteChangeProvider } from "@/context/kanban-route-change-context";
+import { NavigationGuardProvider } from "next-navigation-guard";
 
 const fontSans = FontSans({
   subsets: ["latin"],
@@ -82,54 +83,58 @@ export default async function BaseLayout({
             enableSystem
             disableTransitionOnChange
           >
-            <NextAuthSessionProvider>
-              <ScrollTopProvider>
-                <ValidUserSessionContext>
-                  <StompProvider
-                    url={spring + "/ws/ws-service"}
-                    authUser={session?.user}
-                  >
-                    <ChatProvider authUser={session?.user}>
-                      <ChatMessageNotificationProvider authUser={session?.user}>
-                        <PostApproveNotificationProvider
+            <NavigationGuardProvider>
+              <NextAuthSessionProvider>
+                <ScrollTopProvider>
+                  <ValidUserSessionContext>
+                    <StompProvider
+                      url={spring + "/ws/ws-service"}
+                      authUser={session?.user}
+                    >
+                      <ChatProvider authUser={session?.user}>
+                        <ChatMessageNotificationProvider
                           authUser={session?.user}
                         >
-                          <RecipeApproveNotificationProvider
+                          <PostApproveNotificationProvider
                             authUser={session?.user}
                           >
-                            <PlanApproveNotificationProvider
+                            <RecipeApproveNotificationProvider
                               authUser={session?.user}
                             >
-                              <BoughtNotificationProvider
+                              <PlanApproveNotificationProvider
                                 authUser={session?.user}
                               >
-                                <NotificationPopProvider
+                                <BoughtNotificationProvider
                                   authUser={session?.user}
                                 >
-                                  <CartProvider>
-                                    <SubscriptionProvider
-                                      authUser={session?.user}
-                                    >
-                                      <KanbanRouteChangeProvider>
-                                        <>
-                                          {children}
-                                          <AiChatBoxWrapper {...aiTexts} />
-                                        </>
-                                      </KanbanRouteChangeProvider>
-                                    </SubscriptionProvider>
-                                  </CartProvider>
-                                </NotificationPopProvider>
-                              </BoughtNotificationProvider>
-                            </PlanApproveNotificationProvider>
-                          </RecipeApproveNotificationProvider>
-                        </PostApproveNotificationProvider>
-                      </ChatMessageNotificationProvider>
-                    </ChatProvider>
-                  </StompProvider>
-                </ValidUserSessionContext>
-              </ScrollTopProvider>
-            </NextAuthSessionProvider>
-            <Toaster />
+                                  <NotificationPopProvider
+                                    authUser={session?.user}
+                                  >
+                                    <CartProvider>
+                                      <SubscriptionProvider
+                                        authUser={session?.user}
+                                      >
+                                        <KanbanRouteChangeProvider>
+                                          <>
+                                            {children}
+                                            <AiChatBoxWrapper {...aiTexts} />
+                                          </>
+                                        </KanbanRouteChangeProvider>
+                                      </SubscriptionProvider>
+                                    </CartProvider>
+                                  </NotificationPopProvider>
+                                </BoughtNotificationProvider>
+                              </PlanApproveNotificationProvider>
+                            </RecipeApproveNotificationProvider>
+                          </PostApproveNotificationProvider>
+                        </ChatMessageNotificationProvider>
+                      </ChatProvider>
+                    </StompProvider>
+                  </ValidUserSessionContext>
+                </ScrollTopProvider>
+              </NextAuthSessionProvider>
+              <Toaster />
+            </NavigationGuardProvider>
           </ThemeProvider>
         </NextIntlClientProvider>
       </body>

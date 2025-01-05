@@ -8,18 +8,33 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.scheduling.concurrent.SimpleAsyncTaskScheduler;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
 import java.time.Duration;
 
 
 @Configuration
 public class AsyncConfig {
-    @Value("${spring.custom.thread.pool.size:64}")
-    private int threadPoolSize;
+    @Value("${spring.custom.virtual.thread.pool.size:32}")
+    private int virtualThreadPoolSize;
 
-    @Value("${spring.custom.executor.async.concurrency.limit:128}")
+    @Value("${spring.custom.executor.async.concurrency.limit:64}")
     private int executorAsyncConcurrencyLimit;
 
+    @Value("${spring.custom.thread.pool.size:4}")
+    private int threadPoolSize;
+
+    @Bean
+    public ThreadPoolTaskScheduler threadPoolTaskScheduler() {
+        ThreadPoolTaskScheduler threadPoolTaskScheduler = new ThreadPoolTaskScheduler();
+        threadPoolTaskScheduler.setPoolSize(threadPoolSize);
+        threadPoolTaskScheduler.setThreadNamePrefix("ThreadPoolScheduler-");
+        threadPoolTaskScheduler.setRemoveOnCancelPolicy(true);
+        threadPoolTaskScheduler.setWaitForTasksToCompleteOnShutdown(true);
+        threadPoolTaskScheduler.setAwaitTerminationSeconds(20);
+        return threadPoolTaskScheduler;
+
+    }
 
     @Bean
     public SimpleAsyncTaskScheduler containerSimpleAsyncTaskScheduler() {
@@ -40,7 +55,7 @@ public class AsyncConfig {
         return new SimpleAsyncTaskSchedulerBuilder()
                 .virtualThreads(true)
                 .threadNamePrefix("SimpleAsyncTaskSchedulerInstance" + prefix + "-")
-                .concurrencyLimit(threadPoolSize)
+                .concurrencyLimit(virtualThreadPoolSize)
                 .taskTerminationTimeout(Duration.ofSeconds(20))
                 .build();
     }

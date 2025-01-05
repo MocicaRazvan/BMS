@@ -68,9 +68,8 @@ import DiffusionImagesForm, {
   DiffusionImagesFormCallback,
   DiffusionImagesFormTexts,
 } from "@/components/forms/diffusion-images-form";
-import useGetDiffusionImages, {
-  DiffusionCallback,
-} from "@/hoooks/useGetDiffusionImages";
+import useGetDiffusionImages from "@/hoooks/useGetDiffusionImages";
+import { useNavigationGuardI18nForm } from "@/hoooks/use-navigation-guard-i18n-form";
 
 export interface RecipeFormTexts extends SingleChildFormTexts, AITitleBodyForm {
   ingredientQuantitySchemaTexts: IngredientQuantitySchemaTexts;
@@ -185,6 +184,8 @@ export default function RecipeForm({
       })),
     },
   });
+
+  useNavigationGuardI18nForm({ form });
 
   const watchImages = form.watch("images");
   const watchVideos = form.watch("videos");

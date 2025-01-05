@@ -17,14 +17,15 @@ import com.mocicarazvan.templatemodule.hateos.CustomEntityModel;
 import com.mocicarazvan.templatemodule.services.impl.RabbitMqSenderImpl;
 import com.mocicarazvan.templatemodule.utils.RequestsUtils;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.util.Pair;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.codec.multipart.FilePart;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Flux;
@@ -36,7 +37,6 @@ import java.util.stream.IntStream;
 
 @RestController
 @RequestMapping("/posts")
-@RequiredArgsConstructor
 @Slf4j
 public class PostController implements ApproveController
         <Post, PostBody, PostResponse,
@@ -48,6 +48,18 @@ public class PostController implements ApproveController
     private final RequestsUtils requestsUtils;
     private final ObjectMapper objectMapper;
     private final RabbitTemplate rabbitTemplate;
+    private final ThreadPoolTaskScheduler taskScheduler;
+
+    public PostController(PostService postService, PostReactiveResponseBuilder postReactiveResponseBuilder,
+                          RequestsUtils requestsUtils, ObjectMapper objectMapper,
+                          RabbitTemplate rabbitTemplate, @Qualifier("threadPoolTaskScheduler") ThreadPoolTaskScheduler taskScheduler) {
+        this.postService = postService;
+        this.postReactiveResponseBuilder = postReactiveResponseBuilder;
+        this.requestsUtils = requestsUtils;
+        this.objectMapper = objectMapper;
+        this.rabbitTemplate = rabbitTemplate;
+        this.taskScheduler = taskScheduler;
+    }
 
     @Override
     @PatchMapping(value = "/approved", produces = {MediaType.APPLICATION_NDJSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
@@ -272,7 +284,7 @@ public class PostController implements ApproveController
             @RequestParam("clientId") String clientId,
             ServerWebExchange exchange) {
 
-        return requestsUtils.getBodyFromJson(body, PostBody.class, objectMapper)
+        return requestsUtils.getBodyFromJson(body, PostBody.class, objectMapper, taskScheduler)
                 .flatMap(postBody -> postService.createModel(files, postBody, requestsUtils.extractAuthUser(exchange), clientId)
                         .flatMap(m -> postReactiveResponseBuilder.toModel(m, PostController.class)))
 
@@ -290,7 +302,7 @@ public class PostController implements ApproveController
             ServerWebExchange exchange) {
         // getting original approved status of the post
         return
-                requestsUtils.getBodyFromJson(body, PostBody.class, objectMapper)
+                requestsUtils.getBodyFromJson(body, PostBody.class, objectMapper, taskScheduler)
                         .flatMap(postBody -> postService.updateModelWithImagesGetOriginalApproved(files, id, postBody, requestsUtils.extractAuthUser(exchange), clientId)
                                 .flatMap(m -> postReactiveResponseBuilder.toModelWithPair(m, PostController.class))
                                 .map(Pair::getFirst)
@@ -308,9 +320,9 @@ public class PostController implements ApproveController
     @GetMapping("/testQueue")
     public Mono<String> testQueue(@RequestParam(required = false, defaultValue = "100") Integer nr) {
         var sender = new RabbitMqSenderImpl("post-exchange", "post-update-routing-key", rabbitTemplate);
-        var max = Math.ceil(nr / 250.0);
+        var max = Math.ceil(nr / 1000.0);
         IntStream.range(0, (int) max).parallel().forEach(i -> {
-            var posts = IntStream.range(0, 250)
+            var posts = IntStream.range(0, 1000)
                     .mapToObj(j -> Post.builder().id((long) j).title("title" + j)
                             .body("body" + j)
                             .approved(true)

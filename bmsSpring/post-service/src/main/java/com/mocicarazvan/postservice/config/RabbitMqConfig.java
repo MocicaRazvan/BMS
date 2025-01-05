@@ -48,7 +48,7 @@ public class RabbitMqConfig {
     @Value("${post.update.routing.key}")
     private String postUpdateRoutingKey;
 
-    @Value("${spring.custom.rabbit.thread.pool.executorAsyncConcurrencyLimit:128}")
+    @Value("${spring.custom.rabbit.thread.pool.executorAsyncConcurrencyLimit:64}")
     private int executorAsyncConcurrencyLimit;
 
     @Bean

@@ -7,6 +7,7 @@ import { Locale } from "@/navigation";
 import { unstable_setRequestLocale } from "next-intl/server";
 import { Metadata } from "next";
 import { getIntlMetadata } from "@/texts/metadata";
+import ScrollProgress from "@/components/common/scroll-progress";
 
 interface Props {
   params: { locale: Locale; id: string };
@@ -31,6 +32,7 @@ export default async function SinglePostPage({ params: { locale } }: Props) {
   ]);
   return (
     <Suspense fallback={<LoadingSpinner />}>
+      <ScrollProgress />
       <SinglePostPageContent authUser={user} {...singlePostPageTexts} />
     </Suspense>
   );

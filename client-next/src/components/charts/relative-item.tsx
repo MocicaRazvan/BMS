@@ -187,7 +187,7 @@ export default function RelativeItem<M extends WithUserDto>({
   }
 
   return (
-    <Card className="max-w-xs mx-auto shadow h-full">
+    <Card className="max-w-[350px] mx-auto shadow h-full">
       <CardHeader>
         <CardTitle className="capitalize">{type}</CardTitle>
         <CardDescription>{description}</CardDescription>
@@ -338,7 +338,7 @@ export function RelativeItemsSummary({
 
   const chartConfig = getChartConfig(texts);
   return (
-    <Card className="max-w-xs mx-auto shadow h-full overflow-hidden">
+    <Card className="max-w-[350px] mx-auto shadow h-full overflow-hidden">
       <CardHeader>
         <CardTitle className="capitalize">{summaryTexts.items}</CardTitle>
         <CardDescription>{summaryTexts.description}</CardDescription>
@@ -349,7 +349,7 @@ export function RelativeItemsSummary({
         ) : (
           <ChartContainer
             config={chartConfig}
-            className="mx-auto aspect-square   "
+            className="mx-auto aspect-square"
             {...props}
           >
             <PieChart>

@@ -8,6 +8,12 @@
     "description": "Ne pare rău, dar pagina pe care o căutați nu există."
   },
   "zod": {
+    "RegisterSchemaTexts": {
+      "minPassword": "Parola trebuie să aibă cel puțin 8 caractere",
+      "mustLetters": "Parola trebuie să conțină cel puțin o literă",
+      "mustNumbers": "Parola trebuie să conțină cel puțin un număr",
+      "mustSpecial": "Parola trebuie să conțină cel puțin un caracter special"
+    },
     "DiffusionSchemaTexts": {
       "minPrompt": "Promptul trebuie să aibă cel puțin 20 de caractere",
       "maxPrompt": "Promptul trebuie să aibă cel mult 100 de caractere",
@@ -315,7 +321,7 @@
       "firstNameLabel": "Prenume",
       "lastNameLabel": "Nume",
       "emailLabel": "Email",
-      "passwordLabel": "Parolă (Trebuie să aibă cel puțin 4 caractere)",
+      "passwordLabel": "Parolă",
       "confirmPasswordLabel": "Confirmați parola",
       "submitButton": "Înregistrare",
       "loadingButton": "Vă rugăm să așteptați",
@@ -329,6 +335,19 @@
   },
   "components": {
     "forms": {
+      "UseNavigationGuardI18nTexts": {
+        "confirm": "Ați făcut modificări care nu au fost salvate. Sunteți sigur că doriți să părăsiți pagina?"
+      },
+      "PasswordStrengthIndicatorTexts": {
+        "weak": "Slabă",
+        "medium": "Medie",
+        "strong": "Puternică",
+        "strength": "Puterea parolei: ",
+        "hasLetter": "Conține o literă",
+        "hasNumber": "Conține un număr",
+        "hasSpecialChar": "Conține un caracter special",
+        "minLength": "Cel puțin 8 caractere"
+      },
       "DiffusionImagesFormTexts": {
         "toxicError": "Câmpul nu trebuie să conțină limbaj toxic",
         "englishError": "Câmpul trebuie să fie în limba engleză",

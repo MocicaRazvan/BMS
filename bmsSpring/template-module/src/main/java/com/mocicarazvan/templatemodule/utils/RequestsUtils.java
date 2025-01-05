@@ -1,10 +1,11 @@
 package com.mocicarazvan.templatemodule.utils;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mocicarazvan.templatemodule.exceptions.notFound.AuthHeaderNotFound;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -18,14 +19,12 @@ public class RequestsUtils {
         ).orElseThrow(AuthHeaderNotFound::new);
     }
 
-    public <T> Mono<T> getBodyFromJson(String jsonBody, Class<T> clazz, ObjectMapper objectMapper) {
-        T body = null;
-        try {
-            body = objectMapper.readValue(jsonBody, clazz);
-        } catch (JsonProcessingException e) {
-            return Mono.error(e);
-        }
-        return Mono.just(body);
+    public <T> Mono<T> getBodyFromJson(String jsonBody, Class<T> clazz, ObjectMapper objectMapper, ThreadPoolTaskScheduler taskScheduler) {
+
+        return Mono.just(jsonBody)
+                .flatMap(jb -> Mono.fromCallable(() -> objectMapper.readValue(jb, clazz))
+                        .subscribeOn(Schedulers.fromExecutor(taskScheduler.getScheduledExecutor())));
+
     }
 
     public List<Object> getListOfNotNullObjects(Object... objects) {

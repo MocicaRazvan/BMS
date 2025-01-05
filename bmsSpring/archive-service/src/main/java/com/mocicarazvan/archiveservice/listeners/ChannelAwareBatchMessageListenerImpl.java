@@ -3,20 +3,21 @@ package com.mocicarazvan.archiveservice.listeners;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mocicarazvan.archiveservice.config.QueuesPropertiesConfig;
 import com.mocicarazvan.archiveservice.services.SaveMessagesAggregator;
+import com.mocicarazvan.archiveservice.utils.MonoWrapper;
 import com.rabbitmq.client.Channel;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.listener.api.ChannelAwareBatchMessageListener;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
 
 import java.io.IOException;
 import java.time.Duration;
 import java.util.List;
 
-@RequiredArgsConstructor
 @Slf4j
 public class ChannelAwareBatchMessageListenerImpl<T> implements ChannelAwareBatchMessageListener {
 
@@ -25,6 +26,19 @@ public class ChannelAwareBatchMessageListenerImpl<T> implements ChannelAwareBatc
     private final String queueName;
     private final SaveMessagesAggregator saveMessagesAggregator;
     private final QueuesPropertiesConfig queuesPropertiesConfig;
+    private final Scheduler scheduler;
+
+    public ChannelAwareBatchMessageListenerImpl(ObjectMapper objectMapper,
+                                                Class<T> clazz, String queueName, SaveMessagesAggregator saveMessagesAggregator,
+                                                QueuesPropertiesConfig queuesPropertiesConfig,
+                                                ThreadPoolTaskScheduler threadPoolTaskScheduler) {
+        this.objectMapper = objectMapper;
+        this.clazz = clazz;
+        this.queueName = queueName;
+        this.saveMessagesAggregator = saveMessagesAggregator;
+        this.queuesPropertiesConfig = queuesPropertiesConfig;
+        this.scheduler = Schedulers.fromExecutor(threadPoolTaskScheduler);
+    }
 
 
     @Override
@@ -34,7 +48,9 @@ public class ChannelAwareBatchMessageListenerImpl<T> implements ChannelAwareBatc
 //        log.info("Thread name is {} and virtual thread is {}", Thread.currentThread().getName(), Thread.currentThread().isVirtual());
         try {
             Flux.fromIterable(messages)
-                    .map(this::deserializeMessage)
+                    .flatMap(m -> Mono.fromCallable(() -> deserializeMessage(m)
+                            ).subscribeOn(scheduler)
+                    )
                     .bufferTimeout(queuesPropertiesConfig.getBatchSize(), Duration.ofSeconds(queuesPropertiesConfig.getSavingBufferSeconds()))
                     .flatMap(this::sendBatchToBeSaved)
                     .doOnError(e -> {
@@ -71,13 +87,7 @@ public class ChannelAwareBatchMessageListenerImpl<T> implements ChannelAwareBatc
                 Mono.fromCallable(() -> {
                             saveMessagesAggregator.getSaveBatchMessages().saveBatch(batch, queueName);
                             return null;
-                        }).subscribeOn(Schedulers.boundedElastic())
-
-                        .doOnSuccess(ignored ->
-                                {
-//                                    log.info("Saved {} messages to disk for queue {}", batch.size(), queueName);
-                                }
-                        )
+                        })
                         .then();
     }
 
@@ -90,12 +100,14 @@ public class ChannelAwareBatchMessageListenerImpl<T> implements ChannelAwareBatc
     }
 
     private void acknowledgeBatch(List<Message> messages, Channel channel) {
-        try {
-            long lastDeliveryTag = messages.getLast().getMessageProperties().getDeliveryTag();
-            channel.basicAck(lastDeliveryTag, true);
+        MonoWrapper.wrapBlockingFunction(() -> {
+            try {
+                long lastDeliveryTag = messages.getLast().getMessageProperties().getDeliveryTag();
+                channel.basicAck(lastDeliveryTag, true);
 //            log.info("Acknowledged messages up to {}", lastDeliveryTag);
-        } catch (Exception e) {
-            log.error("Error acknowledging messages: {}", e.getMessage());
-        }
+            } catch (Exception e) {
+                log.error("Error acknowledging messages: {}", e.getMessage());
+            }
+        });
     }
 }

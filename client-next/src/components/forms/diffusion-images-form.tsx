@@ -37,6 +37,7 @@ import ButtonSubmit, {
   ButtonSubmitTexts,
 } from "@/components/forms/button-submit";
 import { cn } from "@/lib/utils";
+import { useNavigationGuardI18nForm } from "@/hoooks/use-navigation-guard-i18n-form";
 
 export type DiffusionImagesFormCallback = (
   images: DiffusionSchemaType,
@@ -90,6 +91,8 @@ export default function DiffusionImagesForm({
       numImages: 1,
     },
   });
+
+  useNavigationGuardI18nForm({ form });
 
   const handleToxic = useCallback(
     async (

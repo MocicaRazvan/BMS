@@ -102,7 +102,7 @@ export default function SingIn({
   };
 
   return (
-    <main className="w-full min-h-[calc(100vh-4rem)] flex items-center justify-center transition-all">
+    <main className="w-full min-h-[calc(100vh-4rem)] flex items-center justify-center transition-all pt-5">
       <Card className="w-[500px]">
         <CardHeader>
           <CardTitle className="text-center">{cardTitle}</CardTitle>

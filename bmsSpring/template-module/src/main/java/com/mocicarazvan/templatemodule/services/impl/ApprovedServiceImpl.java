@@ -1,6 +1,5 @@
 package com.mocicarazvan.templatemodule.services.impl;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mocicarazvan.templatemodule.clients.FileClient;
 import com.mocicarazvan.templatemodule.clients.UserClient;
 import com.mocicarazvan.templatemodule.dtos.PageableBody;
@@ -45,8 +44,8 @@ public abstract class ApprovedServiceImpl<MODEL extends Approve, BODY extends Ti
 
     protected final RabbitMqApprovedSender<RESPONSE> rabbitMqApprovedSender;
 
-    public ApprovedServiceImpl(S modelRepository, M modelMapper, PageableUtilsCustom pageableUtils, UserClient userClient, String modelName, List<String> allowedSortingFields, EntitiesUtils entitiesUtils, FileClient fileClient, ObjectMapper objectMapper, RabbitMqApprovedSender<RESPONSE> rabbitMqApprovedSender, CR self, RabbitMqUpdateDeleteService<MODEL> rabbitMqUpdateDeleteService) {
-        super(modelRepository, modelMapper, pageableUtils, userClient, modelName, allowedSortingFields, entitiesUtils, fileClient, objectMapper, self, rabbitMqUpdateDeleteService);
+    public ApprovedServiceImpl(S modelRepository, M modelMapper, PageableUtilsCustom pageableUtils, UserClient userClient, String modelName, List<String> allowedSortingFields, EntitiesUtils entitiesUtils, FileClient fileClient, RabbitMqApprovedSender<RESPONSE> rabbitMqApprovedSender, CR self, RabbitMqUpdateDeleteService<MODEL> rabbitMqUpdateDeleteService) {
+        super(modelRepository, modelMapper, pageableUtils, userClient, modelName, allowedSortingFields, entitiesUtils, fileClient, self, rabbitMqUpdateDeleteService);
         this.rabbitMqApprovedSender = rabbitMqApprovedSender;
     }
 

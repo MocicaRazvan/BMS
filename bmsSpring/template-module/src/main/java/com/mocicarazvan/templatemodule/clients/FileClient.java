@@ -1,7 +1,5 @@
 package com.mocicarazvan.templatemodule.clients;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mocicarazvan.templatemodule.dtos.files.GridIdsDto;
 import com.mocicarazvan.templatemodule.dtos.files.MetadataDto;
 import com.mocicarazvan.templatemodule.dtos.response.FileUploadResponse;
@@ -38,18 +36,14 @@ public class FileClient extends ClientBase {
         super(service, webClientBuilder, circuitBreakerRegistry, retryRegistry, rateLimiterRegistry);
     }
 
-    public Mono<FileUploadResponse> uploadFiles(Flux<FilePart> files, MetadataDto metadata, ObjectMapper objectMapper) {
+    public Mono<FileUploadResponse> uploadFiles(Flux<FilePart> files, MetadataDto metadata) {
         return files.collectList().flatMap(fileParts -> {
             MultipartBodyBuilder bodyBuilder = new MultipartBodyBuilder();
             fileParts.forEach(filePart -> bodyBuilder.part("files", filePart)
                     .contentType(MediaType.APPLICATION_OCTET_STREAM)
                     .filename(filePart.filename()));
-            try {
-                String metadataJson = objectMapper.writeValueAsString(metadata);
-                bodyBuilder.part("metadata", metadataJson);
-            } catch (JsonProcessingException e) {
-                return Mono.error(e);
-            }
+            bodyBuilder.part("metadata", metadata);
+
 
             return getClient()
                     .post()

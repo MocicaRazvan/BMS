@@ -31,6 +31,7 @@ import { EmailRequest } from "@/types/dto";
 import { fetchStream } from "@/hoooks/fetchStream";
 import { toast } from "@/components/ui/use-toast";
 import { handleBaseError } from "@/lib/utils";
+import { useNavigationGuardI18nForm } from "@/hoooks/use-navigation-guard-i18n-form";
 
 export interface AdminEmailTexts {
   adminEmailSchemaTexts: AdminEmailSchemaTexts;
@@ -49,23 +50,23 @@ export interface AdminEmailTexts {
 }
 
 const render = (value: string) => `
-  <table align="center" width="100%" border="0" cellPadding="0" cellSpacing="0" role="presentation" style="max-width:37.5em;padding-top:1.25rem;padding-bottom:1.25rem">
+  <table align="center" width="100%" border="0" cellPadding="0" cellSpacing="0" role="presentation" style="max-width:45em;padding-top:1.5rem;padding-bottom:1.5rem">
     <tbody>
       <tr style="width:100%">
         <td>
-          <table align="center" width="100%" class="bg-backround" border="0" cellPadding="0" cellSpacing="0" role="presentation" style="max-width:37.5em;box-shadow:0 0 #0000, 0 0 #0000, 0 20px 25px -5px rgb(0,0,0,0.1), 0 8px 10px -6px rgb(0,0,0,0.1);border-radius:0.25rem">
+          <table align="center" width="100%" class="bg-backround" border="0" cellPadding="0" cellSpacing="0" role="presentation" style="max-width:45em;box-shadow:0 0 #0000, 0 0 #0000, 0 20px 25px -5px rgb(0,0,0,0.1), 0 8px 10px -6px rgb(0,0,0,0.1);border-radius:0.25rem">
             <tbody>
               <tr style="width:100%">
                 <td>
-                  <table align="center" width="100%" border="0" cellPadding="0" cellSpacing="0" role="presentation" style="height:100px;background-color:rgb(148,163,184);border-top-left-radius:0.25rem;border-top-right-radius:0.25rem;padding: 1.25rem;color: #000000;">
+                  <table align="center" width="100%" border="0" cellPadding="0" cellSpacing="0" role="presentation" style="height:120px;background-color:rgb(148,163,184);border-top-left-radius:0.25rem;border-top-right-radius:0.25rem;padding: 1.5rem;color: #000000;">
                     <tbody>
                       <tr>
                         <td style="padding-left: 20px ; padding-right: 20px">
                           <table align="center" width="100%" border="0" cellPadding="0" cellSpacing="0" role="presentation" style="width:100%">
                             <tbody style="width:100%">
                               <tr style="width:100%" class="flex w-full items-center justify-between">
-                                <td data-id="__react-email-column" style="text-align:start; color: #000000;"><a href="https://example.com" target="_blank" style="font-size:1.5rem;line-height:2rem;font-weight:700;letter-spacing:-0.05em;margin-right:1rem;text-decoration-line:none;color:inherit">Bro Meets Science</a></td>
-                                <td data-id="__react-email-column" style="text-align:end; padding-left: 20px"><img src="https://res.cloudinary.com/lamatutorial/image/upload/v1722269171/logo_i2scwt_2_we0jmo.png" alt="Logo" width="80" height="80"  /></td>
+                                <td data-id="__react-email-column" style="text-align:start; color: #000000;"><a href="https://example.com" target="_blank" style="font-size:2rem;line-height:2.5rem;font-weight:700;letter-spacing:-0.05em;margin-right:1rem;text-decoration-line:none;color:inherit">Bro Meets Science</a></td>
+                                <td data-id="__react-email-column" style="text-align:end; padding-left: 20px"><img src="https://res.cloudinary.com/lamatutorial/image/upload/v1722269171/logo_i2scwt_2_we0jmo.png" alt="Logo" width="100" height="100"  /></td>
                               </tr>
                             </tbody>
                           </table>
@@ -73,18 +74,18 @@ const render = (value: string) => `
                       </tr>
                     </tbody>
                   </table>
-                  <table align="center" width="100%" class="space-y-2" border="0" cellPadding="0" cellSpacing="0" role="presentation" style="max-width:37.5em;margin-top:2.5rem;margin-bottom:2.5rem;padding-left:0.5rem;padding-right:0.5rem;color: #000000;">
+                  <table align="center" width="100%" class="space-y-2" border="0" cellPadding="0" cellSpacing="0" role="presentation" style="max-width:45em;margin-top:3rem;margin-bottom:3rem;padding-left:1rem;padding-right:1rem;color: #000000;">
                     <tbody>
                       <tr style="width:100%">
-                        <td style="padding: 1rem;">${value}</td>
+                        <td style="padding: 1.5rem; font-size:18px; line-height:28px;">${value}</td>
                       </tr>
                     </tbody>
                   </table>
-                  <table align="center" width="100%" border="0" cellPadding="0" cellSpacing="0" role="presentation" style="height:50px;background-color:rgb(148,163,184);border-bottom-right-radius:0.25rem;border-bottom-left-radius:0.25rem;padding: 1.25rem;color: #000000;">
+                  <table align="center" width="100%" border="0" cellPadding="0" cellSpacing="0" role="presentation" style="height:60px;background-color:rgb(148,163,184);border-bottom-right-radius:0.25rem;border-bottom-left-radius:0.25rem;padding: 1.5rem;color: #000000;">
                     <tbody>
                       <tr>
                         <td style="padding-left: 20px ; padding-right: 20px">
-                          <p style="font-size:17px;line-height:24px;margin:16px 0;text-align:center;color: #000000;">For any information, please contact us at <a href="mailto:razvanmocica@gmail.com" style="font-weight:700;letter-spacing:-0.05em;text-decoration-line:none;color:inherit">razvanmocica@gmail.com</a></p>
+                          <p style="font-size:18px;line-height:26px;margin:18px 0;text-align:center;color: #000000;">For any information, please contact us at <a href="mailto:razvanmocica@gmail.com" style="font-weight:700;letter-spacing:-0.05em;text-decoration-line:none;color:inherit">razvanmocica@gmail.com</a></p>
                         </td>
                       </tr>
                     </tbody>
@@ -129,6 +130,8 @@ export default function AdminEmail({
     },
   });
 
+  useNavigationGuardI18nForm({ form });
+
   const onSubmit = useCallback(
     async (data: AdminEmailSchemaType) => {
       setIsLoading(true);
@@ -168,9 +171,6 @@ export default function AdminEmail({
 
   return (
     <Card className="max-w-7xl w-full sm:px-2 md:px-5 py-6 border-0 mx-auto">
-      {/*<CardTitle className="font-bold text-2xl text-center capitalize">*/}
-      {/*  {title}*/}
-      {/*</CardTitle>*/}
       <CardContent>
         <Form {...form}>
           <form
@@ -228,7 +228,7 @@ export default function AdminEmail({
                 </FormItem>
               )}
             />
-            <div className="space-y-2">
+            <div className="space-y-6">
               <p className="font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-lg capitalize">
                 {preview}
               </p>

@@ -1,7 +1,6 @@
 package com.mocicarazvan.postservice.services.impl;
 
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mocicarazvan.postservice.clients.CommentClient;
 import com.mocicarazvan.postservice.dtos.PostBody;
 import com.mocicarazvan.postservice.dtos.PostResponse;
@@ -53,9 +52,9 @@ public class PostServiceImpl extends ApprovedServiceImpl<Post, PostBody, PostRes
     private final PostEmbedServiceImpl postEmbedServiceImpl;
 
 
-    public PostServiceImpl(PostRepository modelRepository, PostMapper modelMapper, PageableUtilsCustom pageableUtils, UserClient userClient, EntitiesUtils entitiesUtils, FileClient fileClient, ObjectMapper objectMapper, CommentClient commentClient, PostExtendedRepository postExtendedRepository, RabbitMqApprovedSender<PostResponse> rabbitMqSender, PostServiceRedisCacheWrapper self, TransactionalOperator transactionalOperator, PostEmbedServiceImpl postEmbedServiceImpl, RabbitMqUpdateDeleteService<Post> rabbitMqUpdateDeleteService) {
+    public PostServiceImpl(PostRepository modelRepository, PostMapper modelMapper, PageableUtilsCustom pageableUtils, UserClient userClient, EntitiesUtils entitiesUtils, FileClient fileClient, CommentClient commentClient, PostExtendedRepository postExtendedRepository, RabbitMqApprovedSender<PostResponse> rabbitMqSender, PostServiceRedisCacheWrapper self, TransactionalOperator transactionalOperator, PostEmbedServiceImpl postEmbedServiceImpl, RabbitMqUpdateDeleteService<Post> rabbitMqUpdateDeleteService) {
         super(modelRepository, modelMapper, pageableUtils, userClient, "post", List.of("id", "userId", "title", "createdAt", "updatedAt", "approved"),
-                entitiesUtils, fileClient, objectMapper, rabbitMqSender, self, rabbitMqUpdateDeleteService
+                entitiesUtils, fileClient, rabbitMqSender, self, rabbitMqUpdateDeleteService
         );
         this.commentClient = commentClient;
         this.postExtendedRepository = postExtendedRepository;

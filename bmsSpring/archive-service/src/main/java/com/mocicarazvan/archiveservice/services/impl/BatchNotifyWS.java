@@ -1,11 +1,11 @@
 package com.mocicarazvan.archiveservice.services.impl;
 
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mocicarazvan.archiveservice.config.QueuesPropertiesConfig;
 import com.mocicarazvan.archiveservice.dtos.websocket.NotifyBatchUpdate;
 import com.mocicarazvan.archiveservice.services.BatchNotify;
 import com.mocicarazvan.archiveservice.services.SimpleRedisCache;
+import com.mocicarazvan.archiveservice.utils.MonoWrapper;
 import com.mocicarazvan.archiveservice.websocket.BatchHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -28,24 +28,23 @@ import java.util.concurrent.ScheduledFuture;
 @Service
 public class BatchNotifyWS implements BatchNotify {
 
-    private final ObjectMapper objectMapper;
-    private final ReactiveRedisTemplate<String, String> redisTemplate;
+    private final ReactiveRedisTemplate<String, Object> redisTemplate;
     private final ConcurrentHashMap<String, Long> queueMap;
     private final ConcurrentHashMap<String, ScheduledFuture<?>> scheduledTasks;
     private final ConcurrentHashMap<String, Instant> lastReceived;
     private final SimpleAsyncTaskScheduler taskExecutor;
     private final SimpleRedisCache simpleRedisCache;
-//    private final AtomicLong globalCnt = new AtomicLong(0);
 
     @Value("${spring.custom.batch.notify.timeout:15}")
     private int notifyTimeout;
 
-    @Value("${spring.custom.bath.update.period:3}")
+    @Value("${spring.custom.batch.update.period:3}")
     private int updatePeriod;
 
 
-    public BatchNotifyWS(ObjectMapper objectMapper, ReactiveRedisTemplate<String, String> redisTemplate, QueuesPropertiesConfig queuesPropertiesConfig, @Qualifier("redisSimpleAsyncTaskScheduler") SimpleAsyncTaskScheduler taskExecutor, SimpleRedisCache simpleRedisCache) {
-        this.objectMapper = objectMapper;
+    public BatchNotifyWS(ReactiveRedisTemplate<String, Object> redisTemplate, QueuesPropertiesConfig queuesPropertiesConfig,
+                         @Qualifier("redisSimpleAsyncTaskScheduler") SimpleAsyncTaskScheduler taskExecutor,
+                         SimpleRedisCache simpleRedisCache) {
         this.redisTemplate = redisTemplate;
         this.taskExecutor = taskExecutor;
         this.queueMap = new ConcurrentHashMap<>(
@@ -63,14 +62,12 @@ public class BatchNotifyWS implements BatchNotify {
     @Override
     public <T> void notifyBatchUpdate(List<T> items, String queueName) {
 
-//        queueMap.put(queueName, queueMap.getOrDefault(queueName, 0L) + items.size());
+        MonoWrapper.wrapBlockingFunction(() -> {
+            queueMap.merge(queueName, (long) items.size(), Long::sum);
+            lastReceived.put(queueName, Instant.now());
 
-        queueMap.merge(queueName, (long) items.size(), Long::sum);
-        lastReceived.put(queueName, Instant.now());
-
-        startScheduledTaskIfNotStarted(queueName);
-//        log.info("Sending update global notifyBatchUpdate count is {}", globalCnt);
-
+            startScheduledTaskIfNotStarted(queueName);
+        });
     }
 
 
@@ -87,8 +84,6 @@ public class BatchNotifyWS implements BatchNotify {
     private void handleScheduledTask(String queueName) {
         Long count = queueMap.getOrDefault(queueName, 0L);
         if (count > 0) {
-//                    globalCnt.addAndGet(count);
-//                    log.info("Sending update global sending count is {}", globalCnt);
             sendUpdateBatchToRedis(queueName, count, false);
 
         }
@@ -105,7 +100,6 @@ public class BatchNotifyWS implements BatchNotify {
             queueMap.put(queueName, 0L);
             stopScheduledTask(queueName);
             sendUpdateBatchToRedis(queueName, 0L, true);
-//            globalCnt.set(0);
             log.info("Stopped task for queue {}", queueName);
 
         }
@@ -115,18 +109,19 @@ public class BatchNotifyWS implements BatchNotify {
         try {
             Mono.zip(simpleRedisCache.evictCachedValue(queueName),
                             redisTemplate.convertAndSend(BatchHandler.getChannelName(),
-                                    objectMapper.writeValueAsString(NotifyBatchUpdate.builder()
+                                    NotifyBatchUpdate.builder()
                                             .numberProcessed(count)
                                             .queueName(queueName)
                                             .id(UUID.randomUUID().toString())
                                             .timestamp(LocalDateTime.now())
                                             .finished(finished)
-                                            .build())))
+                                            .build()))
                     .subscribe();
-//            log.info("Sending update global count in redis is {}", globalCnt);
         } catch (Exception e) {
             throw new RuntimeException("Error sending message to redis", e);
         }
+
+
     }
 
 

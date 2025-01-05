@@ -63,6 +63,7 @@ import { toast } from "@/components/ui/use-toast";
 import { useRouter } from "@/navigation";
 import { AiIdeasField } from "@/types/ai-ideas-types";
 import useBaseAICallbackTitleBody from "@/hoooks/useBaseAICallbackTitleBody";
+import { useNavigationGuardI18nForm } from "@/hoooks/use-navigation-guard-i18n-form";
 
 export interface DayFromTexts extends SingleMealTexts, AITitleBodyForm {
   titleBodyTexts: TitleBodyTexts;
@@ -195,6 +196,9 @@ export default function DayForm({
       title: existingDay?.title || "",
     },
   });
+
+  useNavigationGuardI18nForm({ form });
+
   const watchTitle = form.watch("title");
   const watchBody = form.watch("body");
   const watchType = form.watch("type");

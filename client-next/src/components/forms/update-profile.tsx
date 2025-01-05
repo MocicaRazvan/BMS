@@ -25,6 +25,7 @@ import { useSession } from "next-auth/react";
 import { fetchWithFiles } from "@/hoooks/fetchWithFiles";
 import { CustomEntityModel, UserBody, UserDto } from "@/types/dto";
 import { BaseError } from "@/types/responses";
+import { useNavigationGuardI18nForm } from "@/hoooks/use-navigation-guard-i18n-form";
 
 interface Props extends WithUser, UpdateProfileTexts {
   successCallback: (userDto: UserDto) => void;
@@ -58,6 +59,8 @@ export default function UpdateProfile({
       image: [],
     },
   });
+
+  useNavigationGuardI18nForm({ form });
 
   const onSubmit = useCallback(
     async (data: UpdateProfileType) => {

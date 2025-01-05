@@ -9,6 +9,7 @@ import com.mocicarazvan.templatemodule.dtos.response.ResponseWithUserDto;
 import com.mocicarazvan.templatemodule.enums.ApprovedNotificationType;
 import com.mocicarazvan.templatemodule.services.RabbitMqApprovedSender;
 import com.mocicarazvan.templatemodule.services.RabbitMqSender;
+import com.mocicarazvan.templatemodule.utils.MonoWrapper;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
@@ -23,31 +24,32 @@ public class RabbitMqApprovedSenderImpl<T extends ApproveDto> implements RabbitM
 
 
     @Override
-    public Void sendMessage(boolean approved, ResponseWithUserDto<T> model, UserDto authUser) {
-        try {
+    public void sendMessage(boolean approved, ResponseWithUserDto<T> model, UserDto authUser) {
+        MonoWrapper.wrapBlockingFunction(() -> {
+            try {
 
-            rabbitMqSender.sendMessage(
-                    ApproveNotificationBody.builder()
-                            .senderEmail(authUser.getEmail())
-                            .receiverEmail(model.getUser().getEmail())
-                            .type(approved ? ApprovedNotificationType.APPROVED : ApprovedNotificationType.DISAPPROVED)
-                            .referenceId(model.getModel().getId())
-                            .content(
-                                    objectMapper.writeValueAsString(
-                                            RMQContent.builder()
-                                                    .title(model.getModel().getTitle())
-                                                    .build()
-                                    )
-                            )
-                            .extraLink(extraLink + model.getModel().getId())
-                            .build()
-            );
-        } catch (JsonProcessingException e) {
-            log.error("Error sending message to rabbitmq: {}", e.getMessage());
-            e.printStackTrace();
-            throw new RuntimeException("Error sending message to rabbitmq", e);
-        }
-        return null;
+                rabbitMqSender.sendMessage(
+                        ApproveNotificationBody.builder()
+                                .senderEmail(authUser.getEmail())
+                                .receiverEmail(model.getUser().getEmail())
+                                .type(approved ? ApprovedNotificationType.APPROVED : ApprovedNotificationType.DISAPPROVED)
+                                .referenceId(model.getModel().getId())
+                                .content(
+                                        objectMapper.writeValueAsString(
+                                                RMQContent.builder()
+                                                        .title(model.getModel().getTitle())
+                                                        .build()
+                                        )
+                                )
+                                .extraLink(extraLink + model.getModel().getId())
+                                .build()
+                );
+            } catch (JsonProcessingException e) {
+                log.error("Error sending message to rabbitmq: {}", e.getMessage());
+                e.printStackTrace();
+                throw new RuntimeException("Error sending message to rabbitmq", e);
+            }
+        });
     }
 
     @Data

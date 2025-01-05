@@ -1,14 +1,17 @@
 package com.mocicarazvan.templatemodule.services.impl;
 
 import com.mocicarazvan.templatemodule.services.RabbitMqSender;
+import com.mocicarazvan.templatemodule.utils.MonoWrapper;
 import lombok.Builder;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 
 import java.util.List;
 
 @RequiredArgsConstructor
 @Builder
+@Slf4j
 public class RabbitMqSenderImpl implements RabbitMqSender {
 
     private final String exchangeName;
@@ -16,14 +19,14 @@ public class RabbitMqSenderImpl implements RabbitMqSender {
     private final RabbitTemplate rabbitTemplate;
 
     public <T> void sendMessage(T message) {
-        if (message == null) {
-            throw new IllegalArgumentException("Message cannot be null");
-        }
-        checkArgs();
-        rabbitTemplate.convertAndSend(exchangeName, routingKey, message);
+        checkArgs(List.of(message));
+        MonoWrapper.wrapBlockingFunction(() -> rabbitTemplate.convertAndSend(exchangeName, routingKey, message));
     }
 
-    private void checkArgs() {
+    private <T> void checkArgs(List<T> messages) {
+        if (messages == null || messages.isEmpty()) {
+            throw new IllegalArgumentException("Message cannot be null or empty");
+        }
         if (exchangeName == null || exchangeName.isEmpty()) {
             throw new IllegalArgumentException("Exchange name cannot be null or empty");
         }
@@ -33,17 +36,13 @@ public class RabbitMqSenderImpl implements RabbitMqSender {
     }
 
     @Override
-    public <T> void sendBatchMessage(List<T> message) {
-        checkArgs();
-        if (message == null || message.isEmpty()) {
-            throw new IllegalArgumentException("Message cannot be null or empty");
-        }
-
-        rabbitTemplate.invoke(rabbitOperations -> {
-            message.parallelStream()
+    public <T> void sendBatchMessage(List<T> messages) {
+        checkArgs(messages);
+        MonoWrapper.wrapBlockingFunction(() -> rabbitTemplate.invoke(rabbitOperations -> {
+            messages.parallelStream()
                     .forEach(m -> rabbitOperations.convertAndSend(exchangeName, routingKey, m));
-            return null;
-        });
+            return true;
+        }));
     }
 
 }

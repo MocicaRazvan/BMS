@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 
 @Slf4j
@@ -20,20 +21,26 @@ public class EmailUtilsImpl implements EmailUtils {
 
     @Override
     public Mono<Void> sendEmail(String to, String subject, String content) {
-        return Mono.defer(() -> {
-            try {
-                MimeMessage mimeMessage = mailSender.createMimeMessage();
-                MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true);
-                helper.setTo(to);
-                helper.setSubject(subject);
-                helper.setText(content, true);
-                mailSender.send(mimeMessage);
-                log.info("Email sent to: " + to);
-                return Mono.empty();
-            } catch (Exception ex) {
-                log.error("Error sending email to: " + to, ex);
-                return Mono.error(ex);
-            }
-        });
+        return
+                Mono.just(true)
+                        .flatMap(_ ->
+                                Mono.fromCallable(() -> {
+                                            try {
+                                                MimeMessage mimeMessage = mailSender.createMimeMessage();
+                                                MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true);
+                                                helper.setTo(to);
+                                                helper.setSubject(subject);
+                                                helper.setText(content, true);
+                                                mailSender.send(mimeMessage);
+                                                log.info("Email sent to: " + to);
+                                                return Mono.empty();
+                                            } catch (Exception ex) {
+                                                log.error("Error sending email to: " + to, ex);
+                                                return Mono.error(ex);
+                                            }
+                                        })
+                                        .subscribeOn(Schedulers.boundedElastic())
+                        )
+                        .then();
     }
 }

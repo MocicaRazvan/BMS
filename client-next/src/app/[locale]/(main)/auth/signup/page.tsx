@@ -4,6 +4,7 @@ import { LocaleProps } from "@/navigation";
 import SignUp from "@/app/[locale]/(main)/auth/signup/page-content";
 import { Metadata } from "next";
 import { getIntlMetadata } from "@/texts/metadata";
+import { getPasswordStrengthIndicatorTexts } from "@/texts/components/forms";
 
 export async function generateMetadata({
   params: { locale },
@@ -16,10 +17,13 @@ export default async function SignUpPageWrapper({
   params: { locale },
 }: LocaleProps) {
   unstable_setRequestLocale(locale);
-  const [t, registrationSchemaTexts] = await Promise.all([
-    getTranslations("auth.SignUpPageText"),
-    getRegistrationSchemaTexts(),
-  ]);
+  const [t, registrationSchemaTexts, passwordStrengthTexts] = await Promise.all(
+    [
+      getTranslations("auth.SignUpPageText"),
+      getRegistrationSchemaTexts(),
+      getPasswordStrengthIndicatorTexts(),
+    ],
+  );
   return (
     <SignUp
       cardTitle={t("cardTitle")}
@@ -33,6 +37,7 @@ export default async function SignUpPageWrapper({
       firstNameLabel={t("firstNameLabel")}
       lastNameLabel={t("lastNameLabel")}
       registrationSchemaTexts={registrationSchemaTexts}
+      passwordStrengthTexts={passwordStrengthTexts}
     />
   );
 }

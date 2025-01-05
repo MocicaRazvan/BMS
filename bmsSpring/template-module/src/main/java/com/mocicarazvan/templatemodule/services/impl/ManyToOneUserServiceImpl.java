@@ -24,7 +24,6 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.util.function.Tuple2;
 
 import java.time.LocalDateTime;
 import java.time.YearMonth;
@@ -178,11 +177,8 @@ public abstract class ManyToOneUserServiceImpl<MODEL extends ManyToOneUser, BODY
                                     } else {
 
                                         return
-                                                Mono.zip(Mono.fromRunnable(() ->
-                                                                rabbitMqUpdateDeleteService.sendUpdateMessage(cloneModel(model))
-
-                                                        ).thenReturn(true), successCallback.apply(model))
-                                                        .map(Tuple2::getT2);
+                                                successCallback.apply(model)
+                                                        .doOnSuccess(_ -> rabbitMqUpdateDeleteService.sendUpdateMessage(cloneModel(model)));
 
 
                                     }

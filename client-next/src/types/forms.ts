@@ -100,20 +100,6 @@ export const getSignInSchema = ({ minPassword, email }: SignInSchemaTexts) =>
     })
     .and(getEmailSchema({ email }));
 
-// export const getI18nSignInSchema = async () => {
-//   const [tE, tS] = await Promise.all([
-//     getTranslations("zod.EmailSchemaTexts"),
-//     getTranslations("zod.SignInSchemaTexts"),
-//   ]);
-//
-//   return zerialize(
-//     getSignInSchema({
-//       email: tE("email"),
-//       minPassword: tS("minPassword"),
-//     }),
-//   );
-// };
-
 export const getSignInSchemaTexts = async (): Promise<SignInSchemaTexts> => {
   const [emailTexts, signInTexts] = await Promise.all([
     getEmailSchemaTexts(),
@@ -155,10 +141,15 @@ export const getUpdateProfileSchema = ({
 // };
 
 export interface RegisterSchemaTexts
-  extends SignInSchemaTexts,
+  extends EmailSchemaTexts,
     UpdateProfileSchemaTexts,
     ResetPasswordSchemaTexts,
-    ResetPasswordSchemaTexts {}
+    ResetPasswordSchemaTexts {
+  minPassword: string;
+  mustLetters: string;
+  mustNumbers: string;
+  mustSpecial: string;
+}
 
 export const getRegistrationSchema = ({
   minPassword,
@@ -167,14 +158,25 @@ export const getRegistrationSchema = ({
   minFirstName,
   minImage,
   email,
+  mustLetters,
+  mustSpecial,
+  mustNumbers,
 }: RegisterSchemaTexts) =>
   z
     .object({
-      // firstName: z.string().min(2, "First name must be at least 2 characters"),
-      // lastName: z.string().min(2, "Last name must be at least 2 characters"),
       confirmPassword: z.string().min(4, minPassword),
+      password: z
+        .string()
+        .regex(/[a-zA-Z]/, {
+          message: mustLetters,
+        })
+        .regex(/\d/, { message: mustNumbers })
+        .regex(/[!@#$%^&*(),.?":{}|<>]/, {
+          message: mustSpecial,
+        })
+        .min(8, { message: minPassword }),
     })
-    .and(getSignInSchema({ minPassword, email }))
+    .and(getEmailSchema({ email }))
     .and(getUpdateProfileSchema({ minFirstName, minLastName, minImage }))
     .superRefine((data, ctx) => {
       if (data.password !== data.confirmPassword) {
@@ -186,25 +188,6 @@ export const getRegistrationSchema = ({
       }
     });
 
-// export const getI18nRegistrationSchema = async () => {
-//   const [tE, tS, tU, tR] = await Promise.all([
-//     getTranslations("zod.EmailSchemaTexts"),
-//     getTranslations("zod.SignInSchemaTexts"),
-//     getTranslations("zod.UpdateProfileSchemaTexts"),
-//     getTranslations("zod.ResetPasswordSchemaTexts"),
-//   ]);
-//
-//   return zerialize(
-//     getRegistrationSchema({
-//       email: tE("email"),
-//       minPassword: tS("minPassword"),
-//       minLastName: tU("minLastName"),
-//       minFirstName: tU("minFirstName"),
-//       invalidUrl: tU("invalidUrl"),
-//       confirmPassword: tR("confirmPassword"),
-//     }),
-//   );
-// };
 export const getUpdateProfileSchemaTexts =
   async (): Promise<UpdateProfileSchemaTexts> => {
     const t = await getTranslations("zod.UpdateProfileSchemaTexts");
@@ -217,12 +200,13 @@ export const getUpdateProfileSchemaTexts =
 
 export const getRegistrationSchemaTexts =
   async (): Promise<RegisterSchemaTexts> => {
-    const [emailTexts, signInTexts, updateProfileTexts, resetPasswordTexts] =
+    const [emailTexts, signInTexts, updateProfileTexts, resetPasswordTexts, t] =
       await Promise.all([
         getEmailSchemaTexts(),
         getSignInSchemaTexts(),
         getUpdateProfileSchemaTexts(),
         getResetPasswordSchemaTexts(),
+        getTranslations("zod.RegisterSchemaTexts"),
       ]);
 
     return {
@@ -230,6 +214,10 @@ export const getRegistrationSchemaTexts =
       ...signInTexts,
       ...updateProfileTexts,
       ...resetPasswordTexts,
+      minPassword: t("minPassword"),
+      mustLetters: t("mustLetters"),
+      mustNumbers: t("mustNumbers"),
+      mustSpecial: t("mustSpecial"),
     };
   };
 

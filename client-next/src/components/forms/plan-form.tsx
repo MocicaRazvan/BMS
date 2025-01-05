@@ -101,6 +101,7 @@ import DiffusionImagesForm, {
   DiffusionImagesFormTexts,
 } from "@/components/forms/diffusion-images-form";
 import useGetDiffusionImages from "@/hoooks/useGetDiffusionImages";
+import { useNavigationGuardI18nForm } from "@/hoooks/use-navigation-guard-i18n-form";
 
 export interface PlanFormTexts extends AITitleBodyForm {
   titleBodyTexts: TitleBodyTexts;
@@ -193,6 +194,8 @@ export default function PlanForm({
       images: [],
     },
   });
+
+  useNavigationGuardI18nForm({ form });
 
   const daysWatch = form.watch("days");
   const watchImages = form.watch("images");

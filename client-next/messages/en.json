@@ -8,6 +8,12 @@
     "description": "Sorry, the page you are looking for does not exist."
   },
   "zod": {
+    "RegisterSchemaTexts": {
+      "minPassword": "Password must be at least 8 characters long",
+      "mustLetters": "Password must contain at least one letter",
+      "mustNumbers": "Password must contain at least one number",
+      "mustSpecial": "Password must contain at least one special character"
+    },
     "DiffusionSchemaTexts": {
       "minPrompt": "Prompt must be at least 20 characters",
       "maxPrompt": "Prompt must be at most 100 characters",
@@ -316,7 +322,7 @@
       "firstNameLabel": "First Name",
       "lastNameLabel": "Last Name",
       "emailLabel": "Email",
-      "passwordLabel": " Password (Must be at least 4 characters)",
+      "passwordLabel": " Password",
       "confirmPasswordLabel": "Confirm Password",
       "submitButton": "Sign Up",
       "loadingButton": " Please wait",
@@ -330,6 +336,19 @@
   },
   "components": {
     "forms": {
+      "PasswordStrengthIndicatorTexts": {
+        "weak": "Weak",
+        "medium": "Medium",
+        "strong": "Strong",
+        "strength": "Password Strength: ",
+        "hasLetter": "Contains a letter",
+        "hasNumber": "Contains a number",
+        "hasSpecialChar": "Contains a special character",
+        "minLength": "At least 8 characters long"
+      },
+      "UseNavigationGuardI18nTexts": {
+        "confirm": "You have unsaved changes, are you sure you want to leave?"
+      },
       "DiffusionImagesFormTexts": {
         "toxicError": "The field should not contain toxic language",
         "englishError": "The field must be in English",

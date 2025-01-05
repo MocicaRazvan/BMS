@@ -1,7 +1,6 @@
 package com.mocicarazvan.userservice.services.impl;
 
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mocicarazvan.rediscache.annotation.RedisReactiveCache;
 import com.mocicarazvan.templatemodule.clients.FileClient;
 import com.mocicarazvan.templatemodule.dtos.PageableBody;
@@ -36,7 +35,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.reactive.TransactionalOperator;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.util.function.Tuple2;
 
 import java.util.EnumSet;
 import java.util.List;
@@ -55,7 +53,6 @@ public class UserServiceImpl implements UserService {
     private final EntitiesUtils entitiesUtils;
     private final PageableUtilsCustom pageableUtilsCustom;
     private final FileClient fileClient;
-    private final ObjectMapper objectMapper;
     private final ExtendedUserRepository extendedUserRepository;
     private final UserEmbedServiceImpl userEmbedService;
     private final TransactionalOperator transactionalOperator;
@@ -154,22 +151,19 @@ public class UserServiceImpl implements UserService {
                         .flatMap(tuple -> {
                             UserCustom user = tuple.getT1();
                             UserCustom authUser = tuple.getT2();
-                            return Mono.zip(Mono.fromRunnable(() ->
-                                            rabbitMqUpdateDeleteService.sendUpdateMessage(user.clone())
-                                    ).thenReturn(true)
-                                    , Mono.defer(() -> {
-                                        if (!user.getId().equals(authUser.getId())) {
-                                            return Mono.error(new PrivateRouteException());
-                                        }
-                                        user.setLastName(userBody.getLastName());
-                                        user.setFirstName(userBody.getFirstName());
+                            return Mono.defer(() -> {
+                                if (!user.getId().equals(authUser.getId())) {
+                                    return Mono.error(new PrivateRouteException());
+                                }
+                                user.setLastName(userBody.getLastName());
+                                user.setFirstName(userBody.getFirstName());
 
-                                        if (user.getImage() != null) {
-                                            return fileClient.deleteFiles(List.of(user.getImage())).thenReturn(user);
-                                        }
-                                        return Mono.just(user);
-                                    })
-                            ).map(Tuple2::getT2);
+                                if (user.getImage() != null) {
+                                    return fileClient.deleteFiles(List.of(user.getImage())).thenReturn(user);
+                                }
+                                return Mono.just(user);
+                            }).doOnSuccess(_ -> rabbitMqUpdateDeleteService.sendUpdateMessage(user.clone()));
+
                         }).flatMap(user ->
 
                                 finalFiles.hasElements().flatMap(ha -> {
@@ -178,7 +172,7 @@ public class UserServiceImpl implements UserService {
                                                 metadataDto.setFileType(FileType.IMAGE);
                                                 metadataDto.setName("profile " + userId);
                                                 metadataDto.setClientId(userId + "_profile");
-                                                return fileClient.uploadFiles(finalFiles, metadataDto, objectMapper).map(fileUploadResponse -> {
+                                                return fileClient.uploadFiles(finalFiles, metadataDto).map(fileUploadResponse -> {
                                                     user.setImage(fileUploadResponse.getFiles().get(0));
                                                     return user;
                                                 });

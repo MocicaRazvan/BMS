@@ -31,6 +31,11 @@ import { Loader2 } from "lucide-react";
 import { PasswordInput } from "@/components/ui/password-input";
 import { registerSubmit } from "@/actions/froms";
 import OauthProviders from "@/app/[locale]/(main)/auth/oauth-providers";
+import {
+  calculatePasswordStrength,
+  PasswordStrengthIndicator,
+  PasswordStrengthIndicatorTexts,
+} from "@/components/forms/passowrd-strength-indicator";
 
 interface SignUpPageText {
   emailExistsError: string;
@@ -47,6 +52,7 @@ interface SignUpPageText {
 
 interface Props extends SignUpPageText {
   registrationSchemaTexts: RegisterSchemaTexts;
+  passwordStrengthTexts: PasswordStrengthIndicatorTexts;
 }
 
 export default function SignUp({
@@ -60,8 +66,8 @@ export default function SignUp({
   loadingButton,
   emailExistsError,
   cardTitle,
-  // schema,
   registrationSchemaTexts,
+  passwordStrengthTexts,
 }: Props) {
   const schema = useMemo(
     () => getRegistrationSchema(registrationSchemaTexts),
@@ -80,6 +86,11 @@ export default function SignUp({
   const router = useRouter();
   const [errorMsg, setErrorMsg] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const password = form.watch("password");
+  const strength = useMemo(
+    () => calculatePasswordStrength(password),
+    [password],
+  );
 
   const onSubmit = async (values: RegisterType) => {
     setIsLoading(true);
@@ -99,7 +110,7 @@ export default function SignUp({
   };
 
   return (
-    <main className="w-full min-h-[calc(100vh-4rem)] flex items-center justify-center transition-all">
+    <main className="w-full min-h-[calc(100vh-4rem)] flex items-center justify-center transition-all py-4">
       <Card className="w-[500px]">
         <CardHeader>
           <CardTitle className="text-center">{cardTitle}</CardTitle>
@@ -181,12 +192,19 @@ export default function SignUp({
                       />
                     </FormControl>
                     <FormMessage />
+                    <div className="pt-5">
+                      <PasswordStrengthIndicator
+                        texts={passwordStrengthTexts}
+                        password={password}
+                      />
+                    </div>
                   </FormItem>
                 )}
               />
               <FormField
                 control={form.control}
                 name="confirmPassword"
+                disabled={strength.score !== 100}
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>{confirmPasswordLabel}</FormLabel>

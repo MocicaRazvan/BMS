@@ -18,7 +18,7 @@ public class SimpleTaskExecutorsInstance {
                 .virtualThreads(true)
                 .threadNamePrefix("SimpleAsyncTaskExecutorInstance-")
                 .concurrencyLimit(executorAsyncConcurrencyLimit)
-                .taskTerminationTimeout(Duration.ofSeconds(15))
+                .taskTerminationTimeout(Duration.ofSeconds(5))
                 .build();
     }
 
@@ -30,7 +30,7 @@ public class SimpleTaskExecutorsInstance {
         threadPoolTaskScheduler.setThreadNamePrefix("ThreadPoolTaskScheduler-");
         threadPoolTaskScheduler.setRemoveOnCancelPolicy(true);
         threadPoolTaskScheduler.setWaitForTasksToCompleteOnShutdown(true);
-        threadPoolTaskScheduler.setAwaitTerminationSeconds(60);
+        threadPoolTaskScheduler.setAwaitTerminationSeconds(20);
         return threadPoolTaskScheduler;
     }
 
@@ -39,7 +39,7 @@ public class SimpleTaskExecutorsInstance {
                 .virtualThreads(true)
                 .threadNamePrefix("SimpleAsyncTaskSchedulerInstance-")
                 .concurrencyLimit(executorAsyncConcurrencyLimit)
-                .taskTerminationTimeout(Duration.ofSeconds(15))
+                .taskTerminationTimeout(Duration.ofSeconds(5))
                 .build();
     }
 }

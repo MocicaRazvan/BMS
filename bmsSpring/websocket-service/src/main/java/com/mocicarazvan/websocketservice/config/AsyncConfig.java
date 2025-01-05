@@ -14,9 +14,9 @@ import java.time.Duration;
 @Configuration
 public class AsyncConfig {
 
-    @Value("${spring.custom.thread.pool.size:16}")
+    @Value("${spring.custom.thread.pool.size:8}")
     private int threadPoolSize;
-    @Value("${spring.custom.executor.async.concurrency.limit:128}")
+    @Value("${spring.custom.executor.async.concurrency.limit:64}")
     private int executorAsyncConcurrencyLimit;
 
 

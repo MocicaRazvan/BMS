@@ -38,13 +38,12 @@ import UploadingProgress, {
 } from "@/components/forms/uploading-progress";
 import { AiIdeasField } from "@/types/ai-ideas-types";
 import useBaseAICallbackTitleBody from "@/hoooks/useBaseAICallbackTitleBody";
-import useGetDiffusionImages, {
-  DiffusionCallback,
-} from "@/hoooks/useGetDiffusionImages";
+import useGetDiffusionImages from "@/hoooks/useGetDiffusionImages";
 import DiffusionImagesForm, {
   DiffusionImagesFormCallback,
   DiffusionImagesFormTexts,
 } from "@/components/forms/diffusion-images-form";
+import { useNavigationGuardI18nForm } from "@/hoooks/use-navigation-guard-i18n-form";
 
 export interface PostFormProps
   extends Partial<Omit<PostType, "images">>,
@@ -109,6 +108,9 @@ export default function PostForm({
       title,
     },
   });
+
+  useNavigationGuardI18nForm({ form });
+
   const [isImagesListCollapsed, setIsImagesListCollapsed] = useState(true);
   const watchImages = form.watch("images");
   const watchTitle = form.watch("title");

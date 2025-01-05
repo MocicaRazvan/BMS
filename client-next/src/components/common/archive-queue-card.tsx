@@ -385,9 +385,6 @@ const DashboardSuccessCard = memo(
           </TooltipProvider>
         </CardHeader>
         <CardContent className="w-full">
-          {/*<p className="text-2xl font-bold">*/}
-          {/*  {formatIntl.number(messageCount)}*/}
-          {/*</p>*/}
           <FadeTextChange
             text={formatIntl.number(messageCount)}
             className="text-2xl font-bold"
@@ -397,7 +394,7 @@ const DashboardSuccessCard = memo(
             <div className="flex items-center justify-items-start gap-1 w-full mt-4">
               <p>{lastRefresh}</p>
               <p className="ml-0.5 font-semibold text-foreground text-sm ">
-                {formatIntl.dateTime(parseISO(timestamp), {
+                {formatIntl.dateTime(new Date(parseISO(timestamp + "Z")), {
                   hour: "numeric",
                   hour12: false,
                   minute: "numeric",

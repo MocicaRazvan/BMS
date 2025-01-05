@@ -29,7 +29,7 @@ public class RabbitMqConfig {
     @Value("${plan.bought.routing.key}")
     private String planBoughtRoutingKey;
 
-    @Value("${spring.custom.rabbit.thread.pool.executorAsyncConcurrencyLimit:128}")
+    @Value("${spring.custom.rabbit.thread.pool.executorAsyncConcurrencyLimit:64}")
     private int executorAsyncConcurrencyLimit;
 
     @Bean

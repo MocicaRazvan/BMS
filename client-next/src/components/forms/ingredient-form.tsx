@@ -55,6 +55,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useNavigationGuardI18nForm } from "@/hoooks/use-navigation-guard-i18n-form";
 
 export interface FieldTexts {
   label: string;
@@ -131,7 +132,7 @@ export default function IngredientForm({
     mode: "onTouched",
   });
 
-  console.log("nutritionalFact", nutritionalFact?.saturatedFat || 0);
+  useNavigationGuardI18nForm({ form });
 
   const protein = form.watch("nutritionalFact.protein");
   const fat = form.watch("nutritionalFact.fat");

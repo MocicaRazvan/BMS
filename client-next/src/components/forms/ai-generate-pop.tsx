@@ -1,6 +1,6 @@
 "use client";
 import { useCallback, useMemo, useState } from "react";
-import { aiIdea } from "@/actions/ai-ideas";
+import { aiIdea } from "@/actions/ai/ai-ideas";
 import {
   Popover,
   PopoverContent,

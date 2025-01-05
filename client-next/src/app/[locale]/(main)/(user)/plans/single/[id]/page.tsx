@@ -7,6 +7,7 @@ import LoadingSpinner from "@/components/common/loading-spinner";
 import UserPlanPageContent from "@/app/[locale]/(main)/(user)/plans/single/[id]/page-content";
 import { Metadata } from "next";
 import { getIntlMetadata } from "@/texts/metadata";
+import ScrollProgress from "@/components/common/scroll-progress";
 
 interface Props {
   params: { locale: Locale; id: string };
@@ -30,6 +31,7 @@ export default async function UserPlanPage({ params: { locale } }: Props) {
   ]);
   return (
     <Suspense fallback={<LoadingSpinner />}>
+      <ScrollProgress />
       <UserPlanPageContent authUser={user} {...texts} />
     </Suspense>
   );

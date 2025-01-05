@@ -1,7 +1,6 @@
 package com.mocicarazvan.recipeservice.services.impl;
 
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mocicarazvan.recipeservice.clients.DayClient;
 import com.mocicarazvan.recipeservice.clients.IngredientClient;
 import com.mocicarazvan.recipeservice.dtos.RecipeBody;
@@ -62,8 +61,8 @@ public class RecipeServiceImpl extends ApprovedServiceImpl<Recipe, RecipeBody, R
     private final TransactionalOperator transactionalOperator;
     private final RecipeEmbedServiceImpl recipeEmbedServiceImpl;
 
-    public RecipeServiceImpl(RecipeRepository modelRepository, RecipeMapper modelMapper, PageableUtilsCustom pageableUtils, UserClient userClient, EntitiesUtils entitiesUtils, FileClient fileClient, ObjectMapper objectMapper, RecipeExtendedRepository recipeExtendedRepository, IngredientClient ingredientClient, IngredientQuantityService ingredientQuantityService, RabbitMqApprovedSender<RecipeResponse> rabbitMqSender, DayClient dayClient, RecipeServiceRedisCacheWrapper self, TransactionalOperator transactionalOperator, RecipeEmbedServiceImpl recipeEmbedServiceImpl, RabbitMqUpdateDeleteService<Recipe> recipeRabbitMqUpdateDeleteService) {
-        super(modelRepository, modelMapper, pageableUtils, userClient, "recipe", List.of("id", "userId", "type", "title", "createdAt", "updatedAt", "approved"), entitiesUtils, fileClient, objectMapper, rabbitMqSender, self, recipeRabbitMqUpdateDeleteService);
+    public RecipeServiceImpl(RecipeRepository modelRepository, RecipeMapper modelMapper, PageableUtilsCustom pageableUtils, UserClient userClient, EntitiesUtils entitiesUtils, FileClient fileClient, RecipeExtendedRepository recipeExtendedRepository, IngredientClient ingredientClient, IngredientQuantityService ingredientQuantityService, RabbitMqApprovedSender<RecipeResponse> rabbitMqSender, DayClient dayClient, RecipeServiceRedisCacheWrapper self, TransactionalOperator transactionalOperator, RecipeEmbedServiceImpl recipeEmbedServiceImpl, RabbitMqUpdateDeleteService<Recipe> recipeRabbitMqUpdateDeleteService) {
+        super(modelRepository, modelMapper, pageableUtils, userClient, "recipe", List.of("id", "userId", "type", "title", "createdAt", "updatedAt", "approved"), entitiesUtils, fileClient, rabbitMqSender, self, recipeRabbitMqUpdateDeleteService);
         this.recipeExtendedRepository = recipeExtendedRepository;
         this.ingredientClient = ingredientClient;
         this.ingredientQuantityService = ingredientQuantityService;

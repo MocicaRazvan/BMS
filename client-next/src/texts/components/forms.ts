@@ -36,6 +36,8 @@ import { DayType, dayTypes, planObjectives } from "@/types/dto";
 import { UploadingProgressTexts } from "@/components/forms/uploading-progress";
 import { AIGeneratePopTexts } from "@/components/forms/ai-generate-pop";
 import { DiffusionImagesFormTexts } from "@/components/forms/diffusion-images-form";
+import { UseNavigationGuardI18nTexts } from "@/hoooks/use-navigation-guard-i18n-form";
+import { PasswordStrengthIndicatorTexts } from "@/components/forms/passowrd-strength-indicator";
 
 export type FormType = "create" | "update";
 
@@ -618,5 +620,29 @@ export async function getDiffusionImagesFormTexts(): Promise<DiffusionImagesForm
     negativePromptPlaceholder: t("negativePromptPlaceholder"),
     negativePromptDescription: t("negativePromptDescription"),
     englishError: t("englishError"),
+  };
+}
+export async function getUseNavigationGuardI18nTexts(): Promise<UseNavigationGuardI18nTexts> {
+  const t = await getTranslations(
+    "components.forms.UseNavigationGuardI18nTexts",
+  );
+  return {
+    confirm: t("confirm"),
+  };
+}
+
+export async function getPasswordStrengthIndicatorTexts(): Promise<PasswordStrengthIndicatorTexts> {
+  const t = await getTranslations(
+    "components.forms.PasswordStrengthIndicatorTexts",
+  );
+  return {
+    weak: t("weak"),
+    medium: t("medium"),
+    strong: t("strong"),
+    strength: t("strength"),
+    hasLetter: t("hasLetter"),
+    hasNumber: t("hasNumber"),
+    hasSpecialChar: t("hasSpecialChar"),
+    minLength: t("minLength"),
   };
 }
