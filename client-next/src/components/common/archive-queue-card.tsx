@@ -47,6 +47,7 @@ import { toast } from "@/components/ui/use-toast";
 import useGetArchiveUpdates from "@/hoooks/useGetArchiveUpdates";
 import { WithUser } from "@/lib/user";
 import FadeTextChange from "@/components/ui/fade-text-change";
+import { DispatchStateAction } from "react-day-picker/src/hooks/useControlledValue";
 
 export interface ArchiveQueueCardsTexts {
   title: Record<"delete" | "update", string>;
@@ -286,6 +287,11 @@ const DashboardSuccessCard = memo(
     const { getAction, getBatchUpdates } = useGetArchiveUpdates({
       authToken: authUser.token,
     });
+    const [alive, setAlive] = useState<string>("60000");
+    const [triggerLoading, setTriggerLoading] = useState<boolean>(false);
+    const [stopLoading, setStopLoading] = useState<boolean>(false);
+    const [popOpen, setPopOpen] = useState<boolean>(false);
+
     const [
       { messageCount, consumerCount, cronExpression, timestamp, name },
       setQueueInfo,
@@ -307,16 +313,60 @@ const DashboardSuccessCard = memo(
         refetch();
       }
     }, [action]);
+    const toggleBooleanState = useCallback(
+      (
+        state: boolean,
+        setState: (value: boolean) => void,
+        wantedState: boolean,
+      ) => {
+        if (state !== wantedState) {
+          setState(wantedState);
+        }
+      },
+      [],
+    );
 
     useEffect(() => {
       if (action === ContainerAction.STOP && consumerCount > 0) {
-        refetch();
+        setQueueInfo((prev) => ({
+          ...prev,
+          consumerCount: 0,
+          timestamp: new Date().toISOString(),
+        }));
+        toggleBooleanState(popOpen, setPopOpen, false);
+        toggleBooleanState(stopLoading, setStopLoading, false);
         toast({
           title: queueName,
           description: managePopTexts.consumerStoppedDescription,
         });
+      } else if (
+        action === ContainerAction.START_MANUAL &&
+        consumerCount === 0
+      ) {
+        setQueueInfo((prev) => ({
+          ...prev,
+          consumerCount: 1,
+          timestamp: new Date().toISOString(),
+        }));
+        toggleBooleanState(popOpen, setPopOpen, false);
+        toggleBooleanState(triggerLoading, setTriggerLoading, false);
+        toast({
+          title: queueName,
+          description: managePopTexts.toastSchedule + alive,
+        });
       }
-    }, [action, consumerCount]);
+    }, [
+      action,
+      consumerCount,
+      alive,
+      toggleBooleanState,
+      popOpen,
+      stopLoading,
+      queueName,
+      managePopTexts.consumerStoppedDescription,
+      managePopTexts.toastSchedule,
+      triggerLoading,
+    ]);
 
     useEffect(() => {
       if (batchUpdateMessagesFinished) {
@@ -330,16 +380,16 @@ const DashboardSuccessCard = memo(
       }
     }, [batchUpdateMessagesCount, batchUpdateMessagesFinished]);
 
-    const scheduleCallbackAfter = useCallback((q: QueueInformation) => {
-      setQueueInfo((prev) => ({
-        ...q,
-        messageCount: prev.messageCount,
-      }));
-    }, []);
-
-    const scheduleCallbackBefore = useCallback((q: QueueInformation) => {
-      setQueueInfo(q);
-    }, []);
+    // const scheduleCallbackAfter = useCallback((q: QueueInformation) => {
+    //   setQueueInfo((prev) => ({
+    //     ...q,
+    //     messageCount: prev.messageCount,
+    //   }));
+    // }, []);
+    //
+    // const scheduleCallbackBefore = useCallback((q: QueueInformation) => {
+    //   setQueueInfo(q);
+    // }, []);
 
     return (
       <div className="h-full w-full">
@@ -451,12 +501,18 @@ const DashboardSuccessCard = memo(
                     messageCount,
                     timestamp,
                   }}
-                  callbackBefore={scheduleCallbackBefore}
-                  callbackAfter={scheduleCallbackAfter}
+                  alive={alive}
+                  setAlive={setAlive}
                   errorMessage="error"
                   refetch={refetch}
                   {...managePopTexts}
                   authUser={authUser}
+                  triggerLoading={triggerLoading}
+                  stopLoading={stopLoading}
+                  popOpen={popOpen}
+                  setPopOpen={setPopOpen}
+                  setTriggerLoading={setTriggerLoading}
+                  setStopLoading={setStopLoading}
                 />
               </div>
             </div>
@@ -507,15 +563,21 @@ interface ManagePopTexts {
 }
 interface ManagePopProps extends ManagePopTexts, WithUser {
   queueInformation: QueueInformation;
-  callbackBefore: (q: QueueInformation) => void;
-  callbackAfter: (q: QueueInformation) => void;
+  alive: string;
+  setAlive: (value: string) => void;
   refetch: () => void;
   errorMessage: string;
+  triggerLoading: boolean;
+  stopLoading: boolean;
+  popOpen: boolean;
+  setPopOpen: (value: boolean) => void;
+  setTriggerLoading: (value: boolean) => void;
+  setStopLoading: (value: boolean) => void;
 }
 const ManagePop = ({
   queueInformation: { name: queueName, consumerCount },
-  callbackBefore,
-  callbackAfter,
+  alive,
+  setAlive,
   errorMessage,
   manageBtn,
   stopBtnLoading,
@@ -528,13 +590,14 @@ const ManagePop = ({
   toastSchedule,
   scheduleTooltip,
   authUser,
-  refetch,
+  popOpen,
+  setPopOpen,
+  triggerLoading,
+  stopLoading,
+  setTriggerLoading,
+  setStopLoading,
 }: ManagePopProps) => {
-  const [alive, setAlive] = useState<string>("60000");
   const [scheduleError, setScheduleError] = useState<string | null>(null);
-  const [triggerLoading, setTriggerLoading] = useState<boolean>(false);
-  const [stopLoading, setStopLoading] = useState<boolean>(false);
-  const [popOpen, setPopOpen] = useState<boolean>(false);
   const schedule = async () => {
     setScheduleError(null);
     setTriggerLoading(true);
@@ -551,26 +614,18 @@ const ManagePop = ({
       return;
     }
 
-    callbackBefore(resp.messages[0]);
     fetchStream<QueueInformation>({
       path: "/archive/container/schedule",
       method: "PATCH",
       queryParams: { queueName, alive },
-    })
-      .then(async ({ messages, error }) => {
-        if (error) {
-          console.error(error);
-          setScheduleError(errorMessage);
-          return;
-        }
-        callbackAfter(messages[0]);
-        setPopOpen(false);
-        toast({
-          title: queueName,
-          description: toastSchedule + alive,
-        });
-      })
-      .finally(() => setTriggerLoading(false));
+    }).then(async ({ messages, error }) => {
+      if (error) {
+        console.error(error);
+        setScheduleError(errorMessage);
+        setTriggerLoading(false);
+        return;
+      }
+    });
   };
   const stopContainer = () => {
     setScheduleError(null);
@@ -579,21 +634,14 @@ const ManagePop = ({
       path: "/archive/container/stop",
       method: "PATCH",
       queryParams: { queueName },
-    })
-      .then(({ messages, error }) => {
-        if (error) {
-          console.error("/archive/container/stop", error);
-          setScheduleError(errorMessage);
-          return;
-        }
-        refetch();
-        setPopOpen(false);
-        toast({
-          title: queueName,
-          description: toastStop,
-        });
-      })
-      .finally(() => setStopLoading(false));
+    }).then(({ messages, error }) => {
+      if (error) {
+        console.error("/archive/container/stop", error);
+        setScheduleError(errorMessage);
+        setStopLoading(false);
+        return;
+      }
+    });
   };
 
   return (

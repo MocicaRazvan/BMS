@@ -25,6 +25,14 @@ import java.util.HexFormat;
 public class AspectUtils {
 
     private final ExpressionParser expressionParser = new SpelExpressionParser();
+    private static final ThreadLocal<MessageDigest> MD5_DIGEST = ThreadLocal.withInitial(() -> {
+        try {
+            return MessageDigest.getInstance("MD5");
+        } catch (Exception e) {
+            log.error("Error creating MD5 digest", e);
+            throw new RuntimeException("Error creating MD5 digest", e);
+        }
+    });
 
     public String extractKeyFromAnnotation(String keyPath, ProceedingJoinPoint joinPoint) {
         if (keyPath == null || keyPath.isEmpty()) {
@@ -132,8 +140,8 @@ public class AspectUtils {
         try {
             String argsString = Arrays.deepToString(joinPoint.getArgs()) + key + methodName;
             // simple algorithm no need for sha
-            MessageDigest md = MessageDigest.getInstance("MD5");
-            byte[] hashBytes = md.digest(argsString.getBytes(StandardCharsets.UTF_8));
+//            MessageDigest md = MessageDigest.getInstance("MD5");
+            byte[] hashBytes = MD5_DIGEST.get().digest(argsString.getBytes(StandardCharsets.UTF_8));
 
 
             return HexFormat.of().formatHex(hashBytes);

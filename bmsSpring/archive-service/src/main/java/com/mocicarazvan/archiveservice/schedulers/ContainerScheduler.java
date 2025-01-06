@@ -20,6 +20,7 @@ import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -30,7 +31,7 @@ public class ContainerScheduler {
     private final SimpleAsyncTaskScheduler simpleAsyncTaskScheduler;
     private final QueuesPropertiesConfig queuesPropertiesConfig;
     private final ContainerNotify containerNotify;
-    private ScheduledFuture<?> stopTask;
+    private AtomicReference<ScheduledFuture<?>> stopTask = new AtomicReference<>();
     private int maxAttempts = 150;
     private int intervalMillis = 500;
 
@@ -46,7 +47,7 @@ public class ContainerScheduler {
     private void scheduleCron() {
         String queueName = simpleMessageListenerContainer.getQueueNames()[0];
 
-        stopPrevious(queueName);
+        stopPrevious();
         stopContainerGracefully();
 //        if (simpleMessageListenerContainer.isRunning()) {
 //            // for * cron expression
@@ -58,17 +59,23 @@ public class ContainerScheduler {
 
         containerNotify.notifyContainersStartCron(queueName);
 
-        stopTask = simpleAsyncTaskScheduler.schedule(
+        stopTask.set(simpleAsyncTaskScheduler.schedule(
                 this::stopContainerGracefully,
                 new AfterMillisTrigger(queuesPropertiesConfig.getSchedulerAliveMillis())
-        );
+        ));
 
-        log.info("Container will be stopped after {} s", Objects.requireNonNull(stopTask).getDelay(TimeUnit.SECONDS));
+        log.info("Container will be stopped after {} s", Objects.requireNonNull(stopTask.get()).getDelay(TimeUnit.SECONDS));
     }
 
     public void startContainerForFixedTime(long aliveMillis) {
+        simpleAsyncTaskScheduler.submit(
+                () -> startContainerForFixedTimeInternal(aliveMillis)
+        );
+    }
+
+    private void startContainerForFixedTimeInternal(long aliveMillis) {
         String queueName = simpleMessageListenerContainer.getQueueNames()[0];
-        stopPrevious(queueName);
+        stopPrevious();
         stopContainerGracefully();
 
         log.info("Manually starting container for queue: {} for {} s", queueName, Duration.ofMillis(aliveMillis).getSeconds());
@@ -76,24 +83,33 @@ public class ContainerScheduler {
 
         containerNotify.notifyContainersStartManual(queueName);
 
-        stopTask = simpleAsyncTaskScheduler.schedule(
+        stopTask.set(simpleAsyncTaskScheduler.schedule(
                 this::stopContainerGracefully,
                 new AfterMillisTrigger(aliveMillis)
-        );
+        ));
+
+
     }
 
     public void stopContainerManually() {
+        simpleAsyncTaskScheduler.submit(
+                this::stopContainerManuallyInternal
+        );
+    }
+
+    private void stopContainerManuallyInternal() {
         String queueName = simpleMessageListenerContainer.getQueueNames()[0];
         log.info("Manually stopping container for queue: {}", queueName);
 
-        stopPrevious(queueName);
+        stopPrevious();
         stopContainerGracefully();
     }
 
-    private void stopPrevious(String queueName) {
-        if (stopTask != null && !stopTask.isDone()) {
-            stopTask.cancel(false);
-            log.info("Cancelled previously scheduled stop task for queue: {}", queueName);
+    private void stopPrevious() {
+        ScheduledFuture<?> currentTask = stopTask.get();
+        if (currentTask != null && !currentTask.isDone()) {
+            currentTask.cancel(false);
+            log.info("Cancelled previously scheduled stop task for queue");
         }
     }
 
@@ -157,9 +173,7 @@ public class ContainerScheduler {
 
     @PreDestroy
     public void destroy() {
-        if (stopTask != null && !stopTask.isDone()) {
-            stopTask.cancel(false);
-        }
+        stopPrevious();
         stopContainerGracefully();
     }
 

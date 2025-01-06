@@ -6,6 +6,7 @@ import com.mocicarazvan.archiveservice.dtos.websocket.NotifyContainerAction;
 import com.mocicarazvan.archiveservice.services.ContainerNotify;
 import com.mocicarazvan.archiveservice.services.SimpleRedisCache;
 import com.mocicarazvan.archiveservice.websocket.BatchHandler;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.ReactiveRedisTemplate;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
@@ -16,6 +17,7 @@ import reactor.core.scheduler.Schedulers;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+@Slf4j
 @Service
 public class ContainerNotifyImpl implements ContainerNotify {
     private final ObjectMapper objectMapper;
@@ -41,6 +43,7 @@ public class ContainerNotifyImpl implements ContainerNotify {
 
     @Override
     public void notifyContainersStartManual(String queueName) {
+        log.info("Notifying container to start manually for queue: {}", queueName);
         simpleRedisCache.evictCachedValue(queueName)
                 .then(sendContainerActionToRedis(queueName, ContainerAction.START_MANUAL))
                 .subscribe();

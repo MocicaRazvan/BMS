@@ -113,7 +113,7 @@ export default function useGetArchiveUpdates({
   useEffect(() => {
     if (lastMessage) {
       const parsedMessage = JSON.parse(lastMessage.data);
-      if (parsedMessage.id !== lastProcessedMessageId.current) {
+      if (parsedMessage?.id !== lastProcessedMessageId.current) {
         lastProcessedMessageId.current = parsedMessage.id;
         handleLastMessageUpdate(parsedMessage);
       }
