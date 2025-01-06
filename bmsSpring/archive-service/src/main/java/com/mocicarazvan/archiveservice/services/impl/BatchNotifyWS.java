@@ -23,16 +23,19 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
 public class BatchNotifyWS implements BatchNotify {
 
     private final ReactiveRedisTemplate<String, Object> redisTemplate;
-    private final ConcurrentHashMap<String, Long> queueMap;
-    private final ConcurrentHashMap<String, ScheduledFuture<?>> scheduledTasks;
-    private final ConcurrentHashMap<String, Instant> lastReceived;
+    private final ConcurrentMap<String, Long> queueMap;
+    private final ConcurrentMap<String, AtomicReference<ScheduledFuture<?>>> scheduledTasks;
+    private final ConcurrentMap<String, Instant> lastReceived;
     private final SimpleAsyncTaskScheduler taskExecutor;
     private final SimpleRedisCache simpleRedisCache;
 
@@ -51,8 +54,11 @@ public class BatchNotifyWS implements BatchNotify {
         this.queueMap = new ConcurrentHashMap<>(
                 queuesPropertiesConfig.getQueues().size()
         );
-        this.scheduledTasks = new ConcurrentHashMap<>(
-                queuesPropertiesConfig.getQueues().size()
+        this.scheduledTasks = queuesPropertiesConfig.getQueues().stream().collect(
+                Collectors.toConcurrentMap(
+                        queue -> queue,
+                        _ -> new AtomicReference<>()
+                )
         );
         this.lastReceived = new ConcurrentHashMap<>(
                 queuesPropertiesConfig.getQueues().size()
@@ -74,13 +80,14 @@ public class BatchNotifyWS implements BatchNotify {
 
     private void startScheduledTaskIfNotStarted(String queueName) {
 //        log.info("Sending update global outside count is {}", globalCnt);
-        if (scheduledTasks.get(queueName) == null || scheduledTasks.get(queueName).isCancelled()) {
+        ScheduledFuture<?> queueFuture = scheduledTasks.get(queueName).get();
+        if (queueFuture == null || queueFuture.isCancelled()) {
             PeriodicTrigger trigger = new PeriodicTrigger(Duration.ofSeconds(updatePeriod));
             trigger.setInitialDelay(Duration.ofSeconds(updatePeriod / 2));
             ScheduledFuture<?> scheduledFuture = taskExecutor.schedule(() -> handleScheduledTask(queueName),
                     trigger);
             assert scheduledFuture != null;
-            scheduledTasks.put(queueName, scheduledFuture);
+            scheduledTasks.put(queueName, new AtomicReference<>(scheduledFuture));
         }
     }
 
@@ -99,8 +106,11 @@ public class BatchNotifyWS implements BatchNotify {
         if (lastUpdateTime != null && lastUpdateTime.isBefore(Instant.now().minusSeconds(notifyTimeout))) {
             log.info("Last received is {}", lastReceived.get(queueName));
             queueMap.put(queueName, 0L);
+            ScheduledFuture<?> scheduledFuture = scheduledTasks.get(queueName).get();
+            if (scheduledFuture != null && !scheduledFuture.isCancelled()) {
+                sendUpdateBatchToRedis(queueName, 0L, true);
+            }
             stopScheduledTask(queueName);
-            sendUpdateBatchToRedis(queueName, 0L, true);
             log.info("Stopped task for queue {}", queueName);
 
         }
@@ -127,7 +137,7 @@ public class BatchNotifyWS implements BatchNotify {
 
 
     private void stopScheduledTask(String queueName) {
-        ScheduledFuture<?> scheduledFuture = scheduledTasks.get(queueName);
+        ScheduledFuture<?> scheduledFuture = scheduledTasks.get(queueName).get();
         if (scheduledFuture != null && !scheduledFuture.isCancelled()) {
             scheduledFuture.cancel(true);
             scheduledTasks.remove(queueName);
@@ -137,8 +147,8 @@ public class BatchNotifyWS implements BatchNotify {
     @PreDestroy
     public void shutdown() {
         scheduledTasks.values().forEach(task -> {
-            if (!task.isCancelled()) {
-                task.cancel(true);
+            if (!task.get().isCancelled()) {
+                task.get().cancel(true);
             }
         });
         scheduledTasks.clear();
