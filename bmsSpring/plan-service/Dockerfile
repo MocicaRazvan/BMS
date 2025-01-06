@@ -34,10 +34,10 @@ COPY plan-service/src plan-service/src
 RUN mvn -f plan-service/pom.xml dependency:go-offline -B
 RUN mvn -f plan-service/pom.xml clean package -DskipTests -Dmaven.compiler.showWarnings=true -Dmaven.compiler.source=22 -Dmaven.compiler.target=22 -Dmaven.compiler.compilerArgs=--enable-preview
 
-FROM openjdk:22-jdk-slim
+FROM alpine/java:22.0.2-jre AS runtime
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y curl netcat-openbsd && rm -rf /var/lib/apt/lists/*
+RUN apk add --no-cache curl netcat-openbsd
 
 
 COPY --from=build /app/plan-service/target/plan-service-0.0.1-SNAPSHOT.jar .
