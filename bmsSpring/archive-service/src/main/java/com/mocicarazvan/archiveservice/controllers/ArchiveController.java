@@ -38,7 +38,7 @@ public class ArchiveController {
     @PatchMapping("/container/schedule")
     public Mono<ResponseEntity<QueueInformationWithTimestamp>> startQueueContainer(
             @RequestParam(value = "queueName") @Valid @ValidQueueName String queueName,
-            @RequestParam(value = "alive") @Valid @Min(0) @Max(1000000) long alive
+            @RequestParam(value = "alive") @Valid @Min(0) @Max(60000000) long alive
     ) {
         return queueService.startContainerForFixedTime(queueName, alive).map(ResponseEntity::ok);
     }

@@ -4,6 +4,7 @@ package com.mocicarazvan.archiveservice.schedulers;
 import com.mocicarazvan.archiveservice.config.QueuesPropertiesConfig;
 import com.mocicarazvan.archiveservice.services.ContainerNotify;
 import com.mocicarazvan.archiveservice.triggers.AfterMillisTrigger;
+import jakarta.annotation.PreDestroy;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -11,10 +12,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
 import org.springframework.scheduling.concurrent.SimpleAsyncTaskScheduler;
 import org.springframework.scheduling.support.CronTrigger;
+import org.springframework.scheduling.support.PeriodicTrigger;
 
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -101,7 +104,7 @@ public class ContainerScheduler {
         }
 
         String queueName = simpleMessageListenerContainer.getQueueNames()[0];
-        log.info("Stopping container gracefully for queue: {}", queueName);
+        log.info("Stopping container for queue: {}", queueName);
 
         try {
             simpleMessageListenerContainer.stop();
@@ -118,7 +121,6 @@ public class ContainerScheduler {
             Thread.currentThread().interrupt();
         }
         if (!simpleMessageListenerContainer.isRunning()) {
-            log.info("Container stopped gracefully: {}", Arrays.toString(simpleMessageListenerContainer.getQueueNames()));
             containerNotify.notifyContainersStop(queueName);
         } else {
             log.warn("Container did not stop within the expected time: {}", Arrays.toString(simpleMessageListenerContainer.getQueueNames()));
@@ -126,21 +128,40 @@ public class ContainerScheduler {
     }
 
     private boolean waitForContainerToStop() {
-        for (int i = 0; i < maxAttempts; i++) {
-            if (!simpleMessageListenerContainer.isRunning()) {
-                return true;
-            }
-            try {
-                Thread.sleep(intervalMillis);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                log.error("Interrupted while waiting for container to stop.");
-                return false;
+        final int[] attempts = {0};
+        ScheduledFuture<?> scheduledStop = null;
+        try {
+            CompletableFuture<Boolean> containerStopped = new CompletableFuture<>();
+            scheduledStop = simpleAsyncTaskScheduler.schedule(() -> {
+                log.info("Attempt {} to check if container stopped.", attempts[0]);
+                if (!simpleMessageListenerContainer.isRunning()) {
+                    containerStopped.complete(true);
+                } else if (attempts[0]++ >= maxAttempts) {
+                    containerStopped.complete(false);
+                }
+            }, new PeriodicTrigger(Duration.ofMillis(intervalMillis)));
+
+            return containerStopped.get((long) maxAttempts * intervalMillis, TimeUnit.MILLISECONDS);
+        } catch (Exception e) {
+            log.error("Error while waiting for container to stop.", e);
+            Thread.currentThread().interrupt();
+            return false;
+        } finally {
+            if (scheduledStop != null && !scheduledStop.isDone()) {
+                scheduledStop.cancel(false);
+                log.info("Cancelled containerStopped scheduled stop task.");
+
             }
         }
-        return false;
     }
 
+    @PreDestroy
+    public void destroy() {
+        if (stopTask != null && !stopTask.isDone()) {
+            stopTask.cancel(false);
+        }
+        stopContainerGracefully();
+    }
 
 }
 
