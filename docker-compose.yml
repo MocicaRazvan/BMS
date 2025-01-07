@@ -109,9 +109,30 @@ services:
     container_name: zipkin-container-bms
     ports:
       - "9411:9411"
+    environment:
+      STORAGE_TYPE: mysql
+      MYSQL_HOST: mysql-zipkin
+      MYSQL_USER: zipkin
+      MYSQL_PASS: zipkin
     networks:
       - bms
     restart: unless-stopped
+    depends_on:
+      mysql-zipkin:
+        condition: service_started
+
+  mysql-zipkin:
+    image: openzipkin/zipkin-mysql:2.22
+    container_name: mysql-zipkin-container-bms
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_USER: zipkin
+      MYSQL_PASSWORD: zipkin
+      MYSQL_DATABASE: zipkin
+    volumes:
+      - zipkin_mysql_data:/var/lib/mysql
+    networks:
+      - bms
 
   stripe-cli:
     image: stripe/stripe-cli:latest
@@ -826,6 +847,7 @@ volumes:
   ollama_fs:
   pgadmin_data:
   diffusion_fs:
+  zipkin_mysql_data:
 networks:
   bms:
     driver: bridge
