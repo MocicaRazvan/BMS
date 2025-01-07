@@ -30,7 +30,7 @@ export function AiChatBoxWrapper(props: AiChatBoxTexts) {
             setIsFinished(true);
             return;
           }
-          if (messages[0].length > 0) {
+          if (messages[0]?.length > 0) {
             setInitialMessages(
               messages[0].map((m) => ({
                 id: m.vercelId,

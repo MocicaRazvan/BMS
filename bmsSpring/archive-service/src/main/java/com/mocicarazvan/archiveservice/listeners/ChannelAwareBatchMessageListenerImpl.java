@@ -60,7 +60,6 @@ public class ChannelAwareBatchMessageListenerImpl<T> implements ChannelAwareBatc
                     .doOnComplete(() ->
                     {
                         acknowledgeBatch(messages, channel);
-                        saveMessagesAggregator.getBatchNotify().notifyBatchUpdate(messages, queueName);
                     })
                     .subscribe();
         } catch (Exception e) {
@@ -104,6 +103,7 @@ public class ChannelAwareBatchMessageListenerImpl<T> implements ChannelAwareBatc
             try {
                 long lastDeliveryTag = messages.getLast().getMessageProperties().getDeliveryTag();
                 channel.basicAck(lastDeliveryTag, true);
+                saveMessagesAggregator.getBatchNotify().notifyBatchUpdate(messages, queueName);
 //            log.info("Acknowledged messages up to {}", lastDeliveryTag);
             } catch (Exception e) {
                 log.error("Error acknowledging messages: {}", e.getMessage());

@@ -35,6 +35,7 @@ public class RouteValidator {
             "/plan-service/v3/api-docs",
             "/ingredient-service/v3/api-docs",
             "/day-service/v3/api-docs",
+            "/archive-service/v3/api-docs",
             "/user-service/actuator/**",
             "/post-service/actuator/**",
             "/comment-service/actuator/**",
@@ -45,6 +46,7 @@ public class RouteValidator {
             "/plan-service/actuator/**",
             "/ingredient-service/actuator/**",
             "/day-service/actuator/**",
+            "/archive-service/actuator/**",
             "/webjars/**",
             "/favicon.ico",
             "/auth/github/callback",
@@ -118,9 +120,10 @@ public class RouteValidator {
             "/kanban/admin/**",
 
             "/days/admin/**",
-            "/meals/admin/**"
+            "/meals/admin/**",
 
 
+            "/archive/**"
     );
 
     public Predicate<ServerHttpRequest> isWhitelisted() {

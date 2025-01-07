@@ -78,6 +78,7 @@ export async function fetchStream<
     headers,
     signal: abortController.signal,
     cache,
+    credentials: "include",
   };
 
   if (body !== null && method !== "GET" && method !== "HEAD") {

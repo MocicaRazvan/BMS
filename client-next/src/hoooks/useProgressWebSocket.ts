@@ -16,9 +16,13 @@ const useProgressWebSocket = (
 ) => {
   const [messages, setMessages] = useState<ProgressUpdateDto[]>([]);
 
-  const wsUrl = `${process.env.NEXT_PUBLIC_SPRING_CLIENT_WEBSOCKET}/files/ws/progress/${clientId}?fileType=${fileType}&authToken=${authToken}`;
+  const wsUrl = `${process.env.NEXT_PUBLIC_SPRING_CLIENT_WEBSOCKET}/files/ws/progress/${clientId}`;
 
   const { sendMessage, lastMessage, readyState } = useWebSocket(wsUrl, {
+    queryParams: {
+      // authToken,
+      fileType,
+    },
     onOpen: () => {
       console.log(" useProgressWebSocket WebSocket connection established");
     },

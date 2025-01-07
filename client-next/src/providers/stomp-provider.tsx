@@ -18,9 +18,10 @@ export const StompProvider = ({
   };
   const conRec = authUser ? 1000 : 0;
   const isProduction = process.env.NODE_ENV === "production";
+  const newUrl = url + `?authToken=${authUser?.token}`;
   return (
     <StompSessionProvider
-      url={url + `?authToken=${authUser?.token}`}
+      url={url}
       connectHeaders={headers}
       connectionTimeout={conRec}
       reconnectDelay={conRec}
@@ -54,6 +55,7 @@ export const StompProvider = ({
       }}
       heartbeatIncoming={30000}
       heartbeatOutgoing={30000}
+      enabled={authUser?.token !== undefined}
     >
       {children}
     </StompSessionProvider>

@@ -69,7 +69,7 @@ export default function useGetArchiveUpdates({
   const { lastMessage, readyState } = useWebSocket(wsUrl, {
     shouldReconnect: (_) => true,
     queryParams: {
-      authToken,
+      // authToken,
     },
     share: true,
   });

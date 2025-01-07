@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { encode, getToken } from "next-auth/jwt";
 import { emitError } from "@/logger";
+import { decode } from "next-auth/jwt";
 
 export default async function handleOauthCall(
   req: NextRequest,

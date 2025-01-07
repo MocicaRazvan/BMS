@@ -47,7 +47,6 @@ import { toast } from "@/components/ui/use-toast";
 import useGetArchiveUpdates from "@/hoooks/useGetArchiveUpdates";
 import { WithUser } from "@/lib/user";
 import FadeTextChange from "@/components/ui/fade-text-change";
-import { DispatchStateAction } from "react-day-picker/src/hooks/useControlledValue";
 
 export interface ArchiveQueueCardsTexts {
   title: Record<"delete" | "update", string>;
@@ -646,7 +645,7 @@ const ManagePop = ({
 
   return (
     <Popover open={popOpen} onOpenChange={setPopOpen}>
-      <PopoverTrigger>
+      <PopoverTrigger asChild={true}>
         <Button variant="outline" size="sm">
           {manageBtn}
         </Button>
