@@ -1,14 +1,10 @@
 package com.mocicarazvan.gatewayservice.services;
 
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mocicarazvan.gatewayservice.dtos.NextJSJWE;
-import com.nimbusds.jose.JWEObject;
-import com.nimbusds.jose.crypto.DirectDecrypter;
+import com.mocicarazvan.gatewayservice.config.NextAuthProperties;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
@@ -17,41 +13,15 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HexFormat;
 
-@Slf4j
-@Component
+@Service
 @RequiredArgsConstructor
-public class NextAuthDecrypt {
-    @Value("${next.auth.auth.secret}")
-    private String secretKey;
-
-    @Value("${next.auth.auth.csrf.enabled:true}")
-    private boolean csrfEnabled;
-
-    private final ObjectMapper objectMapper;
-    private final DirectDecrypter directDecrypter;
-    public static final String NULL_COOKIE = "NULL_COOKIE";
-
-
-    public Mono<String> getTokenPayload(String token) {
-        if (token == null || token.isBlank()) {
-            return Mono.just(NULL_COOKIE);
-        }
-
-        return Mono.just(true)
-                .flatMap(_ -> Mono.fromCallable(() -> {
-                            JWEObject jweObject = JWEObject.parse(token);
-                            jweObject.decrypt(directDecrypter);
-                            return objectMapper.readValue(jweObject.getPayload().toString(), NextJSJWE.class)
-                                    .getUser().getToken();
-                        })
-                        .subscribeOn(Schedulers.boundedElastic())
-                        .onErrorResume(_ -> Mono.just(NULL_COOKIE)
-                        ));
-    }
+@Slf4j
+public class NextCsrfValidator {
+    private final NextAuthProperties nextAuthProperties;
 
     public Mono<Boolean> validateCsrf(String csrf, String requestUri) {
 
-        if (!csrfEnabled) {
+        if (!nextAuthProperties.isCsrfEnabled()) {
             return Mono.just(true);
         }
 
@@ -72,7 +42,7 @@ public class NextAuthDecrypt {
                                     String requestToken = parts[0];
                                     String requestHash = parts[1];
 
-                                    String validHash = computeSha256Hash(requestToken + secretKey);
+                                    String validHash = computeSha256Hash(requestToken + nextAuthProperties.getSecret());
 
                                     return requestHash.equals(validHash);
                                 })
@@ -87,5 +57,4 @@ public class NextAuthDecrypt {
         byte[] hashBytes = digest.digest(data.getBytes(StandardCharsets.UTF_8));
         return HexFormat.of().formatHex(hashBytes);
     }
-
 }
