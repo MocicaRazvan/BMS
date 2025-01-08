@@ -9,6 +9,7 @@ import {
 import { Locale } from "@/navigation";
 import { tool } from "@langchain/core/tools";
 import { z } from "zod";
+import { getCsrfNextAuth } from "@/actions/get-csr-next-auth";
 
 export async function getItemTool<T extends TitleBodyUserDto>(
   input: string,
@@ -19,6 +20,7 @@ export async function getItemTool<T extends TitleBodyUserDto>(
   locale: Locale,
   extraMap?: (content: T) => string,
 ) {
+  const csrf = await getCsrfNextAuth();
   const response = await fetchStream<
     PageableResponse<ResponseWithUserDtoEntity<T>>[]
   >({
@@ -27,6 +29,7 @@ export async function getItemTool<T extends TitleBodyUserDto>(
     token,
     cache: "no-cache",
     acceptHeader: "application/json",
+    csrf,
     body: {
       page: 0,
       size: process.env.OLLAMA_TOOL_PAGE_SIZE

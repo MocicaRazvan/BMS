@@ -18,6 +18,7 @@ export interface FetchStreamProps<T> {
   errorCallback?: (error: BaseError) => void;
   acceptHeader?: AcceptHeader;
   batchSize?: number;
+  csrf?: string;
 }
 
 export async function fetchStream<
@@ -38,6 +39,7 @@ export async function fetchStream<
   successArrayCallback,
   acceptHeader = "application/x-ndjson",
   batchSize = 6,
+  csrf,
 }: FetchStreamProps<T>) {
   // TODO RETEST ALL OF THIS
   let batchBuffer: T[] = [];
@@ -46,7 +48,6 @@ export async function fetchStream<
   let isFinished = false;
 
   const abortController = aboveController || new AbortController();
-  const csrf = await getCsrfNextAuth();
 
   const headers = new Headers(customHeaders);
   headers.set("Accept", acceptHeader);
