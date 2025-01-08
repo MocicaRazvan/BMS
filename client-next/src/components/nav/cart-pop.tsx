@@ -11,7 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
-import { Fragment } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { ScrollArea } from "../ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { useToast } from "../ui/use-toast";
@@ -45,12 +45,23 @@ export default function CartPop({ authUser, cartPopTexts }: Props) {
     usersCartTotalPrice,
     addToCartForUser,
   } = useCartForUser(authUser.id);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
   const formatIntl = useFormatter();
 
+  useEffect(() => {
+    if (usersCart.total === 0) {
+      setDropdownOpen(false);
+    }
+  }, [usersCart?.total]);
+
   return (
-    <DropdownMenu modal={false}>
+    <DropdownMenu
+      modal={false}
+      open={dropdownOpen}
+      onOpenChange={setDropdownOpen}
+    >
       <DropdownMenuTrigger asChild>
         <div className="relative">
           <TooltipProvider>
@@ -93,7 +104,7 @@ export default function CartPop({ authUser, cartPopTexts }: Props) {
               )}
             >
               {usersCart.plans.map((plan, index) => (
-                <Fragment key={plan.id + index}>
+                <Fragment key={plan.id}>
                   <DropdownMenuItem onClick={(e) => e.preventDefault()}>
                     <div className="py-1 h-10 flex items-center justify-between w-full ">
                       <div>

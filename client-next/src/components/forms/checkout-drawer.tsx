@@ -96,12 +96,19 @@ export default function CheckoutDrawer({
       userConfirmedPrice: totalPrice,
     },
   });
+  const totalPriceWatch = form.watch("userConfirmedPrice");
 
   useEffect(() => {
     if (!isDrawerOpen) {
       form.reset();
     }
   }, [isDrawerOpen]);
+
+  useEffect(() => {
+    if (totalPriceWatch !== totalPrice) {
+      form.setValue("userConfirmedPrice", totalPrice);
+    }
+  }, [totalPriceWatch, totalPrice]);
 
   const onSubmit = useCallback(
     async ({ userConfirmedPrice }: CheckoutSchemaType) => {
