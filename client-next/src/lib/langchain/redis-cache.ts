@@ -1,7 +1,9 @@
 import { Redis } from "ioredis";
 import { RedisCache } from "@langchain/community/caches/ioredis";
 
-let redisCache: RedisCache | null = null;
+declare const globalThis: {
+  redisCache: RedisCache | undefined;
+} & typeof global;
 
 const redisDb = process.env.LANGCHAIN_CACHE_REDIS_DB
   ? parseInt(process.env.LANGCHAIN_CACHE_REDIS_DB)
@@ -17,15 +19,15 @@ const redisTTL = process.env.LANGCHAIN_CACHE_REDIS_TTL
   : 300;
 
 export function getRedisCache(): RedisCache {
-  if (!redisCache) {
+  if (!globalThis.redisCache) {
     const redisCon = new Redis({
       db: redisDb,
       port: redisPort,
       host: redisHost,
     });
-    redisCache = new RedisCache(redisCon, {
+    globalThis.redisCache = new RedisCache(redisCon, {
       ttl: redisTTL,
     });
   }
-  return redisCache;
+  return globalThis.redisCache;
 }
