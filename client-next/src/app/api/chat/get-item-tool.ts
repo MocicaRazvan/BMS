@@ -123,7 +123,8 @@ export function generateToolsForUser(
         "plans",
         siteUrl,
         locale,
-        (c) => `Objective: ${c.objective}\t Number of days: ${c.days}\t `,
+        (c) =>
+          `Objective: ${c.objective}\t Number of days: ${c.days?.length}\t `,
       );
       console.log("getMealPlansByTitle", ret);
       return ret;
