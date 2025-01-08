@@ -5,6 +5,7 @@ import com.mocicarazvan.gatewayservice.config.NextAuthProperties;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.util.AntPathMatcher;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
@@ -18,10 +19,15 @@ import java.util.HexFormat;
 @Slf4j
 public class NextCsrfValidator {
     private final NextAuthProperties nextAuthProperties;
+    private final AntPathMatcher antPathMatcher;
+
 
     public Mono<Boolean> validateCsrf(String csrf, String requestUri) {
 
         if (!nextAuthProperties.isCsrfEnabled()) {
+            return Mono.just(true);
+        }
+        if (isExemptedPath(requestUri)) {
             return Mono.just(true);
         }
 
@@ -56,5 +62,9 @@ public class NextCsrfValidator {
         MessageDigest digest = MessageDigest.getInstance("SHA-256");
         byte[] hashBytes = digest.digest(data.getBytes(StandardCharsets.UTF_8));
         return HexFormat.of().formatHex(hashBytes);
+    }
+
+    public boolean isExemptedPath(String path) {
+        return nextAuthProperties.getCsrfExemptedUrls().stream().anyMatch(p -> antPathMatcher.match(p, path));
     }
 }

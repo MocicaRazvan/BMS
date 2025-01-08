@@ -56,4 +56,6 @@ public class CsrfFilter implements GatewayFilter {
                     return chain.filter(exchange);
                 });
     }
+
+
 }
