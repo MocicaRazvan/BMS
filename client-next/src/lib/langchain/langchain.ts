@@ -5,7 +5,7 @@ import { DocumentInterface } from "@langchain/core/documents";
 import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
 import { EmbeddingsFilter } from "langchain/retrievers/document_compressors/embeddings_filter";
 import { CustomOllamaEmbeddings } from "@/lib/langchain/custom-ollama-embeddings";
-import { Pool } from "pg";
+import { PoolConfig } from "pg";
 import {
   DistanceStrategy,
   PGVectorStore,
@@ -18,16 +18,15 @@ const embeddingModel = process.env.OLLAMA_EMBEDDING;
 const siteUrl = process.env.NEXTAUTH_URL;
 const keepAlive = "-1m";
 
-const pool = new Pool({
-  host: process.env.POSTGRES_HOST,
-  port: parseInt(process.env.POSTGRES_PORT || "5432"),
-  user: process.env.POSTGRES_USER,
-  password: process.env.POSTGRES_PASSWORD,
-  database: process.env.POSTGRES_DB,
-});
-
 const pgConfig = {
-  pool,
+  postgresConnectionOptions: {
+    type: "postgres",
+    host: process.env.POSTGRES_HOST,
+    port: parseInt(process.env.POSTGRES_PORT || "5432"),
+    user: process.env.POSTGRES_USER,
+    password: process.env.POSTGRES_PASSWORD,
+    database: process.env.POSTGRES_DB,
+  } as PoolConfig,
   tableName: "langchain_vector_store",
   columns: {
     idColumnName: "id",
@@ -35,7 +34,7 @@ const pgConfig = {
     contentColumnName: "content",
     metadataColumnName: "metadata",
   },
-  distanceStrategy: "cosine" as DistanceStrategy,
+  distanceStrategy: "innerProduct" as DistanceStrategy,
 };
 
 if (!ollamaBaseUrl || !embeddingModel || !siteUrl) {
