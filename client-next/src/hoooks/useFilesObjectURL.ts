@@ -20,7 +20,6 @@ async function fetchFileObjectURL(url: string): Promise<FieldInputItem> {
   const res = await fetch(url, {
     priority: "high",
     method: "GET",
-    credentials: "include",
   });
   const blob = await res.blob();
   const fileName = url.split("/").pop() || "file";
