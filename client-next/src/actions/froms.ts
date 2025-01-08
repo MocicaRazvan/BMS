@@ -4,12 +4,15 @@ import { RegisterType } from "@/types/forms";
 import { BaseError } from "@/types/responses";
 import { redirect } from "@/navigation";
 import { emitInfo } from "@/logger";
+import { getCsrfNextAuthHeader } from "@/actions/get-csr-next-auth";
 
 export async function registerSubmit(data: RegisterType): Promise<BaseError> {
+  const csrfHeader = await getCsrfNextAuthHeader();
   const resp = await fetch(process.env.NEXT_PUBLIC_SPRING! + "/auth/register", {
     method: "POST",
     body: JSON.stringify(data),
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...csrfHeader },
+    credentials: "include",
   });
 
   emitInfo({

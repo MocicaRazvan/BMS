@@ -39,6 +39,8 @@ export async function getItemTool<T extends TitleBodyUserDto>(
     },
   });
 
+  console.log("getItemTool", response);
+
   if (response.error || response.messages[0].length === 0) {
     return "";
   }

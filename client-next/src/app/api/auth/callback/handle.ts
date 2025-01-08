@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { encode, getToken } from "next-auth/jwt";
 import { emitError } from "@/logger";
-import { decode } from "next-auth/jwt";
+import { getCsrfNextAuthHeader } from "@/actions/get-csr-next-auth";
 
 export default async function handleOauthCall(
   req: NextRequest,
@@ -16,11 +16,11 @@ export default async function handleOauthCall(
       status: 400,
     });
   }
-
+  const csrfHeader = await getCsrfNextAuthHeader();
   try {
     const response = await fetch(url, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", ...csrfHeader },
       body: JSON.stringify({ code, state: state ? state : null }),
     });
 

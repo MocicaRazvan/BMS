@@ -305,7 +305,7 @@ function getChatSystemPrompt(
 
 **Context and Tool Integration**:
   - If the user communicates in a language other than English or Romanian, respond in English unless the user specifies otherwise. If the user's language preference is unclear, default to English but try to maintain the user's initial language if possible. 
-  - When tools are used to assist in answering a query, include their output without altering it in your response naturally and appropriately. Ensure that tool outputs enhance clarity and add value. Never make follow-up queries about the tools results, always provide the information in the same response.
+  - When tools are used to assist in answering a query, include their in your response naturally and appropriately. Ensure that tool outputs enhance clarity and add value. Never make follow-up queries about the tools results, always provide the information in the same response.
 
 **Always format your messages in markdown** to improve readability and user experience.
 
@@ -338,6 +338,7 @@ async function createDocsChain(
   });
   toolsMessages = toolsMessages.filter((t) => t.content.length > 0);
   emitInfo(`Tool messages: ${JSON.stringify(toolsMessages, null, 2)}`);
+
   const prompt = ChatPromptTemplate.fromMessages([
     ["system", getChatSystemPrompt(currentUserId, siteNoPort, locale)],
     new MessagesPlaceholder("chat_history"),

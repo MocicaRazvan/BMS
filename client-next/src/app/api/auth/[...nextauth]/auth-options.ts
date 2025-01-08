@@ -2,6 +2,7 @@ import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GitHubProvider from "next-auth/providers/github";
 import { CustomGoogleProvider } from "@/app/api/auth/[...nextauth]/custom-google-provider";
+import { getCsrfNextAuthHeader } from "@/actions/get-csr-next-auth";
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -21,13 +22,17 @@ export const authOptions: NextAuthOptions = {
           if (!credentials?.email || !credentials?.password) {
             return { error: "Missing credentials" };
           }
+          const csrfHeader = await getCsrfNextAuthHeader();
 
           const resp = await fetch(
             `${process.env.NEXT_PUBLIC_SPRING}/auth/login`,
             {
               method: "POST",
               body: JSON.stringify(credentials),
-              headers: { "Content-Type": "application/json" },
+              headers: {
+                "Content-Type": "application/json",
+                ...csrfHeader,
+              },
             },
           );
 

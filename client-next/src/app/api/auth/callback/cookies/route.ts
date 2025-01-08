@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { v4 as uuidv4 } from "uuid";
+import { getCsrfNextAuthHeader } from "@/actions/get-csr-next-auth";
 
 export async function GET(req: NextRequest) {
   const state = uuidv4();
@@ -13,6 +14,7 @@ export async function GET(req: NextRequest) {
 
   cookies().set(cookieName, state);
   const springUrl = process.env.NEXT_PUBLIC_SPRING!;
+  const csrfHeader = await getCsrfNextAuthHeader();
 
   const backendResponse = await fetch(
     `${springUrl}/auth/google/login?state=${state}`,
@@ -20,6 +22,7 @@ export async function GET(req: NextRequest) {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
+        ...csrfHeader,
       },
     },
   );

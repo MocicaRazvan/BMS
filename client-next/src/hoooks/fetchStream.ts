@@ -1,6 +1,7 @@
 import ndjsonStream from "can-ndjson-stream";
 import { BaseError } from "@/types/responses";
 import { AcceptHeader } from "@/types/fetch-utils";
+import { getCsrfNextAuth } from "@/actions/get-csr-next-auth";
 
 export interface FetchStreamProps<T> {
   path: string;
@@ -45,6 +46,7 @@ export async function fetchStream<
   let isFinished = false;
 
   const abortController = aboveController || new AbortController();
+  const csrf = await getCsrfNextAuth();
 
   const headers = new Headers(customHeaders);
   headers.set("Accept", acceptHeader);
@@ -55,6 +57,10 @@ export async function fetchStream<
 
   if (body !== null && !headers.has("Content-Type")) {
     headers.set("Content-Type", "application/json");
+  }
+
+  if (csrf) {
+    headers.set("x-csrf-token", csrf);
   }
 
   const querySearch = new URLSearchParams(queryParams).toString();

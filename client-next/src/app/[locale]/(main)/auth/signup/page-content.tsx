@@ -110,8 +110,8 @@ export default function SignUp({
   };
 
   return (
-    <main className="w-full min-h-[calc(100vh-4rem)] flex items-center justify-center transition-all py-4">
-      <Card className="w-[500px]">
+    <main className="w-full min-h-[calc(100vh-4rem)] flex items-center justify-center transition-all py-4 px-2">
+      <Card className="w-full max-w-[550px]">
         <CardHeader>
           <CardTitle className="text-center">{cardTitle}</CardTitle>
         </CardHeader>

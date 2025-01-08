@@ -24,6 +24,8 @@ public class CsrfFilter implements GatewayFilter {
             , "next-auth.csrf-token"
     };
 
+    private static final String NEXT_CSRF_HEADER = "x-csrf-token";
+
     public CsrfFilter(NextCsrfValidator nextCsrfValidator, CookieUtils cookieUtils, ErrorHandler errorHandler) {
         this.nextCsrfValidator = nextCsrfValidator;
         this.cookieUtils = cookieUtils;
@@ -39,7 +41,13 @@ public class CsrfFilter implements GatewayFilter {
         ) {
             return chain.filter(exchange);
         }
-        return nextCsrfValidator.validateCsrf(cookieUtils.getCookie(exchange, NEXT_CSRF_COOKIES), exchange.getRequest().getURI().getPath())
+
+        String csrfToken = exchange.getRequest().getHeaders().getFirst(NEXT_CSRF_HEADER);
+        if (csrfToken == null) {
+            csrfToken = cookieUtils.getCookie(exchange, NEXT_CSRF_COOKIES);
+        }
+
+        return nextCsrfValidator.validateCsrf(csrfToken, exchange.getRequest().getURI().getPath())
                 .flatMap(isValid -> {
                     log.info("CSRF Token is valid: {} for request {} with method {}", isValid, exchange.getRequest().getURI().getPath(), exchange.getRequest().getMethod());
                     if (!isValid) {

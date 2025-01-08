@@ -1,4 +1,5 @@
 import { BaseError } from "@/types/responses";
+import { getCsrfNextAuthHeader } from "@/actions/get-csr-next-auth";
 
 interface BaseArgs {
   token: string;
@@ -28,6 +29,7 @@ export async function fetchWithFilesMultipleFiles<
 }: FetchWithFilesArgsMultipleFiles<T>) {
   const formData = new FormData();
   formData.append("body", JSON.stringify(body));
+  const crfHeader = await getCsrfNextAuthHeader();
 
   Object.entries(filesObj).forEach(([key, files]) => {
     if (files.length > 0) {
@@ -40,9 +42,11 @@ export async function fetchWithFilesMultipleFiles<
     {
       method,
       body: formData,
+      credentials: "include",
       headers: {
         Authorization: `Bearer ${token}`,
         Accept: "application/json",
+        ...crfHeader,
       },
     },
   );

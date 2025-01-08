@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getUserWithMinRole } from "@/lib/user";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/auth-options";
+import { getCsrfNextAuthHeader } from "@/actions/get-csr-next-auth";
 
 const springUrl = process.env.NEXT_PUBLIC_SPRING!;
 
@@ -9,9 +10,10 @@ export async function POST(req: NextRequest) {
   try {
     await getUserWithMinRole("ROLE_TRAINER");
 
-    const [session, body] = await Promise.all([
+    const [session, body, csrfHeader] = await Promise.all([
       getServerSession(authOptions),
       await req.json(),
+      await getCsrfNextAuthHeader(),
     ]);
 
     if (!session || !session?.user?.token) {
@@ -23,8 +25,10 @@ export async function POST(req: NextRequest) {
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${session.user.token}`,
+        ...csrfHeader,
       },
       body: JSON.stringify(body),
+      credentials: "include",
     });
 
     if (!response.ok) {
