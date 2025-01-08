@@ -92,7 +92,7 @@ export default function DiffusionImagesForm({
     },
   });
 
-  useNavigationGuardI18nForm({ form });
+  // useNavigationGuardI18nForm({ form });
 
   const handleToxic = useCallback(
     async (
