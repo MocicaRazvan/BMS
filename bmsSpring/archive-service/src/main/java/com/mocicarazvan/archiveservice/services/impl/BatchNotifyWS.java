@@ -80,7 +80,9 @@ public class BatchNotifyWS implements BatchNotify {
 
     private void startScheduledTaskIfNotStarted(String queueName) {
 //        log.info("Sending update global outside count is {}", globalCnt);
-        ScheduledFuture<?> queueFuture = scheduledTasks.get(queueName).get();
+        ScheduledFuture<?> queueFuture = scheduledTasks.computeIfAbsent(queueName,
+                _ -> new AtomicReference<>()
+        ).get();
         if (queueFuture == null || queueFuture.isCancelled()) {
             PeriodicTrigger trigger = new PeriodicTrigger(Duration.ofSeconds(updatePeriod));
             trigger.setInitialDelay(Duration.ofSeconds(updatePeriod / 2));
@@ -140,7 +142,7 @@ public class BatchNotifyWS implements BatchNotify {
         ScheduledFuture<?> scheduledFuture = scheduledTasks.get(queueName).get();
         if (scheduledFuture != null && !scheduledFuture.isCancelled()) {
             scheduledFuture.cancel(true);
-            scheduledTasks.remove(queueName);
+            scheduledTasks.put(queueName, new AtomicReference<>());
         }
     }
 
