@@ -18,6 +18,13 @@ const embeddingModel = process.env.OLLAMA_EMBEDDING;
 const siteUrl = process.env.NEXTAUTH_URL;
 const keepAlive = "-1m";
 
+const minLangchainPool = process.env.MIN_LANGCHAIN_POOL
+  ? parseInt(process.env.MIN_LANGCHAIN_POOL)
+  : 1;
+const maxLangchainPool = process.env.MAX_LANGCHAIN_POOL
+  ? parseInt(process.env.MAX_LANGCHAIN_POOL)
+  : 25;
+
 const pgConfig = {
   postgresConnectionOptions: {
     type: "postgres",
@@ -26,6 +33,8 @@ const pgConfig = {
     user: process.env.POSTGRES_USER,
     password: process.env.POSTGRES_PASSWORD,
     database: process.env.POSTGRES_DB,
+    min: minLangchainPool,
+    max: maxLangchainPool,
   } as PoolConfig,
   tableName: "langchain_vector_store",
   columns: {
