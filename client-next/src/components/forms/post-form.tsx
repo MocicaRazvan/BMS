@@ -147,7 +147,7 @@ export default function PostForm({
     }
     return fields;
   }, [watchBody, watchTags, watchTitle]);
-  const { fileCleanup } = useFilesBase64({
+  const { fileCleanup, chunkProgressValue } = useFilesBase64({
     files: images,
     fieldName: "images",
     setValue: form.setValue,
@@ -282,6 +282,7 @@ export default function PostForm({
               fieldTexts={fieldTexts}
               initialLength={images?.length || 0}
               parentListCollapsed={isImagesListCollapsed}
+              loadingProgress={chunkProgressValue}
             />
             <DiffusionImagesForm
               texts={diffusionImagesFormTexts}

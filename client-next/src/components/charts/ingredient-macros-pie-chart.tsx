@@ -8,9 +8,10 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import React, { ComponentProps, useMemo } from "react";
+import React, { ComponentProps, memo, useMemo } from "react";
 import { Label, Pie, PieChart } from "recharts";
 import { motion } from "framer-motion";
+import { isDeepEqual } from "@/lib/utils";
 
 export interface MacroChartElement {
   macro: Macro | "salt";
@@ -102,92 +103,92 @@ const getChartConfig = ({
     },
   }) satisfies ChartConfig;
 
-export default function IngredientMacrosPieChart({
-  items,
-  texts,
-  strokeWith = 6,
-  innerRadius = 100,
-  ...props
-}: Props) {
-  const chartData = useMemo(
-    () =>
-      items.map((item) => ({
-        ...item,
-        fill: `var(--color-${item.macro})`,
-      })),
-    [items],
-  );
-  const totalCalories = useMemo(
-    () =>
-      Math.ceil(
-        items.reduce(
-          (acc, cur) =>
-            acc +
-            cur.value *
-              (cur.macro === "salt"
-                ? 0
-                : getNutritionalConversionFactorByName(cur.macro)),
-          0,
+export const IngredientMacrosPieChart = memo(
+  ({ items, texts, strokeWith = 6, innerRadius = 100, ...props }: Props) => {
+    const chartData = useMemo(
+      () =>
+        items.map((item) => ({
+          ...item,
+          fill: `var(--color-${item.macro})`,
+        })),
+      [items],
+    );
+    const totalCalories = useMemo(
+      () =>
+        Math.ceil(
+          items.reduce(
+            (acc, cur) =>
+              acc +
+              cur.value *
+                (cur.macro === "salt"
+                  ? 0
+                  : getNutritionalConversionFactorByName(cur.macro)),
+            0,
+          ),
         ),
-      ),
-    [items],
-  );
-  console.log("totalCalories", items);
-  const chartConfig = getChartConfig(texts);
+      [items],
+    );
+    console.log("totalCalories", items);
+    const chartConfig = getChartConfig(texts);
 
-  return (
-    <ChartContainer
-      config={chartConfig}
-      className="mx-auto aspect-square  max-h-[350px] lg:max-h-[400px] "
-      {...props}
-    >
-      <PieChart>
-        <ChartTooltip
-          cursor={false}
-          content={<ChartTooltipContent className="gap-2" />}
-        />
-        <Pie
-          data={chartData}
-          dataKey="value"
-          nameKey="macro"
-          innerRadius={innerRadius}
-          strokeWidth={strokeWith}
-        >
-          <Label
-            content={({ viewBox }) => {
-              if (viewBox && "cx" in viewBox && "cy" in viewBox) {
-                return (
-                  <motion.text
-                    x={viewBox.cx}
-                    y={viewBox.cy}
-                    textAnchor="middle"
-                    dominantBaseline="middle"
-                    initial={{ opacity: 0, scale: 0 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 0.5 }}
-                  >
-                    <tspan
+    return (
+      <ChartContainer
+        config={chartConfig}
+        className="mx-auto aspect-square  max-h-[350px] lg:max-h-[400px] "
+        {...props}
+      >
+        <PieChart>
+          <ChartTooltip
+            cursor={false}
+            content={<ChartTooltipContent className="gap-2" />}
+          />
+          <Pie
+            data={chartData}
+            dataKey="value"
+            nameKey="macro"
+            innerRadius={innerRadius}
+            strokeWidth={strokeWith}
+          >
+            <Label
+              content={({ viewBox }) => {
+                if (viewBox && "cx" in viewBox && "cy" in viewBox) {
+                  return (
+                    <motion.text
                       x={viewBox.cx}
                       y={viewBox.cy}
-                      className="fill-foreground text-3xl font-bold"
+                      textAnchor="middle"
+                      dominantBaseline="middle"
+                      initial={{ opacity: 0, scale: 0 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ duration: 0.5 }}
                     >
-                      {totalCalories.toLocaleString()}
-                    </tspan>
-                    <tspan
-                      x={viewBox.cx}
-                      y={(viewBox.cy || 0) + 24}
-                      className="fill-muted-foreground"
-                    >
-                      {texts.macroLabel}
-                    </tspan>
-                  </motion.text>
-                );
-              }
-            }}
-          />
-        </Pie>
-        <ChartLegend content={<ChartLegendContent nameKey={"macro"} />} />
-      </PieChart>
-    </ChartContainer>
-  );
-}
+                      <tspan
+                        x={viewBox.cx}
+                        y={viewBox.cy}
+                        className="fill-foreground text-3xl font-bold"
+                      >
+                        {totalCalories.toLocaleString()}
+                      </tspan>
+                      <tspan
+                        x={viewBox.cx}
+                        y={(viewBox.cy || 0) + 24}
+                        className="fill-muted-foreground"
+                      >
+                        {texts.macroLabel}
+                      </tspan>
+                    </motion.text>
+                  );
+                }
+              }}
+            />
+          </Pie>
+          <ChartLegend content={<ChartLegendContent nameKey={"macro"} />} />
+        </PieChart>
+      </ChartContainer>
+    );
+  },
+  isDeepEqual,
+);
+
+IngredientMacrosPieChart.displayName = "IngredientMacrosPieChart";
+export default IngredientMacrosPieChart;

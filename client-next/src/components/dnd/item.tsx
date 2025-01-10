@@ -86,7 +86,7 @@ const Item = forwardRef<HTMLDivElement, Props>(
               src={item.src}
               alt={`${item.id}`}
               className={cn(
-                "rounded-lg max-w-100 object-cover w-full h-full h-[250px]",
+                "rounded-lg max-w-100 object-cover w-full  h-[250px]",
                 isDragging ? "shadow-none" : "shadow-md",
               )}
               height={0}
@@ -97,7 +97,7 @@ const Item = forwardRef<HTMLDivElement, Props>(
               <video
                 src={videoSrc}
                 controls={!preview}
-                preload="metadata"
+                preload="auto"
                 // typeof={"blob"}
                 className={cn(
                   "rounded-lg max-w-100 object-cover w-full  h-[250px]",

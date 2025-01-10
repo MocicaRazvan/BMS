@@ -27,6 +27,7 @@ import { ItemTexts } from "@/components/dnd/item";
 import { Loader2 } from "lucide-react";
 import { UploadIcon } from "@radix-ui/react-icons";
 import DotPattern from "@/components/magicui/dot-pattern";
+import ProgressText from "@/components/common/progres-text";
 
 export type InputFieldName = "images" | "videos";
 
@@ -50,6 +51,7 @@ interface Props<T extends FieldValues> {
   multiple?: boolean;
   initialLength: number;
   parentListCollapsed?: boolean;
+  loadingProgress?: number;
 }
 
 export interface FieldInputItem extends SortableItem {
@@ -97,6 +99,7 @@ export default function InputFile<T extends FieldValues>({
   initialLength = 0,
   multiple = true,
   parentListCollapsed,
+  loadingProgress,
 }: Props<T>) {
   const fieldValue = useWatch({
     control,
@@ -222,6 +225,7 @@ export default function InputFile<T extends FieldValues>({
                   />
                   <Loader2 className=" h-16 w-16 text-primary/60 animate-spin" />
                   <p className="font-semibold">{loading}</p>
+                  <ProgressText progress={loadingProgress} />
                 </div>
               ) : (
                 <div className="relative rounded-md pb-5">

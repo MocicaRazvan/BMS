@@ -58,7 +58,7 @@ import { fetchWithFiles } from "@/hoooks/fetchWithFiles";
 import { BaseError } from "@/types/responses";
 import { toast } from "@/components/ui/use-toast";
 import { BaseFormTexts } from "@/texts/components/forms";
-import useFilesBase64 from "@/hoooks/useFilesObjectURL";
+import useFilesObjectURL from "@/hoooks/useFilesObjectURL";
 import {
   Select,
   SelectContent,
@@ -263,7 +263,7 @@ export default function PlanForm({
     }
   }, [JSON.stringify(daysWatch)]);
 
-  const { fileCleanup } = useFilesBase64({
+  const { fileCleanup, chunkProgressValue } = useFilesObjectURL({
     files: images,
     fieldName: "images",
     setValue: form.setValue,
@@ -498,7 +498,7 @@ export default function PlanForm({
                       authUser={authUser}
                       {...childInputMultipleSelectorTexts}
                     />
-                  </FormControl>{" "}
+                  </FormControl>
                   {selectedOptions.length > 0 && <div></div>}
                   <FormMessage />
                   {selectedOptions.length > 0 && dietType && (
@@ -543,6 +543,7 @@ export default function PlanForm({
               fieldTexts={imagesText}
               initialLength={images?.length || 0}
               parentListCollapsed={isImagesListCollapsed}
+              loadingProgress={chunkProgressValue}
             />
             <DiffusionImagesForm
               texts={diffusionImagesFormTexts}

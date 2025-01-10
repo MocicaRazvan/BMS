@@ -57,7 +57,7 @@ import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import { fetchWithFilesMultipleFiles } from "@/hoooks/fetchWithFiles";
 import { toast } from "@/components/ui/use-toast";
 import { BaseError } from "@/types/responses";
-import useFilesBase64 from "@/hoooks/useFilesObjectURL";
+import useFilesObjectURL from "@/hoooks/useFilesObjectURL";
 import useProgressWebSocket from "@/hoooks/useProgressWebSocket";
 import UploadingProgress, {
   UploadingProgressTexts,
@@ -194,13 +194,19 @@ export default function RecipeForm({
 
   const baseAICallback = useBaseAICallbackTitleBody(form, setEditorKey);
 
-  const { fileCleanup: imagesCleanup } = useFilesBase64({
+  const {
+    fileCleanup: imagesCleanup,
+    chunkProgressValue: imagesChunkProgress,
+  } = useFilesObjectURL({
     files: images,
     fieldName: "images",
     setValue: form.setValue,
     getValues: form.getValues,
   });
-  const { fileCleanup: videosCleanup } = useFilesBase64({
+  const {
+    fileCleanup: videosCleanup,
+    chunkProgressValue: videosChunkProgress,
+  } = useFilesObjectURL({
     files: videos,
     fieldName: "videos",
     setValue: form.setValue,
@@ -602,6 +608,7 @@ export default function RecipeForm({
               fieldTexts={imagesText}
               initialLength={images?.length || 0}
               parentListCollapsed={isImagesListCollapsed}
+              loadingProgress={imagesChunkProgress}
             />
             <DiffusionImagesForm
               texts={diffusionImagesFormTexts}
@@ -612,6 +619,7 @@ export default function RecipeForm({
               fieldName={"videos"}
               fieldTexts={videosText}
               initialLength={videos?.length || 0}
+              loadingProgress={videosChunkProgress}
             />
             {isOneIngredientCompletedButNotSubmitted && (
               <div className="w-full space-y-8">
