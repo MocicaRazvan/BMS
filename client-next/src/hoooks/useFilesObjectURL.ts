@@ -170,6 +170,7 @@ import {
   UseFormGetValues,
   UseFormSetValue,
 } from "react-hook-form";
+import { toShuffleArray } from "@/lib/utils";
 
 interface Args<T extends FieldValues> {
   files: string[];
@@ -227,6 +228,7 @@ export default function useFilesObjectURL<T extends FieldValues>({
   const springServer = process.env.NEXT_PUBLIC_SPRING;
   const [chunkProgressValue, setChunkProgressValue] = useState(0);
   const [fetchWorker] = useWorker(fetchFilesObjectURL);
+  const [fetchWorker2] = useWorker(fetchFilesObjectURL);
 
   if (!springClient) {
     throw new Error("Missing environment variable NEXT_PUBLIC_SPRING_CLIENT");
@@ -242,22 +244,51 @@ export default function useFilesObjectURL<T extends FieldValues>({
 
   useEffect(() => {
     if (files.length > 0 && firstRun) {
-      const filesForFront = files.map((f) => {
+      const filesForFront = files.map((f, index) => {
         if (!f.startsWith(springServer)) {
-          return f;
+          return {
+            url: f,
+            index,
+          };
         }
 
         const url = new URL(f);
         const newUrl = new URL(
           springClient + url.pathname + url.search + url.hash,
         );
-        return newUrl.toString();
+        return {
+          url: newUrl.toString(),
+          index,
+        };
       });
 
-      fetchWorker(filesForFront)
-        .then(async (reps) =>
-          (await reps).map((fs) => {
-            console.log("fs", fs);
+      const [workerUrls, workerUrls2] = toShuffleArray(filesForFront).reduce(
+        (acc, item, index) => {
+          if (index % 2 === 0) {
+            acc[0].push(item);
+          } else {
+            acc[1].push(item);
+          }
+
+          return acc;
+        },
+        [[], []] as { url: string; index: number }[][],
+      );
+
+      const worker1Resp = fetchWorker(workerUrls.map((i) => i.url));
+      const worker2Resp =
+        workerUrls2.length > 0
+          ? fetchWorker2(workerUrls2.map((i) => i.url))
+          : Promise.resolve([]);
+      Promise.all([worker1Resp, worker2Resp])
+        .then((r) =>
+          r.flat().map((r) => ({
+            ...r,
+            index: filesForFront.find((i) => i.url === r.url)?.index,
+          })),
+        )
+        .then((reps) =>
+          reps.map((fs) => {
             const file = new File(
               [fs.blob],
               fs.url.split("/").pop() || "file",
@@ -266,17 +297,24 @@ export default function useFilesObjectURL<T extends FieldValues>({
               },
             );
             const objectURL = URL.createObjectURL(fs.blob);
-            setChunkProgressValue((prev) => ((prev + 1) / files.length) * 100);
+            // setChunkProgressValue((prev) => ((prev + 1) / files.length) * 100);
             return {
               id: uuidv4(),
               src: objectURL,
               file,
+              index: fs.index,
             };
           }),
         )
         .then((fs) => {
+          const sortedFs = fs.sort((a, b) =>
+            a.index != undefined && b.index != undefined
+              ? a.index - b.index
+              : 0,
+          );
+
           setFirstRun(false);
-          setValue(fieldName as Path<T>, fs as PathValue<T, Path<T>>);
+          setValue(fieldName as Path<T>, sortedFs as PathValue<T, Path<T>>);
         });
     }
   }, [
@@ -288,6 +326,7 @@ export default function useFilesObjectURL<T extends FieldValues>({
     springServer,
     getValues,
     fetchWorker,
+    fetchWorker2,
   ]);
 
   const fileCleanup = useCallback(() => {

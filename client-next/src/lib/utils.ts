@@ -328,3 +328,11 @@ export function normalizeText<T>(text: T): T {
   }
   return text;
 }
+export const toShuffleArray = <T>(array: T[]) => {
+  const copiedArray: T[] = JSON.parse(JSON.stringify(array));
+  for (let i = copiedArray.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copiedArray[i], copiedArray[j]] = [copiedArray[j], copiedArray[i]];
+  }
+  return copiedArray;
+};

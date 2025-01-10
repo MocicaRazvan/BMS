@@ -48,6 +48,7 @@ const Item = forwardRef<HTMLDivElement, Props>(
       style,
       itemCount,
       itemTexts: { header, tooltipContent },
+      deleteItem,
       ...props
     },
     ref,
@@ -126,14 +127,14 @@ const Item = forwardRef<HTMLDivElement, Props>(
               </TooltipProvider>
             </div>
           )}
-          {props?.deleteItem && (
+          {deleteItem && (
             <Button
               size={"icon"}
               variant={"destructive"}
               className="absolute top-1 right-2"
               onClick={(e) => {
                 e.stopPropagation();
-                props?.deleteItem?.(item.id);
+                deleteItem?.(item.id);
               }}
             >
               <Trash2 />

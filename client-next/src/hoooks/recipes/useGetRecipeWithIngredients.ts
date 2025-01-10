@@ -37,7 +37,7 @@ export default function useGetRecipeWithIngredients(
     path: ingredientPath || `/recipes/ingredients/${recipeId}`,
     method: "GET",
     authToken: true,
-    useAbortController: false,
+    // useAbortController: false,
   });
 
   console.log("IQError", IQError);
