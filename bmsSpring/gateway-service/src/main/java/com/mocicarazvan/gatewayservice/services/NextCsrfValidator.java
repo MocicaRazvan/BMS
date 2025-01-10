@@ -37,23 +37,22 @@ public class NextCsrfValidator {
             return Mono.just(false);
         }
         log.info("CSRF: {}", csrf);
-        return Mono.just(true)
-                .flatMap(_ -> Mono.fromCallable(() -> {
-                                    String delimiter = csrf.contains("|") ? "\\|" : "%7C";
-                                    String[] parts = csrf.split(delimiter);
-                                    if (parts.length != 2) {
-                                        return false;
-                                    }
+        return Mono.fromCallable(() -> {
+                    String delimiter = csrf.contains("|") ? "\\|" : "%7C";
+                    String[] parts = csrf.split(delimiter);
+                    if (parts.length != 2) {
+                        return false;
+                    }
 
-                                    String requestToken = parts[0];
-                                    String requestHash = parts[1];
+                    String requestToken = parts[0];
+                    String requestHash = parts[1];
 
-                                    String validHash = computeSha256Hash(requestToken + nextAuthProperties.getSecret());
+                    String validHash = computeSha256Hash(requestToken + nextAuthProperties.getSecret());
 
-                                    return requestHash.equals(validHash);
-                                })
-                                .subscribeOn(Schedulers.boundedElastic())
-                                .onErrorResume(_ -> Mono.just(false))
+                    return requestHash.equals(validHash);
+                })
+                .subscribeOn(Schedulers.boundedElastic())
+                .onErrorResume(_ -> Mono.just(false)
                 );
     }
 

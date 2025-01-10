@@ -27,16 +27,15 @@ public class NextJWEDecrypt {
             return Mono.just(NULL_COOKIE);
         }
 
-        return Mono.just(true)
-                .flatMap(_ -> Mono.fromCallable(() -> {
-                            JWEObject jweObject = JWEObject.parse(token);
-                            jweObject.decrypt(directDecrypter);
-                            return objectMapper.readValue(jweObject.getPayload().toString(), NextJSJWE.class)
-                                    .getUser().getToken();
-                        })
-                        .subscribeOn(Schedulers.boundedElastic())
-                        .onErrorResume(_ -> Mono.just(NULL_COOKIE)
-                        ));
+        return Mono.fromCallable(() -> {
+                    JWEObject jweObject = JWEObject.parse(token);
+                    jweObject.decrypt(directDecrypter);
+                    return objectMapper.readValue(jweObject.getPayload().toString(), NextJSJWE.class)
+                            .getUser().getToken();
+                })
+                .subscribeOn(Schedulers.boundedElastic())
+                .onErrorResume(_ -> Mono.just(NULL_COOKIE)
+                );
     }
 
 
