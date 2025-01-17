@@ -84,7 +84,7 @@ const prompts: Record<TargetedFields, ChatPromptTemplate> = {
   description: descriptionPrompt,
 };
 
-export async function getHtmlDocs(field: AiIdeasField) {
+async function getHtmlDocs(field: AiIdeasField) {
   return (
     await RecursiveCharacterTextSplitter.fromLanguage("html", {
       chunkSize: 512,
@@ -115,7 +115,7 @@ function cleanString(str: string, targetedField: TargetedFields) {
   return newStr;
 }
 
-export async function getTextDoc(field: AiIdeasField) {
+async function getTextDoc(field: AiIdeasField) {
   return [
     new LangDocument({
       pageContent: `
