@@ -244,6 +244,8 @@ export default function DayForm({
     [currentMeals, form],
   );
 
+  console.log("totalOptions D", currentMeals[0]);
+
   const aiFields: AiIdeasField[] = useMemo(() => {
     const fields: AiIdeasField[] = [];
     if (watchTitle.trim()) {
@@ -251,7 +253,7 @@ export default function DayForm({
         content: watchTitle,
         name: "title",
         isHtml: false,
-        role: "Title of the day in a meal plan",
+        role: "Title of a day in a meal plan",
       });
     }
     if (watchBody.trim()) {
@@ -259,7 +261,7 @@ export default function DayForm({
         content: watchBody,
         name: "body",
         isHtml: true,
-        role: "Description of the of the day in a meal plan",
+        role: "Description of a day in a meal plan",
       });
     }
     if (watchType) {
@@ -267,28 +269,39 @@ export default function DayForm({
         content: watchType,
         name: "type",
         isHtml: false,
-        role: "Kind of the day in a meal plan",
+        role: "Kind of a day in a meal plan",
       });
     }
 
-    if (totalOptions.length) {
+    if (currentMeals.length) {
       fields.push({
-        content: totalOptions.map((tag) => tag.label).join(","),
+        content: currentMeals.reduce((acc, m, i) => {
+          acc += `\n Meal number ${i + 1}. Period: ${m.period.hour}:${m.period.minute}.`;
+          if ("optionRecipes" in m && Array.isArray(m.optionRecipes)) {
+            acc +=
+              m.optionRecipes.reduce((acc, r) => {
+                acc += ` Title of the recipe: ${r?.label}. Type of the recipe: ${r?.type}.`;
+                return acc;
+              }, `\t`) + `\t`;
+          }
+          acc += acc + " \n";
+          return acc;
+        }, ``),
         name: "recipes",
         isHtml: false,
-        role: "Recipes of the day in a meal plan",
+        role: "Recipes of a day in a meal plan",
       });
       fields.push({
         content: dayDietType || "",
         name: "dietType",
         isHtml: false,
-        role: "Diet type of the day in a meal plan",
+        role: "Diet type of a day in a meal plan",
       });
     }
     return fields;
   }, [
     dayDietType,
-    JSON.stringify(totalOptions),
+    JSON.stringify(currentMeals),
     watchBody,
     watchTitle,
     watchType,
@@ -382,7 +395,7 @@ export default function DayForm({
               editorKey={editorKey}
               aiDescriptionCallBack={(r) => baseAICallback("body", r)}
               aiTitleCallBack={(r) => baseAICallback("title", r)}
-              aiItem={"single day of a meal plan"}
+              aiItem={"day in a meal plan"}
               aiCheckBoxes={aiCheckBoxes}
               titleAIGeneratedPopTexts={titleAIGeneratedPopTexts}
               bodyAIGeneratedPopTexts={bodyAIGeneratedPopTexts}

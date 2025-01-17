@@ -109,7 +109,7 @@ export class VectorStoreSingleton {
           // low similarly because the vectors are from html pages
           similarityThreshold: process.env.EMBEDDINGS_SIMILARITY_THRESHOLD
             ? parseFloat(process.env.EMBEDDINGS_SIMILARITY_THRESHOLD)
-            : 0.5,
+            : 0.55,
           // k: 25,
           k: undefined,
         });

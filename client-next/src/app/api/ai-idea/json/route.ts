@@ -1,15 +1,12 @@
-"use server";
-import { ChatOllama } from "@langchain/ollama";
-import { isAIIdeaActionArgs } from "@/types/ai-ideas-types";
-import { vectorStoreInstance } from "@/lib/langchain/langchain";
 import { NextRequest, NextResponse } from "next/server";
-import { LangChainStream, StreamingTextResponse } from "ai";
 import { getUserWithMinRole } from "@/lib/user";
+import { vectorStoreInstance } from "@/lib/langchain/langchain";
+import { isAIIdeaActionArgs } from "@/types/ai-ideas-types";
+import { ChatOllama } from "@langchain/ollama";
 import { cleanString, getBaseIdea } from "@/app/api/ai-idea/ai-idea-utils";
 import { getOllamaArgs } from "@/lib/langchain/ollama-utils";
 
 const { modelName, ollamaBaseUrl } = getOllamaArgs();
-
 export async function POST(req: NextRequest) {
   await getUserWithMinRole("ROLE_TRAINER");
   const [embeddings, vectorFilter, body] = await Promise.all([
@@ -28,12 +25,6 @@ export async function POST(req: NextRequest) {
     );
   }
   const { fields, input, targetedField, item, extraContext = 5 } = body;
-  const { stream, handlers } = LangChainStream();
-  const newHandlers: ReturnType<typeof LangChainStream>["handlers"] = {
-    ...handlers,
-    handleLLMNewToken: (token) =>
-      handlers.handleLLMNewToken(cleanString(token, targetedField)),
-  };
   const llm = new ChatOllama({
     model: modelName,
     baseUrl: ollamaBaseUrl,
@@ -45,10 +36,8 @@ export async function POST(req: NextRequest) {
     numCtx: process.env.OLLAMA_NUM_CTX
       ? parseInt(process.env.OLLAMA_NUM_CTX)
       : 2048,
-    streaming: true,
-    callbacks: [newHandlers],
+    streaming: false,
   });
-
   if (!embeddings || !vectorFilter) {
     return NextResponse.json(
       {
@@ -59,8 +48,7 @@ export async function POST(req: NextRequest) {
       },
     );
   }
-
-  getBaseIdea(
+  const resp = await getBaseIdea(
     targetedField,
     fields,
     embeddings,
@@ -71,5 +59,13 @@ export async function POST(req: NextRequest) {
     item,
   );
 
-  return new StreamingTextResponse(stream);
+  const answer = cleanString(resp.answer, targetedField).trim();
+  return NextResponse.json(
+    {
+      answer,
+    },
+    {
+      status: 200,
+    },
+  );
 }

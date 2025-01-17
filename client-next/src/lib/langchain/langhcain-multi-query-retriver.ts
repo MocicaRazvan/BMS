@@ -12,7 +12,7 @@ const modelName = process.env.OLLAMA_MODEL;
 const ollamaBaseUrl = process.env.OLLAMA_BASE_URL;
 
 function getMultiQuerySystemPrompt(extraQuestion?: string) {
-  return `You are an AI language model assistant. Your task is
+  return `You are an AI language model assistant on a nutritional related site. Your ONLY task is
         to generate ##{queryCount}## different versions of the given user
         input to retrieve relevant documents from a vector database.
         By generating multiple perspectives on the user input,
@@ -28,16 +28,19 @@ function getMultiQuerySystemPrompt(extraQuestion?: string) {
         
         Generate exactly **{queryCount}** rephrased queries.
         
-        Provide these alternative inputs separated by newlines between XML tags. For example:
+        **Output format**:
+          Provide these alternative inputs separated by newlines between XML tags. For example:
+          
+          <inputs>
+          Input 1
+          Input 2
+          Input 3
+          </inputs>
         
-        <inputs>
-        Input 1
-        Input 2
-        Input 3
-        </inputs>
-        
-        **Always make sure to include the original input at the end.**
-        **Do not include any additional information or commentary.**
+        **Final Rules**:
+        - Always make sure to include the original input at the end.
+        - Do not include any additional information or commentary.
+        - You MUST respect the output format and the user intent.
         
         ##Original input##: {question}${extraQuestion ? extraQuestion : ""}`;
 }
@@ -48,6 +51,15 @@ export class LineListOutputParser extends BaseOutputParser<LineList> {
   }
 
   lc_namespace = ["langchain", "retrievers", "multiquery"];
+
+  private readonly originalInput: string;
+  private readonly extraInput: string | undefined;
+
+  constructor(originalInput: string, extraInput?: string) {
+    super();
+    this.originalInput = originalInput;
+    this.extraInput = extraInput;
+  }
 
   async parse(text: string): Promise<LineList> {
     const startKeyIndex = text.indexOf("<inputs>");
@@ -61,8 +73,16 @@ export class LineListOutputParser extends BaseOutputParser<LineList> {
       .split("\n")
       .filter((line) => line.trim() !== "")
       .map((line) => line.trim());
-    console.log("lines: ", lines);
-    return { lines };
+
+    if (this.extraInput && this.extraInput.trim().length > 0) {
+      lines.push(this.extraInput.trim());
+    }
+
+    const newLines = [...new Set(lines.concat(this.originalInput))].filter(
+      (t) => t.trim().length > 0,
+    );
+    console.log("newLines", newLines);
+    return { lines: newLines };
   }
 
   getFormatInstructions(): string {
@@ -74,12 +94,16 @@ interface MultiQueryRetrieverArgs {
   queryCount?: number;
   llmChain?: LLMChain<LineList, ChatOllama>;
   extraQuestion?: string;
+  originalInput: string;
+  extraInput?: string;
 }
 export function getMultiQueryRetriever({
   retriever,
   queryCount = 3,
-  llmChain,
+  llmChain = undefined,
   extraQuestion,
+  originalInput,
+  extraInput,
 }: MultiQueryRetrieverArgs) {
   if (!llmChain) {
     const llm = new ChatOllama({
@@ -100,11 +124,10 @@ export function getMultiQueryRetriever({
       prompt: multiQueryRetrieverPrompt,
     });
   }
-  llmChain.outputParser = new LineListOutputParser();
+  llmChain.outputParser = new LineListOutputParser(originalInput, extraInput);
   return new MultiQueryRetriever({
     retriever,
     llmChain,
     queryCount,
-    // verbose: true,
   });
 }

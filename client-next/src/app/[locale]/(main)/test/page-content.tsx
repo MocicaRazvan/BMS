@@ -25,7 +25,7 @@ export default function TestPageContent() {
     //   },
     // });
 
-    const resp = await fetch("/api/ai-idea", {
+    const resp = await fetch("/api/ai-idea/json", {
       method: "POST",
       body: JSON.stringify({
         fields: [],

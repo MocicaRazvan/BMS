@@ -419,11 +419,17 @@ export default function RecipeForm({
       videosCleanup();
     };
   }, [imagesCleanup, videosCleanup]);
+
   const aiFields: AiIdeasField[] = useMemo(() => {
     const fields: AiIdeasField[] = [];
     if (selectedOptions.length) {
       fields.push({
-        content: selectedOptions.map((o) => o.label).join(","),
+        content: selectedOptions
+          .map(
+            (o, i) =>
+              `\n Ingredient Number:${i + 1}. Name of the ingredient: ${o.label}. Quantity in unit ${o?.unit || ""} : ${o?.quantity} \n`,
+          )
+          .join(","),
         name: "ingredients",
         isHtml: false,
         role: "Ingredients of the recipe",

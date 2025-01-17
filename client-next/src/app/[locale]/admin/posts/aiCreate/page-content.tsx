@@ -7,7 +7,13 @@ import {
 } from "@/types/forms";
 import { useNavigationGuardI18nForm } from "@/hoooks/use-navigation-guard-i18n-form";
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, {
+  Fragment,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { choseRandomItemsFromArray, choseRandomNumber, cn } from "@/lib/utils";
@@ -92,7 +98,7 @@ async function getAIIdeaResponse(
   input: string,
   targetedField: "title" | "description",
 ) {
-  const res = await fetch("/api/ai-idea", {
+  const res = await fetch("/api/ai-idea/json", {
     method: "POST",
     body: JSON.stringify({
       fields: fields,
@@ -393,9 +399,9 @@ export default function AdminAIPostsCreateContent({
                     </FormControl>
                     <SelectContent>
                       {numberOfPostsOptions.map((n) => (
-                        <SelectItem key={n} value={`${n}`}>
-                          {n}
-                        </SelectItem>
+                        <Fragment key={n + " selectnop"}>
+                          <SelectItem value={`${n}`}>{n}</SelectItem>
+                        </Fragment>
                       ))}
                     </SelectContent>
                   </Select>
@@ -421,7 +427,7 @@ export default function AdminAIPostsCreateContent({
                     {currentStatus.map((cr, i) => (
                       <div
                         className="space-y-1"
-                        key={i + "-" + currentStatus.length}
+                        key={i + "-crsmp-" + currentStatus.length}
                       >
                         <p
                           className={cn(
@@ -433,11 +439,17 @@ export default function AdminAIPostsCreateContent({
                         >{`${singlePostLabel} ${i + 1}`}</p>
                         <ul className="space-y-1">
                           {Object.entries(cr).map(([key, value]) => (
-                            <StatusItem
-                              status={value}
-                              text={uploadingState[key as keyof UploadingState]}
-                              key={key}
-                            />
+                            <li
+                              className="flex items-center space-x-2 "
+                              key={key + "si"}
+                            >
+                              <StatusItem
+                                status={value}
+                                text={
+                                  uploadingState[key as keyof UploadingState]
+                                }
+                              />
+                            </li>
                           ))}
                         </ul>
                       </div>
@@ -456,11 +468,10 @@ export default function AdminAIPostsCreateContent({
 interface StatusItemProps {
   status: boolean;
   text: string;
-  key: string;
 }
-const StatusItem = ({ status, text, key }: StatusItemProps) => {
+const StatusItem = ({ status, text }: StatusItemProps) => {
   return (
-    <li key={key} className="flex items-center space-x-2 ">
+    <div className="w-full h-full">
       {status ? (
         <div className="flex items-center justify-start mx-auto flex-1 ">
           <Check className="w-6 h-6 text-success" />
@@ -472,6 +483,6 @@ const StatusItem = ({ status, text, key }: StatusItemProps) => {
           <span className="text-amber">{text}</span>
         </div>
       )}
-    </li>
+    </div>
   );
 };

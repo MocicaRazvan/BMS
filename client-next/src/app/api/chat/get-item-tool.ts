@@ -59,7 +59,7 @@ export async function getItemTool<T extends TitleBodyUserDto>(
       i,
     ) => {
       acc +=
-        `Item Number: ${i + 1} \t ` +
+        `Item ${i + 1} \t ` +
         `Title: ${content.title} \t ` +
         `URL: ${siteUrl}/${locale}/${modelName}/single/${content.id} \t`;
       if (extraMap) {
@@ -71,7 +71,7 @@ export async function getItemTool<T extends TitleBodyUserDto>(
       }
       return acc;
     },
-    `There were ${response.messages[0].length} for the ${modelName} search. \n\n`,
+    `Search result for ${modelName}, there were ${response.messages[0].length} results.  \n\n`,
   );
 }
 

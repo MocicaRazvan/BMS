@@ -28,6 +28,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import * as DOMPurify from "dompurify";
+import removeMd from "remove-markdown";
 
 export interface TitleBodyTexts {
   title: string;
@@ -148,7 +149,7 @@ export const TitleBodyForm = <TFieldValues extends TitleBodyDto>({
                     presentationCallback={(r) => (
                       <div className="w-full h-full space-y-2">
                         <Input
-                          value={r}
+                          value={removeMd(r)}
                           disabled={true}
                           className="flex-1 disabled:cursor-default disabled:bg-background disabled:opacity-100"
                         />

@@ -28,16 +28,10 @@ import { generateToolsForUser } from "@/app/api/chat/get-item-tool";
 import { Locale } from "@/navigation";
 import { PrivilegedRetriever } from "@/lib/langchain/privileged-documents-retriever";
 import { emitInfo } from "@/logger";
+import { getOllamaArgs } from "@/lib/langchain/ollama-utils";
 
-const modelName = process.env.OLLAMA_MODEL;
-const ollamaBaseUrl = process.env.OLLAMA_BASE_URL;
+const { modelName, ollamaBaseUrl } = getOllamaArgs();
 const siteUrl = process.env.NEXTAUTH_URL;
-
-if (!modelName || !ollamaBaseUrl) {
-  throw new Error(
-    "OLLAMA_MODEL and OLLAMA_BASE_URL must be set in the environment",
-  );
-}
 
 if (!siteUrl) {
   throw new Error("NEXTAUTH_URL must be set in the environment");
@@ -102,6 +96,7 @@ export async function POST(req: NextRequest) {
         vectorFilter,
         userChatHistory,
         currentUserRole,
+        currentMessageContent,
       ),
       createDocsChain(
         newHandlers,
@@ -186,7 +181,6 @@ Input 3
 </inputs>
 
 ### Important Notes
-- **Always include the original user query as the last entry.**
 - Do not include any additional commentary, explanations, or unnecessary information.
 - Ensure all rephrased queries align with the website's focus areas and maintain their original intent.`;
 
@@ -215,6 +209,7 @@ async function createHistoryChain(
   vectorFilter: EmbeddingsFilter,
   userChatHistory: HumanMessage[],
   currentUserRole: string,
+  input: string,
 ) {
   const rephrasingModel = new ChatOllama({
     model: modelName,
@@ -257,6 +252,7 @@ async function createHistoryChain(
 
   const multiQueryRetriever = getMultiQueryRetriever({
     retriever: privilegedRetriever,
+    originalInput: input,
     llmChain: new LLMChain({
       llm: rephrasingModel,
       prompt: rephrasePrompt,
@@ -275,7 +271,7 @@ function getChatSystemPrompt(
   siteNoPort: string,
   locale: Locale,
 ) {
-  return `You are Shaormel, the friendly and helpful chatbot for Bro Meets Science, a website focused on nutrition. 
+  return `You are Shaormel, the friendly and helpful chatbot for Bro Meets Science, a website focused on nutrition. The site sells meal plans (also known as just plans), provides nutrition through posts and many other features.
   Your primary role is to assist users by providing information related to nutrition, meal plans, and the site’s features. 
   Do not discuss any technical aspects, including the site's code or development. 
   Your responses should prioritize user health, well-being, and engagement, delivered in a friendly and approachable manner, but keep the responses short and concise. Feel free to use light-hearted humor when appropriate to create a welcoming atmosphere.
@@ -307,7 +303,10 @@ function getChatSystemPrompt(
   - If the user communicates in a language other than English or Romanian, respond in English unless the user specifies otherwise. If the user's language preference is unclear, default to English but try to maintain the user's initial language if possible. 
   - When tools are used to assist in answering a query, include their in your response naturally and appropriately. Ensure that tool outputs enhance clarity and add value. Never make follow-up queries about the tools results, always provide the information in the same response.
 
-**Always format your messages in markdown** to improve readability and user experience.
+**Important Notes**:
+- Always format your messages in markdown to improve readability and user experience.
+- Always steer the conversation back to the current site's content and features.
+- Never invent information or make up details/plans/posts that do not exist on the site. It is crucial to provide accurate and relevant information to users.
 
 The context of the current conversation is as follows:
 {context}`;
