@@ -914,6 +914,35 @@ export const getDiffusionSchema = ({
 export type DiffusionSchemaType = z.infer<
   ReturnType<typeof getDiffusionSchema>
 >;
+export interface AdminAICreatePostSchemaTexts extends DiffusionSchemaTexts {
+  description: string;
+}
+export const getAdminAICreatePostSchemaTexts = async () => {
+  const [diffusionTexts, t] = await Promise.all([
+    getDiffusionSchemaTexts(),
+    getTranslations("zod.AdminAICreatePostSchemaTexts"),
+  ]);
+
+  return {
+    ...diffusionTexts,
+    description: t("description"),
+  };
+};
+
+export const getAdminAICreatePostSchema = ({
+  description,
+  ...diffusion
+}: AdminAICreatePostSchemaTexts) =>
+  z
+    .object({
+      description: z
+        .string({ message: description })
+        .transform((val) => val.trim().replace(/\s+/g, " "))
+        .refine((val) => val.length >= 30, { message: description }),
+      images: z.array(fileItemSchema).min(0, ""),
+      numberOfPosts: z.coerce.number().min(1).max(10),
+    })
+    .and(getDiffusionSchema(diffusion));
 
 export type CommentSchemaType = z.infer<ReturnType<typeof getCommentSchema>>;
 
@@ -972,3 +1001,7 @@ export const conversationMessageSchema = z.object({
   content: z.string().min(1, "Message must be at least 1 character"),
 });
 export type ConversationMessageType = z.infer<typeof conversationMessageSchema>;
+
+export type AdminAICreatePostSchemaType = z.infer<
+  ReturnType<typeof getAdminAICreatePostSchema>
+>;

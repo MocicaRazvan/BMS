@@ -20,6 +20,9 @@
       "minNegativePrompt": "Promptul negativ trebuie să aibă cel puțin 20 de caractere",
       "maxNegativePrompt": "Promptul negativ trebuie să aibă cel mult 100 de caractere"
     },
+    "AdminAICreatePostSchemaTexts": {
+      "description": "Descrierea trebuie să aibă cel puțin 30 de caractere"
+    },
     "CommentSchemaTexts": {
       "body": "Comentariul trebuie să aibă cel puțin 20 caractere"
     },
@@ -171,7 +174,12 @@
           "title": "Titlu",
           "body": "Conținut",
           "titlePlaceholder": "Introduceți titlul",
-          "bodyPlaceholder": "Introduceți conținutul"
+          "bodyPlaceholder": "Introduceți conținutul",
+          "aiResponseTexts": {
+            "useButtonText": "Folosește",
+            "discardButtonText": "Renunță",
+            "warningText": "Ești responsabil pentru conținut dacă îl folosești!"
+          }
         },
         "InputMultipleSelectorTexts": {
           "label": "Selectați {type}",
@@ -1231,7 +1239,9 @@
           },
           "subLabels": {
             "allIngredients": "Toate ingredientele",
-            "createIngredient": "Creează ingredient"
+            "createIngredient": "Creează ingredient",
+            "allPosts": "Toate postările",
+            "createPostsAI": "Creează postare cu IA"
           }
         }
       },
@@ -1801,6 +1811,30 @@
       "AdminIngredientsCreatePage": {
         "title": "Creează un ingredient"
       },
+      "AdminAIPostsCreatePage": {
+        "error": "Eroare la crearea postărilor",
+        "toxicError": "Câmpul nu ar trebui să conțină limbaj toxic",
+        "englishError": "Câmpul trebuie să fie în limba engleză",
+        "promptLabel": "Prompt pentru imagini",
+        "negativePromptLabel": "Prompt negativ pentru imagini",
+        "promptPlaceholder": "realist, salată de pui cu avocado",
+        "negativePromptPlaceholder": "calitate scăzută, neclar, animat",
+        "promptDescription": "Promptul ar trebui să fie o scurtă descriere a imaginii pe care doriți să o generați, elementele trebuie separate prin virgule, păstrați-l simplu și clar",
+        "negativePromptDescription": "Promptul negativ ar trebui să fie o scurtă descriere a ceea ce nu doriți în imagine, elementele trebuie separate prin virgule, păstrați-l simplu și clar",
+        "descriptionLabel": "Descrierea postării",
+        "descriptionPlaceholder": "Faceți o postare despre...",
+        "descriptionDescription": "Descrierea ar trebui să fie un text scurt despre postarea pe care doriți să o creați, păstrați-l simplu și clar",
+        "uploadingState": {
+          "title": "Titlul este generat",
+          "description": "Descrierea este generată",
+          "images": "Imaginile sunt generate",
+          "submitted": "Trimisă"
+        },
+        "title": "Creați postări cu AI",
+        "createdPosts": "Postări create",
+        "numberOfPostsLabel": "Numărul de postări de creat",
+        "singlePostLabel": "Postare"
+      },
       "AdminIngredientsPageTexts": {
         "title": "Toate ingredientele",
         "header": "Aici poți vedea și gestiona toate ingredientele de pe platformă."
@@ -2169,6 +2203,11 @@
         "title": "Creează ingredient",
         "description": "Creează un nou ingredient pe Bro Meets Science",
         "keywords": "creează, ingredient, nutriție, informații, calorii, grăsimi, proteine, carbohidrați, zahăr, sare, afișare"
+      },
+      "CreatePostAI": {
+        "title": "Crează postare cu ajutorul AI",
+        "description": "Crează o postare pe Bro Meets Science cu ajutorul AI",
+        "keywords": "creează, postare, AI, admin"
       },
       "UpdateIngredient": {
         "title": "Actualizează ingredient",

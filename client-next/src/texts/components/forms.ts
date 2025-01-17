@@ -83,6 +83,11 @@ export async function getTitleBodyText(): Promise<TitleBodyTexts> {
     body: t("body"),
     titlePlaceholder: t("titlePlaceholder"),
     bodyPlaceholder: t("bodyPlaceholder"),
+    aiResponseTexts: {
+      discardButtonText: t("aiResponseTexts.discardButtonText"),
+      warningText: t("aiResponseTexts.warningText"),
+      useButtonText: t("aiResponseTexts.useButtonText"),
+    },
   };
 }
 

@@ -20,6 +20,9 @@
       "minNegativePrompt": "Negative prompt must be at least 20 characters",
       "maxNegativePrompt": "Negative prompt must be at most 100 characters"
     },
+    "AdminAICreatePostSchemaTexts": {
+      "description": "The description must be at least 30 characters long"
+    },
     "CommentSchemaTexts": {
       "body": "The comment must be at least 20 characters long"
     },
@@ -143,7 +146,12 @@
           "title": "Title",
           "body": "Body",
           "titlePlaceholder": "Enter the title",
-          "bodyPlaceholder": "Enter the body"
+          "bodyPlaceholder": "Enter the body",
+          "aiResponseTexts": {
+            "useButtonText": "Use",
+            "discardButtonText": "Discard",
+            "warningText": "You are responsible for the content if you use it!"
+          }
         },
         "InputMultipleSelectorTexts": {
           "label": "Select {type}",
@@ -1232,7 +1240,9 @@
           },
           "subLabels": {
             "allIngredients": "All Ingredients",
-            "createIngredient": "Create Ingredient"
+            "createIngredient": "Create Ingredient",
+            "allPosts": "All Posts",
+            "createPostsAI": "Create Posts With AI"
           }
         }
       },
@@ -1802,6 +1812,30 @@
       "AdminIngredientsCreatePage": {
         "title": "Create a new ingredient"
       },
+      "AdminAIPostsCreatePage": {
+        "error": "Error creating the posts",
+        "toxicError": "The field should not contain toxic language",
+        "englishError": "The field should be in English",
+        "promptLabel": "Images Prompt",
+        "negativePromptLabel": "Images Negative Prompt",
+        "promptPlaceholder": "realistic, chicken salad with avocado",
+        "negativePromptPlaceholder": "low quality, blurry, animated",
+        "promptDescription": "The prompt should be a short description of the image you want to generate, items should be separated by commas, keep it simple and clear",
+        "negativePromptDescription": "The negative prompt should be a short description of what you do not want in the image, items should be separated by commas, keep it simple and clear",
+        "descriptionLabel": "Description For The Post",
+        "descriptionPlaceholder": "Make a post about...",
+        "descriptionDescription": "The description should be a short text about the post you want to create, keep it simple and clear",
+        "uploadingState": {
+          "title": "Title is generated",
+          "description": "Description is generated",
+          "images": "Images are generated",
+          "submitted": "Submitted"
+        },
+        "title": "Create Posts With AI",
+        "createdPosts": "Posts Created",
+        "numberOfPostsLabel": "Number of posts to be created",
+        "singlePostLabel": "Post"
+      },
       "AdminIngredientsPageTexts": {
         "title": "All The Ingredients",
         "header": "Here you can see and manage all the ingredients."
@@ -2170,6 +2204,11 @@
         "title": "Create Ingredient",
         "description": "Create a new ingredient on Bro Meets Science",
         "keywords": "create, ingredient, nutrition, facts, calories, fat, protein, carbohydrates, sugar, salt, admin"
+      },
+      "CreatePostAI": {
+        "title": "Create Post With AI",
+        "description": "Create a new post on Bro Meets Science with the help of AI",
+        "keywords": "create, post, write, topics, AI, admin"
       },
       "UpdateIngredient": {
         "title": "Update Ingredient",

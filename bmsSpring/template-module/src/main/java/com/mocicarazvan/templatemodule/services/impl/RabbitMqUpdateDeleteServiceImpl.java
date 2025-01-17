@@ -25,12 +25,18 @@ public class RabbitMqUpdateDeleteServiceImpl<T> implements RabbitMqUpdateDeleteS
     }
 
     @Override
-    public void sendBatchUpdateMessage(@NonNull List<T> model) {
-        updateSender.sendBatchMessage(model);
+    public void sendBatchUpdateMessage(@NonNull List<T> models) {
+        if (models.isEmpty()) {
+            return;
+        }
+        updateSender.sendBatchMessage(models);
     }
 
     @Override
-    public void sendBatchDeleteMessage(@NonNull List<T> model) {
-        deleteSender.sendBatchMessage(model);
+    public void sendBatchDeleteMessage(@NonNull List<T> models) {
+        if (models.isEmpty()) {
+            return;
+        }
+        deleteSender.sendBatchMessage(models);
     }
 }

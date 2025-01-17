@@ -336,3 +336,11 @@ export const toShuffleArray = <T>(array: T[]) => {
   }
   return copiedArray;
 };
+
+export function choseRandomNumber(min: number, max: number) {
+  return Math.floor(Math.random() * (max - min + 1) + min);
+}
+
+export function choseRandomItemsFromArray<T>(array: T[], count = 1) {
+  return toShuffleArray(array).slice(0, count);
+}

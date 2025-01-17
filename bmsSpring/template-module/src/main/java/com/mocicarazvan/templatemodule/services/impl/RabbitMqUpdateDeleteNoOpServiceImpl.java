@@ -18,12 +18,12 @@ public class RabbitMqUpdateDeleteNoOpServiceImpl<T> implements RabbitMqUpdateDel
     }
 
     @Override
-    public void sendBatchUpdateMessage(List<T> model) {
+    public void sendBatchUpdateMessage(List<T> models) {
 
     }
 
     @Override
-    public void sendBatchDeleteMessage(List<T> model) {
+    public void sendBatchDeleteMessage(List<T> models) {
 
     }
 }

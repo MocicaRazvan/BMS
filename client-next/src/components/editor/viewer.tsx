@@ -3,12 +3,12 @@ import StarterKit from "@tiptap/starter-kit";
 import { cn } from "@/lib/utils";
 
 interface Props {
-  descritpion: string;
+  description: string;
 }
-export default function Viewer({ descritpion }: Props) {
+export default function Viewer({ description }: Props) {
   const editor = useEditor({
     extensions: [StarterKit],
-    content: descritpion,
+    content: description,
     editorProps: {
       attributes: {
         class: cn(

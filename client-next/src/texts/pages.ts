@@ -25,6 +25,7 @@ import {
 } from "@/texts/components/list";
 import {
   getAdminEmailTexts,
+  getButtonSubmitTexts,
   getCheckoutDrawerTexts,
   getDayFromTexts,
   getIngredientFormTexts,
@@ -74,6 +75,7 @@ import { ApprovedPlansTexts } from "@/app/[locale]/(main)/(user)/plans/approved/
 import {
   dietTypes,
   getActivitiesTexts,
+  getAdminAICreatePostSchemaTexts,
   getCalculatorSchemaTexts,
   getGenderTexts,
 } from "@/types/forms";
@@ -149,6 +151,7 @@ import { TermsOfServiceTexts } from "@/app/[locale]/(main)/termsOfService/page";
 import { UserDuplicatePostPage } from "@/app/[locale]/trainer/posts/duplicate/[id]/page";
 import { DuplicateRecipePageTexts } from "@/app/[locale]/trainer/recipes/duplicate/[id]/page";
 import { AdminPageDuplicateIngredientTexts } from "@/app/[locale]/admin/ingredients/duplicate/[id]/page";
+import { AdminAIPostsCreateTexts } from "@/app/[locale]/admin/posts/aiCreate/page";
 
 export async function getSinglePostPageTexts(): Promise<SinglePostPageTexts> {
   const [elementHeaderTexts, t, postCommentsTexts] = await Promise.all([
@@ -806,6 +809,42 @@ export async function getAdminIngredientsCreatePageTexts(): Promise<AdminIngredi
     ingredientForm,
     title: t("title"),
     menuTexts,
+  };
+}
+export async function getAdminAIPostsCreate(): Promise<AdminAIPostsCreateTexts> {
+  const [t, menuTexts, schemaTexts, buttonSubmitTexts] = await Promise.all([
+    getTranslations("pages.admin.AdminAIPostsCreatePage"),
+    getSidebarMenuTexts("admin", adminGroupLabels, adminLabels, adminSubLabels),
+    getAdminAICreatePostSchemaTexts(),
+    getButtonSubmitTexts(),
+  ]);
+
+  return {
+    title: t("title"),
+    menuTexts,
+    schemaTexts,
+    buttonSubmitTexts,
+    createdPosts: t("createdPosts"),
+    descriptionDescription: t("descriptionDescription"),
+    descriptionLabel: t("descriptionLabel"),
+    descriptionPlaceholder: t("descriptionPlaceholder"),
+    englishError: t("englishError"),
+    error: t("error"),
+    negativePromptDescription: t("negativePromptDescription"),
+    negativePromptLabel: t("negativePromptLabel"),
+    negativePromptPlaceholder: t("negativePromptPlaceholder"),
+    promptDescription: t("promptDescription"),
+    promptLabel: t("promptLabel"),
+    promptPlaceholder: t("promptPlaceholder"),
+    toxicError: t("toxicError"),
+    numberOfPostsLabel: t("numberOfPostsLabel"),
+    uploadingState: {
+      description: t("uploadingState.description"),
+      title: t("uploadingState.title"),
+      images: t("uploadingState.images"),
+      submitted: t("uploadingState.submitted"),
+    },
+    singlePostLabel: t("singlePostLabel"),
   };
 }
 

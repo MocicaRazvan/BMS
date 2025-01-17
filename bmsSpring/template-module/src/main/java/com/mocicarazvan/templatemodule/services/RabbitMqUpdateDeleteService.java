@@ -9,7 +9,7 @@ public interface RabbitMqUpdateDeleteService<T> {
 
     void sendDeleteMessage(T model);
 
-    void sendBatchUpdateMessage(List<T> model);
+    void sendBatchUpdateMessage(List<T> models);
 
-    void sendBatchDeleteMessage(List<T> model);
+    void sendBatchDeleteMessage(List<T> models);
 }

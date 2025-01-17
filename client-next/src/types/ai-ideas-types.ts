@@ -5,6 +5,7 @@ export interface AIIdeaActionArgs {
   item: string;
   input?: string;
   extraContext?: number;
+  streamResponse?: boolean;
 }
 
 export interface AiIdeasField {

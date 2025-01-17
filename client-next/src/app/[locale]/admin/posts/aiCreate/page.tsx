@@ -1,45 +1,45 @@
 import { Locale } from "@/navigation";
+import { Metadata } from "next";
+import { getIntlMetadata } from "@/texts/metadata";
 import { unstable_setRequestLocale } from "next-intl/server";
 import { getThemeSwitchTexts } from "@/texts/components/nav";
 import { getUserWithMinRole } from "@/lib/user";
-import SidebarContentLayout from "@/components/sidebar/sidebar-content-layout";
-import AdminIngredientsCreatePageContent from "@/app/[locale]/admin/ingredients/create/page-content";
-import { IngredientFormTexts } from "@/components/forms/ingredient-form";
-import { getAdminIngredientsCreatePageTexts } from "@/texts/pages";
-import { Suspense } from "react";
 import LoadingSpinner from "@/components/common/loading-spinner";
+import SidebarContentLayout from "@/components/sidebar/sidebar-content-layout";
+import { Suspense } from "react";
 import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
-import { Metadata } from "next";
-import { getIntlMetadata } from "@/texts/metadata";
+import { getAdminAIPostsCreate } from "@/texts/pages";
+import AdminAIPostsCreateContent, {
+  AdminAIPostsCreateContentTexts,
+} from "@/app/[locale]/admin/posts/aiCreate/page-content";
 
-export interface AdminIngredientsCreatePageTexts {
-  ingredientForm: IngredientFormTexts;
-  title: string;
-  menuTexts: SidebarMenuTexts;
-}
 interface Props {
   params: { locale: Locale };
 }
+
 export async function generateMetadata({
   params: { locale },
 }: Props): Promise<Metadata> {
   return await getIntlMetadata(
-    "admin.CreateIngredient",
-    "/admin/ingredients/create",
+    "admin.CreatePostAI",
+    "admin/posts/aiCreate",
     locale,
   );
 }
-export default async function AdminIngredientsCreatePage({
+export interface AdminAIPostsCreateTexts
+  extends AdminAIPostsCreateContentTexts {
+  title: string;
+  menuTexts: SidebarMenuTexts;
+}
+export default async function AdminAIPostsCreate({
   params: { locale },
 }: Props) {
   unstable_setRequestLocale(locale);
-
   const [themeSwitchTexts, authUser, texts] = await Promise.all([
     getThemeSwitchTexts(),
     getUserWithMinRole("ROLE_ADMIN"),
-    getAdminIngredientsCreatePageTexts(),
+    getAdminAIPostsCreate(),
   ]);
-
   return (
     <SidebarContentLayout
       navbarProps={{
@@ -51,10 +51,7 @@ export default async function AdminIngredientsCreatePage({
       }}
     >
       <Suspense fallback={<LoadingSpinner />}>
-        <AdminIngredientsCreatePageContent
-          authUser={authUser}
-          texts={texts.ingredientForm}
-        />
+        <AdminAIPostsCreateContent {...texts} authUser={authUser} />
       </Suspense>
     </SidebarContentLayout>
   );

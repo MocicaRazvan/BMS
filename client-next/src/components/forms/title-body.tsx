@@ -1,3 +1,4 @@
+"use client";
 import { Control, Path, useFormContext } from "react-hook-form";
 import {
   FormControl,
@@ -13,14 +14,27 @@ import { AiIdeasField } from "@/types/ai-ideas-types";
 import AIGeneratePop, {
   AIGeneratePopTexts,
   AIPopCallback,
+  AIPopCallbackArg,
 } from "@/components/forms/ai-generate-pop";
-import { useMemo } from "react";
+import {
+  Dispatch,
+  HTMLProps,
+  ReactNode,
+  SetStateAction,
+  useMemo,
+  useState,
+} from "react";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { motion, AnimatePresence } from "framer-motion";
+import * as DOMPurify from "dompurify";
 
 export interface TitleBodyTexts {
   title: string;
   body: string;
   titlePlaceholder?: string;
   bodyPlaceholder?: string;
+  aiResponseTexts: AIResponseTexts;
 }
 
 interface CustomFieldProps<TFieldValues extends TitleBodyDto> {
@@ -42,7 +56,13 @@ interface CustomFieldProps<TFieldValues extends TitleBodyDto> {
 
 export const TitleBodyForm = <TFieldValues extends TitleBodyDto>({
   control,
-  titleBodyTexts: { body, bodyPlaceholder, titlePlaceholder, title },
+  titleBodyTexts: {
+    body,
+    bodyPlaceholder,
+    titlePlaceholder,
+    title,
+    aiResponseTexts,
+  },
   hideTitle = false,
   editorKey,
   showAIPopTitle = false,
@@ -57,6 +77,18 @@ export const TitleBodyForm = <TFieldValues extends TitleBodyDto>({
   extraBodyContext = 5,
 }: CustomFieldProps<TFieldValues>) => {
   const { getValues } = useFormContext<TFieldValues>();
+  const {
+    response: titleAI,
+    setResponse: setTitleAI,
+    isLoading: titleIsLoading,
+    setIsLoading: setTitleIsLoading,
+  } = useAIGenerateResponse();
+  const {
+    response: bodyAI,
+    setResponse: setBodyAI,
+    isLoading: bodyIsLoading,
+    setIsLoading: setBodyIsLoading,
+  } = useAIGenerateResponse();
 
   if (!["title", "body"].every((k) => k in getValues())) {
     throw new Error(`Invalid field names`);
@@ -84,24 +116,49 @@ export const TitleBodyForm = <TFieldValues extends TitleBodyDto>({
             <FormItem>
               <FormLabel className="capitalize">{title}</FormLabel>
               <FormControl>
-                <div className="flex items-center justify-center">
-                  <Input
-                    placeholder={titlePlaceholder}
-                    {...field}
-                    className="flex-1"
+                <div className="w-full h-full">
+                  <div className="flex items-center justify-center">
+                    <Input
+                      placeholder={titlePlaceholder}
+                      {...field}
+                      className="flex-1"
+                    />
+
+                    {showAIPopTitle && titleAIGeneratedPopTexts && (
+                      <div className="ml-2 md:ml-4">
+                        <AIGeneratePop
+                          fields={titleAIFields}
+                          finishCallback={aiTitleCallBack}
+                          targetedField={"title"}
+                          item={aiItem}
+                          checkBoxes={aiCheckBoxes}
+                          {...titleAIGeneratedPopTexts}
+                          updateCallback={setTitleAI}
+                          updateDelayMs={100}
+                          loadingCallback={setTitleIsLoading}
+                        />
+                      </div>
+                    )}
+                  </div>
+                  <AIResponse
+                    response={titleAI}
+                    saveCallback={aiTitleCallBack}
+                    setResponse={setTitleAI}
+                    {...aiResponseTexts}
+                    presentationCallback={(r) => (
+                      <div className="w-full h-full space-y-2">
+                        <Input
+                          value={r}
+                          disabled={true}
+                          className="flex-1 disabled:cursor-default disabled:bg-background disabled:opacity-100"
+                        />
+                        <p className="text-sm text-amber">
+                          {aiResponseTexts.warningText}
+                        </p>
+                      </div>
+                    )}
+                    isLoading={titleIsLoading}
                   />
-                  {showAIPopTitle && titleAIGeneratedPopTexts && (
-                    <div className="ml-2 md:ml-4">
-                      <AIGeneratePop
-                        fields={titleAIFields}
-                        callback={aiTitleCallBack}
-                        targetedField={"title"}
-                        item={aiItem}
-                        checkBoxes={aiCheckBoxes}
-                        {...titleAIGeneratedPopTexts}
-                      />
-                    </div>
-                  )}
                 </div>
               </FormControl>
               <FormMessage />
@@ -119,22 +176,51 @@ export const TitleBodyForm = <TFieldValues extends TitleBodyDto>({
               {showAIPopDescription && bodyAIGeneratedPopTexts && (
                 <AIGeneratePop
                   fields={bodyAIFields}
-                  callback={aiDescriptionCallBack}
+                  finishCallback={aiDescriptionCallBack}
                   targetedField={"description"}
                   item={aiItem}
                   checkBoxes={aiCheckBoxes}
                   extraContext={extraBodyContext}
                   {...bodyAIGeneratedPopTexts}
+                  updateCallback={setBodyAI}
+                  updateDelayMs={2100}
+                  loadingCallback={setBodyIsLoading}
                 />
               )}
             </div>
             <FormControl>
-              <Editor
-                descritpion={field.value as string}
-                onChange={field.onChange}
-                placeholder={bodyPlaceholder}
-                key={editorKey}
-              />
+              <div className="h-full w-full space-y-1">
+                <AIResponse
+                  response={bodyAI}
+                  saveCallback={aiDescriptionCallBack}
+                  setResponse={setBodyAI}
+                  isLoading={bodyIsLoading}
+                  {...aiResponseTexts}
+                  presentationCallback={(r) => (
+                    <div className="w-full h-full space-y-2 mb-16">
+                      <p className="text-sm dark:text-amber-500 text-amber-400">
+                        {aiResponseTexts.warningText}
+                      </p>
+                      <div
+                        className="p-2  prose max-w-none [&_ol]:list-decimal [&_ul]:list-disc dark:prose-invert rounded-md border min-h-[140px] border-input bg-background ring-offset-2"
+                        dangerouslySetInnerHTML={{
+                          __html: DOMPurify.sanitize(r, {
+                            FORBID_ATTR: ["style"],
+                          }),
+                        }}
+                      />
+                    </div>
+                  )}
+                  wrapperClassName="flex-col-reverse"
+                  wrapperButtonsClassName="md:justify-end gap-10 w-full mt-2"
+                />
+                <Editor
+                  descritpion={field.value as string}
+                  onChange={field.onChange}
+                  placeholder={bodyPlaceholder}
+                  key={editorKey}
+                />
+              </div>
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -143,3 +229,80 @@ export const TitleBodyForm = <TFieldValues extends TitleBodyDto>({
     </div>
   );
 };
+
+export interface AIResponseTexts {
+  useButtonText: string;
+  discardButtonText: string;
+  warningText: string;
+}
+
+interface AIResponseProps extends AIResponseTexts {
+  response: string | undefined;
+  saveCallback: (resp: AIPopCallbackArg) => void;
+  setResponse: Dispatch<SetStateAction<string | undefined>>;
+  presentationCallback: (r: string) => ReactNode;
+  isLoading: boolean;
+  wrapperClassName?: HTMLProps<HTMLDivElement>["className"];
+  wrapperButtonsClassName?: HTMLProps<HTMLDivElement>["className"];
+}
+function AIResponse({
+  response,
+  saveCallback,
+  setResponse,
+  presentationCallback,
+  isLoading,
+  wrapperClassName = "",
+  wrapperButtonsClassName = "",
+  discardButtonText,
+  useButtonText,
+}: AIResponseProps) {
+  return (
+    <AnimatePresence>
+      {response && response.trim() !== "" && (
+        <motion.div
+          className={cn(
+            !response
+              ? "hidden"
+              : "flex items-start justify-between gap-10 mt-5 md:mt-7 " +
+                  wrapperClassName,
+          )}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+        >
+          {presentationCallback(response)}
+
+          <div
+            className={
+              "flex items-center justify-between gap-5 " +
+              wrapperButtonsClassName
+            }
+          >
+            <Button
+              type={"button"}
+              onClick={() => {
+                saveCallback({ answer: response });
+                setResponse(undefined);
+              }}
+              variant={"success"}
+            >
+              {useButtonText}
+            </Button>
+            {!isLoading && (
+              <Button type={"button"} onClick={() => setResponse(undefined)}>
+                {discardButtonText}
+              </Button>
+            )}
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
+
+function useAIGenerateResponse() {
+  const [response, setResponse] = useState<string | undefined>();
+  const [isLoading, setIsLoading] = useState(false);
+
+  return { response, setResponse, isLoading, setIsLoading };
+}

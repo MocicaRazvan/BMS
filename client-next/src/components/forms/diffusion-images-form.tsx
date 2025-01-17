@@ -6,7 +6,7 @@ import {
   getDiffusionSchema,
 } from "@/types/forms";
 import { useCallback, useMemo, useState } from "react";
-import { useForm } from "react-hook-form";
+import { FieldValues, Path, useForm, UseFormReturn } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Accordion,
@@ -94,31 +94,7 @@ export default function DiffusionImagesForm({
 
   // useNavigationGuardI18nForm({ form });
 
-  const handleToxic = useCallback(
-    async (
-      input: string,
-      f: typeof form,
-      field: "prompt" | "negativePrompt",
-    ) => {
-      const trimmedInput = input.trim().replace(/\s+/g, " ");
-      const toxicResp = await getToxicity(
-        DOMPurify.sanitize(trimmedInput, {
-          ALLOWED_TAGS: [],
-          ALLOWED_ATTR: [],
-        }),
-      );
-      if (toxicResp.failure) {
-        if (toxicResp.reason.toLowerCase() === "toxicity") {
-          f.setError(field, { message: toxicError });
-        } else {
-          f.setError(field, { message: englishError });
-        }
-        return false;
-      }
-      return true;
-    },
-    [englishError, toxicError],
-  );
+  const { handleToxic } = useToxicPrompt({ toxicError, englishError, form });
 
   const onSubmit = useCallback(
     async (data: DiffusionSchemaType) => {
@@ -246,4 +222,49 @@ export default function DiffusionImagesForm({
       </Accordion>
     </div>
   );
+}
+
+interface UseToxicPromptArgs<
+  T extends {
+    prompt: string;
+    negativePrompt: string;
+  },
+> {
+  toxicError: string;
+  englishError: string;
+  form: UseFormReturn<T>;
+}
+export function useToxicPrompt<
+  T extends {
+    prompt: string;
+    negativePrompt: string;
+  },
+>({ toxicError, englishError, form }: UseToxicPromptArgs<T>) {
+  const handleToxic = useCallback(
+    async (
+      input: string,
+      f: typeof form,
+      field: "prompt" | "negativePrompt",
+    ) => {
+      const trimmedInput = input.trim().replace(/\s+/g, " ");
+      const toxicResp = await getToxicity(
+        DOMPurify.sanitize(trimmedInput, {
+          ALLOWED_TAGS: [],
+          ALLOWED_ATTR: [],
+        }),
+      );
+      if (toxicResp.failure) {
+        if (toxicResp.reason.toLowerCase() === "toxicity") {
+          f.setError(field as Path<T>, { message: toxicError });
+        } else {
+          f.setError(field as Path<T>, { message: englishError });
+        }
+        return false;
+      }
+      return true;
+    },
+    [englishError, toxicError],
+  );
+
+  return { handleToxic };
 }

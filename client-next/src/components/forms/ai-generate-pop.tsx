@@ -1,6 +1,5 @@
 "use client";
-import { useCallback, useMemo, useState } from "react";
-import { aiIdea } from "@/actions/ai/ai-ideas";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Popover,
   PopoverContent,
@@ -16,7 +15,8 @@ import ShinyButton from "@/components/magicui/shiny-button";
 import { getToxicity } from "@/actions/toxcity";
 import DOMPurify from "dompurify";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Pen } from "lucide-react";
+import { Pen, StopCircle } from "lucide-react";
+import { useChat } from "ai/react";
 
 export interface AIGeneratePopTexts {
   anchorText: string;
@@ -29,18 +29,23 @@ export interface AIGeneratePopTexts {
   extraContext?: number;
   placeholder: string;
 }
-export type AIPopCallbackArg = Awaited<ReturnType<typeof aiIdea>>;
+export type AIPopCallbackArg =
+  | { error: string; answer?: string }
+  | { answer: string; error?: string };
 export type AIPopCallback = (resp: AIPopCallbackArg) => void;
 interface AIPopProps extends AIGeneratePopTexts {
   fields: AiIdeasField[];
-  callback: AIPopCallback;
+  finishCallback: AIPopCallback;
+  updateCallback: (arg: string) => void;
   targetedField: TargetedFields;
   item: string;
   checkBoxes: Record<string, string>;
+  loadingCallback?: (l: boolean) => void;
+  updateDelayMs: number;
 }
 export default function AIGeneratePop({
   fields,
-  callback,
+  finishCallback,
   targetedField,
   item,
   checkBoxes,
@@ -53,13 +58,31 @@ export default function AIGeneratePop({
   forFunText,
   extraContext = 0,
   placeholder,
+  updateCallback,
+  updateDelayMs = 10,
+  loadingCallback,
 }: AIPopProps) {
   const [input, setInput] = useState<string | undefined>();
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  // const [isLoading, setIsLoading] = useState<boolean>(false);
   const [popOpen, setPopOpen] = useState<boolean>(false);
   const [showFunBtn, setShowFunBtn] = useState<boolean>(false);
   const [inputErr, setInputErr] = useState<string | undefined>();
   const [sentFields, setSentFields] = useState<AiIdeasField[]>(fields);
+  const lastUpdateTime = useRef<number>(-1);
+
+  const {
+    messages,
+    setMessages,
+    handleSubmit: handleChatSubmit,
+    isLoading,
+    stop,
+  } = useChat({
+    api: "/api/ai-idea",
+    onFinish: (r) => {
+      updateCallback(r.content);
+      lastUpdateTime.current = -1;
+    },
+  });
   const hasContext = useMemo(
     () =>
       (sentFields.map((f) => f.content.trim()).join("") + (input || ""))
@@ -67,10 +90,47 @@ export default function AIGeneratePop({
     [sentFields, input],
   );
 
+  const message =
+    messages[0]?.content && lastUpdateTime.current !== -1
+      ? {
+          content: messages[0].content,
+          updatedAt: new Date().getTime(),
+        }
+      : {
+          content: undefined,
+          updatedAt: -1,
+        };
+  // console.log("messageAI", message, lastUpdateTime.current);
+
+  useEffect(() => {
+    if (!isLoading && lastUpdateTime.current !== -1) {
+      lastUpdateTime.current = -1;
+    }
+  }, [isLoading, lastUpdateTime.current]);
+
+  useEffect(() => {
+    if (
+      message.content &&
+      lastUpdateTime.current !== -1 &&
+      lastUpdateTime.current < message.updatedAt - updateDelayMs
+    ) {
+      lastUpdateTime.current = message.updatedAt;
+      updateCallback(message.content);
+    }
+  }, [message]);
+
+  useEffect(() => {
+    if (loadingCallback) {
+      loadingCallback(isLoading);
+    }
+  }, [isLoading]);
+
   const handleSubmit = useCallback(async () => {
     setShowFunBtn(false);
-    setIsLoading(true);
+    // setIsLoading(true);
     setInputErr(undefined);
+    setMessages([]);
+    lastUpdateTime.current = new Date().getTime();
     const trimmedInput = input
       ? input.trim().replace(/\s+/g, " ") || undefined
       : undefined;
@@ -87,21 +147,32 @@ export default function AIGeneratePop({
         } else {
           setInputErr(englishError);
         }
-        setIsLoading(false);
+        // setIsLoading(false);
         setInput("");
         return;
       }
     }
-    const resp = await aiIdea({
-      input: trimmedInput,
-      targetedField,
-      fields: sentFields,
-      item,
-      extraContext,
+    // const resp = await aiIdea({
+    //   input: trimmedInput,
+    //   targetedField,
+    //   fields: sentFields,
+    //   item,
+    //   extraContext,
+    // });
+
+    handleChatSubmit(undefined, {
+      allowEmptySubmit: true,
+      body: {
+        input: trimmedInput,
+        targetedField,
+        fields: sentFields,
+        item,
+        extraContext,
+      },
     });
-    setIsLoading(false);
-    callback(resp);
-    setPopOpen(false);
+    // setIsLoading(false);
+    // callback({});
+    // setPopOpen(false);
   }, [input, hasContext, sentFields]);
 
   function handlePopChange(o: boolean) {
@@ -168,19 +239,32 @@ export default function AIGeneratePop({
             onChange={(e) => setInput(e.target.value)}
           />
           {!showFunBtn && (
-            <ButtonSubmit
-              onClick={async () => {
-                if (!hasContext) {
-                  setShowFunBtn(true);
-                  return;
-                }
-                await handleSubmit();
-              }}
-              isLoading={isLoading}
-              disable={isLoading}
-              size={"default"}
-              buttonSubmitTexts={buttonSubmitTexts}
-            />
+            <div className="w-full h-full flex items-center justify-between">
+              <ButtonSubmit
+                onClick={async () => {
+                  if (!hasContext) {
+                    setShowFunBtn(true);
+                    return;
+                  }
+                  await handleSubmit();
+                }}
+                isLoading={isLoading}
+                disable={isLoading}
+                size={"default"}
+                buttonSubmitTexts={buttonSubmitTexts}
+              />
+              <Button
+                type="button"
+                size="icon"
+                variant="ghost"
+                className="fllex w-10 flex-none items-center justify-center"
+                onClick={() => {
+                  stop();
+                }}
+              >
+                <StopCircle size={24} />
+              </Button>
+            </div>
           )}
           {showFunBtn && (
             <div className="space-y-4">

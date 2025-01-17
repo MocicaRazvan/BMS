@@ -39,6 +39,7 @@ public class RabbitMqSenderImpl implements RabbitMqSender {
     public <T> void sendBatchMessage(List<T> messages) {
         checkArgs(messages);
         MonoWrapper.wrapBlockingFunction(() -> rabbitTemplate.invoke(rabbitOperations -> {
+            // todo test may cause issues mixing reactor and parallelStream
             messages.parallelStream()
                     .forEach(m -> rabbitOperations.convertAndSend(exchangeName, routingKey, m));
             return true;

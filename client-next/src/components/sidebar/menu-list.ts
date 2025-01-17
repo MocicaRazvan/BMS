@@ -75,7 +75,12 @@ export const trainerLabels = [
   "account",
 ] as const;
 
-export const adminSubLabels = ["allIngredients", "createIngredient"] as const;
+export const adminSubLabels = [
+  "allIngredients",
+  "createIngredient",
+  "allPosts",
+  "createPostsAI",
+] as const;
 
 export const trainerSubLabels = [
   "yourPosts",
@@ -133,11 +138,22 @@ export const getAdminMenuList: getMenuListType<AdminSidebarMenuTexts> = (
       groupLabel: groupLabels["contents"],
       menus: [
         {
-          href: appendCreatedAtDesc("/admin/posts"),
+          href: "",
           label: labels["posts"],
           active: pathname.includes("/posts") && !pathname.includes("/users"),
           icon: SquarePen,
-          submenus: [],
+          submenus: [
+            {
+              href: appendCreatedAtDesc("/admin/posts"),
+              label: subLabels["allPosts"],
+              active: pathname === "/admin/posts",
+            },
+            {
+              href: "/admin/posts/aiCreate",
+              label: subLabels["createPostsAI"],
+              active: pathname === "/admin/posts/aiCreate",
+            },
+          ],
         },
         {
           href: appendCreatedAtDesc("/admin/recipes"),
