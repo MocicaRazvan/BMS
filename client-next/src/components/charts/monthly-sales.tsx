@@ -1,7 +1,7 @@
 "use client";
 
 import { WithUser } from "@/lib/user";
-import { format, subDays, subYears } from "date-fns";
+import { format, subMonths, subYears } from "date-fns";
 import { useLocale } from "next-intl";
 import { useEffect, useMemo, useState } from "react";
 import {
@@ -24,7 +24,7 @@ import { ro } from "date-fns/locale";
 import useClientNotFound from "@/hoooks/useClientNotFound";
 
 const now = new Date();
-const oneMonthAgo = subDays(now, 30);
+const oneMonthAgo = subMonths(now, 1);
 const oneYearAgo = subYears(now, 1);
 
 const dateFormat = "dd-MM-yyyy";

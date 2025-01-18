@@ -175,26 +175,6 @@ const TopUsers = memo(
       [dateRangePickerTexts, locale],
     );
 
-    const maxAmountPerOrder = useMemo(
-      () =>
-        messages.length === 0
-          ? 0
-          : Math.max(
-              ...messages.map((user) => user.totalAmount / user.ordersNumber),
-            ),
-      [messages],
-    );
-    const meanAmountPerOrder = useMemo(
-      () =>
-        messages.length === 0
-          ? 0
-          : messages.reduce(
-              (acc, user) => acc + user.totalAmount / user.ordersNumber,
-              0,
-            ) / messages.length,
-      [messages],
-    );
-
     const noMessageOrError = !messages.length || error !== null;
 
     return (
@@ -263,8 +243,6 @@ const TopUsers = memo(
                 <div key={ts.userId}>
                   <UserCard
                     topSummary={ts}
-                    maxAmountPerOrder={maxAmountPerOrder}
-                    meanAmountPerOrder={meanAmountPerOrder}
                     texts={userCardTexts}
                     amountTexts={userAmountPerOderChartTexts}
                   />
@@ -300,8 +278,6 @@ const MotionCard = motion(Card);
 const UserCard = memo(
   ({
     topSummary,
-    maxAmountPerOrder,
-    meanAmountPerOrder,
     texts: {
       userAntent,
       topBuyer,
@@ -317,8 +293,6 @@ const UserCard = memo(
     amountTexts,
   }: {
     topSummary: TopUsersSummary;
-    maxAmountPerOrder: number;
-    meanAmountPerOrder: number;
     texts: UserCardTexts;
     amountTexts: UserAmountPerOderChartTexts;
   }) => {
@@ -343,7 +317,7 @@ const UserCard = memo(
     return (
       <MotionCard
         key={topSummary.userId}
-        className="flex flex-col min-h-[575px]"
+        className="flex flex-col min-h-[575px] shadow"
         initial={{ opacity: 0, scale: 0.8 }}
         whileInView={{ opacity: 1, scale: 1 }}
         viewport={{ once: true, amount: "some" }}
@@ -401,8 +375,8 @@ const UserCard = memo(
               <p className="text-sm font-medium mb-2">{amountPerOrderTitle}</p>
               <UserAmountPerOderChart
                 topSum={topSummary}
-                meanAmountPerOrder={meanAmountPerOrder}
-                maxAmountPerOrder={maxAmountPerOrder}
+                meanAmountPerOrder={topSummary.avgGroupTotal}
+                maxAmountPerOrder={topSummary.maxGroupTotal}
                 texts={amountTexts}
               />
             </div>

@@ -11,7 +11,7 @@ import java.lang.annotation.*;
  *     <li>If the method does not invalidate the cache, it will handle a <b>Mono&lt;T&gt;</b> and return a <b>Mono&lt;T&gt;</b>.</li>
  * </ul>
  * Arguments:
- * // * <ul>
+ * <ul>
  *  <li><b>key</b> - the key to be used for caching. It can be a string or a SPEL with the root this.</li>
  *  <li><b>id</b> - the id of the object to be cached. Must be set on a <b>Mono</b> return.</li>
  *  <li><b>idPath</b> - the id of the object to be cached. Must be set on a <b>Flux</b> return.</li>

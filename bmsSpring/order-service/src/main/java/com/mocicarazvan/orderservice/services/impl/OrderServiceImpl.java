@@ -348,6 +348,13 @@ public class OrderServiceImpl implements OrderService {
     }
 
     private Pair<LocalDateTime, LocalDateTime> getIntervalDates(LocalDate from, LocalDate to) {
+
+        if (from.isAfter(to)) {
+            LocalDate temp = from;
+            from = to;
+            to = temp;
+        }
+
         LocalDateTime startDate = from.atStartOfDay();
         LocalDateTime endDate = to.atStartOfDay().plusDays(1);
         return Pair.of(startDate, endDate);
@@ -655,7 +662,7 @@ public class OrderServiceImpl implements OrderService {
                     );
         }
 
-        @RedisReactiveChildCache(key = CACHE_KEY_PATH, idPath = "month+2*year+3*totalAmount+count*3+271")
+        @RedisReactiveChildCache(key = CACHE_KEY_PATH, idPath = "maxGroupTotal+2*minGroupTotal+3*totalAmount+rank*3+271")
         public Flux<TopUsersSummary> getTopUsersSummaryBase(LocalDateTime from, LocalDateTime to, int top) {
             return orderRepository.getTopUsersSummary(from, to, top);
         }

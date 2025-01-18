@@ -126,7 +126,11 @@ public interface OrderRepository extends ManyToOneUserRepository<Order>, CountIn
             LocalDateTime endDate);
 
     @Query("""
-                select * from
+                select sub.*,
+                    MAX(sub.total_amount) OVER () AS max_group_total,
+                    MIN(sub.total_amount) OVER () AS min_group_total,
+                    AVG(sub.total_amount) OVER () AS avg_group_total
+                       from
                 (SELECT
                     user_id,
                     sum(total) as total_amount,
@@ -146,7 +150,7 @@ public interface OrderRepository extends ManyToOneUserRepository<Order>, CountIn
 
     @Query("""
                 SELECT
-                   COUNT(*) AS value, 
+                   COUNT(*) AS value,
                     a.country as id
             FROM custom_order o
             JOIN address a on a.id = o.address_id

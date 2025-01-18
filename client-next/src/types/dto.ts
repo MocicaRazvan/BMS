@@ -562,4 +562,7 @@ export interface TopUsersSummary {
   planValues: number[];
   rank: number;
   plansNumber: number;
+  maxGroupTotal: number;
+  minGroupTotal: number;
+  avgGroupTotal: number;
 }

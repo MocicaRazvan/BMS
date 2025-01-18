@@ -18,4 +18,7 @@ public class TopUsersSummary {
     private long[] planValues;
     private int rank;
     private int plansNumber;
+    private double maxGroupTotal;
+    private double minGroupTotal;
+    private double avgGroupTotal;
 }

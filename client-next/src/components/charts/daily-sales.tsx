@@ -1,7 +1,7 @@
 "use client";
 import { ro } from "date-fns/locale";
 import { WithUser } from "@/lib/user";
-import { format, subDays } from "date-fns";
+import { format, subMonths } from "date-fns";
 import { useLocale } from "next-intl";
 import { useMemo, useState } from "react";
 import {
@@ -29,7 +29,7 @@ interface Props extends WithUser, DailySalesTexts {
 }
 
 const now = new Date();
-const oneMonthAgo = subDays(now, 30);
+const oneMonthAgo = subMonths(now, 1);
 
 const dateFormat = "dd-MM-yyyy";
 const formattedNow = format(now, dateFormat);
