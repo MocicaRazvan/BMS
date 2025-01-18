@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS custom_order
 
 CREATE INDEX IF NOT EXISTS idx_custom_order_user_id ON custom_order (user_id);
 CREATE INDEX IF NOT EXISTS idx_custom_order_address_id ON custom_order (address_id);
-CREATE INDEX IF NOT EXISTS idx_custom_order_created_at ON custom_order using brin (created_at, user_id)
+CREATE INDEX IF NOT EXISTS idx_custom_order_created_at ON custom_order using brin (created_at)
     with (autosummarize = 1 );
 
 CREATE EXTENSION IF NOT EXISTS pg_trgm;
