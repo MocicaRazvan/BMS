@@ -6,6 +6,9 @@ import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 import java.util.List;
 
@@ -14,9 +17,11 @@ import java.util.List;
 @Slf4j
 public class RabbitMqSenderImpl implements RabbitMqSender {
 
+
     private final String exchangeName;
     private final String routingKey;
     private final RabbitTemplate rabbitTemplate;
+    private final int concurrency;
 
     public <T> void sendMessage(T message) {
         checkArgs(List.of(message));
@@ -38,12 +43,11 @@ public class RabbitMqSenderImpl implements RabbitMqSender {
     @Override
     public <T> void sendBatchMessage(List<T> messages) {
         checkArgs(messages);
-        MonoWrapper.wrapBlockingFunction(() -> rabbitTemplate.invoke(rabbitOperations -> {
-            // todo test may cause issues mixing reactor and parallelStream
-            messages.parallelStream()
-                    .forEach(m -> rabbitOperations.convertAndSend(exchangeName, routingKey, m));
-            return true;
-        }));
+
+        Flux.fromIterable(messages)
+                .flatMap(m -> Mono.fromRunnable(() -> rabbitTemplate.convertAndSend(exchangeName, routingKey, m))
+                        .subscribeOn(Schedulers.boundedElastic()), concurrency)
+                .subscribe();
     }
 
 }

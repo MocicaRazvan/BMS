@@ -51,7 +51,7 @@ export default async function AdminCountries({ params: { locale } }: Props) {
       <div className="w-full h-full bg-background">
         <Heading {...texts} />
         <Suspense fallback={<LoadingSpinner />}>
-          <div className="mt-10 h-full">
+          <div className="mt-10 h-full pb-5">
             <GeographyChart {...texts.geographyChartTexts} />
           </div>
         </Suspense>

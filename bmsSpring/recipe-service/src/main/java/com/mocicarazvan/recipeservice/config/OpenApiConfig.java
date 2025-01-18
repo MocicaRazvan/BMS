@@ -1,4 +1,4 @@
-package com.mocicarazvan.recipeservice.conifg;
+package com.mocicarazvan.recipeservice.config;
 
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.models.OpenAPI;

@@ -1,4 +1,4 @@
-package com.mocicarazvan.recipeservice.conifg;
+package com.mocicarazvan.recipeservice.config;
 
 import com.mocicarazvan.recipeservice.convertors.DietTypeReadingConvertor;
 import com.mocicarazvan.recipeservice.convertors.DietTypeWritingConvertor;

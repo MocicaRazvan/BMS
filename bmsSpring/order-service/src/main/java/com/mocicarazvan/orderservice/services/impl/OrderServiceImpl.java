@@ -72,6 +72,7 @@ import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -686,7 +687,7 @@ public class OrderServiceImpl implements OrderService {
         @RedisReactiveChildCache(key = CACHE_KEY_PATH, idPath = "month+3*year+322", masterId = "#trainerId")
         public Flux<MonthlyOrderSummary> getTrainerOrdersSummaryByMonthBase(List<PlanResponse> plans, Pair<LocalDateTime, LocalDateTime> intervalDates, Long trainerId) {
             return orderRepository.getTrainerOrdersSummaryByDateRangeGroupedByMonth(intervalDates.getFirst(), intervalDates.getSecond())
-                    .map(e -> fromTrainerSummaryToSummary(plans, e, (p) -> MonthlyOrderSummary.builder()
+                    .flatMap(e -> fromTrainerSummaryToSummary(plans, e, (p) -> MonthlyOrderSummary.builder()
                             .year(e.getYear())
                             .month(e.getMonth())
                             .totalAmount(p.getFirst())
@@ -697,7 +698,7 @@ public class OrderServiceImpl implements OrderService {
         @RedisReactiveChildCache(key = CACHE_KEY_PATH, idPath = "day+month+4*year+767", masterId = "#trainerId")
         public Flux<DailyOrderSummary> getTrainerOrdersSummaryByDayBase(List<PlanResponse> plans, Pair<LocalDateTime, LocalDateTime> intervalDates, Long trainerId) {
             return orderRepository.getTrainerOrdersSummaryByDateRangeGroupedByDay(intervalDates.getFirst(), intervalDates.getSecond())
-                    .map(e -> fromTrainerSummaryToSummary(plans, e, (p) -> DailyOrderSummary.builder()
+                    .flatMap(e -> fromTrainerSummaryToSummary(plans, e, (p) -> DailyOrderSummary.builder()
                             .year(e.getYear())
                             .month(e.getMonth())
                             .day(e.getDay())
@@ -706,29 +707,20 @@ public class OrderServiceImpl implements OrderService {
                             .build()));
         }
 
-        public <E extends MonthlyTrainerOrderSummary, T extends MonthlyOrderSummary> T fromTrainerSummaryToSummary(
+        public <E extends MonthlyTrainerOrderSummary, T extends MonthlyOrderSummary> Mono<T> fromTrainerSummaryToSummary(
                 List<PlanResponse> plans, E e, Function<Pair<Double, Integer>, T> mapper) {
 
-            List<Long> planIds = plans.stream().map(PlanResponse::getId).toList();
+            Map<Long, Double> planPriceMap = plans.stream()
+                    .collect(Collectors.toMap(PlanResponse::getId, PlanResponse::getPrice));
 
-            Pair<Double, Integer> totalAndCount = e.getPlanIds().parallelStream()
-                    .reduce(Pair.of(0.0, 0),
-                            (acc, cur) -> {
-                                if (planIds.contains(cur)) {
-                                    double price = plans.stream()
-                                            .filter(p -> p.getId().equals(cur))
-                                            .findFirst()
-                                            .orElseThrow(() -> new IllegalArgumentException("Plan not found in mapping with id " + cur))
-                                            .getPrice();
-                                    return Pair.of(acc.getFirst() + price, acc.getSecond() + 1);
-                                } else {
-                                    return acc;
-                                }
-                            },
-                            (acc1, acc2) -> Pair.of(acc1.getFirst() + acc2.getFirst(), acc1.getSecond() + acc2.getSecond())
-                    );
-
-            return mapper.apply(totalAndCount);
+            return Flux.fromIterable(e.getPlanIds())
+                    .filter(planPriceMap::containsKey)
+                    .map(planId -> Pair.of(planPriceMap.get(planId), 1))// Pair of price and count
+                    .reduce(Pair.of(0.0, 0), (acc, cur) -> Pair.of(
+                            acc.getFirst() + cur.getFirst(),
+                            acc.getSecond() + cur.getSecond()
+                    ))
+                    .map(mapper);
         }
 
         @RedisReactiveChildCache(key = CACHE_KEY_PATH, idPath = "id")

@@ -20,7 +20,7 @@ import {
 import { scaleSequential } from "d3-scale";
 import { interpolateBlues } from "d3-scale-chromatic";
 import { Button } from "@/components/ui/button";
-import { ZoomInIcon, ZoomOutIcon } from "lucide-react";
+import { DownloadIcon, ZoomInIcon, ZoomOutIcon } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -35,6 +35,9 @@ import { useLocale } from "next-intl";
 // @ts-ignore
 import getCountryISO2 from "country-iso-3-to-2";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useTheme } from "next-themes";
+import { useGenerateImage } from "recharts-to-png";
+import FileSaver from "file-saver";
 
 const LEGEND_STEPS = 9;
 
@@ -110,6 +113,49 @@ export default function GeographyChart({
     }).filter(({ startValue, endValue }) => startValue < endValue);
   }, [domain, colorScale]);
 
+  const { theme } = useTheme();
+
+  const [getDivJpeg, { ref, isLoading }] = useGenerateImage<HTMLDivElement>({
+    quality: 1,
+    type: "image/jpeg",
+    options: {
+      ignoreElements: (element) => element.tagName === "BUTTON",
+      windowWidth: 1920,
+      windowHeight: 1080,
+      scrollY: 0,
+      scrollX: 0,
+      scale: 1,
+      width: 1440,
+      height: 1045,
+      backgroundColor: theme === "dark" ? "#1A202C" : "#f0f0f0",
+      x: 0,
+      y: 0,
+      logging: false,
+      imageTimeout: 20000,
+      useCORS: false,
+      allowTaint: false,
+      foreignObjectRendering: false,
+    },
+  });
+  const handleDivDownload = useCallback(async () => {
+    const jpeg = await getDivJpeg();
+
+    if (jpeg) {
+      FileSaver.saveAs(
+        jpeg,
+        `${selectLabels[radioOption].trim().replace(/\s+/g, "_")}_${new Date()
+          .toLocaleString(locale, {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+          })
+          .replace(/[\s,.]+/g, "_")}_geographyChart.jpeg`,
+      );
+    }
+  }, [getDivJpeg, locale, radioOption, selectLabels]);
   return (
     <div
       className="h-[100vh] w-full mx-auto relative bg-accent-foreground/30 dark:bg-accent/80
@@ -124,7 +170,7 @@ export default function GeographyChart({
           wheel={{ step: 100 }}
         >
           {({ zoomIn, zoomOut, resetTransform, centerView, ...rest }) => (
-            <div className="w-full h-full relative  ">
+            <div className="w-full h-full relative  " ref={ref}>
               <AnimatePresence>
                 {isFinished && (
                   <motion.div
@@ -164,12 +210,25 @@ export default function GeographyChart({
                   <Button onClick={() => centerView()}>{centerLabel}</Button>
                   <Button onClick={() => resetTransform()}>{resetLabel}</Button>
                 </div>
-                <div>
+                <div className="flex w-full md:w-fit items-center justify-around mt-5 md:mt-0 md:justify-end gap-3 md:gap-8 lg:gap-12">
                   <DropDownMenuGeographySelect
                     radioOption={radioOption}
                     onRadioOptionChange={setRadioOption}
                     labels={selectLabels}
                   />
+                  <Button
+                    onClick={() => handleDivDownload()}
+                    disabled={isLoading}
+                    type="button"
+                    className="min-w-[65px]"
+                    variant="outline"
+                  >
+                    {isLoading ? (
+                      <span className=" text-primary/60 animate-spin font-bold text-lg w-full h-full " />
+                    ) : (
+                      <DownloadIcon size={24} />
+                    )}
+                  </Button>
                 </div>
                 {/*{scale}*/}
               </div>

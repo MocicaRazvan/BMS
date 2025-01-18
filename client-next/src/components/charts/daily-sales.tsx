@@ -18,6 +18,7 @@ import {
 import useFetchStream from "@/hoooks/useFetchStream";
 import { DailyOrderSummary } from "@/types/dto";
 import useClientNotFound from "@/hoooks/useClientNotFound";
+import { Separator } from "@/components/ui/separator";
 
 export interface DailySalesTexts {
   totalAmountCountOrdersTexts: TotalAmountCountOrdersTexts;
@@ -80,6 +81,7 @@ export default function DailySales({
             to: format(to || from, dateFormat),
           })
         }
+        hiddenPresets={["today", "yesterday", "lastWeek"]}
         align="center"
         locale={locale === "ro" ? ro : undefined}
         defaultPreset={"lastMonth"}
@@ -102,11 +104,15 @@ export default function DailySales({
           <h2 className="text-xl font-bold tracking-tighter md:text-2xl">
             {totalAmountCountOrdersTexts.countLabel.slice(3)}
           </h2>
-          <TrendLineButton
-            {...totalAmountCountOrdersTexts}
-            showTrendLine={showOrdersTrendLine}
-            onShowTrendLineChange={setShowOrdersTrendLine}
-          />
+          <div className="min-w-[180px]">
+            {formattedData.length > 1 && (
+              <TrendLineButton
+                {...totalAmountCountOrdersTexts}
+                showTrendLine={showOrdersTrendLine}
+                onShowTrendLineChange={setShowOrdersTrendLine}
+              />
+            )}
+          </div>
         </div>
         <TotalAmountCountOrders
           data={formattedData}
@@ -115,19 +121,25 @@ export default function DailySales({
           showTotalAmount={false}
           countLabel={totalAmountCountOrdersTexts.countLabel.slice(3)}
           showTrendLine={showOrdersTrendLine}
+          chartName={totalAmountCountOrdersTexts.countLabel.slice(3)}
         />
       </div>
+      <Separator />
       <div>
         <div className="flex items-center justify-between w-full flex-wrap">
           {dateRangePicker}
           <h2 className="text-xl font-bold tracking-tighter md:text-2xl">
             {totalAmountCountOrdersTexts.totalAmountLabel}
           </h2>
-          <TrendLineButton
-            {...totalAmountCountOrdersTexts}
-            showTrendLine={showAmountTrendLine}
-            onShowTrendLineChange={setShowAmountTrendLine}
-          />
+          <div className="min-w-[180px]">
+            {formattedData.length > 1 && (
+              <TrendLineButton
+                {...totalAmountCountOrdersTexts}
+                showTrendLine={showOrdersTrendLine}
+                onShowTrendLineChange={setShowOrdersTrendLine}
+              />
+            )}
+          </div>
         </div>
         <TotalAmountCountOrders
           data={formattedData}
@@ -136,6 +148,7 @@ export default function DailySales({
           showCount={false}
           countLabel={totalAmountCountOrdersTexts.countLabel.slice(3)}
           showTrendLine={showAmountTrendLine}
+          chartName={totalAmountCountOrdersTexts.totalAmountLabel}
         />
       </div>
     </div>

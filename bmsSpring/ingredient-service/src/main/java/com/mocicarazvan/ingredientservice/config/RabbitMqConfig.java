@@ -53,6 +53,9 @@ public class RabbitMqConfig {
     @Value("${spring.custom.rabbit.thread.pool.executorAsyncConcurrencyLimit:64}")
     private int executorAsyncConcurrencyLimit;
 
+    @Value("${spring.custom.rabbitmq.concurrency:8}")
+    private int concurrency;
+
     @Bean
     public Queue ingredientDeleteQueue() {
         return new Queue(ingredientDeleteQueueName, true);
@@ -96,8 +99,8 @@ public class RabbitMqConfig {
     @Bean
     public RabbitMqUpdateDeleteService<Ingredient> ingredientRabbitMqUpdateDeleteService(RabbitTemplate rabbitTemplate) {
         return RabbitMqUpdateDeleteServiceImpl.<Ingredient>builder()
-                .deleteSender(new RabbitMqSenderImpl(ingredientExchangeName, ingredientDeleteRoutingKey, rabbitTemplate))
-                .updateSender(new RabbitMqSenderImpl(ingredientExchangeName, ingredientUpdateRoutingKey, rabbitTemplate))
+                .deleteSender(new RabbitMqSenderImpl(ingredientExchangeName, ingredientDeleteRoutingKey, rabbitTemplate, concurrency))
+                .updateSender(new RabbitMqSenderImpl(ingredientExchangeName, ingredientUpdateRoutingKey, rabbitTemplate, concurrency))
                 .build();
     }
 
@@ -132,8 +135,8 @@ public class RabbitMqConfig {
     @Bean
     public RabbitMqUpdateDeleteService<NutritionalFact> nutritionalFactRabbitMqUpdateDeleteService(RabbitTemplate rabbitTemplate) {
         return RabbitMqUpdateDeleteServiceImpl.<NutritionalFact>builder()
-                .deleteSender(new RabbitMqSenderImpl(nutritionalFactExchangeName, nutritionalFactDeleteRoutingKey, rabbitTemplate))
-                .updateSender(new RabbitMqSenderImpl(nutritionalFactExchangeName, nutritionalFactUpdateRoutingKey, rabbitTemplate))
+                .deleteSender(new RabbitMqSenderImpl(nutritionalFactExchangeName, nutritionalFactDeleteRoutingKey, rabbitTemplate, concurrency))
+                .updateSender(new RabbitMqSenderImpl(nutritionalFactExchangeName, nutritionalFactUpdateRoutingKey, rabbitTemplate, concurrency))
                 .build();
     }
 }

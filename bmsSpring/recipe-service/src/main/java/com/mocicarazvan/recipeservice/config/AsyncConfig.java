@@ -1,4 +1,4 @@
-package com.mocicarazvan.recipeservice.conifg;
+package com.mocicarazvan.recipeservice.config;
 
 
 import com.mocicarazvan.templatemodule.utils.SimpleTaskExecutorsInstance;

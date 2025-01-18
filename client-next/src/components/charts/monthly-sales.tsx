@@ -22,6 +22,7 @@ import useFetchStream from "@/hoooks/useFetchStream";
 import { MonthlyOrderSummary } from "@/types/dto";
 import { ro } from "date-fns/locale";
 import useClientNotFound from "@/hoooks/useClientNotFound";
+import { Separator } from "@/components/ui/separator";
 
 const now = new Date();
 const oneMonthAgo = subMonths(now, 1);
@@ -90,14 +91,7 @@ export default function MonthlySales({
   const dateRangePicker = useMemo(
     () => (
       <DateRangePicker
-        hiddenPresets={[
-          "today",
-          "yesterday",
-          "last7",
-          "last14",
-          "thisWeek",
-          "lastWeek",
-        ]}
+        hiddenPresets={["today", "yesterday", "lastWeek"]}
         onUpdate={({ range: { from, to } }) =>
           setDateRange({
             from: format(from, dateFormat),
@@ -129,19 +123,29 @@ export default function MonthlySales({
     return navigateToNotFound();
   }
 
+  const totalCountAmountChartName =
+    areaRadioOption === "both"
+      ? totalAmountCountOrdersTexts.totalAmountLabel +
+        "&" +
+        totalAmountCountOrdersTexts.countLabel
+      : areaRadioOption === "totalAmount"
+        ? totalAmountCountOrdersTexts.totalAmountLabel
+        : totalAmountCountOrdersTexts.countLabel;
   return (
     <div className="w-full h-ful space-y-10 pt-10 md:space-y-14">
       <div>
         <div className="flex items-center justify-between w-full flex-wrap  ">
           {dateRangePicker}
-          <div className="mt-2 md:mt-0 flex items-center justify-start gap-4">
-            {TrendLineBtn}
-            <DropDownMenuCountTotalAmountSelect
-              {...totalAmountCountOrdersTexts}
-              onRadioOptionChange={setAreaRadioOption}
-              radioOption={areaRadioOption}
-            />
-          </div>
+          {formattedData.length > 0 && (
+            <div className="mt-2 md:mt-0 flex items-center justify-start gap-4">
+              {formattedData.length > 1 && TrendLineBtn}
+              <DropDownMenuCountTotalAmountSelect
+                {...totalAmountCountOrdersTexts}
+                onRadioOptionChange={setAreaRadioOption}
+                radioOption={areaRadioOption}
+              />
+            </div>
+          )}
         </div>
         <TotalAmountCountOrders
           data={formattedData}
@@ -152,8 +156,10 @@ export default function MonthlySales({
             areaRadioOption === "totalAmount" || areaRadioOption === "both"
           }
           showTrendLine={showTrendLine}
+          chartName={totalCountAmountChartName}
         />
       </div>
+      <Separator />
       <div>
         {dateRangePicker}
         <TotalAmountOrdersSingleBarChart
@@ -163,6 +169,7 @@ export default function MonthlySales({
           fieldKey={"totalAmount"}
         />
       </div>
+      <Separator />
       <div>
         {dateRangePicker}
         <TotalAmountOrdersSingleBarChart

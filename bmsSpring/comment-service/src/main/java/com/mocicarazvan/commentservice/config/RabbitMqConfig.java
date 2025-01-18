@@ -37,6 +37,9 @@ public class RabbitMqConfig {
     @Value("${spring.custom.rabbit.thread.pool.executorAsyncConcurrencyLimit:64}")
     private int executorAsyncConcurrencyLimit;
 
+    @Value("${spring.custom.rabbitmq.concurrency:8}")
+    private int concurrency;
+
     @Bean
     public Queue commentDeleteQueue() {
         return new Queue(commentDeleteQueueName, true);
@@ -80,8 +83,8 @@ public class RabbitMqConfig {
     @Bean
     public RabbitMqUpdateDeleteService<Comment> commentRabbitMqUpdateDeleteService(RabbitTemplate rabbitTemplate) {
         return RabbitMqUpdateDeleteServiceImpl.<Comment>builder()
-                .deleteSender(new RabbitMqSenderImpl(commentExchangeName, commentDeleteRoutingKey, rabbitTemplate))
-                .updateSender(new RabbitMqSenderImpl(commentExchangeName, commentUpdateRoutingKey, rabbitTemplate))
+                .deleteSender(new RabbitMqSenderImpl(commentExchangeName, commentDeleteRoutingKey, rabbitTemplate, concurrency))
+                .updateSender(new RabbitMqSenderImpl(commentExchangeName, commentUpdateRoutingKey, rabbitTemplate, concurrency))
                 .build();
     }
 }

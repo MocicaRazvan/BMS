@@ -319,7 +319,7 @@ public class PostController implements ApproveController
 
     @GetMapping("/testQueue")
     public Mono<String> testQueue(@RequestParam(required = false, defaultValue = "100") Integer nr) {
-        var sender = new RabbitMqSenderImpl("post-exchange", "post-update-routing-key", rabbitTemplate);
+        var sender = new RabbitMqSenderImpl("post-exchange", "post-update-routing-key", rabbitTemplate, 8);
         var max = Math.ceil(nr / 1000.0);
         IntStream.range(0, (int) max).parallel().forEach(i -> {
             var posts = IntStream.range(0, 1000)

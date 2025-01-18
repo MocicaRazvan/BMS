@@ -1,4 +1,4 @@
-package com.mocicarazvan.recipeservice.conifg;
+package com.mocicarazvan.recipeservice.config;
 
 
 import com.mocicarazvan.recipeservice.dtos.RecipeResponse;
@@ -52,6 +52,9 @@ public class RabbitMqConfig {
     @Value("${spring.custom.rabbit.thread.pool.executorAsyncConcurrencyLimit:64}")
     private int executorAsyncConcurrencyLimit;
 
+    @Value("${spring.custom.rabbitmq.concurrency:8}")
+    private int concurrency;
+
     @Bean
     public Queue recipeQueue() {
         return new Queue(recipeQueueName, true);
@@ -82,7 +85,7 @@ public class RabbitMqConfig {
 
     @Bean
     public RabbitMqSender rabbitMqSender(RabbitTemplate rabbitTemplate) {
-        return new RabbitMqSenderImpl(recipeExchangeName, recipeRoutingKey, rabbitTemplate);
+        return new RabbitMqSenderImpl(recipeExchangeName, recipeRoutingKey, rabbitTemplate, concurrency);
     }
 
     @Bean
@@ -115,8 +118,8 @@ public class RabbitMqConfig {
     @Bean
     public RabbitMqUpdateDeleteService<Recipe> recipeRabbitMqUpdateDeleteService(RabbitTemplate rabbitTemplate) {
         return RabbitMqUpdateDeleteServiceImpl.<Recipe>builder()
-                .deleteSender(new RabbitMqSenderImpl(recipeExchangeName, recipeDeleteRoutingKey, rabbitTemplate))
-                .updateSender(new RabbitMqSenderImpl(recipeExchangeName, recipeUpdateRoutingKey, rabbitTemplate))
+                .deleteSender(new RabbitMqSenderImpl(recipeExchangeName, recipeDeleteRoutingKey, rabbitTemplate, concurrency))
+                .updateSender(new RabbitMqSenderImpl(recipeExchangeName, recipeUpdateRoutingKey, rabbitTemplate, concurrency))
                 .build();
     }
 }

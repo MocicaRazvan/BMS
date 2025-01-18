@@ -32,6 +32,9 @@ public class RabbitMqConfig {
     @Value("${spring.custom.rabbit.thread.pool.executorAsyncConcurrencyLimit:64}")
     private int executorAsyncConcurrencyLimit;
 
+    @Value("${spring.custom.rabbitmq.concurrency:8}")
+    private int concurrency;
+
     @Bean
     public Queue planBoughtQueue() {
         return new Queue(planBoughtQueueName, true);
@@ -62,7 +65,7 @@ public class RabbitMqConfig {
 
     @Bean
     public RabbitMqSender rabbitMqSender(RabbitTemplate rabbitTemplate) {
-        return new RabbitMqSenderImpl(planBoughtExchangeName, planBoughtRoutingKey, rabbitTemplate);
+        return new RabbitMqSenderImpl(planBoughtExchangeName, planBoughtRoutingKey, rabbitTemplate, concurrency);
     }
 
     @Bean

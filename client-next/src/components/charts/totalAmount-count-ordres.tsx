@@ -1,6 +1,5 @@
 "use client";
 
-import * as React from "react";
 import { useEffect, useMemo } from "react";
 import {
   Area,
@@ -39,6 +38,7 @@ import emptyChart from "../../../public/lottie/emptyChart.json";
 import { motion } from "framer-motion";
 import * as ss from "simple-statistics";
 import { Skeleton } from "@/components/ui/skeleton";
+import useDownloadChartButton from "@/hoooks/charts/download-chart-button";
 
 export interface TotalAmountCountOrdersData {
   count: number;
@@ -62,6 +62,7 @@ interface Props extends TotalAmountCountOrdersTexts {
   showCount?: boolean;
   showTotalAmount?: boolean;
   showTrendLine?: boolean;
+  chartName: string;
 }
 
 export function TotalAmountCountOrders({
@@ -73,6 +74,7 @@ export function TotalAmountCountOrders({
   showTotalAmount = true,
   showTrendLine = true,
   trendLineLabel,
+  chartName,
 }: Props) {
   const chartConfig = {
     count: {
@@ -87,8 +89,6 @@ export function TotalAmountCountOrders({
 
   const debounceDataAvailable = useDebounce(dataAvailable, 225);
 
-  const locale = useLocale();
-
   const regressionKey: "countLine" | "totalAmountLine" | null =
     showCount && showTotalAmount
       ? null
@@ -98,7 +98,7 @@ export function TotalAmountCountOrders({
           ? "totalAmountLine"
           : null;
 
-  const regressionPoints = React.useMemo(() => {
+  const regressionPoints = useMemo(() => {
     if (!regressionKey || !showTrendLine) return null;
     // const points = data.map((d, idx) => [idx, d["count"]]);
     const points = data.reduce<
@@ -139,7 +139,15 @@ export function TotalAmountCountOrders({
     [data],
   );
 
-  console.log("regressionPoints", regressionPoints);
+  const {
+    downloadChartRef: barChartRef,
+    DownloadChartButton: BarChartDownloadButton,
+  } = useDownloadChartButton({ data });
+
+  const {
+    DownloadChartButton: ComposedChartDownloadButton,
+    downloadChartRef: composedChartRef,
+  } = useDownloadChartButton({ data });
 
   return (
     <div className="w-full py-16">
@@ -163,7 +171,7 @@ export function TotalAmountCountOrders({
             />
           </motion.div>
         ) : data.length === 1 ? (
-          <BarChart data={data}>
+          <BarChart data={data} ref={barChartRef}>
             <CartesianGrid vertical={false} />
             <XAxis
               dataKey="date"
@@ -192,7 +200,7 @@ export function TotalAmountCountOrders({
             <ChartLegend content={<ChartLegendContent />} />
           </BarChart>
         ) : (
-          <ComposedChart data={data}>
+          <ComposedChart data={data} ref={composedChartRef}>
             <defs>
               <linearGradient id="fillCount" x1="0" y1="0" x2="0" y2="1">
                 <stop
@@ -306,6 +314,17 @@ export function TotalAmountCountOrders({
           </ComposedChart>
         )}
       </ChartContainer>
+      {data.length > 0 && (
+        <div className="w-full mt-2 flex justify-end">
+          {data.length === 1 ? (
+            <BarChartDownloadButton fileName={`${chartName}_barChart`} />
+          ) : (
+            <ComposedChartDownloadButton
+              fileName={`${chartName}_composedChart`}
+            />
+          )}
+        </div>
+      )}
     </div>
   );
 }
@@ -391,6 +410,7 @@ export const TrendLineButton = ({
   return (
     <Button
       variant="outline"
+      className="min-w-[180px]"
       onClick={() => onShowTrendLineChange(showTrendLine ? false : true)}
     >
       {showTrendLine ? hideTrendLineLabel : showTrendLineLabel}
@@ -432,6 +452,9 @@ export function TotalAmountOrdersSingleBarChart({
     () => data.reduce((acc, curr) => acc + curr[fieldKey], 0) / data.length,
     [data, fieldKey],
   );
+  const { downloadChartRef, DownloadChartButton } = useDownloadChartButton({
+    data,
+  });
 
   return (
     <div className="w-full py-16">
@@ -442,7 +465,7 @@ export function TotalAmountOrdersSingleBarChart({
         {!debounceDataAvailable ? (
           <Skeleton className={"w-full h-full"} />
         ) : (
-          <BarChart data={data}>
+          <BarChart data={data} ref={downloadChartRef}>
             <CartesianGrid vertical={false} />
             <XAxis
               dataKey="date"
@@ -491,6 +514,11 @@ export function TotalAmountOrdersSingleBarChart({
           </BarChart>
         )}
       </ChartContainer>
+      {data.length > 0 && (
+        <div className="w-full mt-2 flex justify-end">
+          <DownloadChartButton fileName={`${label}_barChart`} />
+        </div>
+      )}
     </div>
   );
 }

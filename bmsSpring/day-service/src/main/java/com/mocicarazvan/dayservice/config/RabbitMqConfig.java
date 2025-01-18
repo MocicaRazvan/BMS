@@ -53,6 +53,9 @@ public class RabbitMqConfig {
     @Value("${spring.custom.rabbit.thread.pool.executorAsyncConcurrencyLimit:64}")
     private int executorAsyncConcurrencyLimit;
 
+    @Value("${spring.custom.rabbitmq.concurrency:8}")
+    private int concurrency;
+
     @Bean
     public Queue dayDeleteQueue() {
         return new Queue(dayDeleteQueueName, true);
@@ -96,8 +99,8 @@ public class RabbitMqConfig {
     @Bean
     public RabbitMqUpdateDeleteService<Day> dayRabbitMqUpdateDeleteService(RabbitTemplate rabbitTemplate) {
         return RabbitMqUpdateDeleteServiceImpl.<Day>builder()
-                .deleteSender(new RabbitMqSenderImpl(dayExchangeName, dayDeleteRoutingKey, rabbitTemplate))
-                .updateSender(new RabbitMqSenderImpl(dayExchangeName, dayUpdateRoutingKey, rabbitTemplate))
+                .deleteSender(new RabbitMqSenderImpl(dayExchangeName, dayDeleteRoutingKey, rabbitTemplate, concurrency))
+                .updateSender(new RabbitMqSenderImpl(dayExchangeName, dayUpdateRoutingKey, rabbitTemplate, concurrency))
                 .build();
     }
 
@@ -132,8 +135,8 @@ public class RabbitMqConfig {
     @Bean
     public RabbitMqUpdateDeleteService<Meal> mealRabbitMqUpdateDeleteService(RabbitTemplate rabbitTemplate) {
         return RabbitMqUpdateDeleteServiceImpl.<Meal>builder()
-                .deleteSender(new RabbitMqSenderImpl(mealExchangeName, mealDeleteRoutingKey, rabbitTemplate))
-                .updateSender(new RabbitMqSenderImpl(mealExchangeName, mealUpdateRoutingKey, rabbitTemplate))
+                .deleteSender(new RabbitMqSenderImpl(mealExchangeName, mealDeleteRoutingKey, rabbitTemplate, concurrency))
+                .updateSender(new RabbitMqSenderImpl(mealExchangeName, mealUpdateRoutingKey, rabbitTemplate, concurrency))
                 .build();
     }
 }
