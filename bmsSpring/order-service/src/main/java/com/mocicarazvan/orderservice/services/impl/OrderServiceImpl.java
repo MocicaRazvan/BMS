@@ -17,6 +17,7 @@ import com.mocicarazvan.orderservice.dtos.notifications.InternalBoughtBody;
 import com.mocicarazvan.orderservice.dtos.summaries.CountryOrderSummary;
 import com.mocicarazvan.orderservice.dtos.summaries.DailyOrderSummary;
 import com.mocicarazvan.orderservice.dtos.summaries.MonthlyOrderSummary;
+import com.mocicarazvan.orderservice.dtos.summaries.TopUsersSummary;
 import com.mocicarazvan.orderservice.dtos.summaries.trainer.MonthlyTrainerOrderSummary;
 import com.mocicarazvan.orderservice.email.EmailTemplates;
 import com.mocicarazvan.orderservice.enums.CountrySummaryType;
@@ -301,6 +302,12 @@ public class OrderServiceImpl implements OrderService {
         return
                 self.getOrdersSummaryByMonthBase(intervalDates.getFirst(), intervalDates.getSecond());
 
+    }
+
+    @Override
+    public Flux<TopUsersSummary> getTopUsersSummary(LocalDate from, LocalDate to, int top) {
+        Pair<LocalDateTime, LocalDateTime> intervalDates = getIntervalDates(from, to);
+        return self.getTopUsersSummaryBase(intervalDates.getFirst(), intervalDates.getSecond(), top);
     }
 
     @Override
@@ -646,6 +653,11 @@ public class OrderServiceImpl implements OrderService {
                                         .build();
                             }
                     );
+        }
+
+        @RedisReactiveChildCache(key = CACHE_KEY_PATH, idPath = "month+2*year+3*totalAmount+count*3+271")
+        public Flux<TopUsersSummary> getTopUsersSummaryBase(LocalDateTime from, LocalDateTime to, int top) {
+            return orderRepository.getTopUsersSummary(from, to, top);
         }
 
         @RedisReactiveChildCache(key = CACHE_KEY_PATH, idPath = "month+year+2*totalAmount+count+33")

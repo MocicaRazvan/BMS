@@ -3,6 +3,7 @@ package com.mocicarazvan.orderservice.repositories;
 import com.mocicarazvan.orderservice.dtos.summaries.CountryOrderSummary;
 import com.mocicarazvan.orderservice.dtos.summaries.DailyOrderSummary;
 import com.mocicarazvan.orderservice.dtos.summaries.MonthlyOrderSummary;
+import com.mocicarazvan.orderservice.dtos.summaries.TopUsersSummary;
 import com.mocicarazvan.orderservice.dtos.summaries.trainer.DailyTrainerOrderSummary;
 import com.mocicarazvan.orderservice.dtos.summaries.trainer.MonthlyTrainerOrderSummary;
 import com.mocicarazvan.orderservice.models.Order;
@@ -123,6 +124,25 @@ public interface OrderRepository extends ManyToOneUserRepository<Order>, CountIn
     Flux<DailyTrainerOrderSummary> getTrainerOrdersSummaryByDateRangeGroupedByDay(
             LocalDateTime startDate,
             LocalDateTime endDate);
+
+    @Query("""
+                select * from
+                (SELECT
+                    user_id,
+                    sum(total) as total_amount,
+                    count(id) as orders_number,
+                    SUM(array_length(plan_ids, 1)) as plans_number,
+                    ARRAY_AGG(DISTINCT elem) AS plan_values,
+                    dense_rank() over( order by sum(total) desc) as rank
+                FROM custom_order,
+                     unnest(plan_ids) as elem
+                WHERE created_at >= :startDate AND created_at < :endDate
+                GROUP BY user_id) as sub
+                where sub.rank <= :top
+            """)
+    Flux<TopUsersSummary> getTopUsersSummary(LocalDateTime startDate,
+                                             LocalDateTime endDate,
+                                             int top);
 
     @Query("""
                 SELECT

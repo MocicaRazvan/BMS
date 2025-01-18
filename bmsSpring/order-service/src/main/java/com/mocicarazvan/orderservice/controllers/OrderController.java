@@ -9,6 +9,7 @@ import com.mocicarazvan.orderservice.dtos.clients.collect.FullDayResponse;
 import com.mocicarazvan.orderservice.dtos.summaries.CountryOrderSummary;
 import com.mocicarazvan.orderservice.dtos.summaries.DailyOrderSummary;
 import com.mocicarazvan.orderservice.dtos.summaries.MonthlyOrderSummary;
+import com.mocicarazvan.orderservice.dtos.summaries.TopUsersSummary;
 import com.mocicarazvan.orderservice.enums.CountrySummaryType;
 import com.mocicarazvan.orderservice.enums.DietType;
 import com.mocicarazvan.orderservice.enums.ObjectiveType;
@@ -22,6 +23,7 @@ import com.mocicarazvan.templatemodule.dtos.response.ResponseWithUserDtoEntity;
 import com.mocicarazvan.templatemodule.hateos.CustomEntityModel;
 import com.mocicarazvan.templatemodule.utils.RequestsUtils;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -148,6 +150,15 @@ public class OrderController implements CountInParentController {
                                                              @RequestParam @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate to,
                                                              ServerWebExchange exchange) {
         return orderService.getOrdersSummaryByMonth(from, to, requestsUtils.extractAuthUser(exchange));
+    }
+
+    @GetMapping("/admin/topUsers")
+    @ResponseStatus(HttpStatus.OK)
+    public Flux<TopUsersSummary> getTopUsersSummary(@RequestParam @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate from,
+                                                    @RequestParam @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate to,
+                                                    @RequestParam @Valid @Min(1) int top
+    ) {
+        return orderService.getTopUsersSummary(from, to, top);
     }
 
     @GetMapping("/trainer/countAndAmount/{trainerId}")

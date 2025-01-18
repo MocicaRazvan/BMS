@@ -11,6 +11,7 @@ import { CountrySummaryType } from "@/types/dto";
 import { MonthlySalesTexts } from "@/components/charts/monthly-sales";
 import { getDateRangePickerTexts } from "@/texts/components/ui";
 import { DailySalesTexts } from "@/components/charts/daily-sales";
+import { TopUsersTexts } from "@/components/charts/top-users";
 
 export async function getIngredientPieChartTexts(): Promise<IngredientPieChartTexts> {
   const t = await getTranslations("components.charts.IngredientPieChartTexts");
@@ -122,5 +123,35 @@ export async function getDailySalesTexts(
   return {
     dateRangePickerTexts,
     totalAmountCountOrdersTexts,
+  };
+}
+
+export async function getTopUsersTexts(): Promise<TopUsersTexts> {
+  const [t, dateRangePickerTexts] = await Promise.all([
+    getTranslations("components.charts.TopUsersTexts"),
+    getDateRangePickerTexts(),
+  ]);
+  return {
+    dateRangePickerTexts,
+    topLabel: t("topLabel"),
+    noResults: t("noResults"),
+    userCardTexts: {
+      amountPerOrderTitle: t("userCardTexts.amountPerOrderTitle"),
+      orders: t("userCardTexts.orders"),
+      planDistributionTitle: t("userCardTexts.planDistributionTitle"),
+      topBuyer: t("userCardTexts.topBuyer"),
+      rank: t("userCardTexts.rank"),
+      userAntent: t("userCardTexts.userAntent"),
+      plans: t("userCardTexts.plans"),
+      totalAmount: t("userCardTexts.totalAmount"),
+      type: t("userCardTexts.type"),
+      objective: t("userCardTexts.objective"),
+    },
+    title: t("title"),
+    periodLabel: t("periodLabel"),
+    userAmountPerOderChartTexts: {
+      amountPerOrder: t("userAmountPerOderChartTexts.amountPerOrder"),
+      meanAmountPerOrder: t("userAmountPerOderChartTexts.meanAmountPerOrder"),
+    },
   };
 }

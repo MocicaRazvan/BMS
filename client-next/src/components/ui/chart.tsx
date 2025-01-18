@@ -112,6 +112,8 @@ const ChartTooltipContent = React.forwardRef<
       nameKey?: string;
       labelKey?: string;
       hiddenKeys?: string[];
+      hideValue?: boolean;
+      ItemLabelWrapper?: React.ComponentType<{ children: React.ReactNode }>;
     }
 >(
   (
@@ -130,6 +132,8 @@ const ChartTooltipContent = React.forwardRef<
       nameKey,
       labelKey,
       hiddenKeys = [],
+      hideValue = false,
+      ItemLabelWrapper,
     },
     ref,
   ) => {
@@ -243,11 +247,17 @@ const ChartTooltipContent = React.forwardRef<
                       >
                         <div className="grid gap-1.5 me-2">
                           {nestLabel ? tooltipLabel : null}
-                          <span className="text-muted-foreground">
-                            {itemConfig?.label || item.name}
-                          </span>
+                          {ItemLabelWrapper ? (
+                            <ItemLabelWrapper>
+                              {itemConfig?.label || item.name}
+                            </ItemLabelWrapper>
+                          ) : (
+                            <span className="text-muted-foreground">
+                              {itemConfig?.label || item.name}
+                            </span>
+                          )}
                         </div>
-                        {item.value && (
+                        {item.value && !hideValue && (
                           <span className="font-mono font-medium tabular-nums text-foreground ms-2">
                             {item.value.toLocaleString()}
                           </span>

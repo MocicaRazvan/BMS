@@ -17,6 +17,7 @@ import { getIntlMetadata } from "@/texts/metadata";
 import ArchiveQueueCards, {
   ArchiveQueueCardsTexts,
 } from "@/components/common/archive-queue-card";
+import { Separator } from "@/components/ui/separator";
 
 interface Props {
   params: { locale: Locale };
@@ -91,6 +92,7 @@ export default async function AdminIngredientsPage({
                 admin: "true",
               }}
             />
+            <Separator />
             <ArchiveQueueCards
               prefix={"ingredient"}
               locale={locale}

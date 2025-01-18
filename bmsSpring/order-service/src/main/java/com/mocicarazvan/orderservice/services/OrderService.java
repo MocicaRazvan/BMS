@@ -9,6 +9,7 @@ import com.mocicarazvan.orderservice.dtos.clients.collect.FullDayResponse;
 import com.mocicarazvan.orderservice.dtos.summaries.CountryOrderSummary;
 import com.mocicarazvan.orderservice.dtos.summaries.DailyOrderSummary;
 import com.mocicarazvan.orderservice.dtos.summaries.MonthlyOrderSummary;
+import com.mocicarazvan.orderservice.dtos.summaries.TopUsersSummary;
 import com.mocicarazvan.orderservice.enums.CountrySummaryType;
 import com.mocicarazvan.orderservice.enums.DietType;
 import com.mocicarazvan.orderservice.enums.ObjectiveType;
@@ -46,6 +47,8 @@ public interface OrderService extends CountInParentService {
     Flux<MonthlyEntityGroup<OrderDto>> getOrdersGroupedByMonth(int month, String userId);
 
     Flux<MonthlyOrderSummary> getOrdersSummaryByMonth(LocalDate from, LocalDate to, String userId);
+
+    Flux<TopUsersSummary> getTopUsersSummary(LocalDate from, LocalDate to, int top);
 
     Flux<MonthlyOrderSummary> getTrainerOrdersSummaryByMonth(LocalDate from, LocalDate to, Long trainerId, String userId);
 

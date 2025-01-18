@@ -1187,6 +1187,28 @@
           "count": "Number of orders",
           "totalAmount": "Total amount"
         }
+      },
+      "TopUsersTexts": {
+        "periodLabel": "Period",
+        "topLabel": "Top",
+        "noResults": "No results were found by the search criteria!",
+        "title": "Top Users",
+        "userCardTexts": {
+          "userAntent": "User ",
+          "totalAmount": "Total amount",
+          "topBuyer": "Top buyer: ",
+          "orders": "Orders",
+          "plans": "Plans",
+          "rank": "Rank",
+          "amountPerOrderTitle": "Amount per Order",
+          "planDistributionTitle": "Plan Distribution",
+          "objective": "Objective",
+          "type": "Diet Type"
+        },
+        "userAmountPerOderChartTexts": {
+          "amountPerOrder": "Amount per Order",
+          "meanAmountPerOrder": "Mean for top: "
+        }
       }
     },
     "plans": {

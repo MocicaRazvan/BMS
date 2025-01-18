@@ -18,6 +18,8 @@ import { Locale } from "@/navigation";
 import ArchiveContent, {
   AugmentedArchiveQueuePrefix,
 } from "@/app/[locale]/admin/dashboard/archive-content";
+import TopUsers, { TopUsersTexts } from "@/components/charts/top-users";
+import { Separator } from "@/components/ui/separator";
 
 export interface AdminDashboardPageTexts {
   title: string;
@@ -29,6 +31,7 @@ export interface AdminDashboardPageTexts {
   archiveTexts: Record<ArchiveQueuePrefix, ArchiveQueueCardsTexts>;
   archiveTitle: string;
   selectItems: Record<AugmentedArchiveQueuePrefix, string>;
+  topUsersTexts: TopUsersTexts;
 }
 
 interface Props extends WithUser, AdminDashboardPageTexts {
@@ -43,6 +46,7 @@ export default function AdminDashboardPageContent({
   locale,
   archiveTitle,
   selectItems,
+  topUsersTexts,
 }: Props) {
   const [relativeItemsCount, setRelativeItemsCount] = useState<
     Record<RelativeItems, number>
@@ -110,6 +114,11 @@ export default function AdminDashboardPageContent({
           />
         </motion.div>
       </div>
+      <Separator className="mt-2" />
+      <div className=" my-5 h-full w-full">
+        <TopUsers texts={topUsersTexts} locale={locale} />
+      </div>
+      <Separator />
       <div className="w-full h-full mt-5 md:mt-12">
         <ArchiveContent
           locale={locale}

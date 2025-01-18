@@ -62,6 +62,7 @@ import {
   getIngredientPieChartTexts,
   getMonthlySalesTexts,
   getRelativeItemsSummaryTexts,
+  getTopUsersTexts,
 } from "@/texts/components/charts";
 import { UserRecipesPageTexts } from "@/app/[locale]/trainer/user/[id]/recipes/page";
 import { AdminRecipesPageTexts } from "@/app/[locale]/admin/recipes/page";
@@ -550,6 +551,7 @@ export async function getAdminUsersPageTexts(): Promise<AdminUsersPageTexts> {
     t,
     menuTexts,
     archiveUsersTexts,
+    topUsersTexts,
   ] = await Promise.all([
     getUserTableTexts(),
     getThemeSwitchTexts(),
@@ -557,6 +559,7 @@ export async function getAdminUsersPageTexts(): Promise<AdminUsersPageTexts> {
     getTranslations("pages.admin.AdminUsersPageTexts"),
     getSidebarMenuTexts("admin", adminGroupLabels, adminLabels, adminSubLabels),
     getArchiveQueueCardsTexts("user"),
+    getTopUsersTexts(),
   ]);
   return {
     userTableTexts,
@@ -566,6 +569,7 @@ export async function getAdminUsersPageTexts(): Promise<AdminUsersPageTexts> {
     title: t("title"),
     menuTexts,
     archiveUsersTexts,
+    topUsersTexts,
   };
 }
 
@@ -1376,6 +1380,7 @@ export async function getAdminDashboardPageTexts(): Promise<AdminDashboardPageTe
     relativeItemsSummaryTexts,
     menuTexts,
     archiveTexts,
+    topUsersTexts,
   ] = await Promise.all([
     getTranslations("pages.admin.AdminDashboardPageTexts"),
     getAllRelativeItemTexts(),
@@ -1383,6 +1388,7 @@ export async function getAdminDashboardPageTexts(): Promise<AdminDashboardPageTe
     getRelativeItemsSummaryTexts(),
     getSidebarMenuTexts("admin", adminGroupLabels, adminLabels, adminSubLabels),
     getAllArchiveQueueCardsTexts(),
+    getTopUsersTexts(),
   ]);
 
   return {
@@ -1393,6 +1399,7 @@ export async function getAdminDashboardPageTexts(): Promise<AdminDashboardPageTe
     relativeItemsSummaryTexts,
     menuTexts,
     archiveTexts,
+    topUsersTexts,
     archiveTitle: t("archiveTitle"),
     selectItems: {
       comment: t("selectItems.comment"),

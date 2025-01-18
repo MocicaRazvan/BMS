@@ -554,3 +554,12 @@ export enum ContainerAction {
 export interface NotifyContainerAction extends BaseWSDto {
   action: ContainerAction;
 }
+
+export interface TopUsersSummary {
+  userId: number;
+  totalAmount: number;
+  ordersNumber: number;
+  planValues: number[];
+  rank: number;
+  plansNumber: number;
+}

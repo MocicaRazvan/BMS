@@ -1186,6 +1186,28 @@
           "count": "Numărul de comenzi",
           "totalAmount": "Suma totală"
         }
+      },
+      "TopUsersTexts": {
+        "periodLabel": "Perioadă",
+        "topLabel": "Top",
+        "noResults": "Nu au fost găsite rezultate conform criteriilor de căutare!",
+        "title": "Top utilizatori",
+        "userCardTexts": {
+          "userAntent": "Utilizator",
+          "totalAmount": "Suma totală",
+          "topBuyer": "Cumpărător de top: ",
+          "orders": "Comenzi",
+          "plans": "Planuri",
+          "rank": "Clasament",
+          "amountPerOrderTitle": "Suma pe comandă",
+          "planDistributionTitle": "Distribuția planului",
+          "objective": "Obiectiv",
+          "type": "Tip dietă"
+        },
+        "userAmountPerOderChartTexts": {
+          "amountPerOrder": "Suma pe comandă",
+          "meanAmountPerOrder": "Media pentru top: "
+        }
       }
     },
     "plans": {

@@ -16,6 +16,8 @@ import { getIntlMetadata } from "@/texts/metadata";
 import ArchiveQueueCards, {
   ArchiveQueueCardsTexts,
 } from "@/components/common/archive-queue-card";
+import TopUsers, { TopUsersTexts } from "@/components/charts/top-users";
+import { Separator } from "@/components/ui/separator";
 
 interface Props {
   params: { locale: Locale };
@@ -29,6 +31,7 @@ export interface AdminUsersPageTexts {
   title: string;
   menuTexts: SidebarMenuTexts;
   archiveUsersTexts: ArchiveQueueCardsTexts;
+  topUsersTexts: TopUsersTexts;
 }
 export async function generateMetadata({
   params: { locale },
@@ -47,6 +50,7 @@ export default async function AdminUsersPage({ params: { locale } }: Props) {
       header,
       menuTexts,
       archiveUsersTexts,
+      topUsersTexts,
     },
     authUser,
   ] = await Promise.all([
@@ -84,6 +88,12 @@ export default async function AdminUsersPage({ params: { locale } }: Props) {
                 admin: "true",
               }}
             />
+
+            <Separator />
+            <div className="my-5 h-full w-full">
+              <TopUsers texts={topUsersTexts} locale={locale} />
+            </div>
+            <Separator />
             <ArchiveQueueCards
               prefix={"user"}
               locale={locale}

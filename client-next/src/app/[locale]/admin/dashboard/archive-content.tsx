@@ -58,7 +58,7 @@ const ArchiveContent = memo(
             <SelectContent>
               {augmentedArchiveQueuePrefixes.map((prefix) => (
                 <SelectItem
-                  key="prefix"
+                  key={prefix + "sel"}
                   value={prefix}
                   className="cursor-pointer capitalize"
                 >
