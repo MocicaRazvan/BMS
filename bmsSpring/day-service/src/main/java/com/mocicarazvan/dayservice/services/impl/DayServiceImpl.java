@@ -111,13 +111,13 @@ public class DayServiceImpl
     @Override
     public Flux<PageableResponse<ResponseWithUserDto<DayResponse>>> getDaysFilteredWithUser(String title, DayType type, List<Long> excludeIds, PageableBody pageableBody, String userId, Boolean admin) {
         return getDaysFiltered(title, type, excludeIds, pageableBody, userId, admin)
-                .concatMap(this::getPageableWithUser);
+                .flatMapSequential(this::getPageableWithUser);
     }
 
     @Override
     public Flux<PageableResponse<ResponseWithEntityCount<DayResponse>>> getDaysFilteredWithCount(String title, DayType type, List<Long> excludeIds, PageableBody pageableBody, String userId, Boolean admin) {
         return getDaysFiltered(title, type, excludeIds, pageableBody, userId, admin)
-                .concatMap(pr -> toResponseWithCount(userId, planClient, pr));
+                .flatMapSequential(pr -> toResponseWithCount(userId, planClient, pr));
     }
 
     @Override
@@ -130,7 +130,7 @@ public class DayServiceImpl
     @Override
     public Flux<PageableResponse<ResponseWithEntityCount<DayResponse>>> getDaysFilteredTrainerWithCount(String title, DayType type, List<Long> excludeIds, PageableBody pageableBody, String userId, Long trainerId) {
         return getDaysFilteredTrainer(title, type, excludeIds, pageableBody, userId, trainerId)
-                .concatMap(pr -> toResponseWithCount(userId, planClient, pr));
+                .flatMapSequential(pr -> toResponseWithCount(userId, planClient, pr));
     }
 
     @Override

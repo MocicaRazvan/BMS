@@ -88,7 +88,7 @@ public class RecipeServiceImpl extends ApprovedServiceImpl<Recipe, RecipeBody, R
 
     @Override
     public Flux<PageableResponse<ResponseWithUserDto<RecipeResponse>>> getRecipesFilteredWithUser(String title, DietType dietType, PageableBody pageableBody, String userId, Boolean approved, Boolean admin) {
-        return getRecipesFiltered(title, dietType, pageableBody, userId, approved, admin).concatMap(this::getPageableWithUser);
+        return getRecipesFiltered(title, dietType, pageableBody, userId, approved, admin).flatMapSequential(this::getPageableWithUser);
     }
 
     @Override
@@ -103,7 +103,8 @@ public class RecipeServiceImpl extends ApprovedServiceImpl<Recipe, RecipeBody, R
 
     @Override
     public Flux<PageableResponse<ResponseWithEntityCount<RecipeResponse>>> getRecipesFilteredWithCount(String title, DietType dietType, PageableBody pageableBody, String userId, Boolean approved, Boolean admin) {
-        return getRecipesFiltered(title, dietType, pageableBody, userId, approved, admin).concatMap(pr -> toResponseWithCount(userId, dayClient, pr));
+        return getRecipesFiltered(title, dietType, pageableBody, userId, approved, admin)
+                .flatMapSequential(pr -> toResponseWithCount(userId, dayClient, pr));
 
 
     }
@@ -221,7 +222,7 @@ public class RecipeServiceImpl extends ApprovedServiceImpl<Recipe, RecipeBody, R
     public Flux<PageableResponse<ResponseWithEntityCount<RecipeResponse>>> getRecipesFilteredTrainerWithCount(String title, DietType type, Long trainerId, PageableBody pageableBody, String userId, Boolean approved) {
         return
                 getRecipesFilteredTrainer(title, type, trainerId, pageableBody, userId, approved)
-                        .concatMap(pr -> toResponseWithCount(userId, dayClient, pr));
+                        .flatMapSequential(pr -> toResponseWithCount(userId, dayClient, pr));
     }
 
     @Override

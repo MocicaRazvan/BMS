@@ -83,7 +83,7 @@ public class PostController implements ApproveController
         log.error("approved: " + approved);
         return postService.
                 getModelsWithUser(title, pageableBody, requestsUtils.extractAuthUser(exchange), approved)
-                .concatMap(m -> postReactiveResponseBuilder.toModelWithUserPageable(m, PostController.class));
+                .flatMapSequential(m -> postReactiveResponseBuilder.toModelWithUserPageable(m, PostController.class));
     }
 
     @PatchMapping("/tags/withUser")
@@ -103,7 +103,7 @@ public class PostController implements ApproveController
                 postService.
                         getPostsFilteredWithUser(title, pageableBody, requestsUtils.extractAuthUser(exchange), approved, tags, liked, admin)
 //                .delayElements(Duration.ofSeconds(3))
-                        .concatMap(m -> postReactiveResponseBuilder.toModelWithUserPageable(m, PostController.class))
+                        .flatMapSequential(m -> postReactiveResponseBuilder.toModelWithUserPageable(m, PostController.class))
                 ;
     }
 

@@ -92,7 +92,7 @@ public class IngredientNutritionalFactServiceImpl implements IngredientNutrition
     @Override
     public Flux<PageableResponse<ResponseWithEntityCount<IngredientNutritionalFactResponse>>> getAllModelsFilteredWithEntityCount(String name, Boolean display, DietType type, PageableBody pageableBody, String userId, Boolean admin) {
         return getAllModelsFiltered(name, display, type, pageableBody, userId, admin)
-                .concatMap(pr -> recipeClient.getCountInParent(pr.getContent().getIngredient().getId(), userId)
+                .flatMapSequential(pr -> recipeClient.getCountInParent(pr.getContent().getIngredient().getId(), userId)
                         .map(entityCount -> PageableResponse.<ResponseWithEntityCount<IngredientNutritionalFactResponse>>builder()
                                 .content(ResponseWithEntityCount.of(pr.getContent(), entityCount))
                                 .pageInfo(pr.getPageInfo())

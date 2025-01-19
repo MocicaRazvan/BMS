@@ -71,7 +71,7 @@ public class IngredientServiceImpl extends
         return modelRepository.findAll()
                 .collectList()
                 .flatMapMany(ingredients -> Flux.fromIterable(partitionList(ingredients, batchSize)))
-                .concatMap(batch ->
+                .flatMapSequential(batch ->
                         transactionalOperator.transactional(
                                 Flux.fromIterable(batch)
                                         .flatMap(ingredient ->

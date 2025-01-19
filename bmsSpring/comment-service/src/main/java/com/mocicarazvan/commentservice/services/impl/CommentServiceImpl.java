@@ -127,7 +127,7 @@ public class CommentServiceImpl extends TitleBodyServiceImpl<Comment, CommentBod
     public Flux<PageableResponse<ResponseWithUserDto<CommentResponse>>> getCommentsWithUserByReference(Long postId, PageableBody pageableBody, CommentReferenceType referenceType) {
 
         return getCommentsByReference(postId, pageableBody, referenceType)
-                .concatMap(this::getPageableWithUser);
+                .flatMapSequential(this::getPageableWithUser);
     }
 
 
@@ -253,7 +253,7 @@ public class CommentServiceImpl extends TitleBodyServiceImpl<Comment, CommentBod
         ) {
             return referenceClient.existsApprovedReference(postId.toString())
                     .thenMany(
-                            modelRepository.findAllByReferenceIdAndReferenceType(postId, referenceType).concatMap(c ->
+                            modelRepository.findAllByReferenceIdAndReferenceType(postId, referenceType).flatMapSequential(c ->
                                     userClient.getUser("", c.getUserId().toString())
                                             .map(user -> ResponseWithUserDto.<CommentResponse>builder()
                                                     .user(user)

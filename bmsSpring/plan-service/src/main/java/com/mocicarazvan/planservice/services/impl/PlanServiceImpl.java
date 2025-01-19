@@ -85,14 +85,14 @@ public class PlanServiceImpl
     @Override
     public Flux<PageableResponse<ResponseWithUserDto<PlanResponse>>> getPlansFilteredWithUser(String title, Boolean approved, Boolean display, DietType type, ObjectiveType objective, List<Long> excludeIds, PageableBody pageableBody, String userId, Boolean admin) {
         return getPlansFiltered(title, approved, display, type, objective, excludeIds, pageableBody, userId, admin)
-                .concatMap(this::getPageableWithUser);
+                .flatMapSequential(this::getPageableWithUser);
     }
 
     @Override
     public Flux<PageableResponse<ResponseWithUserDto<PlanResponse>>> getPlansFilteredWithUserByIds(String title, DietType type, ObjectiveType objective, PageableBody pageableBody, List<Long> ids, String userId) {
 
         return self.getPlansFilteredWithUserByIdsBase(title, type, objective, pageableBody, ids, allowedSortingFields)
-                .concatMap(this::getPageableWithUser);
+                .flatMapSequential(this::getPageableWithUser);
     }
 
     @Override
@@ -107,7 +107,7 @@ public class PlanServiceImpl
     public Flux<PageableResponse<ResponseWithEntityCount<PlanResponse>>> getPlansFilteredWithCount(String title, Boolean approved, Boolean display, DietType type, ObjectiveType objective, List<Long> excludeIds, PageableBody pageableBody, String userId, Boolean admin) {
 
         return getPlansFiltered(title, approved, display, type, objective, excludeIds, pageableBody, userId, admin)
-                .concatMap(pr -> toResponseWithCount(userId, orderClient, pr));
+                .flatMapSequential(pr -> toResponseWithCount(userId, orderClient, pr));
 
 
     }
@@ -124,7 +124,7 @@ public class PlanServiceImpl
     public Flux<PageableResponse<ResponseWithEntityCount<PlanResponse>>> getPlansFilteredTrainerWithCount(String title, Boolean approved, Boolean display, DietType type, ObjectiveType objective, PageableBody pageableBody, String userId, Long trainerId) {
         return
                 getPlansFilteredTrainer(title, approved, display, type, objective, pageableBody, userId, trainerId)
-                        .concatMap(pr -> toResponseWithCount(userId, orderClient, pr));
+                        .flatMapSequential(pr -> toResponseWithCount(userId, orderClient, pr));
     }
 
     @Override

@@ -87,7 +87,7 @@ public abstract class ApprovedServiceImpl<MODEL extends Approve, BODY extends Ti
     @Override
     public Flux<PageableResponse<ResponseWithUserDto<RESPONSE>>> getModelsWithUser(String title, PageableBody pageableBody, String userId, boolean approved) {
         return getModelsTitle(title, approved, pageableBody, userId)
-                .concatMap(this::getPageableWithUser);
+                .flatMapSequential(this::getPageableWithUser);
     }
 
     public Flux<PageableResponse<RESPONSE>> getModelsTitle(String title, boolean approved, PageableBody pageableBody, String userId) {

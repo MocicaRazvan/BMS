@@ -84,7 +84,7 @@ public class RecipeController implements ApproveController<Recipe, RecipeBody, R
                                                                                                ServerWebExchange exchange) {
         return
                 recipeService.getModelsWithUser(title, pageableBody, requestsUtils.extractAuthUser(exchange), approved)
-                        .concatMap(m -> recipeReactiveResponseBuilder.toModelWithUserPageable(m, RecipeController.class));
+                        .flatMapSequential(m -> recipeReactiveResponseBuilder.toModelWithUserPageable(m, RecipeController.class));
     }
 
     @Override

@@ -146,7 +146,7 @@ public class PostServiceImpl extends ApprovedServiceImpl<Post, PostBody, PostRes
     @Override
     public Flux<PageableResponse<ResponseWithUserDto<PostResponse>>> getPostsFilteredWithUser(String title, PageableBody pageableBody, String userId, Boolean approved, List<String> tags, Boolean liked, Boolean admin) {
 
-        return getPostsFiltered(title, pageableBody, userId, approved, tags, liked, admin).concatMap(this::getPageableWithUser);
+        return getPostsFiltered(title, pageableBody, userId, approved, tags, liked, admin).flatMapSequential(this::getPageableWithUser);
     }
 
     @Override
