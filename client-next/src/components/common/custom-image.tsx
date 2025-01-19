@@ -6,11 +6,12 @@ import { cn } from "@/lib/utils";
 
 export default function CustomImage({
   src,
-
   thumblinator = false,
+  alt = "image",
   ...rest
 }: ComponentProps<typeof Image> & {
   thumblinator?: boolean;
+  alt?: string;
 }) {
   const [isLoaded, setIsLoaded] = useState(false);
 
@@ -35,9 +36,10 @@ export default function CustomImage({
         className={`w-full h-full absolute top-0 left-0 ${isLoaded ? "hidden" : "block"}`}
       />
       <Image
+        alt={alt}
         {...rest}
         src={src}
-        onLoadingComplete={() => setIsLoaded(true)}
+        onLoad={() => setIsLoaded(true)}
         className={cn(
           `transition-opacity duration-500 ease-in-out ${isLoaded ? "opacity-100" : "opacity-0"}`,
           rest.className,

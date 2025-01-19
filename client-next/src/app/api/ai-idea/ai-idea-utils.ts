@@ -69,7 +69,7 @@ const descriptionPrompt = ChatPromptTemplate.fromMessages([
     5. Don't use the tags: html, head, body and don't add DOCTYPE. The description will be used inside a div.
     
     **Keep In Mind:** 
-      The description should be detailed, engaging, and comprehensive, covering all relevant aspects of the topic. Make it as LARGE and VERBOSE as you can. And format it in simple HTML.
+      The description should be detailed, engaging, and comprehensive, covering all relevant aspects of the topic. Make it as LARGE and VERBOSE as you can while maintaining coherence. And format it in simple HTML.
     `,
   ],
   [
@@ -144,7 +144,6 @@ export async function getBaseIdea(
   llm: ChatOllama,
   extraContext: number,
   input: string | undefined,
-  vectorFilter: EmbeddingsFilter,
   item: string,
 ) {
   const prompt = prompts[targetedField];
@@ -172,7 +171,7 @@ export async function getBaseIdea(
     searchType: "mmr",
     searchKwargs: {
       fetchK: 3 * envK,
-      lambda: 0.75,
+      lambda: 0.6,
     },
     k: envK + extraContext,
   });
@@ -184,9 +183,23 @@ export async function getBaseIdea(
     queryCount: input ? 2 : 3,
   });
 
+  const baseCompressor = new EmbeddingsFilter({
+    embeddings,
+    // low similarly because the vectors are from html pages
+    similarityThreshold: process.env.EMBEDDINGS_GENERATE_SIMILARITY_THRESHOLD
+      ? parseFloat(process.env.EMBEDDINGS_GENERATE_SIMILARITY_THRESHOLD)
+      : 0.5,
+    k: undefined,
+    // ip bc lower length of docs and embeddings are normalized
+    similarityFn: (x, y) =>
+      x.map((rowX) =>
+        y.map((rowY) => rowX.reduce((sum, val, j) => sum + val * rowY[j], 0)),
+      ),
+  });
+
   const compressionRetriever = new ContextualCompressionRetriever({
     baseRetriever: multiQueryRetriever,
-    baseCompressor: vectorFilter,
+    baseCompressor,
   });
 
   const appenderRetriever = new AppenderRetriever(

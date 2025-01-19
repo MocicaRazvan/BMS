@@ -33,7 +33,6 @@ import ButtonSubmit, {
 import { CustomEntityModel, PostBody, PostResponse } from "@/types/dto";
 import useGetDiffusionImages from "@/hoooks/useGetDiffusionImages";
 import { tags } from "@/lib/constants";
-import * as DOMPurify from "dompurify";
 import { useToxicPrompt } from "@/components/forms/diffusion-images-form";
 import { AiIdeasField } from "@/types/ai-ideas-types";
 import { fetchWithFiles } from "@/hoooks/fetchWithFiles";
@@ -52,6 +51,7 @@ import UploadingProgress from "@/components/forms/uploading-progress";
 import ErrorMessage from "@/components/forms/error-message";
 import { Check, X } from "lucide-react";
 import { motion } from "framer-motion";
+import { purifyAIDescription } from "@/components/forms/title-body";
 
 export interface AdminAIPostsCreateContentTexts {
   schemaTexts: AdminAICreatePostSchemaTexts;
@@ -268,9 +268,7 @@ export default function AdminAIPostsCreateContent({
           data: {
             files: diffusionImage.urls.map((u) => u.file),
             body: {
-              body: DOMPurify.sanitize(description, {
-                FORBID_ATTR: ["style"],
-              }),
+              body: purifyAIDescription(description),
               title: aiTitle,
               tags: randomTags,
             },

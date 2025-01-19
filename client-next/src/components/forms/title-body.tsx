@@ -205,9 +205,7 @@ export const TitleBodyForm = <TFieldValues extends TitleBodyDto>({
                       <div
                         className="p-2  prose max-w-none [&_ol]:list-decimal [&_ul]:list-disc dark:prose-invert rounded-md border min-h-[140px] border-input bg-background ring-offset-2"
                         dangerouslySetInnerHTML={{
-                          __html: DOMPurify.sanitize(r, {
-                            FORBID_ATTR: ["style"],
-                          }),
+                          __html: purifyAIDescription(r),
                         }}
                       />
                     </div>
@@ -231,6 +229,21 @@ export const TitleBodyForm = <TFieldValues extends TitleBodyDto>({
   );
 };
 
+export const purifyAIDescription = (descriptions: string) =>
+  DOMPurify.sanitize(descriptions, {
+    FORBID_ATTR: ["style", "id", "class"],
+    FORBID_TAGS: [
+      "style",
+      "script",
+      "html",
+      "body",
+      "image",
+      "head",
+      "meta",
+      "svg",
+    ],
+  });
+
 export interface AIResponseTexts {
   useButtonText: string;
   discardButtonText: string;
@@ -246,6 +259,7 @@ interface AIResponseProps extends AIResponseTexts {
   wrapperClassName?: HTMLProps<HTMLDivElement>["className"];
   wrapperButtonsClassName?: HTMLProps<HTMLDivElement>["className"];
 }
+
 function AIResponse({
   response,
   saveCallback,

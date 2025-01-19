@@ -9,9 +9,8 @@ import { getOllamaArgs } from "@/lib/langchain/ollama-utils";
 const { modelName, ollamaBaseUrl } = getOllamaArgs();
 export async function POST(req: NextRequest) {
   await getUserWithMinRole("ROLE_TRAINER");
-  const [embeddings, vectorFilter, body] = await Promise.all([
+  const [embeddings, body] = await Promise.all([
     vectorStoreInstance.getEmbeddings(),
-    vectorStoreInstance.getFilter(),
     req.json(),
   ]);
   if (!isAIIdeaActionArgs(body)) {
@@ -38,7 +37,7 @@ export async function POST(req: NextRequest) {
       : 2048,
     streaming: false,
   });
-  if (!embeddings || !vectorFilter) {
+  if (!embeddings) {
     return NextResponse.json(
       {
         error: "Error getting vector store",
@@ -55,7 +54,6 @@ export async function POST(req: NextRequest) {
     llm,
     extraContext,
     input,
-    vectorFilter,
     item,
   );
 

@@ -43,6 +43,9 @@ interface AIPopProps extends AIGeneratePopTexts {
   loadingCallback?: (l: boolean) => void;
   updateDelayMs: number;
 }
+
+const MAX_RESPONSE_LENGTH = 250_000;
+
 export default function AIGeneratePop({
   fields,
   finishCallback,
@@ -107,6 +110,18 @@ export default function AIGeneratePop({
       lastUpdateTime.current = -1;
     }
   }, [isLoading, lastUpdateTime.current]);
+
+  useEffect(() => {
+    if (
+      message &&
+      message?.content &&
+      message.content.length > MAX_RESPONSE_LENGTH
+    ) {
+      stop();
+      updateCallback(message.content);
+      lastUpdateTime.current = -1;
+    }
+  }, [message]);
 
   useEffect(() => {
     if (

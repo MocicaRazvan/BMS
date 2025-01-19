@@ -8,9 +8,15 @@ import {
   CarouselPrevious,
 } from "../ui/carousel";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import CustomImage from "@/components/common/custom-image";
 import CarouselVideo from "@/components/common/carousel-video";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 
 export interface Media {
   type: "image" | "video";
@@ -128,6 +134,10 @@ export default function CustomMediaCarousel({ media }: Props) {
               "bg-background w-6 h-6 flex items-center justify-center font-bold"
             }
           >
+            <VisuallyHidden>
+              <DialogTitle>{"Image"}</DialogTitle>
+              <DialogDescription>{currentImage}</DialogDescription>
+            </VisuallyHidden>
             <CustomImage
               thumblinator
               quality={100}
