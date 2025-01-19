@@ -28,6 +28,7 @@ const titlePrompt = ChatPromptTemplate.fromMessages([
     4. Make a single option and do not provide multiple titles.
     5. Make the title at MOST 15 words.
     6. Ensure the title is relevant for the item type: {item}. And make sure it is engaging and captures the essence of the content.
+    7. Avoid using numbers or special characters in the title.
 
     **Final output format:**
     - A SINGLE line containing ONLY the title as text content and NOTHING else besides.
@@ -54,7 +55,7 @@ const descriptionPrompt = ChatPromptTemplate.fromMessages([
     **Strict rules for description generation:**
     - Make sure you ONLY give the description and make it VERY LARGE and VERBOSE don't worry about time, but be sure to maintain quality and coherence.
     - The description will be displayed on a website, so make sure it is well-structured and easy to read.
-    - The output MUST be structured in **HTML** format to enhance readability and organization. Don't add any styling to the HTML and don't use any markdown. 
+    - The output MUST be structured in **HTML** format to enhance readability and organization. Don't add any styling to the HTML and don't use any markdown. The HTML will be used inside a div, so don't use html, head or body tags.
     - NEVER include links or emojis or any other format that is not HTML. 
     - Remember ALWAYS keep in mind that the description is for a {item} and make the description as LARGE and VERBOSE as you can.
     - Tailor the description to the specific nature of the type of the current item: **{item}**. Do not include anything besides the description.
@@ -65,6 +66,7 @@ const descriptionPrompt = ChatPromptTemplate.fromMessages([
     2. For every paragraph, aim to **cover at least 2-3 points** in-depth to add length while maintaining quality and coherence.
     3. Use just HTML and not markdown or any other formatting. And do not include anything other than the description.
     4. Base your generated description on the provided **context** and **input** to ensure relevance and accuracy.
+    5. Don't use the tags: html, head, body and don't add DOCTYPE. The description will be used inside a div.
     
     **Keep In Mind:** 
       The description should be detailed, engaging, and comprehensive, covering all relevant aspects of the topic. Make it as LARGE and VERBOSE as you can. And format it in simple HTML.
@@ -161,26 +163,25 @@ export async function getBaseIdea(
     llm,
     prompt,
   });
+
+  const envK = process.env.OLLAMA_GENERATE_K
+    ? parseInt(process.env.OLLAMA_GENERATE_K)
+    : 10;
+
   const vectorDbRetriever = vectorDb.asRetriever({
     searchType: "mmr",
     searchKwargs: {
-      fetchK: 30,
+      fetchK: 3 * envK,
+      lambda: 0.75,
     },
-    k:
-      (process.env.OLLAMA_GENERATE_K
-        ? parseInt(process.env.OLLAMA_GENERATE_K)
-        : 10) + extraContext,
+    k: envK + extraContext,
   });
-  const extraQuestion = input ? ", also keep in mind " + placeholderInput : "";
-
-  const extraInput =
-    targetedField === "description" ? placeholderInput : undefined;
 
   const multiQueryRetriever = getMultiQueryRetriever({
     retriever: vectorDbRetriever,
-    extraQuestion,
-    originalInput: input ? input + extraQuestion : placeholderInput,
-    extraInput,
+    originalInput: input ?? placeholderInput,
+    extraInput: placeholderInput,
+    queryCount: input ? 2 : 3,
   });
 
   const compressionRetriever = new ContextualCompressionRetriever({

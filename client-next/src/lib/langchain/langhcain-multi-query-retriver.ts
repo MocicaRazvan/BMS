@@ -4,7 +4,7 @@ import { ChatOllama } from "@langchain/ollama";
 import { MultiQueryRetriever } from "langchain/retrievers/multi_query";
 import { LLMChain } from "langchain/chains";
 import { BaseRetrieverInterface } from "@langchain/core/retrievers";
-import { SystemMessage } from "@langchain/core/messages";
+
 type LineList = {
   lines: string[];
 };
@@ -115,6 +115,7 @@ export function getMultiQueryRetriever({
       numCtx: process.env.OLLAMA_NUM_CTX
         ? parseInt(process.env.OLLAMA_NUM_CTX)
         : 2048,
+      streaming: false,
     });
     const multiQueryRetrieverPrompt = ChatPromptTemplate.fromMessages([
       ["system", getMultiQuerySystemPrompt(extraQuestion)],
