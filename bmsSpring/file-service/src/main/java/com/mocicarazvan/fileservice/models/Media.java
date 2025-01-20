@@ -1,6 +1,7 @@
 package com.mocicarazvan.fileservice.models;
 
 
+import com.mocicarazvan.fileservice.enums.MediaType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -22,4 +23,11 @@ public class Media {
     private String fileType;
     @Indexed(unique = true)
     private String gridFsId;
+    private String mediaType;
+
+    public String getMediaType() {
+        return mediaType != null ? mediaType : MediaType.fromFileName(fileName).getValue();
+    }
+
+
 }

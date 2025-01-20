@@ -4,6 +4,7 @@ import com.mocicarazvan.fileservice.dtos.FileUploadResponse;
 import com.mocicarazvan.fileservice.dtos.GridIdsDto;
 import com.mocicarazvan.fileservice.dtos.MetadataDto;
 import com.mocicarazvan.fileservice.enums.FileType;
+import com.mocicarazvan.fileservice.enums.MediaType;
 import com.mocicarazvan.fileservice.exceptions.FileNotFound;
 import com.mocicarazvan.fileservice.models.Media;
 import com.mocicarazvan.fileservice.models.MediaMetadata;
@@ -65,7 +66,7 @@ public class MediaServiceImpl implements MediaService {
     @Override
     public Mono<FileUploadResponse> uploadFiles(Flux<FilePart> files, MetadataDto metadataDto) {
         return files.index()
-                .subscribeOn(Schedulers.parallel())
+//                .subscribeOn(Schedulers.parallel())
                 .flatMap(indexedFilePart -> saveFileWithIndex(indexedFilePart.getT1(), indexedFilePart.getT2(), metadataDto)
                         .doOnNext(tuple -> {
                             log.error("Sending progress update " + tuple.getT1());
@@ -120,6 +121,7 @@ public class MediaServiceImpl implements MediaService {
                 .flatMap(file -> file.getGridFSFile()
                         .flatMap(gridFSFile -> {
                             FileType fileType = FileType.valueOf(file.getOptions().getMetadata().getString("fileType"));
+                            MediaType mediaType = MediaType.fromValue(file.getOptions().getMetadata().getString("mediaType"));
                             log.info("File type: {}", fileType);
                             ServerHttpRequest request = exchange.getRequest();
                             ServerHttpResponse response = exchange.getResponse();
@@ -130,8 +132,10 @@ public class MediaServiceImpl implements MediaService {
                             if (fileType.equals(FileType.VIDEO)) {
                                 response.getHeaders().set(HttpHeaders.CONTENT_TYPE, "video/mp4");
                             } else if (fileType.equals(FileType.IMAGE)) {
-                                response.getHeaders().set(HttpHeaders.CONTENT_TYPE, "image/**");
+                                response.getHeaders().set(HttpHeaders.CONTENT_TYPE, "image/" + mediaType.getValue());
                             }
+
+
                             List<HttpRange> httpRanges = request.getHeaders().getRange();
                             Flux<DataBuffer> downloadStream = file.getDownloadStream();
                             long fileLength = gridFSFile.getLength();
@@ -209,7 +213,7 @@ public class MediaServiceImpl implements MediaService {
     @Override
     public Mono<Void> deleteFile(String gridId) {
         return gridFsTemplate.delete(new Query(Criteria.where("_id").is(new ObjectId(gridId))))
-                .subscribeOn(Schedulers.parallel())
+//                .subscribeOn(Schedulers.parallel())
                 .then(mediaRepository.findAllByGridFsId(gridId)
                         .flatMap(media -> mediaMetadataRepository.deleteAllByMediaId(media.getId()))
                         .then(mediaRepository.deleteAllByGridFsId(gridId)));
@@ -217,15 +221,34 @@ public class MediaServiceImpl implements MediaService {
 
     @Override
     public Mono<Void> deleteFiles(List<String> gridIds) {
-        return Flux.fromIterable(gridIds
-                        .stream().filter(ObjectId::isValid)
-                        .toList()
+
+        List<String> validIds = gridIds.stream().filter(ObjectId::isValid).toList();
+
+        if (validIds.size() != gridIds.size()) {
+            log.error("Invalid grid ids: {}", gridIds);
+        }
+
+        List<ObjectId> objectIds = validIds.stream().map(ObjectId::new).toList();
+
+        return Mono.zip(
+                        gridFsTemplate.delete(new Query(Criteria.where("_id").in(objectIds)))
+                                .thenReturn(true),
+                        mediaRepository.findAllByGridFsIdIn(gridIds)
+                                .map(Media::getId)
+                                .collectList()
+                                .flatMap(mediaMetadataRepository::deleteAllByMediaIdIn)
+                                .then(mediaRepository.deleteAllByGridFsIdIn(gridIds))
+                                .thenReturn(true)
                 )
-                .flatMap(id -> gridFsTemplate.delete(new Query(Criteria.where("_id").is(new ObjectId(id)))))
-                .then(mediaRepository.findAllByGridFsIdIn(gridIds)
-                        .flatMap(media -> mediaMetadataRepository.deleteAllByMediaId(media.getId()))
-                        .then(mediaRepository.deleteAllByGridFsIdIn(gridIds)))
+                .doOnSuccess(tuple -> {
+                    if (tuple.getT1() && tuple.getT2()) {
+                        log.info("Files deleted successfully");
+                    } else {
+                        log.error("Error deleting files");
+                    }
+                })
                 .then();
+
     }
 
     @Override
@@ -241,18 +264,22 @@ public class MediaServiceImpl implements MediaService {
     }
 
     private Mono<Media> saveFile(FilePart filePart, MetadataDto metadataDto) {
-        Document metadata = new Document("name", metadataDto.getName()).append("fileType", metadataDto.getFileType().name());
+        String mediaType = MediaType.fromFileName(filePart.filename()).getValue();
+        Document metadata = new Document("name", metadataDto.getName())
+                .append("fileType", metadataDto.getFileType().name())
+                .append("mediaType", mediaType);
 
         return gridFsTemplate.store(filePart.content(), filePart.filename(), Objects.requireNonNull(filePart.headers().getContentType()).toString(), metadata)
                 .flatMap(gridFSId -> {
                     Media media = Media.builder()
-                            .fileName(metadataDto.getName())
+                            .fileName(filePart.filename())
                             .fileType(metadataDto.getFileType().name())
                             .gridFsId(gridFSId.toHexString())
+                            .mediaType(mediaType)
                             .build();
                     return mediaRepository.save(media)
                             .flatMap(m -> mediaMetadataRepository.save(MediaMetadata.builder()
-                                            .name(metadataDto.getName())
+                                            .name(filePart.filename())
                                             .mediaId(m.getId())
                                             .build())
                                     .thenReturn(media));

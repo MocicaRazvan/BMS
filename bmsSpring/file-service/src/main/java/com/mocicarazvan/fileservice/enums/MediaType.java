@@ -1,0 +1,43 @@
+package com.mocicarazvan.fileservice.enums;
+
+
+import lombok.Getter;
+
+@Getter
+public enum MediaType {
+
+    PNG("png"),
+    JPG("jpg"),
+    JPEG("jpeg"),
+    MP4("mp4"),
+    ALL("**");
+
+    private final String value;
+
+    MediaType(String value) {
+        this.value = value;
+    }
+
+    public static MediaType fromFileName(String fileName) {
+        if (fileName == null || fileName.isBlank()) {
+            return ALL;
+        }
+
+        return MediaType.fromValue(fileName.substring(fileName.lastIndexOf('.') + 1));
+    }
+
+    public static MediaType fromValue(String value) {
+        if (value == null || value.isBlank()) {
+            return ALL;
+        }
+
+        return switch (value.toLowerCase()) {
+            case "png" -> PNG;
+            case "jpg" -> JPG;
+            case "jpeg" -> JPEG;
+            case "mp4" -> MP4;
+            default -> ALL;
+        };
+    }
+
+}
