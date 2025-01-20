@@ -80,7 +80,7 @@ public class UserControllerImpl implements UserController {
                                                                           @RequestParam(name = "admin", required = false, defaultValue = "false") Boolean admin
     ) {
         return userService.getAllUsers(pageableBody, email, roles, providers, emailVerified, admin)
-                .flatMap(pageableUserAssembler::toModel);
+                .flatMapSequential(pageableUserAssembler::toModel);
     }
 
     @Override

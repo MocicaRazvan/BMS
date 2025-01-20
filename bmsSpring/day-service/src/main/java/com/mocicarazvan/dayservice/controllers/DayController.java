@@ -115,7 +115,7 @@ public class DayController implements TitleBodyController<
     @ResponseStatus(HttpStatus.OK)
     public Flux<PageableResponse<CustomEntityModel<DayResponse>>> getModelsByIdIn(@Valid @RequestBody PageableBody pageableBody, @RequestParam List<Long> ids) {
         return dayService.getModelsByIdInPageable(ids, pageableBody)
-                .flatMap(m -> dayReactiveResponseBuilder.toModelPageable(m, DayController.class));
+                .flatMapSequential(m -> dayReactiveResponseBuilder.toModelPageable(m, DayController.class));
     }
 
     @Override
@@ -162,7 +162,7 @@ public class DayController implements TitleBodyController<
                                                                                   @RequestParam(name = "admin", required = false, defaultValue = "false") Boolean admin,
                                                                                   ServerWebExchange exchange) {
         return dayService.getDaysFiltered(title, type, excludeIds, pageableBody, requestsUtils.extractAuthUser(exchange), admin)
-                .flatMap(m -> dayReactiveResponseBuilder.toModelPageable(m, DayController.class));
+                .flatMapSequential(m -> dayReactiveResponseBuilder.toModelPageable(m, DayController.class));
     }
 
     @PatchMapping(value = "/filtered/withUser", produces = {MediaType.APPLICATION_NDJSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
@@ -174,7 +174,7 @@ public class DayController implements TitleBodyController<
                                                                                                   @RequestParam(name = "admin", required = false, defaultValue = "false") Boolean admin,
                                                                                                   ServerWebExchange exchange) {
         return dayService.getDaysFilteredWithUser(title, type, excludeIds, pageableBody, requestsUtils.extractAuthUser(exchange), admin)
-                .flatMap(m -> dayReactiveResponseBuilder.toModelWithUserPageable(m, DayController.class));
+                .flatMapSequential(m -> dayReactiveResponseBuilder.toModelWithUserPageable(m, DayController.class));
     }
 
     @PatchMapping(value = "/filteredWithCount", produces = {MediaType.APPLICATION_NDJSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
@@ -186,7 +186,7 @@ public class DayController implements TitleBodyController<
                                                                                                                     @RequestParam(name = "admin", required = false, defaultValue = "false") Boolean admin,
                                                                                                                     ServerWebExchange exchange) {
         return dayService.getDaysFilteredWithCount(title, type, excludeIds, pageableBody, requestsUtils.extractAuthUser(exchange), admin)
-                .flatMap(m -> dayReactiveResponseBuilder.toModelWithEntityCountPageable(m, DayController.class));
+                .flatMapSequential(m -> dayReactiveResponseBuilder.toModelWithEntityCountPageable(m, DayController.class));
     }
 
     @PatchMapping(value = "/trainer/filtered/{trainerId}", produces = {MediaType.APPLICATION_NDJSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
@@ -198,7 +198,7 @@ public class DayController implements TitleBodyController<
                                                                                          @Valid @RequestBody PageableBody pageableBody,
                                                                                          ServerWebExchange exchange) {
         return dayService.getDaysFilteredTrainer(title, type, excludeIds, pageableBody, requestsUtils.extractAuthUser(exchange), trainerId)
-                .flatMap(m -> dayReactiveResponseBuilder.toModelPageable(m, DayController.class));
+                .flatMapSequential(m -> dayReactiveResponseBuilder.toModelPageable(m, DayController.class));
     }
 
     @PatchMapping(value = "/trainer/filteredWithCount/{trainerId}", produces = {MediaType.APPLICATION_NDJSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
@@ -210,7 +210,7 @@ public class DayController implements TitleBodyController<
                                                                                                                            @Valid @RequestBody PageableBody pageableBody,
                                                                                                                            ServerWebExchange exchange) {
         return dayService.getDaysFilteredTrainerWithCount(title, type, excludeIds, pageableBody, requestsUtils.extractAuthUser(exchange), trainerId)
-                .flatMap(m -> dayReactiveResponseBuilder.toModelWithEntityCountPageable(m, DayController.class));
+                .flatMapSequential(m -> dayReactiveResponseBuilder.toModelWithEntityCountPageable(m, DayController.class));
     }
 
     @GetMapping(value = "/internal/recipe/{id}/{recipeId}", produces = {MediaType.APPLICATION_NDJSON_VALUE, MediaType.APPLICATION_JSON_VALUE})

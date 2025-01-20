@@ -119,7 +119,7 @@ public class CommentController implements TitleBodyController<Comment, CommentBo
     ) {
         CommentReferenceType commentReferenceType = CommentReferenceType.valueOf(referenceType.toUpperCase());
         return commentService.getCommentsByReference(referenceId, pageableBody, commentReferenceType)
-                .flatMap(m -> commentReactiveResponseBuilder.toModelPageable(m, CommentController.class));
+                .flatMapSequential(m -> commentReactiveResponseBuilder.toModelPageable(m, CommentController.class));
     }
 
     @PatchMapping(value = "/user/{referenceType}/{userId}", produces = {MediaType.APPLICATION_NDJSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
@@ -132,7 +132,7 @@ public class CommentController implements TitleBodyController<Comment, CommentBo
     ) {
         CommentReferenceType commentReferenceType = CommentReferenceType.valueOf(referenceType.toUpperCase());
         return commentService.getModelByUser(userId, pageableBody, commentReferenceType)
-                .flatMap(m -> commentReactiveResponseBuilder.toModelPageable(m, CommentController.class));
+                .flatMapSequential(m -> commentReactiveResponseBuilder.toModelPageable(m, CommentController.class));
     }
 
     @PatchMapping(value = "/byIds", produces = {MediaType.APPLICATION_NDJSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
@@ -140,7 +140,7 @@ public class CommentController implements TitleBodyController<Comment, CommentBo
     public Flux<PageableResponse<CustomEntityModel<CommentResponse>>> getModelsByIdIn(@Valid @RequestBody PageableBody pageableBody,
                                                                                       @RequestParam List<Long> ids) {
         return commentService.getModelsByIdInPageable(ids, pageableBody)
-                .flatMap(m -> commentReactiveResponseBuilder.toModelPageable(m, CommentController.class));
+                .flatMapSequential(m -> commentReactiveResponseBuilder.toModelPageable(m, CommentController.class));
     }
 
     @Override
@@ -167,7 +167,7 @@ public class CommentController implements TitleBodyController<Comment, CommentBo
 
         return commentService.getCommentsWithUserByReference(referenceId, pageableBody, commentReferenceType)
                 .doOnNext(c -> log.error("controller " + c.getContent().getModel().getCreatedAt().toString()))
-                .flatMap(m -> commentReactiveResponseBuilder.toModelWithUserPageable(m, CommentController.class));
+                .flatMapSequential(m -> commentReactiveResponseBuilder.toModelWithUserPageable(m, CommentController.class));
     }
 
     @DeleteMapping(value = "/admin/delete/{referenceType}/{referenceId}", produces = {MediaType.APPLICATION_NDJSON_VALUE, MediaType.APPLICATION_JSON_VALUE})

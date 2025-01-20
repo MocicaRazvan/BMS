@@ -64,7 +64,7 @@ public class PlanController implements ApproveController<Plan, PlanBody, PlanRes
     public Flux<PageableResponse<CustomEntityModel<PlanResponse>>> getModelsApproved(
             @RequestParam(required = false) String title, @Valid @RequestBody PageableBody pageableBody, ServerWebExchange exchange) {
         return planService.getModelsApproved(title, pageableBody, requestsUtils.extractAuthUser(exchange))
-                .flatMap(m -> plansReactiveResponseBuilder.toModelPageable(m, PlanController.class));
+                .flatMapSequential(m -> plansReactiveResponseBuilder.toModelPageable(m, PlanController.class));
     }
 
     @Override
@@ -78,7 +78,7 @@ public class PlanController implements ApproveController<Plan, PlanBody, PlanRes
             ServerWebExchange exchange
     ) {
         return planService.getModelsWithUser(title, pageableBody, requestsUtils.extractAuthUser(exchange), approved)
-                .flatMap(m -> plansReactiveResponseBuilder.toModelWithUserPageable(m, PlanController.class));
+                .flatMapSequential(m -> plansReactiveResponseBuilder.toModelWithUserPageable(m, PlanController.class));
     }
 
     @Override
@@ -91,7 +91,7 @@ public class PlanController implements ApproveController<Plan, PlanBody, PlanRes
             @PathVariable Long trainerId,
             ServerWebExchange exchange) {
         return planService.getModelsTrainer(title, trainerId, pageableBody, requestsUtils.extractAuthUser(exchange), approved)
-                .flatMap(m -> plansReactiveResponseBuilder.toModelPageable(m, PlanController.class));
+                .flatMapSequential(m -> plansReactiveResponseBuilder.toModelPageable(m, PlanController.class));
     }
 
     @Override
@@ -111,7 +111,7 @@ public class PlanController implements ApproveController<Plan, PlanBody, PlanRes
                                                                                      @Valid @RequestBody PageableBody pageableBody,
                                                                                      ServerWebExchange exchange) {
         return planService.getAllModels(title, pageableBody, requestsUtils.extractAuthUser(exchange))
-                .flatMap(m -> plansReactiveResponseBuilder.toModelPageable(m, PlanController.class));
+                .flatMapSequential(m -> plansReactiveResponseBuilder.toModelPageable(m, PlanController.class));
     }
 
     @Override
@@ -163,7 +163,7 @@ public class PlanController implements ApproveController<Plan, PlanBody, PlanRes
     public Flux<PageableResponse<CustomEntityModel<PlanResponse>>> getModelsByIdIn(@Valid @RequestBody PageableBody pageableBody,
                                                                                    @RequestParam List<Long> ids) {
         return planService.getModelsByIdInPageable(ids, pageableBody)
-                .flatMap(m -> plansReactiveResponseBuilder.toModelPageable(m, PlanController.class));
+                .flatMapSequential(m -> plansReactiveResponseBuilder.toModelPageable(m, PlanController.class));
     }
 
     @Override
@@ -261,7 +261,7 @@ public class PlanController implements ApproveController<Plan, PlanBody, PlanRes
             ServerWebExchange exchange
     ) {
         return planService.getPlansFiltered(title, approved, display, type, objective, excludeIds, pageableBody, requestsUtils.extractAuthUser(exchange), admin)
-                .flatMap(m -> plansReactiveResponseBuilder.toModelPageable(m, PlanController.class));
+                .flatMapSequential(m -> plansReactiveResponseBuilder.toModelPageable(m, PlanController.class));
     }
 
     @PatchMapping(value = "/filteredWithCount", produces = {MediaType.APPLICATION_NDJSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
@@ -278,7 +278,7 @@ public class PlanController implements ApproveController<Plan, PlanBody, PlanRes
             ServerWebExchange exchange
     ) {
         return planService.getPlansFilteredWithCount(title, approved, display, type, objective, excludeIds, pageableBody, requestsUtils.extractAuthUser(exchange), admin)
-                .flatMap(m -> plansReactiveResponseBuilder.toModelWithEntityCountPageable(m, PlanController.class));
+                .flatMapSequential(m -> plansReactiveResponseBuilder.toModelWithEntityCountPageable(m, PlanController.class));
 
     }
 
@@ -296,7 +296,7 @@ public class PlanController implements ApproveController<Plan, PlanBody, PlanRes
             ServerWebExchange exchange
     ) {
         return planService.getPlansFilteredWithUser(title, approved, display, type, objective, excludeIds, pageableBody, requestsUtils.extractAuthUser(exchange), admin)
-                .flatMap(m -> plansReactiveResponseBuilder.toModelWithUserPageable(m, PlanController.class));
+                .flatMapSequential(m -> plansReactiveResponseBuilder.toModelWithUserPageable(m, PlanController.class));
 
     }
 
@@ -313,7 +313,7 @@ public class PlanController implements ApproveController<Plan, PlanBody, PlanRes
             ServerWebExchange exchange
     ) {
         return planService.getPlansFilteredTrainer(title, approved, display, type, objective, pageableBody, requestsUtils.extractAuthUser(exchange), trainerId)
-                .flatMap(m -> plansReactiveResponseBuilder.toModelPageable(m, PlanController.class));
+                .flatMapSequential(m -> plansReactiveResponseBuilder.toModelPageable(m, PlanController.class));
     }
 
     @PatchMapping(value = "/trainer/filteredWithCount/{trainerId}", produces = {MediaType.APPLICATION_NDJSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
@@ -329,7 +329,7 @@ public class PlanController implements ApproveController<Plan, PlanBody, PlanRes
             ServerWebExchange exchange
     ) {
         return planService.getPlansFilteredTrainerWithCount(title, approved, display, type, objective, pageableBody, requestsUtils.extractAuthUser(exchange), trainerId)
-                .flatMap(m -> plansReactiveResponseBuilder.toModelWithEntityCountPageable(m, PlanController.class));
+                .flatMapSequential(m -> plansReactiveResponseBuilder.toModelWithEntityCountPageable(m, PlanController.class));
     }
 
     @PatchMapping(value = "/alterDisplay/{id}", produces = {MediaType.APPLICATION_NDJSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
@@ -386,7 +386,7 @@ public class PlanController implements ApproveController<Plan, PlanBody, PlanRes
             ServerWebExchange exchange
     ) {
         return planService.getPlansFilteredWithUserByIds(title, type, objective, pageableBody, ids, requestsUtils.extractAuthUser(exchange))
-                .flatMap(m -> plansReactiveResponseBuilder.toModelWithUserPageable(m, PlanController.class));
+                .flatMapSequential(m -> plansReactiveResponseBuilder.toModelWithUserPageable(m, PlanController.class));
     }
 
 

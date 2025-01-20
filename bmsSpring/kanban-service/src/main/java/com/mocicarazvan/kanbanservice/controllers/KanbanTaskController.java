@@ -75,7 +75,7 @@ public class KanbanTaskController
     @ResponseStatus(HttpStatus.OK)
     public Flux<PageableResponse<CustomEntityModel<KanbanTaskResponse>>> getModelsByIdIn(@Valid @RequestBody PageableBody pageableBody, @RequestParam List<Long> ids) {
         return kanbanTaskService.getModelsByIdInPageable(ids, pageableBody)
-                .flatMap(c -> kanbanTaskReactiveResponseBuilder.toModelPageable(c, KanbanTaskController.class));
+                .flatMapSequential(c -> kanbanTaskReactiveResponseBuilder.toModelPageable(c, KanbanTaskController.class));
     }
 
     @Override

@@ -80,7 +80,7 @@ public class IngredientNutritionalFactController {
             ServerWebExchange exchange
     ) {
         return ingredientNutritionalFactService.getAllModelsFiltered(name, display, type, pageableBody, requestsUtils.extractAuthUser(exchange), admin)
-                .flatMap(pr -> ingredientNutritionalValueResponseBuilder.toModelPageable(pr, IngredientNutritionalFactController.class));
+                .flatMapSequential(pr -> ingredientNutritionalValueResponseBuilder.toModelPageable(pr, IngredientNutritionalFactController.class));
     }
 
     @PatchMapping(value = "/filteredWithCount", produces = {MediaType.APPLICATION_NDJSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
@@ -94,7 +94,7 @@ public class IngredientNutritionalFactController {
             ServerWebExchange exchange
     ) {
         return ingredientNutritionalFactService.getAllModelsFilteredWithEntityCount(name, display, type, pageableBody, requestsUtils.extractAuthUser(exchange), admin)
-                .flatMap(pr -> ingredientNutritionalValueResponseBuilder.toModelWithEntityCountPageable(pr, IngredientNutritionalFactController.class));
+                .flatMapSequential(pr -> ingredientNutritionalValueResponseBuilder.toModelWithEntityCountPageable(pr, IngredientNutritionalFactController.class));
     }
 
     @PostMapping(value = "/create", produces = {MediaType.APPLICATION_NDJSON_VALUE, MediaType.APPLICATION_JSON_VALUE})

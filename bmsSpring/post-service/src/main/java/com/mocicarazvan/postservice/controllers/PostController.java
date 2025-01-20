@@ -68,7 +68,7 @@ public class PostController implements ApproveController
             @RequestParam(required = false) String title, @Valid @RequestBody PageableBody pageableBody, ServerWebExchange exchange
     ) {
         return postService.getModelsApproved(title, pageableBody, requestsUtils.extractAuthUser(exchange))
-                .flatMap(m -> postReactiveResponseBuilder.toModelPageable(m, PostController.class));
+                .flatMapSequential(m -> postReactiveResponseBuilder.toModelPageable(m, PostController.class));
     }
 
     @Override
@@ -96,7 +96,7 @@ public class PostController implements ApproveController
                                                                                                     @RequestParam(name = "admin", required = false, defaultValue = "false") Boolean admin,
                                                                                                     ServerWebExchange exchange) {
 
-        log.error("admin: " + admin);
+
         FilterKeyType.KeyRouteType keyRouteType = Boolean.TRUE.equals(admin) ? FilterKeyType.KeyRouteType.createForAdmin() : FilterKeyType.KeyRouteType.createForPublic();
         return
 
@@ -124,7 +124,7 @@ public class PostController implements ApproveController
                 postService.
                         getPostsFiltered(title, pageableBody, requestsUtils.extractAuthUser(exchange), approved, tags, liked, admin)
 //                .delayElements(Duration.ofSeconds(3))
-                        .flatMap(m -> postReactiveResponseBuilder.toModelPageable(m, PostController.class));
+                        .flatMapSequential(m -> postReactiveResponseBuilder.toModelPageable(m, PostController.class));
     }
 
     @Override
@@ -136,7 +136,7 @@ public class PostController implements ApproveController
                                                                                     @PathVariable Long trainerId,
                                                                                     ServerWebExchange exchange) {
         return postService.getModelsTrainer(title, trainerId, pageableBody, requestsUtils.extractAuthUser(exchange), approved)
-                .flatMap(m -> postReactiveResponseBuilder.toModelPageable(m, PostController.class));
+                .flatMapSequential(m -> postReactiveResponseBuilder.toModelPageable(m, PostController.class));
     }
 
     @PatchMapping(value = "/trainer/tags/{trainerId}", produces = {MediaType.APPLICATION_NDJSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
@@ -149,7 +149,7 @@ public class PostController implements ApproveController
                                                                                         ServerWebExchange exchange) {
         return
                 postService.getModelsTrainer(title, trainerId, pageableBody, requestsUtils.extractAuthUser(exchange), approved, tags)
-                        .flatMap(m -> postReactiveResponseBuilder.toModelPageable(m, PostController.class));
+                        .flatMapSequential(m -> postReactiveResponseBuilder.toModelPageable(m, PostController.class));
     }
 
     @Override
@@ -189,7 +189,7 @@ public class PostController implements ApproveController
                                                                                      @Valid @RequestBody PageableBody pageableBody,
                                                                                      ServerWebExchange exchange) {
         return postService.getAllModels(title, pageableBody, requestsUtils.extractAuthUser(exchange))
-                .flatMap(m -> postReactiveResponseBuilder.toModelPageable(m, PostController.class));
+                .flatMapSequential(m -> postReactiveResponseBuilder.toModelPageable(m, PostController.class));
     }
 
     @Override
@@ -233,7 +233,7 @@ public class PostController implements ApproveController
     public Flux<PageableResponse<CustomEntityModel<PostResponse>>> getModelsByIdIn(@Valid @RequestBody PageableBody pageableBody,
                                                                                    @RequestParam List<Long> ids) {
         return postService.getModelsByIdInPageable(ids, pageableBody)
-                .flatMap(m -> postReactiveResponseBuilder.toModelPageable(m, PostController.class));
+                .flatMapSequential(m -> postReactiveResponseBuilder.toModelPageable(m, PostController.class));
     }
 
     // todo id displaying nr likes or dislikes invalidate the cache for id

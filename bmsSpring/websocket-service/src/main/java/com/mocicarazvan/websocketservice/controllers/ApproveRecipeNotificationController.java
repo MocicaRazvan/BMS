@@ -21,7 +21,6 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RequiredArgsConstructor
-//@Controller
 @RestController
 
 public class ApproveRecipeNotificationController implements ApproveNotificationTemplateController<RecipeResponse, ApproveRecipeNotificationBody, ApproveRecipeNotificationResponse> {

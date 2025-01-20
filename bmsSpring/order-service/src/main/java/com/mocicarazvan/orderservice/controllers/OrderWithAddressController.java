@@ -43,7 +43,7 @@ public class OrderWithAddressController {
                                                                                             @Valid @RequestBody PageableBody pageableBody,
                                                                                             ServerWebExchange exchange) {
         return orderWithAddressService.getModelsFilteredAdmin(city, state, country, pageableBody, requestsUtils.extractAuthUser(exchange))
-                .flatMap(m -> orderWithAddressReactiveResponseBuilder.toModelPageable(m, OrderWithAddressController.class));
+                .flatMapSequential(m -> orderWithAddressReactiveResponseBuilder.toModelPageable(m, OrderWithAddressController.class));
     }
 
     @PatchMapping(value = "/filtered/{userId}", produces = {MediaType.APPLICATION_NDJSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
@@ -55,6 +55,6 @@ public class OrderWithAddressController {
                                                                                                 @Valid @RequestBody PageableBody pageableBody,
                                                                                                 ServerWebExchange exchange) {
         return orderWithAddressService.getModelsFilteredUser(city, state, country, pageableBody, userId, requestsUtils.extractAuthUser(exchange))
-                .flatMap(m -> orderWithAddressReactiveResponseBuilder.toModelPageable(m, OrderWithAddressController.class));
+                .flatMapSequential(m -> orderWithAddressReactiveResponseBuilder.toModelPageable(m, OrderWithAddressController.class));
     }
 }

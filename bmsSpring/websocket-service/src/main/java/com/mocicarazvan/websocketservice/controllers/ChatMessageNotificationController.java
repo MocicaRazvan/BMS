@@ -22,7 +22,6 @@ import java.util.List;
 
 
 @RequiredArgsConstructor
-//@Controller
 @RestController
 public class ChatMessageNotificationController implements
         NotificationTemplateController<ChatRoomResponse, ChatMessageNotificationType, ChatMessageNotificationBody, ChatMessageNotificationResponse> {
