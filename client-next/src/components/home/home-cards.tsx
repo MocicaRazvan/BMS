@@ -34,7 +34,6 @@ const cards: {
 ];
 
 export default function HomeCards(props: HomeCardsText) {
-  console.log("PROPS", props);
   return (
     <div className="flex flex-wrap items-center justify-center gap-10 mt-15 overflow-hidden py-16">
       {cards.map((item, i) => (

@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 import handleOauthCall from "../handle";
 import { cookies } from "next/headers";
 import { emitInfo } from "@/logger";
+import { GOOGLE_STATE_COOKIE_NAME } from "@/app/api/auth/[...nextauth]/custom-google-provider";
 
 export async function GET(req: NextRequest) {
   emitInfo("GET /api/auth/callback/google");
@@ -10,6 +11,9 @@ export async function GET(req: NextRequest) {
   return await handleOauthCall(
     req,
     `${springUrl}/auth/google/callback`,
-    cookies().get("googleState")?.value,
+    cookies().get(GOOGLE_STATE_COOKIE_NAME)?.value,
+    async () => {
+      cookies().delete(GOOGLE_STATE_COOKIE_NAME);
+    },
   );
 }

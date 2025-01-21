@@ -7,6 +7,7 @@ export default async function handleOauthCall(
   req: NextRequest,
   url: string,
   state?: string,
+  cleanState?: () => Promise<void>,
 ) {
   const { searchParams } = new URL(req.url);
   const code = searchParams.get("code");
@@ -61,6 +62,10 @@ export default async function handleOauthCall(
         path: "/",
         sameSite: "lax",
       });
+
+      if (cleanState) {
+        await cleanState();
+      }
 
       return res;
     } else {
