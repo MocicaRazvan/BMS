@@ -1,10 +1,10 @@
 import { Issuer } from "openid-client";
 import { Provider } from "next-auth/providers/index";
+import { GOOGLE_STATE_COOKIE_NAME } from "@/lib/constants";
 
 const springUrl = process.env.NEXT_PUBLIC_SPRING!;
 const nextUrl = process.env.NEXTAUTH_URL!;
 
-export const GOOGLE_STATE_COOKIE_NAME = "googleState";
 const googleIssuer = new Issuer({
   issuer: springUrl,
   authorization_endpoint: `${nextUrl}/api/auth/callback/cookies?cookieName=${GOOGLE_STATE_COOKIE_NAME}`,

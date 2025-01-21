@@ -2,7 +2,7 @@ import { NextRequest } from "next/server";
 import handleOauthCall from "../handle";
 import { cookies } from "next/headers";
 import { emitInfo } from "@/logger";
-import { GOOGLE_STATE_COOKIE_NAME } from "@/app/api/auth/[...nextauth]/custom-google-provider";
+import { GOOGLE_STATE_COOKIE_NAME } from "@/lib/constants";
 
 export async function GET(req: NextRequest) {
   emitInfo("GET /api/auth/callback/google");
