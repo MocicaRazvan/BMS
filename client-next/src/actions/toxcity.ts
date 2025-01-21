@@ -4,7 +4,9 @@ import { detect } from "tinyld";
 import { emitInfo } from "@/logger";
 import lande from "lande";
 
-const threshold = 0.35;
+const threshold = process.env.TOXICITY_THRESHOLD
+  ? parseFloat(process.env.TOXICITY_THRESHOLD)
+  : 0.5;
 let globalModel: toxicity.ToxicityClassifier | null = null;
 
 enum TOXIC_REASON {
