@@ -42,6 +42,9 @@ import LoadingSpinner from "@/components/common/loading-spinner";
 import { useFormatter } from "next-intl";
 import useClientNotFound from "@/hoooks/useClientNotFound";
 import OverflowTextTooltip from "@/components/common/overflow-text-tooltip";
+import CreationFilter, {
+  CreationFilterTexts,
+} from "@/components/list/creation-filter";
 
 export interface PlanTableColumnsTexts {
   id: string;
@@ -75,6 +78,7 @@ export interface PlanTableTexts {
   objectiveDropDownTexts: UseFilterDropdownTexts;
   planTableColumnsTexts: PlanTableColumnsTexts;
   search: string;
+  creationFilterTexts: CreationFilterTexts;
 }
 
 export interface PlanTableProps
@@ -103,6 +107,7 @@ export default function PlansTable({
   extraUpdateSearchParams,
   extraCriteria,
   objectiveDropDownTexts,
+  creationFilterTexts,
   forWhom,
 }: PlanTableProps) {
   const router = useRouter();
@@ -172,6 +177,8 @@ export default function PlansTable({
     updateFilterValue,
     clearFilterValue,
     resetCurrentPage,
+    updateUpdatedAtRange,
+    updateCreatedAtRange,
   } = useList<ResponseWithEntityCount<CustomEntityModel<PlanResponse>>>({
     path,
     extraQueryParams: {
@@ -272,7 +279,7 @@ export default function PlansTable({
           </p>
         ),
         cell: ({ row }) => (
-          <div className="max-w-28 text-sm font-bold text-nowrap overflow-x-hidden">
+          <div className="max-w-30 text-xs font-bold text-nowrap overflow-x-hidden">
             <p>{row.original.model.objective}</p>
           </div>
         ),
@@ -616,6 +623,13 @@ export default function PlansTable({
                 {approvedCriteriaCallBack(resetCurrentPage)}
               </div>
             </div>
+          }
+          rangeDateFilter={
+            <CreationFilter
+              {...creationFilterTexts}
+              updateCreatedAtRange={updateCreatedAtRange}
+              updateUpdatedAtRange={updateUpdatedAtRange}
+            />
           }
         />
       </Suspense>

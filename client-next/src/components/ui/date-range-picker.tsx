@@ -1,7 +1,14 @@
 /* eslint-disable max-lines */
 "use client";
 
-import React, { type FC, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  type FC,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { Button } from "./button";
 import { Popover, PopoverContent, PopoverTrigger } from "./popover";
 import { Calendar } from "./calendar";
@@ -73,11 +80,19 @@ export interface DateRangePickerTexts {
   cancel: string;
   update: string;
   presets: Record<(typeof BASE_PRESETS)[number]["name"], string>;
+  none: {
+    false: string;
+    true: string;
+  };
+  noRangeSelected: string;
 }
 
 export interface DateRangePickerProps {
   /** Click handler for applying the updates from DateRangePicker. */
-  onUpdate?: (values: { range: DateRange; rangeCompare?: DateRange }) => void;
+  onUpdate?: (
+    values: { range: DateRange; rangeCompare?: DateRange },
+    none?: boolean,
+  ) => void;
   /** Initial value for start date */
   initialDateFrom?: Date | string;
   /** Initial value for end date */
@@ -94,6 +109,8 @@ export interface DateRangePickerProps {
   showCompare?: boolean;
   defaultPreset?: (typeof BASE_PRESETS)[number]["name"];
   hiddenPresets?: (typeof BASE_PRESETS)[number]["name"][];
+  showNone?: boolean;
+  defaultNone?: boolean;
 }
 
 /** The DateRangePicker component allows a user to select a range of dates */
@@ -116,7 +133,13 @@ export const DateRangePicker: FC<
   update,
   defaultPreset,
   hiddenPresets = [],
+  showNone,
+  defaultNone = false,
+  noRangeSelected,
+  none: { false: noneFalseText, true: noneTrueText },
 }): JSX.Element => {
+  const [none, setNone] = useState(defaultNone);
+  const prevNone = useRef(defaultNone);
   const PRESETS = useMemo(
     () =>
       BASE_PRESETS.filter(
@@ -128,6 +151,13 @@ export const DateRangePicker: FC<
     [hiddenPresets, presets],
   );
 
+  const toggleNone = useCallback(() => {
+    setNone((prev) => {
+      prevNone.current = prev;
+      return !prev;
+    });
+  }, []);
+
   const [isOpen, setIsOpen] = useState(false);
 
   const [range, setRange] = useState<DateRange>({
@@ -136,6 +166,14 @@ export const DateRangePicker: FC<
       ? getDateAdjustedForTimezone(initialDateTo)
       : getDateAdjustedForTimezone(initialDateFrom),
   });
+
+  const isJustFromCurrentDate = useMemo(
+    () =>
+      `${range.from}` === `${getDateAdjustedForTimezone(initialDateFrom)}` &&
+      (`${range.from}` === `${range.to}` || range.to === undefined),
+    [initialDateFrom, range.from, range.to],
+  );
+
   const [rangeCompare, setRangeCompare] = useState<DateRange | undefined>(
     initialCompareFrom
       ? {
@@ -333,14 +371,17 @@ export const DateRangePicker: FC<
     preset,
     label,
     isSelected,
+    disabled,
   }: {
     preset: string;
     label: string;
     isSelected: boolean;
+    disabled?: boolean;
   }): JSX.Element => (
     <Button
       className={cn(isSelected && "pointer-events-none")}
       variant="ghost"
+      disabled={disabled}
       onClick={() => {
         setPreset(preset);
       }}
@@ -372,7 +413,7 @@ export const DateRangePicker: FC<
 
   return (
     <Popover
-      modal={true}
+      modal={false}
       open={isOpen}
       onOpenChange={(open: boolean) => {
         if (!open) {
@@ -385,11 +426,19 @@ export const DateRangePicker: FC<
         <Button
           size={"lg"}
           variant="outline"
-          className="flex items-center justify-between gap-5"
+          className={cn("flex items-center justify-between gap-5 w-80")}
         >
           <CalendarIcon className="h-5 w-5" />
           <div className="text-right ">
-            <div className="py-1 flex-1">
+            <div
+              className={cn(
+                !none && "hidden py-0",
+                none && "py-1 flex-1 font-semibold",
+              )}
+            >
+              {noRangeSelected}
+            </div>
+            <div className={cn("py-1 flex-1", none && "hidden py-0")}>
               <div>{`${formatDate(range.from, locale)}${
                 range.to != null ? " - " + formatDate(range.to, locale) : ""
               }`}</div>
@@ -422,6 +471,7 @@ export const DateRangePicker: FC<
                 {showCompare && (
                   <div className="flex items-center space-x-2 pr-4 py-1">
                     <Switch
+                      disabled={none}
                       defaultChecked={Boolean(rangeCompare)}
                       onCheckedChange={(checked: boolean) => {
                         if (checked) {
@@ -461,6 +511,7 @@ export const DateRangePicker: FC<
                 <div className="flex flex-col gap-2">
                   <div className="flex gap-2">
                     <DateInput
+                      disabled={none}
                       value={range.from}
                       onChange={(date) => {
                         const toDate =
@@ -474,6 +525,7 @@ export const DateRangePicker: FC<
                     />
                     <div className="py-1">{"-"}</div>
                     <DateInput
+                      disabled={none}
                       value={range.to}
                       onChange={(date) => {
                         const fromDate = date < range.from ? date : range.from;
@@ -488,6 +540,7 @@ export const DateRangePicker: FC<
                   {rangeCompare != null && (
                     <div className="flex gap-2">
                       <DateInput
+                        disabled={none}
                         value={rangeCompare?.from}
                         onChange={(date) => {
                           if (rangeCompare) {
@@ -510,6 +563,7 @@ export const DateRangePicker: FC<
                       />
                       <div className="py-1">{"-"}</div>
                       <DateInput
+                        disabled={none}
                         value={rangeCompare?.to}
                         onChange={(date) => {
                           if (rangeCompare && rangeCompare.from) {
@@ -531,6 +585,7 @@ export const DateRangePicker: FC<
               </div>
               {isSmallScreen && (
                 <Select
+                  disabled={none}
                   defaultValue={selectedPreset}
                   onValueChange={(value) => {
                     setPreset(value);
@@ -550,6 +605,7 @@ export const DateRangePicker: FC<
               )}
               <div>
                 <Calendar
+                  disabled={none}
                   mode="range"
                   locale={locale}
                   onSelect={(value: { from?: Date; to?: Date } | undefined) => {
@@ -575,6 +631,7 @@ export const DateRangePicker: FC<
               <div className="flex w-full flex-col items-end gap-1 pr-2 pl-6 pb-6">
                 {PRESETS.map((preset) => (
                   <PresetButton
+                    disabled={none}
                     key={preset.name}
                     preset={preset.name}
                     label={preset.label}
@@ -585,29 +642,62 @@ export const DateRangePicker: FC<
             </div>
           )}
         </div>
-        <div className="flex justify-end gap-2 py-2 pr-4">
-          <Button
-            onClick={() => {
-              setIsOpen(false);
-              resetValues();
-            }}
-            variant="outline"
-          >
-            {cancel}
-          </Button>
-          <Button
-            onClick={() => {
-              setIsOpen(false);
-              if (
-                !areRangesEqual(range, openedRangeRef.current) ||
-                !areRangesEqual(rangeCompare, openedRangeCompareRef.current)
-              ) {
-                onUpdate?.({ range, rangeCompare });
-              }
-            }}
-          >
-            {update}
-          </Button>
+        <div
+          className={cn(
+            "flex flex-col sm:flex-row  gap-2 py-2 pr-4 items-center",
+            showNone ? "justify-between" : "justify-end",
+          )}
+        >
+          {showNone && (
+            <Button
+              className="w-40 h-10"
+              variant={none ? "outlineSuccess" : "outlineAmber"}
+              onClick={() => {
+                toggleNone();
+                if (!none) {
+                  setSelectedPreset(undefined);
+                  setIsOpen(false);
+                  onUpdate?.({ range, rangeCompare }, !none);
+                }
+              }}
+            >
+              {none ? noneTrueText : noneFalseText}
+            </Button>
+          )}
+          <div className="flex justify-end gap-2 py-2 pr-4">
+            <Button
+              className="h-10"
+              disabled={none}
+              onClick={() => {
+                setIsOpen(false);
+                resetValues();
+              }}
+              variant="outline"
+            >
+              {cancel}
+            </Button>
+            <Button
+              className="h-10"
+              disabled={none}
+              onClick={() => {
+                setIsOpen(false);
+                if (
+                  !areRangesEqual(range, openedRangeRef.current) ||
+                  !areRangesEqual(rangeCompare, openedRangeCompareRef.current)
+                ) {
+                  onUpdate?.({ range, rangeCompare }, none);
+                } else if (
+                  showNone &&
+                  isJustFromCurrentDate &&
+                  prevNone.current
+                ) {
+                  onUpdate?.({ range, rangeCompare }, none);
+                }
+              }}
+            >
+              {update}
+            </Button>
+          </div>
         </div>
       </PopoverContent>
     </Popover>

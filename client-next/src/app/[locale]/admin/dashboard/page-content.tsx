@@ -20,6 +20,7 @@ import ArchiveContent, {
 } from "@/app/[locale]/admin/dashboard/archive-content";
 import TopUsers, { TopUsersTexts } from "@/components/charts/top-users";
 import { Separator } from "@/components/ui/separator";
+import { TopPlans, TopPlansTexts } from "@/components/charts/top-plans";
 
 export interface AdminDashboardPageTexts {
   title: string;
@@ -32,6 +33,7 @@ export interface AdminDashboardPageTexts {
   archiveTitle: string;
   selectItems: Record<AugmentedArchiveQueuePrefix, string>;
   topUsersTexts: TopUsersTexts;
+  topPlansTexts: TopPlansTexts;
 }
 
 interface Props extends WithUser, AdminDashboardPageTexts {
@@ -47,6 +49,7 @@ export default function AdminDashboardPageContent({
   archiveTitle,
   selectItems,
   topUsersTexts,
+  topPlansTexts,
 }: Props) {
   const [relativeItemsCount, setRelativeItemsCount] = useState<
     Record<RelativeItems, number>
@@ -117,6 +120,14 @@ export default function AdminDashboardPageContent({
       <Separator className="mt-2" />
       <div className=" my-5 h-full w-full">
         <TopUsers texts={topUsersTexts} locale={locale} />
+      </div>
+      <Separator className="mt-2" />
+      <div className=" my-5 h-full w-full">
+        <TopPlans
+          texts={topPlansTexts}
+          locale={locale}
+          path={"/orders/admin/topPlans"}
+        />
       </div>
       <Separator />
       <div className="w-full h-full mt-5 md:mt-12">

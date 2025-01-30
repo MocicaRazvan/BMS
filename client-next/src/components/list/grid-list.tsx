@@ -21,6 +21,9 @@ import { motion } from "framer-motion";
 import LoadingItemCard from "@/components/list/loading-item-card";
 import noResultsLottie from "@/../public/lottie/noResults.json";
 import Lottie from "react-lottie-player";
+import CreationFilter, {
+  CreationFilterTexts,
+} from "@/components/list/creation-filter";
 
 export interface SortingOption {
   property: string;
@@ -35,6 +38,7 @@ export interface GridListTexts {
   gettingMore: string;
   search: string;
   radioSortTexts: RadioSortTexts;
+  creationFilterTexts: CreationFilterTexts;
 }
 
 interface GridListProps<T extends TitleBodyImagesUserDto>
@@ -66,6 +70,7 @@ export default function GridList<T extends TitleBodyImagesUserDto>({
   radioSortTexts,
   extraCriteriaWithCallBack,
   passExtraImageOverlay,
+  creationFilterTexts,
 }: GridListProps<T>) {
   const {
     messages,
@@ -85,6 +90,8 @@ export default function GridList<T extends TitleBodyImagesUserDto>({
     clearFilterValue,
     setPageInfo,
     resetCurrentPage,
+    updateCreatedAtRange,
+    updateUpdatedAtRange,
   } = useList<ResponseWithUserDtoEntity<T>>({
     path,
     extraQueryParams,
@@ -96,27 +103,37 @@ export default function GridList<T extends TitleBodyImagesUserDto>({
 
   return (
     <div className="w-full ">
-      <div className="my-10 w-full flex items-start justify-start flex-wrap gap-10 transition-all ">
-        <SearchInput
-          value={filter.title || ""}
-          onChange={updateFilterValue}
-          onClear={clearFilterValue}
-          searchInputTexts={{ placeholder: search }}
-        />
-        <div className="flex items-center justify-center ml-12 gap-2 ">
-          <RadioSort
-            sortingOptions={sortingOptions}
-            sort={sort}
-            sortValue={sortValue}
-            setSort={setSort}
-            setSortValue={setSortValue}
-            {...radioSortTexts}
-            callback={resetCurrentPage}
+      <div className="w-full h-full space-y-5">
+        <div className="my-10 w-full flex items-start justify-start flex-wrap gap-10 transition-all ">
+          <SearchInput
+            value={filter.title || ""}
+            onChange={updateFilterValue}
+            onClear={clearFilterValue}
+            searchInputTexts={{ placeholder: search }}
+          />
+
+          <div className="flex items-center justify-end ml-12 gap-4  flex-1">
+            <RadioSort
+              sortingOptions={sortingOptions}
+              sort={sort}
+              sortValue={sortValue}
+              setSort={setSort}
+              setSortValue={setSortValue}
+              {...radioSortTexts}
+              callback={resetCurrentPage}
+            />
+            {extraCriteria && extraCriteria}
+            {extraCriteriaWithCallBack &&
+              extraCriteriaWithCallBack(resetCurrentPage)}
+          </div>
+        </div>
+        <div>
+          <CreationFilter
+            {...creationFilterTexts}
+            updateCreatedAtRange={updateCreatedAtRange}
+            updateUpdatedAtRange={updateUpdatedAtRange}
           />
         </div>
-        {extraCriteria && extraCriteria}
-        {extraCriteriaWithCallBack &&
-          extraCriteriaWithCallBack(resetCurrentPage)}
       </div>
       <div className="w-full mt-10">
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">

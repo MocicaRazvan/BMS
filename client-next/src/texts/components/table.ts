@@ -8,6 +8,7 @@ import {
   PostTableTexts,
 } from "@/components/table/posts-table";
 import {
+  getCreationFilterTexts,
   getUseApprovedFilterTexts,
   getUseBinaryEmailVerifiedTexts,
   getUseBinaryTexts,
@@ -60,6 +61,7 @@ import {
 } from "@/components/table/day-table";
 import { dayTypes, planObjectives } from "@/types/dto";
 import { getDayTypeBadgeTexts } from "@/texts/components/days";
+import { CreationFilterTexts } from "@/components/list/creation-filter";
 
 export async function getDataTablePaginationTexts(): Promise<DataTablePaginationTexts> {
   const t = await getTranslations("components.table.DataTablePaginationTexts");
@@ -250,13 +252,14 @@ export async function getPostTableTexts(): Promise<PostTableTexts> {
     useTagsExtraCriteriaTexts,
     useApprovedFilterTexts,
     postTableColumnsTexts,
-
+    creationFilterTexts,
     t,
   ] = await Promise.all([
     getDataTableTexts(),
     getUseTagsExtraCriteriaTexts(),
     getUseApprovedFilterTexts(),
     getPostTableColumnsTexts(),
+    getCreationFilterTexts(),
     getTranslations("components.table.PostTableTexts"),
   ]);
   return {
@@ -264,6 +267,7 @@ export async function getPostTableTexts(): Promise<PostTableTexts> {
     useTagsExtraCriteriaTexts,
     useApprovedFilterTexts,
     postTableColumnsTexts,
+    creationFilterTexts,
     search: t("search"),
   };
 }
@@ -275,6 +279,7 @@ export async function getUserTableTexts(): Promise<UserTableTexts> {
     useProviderFilterDropdownTexts,
     useRoleFilterTexts,
     useBinaryEmailVerifiedTexts,
+    creationFilterTexts,
     t,
   ] = await Promise.all([
     getDataTableTexts(),
@@ -282,6 +287,7 @@ export async function getUserTableTexts(): Promise<UserTableTexts> {
     getUseProviderFilterDropdownTexts(),
     getUseRoleFilterTexts(),
     getUseBinaryEmailVerifiedTexts(),
+    getCreationFilterTexts(),
     getTranslations("components.table.UserTableTexts"),
   ]);
   return {
@@ -290,6 +296,7 @@ export async function getUserTableTexts(): Promise<UserTableTexts> {
     useProviderFilterDropdownTexts,
     useRoleFilterTexts,
     useBinaryEmailVerifiedTexts,
+    creationFilterTexts,
     search: t("search"),
   };
 }
@@ -300,6 +307,7 @@ export async function getIngredientTableTexts(): Promise<IngredientTableTexts> {
     ingredientTableColumnTexts,
     displayFilterTexts,
     dietDropdownTexts,
+    creationFilterTexts,
     t,
   ] = await Promise.all([
     getDataTableTexts(),
@@ -309,6 +317,7 @@ export async function getIngredientTableTexts(): Promise<IngredientTableTexts> {
       "UseDietDropdownTexts",
       dietTypes as unknown as string[],
     ),
+    getCreationFilterTexts(),
     getTranslations("components.table.IngredientTableTexts"),
   ]);
 
@@ -317,6 +326,7 @@ export async function getIngredientTableTexts(): Promise<IngredientTableTexts> {
     ingredientTableColumnTexts,
     displayFilterTexts,
     dietDropdownTexts,
+    creationFilterTexts,
     search: t("search"),
   };
 }
@@ -327,6 +337,7 @@ export async function getRecipeTableTexts(): Promise<RecipeTableTexts> {
     recipeTableColumnsTexts,
     useApprovedFilterTexts,
     dietDropdownTexts,
+    creationFilterTexts,
     t,
   ] = await Promise.all([
     getDataTableTexts(),
@@ -336,6 +347,7 @@ export async function getRecipeTableTexts(): Promise<RecipeTableTexts> {
       "UseDietDropdownTexts",
       dietTypes as unknown as string[],
     ),
+    getCreationFilterTexts(),
     getTranslations("components.table.RecipeTableTexts"),
   ]);
   return {
@@ -343,6 +355,7 @@ export async function getRecipeTableTexts(): Promise<RecipeTableTexts> {
     dataTableTexts,
     dietDropdownTexts,
     useApprovedFilterTexts,
+    creationFilterTexts,
     search: t("search"),
   };
 }
@@ -353,6 +366,7 @@ export async function getDayTableTexts(): Promise<DayTableTexts> {
     dayTableColumnTexts,
     typeDropdownTexts,
     dayTypeBadgeTexts,
+    creationFilterTexts,
     t,
   ] = await Promise.all([
     getDataTableTexts(),
@@ -362,6 +376,7 @@ export async function getDayTableTexts(): Promise<DayTableTexts> {
       dayTypes as unknown as string[],
     ),
     getDayTypeBadgeTexts(),
+    getCreationFilterTexts(),
     getTranslations("components.table.DayTableTexts"),
   ]);
 
@@ -370,6 +385,7 @@ export async function getDayTableTexts(): Promise<DayTableTexts> {
     dayTableColumnTexts,
     typeDropdownTexts,
     dayTypeBadgeTexts,
+    creationFilterTexts,
     search: t("search"),
   };
 }
@@ -382,6 +398,7 @@ export async function getPlanTableTexts(): Promise<PlanTableTexts> {
     dietDropdownTexts,
     objectiveDropDownTexts,
     planTableColumnsTexts,
+    creationFilterTexts,
     t,
   ] = await Promise.all([
     getDataTableTexts(),
@@ -396,6 +413,7 @@ export async function getPlanTableTexts(): Promise<PlanTableTexts> {
       planObjectives as unknown as string[],
     ),
     getPlanTableColumnsTexts(),
+    getCreationFilterTexts(),
     getTranslations("components.table.PlanTableTexts"),
   ]);
 
@@ -406,6 +424,7 @@ export async function getPlanTableTexts(): Promise<PlanTableTexts> {
     dietDropdownTexts,
     planTableColumnsTexts,
     objectiveDropDownTexts,
+    creationFilterTexts,
     search: t("search"),
   };
 }
@@ -432,16 +451,19 @@ export async function getOrderTableColumnsTexts(): Promise<OrderTableColumnsText
 }
 
 export async function getOrderTableTexts(): Promise<OrderTableTexts> {
-  const [dataTableTexts, orderTableColumnsTexts, t] = await Promise.all([
-    getDataTableTexts(),
-    getOrderTableColumnsTexts(),
-    getTranslations("components.table.OrderTableTexts"),
-  ]);
+  const [dataTableTexts, orderTableColumnsTexts, creationFilterTexts, t] =
+    await Promise.all([
+      getDataTableTexts(),
+      getOrderTableColumnsTexts(),
+      getCreationFilterTexts(),
+      getTranslations("components.table.OrderTableTexts"),
+    ]);
 
   return {
     dataTableTexts,
     orderTableColumnsTexts,
     search: t("search"),
+    creationFilterTexts,
     searchKeyLabel: {
       city: t("searchKeyLabel.city"),
       country: t("searchKeyLabel.country"),

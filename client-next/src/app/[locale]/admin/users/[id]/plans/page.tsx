@@ -11,6 +11,7 @@ import UserPlansAdminPageContent from "@/app/[locale]/admin/users/[id]/plans/pag
 import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
 import { Metadata } from "next";
 import { getIntlMetadata } from "@/texts/metadata";
+import { TopPlansTexts } from "@/components/charts/top-plans";
 
 export interface UserPlansAdminPageTexts {
   plansTableTexts: PlanTableTexts;
@@ -19,6 +20,7 @@ export interface UserPlansAdminPageTexts {
   title: string;
   header: string;
   menuTexts: SidebarMenuTexts;
+  topPlansTexts: TopPlansTexts;
 }
 interface Props {
   params: { locale: Locale; id: string };
@@ -56,6 +58,7 @@ export default async function UserPlansAdminPage({
       id={id}
       authUser={authUser}
       sortingOptions={plansOptions}
+      locale={locale}
       {...texts}
       path={`/plans/trainer/filteredWithCount/${id}`}
     />

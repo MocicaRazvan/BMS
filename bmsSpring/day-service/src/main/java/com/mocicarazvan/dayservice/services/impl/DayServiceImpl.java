@@ -37,6 +37,7 @@ import org.springframework.transaction.reactive.TransactionalOperator;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 
@@ -102,34 +103,55 @@ public class DayServiceImpl
     // todo admin route
     @Override
     @RedisReactiveChildCache(key = CACHE_KEY_PATH, idPath = "content.id", masterId = "#userId")
-    public Flux<PageableResponse<DayResponse>> getDaysFiltered(String title, DayType type, List<Long> excludeIds, PageableBody pageableBody, String userId, Boolean admin) {
+    public Flux<PageableResponse<DayResponse>> getDaysFiltered(String title, DayType type, List<Long> excludeIds,
+                                                               LocalDate createdAtLowerBound, LocalDate createdAtUpperBound,
+                                                               LocalDate updatedAtLowerBound, LocalDate updatedAtUpperBound,
+                                                               PageableBody pageableBody, String userId, Boolean admin) {
 
-        return self.getDaysFiltered(title, type, excludeIds, pageableBody, userId, admin, allowedSortingFields);
+        return self.getDaysFiltered(title, type, excludeIds,
+                createdAtLowerBound, createdAtUpperBound, updatedAtLowerBound, updatedAtUpperBound,
+                pageableBody, userId, admin, allowedSortingFields);
     }
 
     // todo admin route
     @Override
-    public Flux<PageableResponse<ResponseWithUserDto<DayResponse>>> getDaysFilteredWithUser(String title, DayType type, List<Long> excludeIds, PageableBody pageableBody, String userId, Boolean admin) {
-        return getDaysFiltered(title, type, excludeIds, pageableBody, userId, admin)
+    public Flux<PageableResponse<ResponseWithUserDto<DayResponse>>> getDaysFilteredWithUser(String title, DayType type, List<Long> excludeIds,
+                                                                                            LocalDate createdAtLowerBound, LocalDate createdAtUpperBound,
+                                                                                            LocalDate updatedAtLowerBound, LocalDate updatedAtUpperBound,
+                                                                                            PageableBody pageableBody, String userId, Boolean admin) {
+        return getDaysFiltered(title, type, excludeIds,
+                createdAtLowerBound, createdAtUpperBound, updatedAtLowerBound, updatedAtUpperBound,
+                pageableBody, userId, admin)
                 .flatMapSequential(this::getPageableWithUser);
     }
 
     @Override
-    public Flux<PageableResponse<ResponseWithEntityCount<DayResponse>>> getDaysFilteredWithCount(String title, DayType type, List<Long> excludeIds, PageableBody pageableBody, String userId, Boolean admin) {
-        return getDaysFiltered(title, type, excludeIds, pageableBody, userId, admin)
+    public Flux<PageableResponse<ResponseWithEntityCount<DayResponse>>> getDaysFilteredWithCount(String title, DayType type, List<Long> excludeIds, LocalDate createdAtLowerBound, LocalDate createdAtUpperBound,
+                                                                                                 LocalDate updatedAtLowerBound, LocalDate updatedAtUpperBound, PageableBody pageableBody, String userId, Boolean admin) {
+        return getDaysFiltered(title, type, excludeIds,
+                createdAtLowerBound, createdAtUpperBound, updatedAtLowerBound, updatedAtUpperBound,
+                pageableBody, userId, admin)
                 .flatMapSequential(pr -> toResponseWithCount(userId, planClient, pr));
     }
 
     @Override
     @RedisReactiveChildCache(key = CACHE_KEY_PATH, idPath = "content.id", masterId = "#trainerId")
-    public Flux<PageableResponse<DayResponse>> getDaysFilteredTrainer(String title, DayType type, List<Long> excludeIds, PageableBody pageableBody, String userId, Long trainerId) {
+    public Flux<PageableResponse<DayResponse>> getDaysFilteredTrainer(String title, DayType type, List<Long> excludeIds,
+                                                                      LocalDate createdAtLowerBound, LocalDate createdAtUpperBound,
+                                                                      LocalDate updatedAtLowerBound, LocalDate updatedAtUpperBound,
+                                                                      PageableBody pageableBody, String userId, Long trainerId) {
 
-        return self.getDaysFilteredTrainer(title, type, excludeIds, pageableBody, userId, trainerId, allowedSortingFields);
+        return self.getDaysFilteredTrainer(title, type, excludeIds,
+                createdAtLowerBound, createdAtUpperBound, updatedAtLowerBound, updatedAtUpperBound,
+                pageableBody, userId, trainerId, allowedSortingFields);
     }
 
     @Override
-    public Flux<PageableResponse<ResponseWithEntityCount<DayResponse>>> getDaysFilteredTrainerWithCount(String title, DayType type, List<Long> excludeIds, PageableBody pageableBody, String userId, Long trainerId) {
-        return getDaysFilteredTrainer(title, type, excludeIds, pageableBody, userId, trainerId)
+    public Flux<PageableResponse<ResponseWithEntityCount<DayResponse>>> getDaysFilteredTrainerWithCount(String title, DayType type, List<Long> excludeIds, LocalDate createdAtLowerBound, LocalDate createdAtUpperBound,
+                                                                                                        LocalDate updatedAtLowerBound, LocalDate updatedAtUpperBound, PageableBody pageableBody, String userId, Long trainerId) {
+        return getDaysFilteredTrainer(title, type, excludeIds,
+                createdAtLowerBound, createdAtUpperBound, updatedAtLowerBound, updatedAtUpperBound,
+                pageableBody, userId, trainerId)
                 .flatMapSequential(pr -> toResponseWithCount(userId, planClient, pr));
     }
 
@@ -297,25 +319,38 @@ public class DayServiceImpl
 
 
         @RedisReactiveChildCache(key = CACHE_KEY_PATH, idPath = "content.id", masterId = "#userId")
-        public Flux<PageableResponse<DayResponse>> getDaysFiltered(String title, DayType type, List<Long> excludeIds, PageableBody pageableBody, String userId, Boolean admin, List<String> allowedSortingFields) {
+        public Flux<PageableResponse<DayResponse>> getDaysFiltered(String title, DayType type, List<Long> excludeIds,
+                                                                   LocalDate createdAtLowerBound, LocalDate createdAtUpperBound,
+                                                                   LocalDate updatedAtLowerBound, LocalDate updatedAtUpperBound,
+                                                                   PageableBody pageableBody, String userId, Boolean admin, List<String> allowedSortingFields) {
             return pageableUtils.isSortingCriteriaValid(pageableBody.getSortingCriteria(), allowedSortingFields)
                     .then(pageableUtils.createPageRequest(pageableBody))
                     .flatMapMany(pr ->
                             pageableUtils.createPageableResponse(
-                                    extendedDayRepository.getDaysFiltered(title, type, pr, excludeIds).map(modelMapper::fromModelToResponse),
-                                    extendedDayRepository.countDayFiltered(title, type, excludeIds),
+                                    extendedDayRepository.getDaysFiltered(title, type,
+                                            createdAtLowerBound, createdAtUpperBound, updatedAtLowerBound, updatedAtUpperBound,
+                                            pr, excludeIds).map(modelMapper::fromModelToResponse),
+                                    extendedDayRepository.countDayFiltered(title, type, excludeIds,
+                                            createdAtLowerBound, createdAtUpperBound, updatedAtLowerBound, updatedAtUpperBound),
                                     pr
                             ));
         }
 
         @RedisReactiveChildCache(key = CACHE_KEY_PATH, idPath = "content.id", masterId = "#trainerId")
-        public Flux<PageableResponse<DayResponse>> getDaysFilteredTrainer(String title, DayType type, List<Long> excludeIds, PageableBody pageableBody, String userId, Long trainerId, List<String> allowedSortingFields) {
+        public Flux<PageableResponse<DayResponse>> getDaysFilteredTrainer(String title, DayType type, List<Long> excludeIds,
+                                                                          LocalDate createdAtLowerBound, LocalDate createdAtUpperBound,
+                                                                          LocalDate updatedAtLowerBound, LocalDate updatedAtUpperBound,
+                                                                          PageableBody pageableBody, String userId, Long trainerId, List<String> allowedSortingFields) {
             return pageableUtils.isSortingCriteriaValid(pageableBody.getSortingCriteria(), allowedSortingFields)
                     .then(pageableUtils.createPageRequest(pageableBody))
                     .flatMapMany(pr ->
                             pageableUtils.createPageableResponse(
-                                    extendedDayRepository.getDaysFilteredTrainer(title, type, pr, excludeIds, trainerId).map(modelMapper::fromModelToResponse),
-                                    extendedDayRepository.countDayFilteredTrainer(title, type, excludeIds, trainerId),
+                                    extendedDayRepository.getDaysFilteredTrainer(title, type, pr, excludeIds,
+                                            createdAtLowerBound, createdAtUpperBound, updatedAtLowerBound, updatedAtUpperBound,
+                                            trainerId).map(modelMapper::fromModelToResponse),
+                                    extendedDayRepository.countDayFilteredTrainer(title, type, excludeIds,
+                                            createdAtLowerBound, createdAtUpperBound, updatedAtLowerBound, updatedAtUpperBound,
+                                            trainerId),
                                     pr
                             ));
         }

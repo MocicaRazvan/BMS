@@ -6,10 +6,7 @@ import com.mocicarazvan.orderservice.dtos.clients.MealResponse;
 import com.mocicarazvan.orderservice.dtos.clients.PlanResponse;
 import com.mocicarazvan.orderservice.dtos.clients.RecipeResponse;
 import com.mocicarazvan.orderservice.dtos.clients.collect.FullDayResponse;
-import com.mocicarazvan.orderservice.dtos.summaries.CountryOrderSummary;
-import com.mocicarazvan.orderservice.dtos.summaries.DailyOrderSummary;
-import com.mocicarazvan.orderservice.dtos.summaries.MonthlyOrderSummary;
-import com.mocicarazvan.orderservice.dtos.summaries.TopUsersSummary;
+import com.mocicarazvan.orderservice.dtos.summaries.*;
 import com.mocicarazvan.orderservice.enums.CountrySummaryType;
 import com.mocicarazvan.orderservice.enums.DietType;
 import com.mocicarazvan.orderservice.enums.ObjectiveType;
@@ -86,10 +83,16 @@ public class OrderController implements CountInParentController {
             @RequestParam(required = false) String title,
             @RequestParam(required = false) DietType type,
             @RequestParam(required = false) ObjectiveType objective,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate createdAtLowerBound,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate createdAtUpperBound,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate updatedAtLowerBound,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate updatedAtUpperBound,
             @Valid @RequestBody PageableBody pageableBody,
             ServerWebExchange exchange
     ) {
-        return orderService.getPlansForUser(title, type, objective, pageableBody, requestsUtils.extractAuthUser(exchange));
+        return orderService.getPlansForUser(title, type, objective,
+                createdAtLowerBound, createdAtUpperBound, updatedAtLowerBound, updatedAtUpperBound,
+                pageableBody, requestsUtils.extractAuthUser(exchange));
     }
 
     @GetMapping(value = "/subscriptionsByOrder/{orderId}", produces = {MediaType.APPLICATION_NDJSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
@@ -161,6 +164,27 @@ public class OrderController implements CountInParentController {
         return orderService.getTopUsersSummary(from, to, top);
     }
 
+    @GetMapping("/admin/topPlans")
+    @ResponseStatus(HttpStatus.OK)
+    public Flux<TopPlansSummary> getTopPlansSummary(@RequestParam @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate from,
+                                                    @RequestParam @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate to,
+                                                    @RequestParam @Valid @Min(1) int top
+    ) {
+        return orderService.getTopPlansSummary(from, to, top);
+    }
+
+    @GetMapping("/trainer/topPlans/{trainerId}")
+    @ResponseStatus(HttpStatus.OK)
+    public Flux<TopPlansSummary> getTopPlansTrainerSummary(@RequestParam @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate from,
+                                                           @RequestParam @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate to,
+                                                           @PathVariable Long trainerId,
+                                                           @RequestParam @Valid @Min(1) int top,
+                                                           ServerWebExchange exchange
+
+    ) {
+        return orderService.getTopPlansSummaryTrainer(from, to, top, trainerId, requestsUtils.extractAuthUser(exchange));
+    }
+
     @GetMapping("/trainer/countAndAmount/{trainerId}")
     @ResponseStatus(HttpStatus.OK)
     public Flux<MonthlyOrderSummary> getTrainerOrdersSummaryByMonth(@RequestParam @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate from,
@@ -189,7 +213,10 @@ public class OrderController implements CountInParentController {
 
     @GetMapping("/admin/summaryByCountry")
     @ResponseStatus(HttpStatus.OK)
-    public Flux<CountryOrderSummary> getOrdersSummaryByCountry(@RequestParam CountrySummaryType type) {
-        return orderService.getOrdersSummaryByCountry(type);
+    public Flux<CountryOrderSummary> getOrdersSummaryByCountry(@RequestParam CountrySummaryType type,
+                                                               @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate from,
+                                                               @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate to
+    ) {
+        return orderService.getOrdersSummaryByCountry(type, from, to);
     }
 }

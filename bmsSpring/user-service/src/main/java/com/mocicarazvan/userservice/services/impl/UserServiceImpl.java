@@ -36,6 +36,7 @@ import org.springframework.transaction.reactive.TransactionalOperator;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDate;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
@@ -85,7 +86,10 @@ public class UserServiceImpl implements UserService {
     @RedisReactiveRoleCache(key = USER_SERVICE_NAME, idPath = "content.id", roleArgumentPath = "#roles!=null?#roles.isEmpty()?null:#roles[0]:null")
     @Override
     public Flux<PageableResponse<UserDto>> getAllUsers(PageableBody pageableBody, String email, Set<Role> roles,
-                                                       Set<AuthProvider> providers, Boolean emailVerified, Boolean admin) {
+                                                       Set<AuthProvider> providers, Boolean emailVerified, Boolean admin,
+                                                       LocalDate createdAtLowerBound, LocalDate createdAtUpperBound,
+                                                       LocalDate updatedAtLowerBound, LocalDate updatedAtUpperBound
+    ) {
 
         final String emailToSearch = email == null ? "" : email;
 
@@ -97,8 +101,12 @@ public class UserServiceImpl implements UserService {
                 .then(pageableUtilsCustom.createPageRequest(pageableBody))
                 .flatMapMany(pr ->
                         pageableUtilsCustom.createPageableResponse(
-                                extendedUserRepository.getUsersFiltered(pr, emailToSearch, finalRoles, finalProviders, emailVerified).map(userMapper::fromUserCustomToUserDto),
-                                extendedUserRepository.countUsersFiltered(emailToSearch, finalRoles, finalProviders, emailVerified),
+                                extendedUserRepository.getUsersFiltered(pr, emailToSearch, finalRoles, finalProviders, emailVerified,
+                                        createdAtLowerBound, createdAtUpperBound, updatedAtLowerBound, updatedAtUpperBound
+                                ).map(userMapper::fromUserCustomToUserDto),
+                                extendedUserRepository.countUsersFiltered(emailToSearch, finalRoles, finalProviders, emailVerified,
+                                        createdAtLowerBound, createdAtUpperBound, updatedAtLowerBound, updatedAtUpperBound
+                                ),
                                 pr)
 
 

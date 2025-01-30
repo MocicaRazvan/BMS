@@ -12,6 +12,7 @@ import org.springframework.http.codec.multipart.FilePart;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 
@@ -20,7 +21,8 @@ public interface UserService {
 
     Mono<UserDto> getUser(Long id);
 
-    Flux<PageableResponse<UserDto>> getAllUsers(PageableBody pageableBody, String email, Set<Role> roles, Set<AuthProvider> providers, Boolean emailVerified, Boolean admin);
+    Flux<PageableResponse<UserDto>> getAllUsers(PageableBody pageableBody, String email, Set<Role> roles, Set<AuthProvider> providers, Boolean emailVerified, Boolean admin, LocalDate createdAtLowerBound, LocalDate createdAtUpperBound,
+                                                LocalDate updatedAtLowerBound, LocalDate updatedAtUpperBound);
 
     Mono<UserDto> makeTrainer(Long id);
 

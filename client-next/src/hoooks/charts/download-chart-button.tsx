@@ -1,10 +1,17 @@
 "use client";
 import { useCurrentPng } from "recharts-to-png";
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import FileSaver from "file-saver";
 import { Button } from "@/components/ui/button";
 import { DownloadIcon } from "lucide-react";
 import { useTheme } from "next-themes";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { getUseDownloadChartButtonTexts } from "@/texts/components/charts";
 
 interface DateString {
   date: string;
@@ -16,6 +23,10 @@ interface Args<T extends DateString> {
 export default function useDownloadChartButton<T extends DateString>({
   data,
 }: Args<T>) {
+  const [text, setText] = useState("");
+  useEffect(() => {
+    getUseDownloadChartButtonTexts().then((t) => setText(t.downloadChart));
+  }, []);
   const { theme } = useTheme();
   const [getPng, { ref, isLoading }] = useCurrentPng({
     backgroundColor: theme === "dark" ? "#1A202C" : "#f0f0f0",
@@ -81,19 +92,28 @@ export default function useDownloadChartButton<T extends DateString>({
   );
 
   const DownloadChartButton = ({ fileName }: { fileName: string }) => (
-    <Button
-      onClick={() => handleDownload(fileName)}
-      disabled={isLoading}
-      type="button"
-      className="min-w-[65px]"
-      variant="outline"
-    >
-      {isLoading ? (
-        <span className=" text-primary/60 animate-spin font-bold text-lg w-full h-full " />
-      ) : (
-        <DownloadIcon size={24} />
-      )}
-    </Button>
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild={true}>
+          <Button
+            onClick={() => handleDownload(fileName)}
+            disabled={isLoading}
+            type="button"
+            className="min-w-[65px]"
+            variant="outline"
+          >
+            {isLoading ? (
+              <span className=" text-primary/60 animate-spin font-bold text-lg w-full h-full " />
+            ) : (
+              <DownloadIcon size={24} />
+            )}
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>{text}</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   );
 
   return { DownloadChartButton, downloadChartRef: ref };

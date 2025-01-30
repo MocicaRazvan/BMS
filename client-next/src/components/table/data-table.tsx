@@ -80,6 +80,7 @@ interface DataTableProps<TData, TValue> extends DataTableTexts {
   searchInputProps: SearchInputProps;
   radioSortProps: Omit<RadioSortProps, "noSort">;
   extraCriteria?: ReactNode;
+  rangeDateFilter?: ReactNode;
   sizeOptions?: number[];
   hidePDFColumnIds?: string[];
   specialPDFColumns?: {
@@ -108,6 +109,7 @@ export function DataTable<TData extends Record<string, any>, TValue>({
   fileName,
   hidePDFColumnIds = [],
   specialPDFColumns = [],
+  rangeDateFilter,
 }: DataTableProps<TData, TValue>) {
   const formatIntl = useFormatter();
 
@@ -363,6 +365,7 @@ export function DataTable<TData extends Record<string, any>, TValue>({
           </DropdownMenu>
         </div>
       </div>
+      {rangeDateFilter && <div className="w-full mb-4">{rangeDateFilter}</div>}
       <div className="rounded-md border">
         {!isFinished ? (
           <div className="w-full h-full min-h-[60vh] space-y-4 p-2">

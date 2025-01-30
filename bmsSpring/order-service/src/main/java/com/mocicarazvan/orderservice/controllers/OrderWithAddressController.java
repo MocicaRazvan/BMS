@@ -10,6 +10,7 @@ import com.mocicarazvan.templatemodule.hateos.CustomEntityModel;
 import com.mocicarazvan.templatemodule.utils.RequestsUtils;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +18,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.time.LocalDate;
 
 @RestController
 @RequestMapping("/orders")
@@ -40,9 +43,15 @@ public class OrderWithAddressController {
     public Flux<PageableResponse<CustomEntityModel<OrderDtoWithAddress>>> getModelsFiltered(@RequestParam(required = false) String city,
                                                                                             @RequestParam(required = false) String state,
                                                                                             @RequestParam(required = false) String country,
+                                                                                            @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate createdAtLowerBound,
+                                                                                            @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate createdAtUpperBound,
+                                                                                            @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate updatedAtLowerBound,
+                                                                                            @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate updatedAtUpperBound,
                                                                                             @Valid @RequestBody PageableBody pageableBody,
                                                                                             ServerWebExchange exchange) {
-        return orderWithAddressService.getModelsFilteredAdmin(city, state, country, pageableBody, requestsUtils.extractAuthUser(exchange))
+        return orderWithAddressService.getModelsFilteredAdmin(city, state, country,
+                        createdAtLowerBound, createdAtUpperBound, updatedAtLowerBound, updatedAtUpperBound,
+                        pageableBody, requestsUtils.extractAuthUser(exchange))
                 .flatMapSequential(m -> orderWithAddressReactiveResponseBuilder.toModelPageable(m, OrderWithAddressController.class));
     }
 
@@ -51,10 +60,16 @@ public class OrderWithAddressController {
     public Flux<PageableResponse<CustomEntityModel<OrderDtoWithAddress>>> getModelsFilteredUser(@RequestParam(required = false) String city,
                                                                                                 @RequestParam(required = false) String state,
                                                                                                 @RequestParam(required = false) String country,
+                                                                                                @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate createdAtLowerBound,
+                                                                                                @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate createdAtUpperBound,
+                                                                                                @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate updatedAtLowerBound,
+                                                                                                @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate updatedAtUpperBound,
                                                                                                 @PathVariable Long userId,
                                                                                                 @Valid @RequestBody PageableBody pageableBody,
                                                                                                 ServerWebExchange exchange) {
-        return orderWithAddressService.getModelsFilteredUser(city, state, country, pageableBody, userId, requestsUtils.extractAuthUser(exchange))
+        return orderWithAddressService.getModelsFilteredUser(city, state, country,
+                        createdAtLowerBound, createdAtUpperBound, updatedAtLowerBound, updatedAtUpperBound,
+                        pageableBody, userId, requestsUtils.extractAuthUser(exchange))
                 .flatMapSequential(m -> orderWithAddressReactiveResponseBuilder.toModelPageable(m, OrderWithAddressController.class));
     }
 }

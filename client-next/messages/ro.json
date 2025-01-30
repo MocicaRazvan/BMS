@@ -834,6 +834,10 @@
         "gettingMore": "Se obțin mai multe elemente...",
         "search": "Caută după titlu..."
       },
+      "CreationFilterTexts": {
+        "createdAtLabel": "Filtrați după data creării",
+        "updatedAtLabel": "Filtrați după data actualizării"
+      },
       "UseApprovedFilterTexts": {
         "approved": "Aprobate",
         "notApproved": "Neaprobate",
@@ -1168,7 +1172,7 @@
           "orders": "comenzi",
           "plans": "planuri"
         },
-        "countLabel": "10*Numărul de {type}",
+        "countLabel": "Numărul de {type}",
         "totalAmountLabel": "Suma totală pentru {type}",
         "bothLabel": "Ambele",
         "averageTotalAmountLabel": "Suma medie petntru {type}",
@@ -1187,13 +1191,21 @@
           "totalAmount": "Suma totală"
         }
       },
+      "DownloadChartButton": {
+        "downloadChart": "Descarcă graficul"
+      },
+      "TopChartWrapperTexts": {
+        "periodLabel": "Perioadă",
+        "topLabel": "Top",
+        "noResults": "Nu au fost găsite rezultate conform criteriilor de căutare!"
+      },
       "TopUsersTexts": {
         "periodLabel": "Perioadă",
         "topLabel": "Top",
         "noResults": "Nu au fost găsite rezultate conform criteriilor de căutare!",
         "title": "Top utilizatori",
         "userCardTexts": {
-          "userAntent": "Utilizator",
+          "userAntent": "Utilizator: ",
           "totalAmount": "Suma totală",
           "topBuyer": "Cumpărător de top: ",
           "orders": "Comenzi",
@@ -1207,6 +1219,20 @@
         "userAmountPerOderChartTexts": {
           "amountPerOrder": "Suma pe comandă",
           "meanAmountPerOrder": "Media pentru top: "
+        }
+      },
+      "TopPlansTexts": {
+        "title": "Top planuri",
+        "planCardTexts": {
+          "planAntet": "Plan: ",
+          "topPlan": "Top plan: ",
+          "dietType": "Tip dietă",
+          "numberOfPurchases": "Numărul de cumpărări",
+          "meanNumberOfPurchases": "Media pentru top: ",
+          "ratioLabel": "Raportul de cumpărări",
+          "rankLabel": "Clasament",
+          "ordersCount": "În comenzi",
+          "madeBy": "Creat de"
         }
       }
     },
@@ -1412,6 +1438,7 @@
         "compare": "Compară",
         "cancel": "Anulează",
         "update": "Actualizează",
+        "noRangeSelected": "Niciun interval selectat",
         "presets": {
           "today": "Astăzi",
           "yesterday": "Ieri",
@@ -1423,6 +1450,10 @@
           "thisMonth": "Luna aceasta",
           "lastMonth": "Luna trecută",
           "pastYear": "Ultimul an"
+        },
+        "none": {
+          "false": "Fă intervalul inactiv",
+          "true": "Fă intervalul activ"
         }
       }
     },

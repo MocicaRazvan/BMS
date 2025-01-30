@@ -37,6 +37,7 @@ import org.springframework.transaction.reactive.TransactionalOperator;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDate;
 import java.util.List;
 
 
@@ -144,13 +145,21 @@ public class PostServiceImpl extends ApprovedServiceImpl<Post, PostBody, PostRes
 
 
     @Override
-    public Flux<PageableResponse<ResponseWithUserDto<PostResponse>>> getPostsFilteredWithUser(String title, PageableBody pageableBody, String userId, Boolean approved, List<String> tags, Boolean liked, Boolean admin) {
+    public Flux<PageableResponse<ResponseWithUserDto<PostResponse>>> getPostsFilteredWithUser(String title, PageableBody pageableBody, String userId,
+                                                                                              Boolean approved, List<String> tags, Boolean liked, Boolean admin, LocalDate createdAtLowerBound, LocalDate createdAtUpperBound,
+                                                                                              LocalDate updatedAtLowerBound, LocalDate updatedAtUpperBound) {
 
-        return getPostsFiltered(title, pageableBody, userId, approved, tags, liked, admin).flatMapSequential(this::getPageableWithUser);
+        return getPostsFiltered(title, pageableBody, userId, approved, tags, liked, admin,
+                createdAtLowerBound, createdAtUpperBound, updatedAtLowerBound, updatedAtUpperBound
+        ).flatMapSequential(this::getPageableWithUser);
     }
 
     @Override
-    public Flux<PageableResponse<PostResponse>> getPostsFiltered(String title, PageableBody pageableBody, String userId, Boolean approved, List<String> tags, Boolean liked, Boolean admin) {
+    public Flux<PageableResponse<PostResponse>> getPostsFiltered(String title, PageableBody pageableBody, String userId, Boolean approved,
+                                                                 List<String> tags, Boolean liked, Boolean admin,
+                                                                 LocalDate createdAtLowerBound, LocalDate createdAtUpperBound,
+                                                                 LocalDate updatedAtLowerBound, LocalDate updatedAtUpperBound
+    ) {
         final String finalTitle = title == null ? "" : title;
         final Long likedUserId = (liked != null && liked) ? Long.valueOf(userId) : null;
 
@@ -158,16 +167,18 @@ public class PostServiceImpl extends ApprovedServiceImpl<Post, PostBody, PostRes
         return protectRoute(approvedNotNull, pageableBody, userId)
                 .flatMapMany(
                         pr ->
-                                self.getPostFilteredBase(finalTitle, approved, tags, likedUserId, admin, pr)
+                                self.getPostFilteredBase(finalTitle, approved, tags, likedUserId, admin, createdAtLowerBound, createdAtUpperBound, updatedAtLowerBound, updatedAtUpperBound, pr)
                 );
     }
 
     @Override
-    public Flux<PageableResponse<PostResponse>> getModelsTrainer(String title, Long trainerId, PageableBody pageableBody, String userId, Boolean approved, List<String> tags) {
+    public Flux<PageableResponse<PostResponse>> getModelsTrainer(String title, Long trainerId, PageableBody pageableBody, String userId, Boolean approved, List<String> tags,
+                                                                 LocalDate createdAtLowerBound, LocalDate createdAtUpperBound,
+                                                                 LocalDate updatedAtLowerBound, LocalDate updatedAtUpperBound) {
         String newTitle = title == null ? "" : title.trim();
         return getModelsAuthor(trainerId, pageableBody, userId, pr ->
 
-                self.getPostFilteredTrainerBase(newTitle, approved, tags, trainerId, pr)
+                self.getPostFilteredTrainerBase(newTitle, approved, tags, trainerId, createdAtLowerBound, createdAtUpperBound, updatedAtLowerBound, updatedAtUpperBound, pr)
 
 
         );
@@ -259,22 +270,33 @@ public class PostServiceImpl extends ApprovedServiceImpl<Post, PostBody, PostRes
 
         @RedisReactiveApprovedCache(key = CACHE_KEY_PATH, idPath = "content.id", approvedArgumentPath = "#approved", forWhom = "#admin?0:-1")
         public Flux<PageableResponse<PostResponse>> getPostFilteredBase(String finalTitle,
-                                                                        Boolean approved, List<String> tags, Long likedUserId, Boolean admin, PageRequest pr) {
+                                                                        Boolean approved, List<String> tags, Long likedUserId, Boolean admin,
+                                                                        LocalDate createdAtLowerBound, LocalDate createdAtUpperBound,
+                                                                        LocalDate updatedAtLowerBound, LocalDate updatedAtUpperBound,
+                                                                        PageRequest pr) {
             return
                     pageableUtils.createPageableResponse(
-                            postExtendedRepository.getPostsFiltered(finalTitle, approved, tags, likedUserId, pr)
+                            postExtendedRepository.getPostsFiltered(finalTitle, approved, tags, likedUserId, createdAtLowerBound, createdAtUpperBound, updatedAtLowerBound, updatedAtUpperBound, pr)
                                     .map(modelMapper::fromModelToResponse),
-                            postExtendedRepository.countPostsFiltered(finalTitle, approved, tags, likedUserId)
+                            postExtendedRepository.countPostsFiltered(finalTitle, approved, tags,
+                                    createdAtLowerBound, createdAtUpperBound, updatedAtLowerBound, updatedAtUpperBound,
+                                    likedUserId)
                             , pr
                     );
         }
 
         @RedisReactiveApprovedCache(key = CACHE_KEY_PATH, idPath = "content.id", approvedArgumentPath = "#approved", forWhom = "#trainerId")
         public Flux<PageableResponse<PostResponse>> getPostFilteredTrainerBase(String newTitle,
-                                                                               Boolean approved, List<String> tags, Long trainerId, PageRequest pr) {
+                                                                               Boolean approved, List<String> tags, Long trainerId,
+                                                                               LocalDate createdAtLowerBound, LocalDate createdAtUpperBound,
+                                                                               LocalDate updatedAtLowerBound, LocalDate updatedAtUpperBound,
+                                                                               PageRequest pr) {
             return pageableUtils.createPageableResponse(
-                    postExtendedRepository.getPostsFilteredTrainer(newTitle, approved, tags, trainerId, pr).map(modelMapper::fromModelToResponse),
-                    postExtendedRepository.countPostsFilteredTrainer(newTitle, approved, trainerId, tags),
+                    postExtendedRepository.getPostsFilteredTrainer(newTitle, approved, tags, trainerId,
+                            createdAtLowerBound, createdAtUpperBound, updatedAtLowerBound, updatedAtUpperBound,
+                            pr).map(modelMapper::fromModelToResponse),
+                    postExtendedRepository.countPostsFilteredTrainer(newTitle, approved, trainerId, tags,
+                            createdAtLowerBound, createdAtUpperBound, updatedAtLowerBound, updatedAtUpperBound),
                     pr);
         }
 

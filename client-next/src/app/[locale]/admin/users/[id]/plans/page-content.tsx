@@ -11,9 +11,13 @@ import { Suspense } from "react";
 import PlansTable from "@/components/table/plans-table";
 import { useSidebarToggle } from "@/context/sidebar-toggle";
 import useClientNotFound from "@/hoooks/useClientNotFound";
+import { Separator } from "@/components/ui/separator";
+import TopPlans from "@/components/charts/top-plans";
+import { Locale } from "@/navigation";
 
 interface Props extends UserPlansAdminPageTexts, WithUser, UseListProps {
   id: string;
+  locale: Locale;
 }
 
 export default function UserPlansAdminPageContent({
@@ -26,6 +30,8 @@ export default function UserPlansAdminPageContent({
   path,
   sortingOptions,
   menuTexts,
+  topPlansTexts,
+  locale,
 }: Props) {
   const { isOpen } = useSidebarToggle();
   const { user, messages, error, isFinished } = useGetUser(id);
@@ -64,6 +70,14 @@ export default function UserPlansAdminPageContent({
                   isSidebarOpen={isOpen}
                   mainDashboard={true}
                 />
+                <Separator className="mt-2" />
+                <div className=" my-5 h-full w-full">
+                  <TopPlans
+                    texts={topPlansTexts}
+                    locale={locale}
+                    path={`/orders/trainer/topPlans/${id}`}
+                  />
+                </div>
               </div>
             </Suspense>
           </>

@@ -46,6 +46,7 @@ import org.springframework.transaction.reactive.TransactionalOperator;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -83,47 +84,73 @@ public class PlanServiceImpl
     }
 
     @Override
-    public Flux<PageableResponse<ResponseWithUserDto<PlanResponse>>> getPlansFilteredWithUser(String title, Boolean approved, Boolean display, DietType type, ObjectiveType objective, List<Long> excludeIds, PageableBody pageableBody, String userId, Boolean admin) {
-        return getPlansFiltered(title, approved, display, type, objective, excludeIds, pageableBody, userId, admin)
+    public Flux<PageableResponse<ResponseWithUserDto<PlanResponse>>> getPlansFilteredWithUser(String title, Boolean approved, Boolean display, DietType type, ObjectiveType objective, List<Long> excludeIds,
+                                                                                              LocalDate createdAtLowerBound, LocalDate createdAtUpperBound,
+                                                                                              LocalDate updatedAtLowerBound, LocalDate updatedAtUpperBound,
+                                                                                              PageableBody pageableBody, String userId, Boolean admin) {
+        return getPlansFiltered(title, approved, display, type, objective, excludeIds,
+                createdAtLowerBound, createdAtUpperBound, updatedAtLowerBound, updatedAtUpperBound,
+                pageableBody, userId, admin)
                 .flatMapSequential(this::getPageableWithUser);
     }
 
     @Override
-    public Flux<PageableResponse<ResponseWithUserDto<PlanResponse>>> getPlansFilteredWithUserByIds(String title, DietType type, ObjectiveType objective, PageableBody pageableBody, List<Long> ids, String userId) {
+    public Flux<PageableResponse<ResponseWithUserDto<PlanResponse>>> getPlansFilteredWithUserByIds(String title, DietType type, ObjectiveType objective, LocalDate createdAtLowerBound, LocalDate createdAtUpperBound,
+                                                                                                   LocalDate updatedAtLowerBound, LocalDate updatedAtUpperBound, PageableBody pageableBody, List<Long> ids, String userId) {
 
-        return self.getPlansFilteredWithUserByIdsBase(title, type, objective, pageableBody, ids, allowedSortingFields)
+        return self.getPlansFilteredWithUserByIdsBase(title, type, objective,
+                        createdAtLowerBound, createdAtUpperBound, updatedAtLowerBound, updatedAtUpperBound,
+                        pageableBody, ids, allowedSortingFields)
                 .flatMapSequential(this::getPageableWithUser);
     }
 
     @Override
-    public Flux<PageableResponse<PlanResponse>> getPlansFiltered(String title, Boolean approved, Boolean display, DietType type, ObjectiveType objective, List<Long> excludeIds, PageableBody pageableBody, String userId, Boolean admin) {
+    public Flux<PageableResponse<PlanResponse>> getPlansFiltered(String title, Boolean approved, Boolean display, DietType type, ObjectiveType objective, List<Long> excludeIds, LocalDate createdAtLowerBound, LocalDate createdAtUpperBound,
+                                                                 LocalDate updatedAtLowerBound, LocalDate updatedAtUpperBound, PageableBody pageableBody, String userId, Boolean admin) {
         final boolean approvedNotNull = approved != null;
 
         return protectRoute(approvedNotNull, pageableBody, userId)
-                .flatMapMany(pr -> self.getPlansFilteredBase(title, approved, display, type, objective, excludeIds, pr, admin));
+                .flatMapMany(pr -> self.getPlansFilteredBase(title, approved, display, type, objective, excludeIds,
+                        createdAtLowerBound, createdAtUpperBound, updatedAtLowerBound, updatedAtUpperBound,
+                        pr, admin));
     }
 
     @Override
-    public Flux<PageableResponse<ResponseWithEntityCount<PlanResponse>>> getPlansFilteredWithCount(String title, Boolean approved, Boolean display, DietType type, ObjectiveType objective, List<Long> excludeIds, PageableBody pageableBody, String userId, Boolean admin) {
+    public Flux<PageableResponse<ResponseWithEntityCount<PlanResponse>>> getPlansFilteredWithCount(String title, Boolean approved, Boolean display, DietType type, ObjectiveType objective, List<Long> excludeIds,
+                                                                                                   LocalDate createdAtLowerBound, LocalDate createdAtUpperBound,
+                                                                                                   LocalDate updatedAtLowerBound, LocalDate updatedAtUpperBound,
+                                                                                                   PageableBody pageableBody, String userId, Boolean admin) {
 
-        return getPlansFiltered(title, approved, display, type, objective, excludeIds, pageableBody, userId, admin)
+        return getPlansFiltered(title, approved, display, type, objective, excludeIds,
+                createdAtLowerBound, createdAtUpperBound, updatedAtLowerBound, updatedAtUpperBound,
+                pageableBody, userId, admin)
                 .flatMapSequential(pr -> toResponseWithCount(userId, orderClient, pr));
 
 
     }
 
     @Override
-    public Flux<PageableResponse<PlanResponse>> getPlansFilteredTrainer(String title, Boolean approved, Boolean display, DietType type, ObjectiveType objective, PageableBody pageableBody, String userId, Long trainerId) {
+    public Flux<PageableResponse<PlanResponse>> getPlansFilteredTrainer(String title, Boolean approved, Boolean display, DietType type, ObjectiveType objective,
+                                                                        LocalDate createdAtLowerBound, LocalDate createdAtUpperBound,
+                                                                        LocalDate updatedAtLowerBound, LocalDate updatedAtUpperBound,
+                                                                        PageableBody pageableBody, String userId, Long trainerId) {
 
         return getModelsAuthor(trainerId, pageableBody, userId, pr ->
-                self.getPlansFilteredTrainerBase(title, approved, display, type, objective, trainerId, pr)
+                self.getPlansFilteredTrainerBase(title, approved, display, type, objective, trainerId,
+                        createdAtLowerBound, createdAtUpperBound, updatedAtLowerBound, updatedAtUpperBound,
+                        pr)
         );
     }
 
     @Override
-    public Flux<PageableResponse<ResponseWithEntityCount<PlanResponse>>> getPlansFilteredTrainerWithCount(String title, Boolean approved, Boolean display, DietType type, ObjectiveType objective, PageableBody pageableBody, String userId, Long trainerId) {
+    public Flux<PageableResponse<ResponseWithEntityCount<PlanResponse>>> getPlansFilteredTrainerWithCount(String title, Boolean approved, Boolean display, DietType type, ObjectiveType objective,
+                                                                                                          LocalDate createdAtLowerBound, LocalDate createdAtUpperBound,
+                                                                                                          LocalDate updatedAtLowerBound, LocalDate updatedAtUpperBound,
+                                                                                                          PageableBody pageableBody, String userId, Long trainerId) {
         return
-                getPlansFilteredTrainer(title, approved, display, type, objective, pageableBody, userId, trainerId)
+                getPlansFilteredTrainer(title, approved, display, type, objective,
+                        createdAtLowerBound, createdAtUpperBound, updatedAtLowerBound, updatedAtUpperBound,
+                        pageableBody, userId, trainerId)
                         .flatMapSequential(pr -> toResponseWithCount(userId, orderClient, pr));
     }
 
@@ -436,26 +463,38 @@ public class PlanServiceImpl
 
 
         @RedisReactiveApprovedCache(key = CACHE_KEY_PATH, idPath = "content.id", approvedArgumentPath = "#approved", forWhom = "#admin?0:-1")
-        public Flux<PageableResponse<PlanResponse>> getPlansFilteredBase(String title, Boolean approved, Boolean display, DietType type, ObjectiveType objective, List<Long> excludeIds, PageRequest pr, Boolean admin) {
+        public Flux<PageableResponse<PlanResponse>> getPlansFilteredBase(String title, Boolean approved, Boolean display, DietType type, ObjectiveType objective, List<Long> excludeIds, LocalDate createdAtLowerBound, LocalDate createdAtUpperBound,
+                                                                         LocalDate updatedAtLowerBound, LocalDate updatedAtUpperBound, PageRequest pr, Boolean admin) {
 
             return
                     pageableUtils.createPageableResponse(
-                            extendedPlanRepository.getPlansFiltered(title, approved, display, type, objective, pr, excludeIds).map(modelMapper::fromModelToResponse),
-                            extendedPlanRepository.countPlansFiltered(title, approved, display, type, objective, excludeIds), pr
+                            extendedPlanRepository.getPlansFiltered(title, approved, display, type, objective, pr, excludeIds,
+                                    createdAtLowerBound, createdAtUpperBound, updatedAtLowerBound, updatedAtUpperBound
+                            ).map(modelMapper::fromModelToResponse),
+                            extendedPlanRepository.countPlansFiltered(title, approved, display, type, objective, excludeIds,
+                                    createdAtLowerBound, createdAtUpperBound, updatedAtLowerBound, updatedAtUpperBound
+                            ), pr
                     )
                     ;
         }
 
         // independent of approved
         @RedisReactiveCache(key = CACHE_KEY_PATH, idPath = "content.id")
-        public Flux<PageableResponse<PlanResponse>> getPlansFilteredWithUserByIdsBase(String title, DietType type, ObjectiveType objective, PageableBody pageableBody, List<Long> ids, List<String> allowedSortingFields) {
+        public Flux<PageableResponse<PlanResponse>> getPlansFilteredWithUserByIdsBase(String title, DietType type, ObjectiveType objective,
+                                                                                      LocalDate createdAtLowerBound, LocalDate createdAtUpperBound,
+                                                                                      LocalDate updatedAtLowerBound, LocalDate updatedAtUpperBound,
+                                                                                      PageableBody pageableBody, List<Long> ids, List<String> allowedSortingFields) {
             return pageableUtils.isSortingCriteriaValid(pageableBody.getSortingCriteria(), allowedSortingFields)
                     .then(pageableUtils.createPageRequest(pageableBody))
                     .flatMapMany(
                             pr ->
                                     pageableUtils.createPageableResponse(
-                                            extendedPlanRepository.getPlansFilteredByIds(title, null, null, type, objective, ids, pr).map(modelMapper::fromModelToResponse),
-                                            extendedPlanRepository.countPlansFilteredByIds(title, null, null, type, objective, ids), pr
+                                            extendedPlanRepository.getPlansFilteredByIds(title, null, null, type, objective, ids,
+                                                    createdAtLowerBound, createdAtUpperBound, updatedAtLowerBound, updatedAtUpperBound,
+                                                    pr).map(modelMapper::fromModelToResponse),
+                                            extendedPlanRepository.countPlansFilteredByIds(title, null, null, type, objective, ids,
+                                                    createdAtLowerBound, createdAtUpperBound, updatedAtLowerBound, updatedAtUpperBound
+                                            ), pr
                                     )
 
                     );
@@ -463,13 +502,18 @@ public class PlanServiceImpl
 
         @RedisReactiveApprovedCache(key = CACHE_KEY_PATH, idPath = "content.id", approvedArgumentPath = "#approved", forWhom = "#trainerId")
         public Flux<PageableResponse<PlanResponse>> getPlansFilteredTrainerBase(String title, Boolean approved, Boolean display, DietType type, ObjectiveType objective, Long trainerId,
-                                                                                PageRequest pr
+                                                                                LocalDate createdAtLowerBound, LocalDate createdAtUpperBound,
+                                                                                LocalDate updatedAtLowerBound, LocalDate updatedAtUpperBound, PageRequest pr
         ) {
 
             return
                     pageableUtils.createPageableResponse(
-                            extendedPlanRepository.getPlansFilteredTrainer(title, approved, display, type, objective, trainerId, pr).map(modelMapper::fromModelToResponse),
-                            extendedPlanRepository.countPlansFilteredTrainer(title, approved, display, trainerId, type, objective), pr
+                            extendedPlanRepository.getPlansFilteredTrainer(title, approved, display, type, objective, trainerId,
+                                    createdAtLowerBound, createdAtUpperBound, updatedAtLowerBound, updatedAtUpperBound,
+                                    pr).map(modelMapper::fromModelToResponse),
+                            extendedPlanRepository.countPlansFilteredTrainer(title, approved, display, trainerId, type, objective,
+                                    createdAtLowerBound, createdAtUpperBound, updatedAtLowerBound, updatedAtUpperBound
+                            ), pr
                     );
 
         }

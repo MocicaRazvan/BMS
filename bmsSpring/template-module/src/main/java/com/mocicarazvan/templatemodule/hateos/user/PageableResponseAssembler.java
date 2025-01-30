@@ -45,7 +45,7 @@ public abstract class PageableResponseAssembler<T, D extends ReactiveRepresentat
                         .page(0)
                         .size(10)
                         .sortingCriteria(Map.of("email", "asc"))
-                        .build(), "raz", Set.of(Role.ROLE_USER, Role.ROLE_TRAINER), Set.of(AuthProvider.GOOGLE), true, false)).withSelfRel());
+                        .build(), "raz", Set.of(Role.ROLE_USER, Role.ROLE_TRAINER), Set.of(AuthProvider.GOOGLE), true, false, null, null, null, null)).withSelfRel());
         return toModel(pageableResponse, links);
     }
 

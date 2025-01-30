@@ -32,7 +32,7 @@ export function Menu({ isOpen, texts, mappingKey, authUser }: MenuProps) {
   const menuList = mappingFunctions[mappingKey](authUser, pathname, texts);
 
   return (
-    <ScrollArea className="[&>div>div[style]]:!block">
+    <ScrollArea className="[&>div>div[style]]:!block ">
       <nav className="pt-8 h-full w-full">
         <ul className="flex flex-col min-h-[calc(100vh-48px-36px-16px-32px-32px)] lg:min-h-[calc(100vh-32px-40px-32px-32px)] items-start space-y-1 px-2">
           {menuList.map(({ groupLabel, menus }, index) => (

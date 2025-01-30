@@ -13,8 +13,8 @@ public class OrdersWithAddressReactiveLinkBuilder implements ReactiveLinkBuilder
     public List<WebFluxLinkBuilder.WebFluxLink> createModelLinks(OrderDtoWithAddress orderDtoWithAddress, Class<OrderWithAddressController> c) {
         List<WebFluxLinkBuilder.WebFluxLink> links = new ArrayList<>();
         links.add(WebFluxLinkBuilder.linkTo(WebFluxLinkBuilder.methodOn(c).getModelById(orderDtoWithAddress.getOrder().getId(), null)).withRel("getModelById"));
-        links.add(WebFluxLinkBuilder.linkTo(WebFluxLinkBuilder.methodOn(c).getModelsFiltered(null, null, null, null, null)).withRel("getModelsFiltered"));
-        links.add(WebFluxLinkBuilder.linkTo(WebFluxLinkBuilder.methodOn(c).getModelsFilteredUser(null, null, null, null, null, null)).withRel("getModelsFilteredUser"));
+        links.add(WebFluxLinkBuilder.linkTo(WebFluxLinkBuilder.methodOn(c).getModelsFiltered(null, null, null, null, null, null, null, null, null)).withRel("getModelsFiltered"));
+        links.add(WebFluxLinkBuilder.linkTo(WebFluxLinkBuilder.methodOn(c).getModelsFilteredUser(null, null, null, null, null, null, null, null, null, null)).withRel("getModelsFilteredUser"));
         return links;
     }
 }

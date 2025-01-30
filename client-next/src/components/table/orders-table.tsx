@@ -25,6 +25,9 @@ import { Button } from "@/components/ui/button";
 import { MoreHorizontal } from "lucide-react";
 import LoadingSpinner from "@/components/common/loading-spinner";
 import useClientNotFound from "@/hoooks/useClientNotFound";
+import CreationFilter, {
+  CreationFilterTexts,
+} from "@/components/list/creation-filter";
 
 export interface OrderTableColumnsTexts {
   id: string;
@@ -40,6 +43,7 @@ export interface OrderTableTexts {
   orderTableColumnsTexts: OrderTableColumnsTexts;
   search: string;
   searchKeyLabel: Record<(typeof fieldKeys)[number], string>;
+  creationFilterTexts: CreationFilterTexts;
 }
 
 type Props = ExtraTableProps & OrderTableTexts & UseListProps & WithUser;
@@ -60,6 +64,7 @@ export default function OrdersTable({
   sizeOptions,
   authUser,
   searchKeyLabel,
+  creationFilterTexts,
 }: Props) {
   const router = useRouter();
   const isAdmin = authUser?.role === "ROLE_ADMIN";
@@ -137,6 +142,7 @@ export default function OrdersTable({
     updateFilterValue,
     updateFilterValueFromString,
     filterValue,
+    updateCreatedAtRange,
   } = useList<CustomEntityModel<OrderDtoWithAddress>>({
     path,
     sizeOptions,
@@ -144,8 +150,6 @@ export default function OrdersTable({
     sortingOptions,
     extraUpdateSearchParams: updateSearchKeyParams,
   });
-
-  console.log("TEXTS", orderTableColumnsTexts);
 
   const data: OrderDtoWithAddress[] = useMemo(
     () => items.map(({ content }) => content),
@@ -340,6 +344,13 @@ export default function OrdersTable({
             <div className="order-[2]">
               {searchKeyCriteria(resetCurrentPage)}
             </div>
+          }
+          rangeDateFilter={
+            <CreationFilter
+              {...creationFilterTexts}
+              updateCreatedAtRange={updateCreatedAtRange}
+              hideUpdatedAt={true}
+            />
           }
         />
       </Suspense>

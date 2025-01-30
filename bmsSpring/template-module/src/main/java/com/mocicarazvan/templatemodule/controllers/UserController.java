@@ -9,6 +9,7 @@ import com.mocicarazvan.templatemodule.enums.AuthProvider;
 import com.mocicarazvan.templatemodule.enums.Role;
 import com.mocicarazvan.templatemodule.hateos.CustomEntityModel;
 import jakarta.validation.Valid;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -18,6 +19,7 @@ import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 
@@ -30,7 +32,10 @@ public interface UserController {
     Flux<PageableResponse<CustomEntityModel<UserDto>>> getAllUsers(
             @Valid @RequestBody PageableBody pageableBody, @RequestParam(required = false) String email,
             @RequestParam(required = false) Set<Role> roles, @RequestParam(required = false) Set<AuthProvider> providers, @RequestParam(required = false) Boolean emailVerified,
-            @RequestParam(name = "admin", required = false, defaultValue = "false") Boolean admin
+            @RequestParam(name = "admin", required = false, defaultValue = "false") Boolean admin, @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate createdAtLowerBound,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate createdAtUpperBound,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate updatedAtLowerBound,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate updatedAtUpperBound
 
     );
 

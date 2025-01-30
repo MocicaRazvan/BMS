@@ -55,14 +55,22 @@ export interface TotalAmountCountOrdersTexts {
   hideTrendLineLabel: string;
   trendLineLabel: string;
 }
+type ExtendedData = TotalAmountCountOrdersData &
+  Partial<Record<string, string | number>>;
 
 interface Props extends TotalAmountCountOrdersTexts {
-  data: TotalAmountCountOrdersData[];
+  data: TotalAmountCountOrdersData[] | ExtendedData[];
   dataAvailable: boolean;
   showCount?: boolean;
   showTotalAmount?: boolean;
   showTrendLine?: boolean;
   chartName: string;
+  extraChartConfig?: ChartConfig;
+  mapCountLabel?: (showCount: boolean, showTotalAmount: boolean) => string;
+  mapTotalAmountLabel?: (
+    showCount: boolean,
+    showTotalAmount: boolean,
+  ) => string;
 }
 
 export function TotalAmountCountOrders({
@@ -75,6 +83,9 @@ export function TotalAmountCountOrders({
   showTrendLine = true,
   trendLineLabel,
   chartName,
+  extraChartConfig,
+  mapCountLabel = (showCount, showTotalAmount) => "count",
+  mapTotalAmountLabel = (showCount, showTotalAmount) => "totalAmount",
 }: Props) {
   const chartConfig = {
     count: {
@@ -85,6 +96,7 @@ export function TotalAmountCountOrders({
       label: totalAmountLabel,
       color: "hsl(var(--chart-6))",
     },
+    ...(extraChartConfig && extraChartConfig),
   } satisfies ChartConfig;
 
   const debounceDataAvailable = useDebounce(dataAvailable, 225);
@@ -193,9 +205,17 @@ export function TotalAmountCountOrders({
               cursor={false}
               content={<ChartTooltipContent indicator="dot" />}
             />
-            {showCount && <Bar dataKey="count" fill="var(--color-count)" />}
+            {showCount && (
+              <Bar
+                dataKey={mapCountLabel(showCount, showTotalAmount)}
+                fill="var(--color-count)"
+              />
+            )}
             {showTotalAmount && (
-              <Bar dataKey="totalAmount" fill="var(--color-totalAmount)" />
+              <Bar
+                dataKey={mapTotalAmountLabel(showCount, showTotalAmount)}
+                fill="var(--color-totalAmount)"
+              />
             )}
             <ChartLegend content={<ChartLegendContent />} />
           </BarChart>
@@ -260,7 +280,7 @@ export function TotalAmountCountOrders({
             />
             {showCount && (
               <Area
-                dataKey="count"
+                dataKey={mapCountLabel(showCount, showTotalAmount)}
                 type="monotoneX"
                 fill="url(#fillCount)"
                 stroke="var(--color-count)"
@@ -269,7 +289,7 @@ export function TotalAmountCountOrders({
             )}
             {showTotalAmount && (
               <Area
-                dataKey="totalAmount"
+                dataKey={mapTotalAmountLabel(showCount, showTotalAmount)}
                 type="monotoneX"
                 fill="url(#fillTotalAmount)"
                 stroke="var(--color-totalAmount)"

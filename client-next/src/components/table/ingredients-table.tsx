@@ -38,6 +38,9 @@ import ToggleDisplayIngredient from "@/components/dialogs/ingredients/ingredient
 import AlertDialogDeleteIngredient from "@/components/dialogs/ingredients/delete-ingredient";
 import useClientNotFound from "@/hoooks/useClientNotFound";
 import OverflowTextTooltip from "@/components/common/overflow-text-tooltip";
+import CreationFilter, {
+  CreationFilterTexts,
+} from "@/components/list/creation-filter";
 
 export interface IngredientTableColumnTexts {
   id: string;
@@ -68,6 +71,7 @@ export interface IngredientTableTexts {
   displayFilterTexts: UseBinaryTexts;
   dietDropdownTexts: UseFilterDropdownTexts;
   search: string;
+  creationFilterTexts: CreationFilterTexts;
 }
 
 export type IngredientTableProps = ExtraTableProps &
@@ -94,6 +98,7 @@ export default function IngredientsTable({
   displayFilterTexts,
   dietDropdownTexts,
   search,
+  creationFilterTexts,
 }: IngredientTableProps) {
   const router = useRouter();
   const isAdmin = authUser?.role === "ROLE_ADMIN";
@@ -137,6 +142,8 @@ export default function IngredientsTable({
     updateFilterValue,
     clearFilterValue,
     resetCurrentPage,
+    updateCreatedAtRange,
+    updateUpdatedAtRange,
   } = useList<
     ResponseWithEntityCount<
       CustomEntityModel<IngredientNutritionalFactResponse>
@@ -564,6 +571,13 @@ export default function IngredientsTable({
               </div>
             </div>
           }
+          // rangeDateFilter={
+          //   <CreationFilter
+          //     {...creationFilterTexts}
+          //     updateCreatedAtRange={updateCreatedAtRange}
+          //     updateUpdatedAtRange={updateUpdatedAtRange}
+          //   />
+          // }
         />
       </Suspense>
     </div>

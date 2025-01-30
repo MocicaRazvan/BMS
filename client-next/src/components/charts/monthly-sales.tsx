@@ -13,7 +13,6 @@ import {
   CountTotalAmountRadioOptionsType,
   DropDownMenuCountTotalAmountSelect,
   TotalAmountCountOrders,
-  TotalAmountCountOrdersData,
   TotalAmountCountOrdersTexts,
   TotalAmountOrdersSingleBarChart,
   TrendLineButton,
@@ -69,10 +68,11 @@ export default function MonthlySales({
     },
   });
 
-  const formattedData: TotalAmountCountOrdersData[] = useMemo(
+  const formattedData = useMemo(
     () =>
       messages.map((i) => ({
-        count: i.count * 10,
+        count: i.count,
+        count10: 10 * i.count,
         totalAmount: Math.floor(i.totalAmount),
         date: format(new Date(i.year, i.month - 1), "MM-yyyy"),
       })),
@@ -82,11 +82,6 @@ export default function MonthlySales({
   useEffect(() => {
     setShowTrendLine(areaRadioOption !== "both");
   }, [areaRadioOption]);
-
-  const countFormattedData = useMemo(
-    () => formattedData.map((i) => ({ ...i, count: i.count / 10 })),
-    [formattedData],
-  );
 
   const dateRangePicker = useMemo(
     () => (
@@ -138,12 +133,12 @@ export default function MonthlySales({
           {dateRangePicker}
           {formattedData.length > 0 && (
             <div className="mt-2 md:mt-0 flex items-center justify-start gap-4">
-              {formattedData.length > 1 && TrendLineBtn}
               <DropDownMenuCountTotalAmountSelect
                 {...totalAmountCountOrdersTexts}
                 onRadioOptionChange={setAreaRadioOption}
                 radioOption={areaRadioOption}
               />
+              {formattedData.length > 1 && TrendLineBtn}
             </div>
           )}
         </div>
@@ -157,11 +152,26 @@ export default function MonthlySales({
           }
           showTrendLine={showTrendLine}
           chartName={totalCountAmountChartName}
+          mapCountLabel={(showCount, showTotalAmount) =>
+            showTotalAmount ? "count10" : "count"
+          }
+          extraChartConfig={{
+            count10: {
+              label: "10*" + totalAmountCountOrdersTexts.countLabel,
+              color: "hsl(var(--chart-1))",
+            },
+          }}
         />
       </div>
       <Separator />
       <div>
-        {dateRangePicker}
+        <div className="flex flex-col md:flex-row items-center justify-between gap-5 md:gap-2">
+          {dateRangePicker}
+          <h2 className="text-xl font-bold tracking-tighter md:text-2xl">
+            {totalAmountCountOrdersTexts.totalAmountLabel}
+          </h2>
+          <div className="w-80" />
+        </div>
         <TotalAmountOrdersSingleBarChart
           data={formattedData}
           dataAvailable={isFinished}
@@ -171,12 +181,18 @@ export default function MonthlySales({
       </div>
       <Separator />
       <div>
-        {dateRangePicker}
+        <div className="flex flex-col md:flex-row items-center justify-between gap-5 md:gap-2">
+          {dateRangePicker}
+          <h2 className="text-xl font-bold tracking-tighter md:text-2xl">
+            {totalAmountCountOrdersTexts.countLabel}
+          </h2>
+          <div className="w-1 md:w-80" />
+        </div>
         <TotalAmountOrdersSingleBarChart
-          data={countFormattedData}
+          data={formattedData}
           dataAvailable={isFinished}
           {...totalAmountCountOrdersTexts}
-          countLabel={totalAmountCountOrdersTexts.countLabel.slice(3)}
+          countLabel={totalAmountCountOrdersTexts.countLabel}
           fieldKey={"count"}
         />
       </div>

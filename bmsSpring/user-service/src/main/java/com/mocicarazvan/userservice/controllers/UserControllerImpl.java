@@ -16,6 +16,7 @@ import com.mocicarazvan.userservice.services.UserService;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -27,6 +28,7 @@ import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 
@@ -77,9 +79,13 @@ public class UserControllerImpl implements UserController {
                                                                           @RequestParam(required = false) Set<Role> roles,
                                                                           @RequestParam(required = false) Set<AuthProvider> providers,
                                                                           @RequestParam(required = false) Boolean emailVerified,
-                                                                          @RequestParam(name = "admin", required = false, defaultValue = "false") Boolean admin
+                                                                          @RequestParam(name = "admin", required = false, defaultValue = "false") Boolean admin,
+                                                                          @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate createdAtLowerBound,
+                                                                          @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate createdAtUpperBound,
+                                                                          @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate updatedAtLowerBound,
+                                                                          @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate updatedAtUpperBound
     ) {
-        return userService.getAllUsers(pageableBody, email, roles, providers, emailVerified, admin)
+        return userService.getAllUsers(pageableBody, email, roles, providers, emailVerified, admin, createdAtLowerBound, createdAtUpperBound, updatedAtLowerBound, updatedAtUpperBound)
                 .flatMapSequential(pageableUserAssembler::toModel);
     }
 

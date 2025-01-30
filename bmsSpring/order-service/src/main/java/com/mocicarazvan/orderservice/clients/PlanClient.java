@@ -32,7 +32,9 @@ import org.springframework.web.reactive.function.client.WebClientRequestExceptio
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Component
 public class PlanClient extends ValidIdsClient<PlanResponse> {
@@ -80,7 +82,10 @@ public class PlanClient extends ValidIdsClient<PlanResponse> {
                 .onErrorResume(ThrowFallback.class, e -> Flux.empty());
     }
 
-    public Flux<PageableResponse<ResponseWithUserDtoEntity<PlanResponse>>> getPlansForUser(String title, DietType dietType, ObjectiveType objective, List<Long> ids, PageableBody pageableBody, String userId) {
+    public Flux<PageableResponse<ResponseWithUserDtoEntity<PlanResponse>>> getPlansForUser(String title, DietType dietType, ObjectiveType objective, List<Long> ids,
+                                                                                           LocalDate createdAtLowerBound, LocalDate createdAtUpperBound,
+                                                                                           LocalDate updatedAtLowerBound, LocalDate updatedAtUpperBound,
+                                                                                           PageableBody pageableBody, String userId) {
         if (serviceUrl == null) {
             return Flux.error(new IllegalArgumentException("Service url is null"));
         }
@@ -94,6 +99,10 @@ public class PlanClient extends ValidIdsClient<PlanResponse> {
                         .queryParam("type", dietType)
                         .queryParam("ids", ids)
                         .queryParam("objective", objective)
+                        .queryParamIfPresent("createdAtLowerBound", Optional.ofNullable(createdAtLowerBound))
+                        .queryParamIfPresent("createdAtUpperBound", Optional.ofNullable(createdAtUpperBound))
+                        .queryParamIfPresent("updatedAtLowerBound", Optional.ofNullable(updatedAtLowerBound))
+                        .queryParamIfPresent("updatedAtUpperBound", Optional.ofNullable(updatedAtUpperBound))
                         .build())
                 .bodyValue(pageableBody)
                 .accept(MediaType.APPLICATION_NDJSON)

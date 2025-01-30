@@ -24,6 +24,7 @@ import org.springframework.transaction.reactive.TransactionalOperator;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -84,14 +85,22 @@ public class IngredientNutritionalFactServiceImpl implements IngredientNutrition
     }
 
     @Override
-    public Flux<PageableResponse<IngredientNutritionalFactResponse>> getAllModelsFiltered(String name, Boolean display, DietType type, PageableBody pageableBody, String userId, Boolean admin) {
+    public Flux<PageableResponse<IngredientNutritionalFactResponse>> getAllModelsFiltered(String name, Boolean display, DietType type, LocalDate createdAtLowerBound, LocalDate createdAtUpperBound,
+                                                                                          LocalDate updatedAtLowerBound, LocalDate updatedAtUpperBound, PageableBody pageableBody, String userId, Boolean admin) {
 
-        return self.getAllModelsFiltered(name, display, type, pageableBody, userId, admin, allowedSortingFields);
+        return self.getAllModelsFiltered(name, display, type,
+                createdAtLowerBound, createdAtUpperBound, updatedAtLowerBound, updatedAtUpperBound,
+                pageableBody, userId, admin, allowedSortingFields);
     }
 
     @Override
-    public Flux<PageableResponse<ResponseWithEntityCount<IngredientNutritionalFactResponse>>> getAllModelsFilteredWithEntityCount(String name, Boolean display, DietType type, PageableBody pageableBody, String userId, Boolean admin) {
-        return getAllModelsFiltered(name, display, type, pageableBody, userId, admin)
+    public Flux<PageableResponse<ResponseWithEntityCount<IngredientNutritionalFactResponse>>> getAllModelsFilteredWithEntityCount(String name, Boolean display, DietType type,
+                                                                                                                                  LocalDate createdAtLowerBound, LocalDate createdAtUpperBound,
+                                                                                                                                  LocalDate updatedAtLowerBound, LocalDate updatedAtUpperBound,
+                                                                                                                                  PageableBody pageableBody, String userId, Boolean admin) {
+        return getAllModelsFiltered(name, display, type,
+                createdAtLowerBound, createdAtUpperBound, updatedAtLowerBound, updatedAtUpperBound,
+                pageableBody, userId, admin)
                 .flatMapSequential(pr -> recipeClient.getCountInParent(pr.getContent().getIngredient().getId(), userId)
                         .map(entityCount -> PageableResponse.<ResponseWithEntityCount<IngredientNutritionalFactResponse>>builder()
                                 .content(ResponseWithEntityCount.of(pr.getContent(), entityCount))
@@ -153,7 +162,10 @@ public class IngredientNutritionalFactServiceImpl implements IngredientNutrition
         }
 
         @RedisReactiveChildCache(key = CACHE_KEY_PATH, idPath = "content.ingredient.id")
-        public Flux<PageableResponse<IngredientNutritionalFactResponse>> getAllModelsFiltered(String name, Boolean display, DietType type, PageableBody pageableBody, String userId, Boolean admin,
+        public Flux<PageableResponse<IngredientNutritionalFactResponse>> getAllModelsFiltered(String name, Boolean display, DietType type,
+                                                                                              LocalDate createdAtLowerBound, LocalDate createdAtUpperBound,
+                                                                                              LocalDate updatedAtLowerBound, LocalDate updatedAtUpperBound,
+                                                                                              PageableBody pageableBody, String userId, Boolean admin,
                                                                                               List<String> allowedSortingFields
         ) {
 
@@ -161,10 +173,12 @@ public class IngredientNutritionalFactServiceImpl implements IngredientNutrition
                     .then(pageableUtilsCustom.createPageRequest(pageableBody))
                     .flatMapMany(pr ->
                             pageableUtilsCustom.createPageableResponse(
-                                    extendedIngredientNutritionalFactRepository.getModelsFiltered(name, display, type, pr).map(
+                                    extendedIngredientNutritionalFactRepository.getModelsFiltered(name, display, type,
+                                            createdAtLowerBound, createdAtUpperBound, updatedAtLowerBound, updatedAtUpperBound,
+                                            pr).map(
                                             ingredientNutritionalFactMapper::fromModelToResponse
                                     ),
-                                    extendedIngredientNutritionalFactRepository.countModelsFiltered(name, display, type, pr),
+                                    extendedIngredientNutritionalFactRepository.countModelsFiltered(name, display, type, createdAtLowerBound, createdAtUpperBound, updatedAtLowerBound, updatedAtUpperBound),
                                     pr
                             )
                     );

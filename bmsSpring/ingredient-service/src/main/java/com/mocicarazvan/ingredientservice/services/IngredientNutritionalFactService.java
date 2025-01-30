@@ -9,6 +9,7 @@ import com.mocicarazvan.templatemodule.dtos.response.ResponseWithEntityCount;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDate;
 import java.util.List;
 
 public interface IngredientNutritionalFactService {
@@ -20,9 +21,11 @@ public interface IngredientNutritionalFactService {
 
     Mono<IngredientNutritionalFactResponse> updateModel(Long id, IngredientNutritionalFactBody body, String userId);
 
-    Flux<PageableResponse<IngredientNutritionalFactResponse>> getAllModelsFiltered(String name, Boolean display, DietType type, PageableBody pageableBody, String userId, Boolean admin);
+    Flux<PageableResponse<IngredientNutritionalFactResponse>> getAllModelsFiltered(String name, Boolean display, DietType type, LocalDate createdAtLowerBound, LocalDate createdAtUpperBound,
+                                                                                   LocalDate updatedAtLowerBound, LocalDate updatedAtUpperBound, PageableBody pageableBody, String userId, Boolean admin);
 
-    Flux<PageableResponse<ResponseWithEntityCount<IngredientNutritionalFactResponse>>> getAllModelsFilteredWithEntityCount(String name, Boolean display, DietType type, PageableBody pageableBody, String userId, Boolean admin);
+    Flux<PageableResponse<ResponseWithEntityCount<IngredientNutritionalFactResponse>>> getAllModelsFilteredWithEntityCount(String name, Boolean display, DietType type, LocalDate createdAtLowerBound, LocalDate createdAtUpperBound,
+                                                                                                                           LocalDate updatedAtLowerBound, LocalDate updatedAtUpperBound, PageableBody pageableBody, String userId, Boolean admin);
 
 
     Mono<IngredientNutritionalFactResponse> createModel(IngredientNutritionalFactBody body, String userId);

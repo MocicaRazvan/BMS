@@ -18,6 +18,7 @@ import ArchiveQueueCards, {
   ArchiveQueueCardsTexts,
 } from "@/components/common/archive-queue-card";
 import { Separator } from "@/components/ui/separator";
+import TopPlans, { TopPlansTexts } from "@/components/charts/top-plans";
 
 interface Props {
   params: { locale: Locale };
@@ -32,6 +33,7 @@ export interface AdminPlansPageTexts {
   menuTexts: SidebarMenuTexts;
   archivePlansTexts: ArchiveQueueCardsTexts;
   archiveDayTexts: ArchiveQueueCardsTexts;
+  topPlansTexts: TopPlansTexts;
 }
 
 export async function generateMetadata({
@@ -51,6 +53,7 @@ export default async function AdminPlansPage({ params: { locale } }: Props) {
       title,
       menuTexts,
       archivePlansTexts,
+      topPlansTexts,
     },
     authUser,
   ] = await Promise.all([
@@ -89,6 +92,14 @@ export default async function AdminPlansPage({ params: { locale } }: Props) {
                 admin: "true",
               }}
             />
+            <Separator className="mt-2" />
+            <div className=" my-5 h-full w-full">
+              <TopPlans
+                texts={topPlansTexts}
+                locale={locale}
+                path={"/orders/admin/topPlans"}
+              />
+            </div>
             <Separator />
             <div className="space-y-5">
               <ArchiveQueueCards

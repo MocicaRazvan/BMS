@@ -20,6 +20,11 @@ export async function getDateRangePickerTexts(): Promise<DateRangePickerTexts> {
     cancel: t("cancel"),
     compare: t("compare"),
     update: t("update"),
+    none: {
+      false: t("none.false"),
+      true: t("none.true"),
+    },
+    noRangeSelected: t("noRangeSelected"),
     presets: {
       ...presets.reduce(
         (acc, cur) => ({ ...acc, [cur]: t(`presets.${cur}`) }),

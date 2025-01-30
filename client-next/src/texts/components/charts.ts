@@ -1,3 +1,4 @@
+"use server";
 import { IngredientPieChartTexts } from "@/components/charts/ingredient-macros-pie-chart";
 import { getTranslations } from "next-intl/server";
 import {
@@ -12,6 +13,9 @@ import { MonthlySalesTexts } from "@/components/charts/monthly-sales";
 import { getDateRangePickerTexts } from "@/texts/components/ui";
 import { DailySalesTexts } from "@/components/charts/daily-sales";
 import { TopUsersTexts } from "@/components/charts/top-users";
+import { getCreationFilterTexts } from "@/texts/components/list";
+import { TopChartWrapperTexts } from "@/components/charts/top-chart-wrapper";
+import { TopPlansTexts } from "@/components/charts/top-plans";
 
 export async function getIngredientPieChartTexts(): Promise<IngredientPieChartTexts> {
   const t = await getTranslations("components.charts.IngredientPieChartTexts");
@@ -89,12 +93,16 @@ export async function getTotalAmountCountOrdersTexts(
   };
 }
 export async function getGeographyChartTexts(): Promise<GeographyChartTexts> {
-  const t = await getTranslations("components.charts.GeographyChartTexts");
+  const [t, creationFilterTexts] = await Promise.all([
+    getTranslations("components.charts.GeographyChartTexts"),
+    getCreationFilterTexts(),
+  ]);
   return {
     resetLabel: t("resetLabel"),
     centerLabel: t("centerLabel"),
     zoomOutLabel: t("zoomOutLabel"),
     zoomInLabel: t("zoomInLabel"),
+    creationFilterTexts,
     selectLabels: {
       [CountrySummaryType.COUNT]: t("selectLabels.count"),
       [CountrySummaryType.TOTAL_AMOUNT]: t("selectLabels.totalAmount"),
@@ -126,15 +134,26 @@ export async function getDailySalesTexts(
   };
 }
 
-export async function getTopUsersTexts(): Promise<TopUsersTexts> {
+export async function getTopChartWrapperTexts(): Promise<TopChartWrapperTexts> {
   const [t, dateRangePickerTexts] = await Promise.all([
-    getTranslations("components.charts.TopUsersTexts"),
+    getTranslations("components.charts.TopChartWrapperTexts"),
     getDateRangePickerTexts(),
   ]);
   return {
     dateRangePickerTexts,
     topLabel: t("topLabel"),
+    periodLabel: t("periodLabel"),
     noResults: t("noResults"),
+  };
+}
+
+export async function getTopUsersTexts(): Promise<TopUsersTexts> {
+  const [t, topChartWrapperTexts] = await Promise.all([
+    getTranslations("components.charts.TopUsersTexts"),
+    getTopChartWrapperTexts(),
+  ]);
+  return {
+    topChartWrapperTexts,
     userCardTexts: {
       amountPerOrderTitle: t("userCardTexts.amountPerOrderTitle"),
       orders: t("userCardTexts.orders"),
@@ -148,10 +167,38 @@ export async function getTopUsersTexts(): Promise<TopUsersTexts> {
       objective: t("userCardTexts.objective"),
     },
     title: t("title"),
-    periodLabel: t("periodLabel"),
     userAmountPerOderChartTexts: {
       amountPerOrder: t("userAmountPerOderChartTexts.amountPerOrder"),
       meanAmountPerOrder: t("userAmountPerOderChartTexts.meanAmountPerOrder"),
     },
+  };
+}
+
+export async function getTopPlansTexts(): Promise<TopPlansTexts> {
+  const [t, topChartWrapperTexts] = await Promise.all([
+    getTranslations("components.charts.TopPlansTexts"),
+    getTopChartWrapperTexts(),
+  ]);
+  return {
+    topChartWrapperTexts,
+    planCardTexts: {
+      dietType: t("planCardTexts.dietType"),
+      madeBy: t("planCardTexts.madeBy"),
+      meanNumberOfPurchases: t("planCardTexts.meanNumberOfPurchases"),
+      numberOfPurchases: t("planCardTexts.numberOfPurchases"),
+      planAntet: t("planCardTexts.planAntet"),
+      ratioLabel: t("planCardTexts.ratioLabel"),
+      topPlan: t("planCardTexts.topPlan"),
+      rankLabel: t("planCardTexts.rankLabel"),
+      ordersCount: t("planCardTexts.ordersCount"),
+    },
+    title: t("title"),
+  };
+}
+
+export async function getUseDownloadChartButtonTexts() {
+  const t = await getTranslations("components.charts.DownloadChartButton");
+  return {
+    downloadChart: t("downloadChart"),
   };
 }

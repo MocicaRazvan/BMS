@@ -38,6 +38,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useTheme } from "next-themes";
 import { useGenerateImage } from "recharts-to-png";
 import FileSaver from "file-saver";
+import CreationFilter, {
+  CreationFilterTexts,
+} from "@/components/list/creation-filter";
+import useDateRangeFilterParams from "@/hoooks/useDateRangeFilterParams";
 
 const LEGEND_STEPS = 9;
 
@@ -47,6 +51,7 @@ export interface GeographyChartTexts {
   centerLabel: string;
   resetLabel: string;
   selectLabels: Record<CountrySummaryType, string>;
+  creationFilterTexts: CreationFilterTexts;
 }
 
 interface Props extends GeographyChartTexts {}
@@ -56,6 +61,7 @@ export default function GeographyChart({
   centerLabel,
   resetLabel,
   selectLabels,
+  creationFilterTexts,
 }: Props) {
   const locale = useLocale();
 
@@ -73,12 +79,18 @@ export default function GeographyChart({
     [locale, radioOption],
   );
 
+  const {
+    updateRange: updateCreatedAtRange,
+    queryParams: createdAtRangeParams,
+  } = useDateRangeFilterParams("from", "to");
+
   const { messages, error, isFinished } = useFetchStream<CountryOrderSummary>({
     path: "/orders/admin/summaryByCountry",
     method: "GET",
     authToken: true,
     queryParams: {
       type: radioOption,
+      ...createdAtRangeParams,
     },
   });
 
@@ -92,8 +104,10 @@ export default function GeographyChart({
   const [scale, setScale] = useState(1);
 
   const max = useMemo(
-    () => messages.reduce((acc, curr) => Math.max(acc, curr.value), 0),
-    [messages],
+    () =>
+      // messages.reduce((acc, curr) => Math.max(acc, curr.value), 0),
+      messages.length ? messages[0].maxGroupTotal : 0,
+    [JSON.stringify(messages)],
   );
   const domain = useMemo(() => [0, Math.round(max)], [max]);
 
@@ -111,7 +125,7 @@ export default function GeographyChart({
         color: colorScale(startValue),
       };
     }).filter(({ startValue, endValue }) => startValue < endValue);
-  }, [domain, colorScale]);
+  }, [domain, colorScale, JSON.stringify(messages)]);
 
   const { theme } = useTheme();
 
@@ -119,7 +133,8 @@ export default function GeographyChart({
     quality: 1,
     type: "image/jpeg",
     options: {
-      ignoreElements: (element) => element.tagName === "BUTTON",
+      ignoreElements: (element) =>
+        ["BUTTON", "LABEL"].includes(element.tagName),
       windowWidth: 1920,
       windowHeight: 1080,
       scrollY: 0,
@@ -211,6 +226,11 @@ export default function GeographyChart({
                   <Button onClick={() => resetTransform()}>{resetLabel}</Button>
                 </div>
                 <div className="flex w-full md:w-fit items-center justify-around mt-5 md:mt-0 md:justify-end gap-3 md:gap-8 lg:gap-12">
+                  <CreationFilter
+                    {...creationFilterTexts}
+                    updateCreatedAtRange={updateCreatedAtRange}
+                    hideUpdatedAt={true}
+                  />
                   <DropDownMenuGeographySelect
                     radioOption={radioOption}
                     onRadioOptionChange={setRadioOption}

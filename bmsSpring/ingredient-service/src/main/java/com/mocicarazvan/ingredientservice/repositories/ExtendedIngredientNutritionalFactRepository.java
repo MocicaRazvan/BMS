@@ -6,8 +6,12 @@ import org.springframework.data.domain.PageRequest;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-public interface ExtendedIngredientNutritionalFactRepository {
-    Flux<IngredientNutritionalFact> getModelsFiltered(String name, Boolean display, DietType type, PageRequest pageRequest);
+import java.time.LocalDate;
 
-    Mono<Long> countModelsFiltered(String name, Boolean display, DietType type, PageRequest pageRequest);
+public interface ExtendedIngredientNutritionalFactRepository {
+    Flux<IngredientNutritionalFact> getModelsFiltered(String name, Boolean display, DietType type, LocalDate createdAtLowerBound, LocalDate createdAtUpperBound,
+                                                      LocalDate updatedAtLowerBound, LocalDate updatedAtUpperBound, PageRequest pageRequest);
+
+    Mono<Long> countModelsFiltered(String name, Boolean display, DietType type, LocalDate createdAtLowerBound, LocalDate createdAtUpperBound,
+                                   LocalDate updatedAtLowerBound, LocalDate updatedAtUpperBound);
 }

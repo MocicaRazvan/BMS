@@ -14,10 +14,7 @@ import com.mocicarazvan.orderservice.dtos.clients.PlanResponse;
 import com.mocicarazvan.orderservice.dtos.clients.RecipeResponse;
 import com.mocicarazvan.orderservice.dtos.clients.collect.FullDayResponse;
 import com.mocicarazvan.orderservice.dtos.notifications.InternalBoughtBody;
-import com.mocicarazvan.orderservice.dtos.summaries.CountryOrderSummary;
-import com.mocicarazvan.orderservice.dtos.summaries.DailyOrderSummary;
-import com.mocicarazvan.orderservice.dtos.summaries.MonthlyOrderSummary;
-import com.mocicarazvan.orderservice.dtos.summaries.TopUsersSummary;
+import com.mocicarazvan.orderservice.dtos.summaries.*;
 import com.mocicarazvan.orderservice.dtos.summaries.trainer.MonthlyTrainerOrderSummary;
 import com.mocicarazvan.orderservice.email.EmailTemplates;
 import com.mocicarazvan.orderservice.enums.CountrySummaryType;
@@ -264,10 +261,15 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public Flux<PageableResponse<ResponseWithUserDtoEntity<PlanResponse>>> getPlansForUser(String title, DietType dietType, ObjectiveType objective, PageableBody pageableBody, String userId) {
+    public Flux<PageableResponse<ResponseWithUserDtoEntity<PlanResponse>>> getPlansForUser(String title, DietType dietType, ObjectiveType objective,
+                                                                                           LocalDate createdAtLowerBound, LocalDate createdAtUpperBound,
+                                                                                           LocalDate updatedAtLowerBound, LocalDate updatedAtUpperBound,
+                                                                                           PageableBody pageableBody, String userId) {
         return orderRepository.findUserPlanIds(Long.valueOf(userId))
                 .collectList()
-                .flatMapMany(planIds -> planClient.getPlansForUser(title, dietType, objective, planIds, pageableBody, userId));
+                .flatMapMany(planIds -> planClient.getPlansForUser(title, dietType, objective, planIds,
+                        createdAtLowerBound, createdAtUpperBound, updatedAtLowerBound, updatedAtUpperBound,
+                        pageableBody, userId));
     }
 
     @Override
@@ -275,11 +277,13 @@ public class OrderServiceImpl implements OrderService {
         return userClient.getUser("", userId)
                 .flatMapMany(userDto -> getOrderById(orderId)
                         .flatMapMany(order -> entitiesUtils.checkEntityOwnerOrAdmin(order, userDto)
-                                .thenMany(planClient.getPlansForUser("", null, null, order.getPlanIds(), PageableBody.builder()
-                                        .page(0)
-                                        .size(order.getPlanIds().size())
-                                        .sortingCriteria(Map.of())
-                                        .build(), userId)
+                                .thenMany(planClient.getPlansForUser("", null, null, order.getPlanIds(),
+                                        null, null, null, null,
+                                        PageableBody.builder()
+                                                .page(0)
+                                                .size(order.getPlanIds().size())
+                                                .sortingCriteria(Map.of())
+                                                .build(), userId)
                                 )))
                 ;
     }
@@ -312,15 +316,25 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    public Flux<TopPlansSummary> getTopPlansSummary(LocalDate from, LocalDate to, int top) {
+        Pair<LocalDateTime, LocalDateTime> intervalDates = getIntervalDates(from, to);
+        return self.getTopPlansSummaryBase(intervalDates.getFirst(), intervalDates.getSecond(), top);
+    }
+
+    @Override
+    public Flux<TopPlansSummary> getTopPlansSummaryTrainer(LocalDate from, LocalDate to, int top, Long trainerId, String userId) {
+        Pair<LocalDateTime, LocalDateTime> intervalDates = getIntervalDates(from, to);
+        return getTrainerSummaryWrapper(trainerId, userId,
+                plans -> self.getTopPlansSummaryTrainerBase(intervalDates.getFirst(), intervalDates.getSecond(), top,
+                        plans, trainerId));
+    }
+
+    @Override
     public Flux<MonthlyOrderSummary> getTrainerOrdersSummaryByMonth(LocalDate from, LocalDate to, Long trainerId, String userId) {
         Pair<LocalDateTime, LocalDateTime> intervalDates = getIntervalDates(from, to);
 
-        return userClient.existsTrainerOrAdmin("/exists", trainerId)
-                .thenMany(planClient.getTrainersPlans(String.valueOf(trainerId), userId)
-                        .collectList()
-                        .flatMapMany(
-                                plans -> self.getTrainerOrdersSummaryByMonthBase(plans, intervalDates, trainerId)
-                        ));
+        return getTrainerSummaryWrapper(trainerId, userId,
+                plans -> self.getTrainerOrdersSummaryByMonthBase(plans, intervalDates, trainerId));
 
     }
 
@@ -338,14 +352,19 @@ public class OrderServiceImpl implements OrderService {
     public Flux<DailyOrderSummary> getTrainerOrdersSummaryByDay(LocalDate from, LocalDate to, Long trainerId, String userId) {
         Pair<LocalDateTime, LocalDateTime> intervalDates = getIntervalDates(from, to);
 
-        return
-                userClient.existsTrainerOrAdmin("/exists", trainerId)
-                        .thenMany(
-                                planClient.getTrainersPlans(String.valueOf(trainerId), userId)
-                                        .collectList()
-                                        .flatMapMany(plans ->
-                                                self.getTrainerOrdersSummaryByDayBase(plans, intervalDates, trainerId))
-                        );
+        return getTrainerSummaryWrapper(trainerId, userId,
+                plans -> self.getTrainerOrdersSummaryByDayBase(plans, intervalDates, trainerId));
+
+    }
+
+    private <T> Flux<T> getTrainerSummaryWrapper(Long trainerId, String userId,
+                                                 Function<List<PlanResponse>, Flux<T>> summaryFunction
+    ) {
+        return userClient.existsTrainerOrAdmin("/exists", trainerId)
+                .thenMany(planClient.getTrainersPlans(String.valueOf(trainerId), userId)
+                        .collectList()
+                        .flatMapMany(summaryFunction)
+                );
     }
 
     private Pair<LocalDateTime, LocalDateTime> getIntervalDates(LocalDate from, LocalDate to) {
@@ -362,10 +381,9 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public Flux<CountryOrderSummary> getOrdersSummaryByCountry(CountrySummaryType type) {
-
+    public Flux<CountryOrderSummary> getOrdersSummaryByCountry(CountrySummaryType type, LocalDate from, LocalDate to) {
         return
-                self.getOrdersSummaryByCountryBase(type);
+                self.getOrdersSummaryByCountryBase(type, from, to);
 
     }
 
@@ -668,6 +686,16 @@ public class OrderServiceImpl implements OrderService {
             return orderRepository.getTopUsersSummary(from, to, top);
         }
 
+        @RedisReactiveChildCache(key = CACHE_KEY_PATH, idPath = "4*maxGroupCount+2*minGroupCount+4*avgGroupCount+rank*16+197")
+        public Flux<TopPlansSummary> getTopPlansSummaryBase(LocalDateTime from, LocalDateTime to, int top) {
+            return orderRepository.getTopPlansSummary(from, to, top);
+        }
+
+        @RedisReactiveChildCache(key = CACHE_KEY_PATH, idPath = "3*maxGroupCount+2*minGroupCount+3*avgGroupCount+rank*15+97", masterId = "#trainerId")
+        public Flux<TopPlansSummary> getTopPlansSummaryTrainerBase(LocalDateTime from, LocalDateTime to, int top, List<PlanResponse> plans, Long trainerId) {
+            return orderRepository.getTopPlansSummaryTrainer(from, to, top, getPlanIds(plans));
+        }
+
         @RedisReactiveChildCache(key = CACHE_KEY_PATH, idPath = "month+year+2*totalAmount+count+33")
         public Flux<MonthlyOrderSummary> getOrdersSummaryByMonthBase(LocalDateTime f, LocalDateTime s) {
 
@@ -686,7 +714,8 @@ public class OrderServiceImpl implements OrderService {
 
         @RedisReactiveChildCache(key = CACHE_KEY_PATH, idPath = "month+3*year+322", masterId = "#trainerId")
         public Flux<MonthlyOrderSummary> getTrainerOrdersSummaryByMonthBase(List<PlanResponse> plans, Pair<LocalDateTime, LocalDateTime> intervalDates, Long trainerId) {
-            return orderRepository.getTrainerOrdersSummaryByDateRangeGroupedByMonth(intervalDates.getFirst(), intervalDates.getSecond())
+            return orderRepository.getTrainerOrdersSummaryByDateRangeGroupedByMonth(intervalDates.getFirst(), intervalDates.getSecond(),
+                            getPlanIds(plans))
                     .flatMap(e -> fromTrainerSummaryToSummary(plans, e, (p) -> MonthlyOrderSummary.builder()
                             .year(e.getYear())
                             .month(e.getMonth())
@@ -697,7 +726,8 @@ public class OrderServiceImpl implements OrderService {
 
         @RedisReactiveChildCache(key = CACHE_KEY_PATH, idPath = "day+month+4*year+767", masterId = "#trainerId")
         public Flux<DailyOrderSummary> getTrainerOrdersSummaryByDayBase(List<PlanResponse> plans, Pair<LocalDateTime, LocalDateTime> intervalDates, Long trainerId) {
-            return orderRepository.getTrainerOrdersSummaryByDateRangeGroupedByDay(intervalDates.getFirst(), intervalDates.getSecond())
+            return orderRepository.getTrainerOrdersSummaryByDateRangeGroupedByDay(
+                            intervalDates.getFirst(), intervalDates.getSecond(), getPlanIds(plans))
                     .flatMap(e -> fromTrainerSummaryToSummary(plans, e, (p) -> DailyOrderSummary.builder()
                             .year(e.getYear())
                             .month(e.getMonth())
@@ -724,12 +754,12 @@ public class OrderServiceImpl implements OrderService {
         }
 
         @RedisReactiveChildCache(key = CACHE_KEY_PATH, idPath = "id")
-        public Flux<CountryOrderSummary> getOrdersSummaryByCountryBase(CountrySummaryType type) {
+        public Flux<CountryOrderSummary> getOrdersSummaryByCountryBase(CountrySummaryType type, LocalDate from, LocalDate to) {
 
             return
                     (type.equals(CountrySummaryType.COUNT) ?
-                            orderRepository.getOrdersCountByCountry() :
-                            orderRepository.getOrdersTotalByCountry())
+                            orderRepository.getOrdersCountByCountry(from, to) :
+                            orderRepository.getOrdersTotalByCountry(from, to))
                             .map(e -> {
                                 e.setId(
                                         new Locale.Builder().setRegion(e.getId().toUpperCase()).build().getISO3Country()
@@ -741,14 +771,18 @@ public class OrderServiceImpl implements OrderService {
 
         @RedisReactiveChildCacheEvict(key = CACHE_KEY_PATH, masterId = "#userId")
         public <T> Mono<T> invalidateForUser(T t, String userId) {
-            log.info("Invalidating cache for user: " + userId);
+            log.info("Invalidating cache for user: {}", userId);
             return Mono.just(t);
         }
 
         @RedisReactiveChildCacheEvict(key = CACHE_KEY_PATH, masterPath = "userId")
         public Mono<PlanResponse> invalidateForTrainer(PlanResponse t) {
-            log.info("Invalidating cache for trainer: " + t.getUserId());
+            log.info("Invalidating cache for trainer: {}", t.getUserId());
             return Mono.just(t);
+        }
+
+        private Long[] getPlanIds(List<PlanResponse> plans) {
+            return plans.stream().map(PlanResponse::getId).toArray(Long[]::new);
         }
 
 

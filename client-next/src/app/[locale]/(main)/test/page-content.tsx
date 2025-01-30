@@ -1,4 +1,8 @@
 "use client";
-export default function TestPageContent() {
-  return <div>TestPageContent</div>;
+export default function PageContent() {
+  return (
+    <div>
+      <h1>Page Content</h1>
+    </div>
+  );
 }

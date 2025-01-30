@@ -403,6 +403,7 @@ export enum CountrySummaryType {
 export interface CountryOrderSummary {
   id: string;
   value: number;
+  maxGroupTotal: number;
 }
 
 export interface EmailRequest {
@@ -555,14 +556,25 @@ export interface NotifyContainerAction extends BaseWSDto {
   action: ContainerAction;
 }
 
-export interface TopUsersSummary {
+export interface RankSummary {
+  rank: number;
+}
+export interface TopUsersSummary extends RankSummary {
   userId: number;
   totalAmount: number;
   ordersNumber: number;
   planValues: number[];
-  rank: number;
   plansNumber: number;
   maxGroupTotal: number;
   minGroupTotal: number;
   avgGroupTotal: number;
+}
+
+export interface TopPlansSummary extends RankSummary {
+  planId: number;
+  count: number;
+  maxGroupCount: number;
+  minGroupCount: number;
+  avgGroupCount: number;
+  ratio: number;
 }

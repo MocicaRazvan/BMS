@@ -14,6 +14,7 @@ import com.mocicarazvan.templatemodule.utils.RequestsUtils;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -22,6 +23,7 @@ import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -75,11 +77,17 @@ public class IngredientNutritionalFactController {
             @RequestParam(required = false) String name,
             @RequestParam(required = false) Boolean display,
             @RequestParam(required = false) DietType type,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate createdAtLowerBound,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate createdAtUpperBound,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate updatedAtLowerBound,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate updatedAtUpperBound,
             @Valid @RequestBody PageableBody pageableBody,
             @RequestParam(name = "admin", required = false, defaultValue = "false") Boolean admin,
             ServerWebExchange exchange
     ) {
-        return ingredientNutritionalFactService.getAllModelsFiltered(name, display, type, pageableBody, requestsUtils.extractAuthUser(exchange), admin)
+        return ingredientNutritionalFactService.getAllModelsFiltered(name, display, type,
+                        createdAtLowerBound, createdAtUpperBound, updatedAtLowerBound, updatedAtUpperBound,
+                        pageableBody, requestsUtils.extractAuthUser(exchange), admin)
                 .flatMapSequential(pr -> ingredientNutritionalValueResponseBuilder.toModelPageable(pr, IngredientNutritionalFactController.class));
     }
 
@@ -89,11 +97,17 @@ public class IngredientNutritionalFactController {
             @RequestParam(required = false) String name,
             @RequestParam(required = false) Boolean display,
             @RequestParam(required = false) DietType type,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate createdAtLowerBound,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate createdAtUpperBound,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate updatedAtLowerBound,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate updatedAtUpperBound,
             @Valid @RequestBody PageableBody pageableBody,
             @RequestParam(name = "admin", required = false, defaultValue = "false") Boolean admin,
             ServerWebExchange exchange
     ) {
-        return ingredientNutritionalFactService.getAllModelsFilteredWithEntityCount(name, display, type, pageableBody, requestsUtils.extractAuthUser(exchange), admin)
+        return ingredientNutritionalFactService.getAllModelsFilteredWithEntityCount(name, display, type,
+                        createdAtLowerBound, createdAtUpperBound, updatedAtLowerBound, updatedAtUpperBound,
+                        pageableBody, requestsUtils.extractAuthUser(exchange), admin)
                 .flatMapSequential(pr -> ingredientNutritionalValueResponseBuilder.toModelWithEntityCountPageable(pr, IngredientNutritionalFactController.class));
     }
 

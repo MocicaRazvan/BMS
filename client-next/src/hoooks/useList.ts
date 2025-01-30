@@ -23,6 +23,7 @@ import {
 } from "@/types/dto";
 import { FetchStreamProps } from "@/hoooks/fetchStream";
 import { useDebounceWithCallBack } from "@/hoooks/useDebounceWithCallback";
+import useDateRangeFilterParams from "@/hoooks/useDateRangeFilterParams";
 
 export interface UseListProps {
   sortingOptions: SortingOption[];
@@ -103,6 +104,40 @@ export default function useList<T>({
     currentSearchParams.get("pageSize") || sizeOptions?.[0].toString() || "6",
     10,
   );
+  const defaultCreatedAtLowerBound = currentSearchParams.get(
+    "createdAtLowerBound",
+  );
+  const defaultCreatedAtUpperBound = currentSearchParams.get(
+    "createdAtUpperBound",
+  );
+  const defaultUpdatedAtLowerBound = currentSearchParams.get(
+    "updatedAtLowerBound",
+  );
+  const defaultUpdatedAtUpperBound = currentSearchParams.get(
+    "updatedAtUpperBound",
+  );
+
+  const {
+    updateRange: updateCreatedAtRange,
+    queryParams: createdAtRangeParams,
+    updateSearchParams: updateCreatedAtSearchParams,
+  } = useDateRangeFilterParams(
+    "createdAtLowerBound",
+    "createdAtUpperBound",
+    defaultCreatedAtLowerBound ?? undefined,
+    defaultCreatedAtUpperBound ?? undefined,
+  );
+
+  const {
+    updateRange: updateUpdatedAtRange,
+    queryParams: updatedAtRangeParams,
+    updateSearchParams: updateUpdatedAtSearchParams,
+  } = useDateRangeFilterParams(
+    "updatedAtLowerBound",
+    "updatedAtUpperBound",
+    defaultUpdatedAtLowerBound ?? undefined,
+    defaultUpdatedAtUpperBound ?? undefined,
+  );
 
   console.log("currentPage", currentPage);
 
@@ -137,6 +172,8 @@ export default function useList<T>({
     useAbortController,
     queryParams: {
       [filterKey]: navigate ? filterValue : filter[filterKey] || filterValue,
+      ...createdAtRangeParams,
+      ...updatedAtRangeParams,
       ...(extraQueryParams && extraQueryParams),
     },
     arrayQueryParam: {
@@ -185,6 +222,7 @@ export default function useList<T>({
       updatedSearchParams.set(filterKey, curFilter);
       updatedSearchParams.set("currentPage", pageInfo.currentPage.toString());
       updatedSearchParams.set("pageSize", pageInfo.pageSize.toString());
+
       const curSortParams = makeSortFetchParams(sort);
 
       if (curFilter === "" && Object.keys(curSortParams).length === 0) {
@@ -208,6 +246,8 @@ export default function useList<T>({
           makeSortString(makeSortFetchParams(sort)),
         );
       }
+      updateCreatedAtSearchParams(updatedSearchParams);
+      updateUpdatedAtSearchParams(updatedSearchParams);
 
       if (extraUpdateSearchParams) {
         extraUpdateSearchParams(updatedSearchParams);
@@ -229,6 +269,10 @@ export default function useList<T>({
     filterKey,
     navigate,
     sortingOptions,
+    updateCreatedAtSearchParams,
+    updateUpdatedAtSearchParams,
+    JSON.stringify(updateCreatedAtRange),
+    JSON.stringify(updateUpdatedAtRange),
   ]);
 
   const resetCurrentPage = useCallback(() => {
@@ -297,5 +341,9 @@ export default function useList<T>({
     resetCurrentPage,
     updateFilterValueFromString,
     filterValue,
+    updateCreatedAtRange,
+    updateUpdatedAtRange,
+    updatedAtRangeParams,
+    createdAtRangeParams,
   };
 }

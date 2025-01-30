@@ -34,6 +34,9 @@ import useBinaryFilter from "@/components/list/useBinaryFilter";
 import { postColumnActions } from "@/lib/constants";
 import useClientNotFound from "@/hoooks/useClientNotFound";
 import OverflowTextTooltip from "@/components/common/overflow-text-tooltip";
+import CreationFilter, {
+  CreationFilterTexts,
+} from "@/components/list/creation-filter";
 
 export interface PostTableColumnsTexts {
   id: string;
@@ -56,6 +59,7 @@ export interface PostTableTexts {
   useTagsExtraCriteriaTexts: UseTagsExtraCriteriaTexts;
   postTableColumnsTexts: PostTableColumnsTexts;
   search: string;
+  creationFilterTexts: CreationFilterTexts;
 }
 
 type Props = ExtraTableProps & PostTableTexts & UseListProps & WithUser;
@@ -73,6 +77,7 @@ export default function PostsTable({
   postTableColumnsTexts,
   authUser,
   mainDashboard = false,
+  creationFilterTexts,
 }: Props) {
   const {
     extraUpdateSearchParams,
@@ -115,6 +120,8 @@ export default function PostsTable({
     updateFilterValue,
     clearFilterValue,
     resetCurrentPage,
+    updateUpdatedAtRange,
+    updateCreatedAtRange,
   } = useList<CustomEntityModel<PostResponse>>({
     path,
     extraQueryParams: {
@@ -388,6 +395,13 @@ export default function PostsTable({
               </div>
               {fieldCriteriaCallBack(resetCurrentPage)}
             </div>
+          }
+          rangeDateFilter={
+            <CreationFilter
+              {...creationFilterTexts}
+              updateCreatedAtRange={updateCreatedAtRange}
+              updateUpdatedAtRange={updateUpdatedAtRange}
+            />
           }
         />
       </Suspense>

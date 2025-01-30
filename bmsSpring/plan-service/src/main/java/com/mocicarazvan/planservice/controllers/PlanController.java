@@ -25,6 +25,7 @@ import com.mocicarazvan.templatemodule.utils.RequestsUtils;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.util.Pair;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -35,6 +36,7 @@ import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -257,10 +259,16 @@ public class PlanController implements ApproveController<Plan, PlanBody, PlanRes
             @RequestParam(required = false) ObjectiveType objective,
             @RequestParam(required = false) List<Long> excludeIds,
             @RequestParam(name = "admin", required = false, defaultValue = "false") Boolean admin,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate createdAtLowerBound,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate createdAtUpperBound,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate updatedAtLowerBound,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate updatedAtUpperBound,
             @Valid @RequestBody PageableBody pageableBody,
             ServerWebExchange exchange
     ) {
-        return planService.getPlansFiltered(title, approved, display, type, objective, excludeIds, pageableBody, requestsUtils.extractAuthUser(exchange), admin)
+        return planService.getPlansFiltered(title, approved, display, type, objective, excludeIds,
+                        createdAtLowerBound, createdAtUpperBound, updatedAtLowerBound, updatedAtUpperBound,
+                        pageableBody, requestsUtils.extractAuthUser(exchange), admin)
                 .flatMapSequential(m -> plansReactiveResponseBuilder.toModelPageable(m, PlanController.class));
     }
 
@@ -273,11 +281,17 @@ public class PlanController implements ApproveController<Plan, PlanBody, PlanRes
             @RequestParam(required = false) DietType type,
             @RequestParam(required = false) List<Long> excludeIds,
             @RequestParam(required = false) ObjectiveType objective,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate createdAtLowerBound,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate createdAtUpperBound,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate updatedAtLowerBound,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate updatedAtUpperBound,
             @Valid @RequestBody PageableBody pageableBody,
             @RequestParam(name = "admin", required = false, defaultValue = "false") Boolean admin,
             ServerWebExchange exchange
     ) {
-        return planService.getPlansFilteredWithCount(title, approved, display, type, objective, excludeIds, pageableBody, requestsUtils.extractAuthUser(exchange), admin)
+        return planService.getPlansFilteredWithCount(title, approved, display, type, objective, excludeIds,
+                        createdAtLowerBound, createdAtUpperBound, updatedAtLowerBound, updatedAtUpperBound,
+                        pageableBody, requestsUtils.extractAuthUser(exchange), admin)
                 .flatMapSequential(m -> plansReactiveResponseBuilder.toModelWithEntityCountPageable(m, PlanController.class));
 
     }
@@ -291,11 +305,17 @@ public class PlanController implements ApproveController<Plan, PlanBody, PlanRes
             @RequestParam(required = false) DietType type,
             @RequestParam(required = false) List<Long> excludeIds,
             @RequestParam(required = false) ObjectiveType objective,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate createdAtLowerBound,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate createdAtUpperBound,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate updatedAtLowerBound,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate updatedAtUpperBound,
             @Valid @RequestBody PageableBody pageableBody,
             @RequestParam(name = "admin", required = false, defaultValue = "false") Boolean admin,
             ServerWebExchange exchange
     ) {
-        return planService.getPlansFilteredWithUser(title, approved, display, type, objective, excludeIds, pageableBody, requestsUtils.extractAuthUser(exchange), admin)
+        return planService.getPlansFilteredWithUser(title, approved, display, type, objective, excludeIds,
+                        createdAtLowerBound, createdAtUpperBound, updatedAtLowerBound, updatedAtUpperBound,
+                        pageableBody, requestsUtils.extractAuthUser(exchange), admin)
                 .flatMapSequential(m -> plansReactiveResponseBuilder.toModelWithUserPageable(m, PlanController.class));
 
     }
@@ -308,11 +328,17 @@ public class PlanController implements ApproveController<Plan, PlanBody, PlanRes
             @RequestParam(required = false) Boolean display,
             @RequestParam(required = false) DietType type,
             @RequestParam(required = false) ObjectiveType objective,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate createdAtLowerBound,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate createdAtUpperBound,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate updatedAtLowerBound,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate updatedAtUpperBound,
             @PathVariable Long trainerId,
             @Valid @RequestBody PageableBody pageableBody,
             ServerWebExchange exchange
     ) {
-        return planService.getPlansFilteredTrainer(title, approved, display, type, objective, pageableBody, requestsUtils.extractAuthUser(exchange), trainerId)
+        return planService.getPlansFilteredTrainer(title, approved, display, type, objective,
+                        createdAtLowerBound, createdAtUpperBound, updatedAtLowerBound, updatedAtUpperBound,
+                        pageableBody, requestsUtils.extractAuthUser(exchange), trainerId)
                 .flatMapSequential(m -> plansReactiveResponseBuilder.toModelPageable(m, PlanController.class));
     }
 
@@ -324,11 +350,17 @@ public class PlanController implements ApproveController<Plan, PlanBody, PlanRes
             @RequestParam(required = false) Boolean display,
             @RequestParam(required = false) DietType type,
             @RequestParam(required = false) ObjectiveType objective,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate createdAtLowerBound,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate createdAtUpperBound,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate updatedAtLowerBound,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate updatedAtUpperBound,
             @PathVariable Long trainerId,
             @Valid @RequestBody PageableBody pageableBody,
             ServerWebExchange exchange
     ) {
-        return planService.getPlansFilteredTrainerWithCount(title, approved, display, type, objective, pageableBody, requestsUtils.extractAuthUser(exchange), trainerId)
+        return planService.getPlansFilteredTrainerWithCount(title, approved, display, type, objective,
+                        createdAtLowerBound, createdAtUpperBound, updatedAtLowerBound, updatedAtUpperBound,
+                        pageableBody, requestsUtils.extractAuthUser(exchange), trainerId)
                 .flatMapSequential(m -> plansReactiveResponseBuilder.toModelWithEntityCountPageable(m, PlanController.class));
     }
 
@@ -381,11 +413,17 @@ public class PlanController implements ApproveController<Plan, PlanBody, PlanRes
             @RequestParam(required = false) String title,
             @RequestParam(required = false) DietType type,
             @RequestParam(required = false) ObjectiveType objective,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate createdAtLowerBound,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate createdAtUpperBound,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate updatedAtLowerBound,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate updatedAtUpperBound,
             @RequestParam List<Long> ids,
             @Valid @RequestBody PageableBody pageableBody,
             ServerWebExchange exchange
     ) {
-        return planService.getPlansFilteredWithUserByIds(title, type, objective, pageableBody, ids, requestsUtils.extractAuthUser(exchange))
+        return planService.getPlansFilteredWithUserByIds(title, type, objective,
+                        createdAtLowerBound, createdAtUpperBound, updatedAtLowerBound, updatedAtUpperBound,
+                        pageableBody, ids, requestsUtils.extractAuthUser(exchange))
                 .flatMapSequential(m -> plansReactiveResponseBuilder.toModelWithUserPageable(m, PlanController.class));
     }
 

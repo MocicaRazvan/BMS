@@ -14,6 +14,7 @@ import com.mocicarazvan.templatemodule.services.ApprovedService;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDate;
 import java.util.List;
 
 
@@ -26,9 +27,12 @@ public interface PostService extends ApprovedService<Post, PostBody, PostRespons
     Mono<ResponseWithChildList<PostResponse, ResponseWithUserDto<CommentResponse>>>
     getPostWithComments(Long id, boolean approved);
 
-    Flux<PageableResponse<ResponseWithUserDto<PostResponse>>> getPostsFilteredWithUser(String title, PageableBody pageableBody, String userId, Boolean approved, List<String> tags, Boolean liked, Boolean admin);
+    Flux<PageableResponse<ResponseWithUserDto<PostResponse>>> getPostsFilteredWithUser(String title, PageableBody pageableBody, String userId, Boolean approved, List<String> tags, Boolean liked, Boolean admin, LocalDate createdAtLowerBound, LocalDate createdAtUpperBound,
+                                                                                       LocalDate updatedAtLowerBound, LocalDate updatedAtUpperBound);
 
-    Flux<PageableResponse<PostResponse>> getPostsFiltered(String title, PageableBody pageableBody, String userId, Boolean approved, List<String> tags, Boolean liked, Boolean admin);
+    Flux<PageableResponse<PostResponse>> getPostsFiltered(String title, PageableBody pageableBody, String userId, Boolean approved, List<String> tags, Boolean liked, Boolean admin, LocalDate createdAtLowerBound, LocalDate createdAtUpperBound,
+                                                          LocalDate updatedAtLowerBound, LocalDate updatedAtUpperBound);
 
-    Flux<PageableResponse<PostResponse>> getModelsTrainer(String title, Long trainerId, PageableBody pageableBody, String userId, Boolean approved, List<String> tags);
+    Flux<PageableResponse<PostResponse>> getModelsTrainer(String title, Long trainerId, PageableBody pageableBody, String userId, Boolean approved, List<String> tags, LocalDate createdAtLowerBound, LocalDate createdAtUpperBound,
+                                                          LocalDate updatedAtLowerBound, LocalDate updatedAtUpperBound);
 }

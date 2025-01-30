@@ -62,6 +62,7 @@ import {
   getIngredientPieChartTexts,
   getMonthlySalesTexts,
   getRelativeItemsSummaryTexts,
+  getTopPlansTexts,
   getTopUsersTexts,
 } from "@/texts/components/charts";
 import { UserRecipesPageTexts } from "@/app/[locale]/trainer/user/[id]/recipes/page";
@@ -1036,17 +1037,20 @@ export async function getUserPlansAdminPageTexts(): Promise<UserPlansAdminPageTe
     themeSwitchTexts,
     t,
     menuTexts,
+    topPlansTexts,
   ] = await Promise.all([
     getPlanTableTexts(),
     getSortingItemSortingOptions("plans", sortingPlansSortingOptionsKeys),
     getThemeSwitchTexts(),
     getTranslations("pages.admin.UserPlansAdminPageTexts"),
     getSidebarMenuTexts("admin", adminGroupLabels, adminLabels, adminSubLabels),
+    getTopPlansTexts(),
   ]);
   return {
     plansTableTexts,
     sortingPlansSortingOptions,
     themeSwitchTexts,
+    topPlansTexts,
     title: t("title"),
     header: t("header"),
     menuTexts,
@@ -1086,6 +1090,7 @@ export async function getAdminPlansPageTexts(): Promise<AdminPlansPageTexts> {
     menuTexts,
     archivePlansTexts,
     archiveDayTexts,
+    topPlansTexts,
   ] = await Promise.all([
     getTranslations("pages.admin.AdminPlansPageTexts"),
     getPlanTableTexts(),
@@ -1094,6 +1099,7 @@ export async function getAdminPlansPageTexts(): Promise<AdminPlansPageTexts> {
     getSidebarMenuTexts("admin", adminGroupLabels, adminLabels, adminSubLabels),
     getArchiveQueueCardsTexts("plan"),
     getArchiveQueueCardsTexts("day"),
+    getTopPlansTexts(),
   ]);
 
   return {
@@ -1105,6 +1111,7 @@ export async function getAdminPlansPageTexts(): Promise<AdminPlansPageTexts> {
     menuTexts,
     archivePlansTexts,
     archiveDayTexts,
+    topPlansTexts,
   };
 }
 
@@ -1144,6 +1151,7 @@ export async function getUserPlansPageTexts(): Promise<UserPlansPageTexts> {
     t,
     themeSwitchTexts,
     menuTexts,
+    topPlansTexts,
   ] = await Promise.all([
     getPlanTableTexts(),
     getSortingItemSortingOptions("plans", sortingPlansSortingOptionsKeys),
@@ -1155,6 +1163,7 @@ export async function getUserPlansPageTexts(): Promise<UserPlansPageTexts> {
       trainerLabels,
       trainerSubLabels,
     ),
+    getTopPlansTexts(),
   ]);
   return {
     planTableTexts,
@@ -1163,6 +1172,7 @@ export async function getUserPlansPageTexts(): Promise<UserPlansPageTexts> {
     title: t("title"),
     themeSwitchTexts,
     menuTexts,
+    topPlansTexts,
   };
 }
 
@@ -1381,6 +1391,7 @@ export async function getAdminDashboardPageTexts(): Promise<AdminDashboardPageTe
     menuTexts,
     archiveTexts,
     topUsersTexts,
+    topPlansTexts,
   ] = await Promise.all([
     getTranslations("pages.admin.AdminDashboardPageTexts"),
     getAllRelativeItemTexts(),
@@ -1389,6 +1400,7 @@ export async function getAdminDashboardPageTexts(): Promise<AdminDashboardPageTe
     getSidebarMenuTexts("admin", adminGroupLabels, adminLabels, adminSubLabels),
     getAllArchiveQueueCardsTexts(),
     getTopUsersTexts(),
+    getTopPlansTexts(),
   ]);
 
   return {
@@ -1400,6 +1412,7 @@ export async function getAdminDashboardPageTexts(): Promise<AdminDashboardPageTe
     menuTexts,
     archiveTexts,
     topUsersTexts,
+    topPlansTexts,
     archiveTitle: t("archiveTitle"),
     selectItems: {
       comment: t("selectItems.comment"),

@@ -22,6 +22,7 @@ import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.util.Pair;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -32,6 +33,7 @@ import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDate;
 import java.util.List;
 
 
@@ -242,10 +244,16 @@ public class RecipeController implements ApproveController<Recipe, RecipeBody, R
     public Flux<PageableResponse<CustomEntityModel<RecipeResponse>>> getAllModelsFiltered(@RequestParam(required = false) String title,
                                                                                           @RequestParam(required = false) Boolean approved,
                                                                                           @RequestParam(required = false) DietType type,
+                                                                                          @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate createdAtLowerBound,
+                                                                                          @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate createdAtUpperBound,
+                                                                                          @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate updatedAtLowerBound,
+                                                                                          @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate updatedAtUpperBound,
                                                                                           @Valid @RequestBody PageableBody pageableBody,
                                                                                           @RequestParam(name = "admin", required = false, defaultValue = "false") Boolean admin,
                                                                                           ServerWebExchange exchange) {
-        return recipeService.getRecipesFiltered(title, type, pageableBody, requestsUtils.extractAuthUser(exchange), approved, admin)
+        return recipeService.getRecipesFiltered(title, type,
+                        createdAtLowerBound, createdAtUpperBound, updatedAtLowerBound, updatedAtUpperBound,
+                        pageableBody, requestsUtils.extractAuthUser(exchange), approved, admin)
                 .flatMapSequential(m -> recipeReactiveResponseBuilder.toModelPageable(m, RecipeController.class));
     }
 
@@ -255,10 +263,16 @@ public class RecipeController implements ApproveController<Recipe, RecipeBody, R
                                                                                                                             @RequestParam(required = false) Boolean approved,
                                                                                                                             @RequestParam(required = false) DietType type,
                                                                                                                             @Valid @RequestBody PageableBody pageableBody,
+                                                                                                                            @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate createdAtLowerBound,
+                                                                                                                            @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate createdAtUpperBound,
+                                                                                                                            @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate updatedAtLowerBound,
+                                                                                                                            @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate updatedAtUpperBound,
                                                                                                                             @RequestParam(name = "admin", required = false, defaultValue = "false") Boolean admin,
                                                                                                                             ServerWebExchange exchange) {
 
-        return recipeService.getRecipesFilteredWithCount(title, type, pageableBody, requestsUtils.extractAuthUser(exchange), approved, admin)
+        return recipeService.getRecipesFilteredWithCount(title, type,
+                        createdAtLowerBound, createdAtUpperBound, updatedAtLowerBound, updatedAtUpperBound,
+                        pageableBody, requestsUtils.extractAuthUser(exchange), approved, admin)
                 .flatMapSequential(m -> recipeReactiveResponseBuilder.toModelWithEntityCountPageable(m, RecipeController.class));
     }
 
@@ -267,10 +281,16 @@ public class RecipeController implements ApproveController<Recipe, RecipeBody, R
     public Flux<PageableResponse<ResponseWithUserDtoEntity<RecipeResponse>>> getAllModelsFilteredWithUser(@RequestParam(required = false) String title,
                                                                                                           @RequestParam(required = false) Boolean approved,
                                                                                                           @RequestParam(required = false) DietType type,
+                                                                                                          @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate createdAtLowerBound,
+                                                                                                          @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate createdAtUpperBound,
+                                                                                                          @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate updatedAtLowerBound,
+                                                                                                          @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate updatedAtUpperBound,
                                                                                                           @Valid @RequestBody PageableBody pageableBody,
                                                                                                           @RequestParam(name = "admin", required = false, defaultValue = "false") Boolean admin,
                                                                                                           ServerWebExchange exchange) {
-        return recipeService.getRecipesFilteredWithUser(title, type, pageableBody, requestsUtils.extractAuthUser(exchange), approved, admin)
+        return recipeService.getRecipesFilteredWithUser(title, type,
+                        createdAtLowerBound, createdAtUpperBound, updatedAtLowerBound, updatedAtUpperBound,
+                        pageableBody, requestsUtils.extractAuthUser(exchange), approved, admin)
                 .flatMapSequential(m -> recipeReactiveResponseBuilder.toModelWithUserPageable(m, RecipeController.class));
     }
 
@@ -309,9 +329,15 @@ public class RecipeController implements ApproveController<Recipe, RecipeBody, R
                                                                                               @RequestParam(required = false) Boolean approved,
                                                                                               @RequestParam(required = false) DietType type,
                                                                                               @PathVariable Long trainerId,
+                                                                                              @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate createdAtLowerBound,
+                                                                                              @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate createdAtUpperBound,
+                                                                                              @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate updatedAtLowerBound,
+                                                                                              @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate updatedAtUpperBound,
                                                                                               @Valid @RequestBody PageableBody pageableBody,
                                                                                               ServerWebExchange exchange) {
-        return recipeService.getRecipesFilteredTrainer(title, type, trainerId, pageableBody, requestsUtils.extractAuthUser(exchange), approved)
+        return recipeService.getRecipesFilteredTrainer(title, type, trainerId,
+                        createdAtLowerBound, createdAtUpperBound, updatedAtLowerBound, updatedAtUpperBound,
+                        pageableBody, requestsUtils.extractAuthUser(exchange), approved)
                 .flatMapSequential(m -> recipeReactiveResponseBuilder.toModelPageable(m, RecipeController.class));
     }
 
@@ -321,10 +347,16 @@ public class RecipeController implements ApproveController<Recipe, RecipeBody, R
                                                                                                                                 @RequestParam(required = false) Boolean approved,
                                                                                                                                 @RequestParam(required = false) DietType type,
                                                                                                                                 @PathVariable Long trainerId,
+                                                                                                                                @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate createdAtLowerBound,
+                                                                                                                                @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate createdAtUpperBound,
+                                                                                                                                @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate updatedAtLowerBound,
+                                                                                                                                @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate updatedAtUpperBound,
                                                                                                                                 @Valid @RequestBody PageableBody pageableBody,
                                                                                                                                 ServerWebExchange exchange) {
         return
-                recipeService.getRecipesFilteredTrainerWithCount(title, type, trainerId, pageableBody, requestsUtils.extractAuthUser(exchange), approved)
+                recipeService.getRecipesFilteredTrainerWithCount(title, type, trainerId,
+                                createdAtLowerBound, createdAtUpperBound, updatedAtLowerBound, updatedAtUpperBound,
+                                pageableBody, requestsUtils.extractAuthUser(exchange), approved)
                         .flatMapSequential(m -> recipeReactiveResponseBuilder.toModelWithEntityCountPageable(m, RecipeController.class));
     }
 

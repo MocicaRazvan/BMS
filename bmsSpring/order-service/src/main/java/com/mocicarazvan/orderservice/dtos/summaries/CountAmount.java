@@ -11,7 +11,6 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 @SuperBuilder
 public class CountAmount {
-
     private long count;
     private double totalAmount;
 }

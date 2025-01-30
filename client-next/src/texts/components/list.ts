@@ -8,6 +8,8 @@ import { getRadioSortTexts } from "@/texts/components/common";
 import { SortingOptionsTexts } from "@/lib/constants";
 import { UseFilterDropdownTexts } from "@/components/list/useFilterDropdown";
 import { UseBinaryTexts } from "@/components/list/useBinaryFilter";
+import { getDateRangePickerTexts } from "@/texts/components/ui";
+import { CreationFilterTexts } from "@/components/list/creation-filter";
 
 export const sortingPostsSortingOptionsKeys = [
   "title",
@@ -71,20 +73,40 @@ export async function getItemCardTexts(name: string): Promise<ItemCardTexts> {
   };
 }
 
+export async function getCreationFilterTexts(): Promise<CreationFilterTexts> {
+  const [dateRangePickerTexts, t] = await Promise.all([
+    getDateRangePickerTexts(),
+    getTranslations("components.list.CreationFilterTexts"),
+  ]);
+
+  return {
+    dateRangePickerTexts,
+    createdAtLabel: t("createdAtLabel"),
+    updatedAtLabel: t("updatedAtLabel"),
+  };
+}
+
 export async function getGridListTexts(): Promise<GridListTexts> {
-  const [itemCardTexts, dataTablePaginationTexts, radioSortTexts, t] =
-    await Promise.all([
-      getItemCardTexts("ItemCardTexts"),
-      getDataTablePaginationTexts(),
-      getRadioSortTexts(),
-      getTranslations("components.list.GridListTexts"),
-    ]);
+  const [
+    itemCardTexts,
+    dataTablePaginationTexts,
+    radioSortTexts,
+    creationFilterTexts,
+    t,
+  ] = await Promise.all([
+    getItemCardTexts("ItemCardTexts"),
+    getDataTablePaginationTexts(),
+    getRadioSortTexts(),
+    getCreationFilterTexts(),
+    getTranslations("components.list.GridListTexts"),
+  ]);
 
   return {
     itemCardTexts,
     gettingMore: t("gettingMore"),
     noResults: t("noResults"),
     search: t("search"),
+    creationFilterTexts,
     radioSortTexts,
     dataTablePaginationTexts,
   };

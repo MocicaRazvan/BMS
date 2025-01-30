@@ -1,14 +1,8 @@
 "use client";
 
-import {
-  DateRangeParams,
-  DateRangePicker,
-  DateRangePickerTexts,
-} from "@/components/ui/date-range-picker";
 import { Link, Locale } from "@/navigation";
-import { format, subMonths } from "date-fns";
-import React, { memo, Suspense, useMemo, useState } from "react";
-import { cn, isDeepEqual } from "@/lib/utils";
+import React, { memo, useState } from "react";
+import { isDeepEqual } from "@/lib/utils";
 import {
   CustomEntityModel,
   PageableResponse,
@@ -25,26 +19,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import {
-  Bar,
-  BarChart,
-  Pie,
-  PieChart,
-  ReferenceLine,
-  XAxis,
-  YAxis,
-} from "recharts";
-import { ro } from "date-fns/locale";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import Lottie from "react-lottie-player";
-import noResultsLottie from "../../../public/lottie/noResults.json";
+import { Pie, PieChart } from "recharts";
 import {
   Card,
   CardContent,
@@ -52,17 +27,14 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { useFormatter } from "next-intl";
 import { Switch } from "@/components/ui/switch";
 import { motion } from "framer-motion";
-
-const now = new Date();
-const oneMonthAgo = subMonths(now, 1);
-const dateFormat = "dd-MM-yyyy";
-const formattedNow = format(now, dateFormat);
-const formattedOneMonthAgo = format(oneMonthAgo, dateFormat);
-const topOptions = Array.from({ length: 10 }, (_, i) => i + 1);
+import TopChartWrapper, {
+  TopChartMeanRelative,
+  TopChartWrapperTexts,
+  TopRankBadge,
+} from "@/components/charts/top-chart-wrapper";
 
 const createChartConfig = (arr: string[]) =>
   arr.reduce((acc, t, i) => {
@@ -117,10 +89,7 @@ const objectivePieChartConfig: ChartConfig = createChartConfig([
 export interface TopUsersTexts {
   userCardTexts: UserCardTexts;
   userAmountPerOderChartTexts: UserAmountPerOderChartTexts;
-  dateRangePickerTexts: DateRangePickerTexts;
-  topLabel: string;
-  periodLabel: string;
-  noResults: string;
+  topChartWrapperTexts: TopChartWrapperTexts;
   title: string;
 }
 
@@ -132,125 +101,28 @@ const TopUsers = memo(
   ({
     locale,
     texts: {
-      dateRangePickerTexts,
       userAmountPerOderChartTexts,
       userCardTexts,
-      topLabel,
-      periodLabel,
-      noResults,
+      topChartWrapperTexts,
       title,
     },
   }: Props) => {
-    const [top, setTop] = useState<string>("2");
-    const [dateRange, setDateRange] = useState<DateRangeParams>({
-      from: formattedOneMonthAgo,
-      to: formattedNow,
-    });
-
-    const { messages, error, isFinished } = useFetchStream<TopUsersSummary>({
-      path: "/orders/admin/topUsers",
-      authToken: true,
-      method: "GET",
-      queryParams: {
-        ...dateRange,
-        top,
-      },
-    });
-    const dateRangePicker = useMemo(
-      () => (
-        <DateRangePicker
-          onUpdate={({ range: { from, to } }) =>
-            setDateRange({
-              from: format(from, dateFormat),
-              to: format(to || from, dateFormat),
-            })
-          }
-          align="center"
-          locale={locale === "ro" ? ro : undefined}
-          defaultPreset={"lastMonth"}
-          showCompare={false}
-          {...dateRangePickerTexts}
-        />
-      ),
-      [dateRangePickerTexts, locale],
-    );
-
-    const noMessageOrError = !messages.length || error !== null;
-
     return (
-      <motion.div
-        className="w-full h-full p-4 "
-        initial={{ opacity: 0 }}
-        whileInView={{ opacity: 1 }}
-        viewport={{ once: true, amount: "some" }}
-      >
-        <h2 className="text-2xl lg:text-3xl font-bold tracking-tight capitalize inline">
-          {title}
-        </h2>
-        <div className="flex items-center justify-around w-full  mb-12">
-          <div className="flex items-center gap-2">
-            <Label className="text-lg font-semibold">{periodLabel}</Label>
-            {dateRangePicker}
-          </div>
-          <div className="flex items-center gap-2">
-            <Label className="text-lg font-semibold" htmlFor="top-select">
-              {topLabel}
-            </Label>
-            <Select value={top} onValueChange={(v) => setTop(v)}>
-              <SelectTrigger className="w-36" id="top-select">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {topOptions.map((option) => (
-                  <SelectItem
-                    key={option + "select"}
-                    value={`${option}`}
-                    className={cn(
-                      "cursor-pointer capitalize",
-                      messages.length === option && "text-amber",
-                    )}
-                  >
-                    {option}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-        {!isFinished ? (
-          <LoadingSpinner sectionClassName="min-h-[450px] md:min-h-[650px] w-full h-full pb-10" />
-        ) : noMessageOrError ? (
-          <div className="block w-full h-full">
-            <h2 className="text-4xl tracking-tighter font-bold w-full max-w-3xl max-h-[550px] mx-auto">
-              <p className="text-center">{noResults}</p>
-              <Suspense
-                fallback={<div className="md:w-1/3 md:h-1/3 mx-auto" />}
-              >
-                <Lottie
-                  animationData={noResultsLottie}
-                  loop
-                  className="md:w-1/3 md:h-1/3 mx-auto"
-                  play
-                />
-              </Suspense>
-            </h2>
-          </div>
-        ) : (
-          <div className={"grid gap-4 md:grid-cols-2 min-h-[500px]"}>
-            {messages
-              .sort((a, b) => a.rank - b.rank)
-              .map((ts) => (
-                <div key={ts.userId}>
-                  <UserCard
-                    topSummary={ts}
-                    texts={userCardTexts}
-                    amountTexts={userAmountPerOderChartTexts}
-                  />
-                </div>
-              ))}
+      <TopChartWrapper<TopUsersSummary>
+        texts={topChartWrapperTexts}
+        path="/orders/admin/topUsers"
+        locale={locale}
+        processMessage={(ts) => (
+          <div key={ts.userId}>
+            <UserCard
+              topSummary={ts}
+              texts={userCardTexts}
+              amountTexts={userAmountPerOderChartTexts}
+            />
           </div>
         )}
-      </motion.div>
+        title={title}
+      />
     );
   },
   isDeepEqual,
@@ -316,7 +188,6 @@ const UserCard = memo(
 
     return (
       <MotionCard
-        key={topSummary.userId}
         className="flex flex-col min-h-[575px] shadow"
         initial={{ opacity: 0, scale: 0.8 }}
         whileInView={{ opacity: 1, scale: 1 }}
@@ -334,16 +205,13 @@ const UserCard = memo(
             <CardTitle>
               <Link
                 href={`/admin/users/${user.id}`}
-                className="hover:underline"
+                className="hover:underline flex items-center justify-center gap-2"
               >
-                {userAntent} {user.email}
+                <p>{userAntent}</p>
+                <p>{user.email}</p>
               </Link>
             </CardTitle>
-            <Badge variant={topSummary.rank === 1 ? "success" : "default"}>
-              {rank}
-              {` #`}
-              {topSummary.rank}
-            </Badge>
+            <TopRankBadge rank={topSummary.rank} rankLabel={rank} />
           </div>
           <CardDescription>
             {topBuyer} {topSummary.rank}
@@ -351,7 +219,7 @@ const UserCard = memo(
         </CardHeader>
         <CardContent className="flex-1 grid gap-10 ">
           <div className="flex justify-between">
-            <div>
+            <div className="grid place-items-center">
               <p className="text-sm font-medium">{totalAmount}</p>
               <p className="text-2xl font-bold">
                 {formatIntl.number(topSummary.totalAmount, {
@@ -490,48 +358,14 @@ const UserAmountPerOderChart = memo(
     meanAmountPerOrder: number;
     maxAmountPerOrder: number;
   }) => (
-    <ChartContainer
-      config={{
-        amountPerOrder: {
-          label: texts.amountPerOrder,
-          color: "hsl(var(--chart-6))",
-        },
-      }}
-      className="h-[300px] mx-auto aspect-square"
-    >
-      <BarChart
-        data={[
-          {
-            name: texts.amountPerOrder,
-            amountPerOrder: (topSum.totalAmount / topSum.ordersNumber).toFixed(
-              2,
-            ),
-          },
-        ]}
-      >
-        <XAxis dataKey="name" />
-        <YAxis domain={[0, maxAmountPerOrder + 5]} />
-        <ChartTooltip content={<ChartTooltipContent hideLabel={true} />} />
-        <Bar
-          dataKey="amountPerOrder"
-          fill="var(--color-amountPerOrder)"
-          radius={4}
-        />
-        <ReferenceLine
-          y={meanAmountPerOrder}
-          style={{ stroke: "hsl(var(--primary))" }}
-          strokeDasharray="3 3"
-          fill={"hsl(var(--primary))"}
-          label={{
-            position: "middle",
-            value: texts.meanAmountPerOrder + meanAmountPerOrder.toFixed(2),
-            fill: "hsl(var(--primary))",
-            fontSize: 12,
-            dy: -10,
-          }}
-        />
-      </BarChart>
-    </ChartContainer>
+    <TopChartMeanRelative
+      chartKey="amountPerOrder"
+      chartLabel={texts.amountPerOrder}
+      barData={topSum.totalAmount / topSum.ordersNumber}
+      maxBar={maxAmountPerOrder}
+      referenceValue={meanAmountPerOrder}
+      referenceLabel={texts.meanAmountPerOrder}
+    />
   ),
   isDeepEqual,
 );

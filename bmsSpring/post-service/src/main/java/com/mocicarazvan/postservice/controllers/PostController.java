@@ -21,6 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.util.Pair;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -31,6 +32,7 @@ import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.IntStream;
@@ -94,6 +96,10 @@ public class PostController implements ApproveController
                                                                                                     @RequestParam(required = false) Boolean liked,
                                                                                                     @Valid @RequestBody PageableBody pageableBody,
                                                                                                     @RequestParam(name = "admin", required = false, defaultValue = "false") Boolean admin,
+                                                                                                    @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate createdAtLowerBound,
+                                                                                                    @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate createdAtUpperBound,
+                                                                                                    @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate updatedAtLowerBound,
+                                                                                                    @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate updatedAtUpperBound,
                                                                                                     ServerWebExchange exchange) {
 
 
@@ -101,7 +107,7 @@ public class PostController implements ApproveController
         return
 
                 postService.
-                        getPostsFilteredWithUser(title, pageableBody, requestsUtils.extractAuthUser(exchange), approved, tags, liked, admin)
+                        getPostsFilteredWithUser(title, pageableBody, requestsUtils.extractAuthUser(exchange), approved, tags, liked, admin, createdAtLowerBound, createdAtUpperBound, updatedAtLowerBound, updatedAtUpperBound)
 //                .delayElements(Duration.ofSeconds(3))
                         .flatMapSequential(m -> postReactiveResponseBuilder.toModelWithUserPageable(m, PostController.class))
                 ;
@@ -115,6 +121,10 @@ public class PostController implements ApproveController
                                                                                     @RequestParam(required = false) Boolean liked,
                                                                                     @Valid @RequestBody PageableBody pageableBody,
                                                                                     @RequestParam(name = "admin", required = false, defaultValue = "false") Boolean admin,
+                                                                                    @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate createdAtLowerBound,
+                                                                                    @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate createdAtUpperBound,
+                                                                                    @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate updatedAtLowerBound,
+                                                                                    @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate updatedAtUpperBound,
                                                                                     ServerWebExchange exchange) {
 
         log.error("admin: " + admin);
@@ -122,7 +132,7 @@ public class PostController implements ApproveController
 
         return
                 postService.
-                        getPostsFiltered(title, pageableBody, requestsUtils.extractAuthUser(exchange), approved, tags, liked, admin)
+                        getPostsFiltered(title, pageableBody, requestsUtils.extractAuthUser(exchange), approved, tags, liked, admin, createdAtLowerBound, createdAtUpperBound, updatedAtLowerBound, updatedAtUpperBound)
 //                .delayElements(Duration.ofSeconds(3))
                         .flatMapSequential(m -> postReactiveResponseBuilder.toModelPageable(m, PostController.class));
     }
@@ -146,9 +156,13 @@ public class PostController implements ApproveController
                                                                                         @RequestParam(required = false) List<String> tags,
                                                                                         @Valid @RequestBody PageableBody pageableBody,
                                                                                         @PathVariable Long trainerId,
+                                                                                        @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate createdAtLowerBound,
+                                                                                        @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate createdAtUpperBound,
+                                                                                        @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate updatedAtLowerBound,
+                                                                                        @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate updatedAtUpperBound,
                                                                                         ServerWebExchange exchange) {
         return
-                postService.getModelsTrainer(title, trainerId, pageableBody, requestsUtils.extractAuthUser(exchange), approved, tags)
+                postService.getModelsTrainer(title, trainerId, pageableBody, requestsUtils.extractAuthUser(exchange), approved, tags, createdAtLowerBound, createdAtUpperBound, updatedAtLowerBound, updatedAtUpperBound)
                         .flatMapSequential(m -> postReactiveResponseBuilder.toModelPageable(m, PostController.class));
     }
 

@@ -44,6 +44,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuple2;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.function.Function;
@@ -87,23 +88,37 @@ public class RecipeServiceImpl extends ApprovedServiceImpl<Recipe, RecipeBody, R
     }
 
     @Override
-    public Flux<PageableResponse<ResponseWithUserDto<RecipeResponse>>> getRecipesFilteredWithUser(String title, DietType dietType, PageableBody pageableBody, String userId, Boolean approved, Boolean admin) {
-        return getRecipesFiltered(title, dietType, pageableBody, userId, approved, admin).flatMapSequential(this::getPageableWithUser);
+    public Flux<PageableResponse<ResponseWithUserDto<RecipeResponse>>> getRecipesFilteredWithUser(String title, DietType dietType,
+                                                                                                  LocalDate createdAtLowerBound, LocalDate createdAtUpperBound,
+                                                                                                  LocalDate updatedAtLowerBound, LocalDate updatedAtUpperBound,
+                                                                                                  PageableBody pageableBody, String userId, Boolean approved, Boolean admin) {
+        return getRecipesFiltered(title, dietType,
+                createdAtLowerBound, createdAtUpperBound, updatedAtLowerBound, updatedAtUpperBound,
+                pageableBody, userId, approved, admin).flatMapSequential(this::getPageableWithUser);
     }
 
     @Override
-    public Flux<PageableResponse<RecipeResponse>> getRecipesFiltered(String title, DietType dietType, PageableBody pageableBody, String userId, Boolean approved, Boolean admin) {
+    public Flux<PageableResponse<RecipeResponse>> getRecipesFiltered(String title, DietType dietType,
+                                                                     LocalDate createdAtLowerBound, LocalDate createdAtUpperBound,
+                                                                     LocalDate updatedAtLowerBound, LocalDate updatedAtUpperBound,
+                                                                     PageableBody pageableBody, String userId, Boolean approved, Boolean admin) {
         final boolean approvedNotNull = approved != null;
 
         return protectRoute(approvedNotNull, pageableBody, userId)
                 .flatMapMany(pr ->
-                        self.getRecipesFilteredBase(title, dietType, approved, admin, pr)
+                        self.getRecipesFilteredBase(title, dietType,
+                                createdAtLowerBound, createdAtUpperBound, updatedAtLowerBound, updatedAtUpperBound,
+                                approved, admin, pr)
                 );
     }
 
     @Override
-    public Flux<PageableResponse<ResponseWithEntityCount<RecipeResponse>>> getRecipesFilteredWithCount(String title, DietType dietType, PageableBody pageableBody, String userId, Boolean approved, Boolean admin) {
-        return getRecipesFiltered(title, dietType, pageableBody, userId, approved, admin)
+    public Flux<PageableResponse<ResponseWithEntityCount<RecipeResponse>>> getRecipesFilteredWithCount(String title, DietType dietType, LocalDate createdAtLowerBound, LocalDate createdAtUpperBound,
+                                                                                                       LocalDate updatedAtLowerBound, LocalDate updatedAtUpperBound,
+                                                                                                       PageableBody pageableBody, String userId, Boolean approved, Boolean admin) {
+        return getRecipesFiltered(title, dietType,
+                createdAtLowerBound, createdAtUpperBound, updatedAtLowerBound, updatedAtUpperBound,
+                pageableBody, userId, approved, admin)
                 .flatMapSequential(pr -> toResponseWithCount(userId, dayClient, pr));
 
 
@@ -211,17 +226,27 @@ public class RecipeServiceImpl extends ApprovedServiceImpl<Recipe, RecipeBody, R
     }
 
     @Override
-    public Flux<PageableResponse<RecipeResponse>> getRecipesFilteredTrainer(String title, DietType type, Long trainerId, PageableBody pageableBody, String userId, Boolean approved) {
+    public Flux<PageableResponse<RecipeResponse>> getRecipesFilteredTrainer(String title, DietType type, Long trainerId,
+                                                                            LocalDate createdAtLowerBound, LocalDate createdAtUpperBound,
+                                                                            LocalDate updatedAtLowerBound, LocalDate updatedAtUpperBound,
+                                                                            PageableBody pageableBody, String userId, Boolean approved) {
         return getModelsAuthor(trainerId, pageableBody, userId, pr ->
-                self.getRecipesFilteredTrainerBase(title, type, trainerId, approved, pr)
+                self.getRecipesFilteredTrainerBase(title, type, trainerId,
+                        createdAtLowerBound, createdAtUpperBound, updatedAtLowerBound, updatedAtUpperBound,
+                        approved, pr)
 
         );
     }
 
     @Override
-    public Flux<PageableResponse<ResponseWithEntityCount<RecipeResponse>>> getRecipesFilteredTrainerWithCount(String title, DietType type, Long trainerId, PageableBody pageableBody, String userId, Boolean approved) {
+    public Flux<PageableResponse<ResponseWithEntityCount<RecipeResponse>>> getRecipesFilteredTrainerWithCount(String title, DietType type, Long trainerId,
+                                                                                                              LocalDate createdAtLowerBound, LocalDate createdAtUpperBound,
+                                                                                                              LocalDate updatedAtLowerBound, LocalDate updatedAtUpperBound,
+                                                                                                              PageableBody pageableBody, String userId, Boolean approved) {
         return
-                getRecipesFilteredTrainer(title, type, trainerId, pageableBody, userId, approved)
+                getRecipesFilteredTrainer(title, type, trainerId,
+                        createdAtLowerBound, createdAtUpperBound, updatedAtLowerBound, updatedAtUpperBound,
+                        pageableBody, userId, approved)
                         .flatMapSequential(pr -> toResponseWithCount(userId, dayClient, pr));
     }
 
@@ -396,22 +421,34 @@ public class RecipeServiceImpl extends ApprovedServiceImpl<Recipe, RecipeBody, R
         }
 
         @RedisReactiveApprovedCache(key = CACHE_KEY_PATH, idPath = "content.id", approvedArgumentPath = "#approved", forWhom = "#admin?0:-1")
-        public Flux<PageableResponse<RecipeResponse>> getRecipesFilteredBase(String title, DietType dietType, Boolean approved, Boolean admin, PageRequest pr) {
+        public Flux<PageableResponse<RecipeResponse>> getRecipesFilteredBase(String title, DietType dietType,
+                                                                             LocalDate createdAtLowerBound, LocalDate createdAtUpperBound,
+                                                                             LocalDate updatedAtLowerBound, LocalDate updatedAtUpperBound,
+                                                                             Boolean approved, Boolean admin, PageRequest pr) {
 
             return
                     pageableUtils.createPageableResponse(
-                            recipeExtendedRepository.getRecipesFiltered(title, approved, dietType, pr).map(modelMapper::fromModelToResponse),
-                            recipeExtendedRepository.countRecipesFiltered(title, approved, dietType), pr
+                            recipeExtendedRepository.getRecipesFiltered(title, approved, dietType,
+                                    createdAtLowerBound, createdAtUpperBound, updatedAtLowerBound, updatedAtUpperBound,
+                                    pr).map(modelMapper::fromModelToResponse),
+                            recipeExtendedRepository.countRecipesFiltered(title, approved, dietType,
+                                    createdAtLowerBound, createdAtUpperBound, updatedAtLowerBound, updatedAtUpperBound
+                            ), pr
 
                     );
         }
 
         @RedisReactiveApprovedCache(key = CACHE_KEY_PATH, idPath = "content.id", approvedArgumentPath = "#approved", forWhom = "#trainerId")
-        public Flux<PageableResponse<RecipeResponse>> getRecipesFilteredTrainerBase(String title, DietType type, Long trainerId, Boolean approved, PageRequest pr) {
+        public Flux<PageableResponse<RecipeResponse>> getRecipesFilteredTrainerBase(String title, DietType type, Long trainerId, LocalDate createdAtLowerBound, LocalDate createdAtUpperBound,
+                                                                                    LocalDate updatedAtLowerBound, LocalDate updatedAtUpperBound, Boolean approved, PageRequest pr) {
             return
                     pageableUtils.createPageableResponse(
-                            recipeExtendedRepository.getRecipesFilteredTrainer(title, approved, type, trainerId, pr).map(modelMapper::fromModelToResponse),
-                            recipeExtendedRepository.countRecipesFilteredTrainer(title, approved, trainerId, type), pr
+                            recipeExtendedRepository.getRecipesFilteredTrainer(title, approved, type, trainerId,
+                                    createdAtLowerBound, createdAtUpperBound, updatedAtLowerBound, updatedAtUpperBound,
+                                    pr).map(modelMapper::fromModelToResponse),
+                            recipeExtendedRepository.countRecipesFilteredTrainer(title, approved, trainerId, type,
+                                    createdAtLowerBound, createdAtUpperBound, updatedAtLowerBound, updatedAtUpperBound
+                            ), pr
                     );
         }
 

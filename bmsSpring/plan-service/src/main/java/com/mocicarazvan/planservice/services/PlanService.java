@@ -23,6 +23,7 @@ import com.mocicarazvan.templatemodule.services.ValidIds;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDate;
 import java.util.List;
 
 public interface PlanService
@@ -31,17 +32,31 @@ public interface PlanService
 
     Mono<List<String>> seedEmbeddings();
 
-    Flux<PageableResponse<ResponseWithUserDto<PlanResponse>>> getPlansFilteredWithUser(String title, Boolean approved, Boolean display, DietType type, ObjectiveType objective, List<Long> excludeIds, PageableBody pageableBody, String userId, Boolean admin);
+    Flux<PageableResponse<ResponseWithUserDto<PlanResponse>>> getPlansFilteredWithUser(String title, Boolean approved, Boolean display, DietType type, ObjectiveType objective, List<Long> excludeIds,
+                                                                                       LocalDate createdAtLowerBound, LocalDate createdAtUpperBound,
+                                                                                       LocalDate updatedAtLowerBound, LocalDate updatedAtUpperBound,
+                                                                                       PageableBody pageableBody, String userId, Boolean admin);
 
-    Flux<PageableResponse<ResponseWithUserDto<PlanResponse>>> getPlansFilteredWithUserByIds(String title, DietType type, ObjectiveType objective, PageableBody pageableBody, List<Long> ids, String userId);
+    Flux<PageableResponse<ResponseWithUserDto<PlanResponse>>> getPlansFilteredWithUserByIds(String title, DietType type, ObjectiveType objective, LocalDate createdAtLowerBound, LocalDate createdAtUpperBound,
+                                                                                            LocalDate updatedAtLowerBound, LocalDate updatedAtUpperBound, PageableBody pageableBody, List<Long> ids, String userId);
 
-    Flux<PageableResponse<PlanResponse>> getPlansFiltered(String title, Boolean approved, Boolean display, DietType type, ObjectiveType objective, List<Long> excludeIds, PageableBody pageableBody, String userId, Boolean admin);
+    Flux<PageableResponse<PlanResponse>> getPlansFiltered(String title, Boolean approved, Boolean display, DietType type, ObjectiveType objective, List<Long> excludeIds, LocalDate createdAtLowerBound, LocalDate createdAtUpperBound,
+                                                          LocalDate updatedAtLowerBound, LocalDate updatedAtUpperBound, PageableBody pageableBody, String userId, Boolean admin);
 
-    Flux<PageableResponse<ResponseWithEntityCount<PlanResponse>>> getPlansFilteredWithCount(String title, Boolean approved, Boolean display, DietType type, ObjectiveType objective, List<Long> excludeIds, PageableBody pageableBody, String userId, Boolean admin);
+    Flux<PageableResponse<ResponseWithEntityCount<PlanResponse>>> getPlansFilteredWithCount(String title, Boolean approved, Boolean display, DietType type, ObjectiveType objective, List<Long> excludeIds,
+                                                                                            LocalDate createdAtLowerBound, LocalDate createdAtUpperBound,
+                                                                                            LocalDate updatedAtLowerBound, LocalDate updatedAtUpperBound,
+                                                                                            PageableBody pageableBody, String userId, Boolean admin);
 
-    Flux<PageableResponse<PlanResponse>> getPlansFilteredTrainer(String title, Boolean approved, Boolean display, DietType type, ObjectiveType objective, PageableBody pageableBody, String userId, Long trainerId);
+    Flux<PageableResponse<PlanResponse>> getPlansFilteredTrainer(String title, Boolean approved, Boolean display, DietType type, ObjectiveType objective,
+                                                                 LocalDate createdAtLowerBound, LocalDate createdAtUpperBound,
+                                                                 LocalDate updatedAtLowerBound, LocalDate updatedAtUpperBound,
+                                                                 PageableBody pageableBody, String userId, Long trainerId);
 
-    Flux<PageableResponse<ResponseWithEntityCount<PlanResponse>>> getPlansFilteredTrainerWithCount(String title, Boolean approved, Boolean display, DietType type, ObjectiveType objective, PageableBody pageableBody, String userId, Long trainerId);
+    Flux<PageableResponse<ResponseWithEntityCount<PlanResponse>>> getPlansFilteredTrainerWithCount(String title, Boolean approved, Boolean display, DietType type, ObjectiveType objective,
+                                                                                                   LocalDate createdAtLowerBound, LocalDate createdAtUpperBound,
+                                                                                                   LocalDate updatedAtLowerBound, LocalDate updatedAtUpperBound,
+                                                                                                   PageableBody pageableBody, String userId, Long trainerId);
 
     Flux<FullDayResponse> getFullDaysByPlan(Long id, String userId);
 

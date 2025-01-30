@@ -19,6 +19,7 @@ import com.mocicarazvan.templatemodule.services.ValidIds;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDate;
 import java.util.List;
 
 public interface DayService extends TitleBodyService<
@@ -27,15 +28,21 @@ public interface DayService extends TitleBodyService<
 
     Mono<List<String>> seedEmbeddings();
 
-    Flux<PageableResponse<DayResponse>> getDaysFiltered(String title, DayType type, List<Long> excludeIds, PageableBody pageableBody, String userId, Boolean admin);
+    Flux<PageableResponse<DayResponse>> getDaysFiltered(String title, DayType type, List<Long> excludeIds, LocalDate createdAtLowerBound, LocalDate createdAtUpperBound,
+                                                        LocalDate updatedAtLowerBound, LocalDate updatedAtUpperBound,
+                                                        PageableBody pageableBody, String userId, Boolean admin);
 
-    Flux<PageableResponse<ResponseWithUserDto<DayResponse>>> getDaysFilteredWithUser(String title, DayType type, List<Long> excludeIds, PageableBody pageableBody, String userId, Boolean admin);
+    Flux<PageableResponse<ResponseWithUserDto<DayResponse>>> getDaysFilteredWithUser(String title, DayType type, List<Long> excludeIds, LocalDate createdAtLowerBound, LocalDate createdAtUpperBound,
+                                                                                     LocalDate updatedAtLowerBound, LocalDate updatedAtUpperBound, PageableBody pageableBody, String userId, Boolean admin);
 
-    Flux<PageableResponse<ResponseWithEntityCount<DayResponse>>> getDaysFilteredWithCount(String title, DayType type, List<Long> excludeIds, PageableBody pageableBody, String userId, Boolean admin);
+    Flux<PageableResponse<ResponseWithEntityCount<DayResponse>>> getDaysFilteredWithCount(String title, DayType type, List<Long> excludeIds, LocalDate createdAtLowerBound, LocalDate createdAtUpperBound,
+                                                                                          LocalDate updatedAtLowerBound, LocalDate updatedAtUpperBound, PageableBody pageableBody, String userId, Boolean admin);
 
-    Flux<PageableResponse<DayResponse>> getDaysFilteredTrainer(String title, DayType type, List<Long> excludeIds, PageableBody pageableBody, String userId, Long trainerId);
+    Flux<PageableResponse<DayResponse>> getDaysFilteredTrainer(String title, DayType type, List<Long> excludeIds, LocalDate createdAtLowerBound, LocalDate createdAtUpperBound,
+                                                               LocalDate updatedAtLowerBound, LocalDate updatedAtUpperBound, PageableBody pageableBody, String userId, Long trainerId);
 
-    Flux<PageableResponse<ResponseWithEntityCount<DayResponse>>> getDaysFilteredTrainerWithCount(String title, DayType type, List<Long> excludeIds, PageableBody pageableBody, String userId, Long trainerId);
+    Flux<PageableResponse<ResponseWithEntityCount<DayResponse>>> getDaysFilteredTrainerWithCount(String title, DayType type, List<Long> excludeIds, LocalDate createdAtLowerBound, LocalDate createdAtUpperBound,
+                                                                                                 LocalDate updatedAtLowerBound, LocalDate updatedAtUpperBound, PageableBody pageableBody, String userId, Long trainerId);
 
 
     Mono<Void> validIds(List<Long> ids);

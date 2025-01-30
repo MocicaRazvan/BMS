@@ -16,6 +16,7 @@ import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 
@@ -37,32 +38,38 @@ public class RecipeExtendedRepositoryImpl implements RecipeExtendedRepository {
 
 
     @Override
-    public Flux<Recipe> getRecipesFiltered(String title, Boolean approved, DietType type, PageRequest pageRequest) {
+    public Flux<Recipe> getRecipesFiltered(String title, Boolean approved, DietType type, LocalDate createdAtLowerBound, LocalDate createdAtUpperBound,
+                                           LocalDate updatedAtLowerBound, LocalDate updatedAtUpperBound, PageRequest pageRequest) {
 
 
         StringBuilder queryBuilder = new StringBuilder(SELECT_ALL);
 
         return ollamaAPIService.getEmbedding(title, embedCache).flatMapMany(embeddings -> {
-            appendWhereClause(queryBuilder, title, embeddings, approved, type);
+            appendWhereClause(queryBuilder, title, embeddings, approved, type, createdAtLowerBound, createdAtUpperBound, updatedAtLowerBound, updatedAtUpperBound);
 
 
             pageableUtils.appendPageRequestQueryCallbackIfFieldIsNotEmpty(queryBuilder, pageRequest, embeddings, ollamaQueryUtils::addOrder);
 
-            DatabaseClient.GenericExecuteSpec executeSpec = getGenericExecuteSpec(title, approved, type, queryBuilder);
+            DatabaseClient.GenericExecuteSpec executeSpec = getGenericExecuteSpec(title, approved, type,
+                    createdAtLowerBound, createdAtUpperBound, updatedAtLowerBound, updatedAtUpperBound,
+                    queryBuilder);
 
             return executeSpec.map((row, metadata) -> modelMapper.fromRowToModel(row)).all();
         });
     }
 
     @Override
-    public Flux<Recipe> getRecipesFilteredTrainer(String title, Boolean approved, DietType type, Long trainerId, PageRequest pageRequest) {
+    public Flux<Recipe> getRecipesFilteredTrainer(String title, Boolean approved, DietType type, Long trainerId,
+                                                  LocalDate createdAtLowerBound, LocalDate createdAtUpperBound,
+                                                  LocalDate updatedAtLowerBound, LocalDate updatedAtUpperBound,
+                                                  PageRequest pageRequest) {
 
         return ollamaAPIService.getEmbedding(title, embedCache).flatMapMany(embeddings -> {
 
 
             StringBuilder queryBuilder = new StringBuilder(SELECT_ALL);
 
-            appendWhereClause(queryBuilder, title, embeddings, approved, type);
+            appendWhereClause(queryBuilder, title, embeddings, approved, type, createdAtLowerBound, createdAtUpperBound, updatedAtLowerBound, updatedAtUpperBound);
 
 
             repositoryUtils.addNotNullField(trainerId, queryBuilder, new RepositoryUtils.MutableBoolean(queryBuilder.length() > SELECT_ALL.length()),
@@ -71,7 +78,9 @@ public class RecipeExtendedRepositoryImpl implements RecipeExtendedRepository {
 
             pageableUtils.appendPageRequestQueryCallbackIfFieldIsNotEmpty(queryBuilder, pageRequest, embeddings, ollamaQueryUtils::addOrder);
 
-            DatabaseClient.GenericExecuteSpec executeSpec = getGenericExecuteSpec(title, approved, type, queryBuilder);
+            DatabaseClient.GenericExecuteSpec executeSpec = getGenericExecuteSpec(title, approved, type,
+                    createdAtLowerBound, createdAtUpperBound, updatedAtLowerBound, updatedAtUpperBound,
+                    queryBuilder);
 
 
             executeSpec = repositoryUtils.bindNotNullField(trainerId, executeSpec, "trainerId");
@@ -81,33 +90,42 @@ public class RecipeExtendedRepositoryImpl implements RecipeExtendedRepository {
     }
 
     @Override
-    public Mono<Long> countRecipesFiltered(String title, Boolean approved, DietType type) {
+    public Mono<Long> countRecipesFiltered(String title, Boolean approved, DietType type,
+                                           LocalDate createdAtLowerBound, LocalDate createdAtUpperBound,
+                                           LocalDate updatedAtLowerBound, LocalDate updatedAtUpperBound
+    ) {
         return ollamaAPIService.getEmbedding(title, embedCache).flatMap(embeddings -> {
 
             StringBuilder queryBuilder = new StringBuilder(COUNT_ALL);
 
-            appendWhereClause(queryBuilder, title, embeddings, approved, type);
+            appendWhereClause(queryBuilder, title, embeddings, approved, type, createdAtLowerBound, createdAtUpperBound, updatedAtLowerBound, updatedAtUpperBound);
 
-            DatabaseClient.GenericExecuteSpec executeSpec = getGenericExecuteSpec(title, approved, type, queryBuilder);
+            DatabaseClient.GenericExecuteSpec executeSpec = getGenericExecuteSpec(title, approved, type,
+                    createdAtLowerBound, createdAtUpperBound, updatedAtLowerBound, updatedAtUpperBound,
+                    queryBuilder);
 
             return executeSpec.map((row, metadata) -> row.get(0, Long.class)).first();
         });
     }
 
     @Override
-    public Mono<Long> countRecipesFilteredTrainer(String title, Boolean approved, Long trainerId, DietType type) {
+    public Mono<Long> countRecipesFilteredTrainer(String title, Boolean approved, Long trainerId, DietType type,
+                                                  LocalDate createdAtLowerBound, LocalDate createdAtUpperBound,
+                                                  LocalDate updatedAtLowerBound, LocalDate updatedAtUpperBound) {
         return ollamaAPIService.getEmbedding(title, embedCache).flatMap(embeddings -> {
 
 
             StringBuilder queryBuilder = new StringBuilder(COUNT_ALL);
 
-            appendWhereClause(queryBuilder, title, embeddings, approved, type);
+            appendWhereClause(queryBuilder, title, embeddings, approved, type, createdAtLowerBound, createdAtUpperBound, updatedAtLowerBound, updatedAtUpperBound);
 
 
             repositoryUtils.addNotNullField(trainerId, queryBuilder, new RepositoryUtils.MutableBoolean(queryBuilder.length() > COUNT_ALL.length()),
                     " user_id = :trainerId");
 
-            DatabaseClient.GenericExecuteSpec executeSpec = getGenericExecuteSpec(title, approved, type, queryBuilder);
+            DatabaseClient.GenericExecuteSpec executeSpec = getGenericExecuteSpec(title, approved, type,
+                    createdAtLowerBound, createdAtUpperBound, updatedAtLowerBound, updatedAtUpperBound,
+                    queryBuilder);
 
 
             executeSpec = repositoryUtils.bindNotNullField(trainerId, executeSpec, "trainerId");
@@ -149,31 +167,30 @@ public class RecipeExtendedRepositoryImpl implements RecipeExtendedRepository {
         )).first();
     }
 
-    private DatabaseClient.GenericExecuteSpec getGenericExecuteSpec(String title, Boolean approved, DietType type, StringBuilder queryBuilder) {
+    private DatabaseClient.GenericExecuteSpec getGenericExecuteSpec(String title, Boolean approved, DietType type,
+                                                                    LocalDate createdAtLowerBound, LocalDate createdAtUpperBound,
+                                                                    LocalDate updatedAtLowerBound, LocalDate updatedAtUpperBound,
+                                                                    StringBuilder queryBuilder) {
         DatabaseClient.GenericExecuteSpec executeSpec = databaseClient.sql(queryBuilder.toString());
 
-
         executeSpec = repositoryUtils.bindNotNullField(approved, executeSpec, "approved");
-
         executeSpec = repositoryUtils.bindStringField(title, executeSpec, "title");
-
-
         executeSpec = repositoryUtils.bindEnumField(type, executeSpec, "type");
-
+        executeSpec = repositoryUtils.bindCreatedAtBound(createdAtLowerBound, createdAtUpperBound, executeSpec);
+        executeSpec = repositoryUtils.bindUpdatedAtBound(updatedAtLowerBound, updatedAtUpperBound, executeSpec);
         return executeSpec;
     }
 
-    private void appendWhereClause(StringBuilder queryBuilder, String title, String embeddings, Boolean approved, DietType type) {
+    private void appendWhereClause(StringBuilder queryBuilder, String title, String embeddings, Boolean approved, DietType type,
+                                   LocalDate createdAtLowerBound, LocalDate createdAtUpperBound,
+                                   LocalDate updatedAtLowerBound, LocalDate updatedAtUpperBound
+    ) {
 
         RepositoryUtils.MutableBoolean hasPreviousCriteria = new RepositoryUtils.MutableBoolean(false);
-
-
         repositoryUtils.addNotNullField(approved, queryBuilder, hasPreviousCriteria, " approved = :approved");
-
-
         repositoryUtils.addStringField(title, queryBuilder, hasPreviousCriteria, ollamaQueryUtils.addThresholdFilter(embeddings, " OR title ILIKE '%' || :title || '%' OR similarity(title, :title ) > 0.35"));
-
-
         repositoryUtils.addNotNullField(type, queryBuilder, hasPreviousCriteria, " type = :type");
+        repositoryUtils.addCreatedAtBound("r", createdAtLowerBound, createdAtUpperBound, queryBuilder, hasPreviousCriteria);
+        repositoryUtils.addUpdatedAtBound("r", updatedAtLowerBound, updatedAtUpperBound, queryBuilder, hasPreviousCriteria);
     }
 }

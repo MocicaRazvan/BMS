@@ -37,6 +37,9 @@ import AlertDialogApproveRecipes from "@/components/dialogs/recipes/approve-reci
 import useClientNotFound from "@/hoooks/useClientNotFound";
 import OverflowTextTooltip from "@/components/common/overflow-text-tooltip";
 import AlertDialogDeleteRecipe from "@/components/dialogs/recipes/delete-recipe";
+import CreationFilter, {
+  CreationFilterTexts,
+} from "@/components/list/creation-filter";
 
 export interface RecipeTableColumnsTexts {
   id: string;
@@ -61,6 +64,7 @@ export interface RecipeTableTexts {
   dietDropdownTexts: UseFilterDropdownTexts;
   recipeTableColumnsTexts: RecipeTableColumnsTexts;
   search: string;
+  creationFilterTexts: CreationFilterTexts;
 }
 
 interface Props
@@ -86,6 +90,7 @@ export default function RecipeTable({
   mainDashboard = false,
   extraArrayQueryParam,
   isSidebarOpen = false,
+  creationFilterTexts,
 }: Props) {
   const {
     field: approvedField,
@@ -135,6 +140,8 @@ export default function RecipeTable({
     updateFilterValue,
     clearFilterValue,
     resetCurrentPage,
+    updateCreatedAtRange,
+    updateUpdatedAtRange,
   } = useList<ResponseWithEntityCount<CustomEntityModel<RecipeResponse>>>({
     path,
     extraQueryParams: {
@@ -494,6 +501,13 @@ export default function RecipeTable({
                 {approvedFieldCriteriaCallBack(resetCurrentPage)}
               </div>
             </div>
+          }
+          rangeDateFilter={
+            <CreationFilter
+              {...creationFilterTexts}
+              updateCreatedAtRange={updateCreatedAtRange}
+              updateUpdatedAtRange={updateUpdatedAtRange}
+            />
           }
         />
       </Suspense>

@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from "react";
 
 interface DateInputProps {
   value?: Date;
+  disabled?: boolean;
   onChange: (date: Date) => void;
 }
 
@@ -11,7 +12,7 @@ interface DateParts {
   year: number;
 }
 
-const DateInput: React.FC<DateInputProps> = ({ value, onChange }) => {
+const DateInput: React.FC<DateInputProps> = ({ value, onChange, disabled }) => {
   const [date, setDate] = React.useState<DateParts>(() => {
     const d = value ? new Date(value) : new Date();
     return {
@@ -202,6 +203,7 @@ const DateInput: React.FC<DateInputProps> = ({ value, onChange }) => {
     <div className="flex border rounded-lg items-center text-sm px-1">
       <input
         type="text"
+        disabled={disabled}
         ref={monthRef}
         max={12}
         maxLength={2}
@@ -219,6 +221,7 @@ const DateInput: React.FC<DateInputProps> = ({ value, onChange }) => {
       />
       <span className="opacity-20 -mx-px">{"/"}</span>
       <input
+        disabled={disabled}
         type="text"
         ref={dayRef}
         max={31}
@@ -237,6 +240,7 @@ const DateInput: React.FC<DateInputProps> = ({ value, onChange }) => {
       />
       <span className="opacity-20 -mx-px">{"/"}</span>
       <input
+        disabled={disabled}
         type="text"
         ref={yearRef}
         max={9999}

@@ -835,6 +835,10 @@
         "search": "Search in title...",
         "noSort": "No sorting criteria"
       },
+      "CreationFilterTexts": {
+        "createdAtLabel": "Filter by creation date",
+        "updatedAtLabel": "Filter by update date"
+      },
       "UseApprovedFilterTexts": {
         "approved": "Approved",
         "notApproved": "Not approved",
@@ -1169,7 +1173,7 @@
           "orders": "orders",
           "plans": "plans"
         },
-        "countLabel": "10*Number of {type}",
+        "countLabel": "Number of {type}",
         "totalAmountLabel": "Total amount for {type}",
         "bothLabel": "Both",
         "averageTotalAmountLabel": "Average total amount for {type}",
@@ -1188,13 +1192,21 @@
           "totalAmount": "Total amount"
         }
       },
+      "DownloadChartButton": {
+        "downloadChart": "Download Chart"
+      },
+      "TopChartWrapperTexts": {
+        "periodLabel": "Period",
+        "topLabel": "Top",
+        "noResults": "No results were found by the search criteria!"
+      },
       "TopUsersTexts": {
         "periodLabel": "Period",
         "topLabel": "Top",
         "noResults": "No results were found by the search criteria!",
         "title": "Top Users",
         "userCardTexts": {
-          "userAntent": "User ",
+          "userAntent": "User: ",
           "totalAmount": "Total amount",
           "topBuyer": "Top buyer: ",
           "orders": "Orders",
@@ -1208,6 +1220,20 @@
         "userAmountPerOderChartTexts": {
           "amountPerOrder": "Amount per Order",
           "meanAmountPerOrder": "Mean for top: "
+        }
+      },
+      "TopPlansTexts": {
+        "title": "Top Plans",
+        "planCardTexts": {
+          "planAntet": "Plan: ",
+          "topPlan": "Top plan: ",
+          "dietType": "Diet Type",
+          "numberOfPurchases": "Number of purchases",
+          "meanNumberOfPurchases": "Mean for top: ",
+          "ratioLabel": "Ratio of purchases",
+          "rankLabel": "Rank",
+          "ordersCount": "In orders",
+          "madeBy": "Made by"
         }
       }
     },
@@ -1310,6 +1336,7 @@
         "compare": "Compare",
         "cancel": "Cancel",
         "update": "Update",
+        "noRangeSelected": "No range selected",
         "presets": {
           "today": "Today",
           "yesterday": "Yesterday",
@@ -1321,6 +1348,10 @@
           "thisMonth": "This Month",
           "lastMonth": "Last Month",
           "pastYear": "Past Year"
+        },
+        "none": {
+          "false": "Make range inactive",
+          "true": "Make range active"
         }
       }
     },

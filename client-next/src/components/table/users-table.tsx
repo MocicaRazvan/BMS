@@ -31,7 +31,10 @@ import { useStompClient } from "react-stomp-hooks";
 import { AlertDialogMakeTrainer } from "@/components/dialogs/user/make-trainer-alert";
 import useClientNotFound from "@/hoooks/useClientNotFound";
 import OverflowTextTooltip from "@/components/common/overflow-text-tooltip";
-import { appendCreatedAtDesc } from "@/lib/utils";
+import { appendCreatedAtDesc, cn } from "@/lib/utils";
+import CreationFilter, {
+  CreationFilterTexts,
+} from "@/components/list/creation-filter";
 
 export interface UserTableColumnsTexts {
   id: string;
@@ -56,6 +59,7 @@ export interface UserTableTexts {
   useRoleFilterTexts: UseFilterDropdownTexts;
   useBinaryEmailVerifiedTexts: UseBinaryTexts;
   search: string;
+  creationFilterTexts: CreationFilterTexts;
 }
 
 type Props = ExtraTableProps & UseListProps & WithUser & UserTableTexts;
@@ -77,6 +81,7 @@ export default function UsersTable({
   useRoleFilterTexts,
   useBinaryEmailVerifiedTexts,
   search,
+  creationFilterTexts,
 }: Props) {
   const stompClient = useStompClient();
   const router = useRouter();
@@ -138,6 +143,8 @@ export default function UsersTable({
     updateFilterValue,
     clearFilterValue,
     resetCurrentPage,
+    updateUpdatedAtRange,
+    updateCreatedAtRange,
   } = useList<CustomEntityModel<UserDto>>({
     path,
     extraQueryParams: {
@@ -259,12 +266,21 @@ export default function UsersTable({
         id: userTableColumnsTexts.role,
         accessorKey: "role",
         header: () => (
-          <p className="font-bold text-lg text-left">
+          <p className={"font-bold text-lg text-left"}>
             {userTableColumnsTexts.role}
           </p>
         ),
         cell: ({ row }) => (
-          <p className="font-bold ">
+          <p
+            className={cn(
+              "font-bold",
+              row.original.role === "ROLE_ADMIN"
+                ? "text-destructive"
+                : row.original.role === "ROLE_TRAINER"
+                  ? "text-success"
+                  : "text-primary",
+            )}
+          >
             {(row.original.role as string)?.split("_")?.[1]}
           </p>
         ),
@@ -493,6 +509,13 @@ export default function UsersTable({
                 {roleFilterCriteriaCallback(resetCurrentPage)}
               </div>
             </div>
+          }
+          rangeDateFilter={
+            <CreationFilter
+              {...creationFilterTexts}
+              updateCreatedAtRange={updateCreatedAtRange}
+              updateUpdatedAtRange={updateUpdatedAtRange}
+            />
           }
         />
       </Suspense>

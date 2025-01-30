@@ -35,6 +35,9 @@ import AlertDialogDeleteDay from "@/components/dialogs/days/delete-day";
 import LoadingSpinner from "@/components/common/loading-spinner";
 import OverflowTextTooltip from "@/components/common/overflow-text-tooltip";
 import { DayTypeBadgeTexts } from "@/components/days/day-type-badge";
+import CreationFilter, {
+  CreationFilterTexts,
+} from "@/components/list/creation-filter";
 
 export interface DayTableColumnsTexts {
   id: string;
@@ -54,6 +57,7 @@ export interface DayTableTexts {
   typeDropdownTexts: UseFilterDropdownTexts;
   search: string;
   dayTypeBadgeTexts: DayTypeBadgeTexts;
+  creationFilterTexts: CreationFilterTexts;
 }
 
 export interface DayTableProps
@@ -80,6 +84,7 @@ export default function DaysTable({
   sizeOptions,
   mainDashboard,
   dayTypeBadgeTexts,
+  creationFilterTexts,
 }: DayTableProps) {
   const router = useRouter();
   const formatIntl = useFormatter();
@@ -114,6 +119,8 @@ export default function DaysTable({
     updateFilterValue,
     clearFilterValue,
     resetCurrentPage,
+    updateCreatedAtRange,
+    updateUpdatedAtRange,
   } = useList<ResponseWithEntityCount<CustomEntityModel<DayResponse>>>({
     path,
     extraQueryParams: {
@@ -354,6 +361,13 @@ export default function DaysTable({
                 {dayTypeFilterCriteriaCallback(resetCurrentPage)}
               </div>
             </div>
+          }
+          rangeDateFilter={
+            <CreationFilter
+              {...creationFilterTexts}
+              updateCreatedAtRange={updateCreatedAtRange}
+              updateUpdatedAtRange={updateUpdatedAtRange}
+            />
           }
         />
       </Suspense>

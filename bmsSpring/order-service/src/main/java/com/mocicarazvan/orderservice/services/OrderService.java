@@ -6,10 +6,7 @@ import com.mocicarazvan.orderservice.dtos.clients.MealResponse;
 import com.mocicarazvan.orderservice.dtos.clients.PlanResponse;
 import com.mocicarazvan.orderservice.dtos.clients.RecipeResponse;
 import com.mocicarazvan.orderservice.dtos.clients.collect.FullDayResponse;
-import com.mocicarazvan.orderservice.dtos.summaries.CountryOrderSummary;
-import com.mocicarazvan.orderservice.dtos.summaries.DailyOrderSummary;
-import com.mocicarazvan.orderservice.dtos.summaries.MonthlyOrderSummary;
-import com.mocicarazvan.orderservice.dtos.summaries.TopUsersSummary;
+import com.mocicarazvan.orderservice.dtos.summaries.*;
 import com.mocicarazvan.orderservice.enums.CountrySummaryType;
 import com.mocicarazvan.orderservice.enums.DietType;
 import com.mocicarazvan.orderservice.enums.ObjectiveType;
@@ -34,7 +31,8 @@ public interface OrderService extends CountInParentService {
 
     Flux<UserSubscriptionDto> getSubscriptions(String userId);
 
-    Flux<PageableResponse<ResponseWithUserDtoEntity<PlanResponse>>> getPlansForUser(String title, DietType dietType, ObjectiveType objective, PageableBody pageableBody, String userId);
+    Flux<PageableResponse<ResponseWithUserDtoEntity<PlanResponse>>> getPlansForUser(String title, DietType dietType, ObjectiveType objective, LocalDate createdAtLowerBound, LocalDate createdAtUpperBound,
+                                                                                    LocalDate updatedAtLowerBound, LocalDate updatedAtUpperBound, PageableBody pageableBody, String userId);
 
     Mono<FullDayResponse> getDayByPlanForUser(Long id, Long dayId, String userId);
 
@@ -50,13 +48,17 @@ public interface OrderService extends CountInParentService {
 
     Flux<TopUsersSummary> getTopUsersSummary(LocalDate from, LocalDate to, int top);
 
+    Flux<TopPlansSummary> getTopPlansSummary(LocalDate from, LocalDate to, int top);
+
+    Flux<TopPlansSummary> getTopPlansSummaryTrainer(LocalDate from, LocalDate to, int top, Long trainerId, String userId);
+
     Flux<MonthlyOrderSummary> getTrainerOrdersSummaryByMonth(LocalDate from, LocalDate to, Long trainerId, String userId);
 
     Flux<DailyOrderSummary> getOrdersSummaryByDay(LocalDate from, LocalDate to, String userId);
 
     Flux<DailyOrderSummary> getTrainerOrdersSummaryByDay(LocalDate from, LocalDate to, Long trainerId, String userId);
 
-    Flux<CountryOrderSummary> getOrdersSummaryByCountry(CountrySummaryType type);
+    Flux<CountryOrderSummary> getOrdersSummaryByCountry(CountrySummaryType type, LocalDate from, LocalDate to);
 
     Mono<ResponseWithUserDtoEntity<RecipeResponse>> getRecipeByIdWithUser(Long planId, Long dayId, Long recipeId, String userId);
 

@@ -6,16 +6,21 @@ import org.springframework.data.domain.PageRequest;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDate;
 import java.util.List;
 
 public interface RecipeExtendedRepository {
-    Flux<Recipe> getRecipesFiltered(String title, Boolean approved, DietType type, PageRequest pageRequest);
+    Flux<Recipe> getRecipesFiltered(String title, Boolean approved, DietType type, LocalDate createdAtLowerBound, LocalDate createdAtUpperBound,
+                                    LocalDate updatedAtLowerBound, LocalDate updatedAtUpperBound, PageRequest pageRequest);
 
-    Flux<Recipe> getRecipesFilteredTrainer(String title, Boolean approved, DietType type, Long trainerId, PageRequest pageRequest);
+    Flux<Recipe> getRecipesFilteredTrainer(String title, Boolean approved, DietType type, Long trainerId, LocalDate createdAtLowerBound, LocalDate createdAtUpperBound,
+                                           LocalDate updatedAtLowerBound, LocalDate updatedAtUpperBound, PageRequest pageRequest);
 
-    Mono<Long> countRecipesFiltered(String title, Boolean approved, DietType type);
+    Mono<Long> countRecipesFiltered(String title, Boolean approved, DietType type, LocalDate createdAtLowerBound, LocalDate createdAtUpperBound,
+                                    LocalDate updatedAtLowerBound, LocalDate updatedAtUpperBound);
 
-    Mono<Long> countRecipesFilteredTrainer(String title, Boolean approved, Long trainerId, DietType type);
+    Mono<Long> countRecipesFilteredTrainer(String title, Boolean approved, Long trainerId, DietType type, LocalDate createdAtLowerBound, LocalDate createdAtUpperBound,
+                                           LocalDate updatedAtLowerBound, LocalDate updatedAtUpperBound);
 
     Mono<DietType> determineMostRestrictiveDietType(List<Long> recipeIds);
 }

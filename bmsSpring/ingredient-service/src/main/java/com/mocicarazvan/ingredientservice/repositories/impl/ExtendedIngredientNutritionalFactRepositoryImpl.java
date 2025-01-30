@@ -16,6 +16,8 @@ import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDate;
+
 
 @Repository
 @RequiredArgsConstructor
@@ -51,41 +53,51 @@ public class ExtendedIngredientNutritionalFactRepositoryImpl implements Extended
             """;
 
     @Override
-    public Flux<IngredientNutritionalFact> getModelsFiltered(String name, Boolean display, DietType type, PageRequest pageRequest) {
+    public Flux<IngredientNutritionalFact> getModelsFiltered(String name, Boolean display, DietType type,
+                                                             LocalDate createdAtLowerBound, LocalDate createdAtUpperBound,
+                                                             LocalDate updatedAtLowerBound, LocalDate updatedAtUpperBound,
+                                                             PageRequest pageRequest) {
 
 
         return ollamaAPIService.getEmbedding(name, embedCache).flatMapMany(embeddings -> {
             StringBuilder queryBuilder = new StringBuilder(SELECT_ALL);
 
 
-            appendWhereClause(queryBuilder, name, embeddings, display, type);
+            appendWhereClause(queryBuilder, name, embeddings, display, type, createdAtLowerBound, createdAtUpperBound, updatedAtLowerBound, updatedAtUpperBound);
 
 //        queryBuilder.append(pageableUtilsCustom.createPageRequestQuery(pageRequest));
 
             pageableUtilsCustom.appendPageRequestQueryCallbackIfFieldIsNotEmpty(queryBuilder, pageRequest, embeddings, ollamaQueryUtils::addOrder);
 
-            DatabaseClient.GenericExecuteSpec executeSpec = getGenericExecuteSpec(name, display, type, queryBuilder);
+            DatabaseClient.GenericExecuteSpec executeSpec = getGenericExecuteSpec(name, display, type,
+                    createdAtLowerBound, createdAtUpperBound, updatedAtLowerBound, updatedAtUpperBound,
+                    queryBuilder);
 
             return executeSpec.map((row, metadata) -> ingredientNutritionalFactMapper.fromRowToModel(row)).all();
         });
     }
 
     @Override
-    public Mono<Long> countModelsFiltered(String name, Boolean display, DietType type, PageRequest pageRequest) {
+    public Mono<Long> countModelsFiltered(String name, Boolean display, DietType type, LocalDate createdAtLowerBound, LocalDate createdAtUpperBound,
+                                          LocalDate updatedAtLowerBound, LocalDate updatedAtUpperBound) {
         return ollamaAPIService.getEmbedding(name, embedCache).flatMap(embeddings -> {
 
             StringBuilder queryBuilder = new StringBuilder(COUNT_ALL);
 
 
-            appendWhereClause(queryBuilder, name, embeddings, display, type);
+            appendWhereClause(queryBuilder, name, embeddings, display, type, createdAtLowerBound, createdAtUpperBound, updatedAtLowerBound, updatedAtUpperBound);
 
-            DatabaseClient.GenericExecuteSpec executeSpec = getGenericExecuteSpec(name, display, type, queryBuilder);
+            DatabaseClient.GenericExecuteSpec executeSpec = getGenericExecuteSpec(name, display, type,
+                    createdAtLowerBound, createdAtUpperBound, updatedAtLowerBound, updatedAtUpperBound,
+                    queryBuilder);
 
             return executeSpec.map((row, metadata) -> row.get(0, Long.class)).first();
         });
     }
 
-    private void appendWhereClause(StringBuilder queryBuilder, String name, String embeddings, Boolean display, DietType type) {
+    private void appendWhereClause(StringBuilder queryBuilder, String name, String embeddings, Boolean display, DietType type,
+                                   LocalDate createdAtLowerBound, LocalDate createdAtUpperBound,
+                                   LocalDate updatedAtLowerBound, LocalDate updatedAtUpperBound) {
 
         RepositoryUtils.MutableBoolean hasPreviousCriteria = new RepositoryUtils.MutableBoolean(false);
 
@@ -98,15 +110,22 @@ public class ExtendedIngredientNutritionalFactRepositoryImpl implements Extended
 
         repositoryUtils.addNotNullField(type, queryBuilder, hasPreviousCriteria, " ingredient.type = :type");
 
+        repositoryUtils.addCreatedAtBound("ingredient", createdAtLowerBound, createdAtUpperBound, queryBuilder, hasPreviousCriteria);
+        repositoryUtils.addUpdatedAtBound("ingredient", updatedAtLowerBound, updatedAtUpperBound, queryBuilder, hasPreviousCriteria);
+
     }
 
-    private DatabaseClient.GenericExecuteSpec getGenericExecuteSpec(String name, Boolean display, DietType type, StringBuilder queryBuilder) {
+    private DatabaseClient.GenericExecuteSpec getGenericExecuteSpec(String name, Boolean display, DietType type,
+                                                                    LocalDate createdAtLowerBound, LocalDate createdAtUpperBound,
+                                                                    LocalDate updatedAtLowerBound, LocalDate updatedAtUpperBound,
+                                                                    StringBuilder queryBuilder) {
         DatabaseClient.GenericExecuteSpec executeSpec = databaseClient.sql(queryBuilder.toString());
 
         executeSpec = repositoryUtils.bindStringField(name, executeSpec, "name");
         executeSpec = repositoryUtils.bindNotNullField(display, executeSpec, "display");
         executeSpec = repositoryUtils.bindEnumField(type, executeSpec, "type");
-
+        executeSpec = repositoryUtils.bindCreatedAtBound(createdAtLowerBound, createdAtUpperBound, executeSpec);
+        executeSpec = repositoryUtils.bindUpdatedAtBound(updatedAtLowerBound, updatedAtUpperBound, executeSpec);
         return executeSpec;
     }
 }

@@ -17,6 +17,7 @@ import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Repository
@@ -38,13 +39,16 @@ public class PostExtendedRepositoryImpl implements PostExtendedRepository {
 
 
     @Override
-    public Flux<Post> getPostsFiltered(String title, Boolean approved, List<String> tags, Long likedUserId, PageRequest pageRequest) {
+    public Flux<Post> getPostsFiltered(String title, Boolean approved, List<String> tags, Long likedUserId,
+                                       LocalDate createdAtLowerBound, LocalDate createdAtUpperBound,
+                                       LocalDate updatedAtLowerBound, LocalDate updatedAtUpperBound,
+                                       PageRequest pageRequest) {
 
 
         return ollamaAPIService.getEmbedding(title, embedCache).flatMapMany(embeddings -> {
             StringBuilder queryBuilder = new StringBuilder(SELECT_ALL);
 
-            appendWhereClause(queryBuilder, title, embeddings, approved, tags);
+            appendWhereClause(queryBuilder, title, embeddings, approved, tags, createdAtLowerBound, createdAtUpperBound, updatedAtLowerBound, updatedAtUpperBound);
 
             repositoryUtils.addNotNullField(likedUserId, queryBuilder, new RepositoryUtils.MutableBoolean(queryBuilder.length() > SELECT_ALL.length()),
                     " :user_like_id = ANY(user_likes) ");
@@ -53,7 +57,7 @@ public class PostExtendedRepositoryImpl implements PostExtendedRepository {
             pageableUtils.appendPageRequestQueryCallbackIfFieldIsNotEmpty(queryBuilder, pageRequest, embeddings, ollamaQueryUtils::addOrder);
 
 
-            DatabaseClient.GenericExecuteSpec executeSpec = getGenericExecuteSpec(title, approved, tags, queryBuilder);
+            DatabaseClient.GenericExecuteSpec executeSpec = getGenericExecuteSpec(title, approved, tags, queryBuilder, createdAtLowerBound, createdAtUpperBound, updatedAtLowerBound, updatedAtUpperBound);
 
             executeSpec = repositoryUtils.bindNotNullField(likedUserId, executeSpec, "user_like_id");
 
@@ -62,14 +66,17 @@ public class PostExtendedRepositoryImpl implements PostExtendedRepository {
     }
 
     @Override
-    public Flux<Post> getPostsFilteredTrainer(String title, Boolean approved, List<String> tags, Long trainerId, PageRequest pageRequest) {
+    public Flux<Post> getPostsFilteredTrainer(String title, Boolean approved, List<String> tags, Long trainerId,
+                                              LocalDate createdAtLowerBound, LocalDate createdAtUpperBound,
+                                              LocalDate updatedAtLowerBound, LocalDate updatedAtUpperBound,
+                                              PageRequest pageRequest) {
 
 
         return ollamaAPIService.getEmbedding(title, embedCache).flatMapMany(embeddings -> {
             StringBuilder queryBuilder = new StringBuilder(SELECT_ALL);
 
 
-            appendWhereClause(queryBuilder, title, embeddings, approved, tags);
+            appendWhereClause(queryBuilder, title, embeddings, approved, tags, createdAtLowerBound, createdAtUpperBound, updatedAtLowerBound, updatedAtUpperBound);
 
 
             repositoryUtils.addNotNullField(trainerId, queryBuilder, new RepositoryUtils.MutableBoolean(queryBuilder.length() > SELECT_ALL.length()),
@@ -79,7 +86,7 @@ public class PostExtendedRepositoryImpl implements PostExtendedRepository {
             pageableUtils.appendPageRequestQueryCallbackIfFieldIsNotEmpty(queryBuilder, pageRequest, embeddings, ollamaQueryUtils::addOrder);
 
 
-            DatabaseClient.GenericExecuteSpec executeSpec = getGenericExecuteSpec(title, approved, tags, queryBuilder);
+            DatabaseClient.GenericExecuteSpec executeSpec = getGenericExecuteSpec(title, approved, tags, queryBuilder, createdAtLowerBound, createdAtUpperBound, updatedAtLowerBound, updatedAtUpperBound);
 
 
             executeSpec = repositoryUtils.bindNotNullField(trainerId, executeSpec, "trainerId");
@@ -90,18 +97,19 @@ public class PostExtendedRepositoryImpl implements PostExtendedRepository {
 
 
     @Override
-    public Mono<Long> countPostsFiltered(String title, Boolean approved, List<String> tags, Long likedUserId) {
+    public Mono<Long> countPostsFiltered(String title, Boolean approved, List<String> tags, LocalDate createdAtLowerBound, LocalDate createdAtUpperBound,
+                                         LocalDate updatedAtLowerBound, LocalDate updatedAtUpperBound, Long likedUserId) {
         return ollamaAPIService.getEmbedding(title, embedCache).flatMap(embeddings -> {
 
             StringBuilder queryBuilder = new StringBuilder(COUNT_ALL);
 
 
-            appendWhereClause(queryBuilder, title, embeddings, approved, tags);
+            appendWhereClause(queryBuilder, title, embeddings, approved, tags, createdAtLowerBound, createdAtUpperBound, updatedAtLowerBound, updatedAtUpperBound);
 
             repositoryUtils.addNotNullField(likedUserId, queryBuilder, new RepositoryUtils.MutableBoolean(queryBuilder.length() > COUNT_ALL.length()),
                     " :user_like_id = ANY(user_likes) ");
 
-            DatabaseClient.GenericExecuteSpec executeSpec = getGenericExecuteSpec(title, approved, tags, queryBuilder);
+            DatabaseClient.GenericExecuteSpec executeSpec = getGenericExecuteSpec(title, approved, tags, queryBuilder, createdAtLowerBound, createdAtUpperBound, updatedAtLowerBound, updatedAtUpperBound);
 
             executeSpec = repositoryUtils.bindNotNullField(likedUserId, executeSpec, "user_like_id");
 
@@ -111,20 +119,21 @@ public class PostExtendedRepositoryImpl implements PostExtendedRepository {
     }
 
     @Override
-    public Mono<Long> countPostsFilteredTrainer(String title, Boolean approved, Long trainerId, List<String> tags) {
+    public Mono<Long> countPostsFilteredTrainer(String title, Boolean approved, Long trainerId, List<String> tags, LocalDate createdAtLowerBound, LocalDate createdAtUpperBound,
+                                                LocalDate updatedAtLowerBound, LocalDate updatedAtUpperBound) {
 
         return ollamaAPIService.getEmbedding(title, embedCache).flatMap(embeddings -> {
 
             StringBuilder queryBuilder = new StringBuilder(COUNT_ALL);
 
 
-            appendWhereClause(queryBuilder, title, embeddings, approved, tags);
+            appendWhereClause(queryBuilder, title, embeddings, approved, tags, createdAtLowerBound, createdAtUpperBound, updatedAtLowerBound, updatedAtUpperBound);
 
 
             repositoryUtils.addNotNullField(trainerId, queryBuilder, new RepositoryUtils.MutableBoolean(queryBuilder.length() > COUNT_ALL.length()),
                     " user_id = :trainerId");
 
-            DatabaseClient.GenericExecuteSpec executeSpec = getGenericExecuteSpec(title, approved, tags, queryBuilder);
+            DatabaseClient.GenericExecuteSpec executeSpec = getGenericExecuteSpec(title, approved, tags, queryBuilder, createdAtLowerBound, createdAtUpperBound, updatedAtLowerBound, updatedAtUpperBound);
 
 
             executeSpec = repositoryUtils.bindNotNullField(trainerId, executeSpec, "trainerId");
@@ -134,12 +143,15 @@ public class PostExtendedRepositoryImpl implements PostExtendedRepository {
     }
 
 
-    private DatabaseClient.GenericExecuteSpec getGenericExecuteSpec(String title, Boolean approved, List<String> tags, StringBuilder queryBuilder) {
+    private DatabaseClient.GenericExecuteSpec getGenericExecuteSpec(String title, Boolean approved, List<String> tags, StringBuilder queryBuilder, LocalDate createdAtLowerBound, LocalDate createdAtUpperBound,
+                                                                    LocalDate updatedAtLowerBound, LocalDate updatedAtUpperBound) {
         DatabaseClient.GenericExecuteSpec executeSpec = databaseClient.sql(queryBuilder.toString());
 
 
         executeSpec = repositoryUtils.bindNotNullField(approved, executeSpec, "approved");
         executeSpec = repositoryUtils.bindStringField(title, executeSpec, "title");
+        executeSpec = repositoryUtils.bindCreatedAtBound(createdAtLowerBound, createdAtUpperBound, executeSpec);
+        executeSpec = repositoryUtils.bindUpdatedAtBound(updatedAtLowerBound, updatedAtUpperBound, executeSpec);
 
         if (tags != null && !tags.isEmpty()) {
             for (int i = 0; i < tags.size(); i++) {
@@ -151,12 +163,17 @@ public class PostExtendedRepositoryImpl implements PostExtendedRepository {
     }
 
 
-    private void appendWhereClause(StringBuilder queryBuilder, String title, String embeddings, Boolean approved, List<String> tags) {
+    private void appendWhereClause(StringBuilder queryBuilder, String title, String embeddings, Boolean approved, List<String> tags,
+                                   LocalDate createdAtLowerBound, LocalDate createdAtUpperBound,
+                                   LocalDate updatedAtLowerBound, LocalDate updatedAtUpperBound
+    ) {
 
         RepositoryUtils.MutableBoolean hasPreviousCriteria = new RepositoryUtils.MutableBoolean(false);
 
         repositoryUtils.addNotNullField(approved, queryBuilder, hasPreviousCriteria, "approved = :approved");
         repositoryUtils.addStringField(title, queryBuilder, hasPreviousCriteria, ollamaQueryUtils.addThresholdFilter(embeddings, " OR title ILIKE '%' || :title || '%' OR similarity(title, :title ) > 0.35 "));
+        repositoryUtils.addCreatedAtBound("p", createdAtLowerBound, createdAtUpperBound, queryBuilder, hasPreviousCriteria);
+        repositoryUtils.addUpdatedAtBound("p", updatedAtLowerBound, updatedAtUpperBound, queryBuilder, hasPreviousCriteria);
 
 
         if (tags != null && !tags.isEmpty()) {

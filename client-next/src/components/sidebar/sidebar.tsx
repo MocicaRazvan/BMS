@@ -35,12 +35,12 @@ export default function SideBar({
   return (
     <aside
       className={cn(
-        "fixed top-0 left-0 z-50 h-screen -translate-x-full lg:translate-x-0 transition-[width] ease-in-out duration-300",
+        "fixed top-0 left-0 z-50 h-screen -translate-x-full lg:translate-x-0 transition-[width] ease-in-out duration-300 ",
         !isOpen ? "w-[90px] bg-background" : "w-72 bg-muted/20",
       )}
     >
       <SidebarToggle />
-      <div className="relative h-full flex flex-col px-3 py-4 overflow-y-auto shadow-md dark:shadow-zinc-800">
+      <div className="relative h-full flex flex-col px-3 py-4 overflow-y-auto shadow-md dark:shadow-zinc-800 ">
         <TooltipProvider disableHoverableContent>
           <Tooltip delayDuration={100}>
             <TooltipTrigger asChild>
