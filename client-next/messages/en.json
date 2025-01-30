@@ -1360,7 +1360,9 @@
         "title": "Your path to a healthier life starts here !"
       },
       "HomeHeroTexts": {
-        "title": "Bro Meets Science <br/> the ultimate nutrition platform",
+        "title": "Bro Meets Science <br/> the ultimate nutrition ",
+        "platform": "platform",
+        "community": "community",
         "description": "Get access to the best nutritional plans, recipes, and posts written by professionals. Start your journey to a healthier life today and enjoy your body with Bro Meets Science.",
         "titles": {
           "title1": "Enjoy life",

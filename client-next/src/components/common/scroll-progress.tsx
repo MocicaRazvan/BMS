@@ -2,6 +2,7 @@
 
 import React, { memo, useEffect, useState } from "react";
 import { isDeepEqual } from "@/lib/utils";
+import { motion } from "framer-motion";
 
 interface Props {
   containerRef?: React.RefObject<HTMLDivElement>;
@@ -62,16 +63,22 @@ const ScrollProgress = memo(
     }, [containerRef]);
 
     return (
-      <div
-        className={`fixed  left-0 w-full bg-primary  z-[49] ${className} 
-      backdrop-blur supports-[backdrop-filter]:bg-primary/80 transition-all duration-300 ease-in-out`}
+      <motion.div
+        className={`fixed left-0 w-full bg-primary z-[49] ${className} 
+        backdrop-blur supports-[backdrop-filter]:bg-primary/80`}
+        initial={{ width: 0 }}
+        animate={{ width: `${scrollProgress}%` }}
+        transition={{
+          type: "spring",
+          stiffness: 250,
+          damping: 25,
+          restDelta: 0.001,
+          mass: 1.2,
+        }}
         style={{
           top: `${topItemDimensions.offsetTop}px`,
-          width: `${scrollProgress}%`,
           height: `${height}px`,
           left: `${topItemDimensions.offsetLeft}px`,
-          // transition: "width 0.3s ease",
-          // zIndex: 99999,
         }}
       />
     );

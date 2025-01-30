@@ -17,6 +17,8 @@ import person1 from "@/../public/images/people/person1.jpg";
 import person2 from "@/../public/images/people/person2.jpg";
 import person3 from "@/../public/images/people/person3.jpg";
 import person4 from "@/../public/images/people/person4.jpg";
+import Logo from "@/components/logo/logo";
+import LogoWall from "@/components/reactbits/logo-wall";
 
 interface Props {
   params: { locale: Locale };
@@ -30,6 +32,15 @@ export interface HomeTexts {
   homeHeroTexts: HomeHeroTexts;
   homeTestimonialsTexts: HomeTestimonialsTexts;
 }
+
+const logoWallArr = Array.from({ length: 8 }, (_, i) => (
+  <div
+    className="w-full h-full flex justify-center items-center"
+    key={i + "-logo-wall-element"}
+  >
+    <Logo width={70} height={70} />
+  </div>
+));
 export default async function Home({ params: { locale } }: Props) {
   unstable_setRequestLocale(locale);
 
@@ -66,6 +77,13 @@ export default async function Home({ params: { locale } }: Props) {
         testimonials={testimonials}
         title={homeTestimonialsTexts.title}
       />
+      <div className="my-3">
+        <LogoWall
+          items={logoWallArr}
+          size={"clamp(4rem, 1rem + 15vmin, 13rem)"}
+          duration={"40s"}
+        />
+      </div>
     </main>
   );
 }

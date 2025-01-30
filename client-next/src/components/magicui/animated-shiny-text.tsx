@@ -1,3 +1,4 @@
+"use client";
 import { CSSProperties, FC, ReactNode } from "react";
 
 import { cn } from "@/lib/utils";

@@ -21,6 +21,8 @@ export async function getHomeHeroTexts(): Promise<HomeHeroTexts> {
   return {
     title: t.rich("title"),
     description: t("description"),
+    community: t("community"),
+    platform: t("platform"),
     titles: Array.from({ length: 10 }).reduce(
       (acc, _, i) => {
         const key = `titles.title${i + 1}` as TitleKeys;

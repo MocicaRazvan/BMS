@@ -10,9 +10,15 @@ import {
 import Image, { StaticImageData } from "next/image";
 import { Link } from "@/navigation";
 import { isDeepEqual } from "@/lib/utils";
+import {
+  StaticFirstWordRotate,
+  WordRotate,
+} from "@/components/magicui/word-rotate";
 
 export interface HeroParallaxTexts {
   title: string | ReactNode;
+  platform: string;
+  community: string;
   description: string | ReactNode;
 }
 
@@ -115,10 +121,27 @@ const HeroParallax = memo(
 HeroParallax.displayName = "HeroParallax";
 
 export const Header = (texts: HeroParallaxTexts) => {
+  //todo change
+  let firstTitle = texts.title;
+  let secondTitle = "";
+  if (typeof texts.title === "string") {
+    const split = texts.title.split("<br/>");
+    firstTitle = split[0];
+    secondTitle = split[1] + " ";
+  }
   return (
     <div className="max-w-7xl relative mx-auto py-20 md:py-40 px-4 w-full  left-0 top-0 z-[1] pointer-events-none">
-      <h1 className="text-2xl md:text-7xl font-bold dark:text-white ">
-        <p dangerouslySetInnerHTML={{ __html: `${texts.title}` }} />
+      <h1 className="text-2xl md:text-7xl font-bold dark:text-white w-full py-1">
+        {/*<p dangerouslySetInnerHTML={{ __html: `${texts.title}` }} />*/}
+        <p>{firstTitle}</p>
+        <span className="flex items-center gap-2 md:gap-5 pb-2">
+          <p>{`${secondTitle} `}</p>
+          <StaticFirstWordRotate
+            firstWord={texts.platform}
+            secondWord={texts.community}
+            wrapperClassName="py-0 px-0 pb-1"
+          />
+        </span>
       </h1>
       <p className="max-w-2xl text-base md:text-xl mt-8 dark:text-neutral-200">
         {texts.description}

@@ -1,8 +1,5 @@
 "use client";
+
 export default function PageContent() {
-  return (
-    <div>
-      <h1>Page Content</h1>
-    </div>
-  );
+  return <div className="w-full h-[600px]"></div>;
 }

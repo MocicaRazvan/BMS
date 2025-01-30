@@ -1335,7 +1335,9 @@
         "title": "Calea către o viață sănătoasă începe aici !"
       },
       "HomeHeroTexts": {
-        "title": "Bro meets science <br/> alegerea perfectă pentru sănătate",
+        "title": "Bro meets science <br/> cea mai bună ",
+        "platform": "platformă",
+        "community": "comunitate",
         "description": "Platforma noastră oferă planuri nutriționale personalizate, rețete delicioase și conținut educativ pentru a te ajuta să îți îmbunătățești sănătatea și să îți atingi obiectivele de fitness. Alătură-te comunității noastre și începe-ți călătoria spre o viață mai sănătoasă astăzi!",
         "titles": {
           "title1": "Bucură-te de viață",

@@ -112,6 +112,14 @@ const config = {
           "0%, 100%": { boxShadow: "0 0 0 0 var(--pulse-color)" },
           "50%": { boxShadow: "0 0 0 8px var(--pulse-color)" },
         },
+        scrollX: {
+          "0%": { transform: "translateX(0)" },
+          "100%": { transform: "translateX(-100%)" },
+        },
+        scrollY: {
+          "0%": { transform: "translateY(0)" },
+          "100%": { transform: "translateY(-100%)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -120,6 +128,8 @@ const config = {
         backgroundPositionSpin:
           "background-position-spin 3000ms infinite alternate",
         pulse: "pulse var(--duration) ease-out infinite",
+        scrollX: "scrollX var(--duration) linear infinite",
+        scrollY: "scrollY var(--duration) linear infinite",
       },
     },
   },

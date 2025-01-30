@@ -69,7 +69,6 @@ import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.util.*;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -358,12 +357,11 @@ public class OrderServiceImpl implements OrderService {
     }
 
     private <T> Flux<T> getTrainerSummaryWrapper(Long trainerId, String userId,
-                                                 Function<List<PlanResponse>, Flux<T>> summaryFunction
+                                                 Function<Flux<PlanResponse>, Flux<T>> summaryFunction
     ) {
         return userClient.existsTrainerOrAdmin("/exists", trainerId)
                 .thenMany(planClient.getTrainersPlans(String.valueOf(trainerId), userId)
-                        .collectList()
-                        .flatMapMany(summaryFunction)
+                        .as(summaryFunction)
                 );
     }
 
@@ -692,8 +690,8 @@ public class OrderServiceImpl implements OrderService {
         }
 
         @RedisReactiveChildCache(key = CACHE_KEY_PATH, idPath = "3*maxGroupCount+2*minGroupCount+3*avgGroupCount+rank*15+97", masterId = "#trainerId")
-        public Flux<TopPlansSummary> getTopPlansSummaryTrainerBase(LocalDateTime from, LocalDateTime to, int top, List<PlanResponse> plans, Long trainerId) {
-            return orderRepository.getTopPlansSummaryTrainer(from, to, top, getPlanIds(plans));
+        public Flux<TopPlansSummary> getTopPlansSummaryTrainerBase(LocalDateTime from, LocalDateTime to, int top, Flux<PlanResponse> plans, Long trainerId) {
+            return getPlanIds(plans).flatMapMany(ids -> orderRepository.getTopPlansSummaryTrainer(from, to, top, ids));
         }
 
         @RedisReactiveChildCache(key = CACHE_KEY_PATH, idPath = "month+year+2*totalAmount+count+33")
@@ -713,44 +711,46 @@ public class OrderServiceImpl implements OrderService {
         }
 
         @RedisReactiveChildCache(key = CACHE_KEY_PATH, idPath = "month+3*year+322", masterId = "#trainerId")
-        public Flux<MonthlyOrderSummary> getTrainerOrdersSummaryByMonthBase(List<PlanResponse> plans, Pair<LocalDateTime, LocalDateTime> intervalDates, Long trainerId) {
-            return orderRepository.getTrainerOrdersSummaryByDateRangeGroupedByMonth(intervalDates.getFirst(), intervalDates.getSecond(),
-                            getPlanIds(plans))
-                    .flatMap(e -> fromTrainerSummaryToSummary(plans, e, (p) -> MonthlyOrderSummary.builder()
+        public Flux<MonthlyOrderSummary> getTrainerOrdersSummaryByMonthBase(Flux<PlanResponse> plans, Pair<LocalDateTime, LocalDateTime> intervalDates, Long trainerId) {
+            Flux<PlanResponse> cachedPlans = plans.cache();
+            return getPlanIds(plans).flatMapMany(ids -> orderRepository.getTrainerOrdersSummaryByDateRangeGroupedByMonth(intervalDates.getFirst(), intervalDates.getSecond(),
+                            ids)
+                    .flatMap(e -> fromTrainerSummaryToSummary(cachedPlans, e, (p) -> MonthlyOrderSummary.builder()
                             .year(e.getYear())
                             .month(e.getMonth())
                             .totalAmount(p.getFirst())
                             .count(p.getSecond())
-                            .build()));
+                            .build())));
         }
 
         @RedisReactiveChildCache(key = CACHE_KEY_PATH, idPath = "day+month+4*year+767", masterId = "#trainerId")
-        public Flux<DailyOrderSummary> getTrainerOrdersSummaryByDayBase(List<PlanResponse> plans, Pair<LocalDateTime, LocalDateTime> intervalDates, Long trainerId) {
-            return orderRepository.getTrainerOrdersSummaryByDateRangeGroupedByDay(
-                            intervalDates.getFirst(), intervalDates.getSecond(), getPlanIds(plans))
-                    .flatMap(e -> fromTrainerSummaryToSummary(plans, e, (p) -> DailyOrderSummary.builder()
+        public Flux<DailyOrderSummary> getTrainerOrdersSummaryByDayBase(Flux<PlanResponse> plans, Pair<LocalDateTime, LocalDateTime> intervalDates, Long trainerId) {
+            Flux<PlanResponse> cachedPlans = plans.cache();
+            return getPlanIds(plans).flatMapMany(ids -> orderRepository.getTrainerOrdersSummaryByDateRangeGroupedByDay(
+                            intervalDates.getFirst(), intervalDates.getSecond(), ids)
+                    .flatMap(e -> fromTrainerSummaryToSummary(cachedPlans, e, (p) -> DailyOrderSummary.builder()
                             .year(e.getYear())
                             .month(e.getMonth())
                             .day(e.getDay())
                             .totalAmount(p.getFirst())
                             .count(p.getSecond())
-                            .build()));
+                            .build())));
         }
 
         public <E extends MonthlyTrainerOrderSummary, T extends MonthlyOrderSummary> Mono<T> fromTrainerSummaryToSummary(
-                List<PlanResponse> plans, E e, Function<Pair<Double, Integer>, T> mapper) {
+                Flux<PlanResponse> plans, E e, Function<Pair<Double, Integer>, T> mapper) {
 
-            Map<Long, Double> planPriceMap = plans.stream()
-                    .collect(Collectors.toMap(PlanResponse::getId, PlanResponse::getPrice));
-
-            return Flux.fromIterable(e.getPlanIds())
-                    .filter(planPriceMap::containsKey)
-                    .map(planId -> Pair.of(planPriceMap.get(planId), 1))// Pair of price and count
-                    .reduce(Pair.of(0.0, 0), (acc, cur) -> Pair.of(
-                            acc.getFirst() + cur.getFirst(),
-                            acc.getSecond() + cur.getSecond()
-                    ))
-                    .map(mapper);
+            return
+                    plans.collectMap(PlanResponse::getId, PlanResponse::getPrice)
+                            .flatMap(planPriceMap ->
+                                    Flux.fromIterable(e.getPlanIds())
+                                            .filter(planPriceMap::containsKey)
+                                            .map(planId -> Pair.of(planPriceMap.get(planId), 1))// Pair of price and count
+                                            .reduce(Pair.of(0.0, 0), (acc, cur) -> Pair.of(
+                                                    acc.getFirst() + cur.getFirst(),
+                                                    acc.getSecond() + cur.getSecond()
+                                            ))
+                                            .map(mapper));
         }
 
         @RedisReactiveChildCache(key = CACHE_KEY_PATH, idPath = "id")
@@ -781,8 +781,9 @@ public class OrderServiceImpl implements OrderService {
             return Mono.just(t);
         }
 
-        private Long[] getPlanIds(List<PlanResponse> plans) {
-            return plans.stream().map(PlanResponse::getId).toArray(Long[]::new);
+        private Mono<Long[]> getPlanIds(Flux<PlanResponse> plans) {
+            return plans.map(PlanResponse::getId).collectList()
+                    .map(l -> l.toArray(new Long[0]));
         }
 
 
