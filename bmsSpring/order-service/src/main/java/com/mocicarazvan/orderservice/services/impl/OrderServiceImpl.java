@@ -713,7 +713,7 @@ public class OrderServiceImpl implements OrderService {
         @RedisReactiveChildCache(key = CACHE_KEY_PATH, idPath = "month+3*year+322", masterId = "#trainerId")
         public Flux<MonthlyOrderSummary> getTrainerOrdersSummaryByMonthBase(Flux<PlanResponse> plans, Pair<LocalDateTime, LocalDateTime> intervalDates, Long trainerId) {
             Flux<PlanResponse> cachedPlans = plans.cache();
-            return getPlanIds(plans).flatMapMany(ids -> orderRepository.getTrainerOrdersSummaryByDateRangeGroupedByMonth(intervalDates.getFirst(), intervalDates.getSecond(),
+            return getPlanIds(cachedPlans).flatMapMany(ids -> orderRepository.getTrainerOrdersSummaryByDateRangeGroupedByMonth(intervalDates.getFirst(), intervalDates.getSecond(),
                             ids)
                     .flatMap(e -> fromTrainerSummaryToSummary(cachedPlans, e, (p) -> MonthlyOrderSummary.builder()
                             .year(e.getYear())
@@ -726,7 +726,7 @@ public class OrderServiceImpl implements OrderService {
         @RedisReactiveChildCache(key = CACHE_KEY_PATH, idPath = "day+month+4*year+767", masterId = "#trainerId")
         public Flux<DailyOrderSummary> getTrainerOrdersSummaryByDayBase(Flux<PlanResponse> plans, Pair<LocalDateTime, LocalDateTime> intervalDates, Long trainerId) {
             Flux<PlanResponse> cachedPlans = plans.cache();
-            return getPlanIds(plans).flatMapMany(ids -> orderRepository.getTrainerOrdersSummaryByDateRangeGroupedByDay(
+            return getPlanIds(cachedPlans).flatMapMany(ids -> orderRepository.getTrainerOrdersSummaryByDateRangeGroupedByDay(
                             intervalDates.getFirst(), intervalDates.getSecond(), ids)
                     .flatMap(e -> fromTrainerSummaryToSummary(cachedPlans, e, (p) -> DailyOrderSummary.builder()
                             .year(e.getYear())
