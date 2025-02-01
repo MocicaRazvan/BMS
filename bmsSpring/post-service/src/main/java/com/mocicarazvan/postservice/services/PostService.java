@@ -2,6 +2,7 @@ package com.mocicarazvan.postservice.services;
 
 import com.mocicarazvan.postservice.dtos.PostBody;
 import com.mocicarazvan.postservice.dtos.PostResponse;
+import com.mocicarazvan.postservice.dtos.PostResponseWithSimilarity;
 import com.mocicarazvan.postservice.dtos.comments.CommentResponse;
 import com.mocicarazvan.postservice.mappers.PostMapper;
 import com.mocicarazvan.postservice.models.Post;
@@ -21,6 +22,9 @@ import java.util.List;
 public interface PostService extends ApprovedService<Post, PostBody, PostResponse, PostRepository, PostMapper> {
 
     Mono<List<String>> seedEmbeddings();
+
+
+    Flux<PostResponseWithSimilarity> getSimilarPosts(Long id, int limit, Double minSimilarity);
 
     Mono<Void> existsByIdAndApprovedIsTrue(Long id);
 

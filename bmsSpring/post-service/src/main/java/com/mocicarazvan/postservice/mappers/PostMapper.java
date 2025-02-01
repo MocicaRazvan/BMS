@@ -3,6 +3,8 @@ package com.mocicarazvan.postservice.mappers;
 
 import com.mocicarazvan.postservice.dtos.PostBody;
 import com.mocicarazvan.postservice.dtos.PostResponse;
+import com.mocicarazvan.postservice.dtos.PostResponseWithSimilarity;
+import com.mocicarazvan.postservice.dtos.PostWithSimilarity;
 import com.mocicarazvan.postservice.models.Post;
 import com.mocicarazvan.templatemodule.mappers.DtoMapper;
 import com.mocicarazvan.templatemodule.utils.EntitiesUtils;
@@ -66,6 +68,23 @@ public abstract class PostMapper extends DtoMapper<Post, PostBody, PostResponse>
                 .id(row.get("id", Long.class))
                 .createdAt(row.get("created_at", LocalDateTime.class))
                 .updatedAt(row.get("updated_at", LocalDateTime.class))
+                .build();
+    }
+
+    public PostResponseWithSimilarity fromPostWithSimilarityToResponse(PostWithSimilarity postWithSimilarity) {
+        return PostResponseWithSimilarity.builder()
+                .tags(postWithSimilarity.getTags())
+                .approved(postWithSimilarity.isApproved())
+                .images(postWithSimilarity.getImages())
+                .body(postWithSimilarity.getBody())
+                .title(postWithSimilarity.getTitle())
+                .userLikes(postWithSimilarity.getUserLikes())
+                .userDislikes(postWithSimilarity.getUserDislikes())
+                .userId(postWithSimilarity.getUserId())
+                .id(postWithSimilarity.getId())
+                .createdAt(postWithSimilarity.getCreatedAt())
+                .updatedAt(postWithSimilarity.getUpdatedAt())
+                .similarity(postWithSimilarity.getSimilarity())
                 .build();
     }
 

@@ -4,6 +4,7 @@ package com.mocicarazvan.planservice.controllers;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mocicarazvan.planservice.dtos.PlanBody;
 import com.mocicarazvan.planservice.dtos.PlanResponse;
+import com.mocicarazvan.planservice.dtos.PlanResponseWithSimilarity;
 import com.mocicarazvan.planservice.dtos.dayClient.DayResponse;
 import com.mocicarazvan.planservice.dtos.dayClient.MealResponse;
 import com.mocicarazvan.planservice.dtos.dayClient.RecipeResponse;
@@ -469,5 +470,17 @@ public class PlanController implements ApproveController<Plan, PlanBody, PlanRes
     public Mono<ResponseEntity<List<String>>> seedEmbeddings() {
         return planService.seedEmbeddings()
                 .map(ResponseEntity::ok);
+    }
+
+    @GetMapping(value = "/similar/{id}", produces = {MediaType.APPLICATION_NDJSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
+    @ResponseStatus(HttpStatus.OK)
+    public Flux<CustomEntityModel<PlanResponseWithSimilarity>> getSimilarPlans(@PathVariable Long id,
+                                                                               @RequestParam(required = false, defaultValue = "#{T(java.util.Collections).emptyList()}") List<Long> excludeIds,
+                                                                               @RequestParam(required = false, defaultValue = "4") int limit,
+                                                                               @RequestParam(required = false, defaultValue = "0.0") Double minSimilarity) {
+
+        return planService.getSimilarPlans(id, excludeIds, limit, minSimilarity)
+                .flatMapSequential(m -> plansReactiveResponseBuilder.toModelConvertSetContent(m, PlanController.class, m
+                ));
     }
 }

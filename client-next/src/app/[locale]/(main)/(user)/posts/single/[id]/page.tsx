@@ -33,7 +33,11 @@ export default async function SinglePostPage({ params: { locale } }: Props) {
   return (
     <Suspense fallback={<LoadingSpinner />}>
       <ScrollProgress />
-      <SinglePostPageContent authUser={user} {...singlePostPageTexts} />
+      <SinglePostPageContent
+        authUser={user}
+        {...singlePostPageTexts}
+        showRecommendations={true}
+      />
     </Suspense>
   );
 }

@@ -154,17 +154,28 @@ import { UserDuplicatePostPage } from "@/app/[locale]/trainer/posts/duplicate/[i
 import { DuplicateRecipePageTexts } from "@/app/[locale]/trainer/recipes/duplicate/[id]/page";
 import { AdminPageDuplicateIngredientTexts } from "@/app/[locale]/admin/ingredients/duplicate/[id]/page";
 import { AdminAIPostsCreateTexts } from "@/app/[locale]/admin/posts/aiCreate/page";
+import {
+  getPlanRecommendationListTexts,
+  getPostRecommendationListTexts,
+} from "@/texts/components/recommandation";
 
 export async function getSinglePostPageTexts(): Promise<SinglePostPageTexts> {
-  const [elementHeaderTexts, t, postCommentsTexts] = await Promise.all([
+  const [
+    elementHeaderTexts,
+    t,
+    postCommentsTexts,
+    postRecommendationListTexts,
+  ] = await Promise.all([
     getElementHeaderTexts(),
     getTranslations("pages.posts.SinglePageTexts"),
     getPostCommentsTexts(),
+    getPostRecommendationListTexts(),
   ]);
   return {
     elementHeaderTexts,
     updateButton: t("updateButton"),
     postCommentsTexts,
+    postRecommendationListTexts,
   };
 }
 
@@ -1246,14 +1257,21 @@ export async function getApprovedPlansTexts(): Promise<ApprovedPlansTexts> {
 }
 
 export async function getUserPlanPageContentTexts(): Promise<UserPlanPageContentTexts> {
-  const [elementHeaderTexts, addToCartBtnTexts, t] = await Promise.all([
+  const [
+    elementHeaderTexts,
+    addToCartBtnTexts,
+    planRecommendationListTexts,
+    t,
+  ] = await Promise.all([
     getElementHeaderTexts(),
     getAddToCartBtnTexts(),
+    getPlanRecommendationListTexts(),
     getTranslations("pages.plans.UserPlanPageContentTexts"),
   ]);
   return {
     elementHeaderTexts,
     addToCartBtnTexts,
+    planRecommendationListTexts,
     price: t("price"),
     buyPrompt: t("buyPrompt"),
     numberDays: t("numberDays"),
@@ -1317,12 +1335,14 @@ export async function getSingleSubscriptionTexts(): Promise<SingleSubscriptionTe
     ingredientPieChartTexts,
     singleDayTexts,
     daysListTexts,
+    planRecommendationListTexts,
   ] = await Promise.all([
     getElementHeaderTexts(),
     getNutritionalTableTexts(),
     getIngredientPieChartTexts(),
     getSingleDayTexts(),
     getDaysListTexts(),
+    getPlanRecommendationListTexts(),
   ]);
 
   return {
@@ -1331,6 +1351,7 @@ export async function getSingleSubscriptionTexts(): Promise<SingleSubscriptionTe
     ingredientPieChartTexts,
     singleDayTexts,
     daysListTexts,
+    planRecommendationListTexts,
   };
 }
 

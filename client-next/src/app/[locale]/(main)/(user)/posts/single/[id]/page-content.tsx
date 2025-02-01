@@ -19,20 +19,29 @@ import { PostCommentsTexts } from "@/texts/components/posts";
 import PostComments from "@/components/posts/post-comments";
 import { useGetTitleBodyUser } from "@/hoooks/useGetTitleBodyUser";
 import useClientNotFound from "@/hoooks/useClientNotFound";
+import PostRecommendationList, {
+  PostRecommendationListTexts,
+} from "@/components/recomandation/post-recommendation-list";
+import { Separator } from "@/components/ui/separator";
 
 export interface SinglePostPageTexts {
   elementHeaderTexts: ElementHeaderTexts;
   updateButton: string;
   postCommentsTexts: PostCommentsTexts;
+  postRecommendationListTexts: PostRecommendationListTexts;
 }
 
-interface Props extends WithUser, SinglePostPageTexts {}
+interface Props extends WithUser, SinglePostPageTexts {
+  showRecommendations?: boolean;
+}
 
 export default function SinglePostPageContent({
   authUser,
   elementHeaderTexts,
   updateButton,
   postCommentsTexts,
+  showRecommendations = false,
+  postRecommendationListTexts,
 }: Props) {
   const {
     itemState: postState,
@@ -136,6 +145,15 @@ export default function SinglePostPageContent({
             authUser={authUser}
           />
         </Suspense>
+      )}
+      {showRecommendations && (
+        <>
+          <Separator className="my-5 md:my-10 md:mt-14" />
+          <PostRecommendationList
+            id={item.id}
+            {...postRecommendationListTexts}
+          />
+        </>
       )}
       {isOwnerOrAdmin && (
         <div className="sticky bottom-0 hover:scale-105 flex items-center px-4 w-fit mx-auto justify-center gap-4 mt-5 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/70 p-2 rounded-md">

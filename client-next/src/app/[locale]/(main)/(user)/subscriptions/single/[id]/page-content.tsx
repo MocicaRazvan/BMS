@@ -18,6 +18,10 @@ import { cn } from "@/lib/utils";
 import DietBadge from "@/components/common/diet-badge";
 import DaysList, { DaysListTexts } from "@/components/days/days-list";
 import { SingleDayTexts } from "@/components/days/single-day";
+import PlanRecommendationList, {
+  PlanRecommendationListTexts,
+} from "@/components/recomandation/plan-recommendation-list";
+import { Separator } from "@/components/ui/separator";
 
 export interface SingleSubscriptionTexts {
   elementHeaderTexts: ElementHeaderTexts;
@@ -25,6 +29,7 @@ export interface SingleSubscriptionTexts {
   ingredientPieChartTexts: IngredientPieChartTexts;
   singleDayTexts: SingleDayTexts;
   daysListTexts: DaysListTexts;
+  planRecommendationListTexts: PlanRecommendationListTexts;
 }
 
 interface Props extends WithUser, SingleSubscriptionTexts {
@@ -37,6 +42,7 @@ export default function SingleSubscriptionPageContent({
   elementHeaderTexts,
   singleDayTexts,
   daysListTexts,
+  planRecommendationListTexts,
 }: Props) {
   const {
     itemState: planState,
@@ -141,6 +147,13 @@ export default function SingleSubscriptionPageContent({
           recipeBasePath={`/orders/subscriptions/recipe/${id}`}
           disableLikes={false}
           {...daysListTexts}
+        />
+      </div>
+      <Separator className="my-5 md:my-10 md:mt-14" />
+      <div>
+        <PlanRecommendationList
+          id={plan?.id}
+          {...planRecommendationListTexts}
         />
       </div>
     </section>

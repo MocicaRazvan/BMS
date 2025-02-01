@@ -4,6 +4,7 @@ package com.mocicarazvan.postservice.services.impl;
 import com.mocicarazvan.postservice.clients.CommentClient;
 import com.mocicarazvan.postservice.dtos.PostBody;
 import com.mocicarazvan.postservice.dtos.PostResponse;
+import com.mocicarazvan.postservice.dtos.PostResponseWithSimilarity;
 import com.mocicarazvan.postservice.dtos.comments.CommentResponse;
 import com.mocicarazvan.postservice.mappers.PostMapper;
 import com.mocicarazvan.postservice.models.Post;
@@ -95,6 +96,17 @@ public class PostServiceImpl extends ApprovedServiceImpl<Post, PostBody, PostRes
                                                 )
                                 )
                         );
+    }
+
+    @RedisReactiveCache(key = CACHE_KEY_PATH, idPath = "id")
+    @Override
+    public Flux<PostResponseWithSimilarity> getSimilarPosts(Long id, int limit, Double minSimilarity) {
+        return
+                existsByIdAndApprovedIsTrue(id).thenMany(
+                        modelRepository.getSimilarPosts(id, limit, minSimilarity)
+                                .map(modelMapper::fromPostWithSimilarityToResponse)
+
+                );
     }
 
     @Override

@@ -1499,6 +1499,23 @@
       "DaysListTexts": {
         "header": "Zile"
       }
+    },
+    "recommendation": {
+      "RecommendationListTexts": {
+        "title": "Pe baza {type} s-ar putea să-ți placă",
+        "similarity": "Similitudine",
+        "type": {
+          "post": "acestei postări",
+          "plan": "acestui planul"
+        }
+      },
+      "PlanItemRendererTexts": {
+        "objective": "Obiectiv:"
+      },
+      "PostItemRendererTexts": {
+        "likes": "Aprecieri",
+        "dislikes": "Dezaprobări"
+      }
     }
   },
   "pages": {

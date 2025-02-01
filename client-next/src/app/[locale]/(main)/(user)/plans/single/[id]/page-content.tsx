@@ -4,7 +4,7 @@ import { WithUser } from "@/lib/user";
 import { useGetTitleBodyUser } from "@/hoooks/useGetTitleBodyUser";
 import { PlanResponse } from "@/types/dto";
 import { useFormatter } from "next-intl";
-import { checkApprovePrivilege, cn, isSuccessCheckReturn } from "@/lib/utils";
+import { checkApprovePrivilege, isSuccessCheckReturn } from "@/lib/utils";
 import ElementHeader, {
   ElementHeaderTexts,
 } from "@/components/common/element-header";
@@ -18,6 +18,11 @@ import AddToCartBtn, {
 import useClientNotFound from "@/hoooks/useClientNotFound";
 import React from "react";
 import { usePlansSubscription } from "@/context/subscriptions-context";
+import PlanType from "@/components/plans/plan-type";
+import PlanRecommendationList, {
+  PlanRecommendationListTexts,
+} from "@/components/recomandation/plan-recommendation-list";
+import { Separator } from "@/components/ui/separator";
 
 export interface UserPlanPageContentTexts {
   elementHeaderTexts: ElementHeaderTexts;
@@ -25,6 +30,7 @@ export interface UserPlanPageContentTexts {
   price: string;
   numberDays: string;
   buyPrompt: string;
+  planRecommendationListTexts: PlanRecommendationListTexts;
 }
 interface Props extends WithUser, UserPlanPageContentTexts {}
 
@@ -35,6 +41,7 @@ export default function UserPlanPageContent({
   addToCartBtnTexts,
   buyPrompt,
   numberDays,
+  planRecommendationListTexts,
 }: Props) {
   const { navigateToNotFound } = useClientNotFound();
   const {
@@ -52,7 +59,8 @@ export default function UserPlanPageContent({
     authUser,
     basePath: `/plans/withUser`,
   });
-  const { isPlanInSubscription } = usePlansSubscription();
+  const { isPlanInSubscription, getSubscriptionPlanIds } =
+    usePlansSubscription();
 
   const formatIntl = useFormatter();
   if (error?.status) {
@@ -84,11 +92,6 @@ export default function UserPlanPageContent({
 
   const { isOwnerOrAdmin, isAdmin, isOwner } = privilegeReturn;
 
-  const colorMap = {
-    VEGAN: "success",
-    OMNIVORE: "secondary",
-    VEGETARIAN: "accent",
-  };
   return (
     <section className="w-full mx-auto max-w-[1500px] min-h-[calc(100vh-4rem)] flex-col items-center justify-center transition-all px-1 md:px-6  relative ">
       <div
@@ -112,13 +115,7 @@ export default function UserPlanPageContent({
           <span className="font-bold">{planState.days.length}</span>
         </div>
         <div className="mt-6">
-          <p
-            className={cn(
-              `px-3 py-1 bg-${colorMap[plan.type]} text-${colorMap[plan.type]}-foreground rounded-full font-bold text-center`,
-            )}
-          >
-            {plan.type}
-          </p>
+          <PlanType type={plan.type} />
         </div>
       </div>
       <div className="md:mt-[-5rem] mt-3" />
@@ -145,6 +142,13 @@ export default function UserPlanPageContent({
           </h2>
         </div>
       )}
+      <Separator className="my-5 md:my-10 md:mt-12" />
+      <div>
+        <PlanRecommendationList
+          id={plan?.id}
+          {...planRecommendationListTexts}
+        />
+      </div>
       <div className="sticky bottom-0 mt-4  w-fit mx-auto  bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/70 p-2 rounded-md">
         <AddToCartBtn
           authUser={authUser}

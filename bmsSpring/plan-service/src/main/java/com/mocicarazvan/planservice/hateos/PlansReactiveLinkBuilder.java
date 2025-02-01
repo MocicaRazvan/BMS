@@ -26,6 +26,7 @@ public class PlansReactiveLinkBuilder extends ApproveReactiveLinkBuilder<
         links.add(WebFluxLinkBuilder.linkTo(WebFluxLinkBuilder.methodOn(c).toggleDisplay(null, false, null)).withRel("toggleDisplay"));
         links.add(WebFluxLinkBuilder.linkTo(WebFluxLinkBuilder.methodOn(c).getDaysByPlan(null, null)).withRel("getRecipesByPlan"));
         links.add(WebFluxLinkBuilder.linkTo(WebFluxLinkBuilder.methodOn(c).getDayByPlan(null, null, null)).withRel("getDayByPlan"));
+        links.add(WebFluxLinkBuilder.linkTo(WebFluxLinkBuilder.methodOn(c).getSimilarPlans(1L, List.of(), 1, 0.0)).withRel("getSimilarPlans"));
         return links;
     }
 }

@@ -3,6 +3,8 @@ package com.mocicarazvan.planservice.mappers;
 
 import com.mocicarazvan.planservice.dtos.PlanBody;
 import com.mocicarazvan.planservice.dtos.PlanResponse;
+import com.mocicarazvan.planservice.dtos.PlanResponseWithSimilarity;
+import com.mocicarazvan.planservice.dtos.PlanWithSimilarity;
 import com.mocicarazvan.planservice.enums.DietType;
 import com.mocicarazvan.planservice.enums.ObjectiveType;
 import com.mocicarazvan.planservice.models.Plan;
@@ -84,6 +86,27 @@ public class PlanMapper extends DtoMapper<Plan, PlanBody, PlanResponse> {
                 .id(row.get("id", Long.class))
                 .createdAt(row.get("created_at", LocalDateTime.class))
                 .updatedAt(row.get("updated_at", LocalDateTime.class))
+                .build();
+    }
+
+    public PlanResponseWithSimilarity fromPlanWithSimilarityToResponse(PlanWithSimilarity planWithSimilarity) {
+        return PlanResponseWithSimilarity.builder()
+                .price(planWithSimilarity.getPrice())
+                .type(planWithSimilarity.getType())
+                .display(planWithSimilarity.isDisplay())
+                .days(planWithSimilarity.getDays())
+                .approved(planWithSimilarity.isApproved())
+                .images(planWithSimilarity.getImages())
+                .body(planWithSimilarity.getBody())
+                .title(planWithSimilarity.getTitle())
+                .userLikes(planWithSimilarity.getUserLikes())
+                .userDislikes(planWithSimilarity.getUserDislikes())
+                .userId(planWithSimilarity.getUserId())
+                .id(planWithSimilarity.getId())
+                .createdAt(planWithSimilarity.getCreatedAt())
+                .updatedAt(planWithSimilarity.getUpdatedAt())
+                .objective(planWithSimilarity.getObjective())
+                .similarity(planWithSimilarity.getSimilarity())
                 .build();
     }
 }

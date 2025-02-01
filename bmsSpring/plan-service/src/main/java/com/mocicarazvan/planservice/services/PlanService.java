@@ -2,6 +2,7 @@ package com.mocicarazvan.planservice.services;
 
 import com.mocicarazvan.planservice.dtos.PlanBody;
 import com.mocicarazvan.planservice.dtos.PlanResponse;
+import com.mocicarazvan.planservice.dtos.PlanResponseWithSimilarity;
 import com.mocicarazvan.planservice.dtos.dayClient.DayResponse;
 import com.mocicarazvan.planservice.dtos.dayClient.MealResponse;
 import com.mocicarazvan.planservice.dtos.dayClient.RecipeResponse;
@@ -83,4 +84,6 @@ public interface PlanService
     Mono<ResponseWithUserDtoEntity<DayResponse>> getDayByIdWithUserInternal(Long id, Long dayId, String userId);
 
     Flux<CustomEntityModel<MealResponse>> getMealsByDayInternal(Long id, Long dayId, String userId);
+
+    Flux<PlanResponseWithSimilarity> getSimilarPlans(Long id, List<Long> excludeIds, int limit, Double minSimilarity);
 }

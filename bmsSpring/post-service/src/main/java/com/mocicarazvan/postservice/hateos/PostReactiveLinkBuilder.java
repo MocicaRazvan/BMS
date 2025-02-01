@@ -21,6 +21,8 @@ public class PostReactiveLinkBuilder extends ApproveReactiveLinkBuilder<Post, Po
 
         links.add(WebFluxLinkBuilder.linkTo(WebFluxLinkBuilder.methodOn(c).getPostsFilteredWithUser(null, null, null, null, null, null, null, null, null, null, null)).withRel("getPostsFilteredWithUser"));
         links.add(WebFluxLinkBuilder.linkTo(WebFluxLinkBuilder.methodOn(c).getPostsFiltered(null, null, null, null, null, null, null, null, null, null, null)).withRel("getPostsFiltered"));
+        links.add(WebFluxLinkBuilder.linkTo(WebFluxLinkBuilder.methodOn(c).getSimilarPosts(1L, 1, 0.0)).withRel("getSimilarPosts"));
+
         return links;
     }
 }

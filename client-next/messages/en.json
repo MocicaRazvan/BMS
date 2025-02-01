@@ -1500,6 +1500,23 @@
       "DaysListTexts": {
         "header": "Days"
       }
+    },
+    "recommendation": {
+      "RecommendationListTexts": {
+        "title": "Based on this {type} you might also like",
+        "similarity": "Similarity",
+        "type": {
+          "post": "post",
+          "plan": "meal plan"
+        }
+      },
+      "PlanItemRendererTexts": {
+        "objective": "Objective:"
+      },
+      "PostItemRendererTexts": {
+        "likes": "Likes",
+        "dislikes": "Dislikes"
+      }
     }
   },
   "pages": {

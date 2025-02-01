@@ -578,3 +578,10 @@ export interface TopPlansSummary extends RankSummary {
   avgGroupCount: number;
   ratio: number;
 }
+
+export interface Similarity {
+  similarity: number;
+}
+
+export interface PostReposeWithSimilarity extends PostResponse, Similarity {}
+export interface PlanReposeWithSimilarity extends PlanResponse, Similarity {}

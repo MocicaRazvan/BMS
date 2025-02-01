@@ -134,5 +134,11 @@ public class ReactiveResponseBuilder<RESPONSE, C> {
                         .build());
     }
 
+    public <T> Mono<CustomEntityModel<T>> toModelConvertSetContent(RESPONSE response, Class<C> clazz, T content) {
+        return toModel(response, clazz)
+                .map(model -> model.convertContent(content))
+                ;
+    }
+
 
 }

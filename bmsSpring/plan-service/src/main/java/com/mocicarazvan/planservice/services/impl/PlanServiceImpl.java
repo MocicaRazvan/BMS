@@ -4,6 +4,7 @@ import com.mocicarazvan.planservice.clients.DayClient;
 import com.mocicarazvan.planservice.clients.OrderClient;
 import com.mocicarazvan.planservice.dtos.PlanBody;
 import com.mocicarazvan.planservice.dtos.PlanResponse;
+import com.mocicarazvan.planservice.dtos.PlanResponseWithSimilarity;
 import com.mocicarazvan.planservice.dtos.dayClient.DayResponse;
 import com.mocicarazvan.planservice.dtos.dayClient.MealResponse;
 import com.mocicarazvan.planservice.dtos.dayClient.RecipeResponse;
@@ -29,6 +30,7 @@ import com.mocicarazvan.templatemodule.dtos.response.*;
 import com.mocicarazvan.templatemodule.exceptions.action.IllegalActionException;
 import com.mocicarazvan.templatemodule.exceptions.action.PrivateRouteException;
 import com.mocicarazvan.templatemodule.exceptions.action.SubEntityUsed;
+import com.mocicarazvan.templatemodule.exceptions.notFound.NotFoundEntity;
 import com.mocicarazvan.templatemodule.hateos.CustomEntityModel;
 import com.mocicarazvan.templatemodule.services.RabbitMqApprovedSender;
 import com.mocicarazvan.templatemodule.services.RabbitMqUpdateDeleteService;
@@ -402,6 +404,24 @@ public class PlanServiceImpl
 
     }
 
+    @RedisReactiveCache(key = CACHE_KEY_PATH, idPath = "id")
+    @Override
+    public Flux<PlanResponseWithSimilarity> getSimilarPlans(Long id, List<Long> excludeIds, int limit, Double minSimilarity) {
+        return
+                existsById(id).thenMany(
+                        modelRepository.getSimilarPlans(id, excludeIds.toArray(Long[]::new), limit, minSimilarity)
+                                .map(modelMapper::fromPlanWithSimilarityToResponse)
+
+                );
+    }
+
+    public Mono<Void> existsById(Long id) {
+        return modelRepository.existsById(id)
+                .filter(Boolean::booleanValue)
+                .switchIfEmpty(Mono.error(new NotFoundEntity("plan", id))
+                ).then();
+    }
+
     @Override
     @RedisReactiveCacheEvict(key = CACHE_KEY_PATH, id = "#id")
     public Mono<PlanResponse> reactToModel(Long id, String type, String userId) {
@@ -418,6 +438,12 @@ public class PlanServiceImpl
             super(modelRepository, modelMapper, "plan", pageableUtils, userClient);
             this.extendedPlanRepository = extendedPlanRepository;
         }
+
+        @RedisReactiveCache(key = CACHE_KEY_PATH, id = "#id")
+        protected Mono<Boolean> existByIdApproved(Long id) {
+            return modelRepository.existsByIdAndApprovedIsTrue(id);
+        }
+
 
         @Override
         @RedisReactiveApprovedCache(key = CACHE_KEY_PATH, idPath = "entity.id", approved = BooleanEnum.NULL, forWhom = "0")

@@ -41,4 +41,8 @@ public class CustomEntityModel<T> {
             _links = new HashMap<>();
         links.forEach(link -> _links.put(link.getRel().value(), link));
     }
+
+    public <M> CustomEntityModel<M> convertContent(M content) {
+        return new CustomEntityModel<>(content, _links);
+    }
 }

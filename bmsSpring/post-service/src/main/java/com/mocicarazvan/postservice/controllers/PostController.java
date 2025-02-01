@@ -3,6 +3,7 @@ package com.mocicarazvan.postservice.controllers;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mocicarazvan.postservice.dtos.PostBody;
 import com.mocicarazvan.postservice.dtos.PostResponse;
+import com.mocicarazvan.postservice.dtos.PostResponseWithSimilarity;
 import com.mocicarazvan.postservice.dtos.comments.CommentResponse;
 import com.mocicarazvan.postservice.hateos.PostReactiveResponseBuilder;
 import com.mocicarazvan.postservice.mappers.PostMapper;
@@ -352,6 +353,17 @@ public class PostController implements ApproveController
 
 
         return Mono.just("ok added: " + nr);
+    }
+
+    @GetMapping(value = "/similar/{id}", produces = {MediaType.APPLICATION_NDJSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
+    @ResponseStatus(HttpStatus.OK)
+    public Flux<CustomEntityModel<PostResponseWithSimilarity>> getSimilarPosts(@PathVariable Long id,
+                                                                               @RequestParam(required = false, defaultValue = "4") int limit,
+                                                                               @RequestParam(required = false, defaultValue = "0.0") Double minSimilarity
+    ) {
+        return postService.getSimilarPosts(id, limit, minSimilarity)
+                .flatMapSequential(m -> postReactiveResponseBuilder.toModelConvertSetContent(m, PostController.class, m
+                ));
     }
 
 

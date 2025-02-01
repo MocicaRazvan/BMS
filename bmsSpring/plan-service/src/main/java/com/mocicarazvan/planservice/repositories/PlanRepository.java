@@ -1,5 +1,6 @@
 package com.mocicarazvan.planservice.repositories;
 
+import com.mocicarazvan.planservice.dtos.PlanWithSimilarity;
 import com.mocicarazvan.planservice.models.Plan;
 import com.mocicarazvan.templatemodule.repositories.ApprovedRepository;
 import com.mocicarazvan.templatemodule.repositories.CountIds;
@@ -35,4 +36,45 @@ public interface PlanRepository extends ApprovedRepository<Plan>, CountInParent,
     Flux<Plan> findModelByMonth(int month, int year);
 
     Flux<Plan> findAllByUserId(Long userId);
+
+    @Query("""
+            with emb as(
+                select p.*,
+                       array [p.objective, p.type] as arr,
+                       pe.embedding
+                from plan p
+                         join plan_embedding pe on p.id = pe.entity_id)
+            select
+                (sub.ip+sub.ti)/2 as similarity,
+                sub.*
+            from (
+                     select
+                         -(e1.embedding <#> e2.embedding) as ip,
+                         coalesce(
+                                 (
+                                     SELECT count(x.arr)
+                                     FROM unnest(e1.arr) x(arr)
+                                              JOIN unnest(e2.arr) y(arr) ON x.arr = y.arr
+                                 )::float, 0
+                         ) /cardinality(e1.arr) as ti, -- gandeste mai bine decat
+                         e2.*
+                     from
+                         emb e1, emb e2
+                     where e1.id=:id
+                       and (
+                           (e2.approved=true and e2.display=true
+                               and e2.id !=ALL(:excludeIds)
+                               )
+                                or e2.id=e1.id)
+                 ) as sub
+            where ( (ip+ti)/2 ) >= :minSimilarity
+            order by  similarity desc
+            limit :limit
+            
+            """)
+    Flux<PlanWithSimilarity> getSimilarPlans(Long id,
+                                             Long[] excludeIds,
+                                             int limit,
+                                             Double minSimilarity
+    );
 }
