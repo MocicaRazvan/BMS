@@ -10,10 +10,7 @@ import {
 import Image, { StaticImageData } from "next/image";
 import { Link } from "@/navigation";
 import { isDeepEqual } from "@/lib/utils";
-import {
-  StaticFirstWordRotate,
-  WordRotate,
-} from "@/components/magicui/word-rotate";
+import { BlurInOut } from "@/components/common/blur-text";
 
 export interface HeroParallaxTexts {
   title: string | ReactNode;
@@ -136,10 +133,12 @@ export const Header = (texts: HeroParallaxTexts) => {
         <p>{firstTitle}</p>
         <span className="flex items-center gap-2 md:gap-5 pb-2">
           <p>{`${secondTitle} `}</p>
-          <StaticFirstWordRotate
-            firstWord={texts.platform}
-            secondWord={texts.community}
-            wrapperClassName="py-0 px-0 pb-1"
+          <BlurInOut
+            outText={texts.platform}
+            inText={texts.community}
+            duration={1.25}
+            changeTime={2.5}
+            inStartScale={1.12}
           />
         </span>
       </h1>
