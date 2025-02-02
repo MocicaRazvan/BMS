@@ -481,6 +481,7 @@ export function TotalAmountOrdersSingleBarChart({
   countColorIndex = 1,
   totalAmountColorIndex = 6,
 }: TotalAmountOrdersSingleBarChartProps) {
+  const stackId = uuidv4();
   const locale = useLocale();
   const label = fieldKey === "count" ? countLabel : totalAmountLabel;
   const avgLabel =
@@ -534,7 +535,11 @@ export function TotalAmountOrdersSingleBarChart({
               cursor={false}
               content={<ChartTooltipContent indicator="dot" />}
             />
-            <Bar dataKey={fieldKey} fill={`var(--color-${fieldKey})`} />
+            <Bar
+              dataKey={fieldKey}
+              fill={`var(--color-${fieldKey})`}
+              stackId={stackId}
+            />
             <ChartLegend content={<ChartLegendContent />} />
             <ReferenceLine
               y={meanValue}
