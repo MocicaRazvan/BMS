@@ -697,22 +697,22 @@ public class OrderServiceImpl implements OrderService {
                     );
         }
 
-        @RedisReactiveChildCache(key = CACHE_KEY_PATH, idPath = "maxGroupTotal+2*minGroupTotal+3*totalAmount+rank*3+271")
+        @RedisReactiveChildCache(key = CACHE_KEY_PATH, idPath = "3*maxGroupTotal+5*minGroupTotal+2*totalAmount+rank*3+2501")
         public Flux<TopUsersSummary> getTopUsersSummaryBase(LocalDateTime from, LocalDateTime to, int top) {
             return orderRepository.getTopUsersSummary(from, to, top);
         }
 
-        @RedisReactiveChildCache(key = CACHE_KEY_PATH, idPath = "4*maxGroupCount+2*minGroupCount+4*avgGroupCount+rank*16+197")
+        @RedisReactiveChildCache(key = CACHE_KEY_PATH, idPath = "3*maxGroupCount+2*minGroupCount+5*avgGroupCount+rank*16+8502")
         public Flux<TopPlansSummary> getTopPlansSummaryBase(LocalDateTime from, LocalDateTime to, int top) {
             return orderRepository.getTopPlansSummary(from, to, top);
         }
 
-        @RedisReactiveChildCache(key = CACHE_KEY_PATH, idPath = "3*maxGroupCount+2*minGroupCount+3*avgGroupCount+rank*15+97", masterId = "#trainerId")
+        @RedisReactiveChildCache(key = CACHE_KEY_PATH, idPath = "2*maxGroupCount+7*minGroupCount+3*avgGroupCount+rank*15+12003", masterId = "#trainerId")
         public Flux<TopPlansSummary> getTopPlansSummaryTrainerBase(LocalDateTime from, LocalDateTime to, int top, Flux<PlanResponse> plans, Long trainerId) {
             return getPlanIds(plans).flatMapMany(ids -> orderRepository.getTopPlansSummaryTrainer(from, to, top, ids));
         }
 
-        @RedisReactiveChildCache(key = CACHE_KEY_PATH, idPath = "month+year+2*totalAmount+count+33")
+        @RedisReactiveChildCache(key = CACHE_KEY_PATH, idPath = "5*month+year+2*totalAmount+3*count+16004")
         public Flux<MonthlyOrderSummary> getOrdersSummaryByMonthBase(LocalDateTime f, LocalDateTime s) {
             return
                     orderRepository.getOrdersSummaryByDateRangeGroupedByMonth(f, s);
@@ -720,7 +720,7 @@ public class OrderServiceImpl implements OrderService {
         }
 
 
-        @RedisReactiveChildCache(key = CACHE_KEY_PATH, idPath = "month+year+2*totalAmount+count+33+10000")
+        @RedisReactiveChildCache(key = CACHE_KEY_PATH, idPath = "3*month+year+2*totalAmount+3*count+21005")
         public Flux<MonthlyOrderSummary> getOrdersPlanSummaryByMonthBase(LocalDateTime f, LocalDateTime s) {
 
             return
@@ -728,7 +728,7 @@ public class OrderServiceImpl implements OrderService {
 
         }
 
-        @RedisReactiveChildCache(key = CACHE_KEY_PATH, idPath = "day+month+2*year+240")
+        @RedisReactiveChildCache(key = CACHE_KEY_PATH, idPath = "2*day+7*month+year+26006")
         public Flux<DailyOrderSummary> getOrdersSummaryByDay(LocalDateTime f, LocalDateTime s) {
 
 
@@ -736,14 +736,14 @@ public class OrderServiceImpl implements OrderService {
                     orderRepository.getOrdersSummaryByDateRangeGroupedByDay(f, s);
         }
 
-        @RedisReactiveChildCache(key = CACHE_KEY_PATH, idPath = "day+month+2*year+100+20000")
+        @RedisReactiveChildCache(key = CACHE_KEY_PATH, idPath = "4*day+3*month+year+31007")
         public Flux<DailyOrderSummary> getOrdersPlanSummaryByDay(LocalDateTime f, LocalDateTime s) {
 
             return
                     orderRepository.getAdminOrdersPlanSummaryByDateRangeGroupedByDay(f, s);
         }
 
-        @RedisReactiveChildCache(key = CACHE_KEY_PATH, idPath = "month+3*year+322", masterId = "#trainerId")
+        @RedisReactiveChildCache(key = CACHE_KEY_PATH, idPath = "5*month+year+36008", masterId = "#trainerId")
         public Flux<MonthlyOrderSummary> getTrainerOrdersSummaryByMonthBase(Flux<PlanResponse> plans, Pair<LocalDateTime, LocalDateTime> intervalDates, Long trainerId) {
             Flux<PlanResponse> cachedPlans = plans.cache();
             return getPlanIds(cachedPlans).flatMapMany(ids -> orderRepository.getTrainerOrdersSummaryByDateRangeGroupedByMonth(intervalDates.getFirst(), intervalDates.getSecond(),
@@ -756,7 +756,7 @@ public class OrderServiceImpl implements OrderService {
                             .build())));
         }
 
-        @RedisReactiveChildCache(key = CACHE_KEY_PATH, idPath = "day+month+4*year+767", masterId = "#trainerId")
+        @RedisReactiveChildCache(key = CACHE_KEY_PATH, idPath = "2*day+7*month+year+41009", masterId = "#trainerId")
         public Flux<DailyOrderSummary> getTrainerOrdersSummaryByDayBase(Flux<PlanResponse> plans, Pair<LocalDateTime, LocalDateTime> intervalDates, Long trainerId) {
             Flux<PlanResponse> cachedPlans = plans.cache();
             return getPlanIds(cachedPlans).flatMapMany(ids -> orderRepository.getTrainerOrdersSummaryByDateRangeGroupedByDay(
