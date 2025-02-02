@@ -155,6 +155,15 @@ public class OrderController implements CountInParentController {
         return orderService.getOrdersSummaryByMonth(from, to, requestsUtils.extractAuthUser(exchange));
     }
 
+    @GetMapping("/admin/plans/countAndAmount")
+    @ResponseStatus(HttpStatus.OK)
+    public Flux<MonthlyOrderSummary> getOrdersPlansSummaryByMonth(@RequestParam @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate from,
+                                                                  @RequestParam @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate to,
+                                                                  ServerWebExchange exchange) {
+        return orderService.getOrdersPlanSummaryByMonth(from, to, requestsUtils.extractAuthUser(exchange));
+    }
+
+
     @GetMapping("/admin/topUsers")
     @ResponseStatus(HttpStatus.OK)
     public Flux<TopUsersSummary> getTopUsersSummary(@RequestParam @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate from,
@@ -200,6 +209,14 @@ public class OrderController implements CountInParentController {
                                                          @RequestParam @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate to,
                                                          ServerWebExchange exchange) {
         return orderService.getOrdersSummaryByDay(from, to, requestsUtils.extractAuthUser(exchange));
+    }
+
+    @GetMapping("/admin/plans/countAndAmount/daily")
+    @ResponseStatus(HttpStatus.OK)
+    public Flux<DailyOrderSummary> getOrdersPlanSummaryByDay(@RequestParam @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate from,
+                                                             @RequestParam @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate to,
+                                                             ServerWebExchange exchange) {
+        return orderService.getOrdersPlanSummaryByDay(from, to, requestsUtils.extractAuthUser(exchange));
     }
 
     @GetMapping("/trainer/countAndAmount/daily/{trainerId}")

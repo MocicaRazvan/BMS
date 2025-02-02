@@ -309,6 +309,15 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    public Flux<MonthlyOrderSummary> getOrdersPlanSummaryByMonth(LocalDate from, LocalDate to, String userId) {
+        Pair<LocalDateTime, LocalDateTime> intervalDates = getIntervalDates(from, to);
+
+        return
+                self.getOrdersPlanSummaryByMonthBase(intervalDates.getFirst(), intervalDates.getSecond());
+
+    }
+
+    @Override
     public Flux<TopUsersSummary> getTopUsersSummary(LocalDate from, LocalDate to, int top) {
         Pair<LocalDateTime, LocalDateTime> intervalDates = getIntervalDates(from, to);
         return self.getTopUsersSummaryBase(intervalDates.getFirst(), intervalDates.getSecond(), top);
@@ -345,6 +354,15 @@ public class OrderServiceImpl implements OrderService {
 
         return
                 self.getOrdersSummaryByDay(intervalDates.getFirst(), intervalDates.getSecond());
+    }
+
+
+    @Override
+    public Flux<DailyOrderSummary> getOrdersPlanSummaryByDay(LocalDate from, LocalDate to, String userId) {
+        Pair<LocalDateTime, LocalDateTime> intervalDates = getIntervalDates(from, to);
+
+        return
+                self.getOrdersPlanSummaryByDay(intervalDates.getFirst(), intervalDates.getSecond());
     }
 
     @Override
@@ -696,18 +714,33 @@ public class OrderServiceImpl implements OrderService {
 
         @RedisReactiveChildCache(key = CACHE_KEY_PATH, idPath = "month+year+2*totalAmount+count+33")
         public Flux<MonthlyOrderSummary> getOrdersSummaryByMonthBase(LocalDateTime f, LocalDateTime s) {
-
             return
                     orderRepository.getOrdersSummaryByDateRangeGroupedByMonth(f, s);
 
         }
 
-        @RedisReactiveChildCache(key = CACHE_KEY_PATH, idPath = "day+month+2*year+100")
+
+        @RedisReactiveChildCache(key = CACHE_KEY_PATH, idPath = "month+year+2*totalAmount+count+33+10000")
+        public Flux<MonthlyOrderSummary> getOrdersPlanSummaryByMonthBase(LocalDateTime f, LocalDateTime s) {
+
+            return
+                    orderRepository.getAdminOrdersPlanSummaryByDateRangeGroupedByMonth(f, s);
+
+        }
+
+        @RedisReactiveChildCache(key = CACHE_KEY_PATH, idPath = "day+month+2*year+240")
         public Flux<DailyOrderSummary> getOrdersSummaryByDay(LocalDateTime f, LocalDateTime s) {
 
 
             return
                     orderRepository.getOrdersSummaryByDateRangeGroupedByDay(f, s);
+        }
+
+        @RedisReactiveChildCache(key = CACHE_KEY_PATH, idPath = "day+month+2*year+100+20000")
+        public Flux<DailyOrderSummary> getOrdersPlanSummaryByDay(LocalDateTime f, LocalDateTime s) {
+
+            return
+                    orderRepository.getAdminOrdersPlanSummaryByDateRangeGroupedByDay(f, s);
         }
 
         @RedisReactiveChildCache(key = CACHE_KEY_PATH, idPath = "month+3*year+322", masterId = "#trainerId")

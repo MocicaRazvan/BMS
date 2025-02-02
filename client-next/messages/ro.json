@@ -1940,7 +1940,8 @@
       },
       "AdminMonthlySalesTexts": {
         "title": "Vânzări lunare",
-        "header": "Aici poți vedea vânzările lunare de pe platformă."
+        "header": "Aici poți vedea vânzările lunare de pe platformă.",
+        "plansTitle": "Vânzări lunare ale planurilor"
       },
       "AdminCountriesTexts": {
         "title": "Comenzi pe țări",
@@ -1948,7 +1949,8 @@
       },
       "AdminDailySalesTexts": {
         "title": "Vânzări zilnice",
-        "header": "Aici poți vedea vânzările zilnice de pe platformă."
+        "header": "Aici poți vedea vânzările zilnice de pe platformă.",
+        "plansTitle": "Vânzări zilnice ale planurilor"
       },
       "AdminEmailPageTexts": {
         "title": "Trimite un email din partea companiei",

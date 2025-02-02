@@ -13,6 +13,7 @@ import MonthlySales, {
 import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
 import { Metadata } from "next";
 import { getIntlMetadata } from "@/texts/metadata";
+import { Separator } from "@/components/ui/separator";
 
 interface Props {
   params: { locale: Locale };
@@ -20,9 +21,11 @@ interface Props {
 export interface AdminMonthlySalesTexts {
   title: string;
   header: string;
+  plansTitle: string;
   monthlySalesTexts: MonthlySalesTexts;
   themeSwitchTexts: ThemeSwitchTexts;
   menuTexts: SidebarMenuTexts;
+  plansMonthlySales: MonthlySalesTexts;
 }
 
 export async function generateMetadata({
@@ -59,6 +62,22 @@ export default async function AdminMonthlySales({ params: { locale } }: Props) {
               path={"/orders/admin/countAndAmount"}
               authUser={authUser}
               {...texts.monthlySalesTexts}
+            />
+          </div>
+        </Suspense>
+        <Separator className="my-10" />
+        <h1 className="text-xl lg:text-2xl font-bold tracking-tight">
+          {texts.plansTitle}
+        </h1>
+        <Suspense fallback={<LoadingSpinner />}>
+          <div className="mt-10 h-full">
+            <MonthlySales
+              path={"/orders/admin/plans/countAndAmount"}
+              authUser={authUser}
+              {...texts.plansMonthlySales}
+              hideTotalAmount={true}
+              countColorIndex={9}
+              totalAmountColorIndex={10}
             />
           </div>
         </Suspense>

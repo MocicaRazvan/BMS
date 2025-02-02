@@ -42,7 +42,7 @@ export default function RecommendationList<
     return <LoadingSpinner sectionClassName=" w-full h-full" />;
   }
 
-  if (!messages.length) {
+  if (!messages.length || messages.length === 1) {
     return null;
   }
 
@@ -51,11 +51,11 @@ export default function RecommendationList<
     .filter((m) => m.id !== itemId);
 
   return (
-    <div className="space-y-10 overflow-hidden">
+    <div className="space-y-10 overflow-hidden ">
       <h3 className="font-semibold tracking-tighter text-lg md:text-[26px]">
         {texts.title}
       </h3>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 lg:grid-cols-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 lg:grid-cols-3 p-2">
         {filteredMessages.map((item) => (
           <div key={item.id}>
             <RecommendationCard
@@ -86,7 +86,7 @@ export function RecommendationCard<
   itemRendererProps?: P;
 }) {
   return (
-    <Card className="flex items-center justify-between">
+    <Card className="flex items-center justify-between  hover:shadow-md transition-all duration-300 hover:shadow-foreground/40 hover:scale-[1.015]">
       <CardHeader className="flex flex-row items-center justify-between w-full">
         <ItemRenderer
           {...({ item, ...itemRendererProps } as { item: T } & P)}
@@ -169,7 +169,10 @@ function SimilarityIndicator({
         className="absolute inset-0 flex flex-col items-center justify-center text-lg font-semibold"
         style={{ color: getColor(clampedPercentage) }}
       >
-        <span>{clampedPercentage}%</span>
+        <span>
+          {clampedPercentage}
+          {"%"}
+        </span>
       </div>
     </div>
   );

@@ -30,6 +30,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
+import { v4 as uuid } from "uuid";
 
 export interface TopChartWrapperTexts {
   dateRangePickerTexts: DateRangePickerTexts;
@@ -199,6 +200,7 @@ export function TopChartMeanRelative({
   referenceLabel,
   chartColorNumber = 6,
 }: TopChartMeanRelativeProps) {
+  const stackId = uuid();
   return (
     <ChartContainer
       config={{
@@ -220,7 +222,12 @@ export function TopChartMeanRelative({
         <XAxis dataKey="name" />
         <YAxis domain={[0, maxBar + maxOffset]} />
         <ChartTooltip content={<ChartTooltipContent hideLabel={true} />} />
-        <Bar dataKey={chartKey} fill={`var(--color-${chartKey})`} radius={4} />
+        <Bar
+          dataKey={chartKey}
+          fill={`var(--color-${chartKey})`}
+          radius={4}
+          stackId={stackId}
+        />
         <ReferenceLine
           y={referenceValue}
           style={{ stroke: "hsl(var(--primary))" }}

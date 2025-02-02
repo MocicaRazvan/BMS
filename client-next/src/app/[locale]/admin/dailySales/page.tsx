@@ -11,6 +11,7 @@ import DailySales, { DailySalesTexts } from "@/components/charts/daily-sales";
 import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
 import { Metadata } from "next";
 import { getIntlMetadata } from "@/texts/metadata";
+import { Separator } from "@/components/ui/separator";
 
 interface Props {
   params: { locale: Locale };
@@ -19,7 +20,9 @@ interface Props {
 export interface AdminDailySalesTexts {
   title: string;
   header: string;
+  plansTitle: string;
   dailySalesTexts: DailySalesTexts;
+  plansDailySalesTexts: DailySalesTexts;
   themeSwitchTexts: ThemeSwitchTexts;
   menuTexts: SidebarMenuTexts;
 }
@@ -53,6 +56,21 @@ export default async function AdminDailySales({ params: { locale } }: Props) {
               path={"/orders/admin/countAndAmount/daily"}
               authUser={authUser}
               {...texts.dailySalesTexts}
+            />
+          </div>
+        </Suspense>
+        <Separator className="my-10" />
+        <h1 className="text-xl lg:text-2xl font-bold tracking-tight">
+          {texts.plansTitle}
+        </h1>
+        <Suspense fallback={<LoadingSpinner />}>
+          <div className="mt-10 h-full">
+            <DailySales
+              path={"/orders/admin/countAndAmount/daily"}
+              authUser={authUser}
+              {...texts.plansDailySalesTexts}
+              hideTotalAmount={true}
+              countColorIndex={9}
             />
           </div>
         </Suspense>

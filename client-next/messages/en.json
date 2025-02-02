@@ -1941,7 +1941,8 @@
       },
       "AdminMonthlySalesTexts": {
         "title": "Monthly Sales",
-        "header": "Here you can see the monthly sales."
+        "header": "Here you can see the monthly sales.",
+        "plansTitle": "Plans Monthly Sales"
       },
       "AdminCountriesTexts": {
         "title": "Orders by countries",
@@ -1949,7 +1950,8 @@
       },
       "AdminDailySalesTexts": {
         "title": "Daily Sales",
-        "header": "Here you can see the daily sales."
+        "header": "Here you can see the daily sales.",
+        "plansTitle": "Plans Daily Sales"
       },
       "AdminEmailPageTexts": {
         "title": "Send Email From Company",

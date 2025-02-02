@@ -38,12 +38,18 @@ export interface MonthlySalesTexts {
 }
 interface Props extends WithUser, MonthlySalesTexts {
   path: string;
+  countColorIndex?: number;
+  totalAmountColorIndex?: number;
+  hideTotalAmount?: boolean;
 }
 export default function MonthlySales({
   authUser,
   dateRangePickerTexts,
   totalAmountCountOrdersTexts,
   path,
+  countColorIndex = 1,
+  totalAmountColorIndex = 6,
+  hideTotalAmount = false,
 }: Props) {
   const locale = useLocale();
 
@@ -158,27 +164,34 @@ export default function MonthlySales({
           extraChartConfig={{
             count10: {
               label: "10*" + totalAmountCountOrdersTexts.countLabel,
-              color: "hsl(var(--chart-1))",
+              color: `hsl(var(--chart-${countColorIndex}))`,
             },
           }}
+          countColorIndex={countColorIndex}
+          totalAmountColorIndex={totalAmountColorIndex}
         />
       </div>
-      <Separator />
-      <div>
-        <div className="flex flex-col md:flex-row items-center justify-between gap-5 md:gap-2">
-          {dateRangePicker}
-          <h2 className="text-xl font-bold tracking-tighter md:text-2xl">
-            {totalAmountCountOrdersTexts.totalAmountLabel}
-          </h2>
-          <div className="w-80" />
-        </div>
-        <TotalAmountOrdersSingleBarChart
-          data={formattedData}
-          dataAvailable={isFinished}
-          {...totalAmountCountOrdersTexts}
-          fieldKey={"totalAmount"}
-        />
-      </div>
+      {!hideTotalAmount && (
+        <>
+          <Separator />
+          <div>
+            <div className="flex flex-col md:flex-row items-center justify-between gap-5 md:gap-2">
+              {dateRangePicker}
+              <h2 className="text-xl font-bold tracking-tighter md:text-2xl">
+                {totalAmountCountOrdersTexts.totalAmountLabel}
+              </h2>
+              <div className="w-80" />
+            </div>
+            <TotalAmountOrdersSingleBarChart
+              data={formattedData}
+              dataAvailable={isFinished}
+              {...totalAmountCountOrdersTexts}
+              fieldKey={"totalAmount"}
+              totalAmountColorIndex={totalAmountColorIndex}
+            />
+          </div>
+        </>
+      )}
       <Separator />
       <div>
         <div className="flex flex-col md:flex-row items-center justify-between gap-5 md:gap-2">
@@ -194,6 +207,7 @@ export default function MonthlySales({
           {...totalAmountCountOrdersTexts}
           countLabel={totalAmountCountOrdersTexts.countLabel}
           fieldKey={"count"}
+          countColorIndex={countColorIndex}
         />
       </div>
     </div>

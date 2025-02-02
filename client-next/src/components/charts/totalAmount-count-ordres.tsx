@@ -39,6 +39,7 @@ import { motion } from "framer-motion";
 import * as ss from "simple-statistics";
 import { Skeleton } from "@/components/ui/skeleton";
 import useDownloadChartButton from "@/hoooks/charts/download-chart-button";
+import { v4 as uuidv4 } from "uuid";
 
 export interface TotalAmountCountOrdersData {
   count: number;
@@ -66,6 +67,8 @@ interface Props extends TotalAmountCountOrdersTexts {
   showTrendLine?: boolean;
   chartName: string;
   extraChartConfig?: ChartConfig;
+  countColorIndex?: number;
+  totalAmountColorIndex?: number;
   mapCountLabel?: (showCount: boolean, showTotalAmount: boolean) => string;
   mapTotalAmountLabel?: (
     showCount: boolean,
@@ -86,15 +89,18 @@ export function TotalAmountCountOrders({
   extraChartConfig,
   mapCountLabel = (showCount, showTotalAmount) => "count",
   mapTotalAmountLabel = (showCount, showTotalAmount) => "totalAmount",
+  countColorIndex = 1,
+  totalAmountColorIndex = 6,
 }: Props) {
+  const stackId = uuidv4();
   const chartConfig = {
     count: {
       label: countLabel,
-      color: "hsl(var(--chart-1))",
+      color: `hsl(var(--chart-${countColorIndex}))`,
     },
     totalAmount: {
       label: totalAmountLabel,
-      color: "hsl(var(--chart-6))",
+      color: `hsl(var(--chart-${totalAmountColorIndex}))`,
     },
     ...(extraChartConfig && extraChartConfig),
   } satisfies ChartConfig;
@@ -209,12 +215,14 @@ export function TotalAmountCountOrders({
               <Bar
                 dataKey={mapCountLabel(showCount, showTotalAmount)}
                 fill="var(--color-count)"
+                stackId={stackId}
               />
             )}
             {showTotalAmount && (
               <Bar
                 dataKey={mapTotalAmountLabel(showCount, showTotalAmount)}
                 fill="var(--color-totalAmount)"
+                stackId={stackId}
               />
             )}
             <ChartLegend content={<ChartLegendContent />} />
@@ -222,7 +230,13 @@ export function TotalAmountCountOrders({
         ) : (
           <ComposedChart data={data} ref={composedChartRef}>
             <defs>
-              <linearGradient id="fillCount" x1="0" y1="0" x2="0" y2="1">
+              <linearGradient
+                id={`fillCount-${stackId}`}
+                x1="0"
+                y1="0"
+                x2="0"
+                y2="1"
+              >
                 <stop
                   offset="5%"
                   stopColor="var(--color-count)"
@@ -234,7 +248,13 @@ export function TotalAmountCountOrders({
                   stopOpacity={0.1}
                 />
               </linearGradient>
-              <linearGradient id="fillTotalAmount" x1="0" y1="0" x2="0" y2="1">
+              <linearGradient
+                id={`fillTotalAmount-${stackId}`}
+                x1="0"
+                y1="0"
+                x2="0"
+                y2="1"
+              >
                 <stop
                   offset="5%"
                   stopColor="var(--color-totalAmount)"
@@ -282,18 +302,20 @@ export function TotalAmountCountOrders({
               <Area
                 dataKey={mapCountLabel(showCount, showTotalAmount)}
                 type="monotoneX"
-                fill="url(#fillCount)"
+                fill={`url(#fillCount-${stackId})`}
                 stroke="var(--color-count)"
                 dot={{ r: 4, fill: "var(--color-count)" }}
+                stackId={stackId}
               />
             )}
             {showTotalAmount && (
               <Area
                 dataKey={mapTotalAmountLabel(showCount, showTotalAmount)}
                 type="monotoneX"
-                fill="url(#fillTotalAmount)"
+                fill={`url(#fillTotalAmount-${stackId})`}
                 stroke="var(--color-totalAmount)"
                 dot={{ r: 4, fill: "var(--color-totalAmount)" }}
+                stackId={stackId}
               />
             )}
             {showTrendLine && regressionPoints && regressionKey && (
@@ -443,6 +465,8 @@ interface TotalAmountOrdersSingleBarChartProps
   data: TotalAmountCountOrdersData[];
   dataAvailable: boolean;
   fieldKey: keyof Omit<TotalAmountCountOrdersData, "date"> & string;
+  countColorIndex?: number;
+  totalAmountColorIndex?: number;
 }
 
 export function TotalAmountOrdersSingleBarChart({
@@ -454,6 +478,8 @@ export function TotalAmountOrdersSingleBarChart({
   fieldKey,
   averageTotalAmountLabel,
   averageCountLabel,
+  countColorIndex = 1,
+  totalAmountColorIndex = 6,
 }: TotalAmountOrdersSingleBarChartProps) {
   const locale = useLocale();
   const label = fieldKey === "count" ? countLabel : totalAmountLabel;
@@ -463,7 +489,9 @@ export function TotalAmountOrdersSingleBarChart({
     [fieldKey]: {
       label,
       color:
-        fieldKey === "count" ? "hsl(var(--chart-1))" : "hsl(var(--chart-6))",
+        fieldKey === "count"
+          ? `hsl(var(--chart-${countColorIndex}))`
+          : `hsl(var(--chart-${totalAmountColorIndex}))`,
     },
   } satisfies ChartConfig;
 

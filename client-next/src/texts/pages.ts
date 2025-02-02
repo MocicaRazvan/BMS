@@ -1450,10 +1450,11 @@ export async function getAdminDashboardPageTexts(): Promise<AdminDashboardPageTe
 }
 
 export async function getAdminMonthlySalesTexts(): Promise<AdminMonthlySalesTexts> {
-  const [t, monthlySalesTexts, themeSwitchTexts, menuTexts] = await Promise.all(
-    [
+  const [t, monthlySalesTexts, plansMonthlySales, themeSwitchTexts, menuTexts] =
+    await Promise.all([
       getTranslations("pages.admin.AdminMonthlySalesTexts"),
       getMonthlySalesTexts("orders"),
+      getMonthlySalesTexts("plans"),
       getThemeSwitchTexts(),
       getSidebarMenuTexts(
         "admin",
@@ -1461,14 +1462,15 @@ export async function getAdminMonthlySalesTexts(): Promise<AdminMonthlySalesText
         adminLabels,
         adminSubLabels,
       ),
-    ],
-  );
+    ]);
   return {
     title: t("title"),
     header: t("header"),
+    plansTitle: t("plansTitle"),
     monthlySalesTexts,
     themeSwitchTexts,
     menuTexts,
+    plansMonthlySales,
   };
 }
 
@@ -1495,18 +1497,27 @@ export async function getAdminCountriesTexts(): Promise<AdminCountriesTexts> {
 }
 
 export async function getAdminDailySalesTexts(): Promise<AdminDailySalesTexts> {
-  const [t, dailySalesTexts, themeSwitchTexts, menuTexts] = await Promise.all([
+  const [
+    t,
+    dailySalesTexts,
+    plansDailySalesTexts,
+    themeSwitchTexts,
+    menuTexts,
+  ] = await Promise.all([
     getTranslations("pages.admin.AdminDailySalesTexts"),
     getDailySalesTexts("orders"),
+    getDailySalesTexts("plans"),
     getThemeSwitchTexts(),
     getSidebarMenuTexts("admin", adminGroupLabels, adminLabels, adminSubLabels),
   ]);
   return {
     title: t("title"),
     header: t("header"),
+    plansTitle: t("plansTitle"),
     dailySalesTexts,
     themeSwitchTexts,
     menuTexts,
+    plansDailySalesTexts,
   };
 }
 

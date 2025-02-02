@@ -31,17 +31,6 @@ public interface OrderRepository extends ManyToOneUserRepository<Order>, CountIn
             """)
     Flux<Long> findUserPlanIds(Long userId);
 
-//    @Query("""
-//                   SELECT o.id AS orderId, o.user_id AS userId, o.plan_ids AS planIds, o.total AS total,
-//                   o.created_at AS orderCreatedAt, o.updated_at AS orderUpdatedAt,
-//                   a.id AS addressId, a.city AS city, a.country AS country, a.line1 AS line1,
-//                   a.line2 AS line2, a.postal_code AS postalCode, a.state AS state,
-//                   a.created_at AS addressCreatedAt, a.updated_at AS addressUpdatedAt
-//            FROM custom_order o
-//            JOIN address a ON o.address_id = a.id
-//            WHERE o.id = :id
-//             """)
-//    Mono<OrderWithAddress> findByIdWithAddress(Long id);
 
     @Override
     @Query("""
@@ -95,10 +84,26 @@ public interface OrderRepository extends ManyToOneUserRepository<Order>, CountIn
     );
 
     @Query("""
-            SELECT EXTRACT(YEAR FROM created_at) AS year, 
-                   EXTRACT(MONTH FROM created_at) AS month, 
+            SELECT EXTRACT(YEAR FROM co.created_at) AS year,
+                   EXTRACT(MONTH FROM co.created_at) AS month,
+                   sum(cardinality(co.plan_ids)) as count,
+                   sum(co.total) as total_amount
+            FROM
+                custom_order co
+            WHERE created_at >= :startDate AND created_at < :endDate
+            GROUP BY EXTRACT(YEAR FROM created_at), EXTRACT(MONTH FROM created_at)
+            ORDER BY year, month
+            """)
+    Flux<MonthlyOrderSummary> getAdminOrdersPlanSummaryByDateRangeGroupedByMonth(
+            LocalDateTime startDate,
+            LocalDateTime endDate
+    );
+
+    @Query("""
+            SELECT EXTRACT(YEAR FROM created_at) AS year,
+                   EXTRACT(MONTH FROM created_at) AS month,
                    EXTRACT(DAY FROM created_at) AS day,
-                   COUNT(*) AS count, 
+                   COUNT(*) AS count,
                    SUM(total) AS total_amount
             FROM custom_order
             WHERE created_at >= :startDate AND created_at < :endDate
@@ -127,6 +132,23 @@ public interface OrderRepository extends ManyToOneUserRepository<Order>, CountIn
             LocalDateTime startDate,
             LocalDateTime endDate,
             Long[] trainerPlanIds
+    );
+
+    @Query("""
+            SELECT EXTRACT(YEAR FROM co.created_at) AS year,
+                   EXTRACT(MONTH FROM co.created_at) AS month,
+                   EXTRACT(DAY FROM created_at) AS day,
+                   sum(cardinality(co.plan_ids)) as count,
+                   sum(co.total) as total_amount
+            FROM
+                custom_order co
+            WHERE created_at >= :startDate AND created_at < :endDate
+            GROUP BY EXTRACT(YEAR FROM created_at), EXTRACT(MONTH FROM created_at)
+            ORDER BY year, month, day
+            """)
+    Flux<DailyOrderSummary> getAdminOrdersPlanSummaryByDateRangeGroupedByDay(
+            LocalDateTime startDate,
+            LocalDateTime endDate
     );
 
     @Query("""

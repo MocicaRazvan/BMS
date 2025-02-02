@@ -27,6 +27,9 @@ export interface DailySalesTexts {
 
 interface Props extends WithUser, DailySalesTexts {
   path: string;
+  countColorIndex?: number;
+  totalAmountColorIndex?: number;
+  hideTotalAmount?: boolean;
 }
 
 const now = new Date();
@@ -41,6 +44,9 @@ export default function DailySales({
   dateRangePickerTexts,
   totalAmountCountOrdersTexts,
   path,
+  countColorIndex = 1,
+  totalAmountColorIndex = 6,
+  hideTotalAmount = false,
 }: Props) {
   const { navigateToNotFound } = useClientNotFound();
 
@@ -122,35 +128,43 @@ export default function DailySales({
           countLabel={totalAmountCountOrdersTexts.countLabel}
           showTrendLine={showOrdersTrendLine}
           chartName={totalAmountCountOrdersTexts.countLabel}
+          countColorIndex={countColorIndex}
+          totalAmountColorIndex={totalAmountColorIndex}
         />
       </div>
-      <Separator />
-      <div>
-        <div className="flex flex-col md:flex-row gap-5 md:gap-2 items-center justify-between w-full flex-wrap">
-          {dateRangePicker}
-          <h2 className="text-xl font-bold tracking-tighter md:text-2xl">
-            {totalAmountCountOrdersTexts.totalAmountLabel}
-          </h2>
-          <div className="md:min-w-80 flex items-center justify-end">
-            {formattedData.length > 1 && (
-              <TrendLineButton
-                {...totalAmountCountOrdersTexts}
-                showTrendLine={showAmountTrendLine}
-                onShowTrendLineChange={setShowAmountTrendLine}
-              />
-            )}
+      {!hideTotalAmount && (
+        <>
+          <Separator />
+          <div>
+            <div className="flex flex-col md:flex-row gap-5 md:gap-2 items-center justify-between w-full flex-wrap">
+              {dateRangePicker}
+              <h2 className="text-xl font-bold tracking-tighter md:text-2xl">
+                {totalAmountCountOrdersTexts.totalAmountLabel}
+              </h2>
+              <div className="md:min-w-80 flex items-center justify-end">
+                {formattedData.length > 1 && (
+                  <TrendLineButton
+                    {...totalAmountCountOrdersTexts}
+                    showTrendLine={showAmountTrendLine}
+                    onShowTrendLineChange={setShowAmountTrendLine}
+                  />
+                )}
+              </div>
+            </div>
+            <TotalAmountCountOrders
+              data={formattedData}
+              dataAvailable={isFinished}
+              {...totalAmountCountOrdersTexts}
+              showCount={false}
+              countLabel={totalAmountCountOrdersTexts.countLabel}
+              showTrendLine={showAmountTrendLine}
+              chartName={totalAmountCountOrdersTexts.totalAmountLabel}
+              countColorIndex={countColorIndex}
+              totalAmountColorIndex={totalAmountColorIndex}
+            />
           </div>
-        </div>
-        <TotalAmountCountOrders
-          data={formattedData}
-          dataAvailable={isFinished}
-          {...totalAmountCountOrdersTexts}
-          showCount={false}
-          countLabel={totalAmountCountOrdersTexts.countLabel}
-          showTrendLine={showAmountTrendLine}
-          chartName={totalAmountCountOrdersTexts.totalAmountLabel}
-        />
-      </div>
+        </>
+      )}
     </div>
   );
 }

@@ -46,6 +46,8 @@ public interface OrderService extends CountInParentService {
 
     Flux<MonthlyOrderSummary> getOrdersSummaryByMonth(LocalDate from, LocalDate to, String userId);
 
+    Flux<MonthlyOrderSummary> getOrdersPlanSummaryByMonth(LocalDate from, LocalDate to, String userId);
+
     Flux<TopUsersSummary> getTopUsersSummary(LocalDate from, LocalDate to, int top);
 
     Flux<TopPlansSummary> getTopPlansSummary(LocalDate from, LocalDate to, int top);
@@ -55,6 +57,8 @@ public interface OrderService extends CountInParentService {
     Flux<MonthlyOrderSummary> getTrainerOrdersSummaryByMonth(LocalDate from, LocalDate to, Long trainerId, String userId);
 
     Flux<DailyOrderSummary> getOrdersSummaryByDay(LocalDate from, LocalDate to, String userId);
+
+    Flux<DailyOrderSummary> getOrdersPlanSummaryByDay(LocalDate from, LocalDate to, String userId);
 
     Flux<DailyOrderSummary> getTrainerOrdersSummaryByDay(LocalDate from, LocalDate to, Long trainerId, String userId);
 
