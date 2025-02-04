@@ -21,10 +21,12 @@ import com.mocicarazvan.orderservice.enums.CountrySummaryType;
 import com.mocicarazvan.orderservice.enums.DietType;
 import com.mocicarazvan.orderservice.enums.ObjectiveType;
 import com.mocicarazvan.orderservice.mappers.OrderMapper;
+import com.mocicarazvan.orderservice.models.CustomAddress;
 import com.mocicarazvan.orderservice.models.Order;
 import com.mocicarazvan.orderservice.repositories.OrderRepository;
 import com.mocicarazvan.orderservice.services.CustomAddressService;
 import com.mocicarazvan.orderservice.services.OrderService;
+import com.mocicarazvan.orderservice.services.PlanOrderService;
 import com.mocicarazvan.orderservice.stripe.CustomerUtil;
 import com.mocicarazvan.rediscache.annotation.RedisReactiveChildCache;
 import com.mocicarazvan.rediscache.annotation.RedisReactiveChildCacheEvict;
@@ -60,6 +62,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.reactive.TransactionalOperator;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -112,6 +115,8 @@ public class OrderServiceImpl implements OrderService {
     private final OrderWithAddressCacheHandler orderWithAddressCacheHandler;
     private final OrderServiceRedisCacheWrapper self;
     private final OrderWithAddressServiceImpl.OrderWithAddRedisCacheWrapper orderWithAddRedisCacheWrapper;
+    private final PlanOrderService planOrderService;
+    private final TransactionalOperator transactionalOperator;
 
 
     @PostConstruct
@@ -488,7 +493,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     private Mono<String> handleSessionCompleted(Session session) {
-        System.out.println("Session object: " + session);
+        log.info("Session object: {}", session);
 
         // Retrieve metadata
         Map<String, String> metadata = session.getMetadata();
@@ -522,17 +527,10 @@ public class OrderServiceImpl implements OrderService {
                     planClient.getByIds(planIds.stream().map(Object::toString).toList(), userId).collectList()
                             .flatMap(plans ->
                                     customAddressService.saveAddress(customerDetails.getAddress())
-                                            .flatMap(a -> orderRepository.save(
-                                                    Order.builder()
-                                                            .addressId(a.getId())
-                                                            .planIds(planIds)
-                                                            .total(total)
-                                                            .userId(Long.valueOf(userId))
-                                                            .createdAt(LocalDateTime.now())
-                                                            .updatedAt(LocalDateTime.now())
-                                                            .stripeInvoiceId(session.getInvoice())
-                                                            .build()
-                                            ))
+                                            .flatMap(a -> saveOrder(session, a, planIds, total, userId)
+                                                    .flatMap(o -> planOrderService.savePlansForOrder(plans, o.getId())
+                                                            .thenReturn(o))
+                                            ).as(transactionalOperator::transactional)
                                             .flatMap(order -> sendOrderEmail(order, customerEmail))
                                             .then(sendNotifications(plans, customerEmail))
                                             .then(self.invalidateForUser("userIn", userId)
@@ -547,6 +545,20 @@ public class OrderServiceImpl implements OrderService {
         } else {
             return Mono.error(new IllegalActionException("Customer details are missing"));
         }
+    }
+
+    private Mono<Order> saveOrder(Session session, CustomAddress a, List<Long> planIds, double total, String userId) {
+        return orderRepository.save(
+                Order.builder()
+                        .addressId(a.getId())
+                        .planIds(planIds)
+                        .total(total)
+                        .userId(Long.valueOf(userId))
+                        .createdAt(LocalDateTime.now())
+                        .updatedAt(LocalDateTime.now())
+                        .stripeInvoiceId(session.getInvoice())
+                        .build()
+        );
     }
 
     private Mono<Void> sendOrderEmail(Order order, String customerEmail) {
@@ -661,6 +673,21 @@ public class OrderServiceImpl implements OrderService {
                 .switchIfEmpty(Mono.error(new NotFoundEntity("order", orderId)));
     }
 
+    @Override
+    public Mono<String> seedPlanOrders(String userId) {
+        return orderRepository.findAll()
+                .buffer(20)
+                .flatMap(os -> Flux.fromIterable(os)
+                        .flatMap(o -> planClient.getByIds(o.getPlanIds().stream().map(Object::toString).toList(), userId).collectList()
+                                .flatMap(plans ->
+                                        planOrderService.deleteAllByOrderId(o.getId())
+                                                .then(planOrderService.savePlansForOrder(plans, o.getId())
+                                                )
+                                )
+                        )).as(transactionalOperator::transactional)
+                .then(Mono.just("Success"));
+    }
+
 
     @Getter
     @Component
@@ -745,29 +772,12 @@ public class OrderServiceImpl implements OrderService {
 
         @RedisReactiveChildCache(key = CACHE_KEY_PATH, idPath = "5*month+year+36008", masterId = "#trainerId")
         public Flux<MonthlyOrderSummary> getTrainerOrdersSummaryByMonthBase(Flux<PlanResponse> plans, Pair<LocalDateTime, LocalDateTime> intervalDates, Long trainerId) {
-            Flux<PlanResponse> cachedPlans = plans.cache();
-            return getPlanIds(cachedPlans).flatMapMany(ids -> orderRepository.getTrainerOrdersSummaryByDateRangeGroupedByMonth(intervalDates.getFirst(), intervalDates.getSecond(),
-                            ids)
-                    .flatMap(e -> fromTrainerSummaryToSummary(cachedPlans, e, (p) -> MonthlyOrderSummary.builder()
-                            .year(e.getYear())
-                            .month(e.getMonth())
-                            .totalAmount(p.getFirst())
-                            .count(p.getSecond())
-                            .build())));
+            return orderRepository.getTrainerOrdersSummaryByDateRangeGroupedByMonth(intervalDates.getFirst(), intervalDates.getSecond(), trainerId);
         }
 
         @RedisReactiveChildCache(key = CACHE_KEY_PATH, idPath = "2*day+7*month+year+41009", masterId = "#trainerId")
         public Flux<DailyOrderSummary> getTrainerOrdersSummaryByDayBase(Flux<PlanResponse> plans, Pair<LocalDateTime, LocalDateTime> intervalDates, Long trainerId) {
-            Flux<PlanResponse> cachedPlans = plans.cache();
-            return getPlanIds(cachedPlans).flatMapMany(ids -> orderRepository.getTrainerOrdersSummaryByDateRangeGroupedByDay(
-                            intervalDates.getFirst(), intervalDates.getSecond(), ids)
-                    .flatMap(e -> fromTrainerSummaryToSummary(cachedPlans, e, (p) -> DailyOrderSummary.builder()
-                            .year(e.getYear())
-                            .month(e.getMonth())
-                            .day(e.getDay())
-                            .totalAmount(p.getFirst())
-                            .count(p.getSecond())
-                            .build())));
+            return orderRepository.getTrainerOrdersSummaryByDateRangeGroupedByDay(intervalDates.getFirst(), intervalDates.getSecond(), trainerId);
         }
 
         public <E extends MonthlyTrainerOrderSummary, T extends MonthlyOrderSummary> Mono<T> fromTrainerSummaryToSummary(

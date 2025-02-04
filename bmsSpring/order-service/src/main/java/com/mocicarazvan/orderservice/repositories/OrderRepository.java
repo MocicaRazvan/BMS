@@ -1,8 +1,6 @@
 package com.mocicarazvan.orderservice.repositories;
 
 import com.mocicarazvan.orderservice.dtos.summaries.*;
-import com.mocicarazvan.orderservice.dtos.summaries.trainer.DailyTrainerOrderSummary;
-import com.mocicarazvan.orderservice.dtos.summaries.trainer.MonthlyTrainerOrderSummary;
 import com.mocicarazvan.orderservice.models.Order;
 import com.mocicarazvan.templatemodule.repositories.CountInParent;
 import com.mocicarazvan.templatemodule.repositories.ManyToOneUserRepository;
@@ -67,20 +65,19 @@ public interface OrderRepository extends ManyToOneUserRepository<Order>, CountIn
     @Query("""
             SELECT EXTRACT(YEAR FROM co.created_at) AS year,
                        EXTRACT(MONTH FROM co.created_at) AS month,
-                       COUNT(*) AS count,
-                       array_agg(u.plan_id) AS plan_ids
+                       COUNT(po.plan_id) AS count,
+                        sum(po.price) as total_amount
             FROM
-                custom_order co,
-                LATERAL unnest(co.plan_ids) AS u(plan_id)
-            WHERE created_at >= :startDate AND created_at < :endDate
-            and u.plan_id = any(:trainerPlanIds)
-            GROUP BY EXTRACT(YEAR FROM created_at), EXTRACT(MONTH FROM created_at)
+                custom_order co join plan_order po on co.id = po.order_id
+            WHERE co.created_at >= :startDate AND co.created_at < :endDate
+            and po.user_id = :trainerId
+            GROUP BY EXTRACT(YEAR FROM co.created_at), EXTRACT(MONTH FROM co.created_at)
             ORDER BY year, month
             """)
-    Flux<MonthlyTrainerOrderSummary> getTrainerOrdersSummaryByDateRangeGroupedByMonth(
+    Flux<MonthlyOrderSummary> getTrainerOrdersSummaryByDateRangeGroupedByMonth(
             LocalDateTime startDate,
             LocalDateTime endDate,
-            Long[] trainerPlanIds
+            Long trainerId
     );
 
     @Query("""
@@ -115,23 +112,22 @@ public interface OrderRepository extends ManyToOneUserRepository<Order>, CountIn
             LocalDateTime endDate);
 
     @Query("""
-            SELECT EXTRACT(YEAR FROM created_at) AS year, 
-                   EXTRACT(MONTH FROM created_at) AS month, 
-                    EXTRACT(DAY FROM created_at) AS day,
-                   COUNT(*) AS count,
-                     array_agg(u.plan_id) AS plan_ids
+            SELECT EXTRACT(YEAR FROM co.created_at) AS year, 
+                   EXTRACT(MONTH FROM co.created_at) AS month, 
+                    EXTRACT(DAY FROM co.created_at) AS day,
+                   COUNT(po.plan_id) AS count,
+                   sum(po.price) as total_amount
             FROM
-                custom_order co,
-                LATERAL unnest(co.plan_ids) AS u(plan_id)
-            WHERE created_at >= :startDate AND created_at < :endDate
-            and u.plan_id = any(:trainerPlanIds)
-            GROUP BY EXTRACT(YEAR FROM created_at), EXTRACT(MONTH FROM created_at), EXTRACT(DAY FROM created_at)
+                custom_order co join plan_order po on co.id = po.order_id
+            WHERE co.created_at >= :startDate AND co.created_at < :endDate
+            and po.user_id = :trainerId
+            GROUP BY EXTRACT(YEAR FROM co.created_at), EXTRACT(MONTH FROM co.created_at), EXTRACT(DAY FROM co.created_at)
             ORDER BY year, month, day
             """)
-    Flux<DailyTrainerOrderSummary> getTrainerOrdersSummaryByDateRangeGroupedByDay(
+    Flux<DailyOrderSummary> getTrainerOrdersSummaryByDateRangeGroupedByDay(
             LocalDateTime startDate,
             LocalDateTime endDate,
-            Long[] trainerPlanIds
+            Long trainerId
     );
 
     @Query("""

@@ -236,4 +236,13 @@ public class OrderController implements CountInParentController {
     ) {
         return orderService.getOrdersSummaryByCountry(type, from, to);
     }
+
+    @GetMapping("/admin/seedPlanOrders")
+    public Mono<ResponseEntity<String>> seedPlanOrders(
+            ServerWebExchange exchange
+    ) {
+        return orderService.seedPlanOrders(
+                requestsUtils.extractAuthUser(exchange)
+        ).map(ResponseEntity::ok);
+    }
 }

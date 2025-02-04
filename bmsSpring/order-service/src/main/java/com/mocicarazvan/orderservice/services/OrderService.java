@@ -69,4 +69,6 @@ public interface OrderService extends CountInParentService {
     Mono<ResponseWithUserDtoEntity<DayResponse>> getDayByIdWithUser(Long planId, Long dayId, String userId);
 
     Flux<CustomEntityModel<MealResponse>> getMealsByDayInternal(Long planId, Long dayId, String userId);
+
+    Mono<String> seedPlanOrders(String userId);
 }
