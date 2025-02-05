@@ -8,6 +8,7 @@ import com.mocicarazvan.ollamasearch.dtos.embed.OllamaEmbedRequestModel;
 import com.mocicarazvan.ollamasearch.dtos.embed.OllamaEmbedResponseModel;
 import com.mocicarazvan.ollamasearch.services.OllamaAPIService;
 import com.mocicarazvan.ollamasearch.utils.OllamaQueryUtils;
+import com.mocicarazvan.ollamasearch.utils.TextPreprocessor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -48,6 +49,7 @@ public class OllamaAPIServiceImpl implements OllamaAPIService {
     @Override
     public Mono<OllamaEmbedResponseModel> generateEmbeddingWithCache(String text, EmbedCache embedCache) {
         return embedCache.getEmbedding(text, this::generateEmbedding)
+                // the response serialization is big
                 .subscribeOn(Schedulers.boundedElastic());
     }
 
@@ -74,7 +76,8 @@ public class OllamaAPIServiceImpl implements OllamaAPIService {
 
 
     private Mono<OllamaEmbedResponseModel> embed(List<String> inputs) {
-        String[] texts = inputs.stream().map(t -> t.toLowerCase().replaceAll("\\s+", " ").trim()).toList().toArray(new String[0]);
+//        String[] texts = inputs.stream().map(t -> t.toLowerCase().replaceAll("\\s+", " ").trim()).toArray(String[]::new);
+        String[] texts = TextPreprocessor.preprocess(inputs);
         OllamaEmbedRequestModel.builder()
                 .fromConfig(ollamaPropertiesConfig)
                 .input(texts)
