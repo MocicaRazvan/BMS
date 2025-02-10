@@ -203,6 +203,57 @@ public class OrderController implements CountInParentController {
         return orderService.getTrainerOrdersSummaryByMonth(from, to, trainerId, requestsUtils.extractAuthUser(exchange));
     }
 
+    @GetMapping("/trainer/countAndAmount/type/{trainerId}")
+    @ResponseStatus(HttpStatus.OK)
+    public Flux<MonthlyOrderSummaryType> getTrainerOrdersSummaryByDateRangeGroupedByMonthTypes(@RequestParam @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate month,
+                                                                                               @PathVariable Long trainerId,
+                                                                                               ServerWebExchange exchange
+    ) {
+        return orderService.getTrainerOrdersSummaryByDateRangeGroupedByMonthTypes(month, trainerId, requestsUtils.extractAuthUser(exchange));
+    }
+
+    @GetMapping("/trainer/countAndAmount/objective/{trainerId}")
+    @ResponseStatus(HttpStatus.OK)
+    public Flux<MonthlyOrderSummaryObjective> getTrainerOrdersSummaryByDateRangeGroupedByMonthObjectives(@RequestParam @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate month,
+                                                                                                         @PathVariable Long trainerId,
+                                                                                                         ServerWebExchange exchange
+    ) {
+        return orderService.getTrainerOrdersSummaryByDateRangeGroupedByMonthObjectives(month, trainerId, requestsUtils.extractAuthUser(exchange));
+    }
+
+    @GetMapping("/trainer/countAndAmount/objectiveType/{trainerId}")
+    @ResponseStatus(HttpStatus.OK)
+    public Flux<MonthlyOrderSummaryObjectiveType> getTrainerOrdersSummaryByDateRangeGroupedByMonthObjectivesTypes(@RequestParam @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate month,
+                                                                                                                  @PathVariable Long trainerId,
+                                                                                                                  ServerWebExchange exchange
+    ) {
+        return orderService.getTrainOrdersSummaryByDateRangeGroupedByMonthObjectiveTypes(month, trainerId, requestsUtils.extractAuthUser(exchange));
+    }
+
+    @GetMapping("/admin/countAndAmount/type")
+    @ResponseStatus(HttpStatus.OK)
+    public Flux<MonthlyOrderSummaryType> getAdminOrdersSummaryByDateRangeGroupedByMonthTypes(@RequestParam @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate month,
+                                                                                             ServerWebExchange exchange
+    ) {
+        return orderService.getAdminOrdersSummaryByDateRangeGroupedByMonthTypes(month, requestsUtils.extractAuthUser(exchange));
+    }
+
+    @GetMapping("/admin/countAndAmount/objective")
+    @ResponseStatus(HttpStatus.OK)
+    public Flux<MonthlyOrderSummaryObjective> getAdminOrdersSummaryByDateRangeGroupedByMonthObjectives(@RequestParam @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate month,
+                                                                                                       ServerWebExchange exchange
+    ) {
+        return orderService.getAdminOrdersSummaryByDateRangeGroupedByMonthObjectives(month, requestsUtils.extractAuthUser(exchange));
+    }
+
+    @GetMapping("/admin/countAndAmount/objectiveType")
+    @ResponseStatus(HttpStatus.OK)
+    public Flux<MonthlyOrderSummaryObjectiveType> getAdminOrdersSummaryByDateRangeGroupedByMonthObjectivesTypes(@RequestParam @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate month,
+                                                                                                                ServerWebExchange exchange
+    ) {
+        return orderService.getAdminOrdersSummaryByDateRangeGroupedByMonthObjectiveTypes(month, requestsUtils.extractAuthUser(exchange));
+    }
+
     @GetMapping("/admin/countAndAmount/daily")
     @ResponseStatus(HttpStatus.OK)
     public Flux<DailyOrderSummary> getOrdersSummaryByDay(@RequestParam @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate from,

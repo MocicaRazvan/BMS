@@ -49,8 +49,8 @@ public interface OrderRepository extends ManyToOneUserRepository<Order>, CountIn
     Flux<Order> findModelByMonth(int month, int year);
 
     @Query("""
-            SELECT EXTRACT(YEAR FROM created_at) AS year, 
-                   EXTRACT(MONTH FROM created_at) AS month, 
+            SELECT EXTRACT(YEAR FROM created_at) AS year,
+                   EXTRACT(MONTH FROM created_at) AS month,
                    COUNT(*) AS count, 
                    SUM(total) AS total_amount
             FROM custom_order
@@ -75,6 +75,106 @@ public interface OrderRepository extends ManyToOneUserRepository<Order>, CountIn
             ORDER BY year, month
             """)
     Flux<MonthlyOrderSummary> getTrainerOrdersSummaryByDateRangeGroupedByMonth(
+            LocalDateTime startDate,
+            LocalDateTime endDate,
+            Long trainerId
+    );
+
+    @Query("""
+                        with agg as (
+                select co.created_at,
+                       co.updated_at,
+                       po.objective,
+                       po.plan_id,
+                       po.user_id,
+                       po.price
+                from custom_order co
+                         join plan_order po on co.id = po.order_id
+            
+            )
+            SELECT EXTRACT(YEAR FROM agg.created_at) AS year,
+                   EXTRACT(MONTH FROM agg.created_at) AS month,
+                   count(agg.plan_id) as count,
+                   sum(agg.price) as total_amount,
+                   agg.objective,
+                   avg(agg.price) as average_amount
+            
+            FROM
+                agg
+              WHERE agg.created_at >= :startDate AND agg.created_at < :endDate
+                         and (:trainerId =-1 or agg.user_id = :trainerId)
+            GROUP BY EXTRACT(YEAR FROM agg.created_at), EXTRACT(MONTH FROM agg.created_at), objective
+            ORDER BY year, month,objective
+            
+            """)
+    Flux<MonthlyOrderSummaryObjective> getTrainerOrdersSummaryByDateRangeGroupedByMonthObjectives(
+            LocalDateTime startDate,
+            LocalDateTime endDate,
+            Long trainerId
+    );
+
+    @Query("""
+            
+             with agg as (
+                select co.created_at,
+                       co.updated_at,
+                       po.plan_id,
+                       po.user_id,
+                       po.type,
+                       po.price
+                from custom_order co
+                         join plan_order po on co.id = po.order_id
+            
+            )
+            SELECT EXTRACT(YEAR FROM agg.created_at) AS year,
+                   EXTRACT(MONTH FROM agg.created_at) AS month,
+                   count(agg.plan_id) as count,
+                   sum(agg.price) as total_amount,
+                   agg.type,
+                   avg(agg.price) as average_amount
+            FROM
+                agg
+              WHERE agg.created_at >= :startDate AND agg.created_at < :endDate
+                         and (:trainerId =-1 or agg.user_id = :trainerId)
+            GROUP BY EXTRACT(YEAR FROM agg.created_at), EXTRACT(MONTH FROM agg.created_at), type
+            ORDER BY year, month,type
+            """)
+    Flux<MonthlyOrderSummaryType> getTrainerOrdersSummaryByDateRangeGroupedByMonthTypes(
+            LocalDateTime startDate,
+            LocalDateTime endDate,
+            Long trainerId
+    );
+
+
+    @Query("""
+                    with agg as (
+                        select co.created_at,
+                               co.updated_at,
+                               po.objective,
+                               po.plan_id,
+                               po.user_id,
+                               po.type,
+                               po.price
+                        from custom_order co
+                                 join plan_order po on co.id = po.order_id
+            
+                    )
+                    SELECT EXTRACT(YEAR FROM agg.created_at) AS year,
+                           EXTRACT(MONTH FROM agg.created_at) AS month,
+                           count(agg.plan_id) as count,
+                           sum(agg.price) as total_amount,
+                           agg.objective,
+                           agg.type,
+                           avg(agg.price) as average_amount
+            
+                    FROM
+                        agg
+                     WHERE agg.created_at >= :startDate AND agg.created_at < :endDate
+                                     and (:trainerId =-1 or agg.user_id = :trainerId)
+                    GROUP BY EXTRACT(YEAR FROM agg.created_at), EXTRACT(MONTH FROM agg.created_at), objective,type
+                    ORDER BY year, month,objective,type
+            """)
+    Flux<MonthlyOrderSummaryObjectiveType> getTrainerOrdersSummaryByDateRangeGroupedByMonthObjectivesTypes(
             LocalDateTime startDate,
             LocalDateTime endDate,
             Long trainerId
@@ -139,13 +239,14 @@ public interface OrderRepository extends ManyToOneUserRepository<Order>, CountIn
             FROM
                 custom_order co
             WHERE created_at >= :startDate AND created_at < :endDate
-            GROUP BY EXTRACT(YEAR FROM created_at), EXTRACT(MONTH FROM created_at)
+            GROUP BY EXTRACT(YEAR FROM created_at), EXTRACT(MONTH FROM created_at), EXTRACT(DAY FROM created_at)
             ORDER BY year, month, day
             """)
     Flux<DailyOrderSummary> getAdminOrdersPlanSummaryByDateRangeGroupedByDay(
             LocalDateTime startDate,
             LocalDateTime endDate
     );
+
 
     @Query("""
                 select sub.*,

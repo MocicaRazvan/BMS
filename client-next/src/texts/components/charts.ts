@@ -16,6 +16,10 @@ import { TopUsersTexts } from "@/components/charts/top-users";
 import { getCreationFilterTexts } from "@/texts/components/list";
 import { TopChartWrapperTexts } from "@/components/charts/top-chart-wrapper";
 import { TopPlansTexts } from "@/components/charts/top-plans";
+import {
+  PlanCharacteristicTexts,
+  PlanCharacteristicWrapperTexts,
+} from "@/components/charts/plan-charctersitic";
 
 export async function getIngredientPieChartTexts(): Promise<IngredientPieChartTexts> {
   const t = await getTranslations("components.charts.IngredientPieChartTexts");
@@ -113,12 +117,19 @@ export async function getGeographyChartTexts(): Promise<GeographyChartTexts> {
 export async function getMonthlySalesTexts(
   type: "orders" | "plans",
 ): Promise<MonthlySalesTexts> {
-  const [dateRangePickerTexts, totalAmountCountOrdersTexts] = await Promise.all(
-    [getDateRangePickerTexts(), getTotalAmountCountOrdersTexts(type)],
-  );
+  const [
+    dateRangePickerTexts,
+    totalAmountCountOrdersTexts,
+    planCharacteristicWrapperTexts,
+  ] = await Promise.all([
+    getDateRangePickerTexts(),
+    getTotalAmountCountOrdersTexts(type),
+    getPlanCharacteristicWrapperTexts(),
+  ]);
   return {
     dateRangePickerTexts,
     totalAmountCountOrdersTexts,
+    planCharacteristicWrapperTexts,
   };
 }
 
@@ -200,5 +211,31 @@ export async function getUseDownloadChartButtonTexts() {
   const t = await getTranslations("components.charts.DownloadChartButton");
   return {
     downloadChart: t("downloadChart"),
+  };
+}
+
+export async function getPlanCharacteristicTexts(): Promise<PlanCharacteristicTexts> {
+  const t = await getTranslations("components.charts.PlanCharacteristicTexts");
+  return {
+    totalAmountLabel: t("totalAmountLabel"),
+    typeLabel: t("typeLabel"),
+    objectiveLabel: t("objectiveLabel"),
+    countLabel: t("countLabel"),
+    averageAmountLabel: t("averageAmountLabel"),
+  };
+}
+
+export async function getPlanCharacteristicWrapperTexts(): Promise<PlanCharacteristicWrapperTexts> {
+  const [planCharacteristicTexts, t] = await Promise.all([
+    getPlanCharacteristicTexts(),
+    getTranslations("components.charts.PlanCharacteristicWrapperTexts"),
+  ]);
+  return {
+    ...planCharacteristicTexts,
+    statisticLabel: t("statisticLabel"),
+    typeSelectLabel: t("typeSelectLabel"),
+    monthSelectLabel: t("monthSelectLabel"),
+    chartName: t("chartName"),
+    title: t("title"),
   };
 }

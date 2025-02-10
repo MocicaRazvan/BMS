@@ -6,6 +6,7 @@ import {
   getPostItemRendererTexts,
   getRecommendationListTexts,
 } from "@/texts/components/recommandation";
+import { getPlanCharacteristicWrapperTexts } from "@/texts/components/charts";
 
 interface Props {
   params: {
@@ -13,7 +14,6 @@ interface Props {
   };
 }
 export default async function TestPage({ params }: Props) {
-  const texts = await getRecommendationListTexts("plan");
-  const texts2 = await getPostItemRendererTexts();
-  return <TestPageContent texts={texts} texts2={texts2} />;
+  const texts = await getPlanCharacteristicWrapperTexts();
+  return <TestPageContent texts={texts} />;
 }

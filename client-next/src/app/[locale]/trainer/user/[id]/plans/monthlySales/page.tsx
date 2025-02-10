@@ -63,6 +63,13 @@ export default async function UsersMonthlySalesPage({
               path={`/orders/trainer/countAndAmount/${id}`}
               {...texts.monthlySalesTexts}
               authUser={authUser}
+              characteristicProps={{
+                plansPaths: {
+                  typePath: `/orders/trainer/countAndAmount/type/${id}`,
+                  objectivePath: `/orders/trainer/countAndAmount/objective/${id}`,
+                  scatterPath: `/orders/trainer/countAndAmount/objectiveType/${id}`,
+                },
+              }}
             />
           </div>
         </Suspense>

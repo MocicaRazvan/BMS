@@ -755,6 +755,9 @@
       }
     },
     "common": {
+      "MonthPickerTexts": {
+        "placeholder": "Selectați luna"
+      },
       "ArchiveQueueCardsTexts": {
         "description": "Elemente care așteaptă să fie arhivate",
         "types": {
@@ -1193,6 +1196,20 @@
       },
       "DownloadChartButton": {
         "downloadChart": "Descarcă graficul"
+      },
+      "PlanCharacteristicTexts": {
+        "totalAmountLabel": "Suma totală",
+        "typeLabel": "Tip dietă",
+        "objectiveLabel": "Obiectiv",
+        "countLabel": "Numărul de cumpărări",
+        "averageAmountLabel": "Suma medie"
+      },
+      "PlanCharacteristicWrapperTexts": {
+        "statisticLabel": "Metrica",
+        "typeSelectLabel": "Tip dietă",
+        "monthSelectLabel": "Luna",
+        "chartName": "Caracteristicile planulurilor",
+        "title": "Metrici dupa caracteristici planurilor"
       },
       "TopChartWrapperTexts": {
         "periodLabel": "Perioadă",

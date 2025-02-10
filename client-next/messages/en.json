@@ -755,6 +755,9 @@
       }
     },
     "common": {
+      "MonthPickerTexts": {
+        "placeholder": "Pick a month"
+      },
       "ArchiveQueueCardsTexts": {
         "description": "Elements waiting to be archived",
         "types": {
@@ -1194,6 +1197,20 @@
       },
       "DownloadChartButton": {
         "downloadChart": "Download Chart"
+      },
+      "PlanCharacteristicTexts": {
+        "totalAmountLabel": "Total amount",
+        "typeLabel": "Diet Type",
+        "objectiveLabel": "Objective",
+        "countLabel": "Number of purchases",
+        "averageAmountLabel": "Average amount"
+      },
+      "PlanCharacteristicWrapperTexts": {
+        "statisticLabel": "Statistic",
+        "typeSelectLabel": "Diet type",
+        "monthSelectLabel": "Month",
+        "chartName": "Plans Characteristics",
+        "title": "Metrics by plan characteristics"
       },
       "TopChartWrapperTexts": {
         "periodLabel": "Period",

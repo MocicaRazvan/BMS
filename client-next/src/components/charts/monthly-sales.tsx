@@ -22,6 +22,11 @@ import { MonthlyOrderSummary } from "@/types/dto";
 import { ro } from "date-fns/locale";
 import useClientNotFound from "@/hoooks/useClientNotFound";
 import { Separator } from "@/components/ui/separator";
+import {
+  PlanCharacteristicColors,
+  PlanCharacteristicWrapper,
+  PlanCharacteristicWrapperTexts,
+} from "@/components/charts/plan-charctersitic";
 
 const now = new Date();
 const oneMonthAgo = subMonths(now, 1);
@@ -35,12 +40,21 @@ const formattedOneYearAgo = format(oneYearAgo, dateFormat);
 export interface MonthlySalesTexts {
   totalAmountCountOrdersTexts: TotalAmountCountOrdersTexts;
   dateRangePickerTexts: DateRangePickerTexts;
+  planCharacteristicWrapperTexts: PlanCharacteristicWrapperTexts;
 }
 interface Props extends WithUser, MonthlySalesTexts {
   path: string;
   countColorIndex?: number;
   totalAmountColorIndex?: number;
   hideTotalAmount?: boolean;
+  characteristicProps?: {
+    plansPaths: {
+      typePath: string;
+      objectivePath: string;
+      scatterPath: string;
+    };
+    colors?: PlanCharacteristicColors;
+  };
 }
 export default function MonthlySales({
   authUser,
@@ -50,6 +64,8 @@ export default function MonthlySales({
   countColorIndex = 1,
   totalAmountColorIndex = 6,
   hideTotalAmount = false,
+  characteristicProps = undefined,
+  planCharacteristicWrapperTexts,
 }: Props) {
   const locale = useLocale();
 
@@ -210,6 +226,18 @@ export default function MonthlySales({
           countColorIndex={countColorIndex}
         />
       </div>
+      {characteristicProps && (
+        <>
+          <Separator />
+          <div>
+            <PlanCharacteristicWrapper
+              {...characteristicProps.plansPaths}
+              {...characteristicProps.colors}
+              {...planCharacteristicWrapperTexts}
+            />
+          </div>
+        </>
+      )}
     </div>
   );
 }

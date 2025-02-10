@@ -396,6 +396,25 @@ export interface MonthlyOrderSummary extends CountAmount {
 export interface DailyOrderSummary extends MonthlyOrderSummary {
   day: number;
 }
+export interface AverageAmount {
+  averageAmount: number;
+}
+
+export interface MonthlyOrderSummaryType
+  extends MonthlyOrderSummary,
+    AverageAmount {
+  type: DietType;
+}
+
+export interface MonthlyOrderSummaryObjective
+  extends MonthlyOrderSummary,
+    AverageAmount {
+  objective: ObjectiveType;
+}
+
+export interface MonthlyOrderSummaryObjectiveType
+  extends MonthlyOrderSummaryType,
+    MonthlyOrderSummaryObjective {}
 export enum CountrySummaryType {
   COUNT = "COUNT",
   TOTAL_AMOUNT = "TOTAL_AMOUNT",

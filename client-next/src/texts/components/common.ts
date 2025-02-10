@@ -5,6 +5,10 @@ import { NutritionalTableTexts } from "@/components/common/nutritional-table";
 import { getIngredientTableColumnTexts } from "@/texts/components/table";
 import { ArchiveQueueCardsTexts } from "@/components/common/archive-queue-card";
 import { ArchiveQueuePrefix, archiveQueuePrefixes } from "@/types/dto";
+import {
+  MonthPicker,
+  MonthPickerTexts,
+} from "@/components/common/month-picker";
 
 export async function getElementHeaderTexts(): Promise<ElementHeaderTexts> {
   const t = await getTranslations("components.common.ElementHeaderTexts");
@@ -89,4 +93,11 @@ export async function getAllArchiveQueueCardsTexts(): Promise<
     },
     {} as Record<ArchiveQueuePrefix, ArchiveQueueCardsTexts>,
   );
+}
+
+export async function getMonthPickerTexts(): Promise<MonthPickerTexts> {
+  const t = await getTranslations("components.common.MonthPickerTexts");
+  return {
+    placeholder: t("placeholder"),
+  };
 }

@@ -72,6 +72,7 @@ import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.util.*;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 @Service
 @RequiredArgsConstructor
@@ -337,7 +338,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public Flux<TopPlansSummary> getTopPlansSummaryTrainer(LocalDate from, LocalDate to, int top, Long trainerId, String userId) {
         Pair<LocalDateTime, LocalDateTime> intervalDates = getIntervalDates(from, to);
-        return getTrainerSummaryWrapper(trainerId, userId,
+        return getTrainerSummaryWrapperPlans(trainerId, userId,
                 plans -> self.getTopPlansSummaryTrainerBase(intervalDates.getFirst(), intervalDates.getSecond(), top,
                         plans, trainerId));
     }
@@ -346,8 +347,8 @@ public class OrderServiceImpl implements OrderService {
     public Flux<MonthlyOrderSummary> getTrainerOrdersSummaryByMonth(LocalDate from, LocalDate to, Long trainerId, String userId) {
         Pair<LocalDateTime, LocalDateTime> intervalDates = getIntervalDates(from, to);
 
-        return getTrainerSummaryWrapper(trainerId, userId,
-                plans -> self.getTrainerOrdersSummaryByMonthBase(plans, intervalDates, trainerId));
+        return getTrainerSummary(trainerId, userId,
+                () -> self.getTrainerOrdersSummaryByMonthBase(intervalDates, trainerId));
 
     }
 
@@ -374,13 +375,21 @@ public class OrderServiceImpl implements OrderService {
     public Flux<DailyOrderSummary> getTrainerOrdersSummaryByDay(LocalDate from, LocalDate to, Long trainerId, String userId) {
         Pair<LocalDateTime, LocalDateTime> intervalDates = getIntervalDates(from, to);
 
-        return getTrainerSummaryWrapper(trainerId, userId,
-                plans -> self.getTrainerOrdersSummaryByDayBase(plans, intervalDates, trainerId));
+        return getTrainerSummary(trainerId, userId,
+                () -> self.getTrainerOrdersSummaryByDayBase(intervalDates, trainerId));
 
     }
 
-    private <T> Flux<T> getTrainerSummaryWrapper(Long trainerId, String userId,
-                                                 Function<Flux<PlanResponse>, Flux<T>> summaryFunction
+
+    private <T> Flux<T> getTrainerSummary(Long trainerId, String userId,
+                                          Supplier<Flux<T>> callaback
+    ) {
+        return userClient.existsTrainerOrAdmin("/exists", trainerId)
+                .thenMany(callaback.get());
+    }
+
+    private <T> Flux<T> getTrainerSummaryWrapperPlans(Long trainerId, String userId,
+                                                      Function<Flux<PlanResponse>, Flux<T>> summaryFunction
     ) {
         return userClient.existsTrainerOrAdmin("/exists", trainerId)
                 .thenMany(planClient.getTrainersPlans(String.valueOf(trainerId), userId)
@@ -479,6 +488,52 @@ public class OrderServiceImpl implements OrderService {
                     });
 
                 }).map(this::fromStripeInvoiceToCustom);
+    }
+
+    @Override
+    public Flux<MonthlyOrderSummaryObjective> getTrainerOrdersSummaryByDateRangeGroupedByMonthObjectives(LocalDate month, Long trainerId, String userId) {
+        Pair<LocalDateTime, LocalDateTime> intervalDates = getMonthRange(month);
+        return getTrainerSummary(trainerId, userId, () ->
+                self.getTrainerOrdersSummaryByDateRangeGroupedByMonthObjectivesBase(intervalDates, trainerId));
+    }
+
+    private Pair<LocalDateTime, LocalDateTime> getMonthRange(LocalDate month) {
+        return getIntervalDates(month.withDayOfMonth(1), month.withDayOfMonth(month.lengthOfMonth()));
+    }
+
+    @Override
+    public Flux<MonthlyOrderSummaryType> getTrainerOrdersSummaryByDateRangeGroupedByMonthTypes(LocalDate month, Long trainerId, String userId) {
+        Pair<LocalDateTime, LocalDateTime> intervalDates = getMonthRange(month);
+        return getTrainerSummary(trainerId, userId, () ->
+                self.getTrainerOrdersSummaryByDateRangeGroupedByMonthTypesBase(intervalDates, trainerId));
+    }
+
+    @Override
+    public Flux<MonthlyOrderSummaryObjectiveType> getTrainOrdersSummaryByDateRangeGroupedByMonthObjectiveTypes(LocalDate month, Long trainerId, String userId) {
+        Pair<LocalDateTime, LocalDateTime> intervalDates = getMonthRange(month);
+        return getTrainerSummary(trainerId, userId, () ->
+                self.getTrainerOrdersSummaryByDateRangeGroupedByMonthObjectivesTypesBase(intervalDates, trainerId));
+    }
+
+    @Override
+    public Flux<MonthlyOrderSummaryObjective> getAdminOrdersSummaryByDateRangeGroupedByMonthObjectives(LocalDate month, String userId) {
+        Pair<LocalDateTime, LocalDateTime> intervalDates = getMonthRange(month);
+        return
+                self.getTrainerOrdersSummaryByDateRangeGroupedByMonthObjectivesBase(intervalDates, -1L);
+    }
+
+    @Override
+    public Flux<MonthlyOrderSummaryType> getAdminOrdersSummaryByDateRangeGroupedByMonthTypes(LocalDate month, String userId) {
+        Pair<LocalDateTime, LocalDateTime> intervalDates = getMonthRange(month);
+        return
+                self.getTrainerOrdersSummaryByDateRangeGroupedByMonthTypesBase(intervalDates, -1L);
+    }
+
+    @Override
+    public Flux<MonthlyOrderSummaryObjectiveType> getAdminOrdersSummaryByDateRangeGroupedByMonthObjectiveTypes(LocalDate month, String userId) {
+        Pair<LocalDateTime, LocalDateTime> intervalDates = getMonthRange(month);
+        return
+                self.getTrainerOrdersSummaryByDateRangeGroupedByMonthObjectivesTypesBase(intervalDates, -1L);
     }
 
 
@@ -771,12 +826,12 @@ public class OrderServiceImpl implements OrderService {
         }
 
         @RedisReactiveChildCache(key = CACHE_KEY_PATH, idPath = "5*month+year+36008", masterId = "#trainerId")
-        public Flux<MonthlyOrderSummary> getTrainerOrdersSummaryByMonthBase(Flux<PlanResponse> plans, Pair<LocalDateTime, LocalDateTime> intervalDates, Long trainerId) {
+        public Flux<MonthlyOrderSummary> getTrainerOrdersSummaryByMonthBase(Pair<LocalDateTime, LocalDateTime> intervalDates, Long trainerId) {
             return orderRepository.getTrainerOrdersSummaryByDateRangeGroupedByMonth(intervalDates.getFirst(), intervalDates.getSecond(), trainerId);
         }
 
         @RedisReactiveChildCache(key = CACHE_KEY_PATH, idPath = "2*day+7*month+year+41009", masterId = "#trainerId")
-        public Flux<DailyOrderSummary> getTrainerOrdersSummaryByDayBase(Flux<PlanResponse> plans, Pair<LocalDateTime, LocalDateTime> intervalDates, Long trainerId) {
+        public Flux<DailyOrderSummary> getTrainerOrdersSummaryByDayBase(Pair<LocalDateTime, LocalDateTime> intervalDates, Long trainerId) {
             return orderRepository.getTrainerOrdersSummaryByDateRangeGroupedByDay(intervalDates.getFirst(), intervalDates.getSecond(), trainerId);
         }
 
@@ -794,6 +849,22 @@ public class OrderServiceImpl implements OrderService {
                                                     acc.getSecond() + cur.getSecond()
                                             ))
                                             .map(mapper));
+        }
+
+        @RedisReactiveChildCache(key = CACHE_KEY_PATH, idPath = "9*month+year+46001", masterId = "#trainerId")
+        Flux<MonthlyOrderSummaryObjective> getTrainerOrdersSummaryByDateRangeGroupedByMonthObjectivesBase(Pair<LocalDateTime, LocalDateTime> intervalDates, Long trainerId) {
+            return orderRepository.getTrainerOrdersSummaryByDateRangeGroupedByMonthObjectives(intervalDates.getFirst(), intervalDates.getSecond(), trainerId);
+        }
+
+        @RedisReactiveChildCache(key = CACHE_KEY_PATH, idPath = "7*month+year+51002", masterId = "#trainerId")
+        Flux<MonthlyOrderSummaryType> getTrainerOrdersSummaryByDateRangeGroupedByMonthTypesBase(Pair<LocalDateTime, LocalDateTime> intervalDates, Long trainerId) {
+            return orderRepository.getTrainerOrdersSummaryByDateRangeGroupedByMonthTypes(intervalDates.getFirst(), intervalDates.getSecond(), trainerId);
+        }
+
+
+        @RedisReactiveChildCache(key = CACHE_KEY_PATH, idPath = "5*month+year+56003")
+        Flux<MonthlyOrderSummaryObjectiveType> getTrainerOrdersSummaryByDateRangeGroupedByMonthObjectivesTypesBase(Pair<LocalDateTime, LocalDateTime> intervalDates, Long trainerId) {
+            return orderRepository.getTrainerOrdersSummaryByDateRangeGroupedByMonthObjectivesTypes(intervalDates.getFirst(), intervalDates.getSecond(), trainerId);
         }
 
         @RedisReactiveChildCache(key = CACHE_KEY_PATH, idPath = "id")

@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/tooltip";
 import { getUseDownloadChartButtonTexts } from "@/texts/components/charts";
 
-interface DateString {
+export interface DateString {
   date: string;
 }
 interface Args<T extends DateString> {

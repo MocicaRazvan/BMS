@@ -78,6 +78,19 @@ export default async function AdminMonthlySales({ params: { locale } }: Props) {
               hideTotalAmount={true}
               countColorIndex={9}
               totalAmountColorIndex={10}
+              characteristicProps={{
+                plansPaths: {
+                  typePath: "/orders/admin/countAndAmount/type",
+                  objectivePath: "/orders/admin/countAndAmount/objective",
+                  scatterPath: "/orders/admin/countAndAmount/objectiveType",
+                },
+                colors: {
+                  countColorIndex: 9,
+                  totalAmountColorIndex: 10,
+                  averageAmountColorIndex: 8,
+                  lineColorIndex: 2,
+                },
+              }}
             />
           </div>
         </Suspense>
