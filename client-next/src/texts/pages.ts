@@ -63,6 +63,7 @@ import {
   getMonthlySalesTexts,
   getRelativeItemsSummaryTexts,
   getTopPlansTexts,
+  getTopTrainersTexts,
   getTopUsersTexts,
 } from "@/texts/components/charts";
 import { UserRecipesPageTexts } from "@/app/[locale]/trainer/user/[id]/recipes/page";
@@ -564,6 +565,7 @@ export async function getAdminUsersPageTexts(): Promise<AdminUsersPageTexts> {
     menuTexts,
     archiveUsersTexts,
     topUsersTexts,
+    topTrainersTexts,
   ] = await Promise.all([
     getUserTableTexts(),
     getThemeSwitchTexts(),
@@ -572,6 +574,7 @@ export async function getAdminUsersPageTexts(): Promise<AdminUsersPageTexts> {
     getSidebarMenuTexts("admin", adminGroupLabels, adminLabels, adminSubLabels),
     getArchiveQueueCardsTexts("user"),
     getTopUsersTexts(),
+    getTopTrainersTexts(),
   ]);
   return {
     userTableTexts,
@@ -582,6 +585,7 @@ export async function getAdminUsersPageTexts(): Promise<AdminUsersPageTexts> {
     menuTexts,
     archiveUsersTexts,
     topUsersTexts,
+    topTrainersTexts,
   };
 }
 
@@ -1413,6 +1417,7 @@ export async function getAdminDashboardPageTexts(): Promise<AdminDashboardPageTe
     archiveTexts,
     topUsersTexts,
     topPlansTexts,
+    topTrainersTexts,
   ] = await Promise.all([
     getTranslations("pages.admin.AdminDashboardPageTexts"),
     getAllRelativeItemTexts(),
@@ -1422,6 +1427,7 @@ export async function getAdminDashboardPageTexts(): Promise<AdminDashboardPageTe
     getAllArchiveQueueCardsTexts(),
     getTopUsersTexts(),
     getTopPlansTexts(),
+    getTopTrainersTexts(),
   ]);
 
   return {
@@ -1434,6 +1440,7 @@ export async function getAdminDashboardPageTexts(): Promise<AdminDashboardPageTe
     archiveTexts,
     topUsersTexts,
     topPlansTexts,
+    topTrainersTexts,
     archiveTitle: t("archiveTitle"),
     selectItems: {
       comment: t("selectItems.comment"),

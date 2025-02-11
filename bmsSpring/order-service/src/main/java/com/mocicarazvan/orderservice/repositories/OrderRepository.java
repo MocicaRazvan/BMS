@@ -266,10 +266,89 @@ public interface OrderRepository extends ManyToOneUserRepository<Order>, CountIn
                 WHERE created_at >= :startDate AND created_at < :endDate
                 GROUP BY user_id) as sub
                 where sub.rank <= :top
+                order by rank
             """)
     Flux<TopUsersSummary> getTopUsersSummary(LocalDateTime startDate,
                                              LocalDateTime endDate,
                                              int top);
+
+
+    @Query("""
+                WITH agg AS (
+                    SELECT co.created_at,
+                           co.updated_at,
+                           po.objective,
+                           po.plan_id,
+                           po.user_id,
+                           po.type,
+                           po.price
+                    FROM custom_order co
+                    JOIN plan_order po ON co.id = po.order_id
+                ),
+                type_counts AS (
+                    SELECT agg.user_id,
+                           agg.type,
+                           COUNT(*) AS type_count,
+                           SUM(agg.price) AS type_amount,
+                           AVG(agg.price) AS type_avg
+                    FROM agg
+                    WHERE agg.created_at >= :startDate
+                      AND agg.created_at < :endDate
+                    GROUP BY agg.user_id, agg.type
+                ),
+                objective_counts AS (
+                    SELECT agg.user_id,
+                           agg.objective,
+                           COUNT(*) AS objective_count,
+                           SUM(agg.price) AS objective_amount,
+                           AVG(agg.price) AS objective_avg
+                    FROM agg
+                    WHERE agg.created_at >= :startDate
+                      AND agg.created_at < :endDate
+                    GROUP BY agg.user_id, agg.objective
+                ),
+                total_aggregated AS (
+                    SELECT agg.user_id,
+                           SUM(agg.price) AS total_amount,
+                           COUNT( agg.plan_id) AS plan_count,
+                           AVG(agg.price) AS average_amount
+                    FROM agg
+                    WHERE agg.created_at >= :startDate
+                      AND agg.created_at < :endDate
+                    GROUP BY agg.user_id
+                ),
+                aggregated AS (
+                    SELECT ta.user_id,
+                           ta.total_amount,
+                           ta.plan_count,
+                           ta.average_amount,
+                           DENSE_RANK() OVER (ORDER BY ta.total_amount DESC) AS rank,
+                           jsonb_object_agg(tc.type, tc.type_count) AS type_counts,
+                           jsonb_object_agg(oc.objective, oc.objective_count) AS objective_counts,
+                           jsonb_object_agg(oc.objective, oc.objective_amount) AS objective_amounts,
+                           jsonb_object_agg(tc.type, tc.type_amount) AS type_amounts,
+                           jsonb_object_agg(oc.objective, oc.objective_avg) AS objective_avgs,
+                           jsonb_object_agg(tc.type, tc.type_avg) AS type_avgs
+                    FROM total_aggregated ta
+                    LEFT JOIN type_counts tc ON ta.user_id = tc.user_id
+                    LEFT JOIN objective_counts oc ON ta.user_id = oc.user_id
+                    GROUP BY ta.user_id, ta.total_amount, ta.plan_count, ta.average_amount
+                )
+                SELECT a.*,
+                       MAX(a.total_amount) OVER () AS max_group_total,
+                       MIN(a.total_amount) OVER () AS min_group_total,
+                       AVG(a.total_amount) OVER () AS avg_group_total,
+                       MAX(a.plan_count) OVER () AS max_group_plan_count,
+                       MIN(a.plan_count) OVER () AS min_group_plan_count,
+                       AVG(a.plan_count) OVER () AS avg_group_plan_count
+                FROM aggregated a
+                WHERE a.rank <= :top
+                ORDER BY a.rank;
+            
+            """)
+    Flux<TopTrainersSummaryR2dbc> getTopTrainersSummary(LocalDateTime startDate,
+                                                        LocalDateTime endDate,
+                                                        int top);
 
 
     @Query("""

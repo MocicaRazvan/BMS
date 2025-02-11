@@ -31,19 +31,11 @@ import { useFormatter } from "next-intl";
 import { Switch } from "@/components/ui/switch";
 import { motion } from "framer-motion";
 import TopChartWrapper, {
+  createChartConfig,
   TopChartMeanRelative,
   TopChartWrapperTexts,
   TopRankBadge,
 } from "@/components/charts/top-chart-wrapper";
-
-const createChartConfig = (arr: string[]) =>
-  arr.reduce((acc, t, i) => {
-    acc[t.toLowerCase()] = {
-      label: t,
-      color: `hsl(var(--chart-${i + 1}))`,
-    };
-    return acc;
-  }, {} as ChartConfig);
 
 const createChartData = <T extends string | number | symbol>(
   plansMessages: PageableResponse<CustomEntityModel<PlanResponse>>[],
@@ -113,7 +105,7 @@ const TopUsers = memo(
         path="/orders/admin/topUsers"
         locale={locale}
         processMessage={(ts) => (
-          <div key={ts.userId}>
+          <div key={ts.userId + "topUsers"}>
             <UserCard
               topSummary={ts}
               texts={userCardTexts}

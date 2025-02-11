@@ -50,6 +50,8 @@ public interface OrderService extends CountInParentService {
 
     Flux<TopUsersSummary> getTopUsersSummary(LocalDate from, LocalDate to, int top);
 
+    Flux<TopTrainersSummaryResponse> getTopTrainersSummary(LocalDate from, LocalDate to, int top);
+
     Flux<TopPlansSummary> getTopPlansSummary(LocalDate from, LocalDate to, int top);
 
     Flux<TopPlansSummary> getTopPlansSummaryTrainer(LocalDate from, LocalDate to, int top, Long trainerId, String userId);

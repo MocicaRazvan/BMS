@@ -344,3 +344,8 @@ export function choseRandomNumber(min: number, max: number) {
 export function choseRandomItemsFromArray<T>(array: T[], count = 1) {
   return toShuffleArray(array).slice(0, count);
 }
+export function formatChartValue(value: number | string) {
+  return typeof value === "number" && !Number.isInteger(value)
+    ? value.toFixed(2)
+    : value;
+}

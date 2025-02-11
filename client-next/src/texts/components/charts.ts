@@ -20,6 +20,7 @@ import {
   PlanCharacteristicTexts,
   PlanCharacteristicWrapperTexts,
 } from "@/components/charts/plan-charctersitic";
+import { TopTrainersTexts } from "@/components/charts/top-trainers";
 
 export async function getIngredientPieChartTexts(): Promise<IngredientPieChartTexts> {
   const t = await getTranslations("components.charts.IngredientPieChartTexts");
@@ -236,6 +237,38 @@ export async function getPlanCharacteristicWrapperTexts(): Promise<PlanCharacter
     typeSelectLabel: t("typeSelectLabel"),
     monthSelectLabel: t("monthSelectLabel"),
     chartName: t("chartName"),
+    title: t("title"),
+  };
+}
+
+export async function getTopTrainersTexts(): Promise<TopTrainersTexts> {
+  const [t, topChartWrapperTexts] = await Promise.all([
+    getTranslations("components.charts.TopTrainerTexts"),
+    getTopChartWrapperTexts(),
+  ]);
+
+  return {
+    topChartWrapperTexts,
+    trainerCardTexts: {
+      userAntent: t("trainerCardTexts.userAntent"),
+      topTrainer: t("trainerCardTexts.topTrainer"),
+      totalAmount: t("trainerCardTexts.totalAmount"),
+      countPlans: t("trainerCardTexts.countPlans"),
+      totalAmountReference: t("trainerCardTexts.totalAmountReference"),
+      countPlansReference: t("trainerCardTexts.countPlansReference"),
+      rankLabel: t("trainerCardTexts.rankLabel"),
+      dropDownMenuTexts: {
+        averageAmountLabel: t(
+          "trainerCardTexts.dropDownMenuTexts.averageAmountLabel",
+        ),
+        countLabel: t("trainerCardTexts.dropDownMenuTexts.countLabel"),
+        totalAmountLabel: t(
+          "trainerCardTexts.dropDownMenuTexts.totalAmountLabel",
+        ),
+      },
+      typePieChartTitle: t("trainerCardTexts.typePieChartTitle"),
+      objectivePieChartTitle: t("trainerCardTexts.objectivePieChartTitle"),
+    },
     title: t("title"),
   };
 }

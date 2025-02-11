@@ -51,6 +51,7 @@ import { format, subMonths } from "date-fns";
 import useFetchStream from "@/hoooks/useFetchStream";
 import { MonthPickerSelect } from "@/components/common/month-picker";
 import { Separator } from "@/components/ui/separator";
+import { formatChartValue } from "@/lib/utils";
 
 export interface PlanCharacteristicTexts {
   countLabel: string;
@@ -174,7 +175,7 @@ export default function PlanCharacteristic({
                 offset={12}
                 className="fill-foreground text-[15px]"
                 fontSize={12}
-                formatter={formatLabelList}
+                formatter={formatChartValue}
               />
             </Bar>
 
@@ -215,12 +216,6 @@ interface ScatterProps
   dataKey: PlanCharacteristicKey;
   dataAvailable: boolean;
   chartName: string;
-}
-
-function formatLabelList(value: number | string) {
-  return typeof value === "number" && !Number.isInteger(value)
-    ? value.toFixed(2)
-    : value;
 }
 
 export function PlanCharacteristicScatter({
@@ -314,7 +309,7 @@ export function PlanCharacteristicScatter({
                 className="fill-foreground text-[15px]"
                 fontSize={12}
                 dataKey={dataKey}
-                formatter={formatLabelList}
+                formatter={formatChartValue}
               />
             </Scatter>
             <ChartLegend content={<ChartLegendContent />} />

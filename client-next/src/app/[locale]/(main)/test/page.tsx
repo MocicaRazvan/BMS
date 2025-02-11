@@ -6,7 +6,11 @@ import {
   getPostItemRendererTexts,
   getRecommendationListTexts,
 } from "@/texts/components/recommandation";
-import { getPlanCharacteristicWrapperTexts } from "@/texts/components/charts";
+import {
+  getPlanCharacteristicWrapperTexts,
+  getTopChartWrapperTexts,
+  getTopTrainersTexts,
+} from "@/texts/components/charts";
 
 interface Props {
   params: {
@@ -14,6 +18,6 @@ interface Props {
   };
 }
 export default async function TestPage({ params }: Props) {
-  const texts = await getPlanCharacteristicWrapperTexts();
+  const texts = await getTopTrainersTexts();
   return <TestPageContent texts={texts} />;
 }

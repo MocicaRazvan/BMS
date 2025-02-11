@@ -31,8 +31,6 @@ import {
 import { AnimatePresence, motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useLocale } from "next-intl";
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
 import getCountryISO2 from "country-iso-3-to-2";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useTheme } from "next-themes";

@@ -173,6 +173,15 @@ public class OrderController implements CountInParentController {
         return orderService.getTopUsersSummary(from, to, top);
     }
 
+    @GetMapping("/admin/topTrainers")
+    @ResponseStatus(HttpStatus.OK)
+    public Flux<TopTrainersSummaryResponse> getTopTrainersSummary(@RequestParam @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate from,
+                                                                  @RequestParam @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate to,
+                                                                  @RequestParam @Valid @Min(1) int top
+    ) {
+        return orderService.getTopTrainersSummary(from, to, top);
+    }
+
     @GetMapping("/admin/topPlans")
     @ResponseStatus(HttpStatus.OK)
     public Flux<TopPlansSummary> getTopPlansSummary(@RequestParam @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate from,

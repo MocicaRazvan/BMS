@@ -1239,6 +1239,25 @@
           "meanAmountPerOrder": "Mean for top: "
         }
       },
+      "TopTrainerTexts": {
+        "title": "Top Trainers",
+        "trainerCardTexts": {
+          "userAntent": "Trainer: ",
+          "topTrainer": "Top ",
+          "totalAmount": "Total amount",
+          "countPlans": "Number of plans",
+          "totalAmountReference": "Amount mean for top: ",
+          "countPlansReference": "Number mean for top: ",
+          "rankLabel": "Rank",
+          "typePieChartTitle": "Diet Type Distribution",
+          "objectivePieChartTitle": "Objective Distribution",
+          "dropDownMenuTexts": {
+            "averageAmountLabel": "Average amount",
+            "countLabel": "Number of plans",
+            "totalAmountLabel": "Total amount"
+          }
+        }
+      },
       "TopPlansTexts": {
         "title": "Top Plans",
         "planCardTexts": {

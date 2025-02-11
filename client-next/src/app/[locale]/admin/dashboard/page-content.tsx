@@ -21,6 +21,9 @@ import ArchiveContent, {
 import TopUsers, { TopUsersTexts } from "@/components/charts/top-users";
 import { Separator } from "@/components/ui/separator";
 import { TopPlans, TopPlansTexts } from "@/components/charts/top-plans";
+import TopTrainers, {
+  TopTrainersTexts,
+} from "@/components/charts/top-trainers";
 
 export interface AdminDashboardPageTexts {
   title: string;
@@ -34,6 +37,7 @@ export interface AdminDashboardPageTexts {
   selectItems: Record<AugmentedArchiveQueuePrefix, string>;
   topUsersTexts: TopUsersTexts;
   topPlansTexts: TopPlansTexts;
+  topTrainersTexts: TopTrainersTexts;
 }
 
 interface Props extends WithUser, AdminDashboardPageTexts {
@@ -50,6 +54,7 @@ export default function AdminDashboardPageContent({
   selectItems,
   topUsersTexts,
   topPlansTexts,
+  topTrainersTexts,
 }: Props) {
   const [relativeItemsCount, setRelativeItemsCount] = useState<
     Record<RelativeItems, number>
@@ -118,16 +123,20 @@ export default function AdminDashboardPageContent({
         </motion.div>
       </div>
       <Separator className="mt-2" />
-      <div className=" my-5 h-full w-full">
+      <div className="my-5 h-full w-full">
         <TopUsers texts={topUsersTexts} locale={locale} />
       </div>
       <Separator className="mt-2" />
-      <div className=" my-5 h-full w-full">
+      <div className="my-5 h-full w-full">
         <TopPlans
           texts={topPlansTexts}
           locale={locale}
           path={"/orders/admin/topPlans"}
         />
+      </div>
+      <Separator className="mt-2" />
+      <div className="my-5 h-full w-full">
+        <TopTrainers texts={topTrainersTexts} locale={locale} />
       </div>
       <Separator />
       <div className="w-full h-full mt-5 md:mt-12">

@@ -330,6 +330,12 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    public Flux<TopTrainersSummaryResponse> getTopTrainersSummary(LocalDate from, LocalDate to, int top) {
+        Pair<LocalDateTime, LocalDateTime> intervalDates = getIntervalDates(from, to);
+        return self.getTopTrainersSummaryBase(intervalDates.getFirst(), intervalDates.getSecond(), top);
+    }
+
+    @Override
     public Flux<TopPlansSummary> getTopPlansSummary(LocalDate from, LocalDate to, int top) {
         Pair<LocalDateTime, LocalDateTime> intervalDates = getIntervalDates(from, to);
         return self.getTopPlansSummaryBase(intervalDates.getFirst(), intervalDates.getSecond(), top);
@@ -750,10 +756,12 @@ public class OrderServiceImpl implements OrderService {
         private final String modelName = "order";
         private final OrderRepository orderRepository;
         private final OrderMapper orderMapper;
+        private final ObjectMapper objectMapper;
 
-        public OrderServiceRedisCacheWrapper(OrderRepository orderRepository, OrderMapper orderMapper) {
+        public OrderServiceRedisCacheWrapper(OrderRepository orderRepository, OrderMapper orderMapper, ObjectMapper objectMapper) {
             this.orderRepository = orderRepository;
             this.orderMapper = orderMapper;
+            this.objectMapper = objectMapper;
         }
 
 
@@ -779,17 +787,17 @@ public class OrderServiceImpl implements OrderService {
                     );
         }
 
-        @RedisReactiveChildCache(key = CACHE_KEY_PATH, idPath = "3*maxGroupTotal+5*minGroupTotal+2*totalAmount+rank*3+2501")
+        @RedisReactiveChildCache(key = CACHE_KEY_PATH, idPath = "userId+rank*2+2501")
         public Flux<TopUsersSummary> getTopUsersSummaryBase(LocalDateTime from, LocalDateTime to, int top) {
             return orderRepository.getTopUsersSummary(from, to, top);
         }
 
-        @RedisReactiveChildCache(key = CACHE_KEY_PATH, idPath = "3*maxGroupCount+2*minGroupCount+5*avgGroupCount+rank*16+8502")
+        @RedisReactiveChildCache(key = CACHE_KEY_PATH, idPath = "userId+rank*5+8502")
         public Flux<TopPlansSummary> getTopPlansSummaryBase(LocalDateTime from, LocalDateTime to, int top) {
             return orderRepository.getTopPlansSummary(from, to, top);
         }
 
-        @RedisReactiveChildCache(key = CACHE_KEY_PATH, idPath = "2*maxGroupCount+7*minGroupCount+3*avgGroupCount+rank*15+12003", masterId = "#trainerId")
+        @RedisReactiveChildCache(key = CACHE_KEY_PATH, idPath = "userId+rank*7+12003", masterId = "#trainerId")
         public Flux<TopPlansSummary> getTopPlansSummaryTrainerBase(LocalDateTime from, LocalDateTime to, int top, Flux<PlanResponse> plans, Long trainerId) {
             return getPlanIds(plans).flatMapMany(ids -> orderRepository.getTopPlansSummaryTrainer(from, to, top, ids));
         }
@@ -865,6 +873,12 @@ public class OrderServiceImpl implements OrderService {
         @RedisReactiveChildCache(key = CACHE_KEY_PATH, idPath = "5*month+year+56003")
         Flux<MonthlyOrderSummaryObjectiveType> getTrainerOrdersSummaryByDateRangeGroupedByMonthObjectivesTypesBase(Pair<LocalDateTime, LocalDateTime> intervalDates, Long trainerId) {
             return orderRepository.getTrainerOrdersSummaryByDateRangeGroupedByMonthObjectivesTypes(intervalDates.getFirst(), intervalDates.getSecond(), trainerId);
+        }
+
+        @RedisReactiveChildCache(key = CACHE_KEY_PATH, idPath = "userId+rank*3+61004")
+        public Flux<TopTrainersSummaryResponse> getTopTrainersSummaryBase(LocalDateTime from, LocalDateTime to, int top) {
+            return orderRepository.getTopTrainersSummary(from, to, top)
+                    .map(r -> TopTrainersSummaryResponse.fromR2dbc(r, objectMapper));
         }
 
         @RedisReactiveChildCache(key = CACHE_KEY_PATH, idPath = "id")

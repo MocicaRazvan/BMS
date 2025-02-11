@@ -26,6 +26,7 @@ import { RankSummary } from "@/types/dto";
 import { Badge } from "@/components/ui/badge";
 import { Bar, BarChart, ReferenceLine, XAxis, YAxis } from "recharts";
 import {
+  ChartConfig,
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
@@ -195,7 +196,7 @@ export function TopChartMeanRelative({
   chartLabel,
   barData,
   maxBar,
-  maxOffset = 5,
+  maxOffset = 10,
   referenceValue,
   referenceLabel,
   chartColorNumber = 6,
@@ -245,3 +246,16 @@ export function TopChartMeanRelative({
     </ChartContainer>
   );
 }
+
+export const createChartConfig = (
+  arr: string[],
+  offset = 0,
+  lowerCase = true,
+) =>
+  arr.reduce((acc, t, i) => {
+    acc[lowerCase ? t.toLowerCase() : t] = {
+      label: t,
+      color: `hsl(var(--chart-${((i + 1 + offset) % 10) + 1}))`,
+    };
+    return acc;
+  }, {} as ChartConfig);

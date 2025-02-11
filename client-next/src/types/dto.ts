@@ -15,6 +15,10 @@ export interface IdGenerateDto {
   updatedAt: string;
 }
 
+export interface WithUserId {
+  userId: number;
+}
+
 export interface WithUserDto extends IdGenerateDto {
   userId: number;
 }
@@ -215,6 +219,8 @@ export interface SenderTypeDto<E extends string> {
 
 export type DietType = "VEGAN" | "VEGETARIAN" | "OMNIVORE";
 // | "CARNIVORE" ;
+
+export const dietTypes: DietType[] = ["VEGAN", "VEGETARIAN", "OMNIVORE"];
 
 export type UnitType = "GRAM" | "MILLILITER";
 
@@ -578,15 +584,38 @@ export interface NotifyContainerAction extends BaseWSDto {
 export interface RankSummary {
   rank: number;
 }
-export interface TopUsersSummary extends RankSummary {
-  userId: number;
-  totalAmount: number;
-  ordersNumber: number;
-  planValues: number[];
-  plansNumber: number;
+export interface GroupSummary extends RankSummary {
   maxGroupTotal: number;
   minGroupTotal: number;
   avgGroupTotal: number;
+}
+export interface TotalAmountSummary {
+  totalAmount: number;
+}
+export interface TopUsersSummary
+  extends GroupSummary,
+    WithUserId,
+    TotalAmountSummary {
+  ordersNumber: number;
+  planValues: number[];
+  plansNumber: number;
+}
+
+export interface TopTrainersSummary
+  extends GroupSummary,
+    WithUserId,
+    TotalAmountSummary {
+  planCount: number;
+  averageAmount: number;
+  maxGroupPlanCount: number;
+  minGroupPlanCount: number;
+  avgGroupPlanCount: number;
+  typeCounts: Partial<Record<DietType, number>>;
+  objectiveCounts: Partial<Record<ObjectiveType, number>>;
+  typeAmounts: Partial<Record<DietType, number>>;
+  objectiveAmounts: Partial<Record<ObjectiveType, number>>;
+  typeAvgs: Partial<Record<DietType, number>>;
+  objectiveAvgs: Partial<Record<ObjectiveType, number>>;
 }
 
 export interface TopPlansSummary extends RankSummary {

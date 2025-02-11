@@ -1238,6 +1238,25 @@
           "meanAmountPerOrder": "Media pentru top: "
         }
       },
+      "TopTrainerTexts": {
+        "title": "Antrenori de top",
+        "trainerCardTexts": {
+          "userAntent": "Antrenor: ",
+          "topTrainer": "Top ",
+          "totalAmount": "Suma totală",
+          "countPlans": "Numărul de planuri",
+          "totalAmountReference": "Media sumei pentru top: ",
+          "countPlansReference": "Media numărului pentru top: ",
+          "rankLabel": "Rang",
+          "typePieChartTitle": "Distribuția tipurilor de dietă",
+          "objectivePieChartTitle": "Distribuția obiectivelor",
+          "dropDownMenuTexts": {
+            "averageAmountLabel": "Sumă medie",
+            "countLabel": "Numărul de planuri",
+            "totalAmountLabel": "Suma totală"
+          }
+        }
+      },
       "TopPlansTexts": {
         "title": "Top planuri",
         "planCardTexts": {
