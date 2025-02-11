@@ -3,13 +3,12 @@ import { AiIdeasField, TargetedFields } from "@/types/ai-ideas-types";
 import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
 import { Document as LangDocument } from "langchain/document";
 import removeMd from "remove-markdown";
-import { ChatOllama } from "@langchain/ollama";
+import { ChatOllama, OllamaEmbeddings } from "@langchain/ollama";
 import { MemoryVectorStore } from "langchain/vectorstores/memory";
 import { createStuffDocumentsChain } from "langchain/chains/combine_documents";
 import { getMultiQueryRetriever } from "@/lib/langchain/langhcain-multi-query-retriver";
 import { ContextualCompressionRetriever } from "langchain/retrievers/contextual_compression";
 import { createRetrievalChain } from "langchain/chains/retrieval";
-import { CustomOllamaEmbeddings } from "@/lib/langchain/custom-ollama-embeddings";
 import { EmbeddingsFilter } from "langchain/retrievers/document_compressors/embeddings_filter";
 import { AppenderRetriever } from "@/lib/langchain/appender-retriever";
 
@@ -140,7 +139,7 @@ export async function getTextDoc(field: AiIdeasField) {
 export async function getBaseIdea(
   targetedField: "title" | "description",
   fields: AiIdeasField[],
-  embeddings: CustomOllamaEmbeddings,
+  embeddings: OllamaEmbeddings,
   llm: ChatOllama,
   extraContext: number,
   input: string | undefined,

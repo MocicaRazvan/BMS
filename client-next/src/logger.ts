@@ -9,6 +9,9 @@ const logger = logs.getLogger(
 );
 
 function emit(severityNumber: SeverityNumber, body: AnyValue) {
+  if (process.env.NODE_ENV !== "production") {
+    return;
+  }
   logger.emit({
     severityNumber,
     body,

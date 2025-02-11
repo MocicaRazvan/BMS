@@ -4,7 +4,6 @@ import { TextLoader } from "langchain/document_loaders/fs/text";
 import { DocumentInterface } from "@langchain/core/documents";
 import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
 import { EmbeddingsFilter } from "langchain/retrievers/document_compressors/embeddings_filter";
-import { CustomOllamaEmbeddings } from "@/lib/langchain/custom-ollama-embeddings";
 import { PoolConfig } from "pg";
 import {
   DistanceStrategy,
@@ -12,6 +11,7 @@ import {
 } from "@langchain/community/vectorstores/pgvector";
 import * as cheerio from "cheerio";
 import { HtmlToTextTransformer } from "@langchain/community/document_transformers/html_to_text";
+import { OllamaEmbeddings } from "@langchain/ollama";
 
 const ollamaBaseUrl = process.env.OLLAMA_BASE_URL;
 const embeddingModel = process.env.OLLAMA_EMBEDDING;
@@ -54,7 +54,7 @@ if (!ollamaBaseUrl || !embeddingModel || !siteUrl) {
 
 export class VectorStoreSingleton {
   private vectorStore: MemoryVectorStore | undefined;
-  private embeddings: CustomOllamaEmbeddings | undefined;
+  private embeddings: OllamaEmbeddings | undefined;
   private filter: EmbeddingsFilter | undefined;
   private isInitialized = false;
   private pgVectorStore: PGVectorStore | undefined;
@@ -70,7 +70,7 @@ export class VectorStoreSingleton {
       console.log("Initializing or reinitializing vector store and embeddings");
 
       if (!this.embeddings) {
-        this.embeddings = new CustomOllamaEmbeddings({
+        this.embeddings = new OllamaEmbeddings({
           model: embeddingModel,
           baseUrl: ollamaBaseUrl,
           keepAlive,
@@ -155,7 +155,7 @@ export class VectorStoreSingleton {
     return this.vectorStore;
   }
 
-  public async getEmbeddings(): Promise<CustomOllamaEmbeddings | undefined> {
+  public async getEmbeddings(): Promise<OllamaEmbeddings | undefined> {
     if (!this.isInitialized) {
       await this.initialize();
     }

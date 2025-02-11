@@ -27,6 +27,8 @@ import {
   SimpleLogRecordProcessor,
 } from "@opentelemetry/sdk-logs";
 import { OTLPLogExporter } from "@opentelemetry/exporter-logs-otlp-http";
+import { IORedisInstrumentation } from "@opentelemetry/instrumentation-ioredis";
+import { PgInstrumentation } from "@opentelemetry/instrumentation-pg";
 
 if (
   !process.env.NEXT_SERVICE_NAME ||
@@ -68,9 +70,17 @@ registerInstrumentations({
     getNodeAutoInstrumentations(),
     new RuntimeNodeInstrumentation({
       enabled: true,
-      eventLoopUtilizationMeasurementInterval: 5000,
+      monitoringPrecision: 5000,
     }),
     new HttpInstrumentation(),
+    new IORedisInstrumentation({
+      requireParentSpan: false,
+      enabled: true,
+    }),
+    new PgInstrumentation({
+      enhancedDatabaseReporting: true,
+      requireParentSpan: false,
+    }),
   ],
 });
 
