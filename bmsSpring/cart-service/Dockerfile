@@ -12,7 +12,6 @@ RUN mvn -f template-module/pom.xml clean install -DskipTests -Dmaven.compiler.sh
 # ---------------------- CART SERVICE  ----------------------
 FROM maven-base AS cart-service
 COPY --from=template-module /root/.m2 /root/.m2
-COPY --from=redis-cache /root/.m2 /root/.m2
 COPY cart-service/pom.xml cart-service/pom.xml
 RUN mvn -f cart-service/pom.xml dependency:go-offline -B
 COPY cart-service/src cart-service/src
