@@ -633,3 +633,11 @@ export interface Similarity {
 
 export interface PostReposeWithSimilarity extends PostResponse, Similarity {}
 export interface PlanReposeWithSimilarity extends PlanResponse, Similarity {}
+
+export interface UserCartResponse extends WithUserDto {
+  plans: PlanResponse[];
+}
+
+export interface UserCartBody {
+  planIds: number[];
+}

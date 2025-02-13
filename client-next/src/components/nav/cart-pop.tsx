@@ -121,7 +121,6 @@ export default function CartPop({ authUser, cartPopTexts }: Props) {
                           </Link>
                         </div>
                         <p className="font-bold">
-                          {" "}
                           {formatIntl.number(plan.price, {
                             style: "currency",
                             currency: "EUR",
@@ -161,7 +160,6 @@ export default function CartPop({ authUser, cartPopTexts }: Props) {
                 <p className="font-bold text-center">
                   {cartPopTexts?.total}
                   <span className="ml-1">
-                    {" "}
                     {formatIntl.number(usersCartTotalPrice, {
                       style: "currency",
                       currency: "EUR",

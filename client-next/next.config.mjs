@@ -1,11 +1,10 @@
 import createNextIntlPlugin from "next-intl/plugin";
-import { EventEmitter } from "events";
-EventEmitter.defaultMaxListeners = 20;
 
 const withNextIntl = createNextIntlPlugin();
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // reactStrictMode: false,
   output: "standalone",
   images: {
     remotePatterns: [

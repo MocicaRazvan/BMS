@@ -1,0 +1,20 @@
+name: Cart Service Docker Image
+
+on:
+  workflow_dispatch: { }
+  push:
+    branches:
+      - main
+    paths:
+      - 'bmsSpring/cart-service/**'
+      - 'bmsSpring/template-module/**'
+jobs:
+  build-and-push-cart-service:
+    uses: ./.github/workflows/build-and-push.yml
+    with:
+      image-name: cart-service-bms
+      context: ./bmsSpring
+      dockerfile: ./bmsSpring/cart-service/Dockerfile
+    secrets:
+      DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}

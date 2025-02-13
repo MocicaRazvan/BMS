@@ -84,6 +84,10 @@ public class UserClient extends ClientBase {
         return Mono.just(authUser.getRole() == Role.ROLE_ADMIN || Objects.equals(authUser.getId(), entityUserId));
     }
 
+    public Mono<Void> existsUser(String uri, String userId) {
+        return existsUser(uri + "/" + userId, List.of(Role.ROLE_TRAINER, Role.ROLE_ADMIN, Role.ROLE_USER));
+    }
+
     public Mono<Void> existsUser(String uri, String trainerId, List<Role> roles) {
         return existsUser(uri + "/" + trainerId, roles);
     }

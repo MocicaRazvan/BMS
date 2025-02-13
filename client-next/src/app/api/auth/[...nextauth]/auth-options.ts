@@ -1,8 +1,9 @@
-import { NextAuthOptions } from "next-auth";
+import { NextAuthOptions, Session } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GitHubProvider from "next-auth/providers/github";
 import { CustomGoogleProvider } from "@/app/api/auth/[...nextauth]/custom-google-provider";
 import { getCsrfNextAuthHeader } from "@/actions/get-csr-next-auth";
+import { AuthResponse } from "aws-lambda";
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -66,7 +67,11 @@ export const authOptions: NextAuthOptions = {
         return token;
       }
       if (user) {
-        token.user = { ...user, emailVerified: !!user.emailVerified };
+        token.user = {
+          ...user,
+          id: `${user.id}`,
+          emailVerified: !!user.emailVerified,
+        };
       }
 
       return token;

@@ -110,7 +110,7 @@ export default async function BaseLayout({
                                   <NotificationPopProvider
                                     authUser={session?.user}
                                   >
-                                    <CartProvider>
+                                    <CartProvider authUser={session?.user}>
                                       <SubscriptionProvider
                                         authUser={session?.user}
                                       >

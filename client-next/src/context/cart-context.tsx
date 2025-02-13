@@ -1,6 +1,11 @@
 "use client";
 
-import { PlanResponse } from "@/types/dto";
+import {
+  CustomEntityModel,
+  PlanResponse,
+  UserCartBody,
+  UserCartResponse,
+} from "@/types/dto";
 import {
   createContext,
   Dispatch,
@@ -11,36 +16,64 @@ import {
   useMemo,
   useReducer,
 } from "react";
-import { roundToDecimalPlaces } from "@/lib/utils";
+import {
+  isDeepEqual,
+  roundToDecimalPlaces,
+  wrapItemToString,
+} from "@/lib/utils";
+import { fetchStream } from "@/hoooks/fetchStream";
+import { Session } from "next-auth";
+import { BaseError } from "@/types/responses";
 
-const CART_STORAGE_KEY = "userCarts";
-
-function saveCartToLocalStorage(cart: CartState) {
-  if (typeof window !== "undefined" && window.localStorage) {
-    try {
-      localStorage[CART_STORAGE_KEY] = JSON.stringify(cart);
-    } catch (err) {
-      console.error("Failed to save cart to local storage:", err);
-    }
+const initialState: UserCart = {
+  plans: [],
+  total: 0,
+  userId: "",
+};
+async function loadInitialCart(
+  authUser: Session["user"],
+): Promise<UserCart | undefined> {
+  if (!authUser?.token) {
+    return initialState;
   }
-}
-
-function loadCartFromLocalStorage(): CartState | undefined {
   try {
-    const serializedCart = localStorage[CART_STORAGE_KEY];
-    if (serializedCart === null) return undefined;
-    return JSON.parse(serializedCart);
+    const { messages, error } = await fetchStream<
+      CustomEntityModel<UserCartResponse>
+    >({
+      method: "POST",
+      token: authUser.token,
+      path: `/cart/getOrCreate/${authUser.id}`,
+    });
+    if (error || messages.length == 0) {
+      return initialState;
+    }
+    return {
+      plans: messages[0].content.plans,
+      total: messages[0].content.plans.length,
+      userId: `${messages[0].content.userId}`,
+    };
   } catch (err) {
-    // console.error("Failed to load cart from local storage:", err);
     return undefined;
   }
 }
+type ObservableCallback<A> = (
+  oldState: UserCart,
+  userId: string,
+  payload: A,
+) => void;
 
+type ObservableCallbackWrapper<A> = (
+  oldState: UserCart,
+  userId: string,
+  payload: A,
+  dispatch: Dispatch<CartActionWrapper>,
+) => void;
 export type DispatchCartAction = "ADD" | "REMOVE" | "CLEAR";
 
 export interface UserCart {
   plans: PlanResponse[];
   total: number;
+  userId: string;
 }
 
 export interface CartState {
@@ -51,66 +84,226 @@ export interface IdType {
   id: number;
 }
 
+const noOpObservableCallback: ObservableCallback<unknown> = (_, __, ___) => {};
+
+function updateOldState(
+  oldState: UserCart,
+  newState: {
+    messages: CustomEntityModel<UserCartResponse>[];
+    error: BaseError | null;
+  },
+  dispatch: Dispatch<CartActionWrapper>,
+) {
+  // console.log("CART NEW STATE", newState);
+  if (newState.error || newState.messages.length === 0) {
+    return;
+  }
+  const content = newState.messages[0].content;
+  const parsed: UserCart = {
+    plans: content.plans,
+    total: content.plans.length,
+    userId: `${content.userId}`,
+  };
+
+  // console.log(
+  //   "EQUAL",
+  //   isDeepEqual(oldState.plans, parsed.plans),
+  //   oldState.plans,
+  //   parsed.plans,
+  //   parsed.userId === oldState.userId,
+  // );
+  const areEqual =
+    parsed.userId === oldState.userId &&
+    isDeepEqual(oldState.plans, parsed.plans); //todo schimba cu id uri si pret
+  if (!areEqual) {
+    // console.log(
+    //   "CART PARSED",
+    //   parsed.plans.map((p) => p.id),
+    // );
+    // console.log(
+    //   "CART OLD STATE",
+    //   oldState.plans.map((p) => p.id),
+    // );
+    dispatch({
+      type: "ADD_ALL",
+      userId: parsed.userId,
+      payload: parsed.plans,
+      observableCallback: noOpObservableCallback,
+    });
+    return;
+  }
+  return;
+}
+
+const addObservableCallback: ObservableCallbackWrapper<PlanResponse> = (
+  oldState,
+  userId,
+  payload,
+  dispatch,
+) => {
+  const body: UserCartBody = {
+    planIds: [payload.id],
+  };
+  fetchStream<CustomEntityModel<UserCartResponse>>({
+    method: "PUT",
+    path: `/cart/add/${userId}`,
+    body,
+  })
+    .then((r) => updateOldState(oldState, r, dispatch))
+    .catch((e) => console.error("Failed to update cart", e));
+};
+const removeObservableCallback: ObservableCallbackWrapper<IdType> = (
+  oldState,
+  userId,
+  payload,
+  dispatch,
+) => {
+  const body: UserCartBody = {
+    planIds: [payload.id],
+  };
+  fetchStream<CustomEntityModel<UserCartResponse>>({
+    method: "PATCH",
+    path: `/cart/remove/${userId}`,
+    body,
+  })
+    .then((r) => updateOldState(oldState, r, dispatch))
+    .catch((e) => console.error("Failed to update cart", e));
+};
+const clearObservableCallback: ObservableCallbackWrapper<string> = (
+  oldState,
+  userId,
+  payload,
+  dispatch,
+) => {
+  fetchStream<CustomEntityModel<UserCartResponse>>({
+    method: "DELETE",
+    path: `/cart/deleteCreateNew/${userId}`,
+  })
+    .then((r) => {
+      console.log("CLEAR OBSERVABLE", r);
+      if (r.error || r.messages.length === 0) {
+        return;
+      }
+      const content = r.messages[0].content;
+      const parsed: UserCart = {
+        plans: content.plans,
+        total: content.plans.length,
+        userId: `${content.userId}`,
+      };
+      if (oldState.userId !== "") {
+        dispatch({
+          type: "ADD_ALL",
+          userId: parsed.userId,
+          payload: parsed.plans,
+          observableCallback: noOpObservableCallback,
+        });
+      }
+    })
+    .catch((e) => console.error("Failed to update cart", e));
+};
+
+const addAllObservableCallback: ObservableCallbackWrapper<PlanResponse[]> = (
+  oldState,
+  userId,
+  payload,
+  dispatch,
+) => {
+  const body: UserCartBody = {
+    planIds: payload.map((p) => p.id),
+  };
+  fetchStream<CustomEntityModel<UserCartResponse>>({
+    method: "PUT",
+    path: `/cart/add/${userId}`,
+    body,
+  })
+    .then((r) => updateOldState(oldState, r, dispatch))
+    .catch((e) => console.error("Failed to update cart", e));
+};
+
+const observableActions: Record<
+  "ADD" | "CLEAR" | "REMOVE" | "ADD_ALL",
+  ObservableCallbackWrapper<any>
+> = {
+  ADD: addObservableCallback,
+  REMOVE: removeObservableCallback,
+  CLEAR: clearObservableCallback,
+  ADD_ALL: addAllObservableCallback,
+} as const;
+
 export type CartAction =
   | { type: "ADD" | "CLEAR"; userId: string; payload?: PlanResponse }
-  | { type: "REMOVE"; userId: string; payload: IdType };
+  | { type: "REMOVE"; userId: string; payload: IdType }
+  | { type: "ADD_ALL"; userId: string; payload: PlanResponse[] };
 
-const initialState: CartState = {
-  carts: {},
+export type CartActionWrapper = CartAction & {
+  observableCallback: ObservableCallback<unknown>;
 };
+
 export const cartReducer = (
-  state: CartState,
-  action: CartAction,
-): CartState => {
+  state: UserCart | undefined,
+  action: CartActionWrapper,
+): UserCart => {
   const { userId } = action;
-  const userCart = state.carts[userId] || { plans: [], total: 0 };
+  const userCart = state || { plans: [], total: 0, userId };
+  // console.log("ACTION", action);
 
   switch (action.type) {
     case "ADD":
-      if (!action.payload) return state;
+      if (!action.payload) return userCart;
       const planExists = userCart.plans.find(
         ({ id }) => id === action?.payload?.id,
       );
-      if (planExists) return state;
+      if (planExists) return userCart;
       const updatedAddCart: UserCart = {
         ...userCart,
         plans: [...userCart.plans, action.payload],
         total: userCart.total + 1,
+        userId,
       };
-      return {
-        ...state,
-        carts: { ...state.carts, [userId]: updatedAddCart },
-      };
+      action.observableCallback(updatedAddCart, userId, action.payload);
+      return updatedAddCart;
 
     case "REMOVE":
-      if (!action.payload) return state;
+      if (!action.payload) return userCart;
       const filteredPlans = userCart.plans.filter(
         ({ id }) => id !== action?.payload?.id,
       );
-      return {
-        ...state,
-        carts: {
-          ...state.carts,
-          [userId]: {
-            plans: filteredPlans,
-            total: filteredPlans.length,
-          },
-        },
+      const removeState = {
+        plans: filteredPlans,
+        total: filteredPlans.length,
+        userId,
       };
+      action.observableCallback(removeState, userId, action.payload);
+      return removeState;
 
     case "CLEAR":
-      return {
-        ...state,
-        carts: { ...state.carts, [userId]: { plans: [], total: 0 } },
+      const clearState = {
+        plans: [],
+        total: 0,
+        userId,
       };
+      const observablePayload = userCart.total !== 0 ? "call" : undefined;
+      action.observableCallback(clearState, userId, observablePayload);
+      return clearState;
+
+    case "ADD_ALL":
+      // console.log("CART ADD_ALL ACTION PAYLOAD", action.payload);
+      if (!action.payload) return userCart;
+      const addAllState = {
+        plans: action.payload,
+        total: action.payload.length,
+        userId,
+      };
+      action.observableCallback(addAllState, userId, action.payload);
+      return addAllState;
 
     default:
-      return state;
+      return userCart;
   }
 };
 
 export interface CartContextType {
-  state: CartState;
+  state: UserCart;
   dispatch: Dispatch<CartAction>;
 }
 
@@ -118,24 +311,59 @@ export const CartContext = createContext<CartContextType | null>(null);
 
 interface Props {
   children: ReactNode;
+  authUser: Session["user"];
 }
 
-export const CartProvider = ({ children }: Props) => {
-  const [state, dispatch] = useReducer(
-    cartReducer,
-    loadCartFromLocalStorage() || initialState,
-  );
+export const CartProvider = ({ children, authUser }: Props) => {
+  const authUserId = authUser?.id;
+  const [state, dispatch] = useReducer(cartReducer, {
+    plans: [],
+    total: 0,
+    userId: authUserId ? `${authUserId}` : "",
+  });
+
+  const dispatchWrapper = useCallback((action: CartAction) => {
+    dispatch({
+      ...action,
+      observableCallback: (oldState, userId, payload) => {
+        if (payload) {
+          observableActions[action.type](oldState, userId, payload, dispatch);
+        }
+      },
+    });
+  }, []);
+
+  // console.log("CART STATE CTX", state);
 
   useEffect(() => {
-    saveCartToLocalStorage(state);
-  }, [state]);
+    if (authUserId !== "") {
+      loadInitialCart(authUser)
+        .then((cart) => {
+          console.log("INITIAL CART", cart);
+          if (cart) {
+            // todo verifica daca state userid e ''
+            dispatch({
+              type: "ADD_ALL",
+              userId: cart.userId,
+              payload: cart.plans,
+              observableCallback: noOpObservableCallback,
+            });
+          }
+        })
+        .catch((e) => {
+          console.error("Failed to load cart from local storage:", e);
+        });
+    }
+  }, [authUserId]);
 
   return (
-    <CartContext.Provider value={{ state, dispatch }}>
+    <CartContext.Provider value={{ state, dispatch: dispatchWrapper }}>
       {children}
     </CartContext.Provider>
   );
 };
+
+//todo reverfica tot si dupa scoate wrapItemToString
 
 export const useCart = () => {
   const context = useContext(CartContext);
@@ -145,26 +373,45 @@ export const useCart = () => {
 
   const addToCart = useCallback(
     (userId: string, plan: PlanResponse) =>
-      context.dispatch({ type: "ADD", userId, payload: plan }),
+      context.dispatch({
+        type: "ADD",
+        userId: wrapItemToString(userId),
+        payload: plan,
+      }),
     [context],
   );
 
   const removeFromCart = useCallback(
     (userId: string, id: IdType) =>
-      context.dispatch({ type: "REMOVE", userId, payload: id }),
+      context.dispatch({
+        type: "REMOVE",
+        userId: wrapItemToString(userId),
+        payload: id,
+      }),
     [context],
   );
 
   const clearCart = useCallback(
-    (userId: string) => context.dispatch({ type: "CLEAR", userId }),
+    (userId: string) =>
+      context.dispatch({ type: "CLEAR", userId: wrapItemToString(userId) }),
     [context],
   );
 
   const getCartForUser = useCallback(
     (userId: string): UserCart => {
-      return context.state.carts[userId] || { plans: [], total: 0 };
+      // console.log(
+      //   "CART STATE CONTEXT",
+      //   context.state,
+      //   context.state && context.state.userId === userId,
+      //   context.state.userId,
+      //   userId,
+      // );
+      return context.state &&
+        wrapItemToString(context.state.userId) === wrapItemToString(userId)
+        ? context.state
+        : { plans: [], total: 0, userId: "" };
     },
-    [context.state.carts],
+    [context.state],
   );
 
   const getPlanIdsForUser = useCallback(
@@ -172,16 +419,23 @@ export const useCart = () => {
     [getCartForUser],
   );
 
+  const addAllForUser = useCallback(
+    (userId: string, plans: PlanResponse[]) =>
+      context.dispatch({
+        type: "ADD_ALL",
+        userId: wrapItemToString(userId),
+        payload: plans,
+      }),
+    [context],
+  );
+
   const cartTotalPrice = useCallback(
     (userId: string) =>
       roundToDecimalPlaces(
-        context.state.carts[userId]?.plans.reduce(
-          (acc, { price }) => acc + price,
-          0,
-        ),
+        getCartForUser(userId).plans.reduce((acc, { price }) => acc + price, 0),
         2,
       ) || 0,
-    [context.state.carts],
+    [getCartForUser],
   );
 
   const isInCart = useCallback(
@@ -199,6 +453,7 @@ export const useCart = () => {
     isInCart,
     cartTotalPrice,
     getPlanIdsForUser,
+    addAllForUser,
   };
 };
 
@@ -211,6 +466,7 @@ export const useCartForUser = (userId: string) => {
     isInCart,
     cartTotalPrice,
     getPlanIdsForUser,
+    addAllForUser,
   } = useCart();
 
   const usersCart = useMemo(
@@ -246,6 +502,10 @@ export const useCartForUser = (userId: string) => {
     () => getPlanIdsForUser(userId),
     [getPlanIdsForUser, userId],
   );
+  const usersAddAll = useCallback(
+    (plans: PlanResponse[]) => addAllForUser(userId, plans),
+    [addAllForUser, userId],
+  );
   return {
     usersCart,
     addToCartForUser,
@@ -254,5 +514,6 @@ export const useCartForUser = (userId: string) => {
     isInCartForUser,
     usersCartTotalPrice,
     usersPlanIds,
+    usersAddAll,
   };
 };

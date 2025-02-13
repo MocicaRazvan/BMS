@@ -139,6 +139,10 @@ public class Config {
                         .filters(f -> f
                                 .filter(csrfFilter).filter(authFilter))
                         .uri("lb://archive-service"))
+                .route("cart-service", r -> r.path("/cart/**")
+                        .filters(f -> f
+                                .filter(csrfFilter).filter(authFilter))
+                        .uri("lb://cart-service"))
                 .route("diffusion-service", r -> r.path("/diffusion/**")
                         .filters(f -> f
                                 .filter(csrfFilter)
@@ -173,6 +177,8 @@ public class Config {
                         .uri("lb://day-service"))
                 .route("archive-openapi", r -> r.path("/archive-service/v3/api-docs")
                         .uri("lb://archive-service"))
+                .route("cart-openapi", r -> r.path("/cart-service/v3/api-docs")
+                        .uri("lb://cart-service"))
 
                 .build();
     }
@@ -261,6 +267,10 @@ public class Config {
                         .filters(f -> f
                                 .filter(csrfFilter).filter(authFilter))
                         .uri("http://archive-service:8092"))
+                .route("cart-service", r -> r.path("/cart/**")
+                        .filters(f -> f
+                                .filter(csrfFilter).filter(authFilter))
+                        .uri("http://cart-service:8093"))
                 .route("diffusion-service", r -> r.path("/diffusion/**")
                         .filters(f -> f
                                 .filter(csrfFilter)
@@ -296,6 +306,8 @@ public class Config {
                         .uri("http://day-service:8091"))
                 .route("archive-openapi", r -> r.path("/archive-service/v3/api-docs")
                         .uri("http://archive-service:8092"))
+                .route("cart-openapi", r -> r.path("/cart-service/v3/api-docs")
+                        .uri("http://cart-service:8093"))
 
                 .build();
     }

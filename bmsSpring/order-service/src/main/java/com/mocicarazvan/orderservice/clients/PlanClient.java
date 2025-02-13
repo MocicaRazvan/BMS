@@ -118,25 +118,6 @@ public class PlanClient extends ValidIdsClient<PlanResponse> {
                 .onErrorResume(ThrowFallback.class, e -> Flux.error(new IllegalArgumentException("Invalid plans " + ids)));
     }
 
-//    public Mono<ResponseWithUserDtoEntity<RecipeResponse>> getRecipeByPlanForUser(String id, String recipeId, String userId) {
-//        if (serviceUrl == null) {
-//            return Mono.error(new IllegalArgumentException("Service url is null"));
-//        }
-//        return getClient()
-//                .get()
-//                .uri(uriBuilder -> uriBuilder.path("/internal/recipes/{id}/{recipeId}").build(id, recipeId))
-//                .accept(MediaType.APPLICATION_NDJSON)
-//                .header(RequestsUtils.AUTH_HEADER, userId)
-//                .retrieve()
-//                .onStatus(HttpStatusCode::isError, response -> handleClientException(response, serviceUrl))
-//                .bodyToMono(new ParameterizedTypeReference<ResponseWithUserDtoEntity<RecipeResponse>>() {
-//                })
-//                .transformDeferred(RetryOperator.of(retry))
-//                .transformDeferred(CircuitBreakerOperator.of(circuitBreaker))
-//                .transformDeferred(RateLimiterOperator.of(rateLimiter))
-//                .onErrorResume(WebClientRequestException.class, this::handleWebRequestException)
-//                .onErrorResume(ThrowFallback.class, e -> Mono.error(new IllegalArgumentException("Invalid plan " + id)));
-//    }
 
     public Mono<FullDayResponse> getFullDayByPlanForUser(String id, String dayId, String userId) {
         if (serviceUrl == null) {
@@ -190,24 +171,6 @@ public class PlanClient extends ValidIdsClient<PlanResponse> {
         }, "/internal/withUser", e -> Mono.error(new IllegalArgumentException("Invalid plan " + id)));
     }
 
-//    public Flux<RecipeResponse> getRecipesByPlan(String id, String userId) {
-//        if (serviceUrl == null) {
-//            return Flux.error(new IllegalArgumentException("Service url is null"));
-//        }
-//        return getClient()
-//                .get()
-//                .uri(uriBuilder -> uriBuilder.path("/recipes/{id}").build(id))
-//                .accept(MediaType.APPLICATION_NDJSON)
-//                .header(RequestsUtils.AUTH_HEADER, userId)
-//                .retrieve()
-//                .onStatus(HttpStatusCode::isError, response -> handleClientException(response, serviceUrl))
-//                .bodyToFlux(RecipeResponse.class)
-//                .transformDeferred(RetryOperator.of(retry))
-//                .transformDeferred(CircuitBreakerOperator.of(circuitBreaker))
-//                .transformDeferred(RateLimiterOperator.of(rateLimiter))
-//                .onErrorResume(WebClientRequestException.class, this::handleWebRequestException)
-//                .onErrorResume(ThrowFallback.class, e -> Flux.error(new IllegalArgumentException("Invalid plan " + id)));
-//    }
 
     public Flux<FullDayResponse> getFullDaysByPlan(String id, String userId) {
         if (serviceUrl == null) {

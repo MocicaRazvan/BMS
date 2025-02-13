@@ -349,3 +349,5 @@ export function formatChartValue(value: number | string) {
     ? value.toFixed(2)
     : value;
 }
+
+export const wrapItemToString = (i: unknown) => `${i}`;
