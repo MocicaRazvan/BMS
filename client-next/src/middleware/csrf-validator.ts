@@ -1,4 +1,4 @@
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 const NEXT_CSRF_COOKIES = [
   "__Host-next-auth.csrf-token",
@@ -15,11 +15,9 @@ export const verifyCsrfToken = async (req: NextRequest): Promise<boolean> => {
   if (!enableCsrfProtection) {
     return true;
   }
-  // console.log("req", req);
   try {
     let parsedCsrfTokenAndHash = getCookie(req);
 
-    // console.log("parsedCsrfTokenAndHash", parsedCsrfTokenAndHash);
     if (!parsedCsrfTokenAndHash) {
       parsedCsrfTokenAndHash = req.headers.get(NEXT_CSRF_HEADER) ?? undefined;
     }
@@ -35,13 +33,10 @@ export const verifyCsrfToken = async (req: NextRequest): Promise<boolean> => {
       parsedCsrfTokenAndHash.split(tokenHashDelimiter);
 
     const secret = process.env.NEXTAUTH_SECRET;
-    console.error("verifyCsrfTokenSecret", secret);
 
     // compute the valid hash
     const validHash = await computeSha256(`${requestToken}${secret}`);
 
-    // console.log("validHash", validHash);
-    // console.log("requestHash", requestHash);
     if (requestHash !== validHash) {
       return logErrorAndReturn(req);
     }
@@ -59,9 +54,7 @@ const logErrorAndReturn = (req: NextRequest): boolean => {
 
 const getCookie = (req: NextRequest): string | undefined => {
   for (const cookieName of NEXT_CSRF_COOKIES) {
-    // console.log("cookieName", cookieName);
     const cookie = req.cookies.get(cookieName);
-    // console.log("cookie", cookie);
     if (cookie) {
       return cookie.value;
     }
@@ -69,6 +62,38 @@ const getCookie = (req: NextRequest): string | undefined => {
 
   return undefined;
 };
+
+export async function apiMiddleware(
+  request: NextRequest,
+  exemptedApiPaths: string[],
+) {
+  // console.log(`Runtime: ${process.env.NEXT_RUNTIME || "nodejs"}`);
+
+  const lowerCasePath = request.nextUrl.pathname.toLowerCase();
+  console.log("apiMiddleware" + lowerCasePath);
+  if (exemptedApiPaths.some((path) => lowerCasePath.startsWith(path))) {
+    return NextResponse.next();
+  }
+
+  const method = request.method;
+  if (method === "OPTIONS" || method === "GET" || method === "HEAD") {
+    return NextResponse.next();
+  }
+
+  const validCsrf = await verifyCsrfToken(request);
+  if (!validCsrf) {
+    return NextResponse.json(
+      {
+        error: "Invalid CSRF token",
+      },
+      {
+        status: 403,
+      },
+    );
+  }
+
+  return NextResponse.next();
+}
 
 const computeSha256 = async (data: string): Promise<string> => {
   const dataBuffer = new TextEncoder().encode(data);
