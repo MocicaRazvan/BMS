@@ -2,13 +2,10 @@ package com.mocicarazvan.recipeservice.config;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mocicarazvan.recipeservice.dtos.RecipeResponse;
 import com.mocicarazvan.rediscache.aspects.RedisReactiveCacheApprovedAspect;
 import com.mocicarazvan.rediscache.aspects.RedisReactiveCacheApprovedEvictAspect;
 import com.mocicarazvan.rediscache.utils.AspectUtils;
 import com.mocicarazvan.rediscache.utils.RedisApprovedCacheUtils;
-import com.mocicarazvan.templatemodule.cache.FilteredListCaffeineCacheApproveFilterKey;
-import com.mocicarazvan.templatemodule.cache.impl.FilteredListCaffeineCacheApproveFilterKeyImpl;
 import com.mocicarazvan.templatemodule.clients.FileClient;
 import com.mocicarazvan.templatemodule.clients.UserClient;
 import com.mocicarazvan.templatemodule.jackson.CustomObjectMapper;
@@ -135,10 +132,10 @@ public class BeanConfig {
         return new RepositoryUtils();
     }
 
-    @Bean
-    public FilteredListCaffeineCacheApproveFilterKey<RecipeResponse> filteredListCaffeineCacheApproveFilterKey() {
-        return new FilteredListCaffeineCacheApproveFilterKeyImpl<>("recipeService");
-    }
+//    @Bean
+//    public FilteredListCaffeineCacheApproveFilterKey<RecipeResponse> filteredListCaffeineCacheApproveFilterKey() {
+//        return new FilteredListCaffeineCacheApproveFilterKeyImpl<>("recipeService");
+//    }
 
     @Bean
     public RedisApprovedCacheUtils redisApprovedCacheUtils(ReactiveRedisTemplate<String, Object> reactiveRedisTemplate,

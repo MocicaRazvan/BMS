@@ -1,6 +1,5 @@
 package com.mocicarazvan.orderservice.services.impl;
 
-import com.mocicarazvan.orderservice.cache.OrderWithAddressCacheHandler;
 import com.mocicarazvan.orderservice.dtos.OrderDtoWithAddress;
 import com.mocicarazvan.orderservice.mappers.OrderWithAddressMapper;
 import com.mocicarazvan.orderservice.repositories.ExtendedOrderWithAddressRepository;
@@ -35,15 +34,11 @@ public class OrderWithAddressServiceImpl implements OrderWithAddressService {
 
     private static final List<String> allowedFields = List.of("id", "createdAt", "updatedAt", "total");
 
-    private final OrderWithAddressMapper orderWithAddressMapper;
-
-    private final ExtendedOrderWithAddressRepository extendedOrderWithAddressRepository;
 
     private final UserClient userClient;
     private final PageableUtilsCustom pageableUtils;
 
     private final EntitiesUtils entitiesUtils;
-    private final OrderWithAddressCacheHandler orderWithAddressCacheHandler;
     private final OrderWithAddRedisCacheWrapper self;
 
 

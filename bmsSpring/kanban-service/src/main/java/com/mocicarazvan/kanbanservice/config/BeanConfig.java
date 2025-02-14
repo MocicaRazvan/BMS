@@ -3,15 +3,11 @@ package com.mocicarazvan.kanbanservice.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.mocicarazvan.kanbanservice.dtos.columns.KanbanColumnResponse;
-import com.mocicarazvan.kanbanservice.dtos.tasks.KanbanTaskResponse;
 import com.mocicarazvan.kanbanservice.jackson.GroupedKanbanTaskDeserializer;
 import com.mocicarazvan.rediscache.aspects.RedisReactiveCacheChildAspect;
 import com.mocicarazvan.rediscache.aspects.RedisReactiveChildCacheEvictAspect;
 import com.mocicarazvan.rediscache.utils.AspectUtils;
 import com.mocicarazvan.rediscache.utils.RedisChildCacheUtils;
-import com.mocicarazvan.templatemodule.cache.FilteredListCaffeineCacheChildFilterKey;
-import com.mocicarazvan.templatemodule.cache.impl.FilteredListCaffeineCacheChildFilterKeyImpl;
 import com.mocicarazvan.templatemodule.clients.UserClient;
 import com.mocicarazvan.templatemodule.jackson.CustomObjectMapper;
 import com.mocicarazvan.templatemodule.utils.EntitiesUtils;
@@ -96,15 +92,15 @@ public class BeanConfig {
         return new LocalValidatorFactoryBean();
     }
 
-    @Bean
-    public FilteredListCaffeineCacheChildFilterKey<KanbanTaskResponse> kanbanTaskResponseFilteredListCaffeineCacheChildFilterKey() {
-        return new FilteredListCaffeineCacheChildFilterKeyImpl<>("kanbanTaskResponse");
-    }
-
-    @Bean
-    public FilteredListCaffeineCacheChildFilterKey<KanbanColumnResponse> kanbanColumnResponseFilteredListCaffeineCacheChildFilterKey() {
-        return new FilteredListCaffeineCacheChildFilterKeyImpl<>("kanbanColumnResponse");
-    }
+//    @Bean
+//    public FilteredListCaffeineCacheChildFilterKey<KanbanTaskResponse> kanbanTaskResponseFilteredListCaffeineCacheChildFilterKey() {
+//        return new FilteredListCaffeineCacheChildFilterKeyImpl<>("kanbanTaskResponse");
+//    }
+//
+//    @Bean
+//    public FilteredListCaffeineCacheChildFilterKey<KanbanColumnResponse> kanbanColumnResponseFilteredListCaffeineCacheChildFilterKey() {
+//        return new FilteredListCaffeineCacheChildFilterKeyImpl<>("kanbanColumnResponse");
+//    }
 
 
     @Bean

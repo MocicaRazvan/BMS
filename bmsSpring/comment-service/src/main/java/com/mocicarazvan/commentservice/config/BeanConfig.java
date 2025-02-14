@@ -2,14 +2,11 @@ package com.mocicarazvan.commentservice.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mocicarazvan.commentservice.clients.PostClient;
-import com.mocicarazvan.commentservice.dtos.CommentResponse;
 import com.mocicarazvan.commentservice.enums.CommentReferenceType;
 import com.mocicarazvan.rediscache.aspects.RedisReactiveCacheChildAspect;
 import com.mocicarazvan.rediscache.aspects.RedisReactiveChildCacheEvictAspect;
 import com.mocicarazvan.rediscache.utils.AspectUtils;
 import com.mocicarazvan.rediscache.utils.RedisChildCacheUtils;
-import com.mocicarazvan.templatemodule.cache.FilteredListCaffeineCacheChildFilterKey;
-import com.mocicarazvan.templatemodule.cache.impl.FilteredListCaffeineCacheChildFilterKeyImpl;
 import com.mocicarazvan.templatemodule.clients.ReferenceClient;
 import com.mocicarazvan.templatemodule.clients.UserClient;
 import com.mocicarazvan.templatemodule.jackson.CustomObjectMapper;
@@ -96,10 +93,10 @@ public class BeanConfig {
         return Map.of(CommentReferenceType.POST, postClient);
     }
 
-    @Bean
-    public FilteredListCaffeineCacheChildFilterKey<CommentResponse> commentResponseFilteredListCaffeineCacheChildFilterKey() {
-        return new FilteredListCaffeineCacheChildFilterKeyImpl<>("commentService");
-    }
+//    @Bean
+//    public FilteredListCaffeineCacheChildFilterKey<CommentResponse> commentResponseFilteredListCaffeineCacheChildFilterKey() {
+//        return new FilteredListCaffeineCacheChildFilterKeyImpl<>("commentService");
+//    }
 
     @Bean
     public RedisChildCacheUtils redisChildCacheUtils(ReactiveRedisTemplate<String, Object> reactiveRedisTemplate,

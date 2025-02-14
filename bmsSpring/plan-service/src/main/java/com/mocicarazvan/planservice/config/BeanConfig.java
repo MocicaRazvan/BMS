@@ -2,13 +2,10 @@ package com.mocicarazvan.planservice.config;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mocicarazvan.planservice.dtos.PlanResponse;
 import com.mocicarazvan.rediscache.aspects.RedisReactiveCacheApprovedAspect;
 import com.mocicarazvan.rediscache.aspects.RedisReactiveCacheApprovedEvictAspect;
 import com.mocicarazvan.rediscache.utils.AspectUtils;
 import com.mocicarazvan.rediscache.utils.RedisApprovedCacheUtils;
-import com.mocicarazvan.templatemodule.cache.FilteredListCaffeineCacheApproveFilterKey;
-import com.mocicarazvan.templatemodule.cache.impl.FilteredListCaffeineCacheApproveFilterKeyImpl;
 import com.mocicarazvan.templatemodule.clients.FileClient;
 import com.mocicarazvan.templatemodule.clients.UserClient;
 import com.mocicarazvan.templatemodule.jackson.CustomObjectMapper;
@@ -138,10 +135,10 @@ public class BeanConfig {
         return new RepositoryUtils();
     }
 
-    @Bean
-    public FilteredListCaffeineCacheApproveFilterKey<PlanResponse> filteredListCaffeineCacheApproveFilterKey() {
-        return new FilteredListCaffeineCacheApproveFilterKeyImpl<>("planService");
-    }
+//    @Bean
+//    public FilteredListCaffeineCacheApproveFilterKey<PlanResponse> filteredListCaffeineCacheApproveFilterKey() {
+//        return new FilteredListCaffeineCacheApproveFilterKeyImpl<>("planService");
+//    }
 
 
     @Bean

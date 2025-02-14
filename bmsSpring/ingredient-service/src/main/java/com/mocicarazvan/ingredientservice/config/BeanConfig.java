@@ -2,18 +2,10 @@ package com.mocicarazvan.ingredientservice.config;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mocicarazvan.ingredientservice.dtos.IngredientNutritionalFactResponse;
-import com.mocicarazvan.ingredientservice.dtos.IngredientResponse;
-import com.mocicarazvan.ingredientservice.dtos.NutritionalFactResponse;
 import com.mocicarazvan.rediscache.aspects.RedisReactiveCacheChildAspect;
 import com.mocicarazvan.rediscache.aspects.RedisReactiveChildCacheEvictAspect;
 import com.mocicarazvan.rediscache.utils.AspectUtils;
 import com.mocicarazvan.rediscache.utils.RedisChildCacheUtils;
-import com.mocicarazvan.templatemodule.cache.FilteredListCaffeineCache;
-import com.mocicarazvan.templatemodule.cache.FilteredListCaffeineCacheChildFilterKey;
-import com.mocicarazvan.templatemodule.cache.impl.FilteredListCaffeineCacheBaseImpl;
-import com.mocicarazvan.templatemodule.cache.impl.FilteredListCaffeineCacheChildFilterKeyImpl;
-import com.mocicarazvan.templatemodule.cache.keys.FilterKeyType;
 import com.mocicarazvan.templatemodule.clients.UserClient;
 import com.mocicarazvan.templatemodule.jackson.CustomObjectMapper;
 import com.mocicarazvan.templatemodule.utils.EntitiesUtils;
@@ -105,20 +97,20 @@ public class BeanConfig {
         return new RepositoryUtils();
     }
 
-    @Bean
-    public FilteredListCaffeineCache<FilterKeyType, IngredientResponse> filterKeyTypeIngredientResponseFilteredListCaffeineCache() {
-        return new FilteredListCaffeineCacheBaseImpl<>("ingredient");
-    }
-
-    @Bean
-    public FilteredListCaffeineCache<FilterKeyType, IngredientNutritionalFactResponse> filterKeyTypeIngredientNutritionalFactResponseFilteredListCaffeineCache() {
-        return new FilteredListCaffeineCacheBaseImpl<>("ingredient-nutritionalFact");
-    }
-
-    @Bean
-    public FilteredListCaffeineCacheChildFilterKey<NutritionalFactResponse> nutritionalFactResponseFilteredListCaffeineCacheChildFilterKey() {
-        return new FilteredListCaffeineCacheChildFilterKeyImpl<>("nutritionalFact");
-    }
+//    @Bean
+//    public FilteredListCaffeineCache<FilterKeyType, IngredientResponse> filterKeyTypeIngredientResponseFilteredListCaffeineCache() {
+//        return new FilteredListCaffeineCacheBaseImpl<>("ingredient");
+//    }
+//
+//    @Bean
+//    public FilteredListCaffeineCache<FilterKeyType, IngredientNutritionalFactResponse> filterKeyTypeIngredientNutritionalFactResponseFilteredListCaffeineCache() {
+//        return new FilteredListCaffeineCacheBaseImpl<>("ingredient-nutritionalFact");
+//    }
+//
+//    @Bean
+//    public FilteredListCaffeineCacheChildFilterKey<NutritionalFactResponse> nutritionalFactResponseFilteredListCaffeineCacheChildFilterKey() {
+//        return new FilteredListCaffeineCacheChildFilterKeyImpl<>("nutritionalFact");
+//    }
 
     @Bean
     public RedisChildCacheUtils redisChildCacheUtils(ReactiveRedisTemplate<String, Object> reactiveRedisTemplate,

@@ -2,14 +2,10 @@ package com.mocicarazvan.orderservice.config;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mocicarazvan.orderservice.dtos.OrderDto;
-import com.mocicarazvan.orderservice.dtos.OrderDtoWithAddress;
 import com.mocicarazvan.rediscache.aspects.RedisReactiveCacheChildAspect;
 import com.mocicarazvan.rediscache.aspects.RedisReactiveChildCacheEvictAspect;
 import com.mocicarazvan.rediscache.utils.AspectUtils;
 import com.mocicarazvan.rediscache.utils.RedisChildCacheUtils;
-import com.mocicarazvan.templatemodule.cache.FilteredListCaffeineCacheChildFilterKey;
-import com.mocicarazvan.templatemodule.cache.impl.FilteredListCaffeineCacheChildFilterKeyImpl;
 import com.mocicarazvan.templatemodule.clients.UserClient;
 import com.mocicarazvan.templatemodule.email.EmailUtils;
 import com.mocicarazvan.templatemodule.email.config.CustomMailProps;
@@ -140,15 +136,15 @@ public class BeanConfig {
         return new EmailUtilsImpl(jml);
     }
 
-    @Bean
-    public FilteredListCaffeineCacheChildFilterKey<OrderDto> orderDtoFilteredListCaffeineCacheChildFilterKey() {
-        return new FilteredListCaffeineCacheChildFilterKeyImpl<>("orderService");
-    }
-
-    @Bean
-    public FilteredListCaffeineCacheChildFilterKey<OrderDtoWithAddress> orderDtoWithAddressFilteredListCaffeineCacheChildFilterKey() {
-        return new FilteredListCaffeineCacheChildFilterKeyImpl<>("orderService");
-    }
+//    @Bean
+//    public FilteredListCaffeineCacheChildFilterKey<OrderDto> orderDtoFilteredListCaffeineCacheChildFilterKey() {
+//        return new FilteredListCaffeineCacheChildFilterKeyImpl<>("orderService");
+//    }
+//
+//    @Bean
+//    public FilteredListCaffeineCacheChildFilterKey<OrderDtoWithAddress> orderDtoWithAddressFilteredListCaffeineCacheChildFilterKey() {
+//        return new FilteredListCaffeineCacheChildFilterKeyImpl<>("orderService");
+//    }
 
     @Bean
     public RedisChildCacheUtils redisChildCacheUtils(ReactiveRedisTemplate<String, Object> reactiveRedisTemplate,
