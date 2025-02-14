@@ -20,6 +20,12 @@ import java.util.HexFormat;
 public class NextCsrfValidator {
     private final NextAuthProperties nextAuthProperties;
     private final AntPathMatcher antPathMatcher;
+    public static final String[] NEXT_CSRF_COOKIES = {
+            "__Host-next-auth.csrf-token"
+            , "next-auth.csrf-token"
+    };
+
+    public static final String NEXT_CSRF_HEADER = "x-csrf-token";
 
 
     public Mono<Boolean> validateCsrf(String csrf, String requestUri) {

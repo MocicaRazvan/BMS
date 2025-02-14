@@ -1,4 +1,4 @@
-package com.mocicarazvan.gatewayservice.dtos;
+package com.mocicarazvan.gatewayservice.dtos.token;
 
 
 import lombok.AllArgsConstructor;

@@ -1,4 +1,4 @@
-package com.mocicarazvan.gatewayservice.dtos;
+package com.mocicarazvan.gatewayservice.dtos.token;
 
 import com.mocicarazvan.gatewayservice.enums.Role;
 import jakarta.validation.constraints.NotNull;

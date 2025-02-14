@@ -19,12 +19,6 @@ public class CsrfFilter implements GatewayFilter {
     private final CookieUtils cookieUtils;
     private final ErrorHandler errorHandler;
 
-    private static final String[] NEXT_CSRF_COOKIES = {
-            "__Host-next-auth.csrf-token"
-            , "next-auth.csrf-token"
-    };
-
-    private static final String NEXT_CSRF_HEADER = "x-csrf-token";
 
     public CsrfFilter(NextCsrfValidator nextCsrfValidator, CookieUtils cookieUtils, ErrorHandler errorHandler) {
         this.nextCsrfValidator = nextCsrfValidator;
@@ -42,9 +36,9 @@ public class CsrfFilter implements GatewayFilter {
             return chain.filter(exchange);
         }
 
-        String csrfToken = exchange.getRequest().getHeaders().getFirst(NEXT_CSRF_HEADER);
+        String csrfToken = exchange.getRequest().getHeaders().getFirst(NextCsrfValidator.NEXT_CSRF_HEADER);
         if (csrfToken == null) {
-            csrfToken = cookieUtils.getCookie(exchange, NEXT_CSRF_COOKIES);
+            csrfToken = cookieUtils.getCookie(exchange, NextCsrfValidator.NEXT_CSRF_COOKIES);
         }
 
         return nextCsrfValidator.validateCsrf(csrfToken, exchange.getRequest().getURI().getPath())

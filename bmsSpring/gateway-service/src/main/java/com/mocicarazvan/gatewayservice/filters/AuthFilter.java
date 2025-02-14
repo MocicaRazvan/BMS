@@ -2,7 +2,7 @@ package com.mocicarazvan.gatewayservice.filters;
 
 
 import com.mocicarazvan.gatewayservice.clients.UserClient;
-import com.mocicarazvan.gatewayservice.dtos.TokenValidationRequest;
+import com.mocicarazvan.gatewayservice.dtos.token.TokenValidationRequest;
 import com.mocicarazvan.gatewayservice.enums.Role;
 import com.mocicarazvan.gatewayservice.routing.RouteValidator;
 import com.mocicarazvan.gatewayservice.services.ErrorHandler;

@@ -1,4 +1,4 @@
-package com.mocicarazvan.gatewayservice.dtos;
+package com.mocicarazvan.gatewayservice.dtos.jwe;
 
 
 import lombok.AllArgsConstructor;

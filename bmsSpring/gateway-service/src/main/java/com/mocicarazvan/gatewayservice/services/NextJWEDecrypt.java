@@ -2,7 +2,7 @@ package com.mocicarazvan.gatewayservice.services;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mocicarazvan.gatewayservice.dtos.NextJSJWE;
+import com.mocicarazvan.gatewayservice.dtos.jwe.NextJSJWE;
 import com.nimbusds.jose.JWEObject;
 import com.nimbusds.jose.crypto.DirectDecrypter;
 import lombok.RequiredArgsConstructor;

@@ -1,5 +1,4 @@
 import { NextRequest } from "next/server";
-import { emitError } from "@/logger";
 
 const NEXT_CSRF_COOKIES = [
   "__Host-next-auth.csrf-token",
@@ -26,7 +25,7 @@ export const verifyCsrfToken = async (req: NextRequest): Promise<boolean> => {
     }
 
     if (!parsedCsrfTokenAndHash) {
-      return emitFalseCsrfTokenErrorAndReturn(req);
+      return logErrorAndReturn(req);
     }
     // delimiter could be either a '|' or a '%7C'
     const tokenHashDelimiter =
@@ -36,6 +35,7 @@ export const verifyCsrfToken = async (req: NextRequest): Promise<boolean> => {
       parsedCsrfTokenAndHash.split(tokenHashDelimiter);
 
     const secret = process.env.NEXTAUTH_SECRET;
+    console.error("verifyCsrfTokenSecret", secret);
 
     // compute the valid hash
     const validHash = await computeSha256(`${requestToken}${secret}`);
@@ -43,25 +43,17 @@ export const verifyCsrfToken = async (req: NextRequest): Promise<boolean> => {
     // console.log("validHash", validHash);
     // console.log("requestHash", requestHash);
     if (requestHash !== validHash) {
-      return emitFalseCsrfTokenErrorAndReturn(req);
+      return logErrorAndReturn(req);
     }
   } catch (err) {
-    emitError({
-      message: "Error verifying CSRF token",
-      error: err instanceof Object ? JSON.stringify(err) : "Error",
-    });
     console.error("Error verifying CSRF token", err);
     return false;
   }
   return true;
 };
 
-const emitFalseCsrfTokenErrorAndReturn = (req: NextRequest): boolean => {
-  emitError({
-    message: "Invalid CSRF token",
-    error: `Invalid CSRF token for request ${req.url}`,
-  });
-
+const logErrorAndReturn = (req: NextRequest): boolean => {
+  console.error("Invalid CSRF token", req.nextUrl.pathname);
   return false;
 };
 

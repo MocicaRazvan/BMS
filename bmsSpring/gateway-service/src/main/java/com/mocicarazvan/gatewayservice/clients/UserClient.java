@@ -1,7 +1,7 @@
 package com.mocicarazvan.gatewayservice.clients;
 
-import com.mocicarazvan.gatewayservice.dtos.TokenValidationRequest;
-import com.mocicarazvan.gatewayservice.dtos.TokenValidationResponse;
+import com.mocicarazvan.gatewayservice.dtos.token.TokenValidationRequest;
+import com.mocicarazvan.gatewayservice.dtos.token.TokenValidationResponse;
 import com.mocicarazvan.gatewayservice.exceptions.ThrowFallback;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
