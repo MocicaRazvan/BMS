@@ -1,9 +1,8 @@
-import { NextAuthOptions, Session } from "next-auth";
+import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GitHubProvider from "next-auth/providers/github";
 import { CustomGoogleProvider } from "@/app/api/auth/[...nextauth]/custom-google-provider";
 import { getCsrfNextAuthHeader } from "@/actions/get-csr-next-auth";
-import { AuthResponse } from "aws-lambda";
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -95,5 +94,9 @@ export const authOptions: NextAuthOptions = {
   },
   session: {
     strategy: "jwt",
+    maxAge: 30 * 24 * 60 * 60,
+  },
+  jwt: {
+    maxAge: 30 * 24 * 60 * 60,
   },
 };
