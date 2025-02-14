@@ -6,21 +6,17 @@ import com.mocicarazvan.orderservice.dtos.clients.MealResponse;
 import com.mocicarazvan.orderservice.dtos.clients.PlanResponse;
 import com.mocicarazvan.orderservice.dtos.clients.RecipeResponse;
 import com.mocicarazvan.orderservice.dtos.clients.collect.FullDayResponse;
-import com.mocicarazvan.orderservice.dtos.summaries.*;
-import com.mocicarazvan.orderservice.enums.CountrySummaryType;
 import com.mocicarazvan.orderservice.enums.DietType;
 import com.mocicarazvan.orderservice.enums.ObjectiveType;
 import com.mocicarazvan.orderservice.services.OrderService;
 import com.mocicarazvan.templatemodule.controllers.CountInParentController;
 import com.mocicarazvan.templatemodule.dtos.PageableBody;
 import com.mocicarazvan.templatemodule.dtos.response.EntityCount;
-import com.mocicarazvan.templatemodule.dtos.response.MonthlyEntityGroup;
 import com.mocicarazvan.templatemodule.dtos.response.PageableResponse;
 import com.mocicarazvan.templatemodule.dtos.response.ResponseWithUserDtoEntity;
 import com.mocicarazvan.templatemodule.hateos.CustomEntityModel;
 import com.mocicarazvan.templatemodule.utils.RequestsUtils;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -39,7 +35,6 @@ import java.time.LocalDate;
 public class OrderController implements CountInParentController {
 
     private final OrderService orderService;
-
     private final RequestsUtils requestsUtils;
 
 
@@ -141,161 +136,6 @@ public class OrderController implements CountInParentController {
                 .map(ResponseEntity::ok);
     }
 
-    @GetMapping("/admin/groupedByMonth")
-    @ResponseStatus(HttpStatus.OK)
-    Flux<MonthlyEntityGroup<OrderDto>> getOrdersGroupedByMonth(@RequestParam int month, ServerWebExchange exchange) {
-        return orderService.getOrdersGroupedByMonth(month, requestsUtils.extractAuthUser(exchange));
-    }
-
-    @GetMapping("/admin/countAndAmount")
-    @ResponseStatus(HttpStatus.OK)
-    public Flux<MonthlyOrderSummary> getOrdersSummaryByMonth(@RequestParam @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate from,
-                                                             @RequestParam @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate to,
-                                                             ServerWebExchange exchange) {
-        return orderService.getOrdersSummaryByMonth(from, to, requestsUtils.extractAuthUser(exchange));
-    }
-
-    @GetMapping("/admin/plans/countAndAmount")
-    @ResponseStatus(HttpStatus.OK)
-    public Flux<MonthlyOrderSummary> getOrdersPlansSummaryByMonth(@RequestParam @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate from,
-                                                                  @RequestParam @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate to,
-                                                                  ServerWebExchange exchange) {
-        return orderService.getOrdersPlanSummaryByMonth(from, to, requestsUtils.extractAuthUser(exchange));
-    }
-
-
-    @GetMapping("/admin/topUsers")
-    @ResponseStatus(HttpStatus.OK)
-    public Flux<TopUsersSummary> getTopUsersSummary(@RequestParam @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate from,
-                                                    @RequestParam @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate to,
-                                                    @RequestParam @Valid @Min(1) int top
-    ) {
-        return orderService.getTopUsersSummary(from, to, top);
-    }
-
-    @GetMapping("/admin/topTrainers")
-    @ResponseStatus(HttpStatus.OK)
-    public Flux<TopTrainersSummaryResponse> getTopTrainersSummary(@RequestParam @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate from,
-                                                                  @RequestParam @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate to,
-                                                                  @RequestParam @Valid @Min(1) int top
-    ) {
-        return orderService.getTopTrainersSummary(from, to, top);
-    }
-
-    @GetMapping("/admin/topPlans")
-    @ResponseStatus(HttpStatus.OK)
-    public Flux<TopPlansSummary> getTopPlansSummary(@RequestParam @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate from,
-                                                    @RequestParam @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate to,
-                                                    @RequestParam @Valid @Min(1) int top
-    ) {
-        return orderService.getTopPlansSummary(from, to, top);
-    }
-
-    @GetMapping("/trainer/topPlans/{trainerId}")
-    @ResponseStatus(HttpStatus.OK)
-    public Flux<TopPlansSummary> getTopPlansTrainerSummary(@RequestParam @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate from,
-                                                           @RequestParam @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate to,
-                                                           @PathVariable Long trainerId,
-                                                           @RequestParam @Valid @Min(1) int top,
-                                                           ServerWebExchange exchange
-
-    ) {
-        return orderService.getTopPlansSummaryTrainer(from, to, top, trainerId, requestsUtils.extractAuthUser(exchange));
-    }
-
-    @GetMapping("/trainer/countAndAmount/{trainerId}")
-    @ResponseStatus(HttpStatus.OK)
-    public Flux<MonthlyOrderSummary> getTrainerOrdersSummaryByMonth(@RequestParam @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate from,
-                                                                    @RequestParam @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate to,
-                                                                    @PathVariable Long trainerId,
-                                                                    ServerWebExchange exchange) {
-        return orderService.getTrainerOrdersSummaryByMonth(from, to, trainerId, requestsUtils.extractAuthUser(exchange));
-    }
-
-    @GetMapping("/trainer/countAndAmount/type/{trainerId}")
-    @ResponseStatus(HttpStatus.OK)
-    public Flux<MonthlyOrderSummaryType> getTrainerOrdersSummaryByDateRangeGroupedByMonthTypes(@RequestParam @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate month,
-                                                                                               @PathVariable Long trainerId,
-                                                                                               ServerWebExchange exchange
-    ) {
-        return orderService.getTrainerOrdersSummaryByDateRangeGroupedByMonthTypes(month, trainerId, requestsUtils.extractAuthUser(exchange));
-    }
-
-    @GetMapping("/trainer/countAndAmount/objective/{trainerId}")
-    @ResponseStatus(HttpStatus.OK)
-    public Flux<MonthlyOrderSummaryObjective> getTrainerOrdersSummaryByDateRangeGroupedByMonthObjectives(@RequestParam @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate month,
-                                                                                                         @PathVariable Long trainerId,
-                                                                                                         ServerWebExchange exchange
-    ) {
-        return orderService.getTrainerOrdersSummaryByDateRangeGroupedByMonthObjectives(month, trainerId, requestsUtils.extractAuthUser(exchange));
-    }
-
-    @GetMapping("/trainer/countAndAmount/objectiveType/{trainerId}")
-    @ResponseStatus(HttpStatus.OK)
-    public Flux<MonthlyOrderSummaryObjectiveType> getTrainerOrdersSummaryByDateRangeGroupedByMonthObjectivesTypes(@RequestParam @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate month,
-                                                                                                                  @PathVariable Long trainerId,
-                                                                                                                  ServerWebExchange exchange
-    ) {
-        return orderService.getTrainOrdersSummaryByDateRangeGroupedByMonthObjectiveTypes(month, trainerId, requestsUtils.extractAuthUser(exchange));
-    }
-
-    @GetMapping("/admin/countAndAmount/type")
-    @ResponseStatus(HttpStatus.OK)
-    public Flux<MonthlyOrderSummaryType> getAdminOrdersSummaryByDateRangeGroupedByMonthTypes(@RequestParam @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate month,
-                                                                                             ServerWebExchange exchange
-    ) {
-        return orderService.getAdminOrdersSummaryByDateRangeGroupedByMonthTypes(month, requestsUtils.extractAuthUser(exchange));
-    }
-
-    @GetMapping("/admin/countAndAmount/objective")
-    @ResponseStatus(HttpStatus.OK)
-    public Flux<MonthlyOrderSummaryObjective> getAdminOrdersSummaryByDateRangeGroupedByMonthObjectives(@RequestParam @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate month,
-                                                                                                       ServerWebExchange exchange
-    ) {
-        return orderService.getAdminOrdersSummaryByDateRangeGroupedByMonthObjectives(month, requestsUtils.extractAuthUser(exchange));
-    }
-
-    @GetMapping("/admin/countAndAmount/objectiveType")
-    @ResponseStatus(HttpStatus.OK)
-    public Flux<MonthlyOrderSummaryObjectiveType> getAdminOrdersSummaryByDateRangeGroupedByMonthObjectivesTypes(@RequestParam @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate month,
-                                                                                                                ServerWebExchange exchange
-    ) {
-        return orderService.getAdminOrdersSummaryByDateRangeGroupedByMonthObjectiveTypes(month, requestsUtils.extractAuthUser(exchange));
-    }
-
-    @GetMapping("/admin/countAndAmount/daily")
-    @ResponseStatus(HttpStatus.OK)
-    public Flux<DailyOrderSummary> getOrdersSummaryByDay(@RequestParam @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate from,
-                                                         @RequestParam @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate to,
-                                                         ServerWebExchange exchange) {
-        return orderService.getOrdersSummaryByDay(from, to, requestsUtils.extractAuthUser(exchange));
-    }
-
-    @GetMapping("/admin/plans/countAndAmount/daily")
-    @ResponseStatus(HttpStatus.OK)
-    public Flux<DailyOrderSummary> getOrdersPlanSummaryByDay(@RequestParam @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate from,
-                                                             @RequestParam @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate to,
-                                                             ServerWebExchange exchange) {
-        return orderService.getOrdersPlanSummaryByDay(from, to, requestsUtils.extractAuthUser(exchange));
-    }
-
-    @GetMapping("/trainer/countAndAmount/daily/{trainerId}")
-    @ResponseStatus(HttpStatus.OK)
-    public Flux<DailyOrderSummary> getTrainerOrdersSummaryByDay(@RequestParam @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate from,
-                                                                @RequestParam @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate to,
-                                                                @PathVariable Long trainerId,
-                                                                ServerWebExchange exchange) {
-        return orderService.getTrainerOrdersSummaryByDay(from, to, trainerId, requestsUtils.extractAuthUser(exchange));
-    }
-
-    @GetMapping("/admin/summaryByCountry")
-    @ResponseStatus(HttpStatus.OK)
-    public Flux<CountryOrderSummary> getOrdersSummaryByCountry(@RequestParam CountrySummaryType type,
-                                                               @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate from,
-                                                               @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate to
-    ) {
-        return orderService.getOrdersSummaryByCountry(type, from, to);
-    }
 
     @GetMapping("/admin/seedPlanOrders")
     public Mono<ResponseEntity<String>> seedPlanOrders(
