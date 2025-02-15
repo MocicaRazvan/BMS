@@ -53,7 +53,7 @@ public class Config {
     }
 
     @Bean
-    AntPathMatcher antPathMatcher() {
+    public AntPathMatcher antPathMatcher() {
         return new AntPathMatcher();
     }
 
