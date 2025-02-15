@@ -9,6 +9,7 @@ import { Locale } from "@/navigation";
 import { tool } from "@langchain/core/tools";
 import { z } from "zod";
 import { getCsrfNextAuthHeader } from "@/actions/get-csr-next-auth";
+import { emitError } from "@/logger";
 
 const springUrl = process.env.NEXT_PUBLIC_SPRING!;
 
@@ -44,6 +45,9 @@ export async function getItemTool<T extends TitleBodyUserDto>(
     );
 
     if (!response.ok) {
+      emitError(
+        `Error fetching items in getItemTool with status ${response.status} for path ${path}`,
+      );
       return "";
     }
 
@@ -79,6 +83,9 @@ export async function getItemTool<T extends TitleBodyUserDto>(
     );
   } catch (error) {
     console.error("Error fetching items:", error);
+    if (error instanceof Error) {
+      emitError(error);
+    }
     return "";
   }
 }

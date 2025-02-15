@@ -22,6 +22,7 @@ export default function useCsrfToken() {
         setCsrfRawToken({ [NEXT_CSRF_HEADER]: t });
       } else {
         setCsrfRawToken(undefined);
+        window.location.reload();
       }
     });
   }, []);

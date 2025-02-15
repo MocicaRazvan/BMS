@@ -41,6 +41,18 @@ export default function PageContent({ texts }: Props) {
   return (
     <div>
       <Button onClick={() => setState((prev) => !prev)}>Click me</Button>
+      {state && <InnerComponent state={state} />}
     </div>
   );
 }
+
+const InnerComponent = ({ state }: { state: boolean }) => {
+  const { csrfRawToken, addTokenConditionally } = useCsrfToken();
+
+  return (
+    <div>
+      Inner + {JSON.stringify(csrfRawToken)}
+      <p>State {`${state}`}</p>
+    </div>
+  );
+};

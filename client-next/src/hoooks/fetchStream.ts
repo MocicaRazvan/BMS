@@ -76,6 +76,8 @@ export async function fetchStream<
       const rawToken = await getCsrfToken();
       if (rawToken) {
         headers.set(NEXT_CSRF_HEADER, rawToken);
+      } else {
+        window.location.reload();
       }
     }
   }
