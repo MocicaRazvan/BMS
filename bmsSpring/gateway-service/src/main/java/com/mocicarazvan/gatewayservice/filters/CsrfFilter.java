@@ -36,14 +36,16 @@ public class CsrfFilter implements GatewayFilter {
             return chain.filter(exchange);
         }
 
-        String csrfToken = exchange.getRequest().getHeaders().getFirst(NextCsrfValidator.NEXT_CSRF_HEADER);
+        String csrfToken = exchange.getRequest().getHeaders().getFirst(NextCsrfValidator.NEXT_CSRF_HEADER_TOKEN);
         if (csrfToken == null) {
             csrfToken = cookieUtils.getCookie(exchange, NextCsrfValidator.NEXT_CSRF_COOKIES);
         }
+        String rawToken = exchange.getRequest().getHeaders().getFirst(NextCsrfValidator.NEXT_CSRF_HEADER);
 
-        return nextCsrfValidator.validateCsrf(csrfToken, exchange.getRequest().getURI().getPath())
+
+        return nextCsrfValidator.validateCsrf(csrfToken, rawToken, exchange.getRequest().getURI().getPath())
                 .flatMap(isValid -> {
-                    log.info("CSRF Token is valid: {} for request {} with method {}", isValid, exchange.getRequest().getURI().getPath(), exchange.getRequest().getMethod());
+//                    log.info("CSRF Token is valid: {} for request {} with method {}", isValid, exchange.getRequest().getURI().getPath(), exchange.getRequest().getMethod());
                     if (!isValid) {
                         return errorHandler.handleError("CSRF token is not valid", exchange);
                     }

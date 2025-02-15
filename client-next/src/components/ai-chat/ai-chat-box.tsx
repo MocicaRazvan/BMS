@@ -13,6 +13,7 @@ import Logo from "@/components/logo/logo";
 import { ChatScrollAnchor } from "@/components/ai-chat/chat-scroll-anchor";
 import useAiChatPersist from "@/hoooks/useAiChatPersist";
 import remarkGfm from "remark-gfm";
+import useCsrfToken from "@/hoooks/useCsrfToken";
 
 export interface AiChatBoxTexts {
   loadingContent: string;
@@ -36,6 +37,7 @@ export default function AiChatBox({
 }: Props) {
   const [isOpen, setIsOpen] = useState(false);
   const [showBot, setShowBot] = useState(true);
+  const { csrfRawToken, addTokenConditionally } = useCsrfToken();
   const {
     messages,
     input,
@@ -48,6 +50,9 @@ export default function AiChatBox({
   } = useChat({
     api: "/api/chat",
     initialMessages,
+    headers: {
+      ...addTokenConditionally(),
+    },
   });
   const [isAtBottom, setIsAtBottom] = useState<boolean>(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -122,7 +127,7 @@ export default function AiChatBox({
         }}
       >
         {showBot && <Bot size={36} />}
-        {isOpen && (
+        {isOpen && csrfRawToken && (
           <div className="w-full h-full flex flex-col items-center justify-center gap-2">
             <div className="p-5 border-b flex items-center justify-between w-full px-10">
               <div className="flex items-center justify-center gap-2 ">

@@ -81,9 +81,6 @@ public class AuthFilter implements GatewayFilter {
         final String encodedCookie = cookieUtils.getCookie(exchange, NEXT_AUTH_COOKIES);
 
         log.info("Encoded Cookie: {}", encodedCookie);
-//        if ((authHeader == null || !authHeader.startsWith("Bearer ")) && (authCookie == null || authCookie.isEmpty())) {
-//            return handleError("Token not found", exchange);
-//        }
 
         boolean isAuthHeaderPresent = authHeader != null && authHeader.startsWith("Bearer ");
 

@@ -25,10 +25,11 @@ public class NextCsrfValidator {
             , "next-auth.csrf-token"
     };
 
-    public static final String NEXT_CSRF_HEADER = "x-csrf-token";
+    public static final String NEXT_CSRF_HEADER_TOKEN = "x-csrf-token";
+    public static final String NEXT_CSRF_HEADER = "x-csrf-header";
 
 
-    public Mono<Boolean> validateCsrf(String csrf, String requestUri) {
+    public Mono<Boolean> validateCsrf(String csrf, String rawToken, String requestUri) {
 
         if (!nextAuthProperties.isCsrfEnabled()) {
             return Mono.just(true);
@@ -41,17 +42,21 @@ public class NextCsrfValidator {
             return Mono.just(true);
         } else if (csrf == null || csrf.isBlank()) {
             return Mono.just(false);
+        } else if (rawToken == null || rawToken.isBlank()) {
+            return Mono.just(false);
         }
         log.info("CSRF: {}", csrf);
         return Mono.fromCallable(() -> {
-                    String delimiter = csrf.contains("|") ? "\\|" : "%7C";
-                    String[] parts = csrf.split(delimiter);
-                    if (parts.length != 2) {
+                    String[] csrfParts = splitCsrf(csrf);
+                    String requestToken = csrfParts[0];
+                    String requestHash = csrfParts[1];
+
+//                    log.error("RequestToken: {} RawToken: {}", requestToken, rawToken);
+
+                    if (!requestToken.equals(rawToken)) {
+                        log.error("CSRF token mismatch requestToken: {} rawToken: {}", requestToken, rawToken);
                         return false;
                     }
-
-                    String requestToken = parts[0];
-                    String requestHash = parts[1];
 
                     String validHash = computeSha256Hash(requestToken + nextAuthProperties.getSecret());
 
@@ -60,6 +65,20 @@ public class NextCsrfValidator {
                 .subscribeOn(Schedulers.boundedElastic())
                 .onErrorResume(_ -> Mono.just(false)
                 );
+    }
+
+    public Mono<Boolean> validateCsrf(String csrf, String requestUri) {
+        return validateCsrf(csrf, splitCsrf(csrf)[0], requestUri);
+    }
+
+    public String[] splitCsrf(String csrf) {
+        String delimiter = csrf.contains("|") ? "\\|" : "%7C";
+        String[] parts = csrf.split(delimiter);
+        if (parts.length != 2) {
+            throw new IllegalArgumentException("Invalid CSRF token");
+        }
+
+        return parts;
     }
 
     private String computeSha256Hash(String data) throws NoSuchAlgorithmException {

@@ -15,8 +15,9 @@ import ShinyButton from "@/components/magicui/shiny-button";
 import { getToxicity } from "@/actions/toxcity";
 import DOMPurify from "dompurify";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Pen, StopCircle } from "lucide-react";
+import { Loader2, Pen, StopCircle } from "lucide-react";
 import { useChat } from "ai/react";
+import useCsrfToken from "@/hoooks/useCsrfToken";
 
 export interface AIGeneratePopTexts {
   anchorText: string;
@@ -72,6 +73,7 @@ export default function AIGeneratePop({
   const [inputErr, setInputErr] = useState<string | undefined>();
   const [sentFields, setSentFields] = useState<AiIdeasField[]>(fields);
   const lastUpdateTime = useRef<number>(-1);
+  const { csrfRawToken, addTokenConditionally } = useCsrfToken();
 
   const {
     messages,
@@ -84,6 +86,9 @@ export default function AIGeneratePop({
     onFinish: (r) => {
       updateCallback(r.content);
       lastUpdateTime.current = -1;
+    },
+    headers: {
+      ...addTokenConditionally(),
     },
   });
   const hasContext = useMemo(
@@ -219,9 +224,13 @@ export default function AIGeneratePop({
   return (
     <Popover open={popOpen} onOpenChange={handlePopChange}>
       <PopoverTrigger asChild>
-        <ShinyButton>
-          <span className="flex items-center justify-center gap-2">
-            <span className="font-semibold">{anchorText}</span>
+        <ShinyButton disabled={!csrfRawToken}>
+          <span className="flex items-center justify-center gap-2 w-10">
+            {!isLoading ? (
+              <span className="font-semibold">{anchorText}</span>
+            ) : (
+              <Loader2 className="h-5 w-5 font-semibold animate-spin" />
+            )}
             <Pen size={18} />
           </span>
         </ShinyButton>

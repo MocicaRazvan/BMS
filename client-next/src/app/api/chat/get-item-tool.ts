@@ -1,4 +1,3 @@
-import { fetchStream } from "@/hoooks/fetchStream";
 import {
   PageableResponse,
   PlanResponse,
@@ -9,7 +8,9 @@ import {
 import { Locale } from "@/navigation";
 import { tool } from "@langchain/core/tools";
 import { z } from "zod";
-import { getCsrfNextAuth } from "@/actions/get-csr-next-auth";
+import { getCsrfNextAuthHeader } from "@/actions/get-csr-next-auth";
+
+const springUrl = process.env.NEXT_PUBLIC_SPRING!;
 
 export async function getItemTool<T extends TitleBodyUserDto>(
   input: string,
@@ -20,59 +21,66 @@ export async function getItemTool<T extends TitleBodyUserDto>(
   locale: Locale,
   extraMap?: (content: T) => string,
 ) {
-  const csrf = await getCsrfNextAuth();
-  const response = await fetchStream<
-    PageableResponse<ResponseWithUserDtoEntity<T>>[]
-  >({
-    path,
-    method: "PATCH",
-    token,
-    cache: "no-cache",
-    acceptHeader: "application/json",
-    csrf,
-    body: {
-      page: 0,
-      size: process.env.OLLAMA_TOOL_PAGE_SIZE
-        ? parseInt(process.env.OLLAMA_TOOL_PAGE_SIZE)
-        : 3,
-    },
-    queryParams: {
-      title: input.trim(),
-      approved: "true",
-    },
-  });
+  try {
+    const csrf = await getCsrfNextAuthHeader();
+    const response = await fetch(
+      `${springUrl}${path}?title=${input.trim()}&approved=true`,
+      {
+        method: "PATCH",
+        cache: "no-cache",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+          Authorization: `Bearer ${token}`,
+          ...csrf,
+        },
+        body: JSON.stringify({
+          page: 0,
+          size: process.env.OLLAMA_TOOL_PAGE_SIZE
+            ? parseInt(process.env.OLLAMA_TOOL_PAGE_SIZE)
+            : 3,
+        }),
+      },
+    );
 
-  console.log("getItemTool", response);
+    if (!response.ok) {
+      return "";
+    }
 
-  if (response.error || response.messages[0].length === 0) {
+    const responseJson = (await response.json()) as PageableResponse<
+      ResponseWithUserDtoEntity<T>
+    >[];
+    console.log("getItemTool", response);
+
+    return responseJson.reduce(
+      (
+        acc,
+        {
+          content: {
+            model: { content },
+          },
+        },
+        i,
+      ) => {
+        acc +=
+          `Item ${i + 1} \t ` +
+          `Title: ${content.title} \t ` +
+          `URL: ${siteUrl}/${locale}/${modelName}/single/${content.id} \t`;
+        if (extraMap) {
+          acc += extraMap(content);
+        }
+        acc += `\n`;
+        if (i === responseJson.length - 1) {
+          acc += `\n`;
+        }
+        return acc;
+      },
+      `Search result for ${modelName}, there were ${responseJson.length} results.  \n\n`,
+    );
+  } catch (error) {
+    console.error("Error fetching items:", error);
     return "";
   }
-
-  return response.messages[0].reduce(
-    (
-      acc,
-      {
-        content: {
-          model: { content },
-        },
-      },
-      i,
-    ) => {
-      acc +=
-        `Item ${i + 1} \t ` +
-        `Title: ${content.title} \t ` +
-        `URL: ${siteUrl}/${locale}/${modelName}/single/${content.id} \t`;
-      if (extraMap) {
-        acc += extraMap(content);
-      }
-      acc += `\n`;
-      if (i === response.messages[0].length - 1) {
-        acc += `\n`;
-      }
-      return acc;
-    },
-    `Search result for ${modelName}, there were ${response.messages[0].length} results.  \n\n`,
-  );
 }
 
 export function createTool(

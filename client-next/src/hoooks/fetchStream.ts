@@ -1,7 +1,11 @@
+"use client";
 import ndjsonStream from "can-ndjson-stream";
 import { BaseError } from "@/types/responses";
 import { AcceptHeader } from "@/types/fetch-utils";
-import { getCsrfNextAuth } from "@/actions/get-csr-next-auth";
+import { NEXT_CSRF_HEADER, NEXT_CSRF_HEADER_TOKEN } from "@/lib/constants";
+import { getCsrfToken } from "next-auth/react";
+
+const mutatingActions = ["POST", "PUT", "DELETE", "PATCH"];
 
 export interface FetchStreamProps<T> {
   path: string;
@@ -41,7 +45,6 @@ export async function fetchStream<
   batchSize = 6,
   csrf,
 }: FetchStreamProps<T>) {
-  // TODO RETEST ALL OF THIS
   let batchBuffer: T[] = [];
   let messages: T[] = [];
   let error: E | null = null;
@@ -61,7 +64,20 @@ export async function fetchStream<
   }
 
   if (csrf) {
-    headers.set("x-csrf-token", csrf);
+    headers.set(NEXT_CSRF_HEADER_TOKEN, csrf);
+  }
+  if (mutatingActions.includes(method)) {
+    if (csrf) {
+      const tokenHashDelimiter = csrf.indexOf("|") !== -1 ? "|" : "%7C";
+
+      const rawToken = csrf.split(tokenHashDelimiter)[0];
+      headers.set(NEXT_CSRF_HEADER, rawToken);
+    } else {
+      const rawToken = await getCsrfToken();
+      if (rawToken) {
+        headers.set(NEXT_CSRF_HEADER, rawToken);
+      }
+    }
   }
 
   const querySearch = new URLSearchParams(queryParams).toString();

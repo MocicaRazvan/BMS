@@ -207,3 +207,12 @@ export const planColumnActions = [
   "hide",
   "duplicate",
 ] as const;
+
+export const NEXT_CSRF_COOKIES = [
+  "__Host-next-auth.csrf-token",
+  "next-auth.csrf-token",
+] as const;
+
+export const NEXT_CSRF_HEADER_TOKEN = "x-csrf-token" as const;
+
+export const NEXT_CSRF_HEADER = "x-csrf-header" as const;

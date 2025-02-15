@@ -52,6 +52,7 @@ import ErrorMessage from "@/components/forms/error-message";
 import { Check, X } from "lucide-react";
 import { motion } from "framer-motion";
 import { purifyAIDescription } from "@/components/forms/title-body";
+import useCsrfToken, { CsrfToken } from "@/hoooks/useCsrfToken";
 
 export interface AdminAIPostsCreateContentTexts {
   schemaTexts: AdminAICreatePostSchemaTexts;
@@ -97,6 +98,7 @@ async function getAIIdeaResponse(
   fields: AiIdeasField[],
   input: string,
   targetedField: "title" | "description",
+  csrfToken: CsrfToken,
 ) {
   const res = await fetch("/api/ai-idea/json", {
     method: "POST",
@@ -107,6 +109,9 @@ async function getAIIdeaResponse(
       item: "post",
       streamResponse: false,
     }),
+    headers: {
+      ...csrfToken,
+    },
   }).then((res) => res.json());
   if (!res?.answer || !(typeof res.answer === "string")) {
     throw new Error("No response from AI");
@@ -147,6 +152,8 @@ export default function AdminAIPostsCreateContent({
     // initialUploadingState,
     // initialUploadingState,
   ]);
+  const { csrfRawToken, addTokenConditionally } = useCsrfToken();
+
   const schema = useMemo(
     () => getAdminAICreatePostSchema(schemaTexts),
     [schemaTexts],
@@ -202,6 +209,7 @@ export default function AdminAIPostsCreateContent({
 
   const onSubmit = useCallback(
     async (data: AdminAICreatePostSchemaType) => {
+      if (!csrfRawToken) return;
       setIsLoading(true);
       const [pToxic, nToxic] = await Promise.all([
         handleToxic(data.prompt, form, "prompt"),
@@ -232,6 +240,7 @@ export default function AdminAIPostsCreateContent({
           [tagsField],
           data.description,
           "title",
+          csrfRawToken,
         );
         setCurrentStatusForIndex(index, { title: true });
         const titleTags: AiIdeasField = {
@@ -245,6 +254,7 @@ export default function AdminAIPostsCreateContent({
             [tagsField, titleTags],
             data.description,
             "description",
+            csrfRawToken,
           ).then((description) => {
             setCurrentStatusForIndex(index, { description: true });
             return description;
@@ -310,6 +320,7 @@ export default function AdminAIPostsCreateContent({
       setCurrentStatusForIndex,
       setErrorMsg,
       setIsLoading,
+      csrfRawToken,
     ],
   );
 
@@ -410,7 +421,7 @@ export default function AdminAIPostsCreateContent({
             <ErrorMessage message={error} show={!!errorMsg} />
             <ButtonSubmit
               isLoading={isLoading}
-              disable={isLoading}
+              disable={isLoading || !csrfRawToken}
               buttonSubmitTexts={buttonSubmitTexts}
             />
             <motion.div className="w-full h-full" layout={true}>

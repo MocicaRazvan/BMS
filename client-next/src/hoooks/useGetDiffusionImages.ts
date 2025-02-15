@@ -10,6 +10,8 @@ import {
   UseFormReturn,
 } from "react-hook-form";
 import { ImageType } from "@/types/forms";
+import { getCsrfToken } from "next-auth/react";
+import { NEXT_CSRF_HEADER } from "@/lib/constants";
 
 export type DiffusionCallback = (images: FieldInputItem[]) => void;
 
@@ -51,6 +53,9 @@ export default function useGetDiffusionImages<T extends ImageType = ImageType>({
           width: 512,
           height: 512,
         }),
+        headers: {
+          [NEXT_CSRF_HEADER]: (await getCsrfToken()) ?? "",
+        },
       });
       if (!response.ok) {
         return {

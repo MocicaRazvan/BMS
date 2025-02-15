@@ -3,6 +3,7 @@ package com.mocicarazvan.gatewayservice.routing;
 import com.mocicarazvan.gatewayservice.config.ExternalServicesConfig;
 import com.mocicarazvan.gatewayservice.filters.AuthFilter;
 import com.mocicarazvan.gatewayservice.filters.CsrfFilter;
+import com.mocicarazvan.gatewayservice.services.NextCsrfValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.gateway.route.Route;
@@ -38,7 +39,8 @@ public class Config {
 
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH", "HEAD"));
         configuration.addAllowedHeader("*");
-        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Cache-Control", "Content-Type", "Accept", "X-Requested-With", "Origin", "Range", "X-CSRF-Token"));
+        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Cache-Control", "Content-Type", "Accept", "X-Requested-With", "Origin", "Range",
+                NextCsrfValidator.NEXT_CSRF_HEADER, NextCsrfValidator.NEXT_CSRF_HEADER_TOKEN));
         configuration.setExposedHeaders(Arrays.asList("Access-Control-Allow-Origin", "Authorization", "Content-Type", "Content-Range", "Content-Length", "Content-Disposition", "Accept-Ranges"));
         configuration.setAllowCredentials(true);
         configuration.setMaxAge(3600L);

@@ -77,7 +77,7 @@ export default async function Home({ params: { locale } }: Props) {
         testimonials={testimonials}
         title={homeTestimonialsTexts.title}
       />
-      <div className="my-3">
+      <div className="mb-3 mt-5">
         <LogoWall
           items={logoWallArr}
           size={"clamp(4rem, 1rem + 15vmin, 13rem)"}

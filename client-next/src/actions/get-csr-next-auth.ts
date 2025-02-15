@@ -1,11 +1,11 @@
 "use server";
 
 import { cookies } from "next/headers";
-
-const NEXT_CSRF_COOKIES = [
-  "__Host-next-auth.csrf-token",
-  "next-auth.csrf-token",
-] as const;
+import {
+  NEXT_CSRF_COOKIES,
+  NEXT_CSRF_HEADER,
+  NEXT_CSRF_HEADER_TOKEN,
+} from "@/lib/constants";
 
 export async function getCsrfNextAuth() {
   const allCookies = await cookies();
@@ -22,13 +22,18 @@ export async function getCsrfNextAuth() {
     return "";
   }
 
-  console.log("CSRF token", value);
+  // console.log("CSRF token", value);
 
   return value;
 }
 
 export async function getCsrfNextAuthHeader() {
+  const token = await getCsrfNextAuth();
+  const tokenHashDelimiter = token.indexOf("|") !== -1 ? "|" : "%7C";
+
+  const rawToken = token.split(tokenHashDelimiter)[0];
   return {
-    "x-csrf-token": await getCsrfNextAuth(),
+    [NEXT_CSRF_HEADER_TOKEN]: token,
+    [NEXT_CSRF_HEADER]: rawToken,
   };
 }

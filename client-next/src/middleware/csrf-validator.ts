@@ -1,11 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-
-const NEXT_CSRF_COOKIES = [
-  "__Host-next-auth.csrf-token",
-  "next-auth.csrf-token",
-] as const;
-
-const NEXT_CSRF_HEADER = "x-csrf-token" as const;
+import {
+  NEXT_CSRF_COOKIES,
+  NEXT_CSRF_HEADER,
+  NEXT_CSRF_HEADER_TOKEN,
+} from "@/lib/constants";
 
 const enableCsrfProtection = process.env.NEXT_CSRF
   ? process.env.NEXT_CSRF.toLowerCase() === "true"
@@ -19,7 +17,8 @@ export const verifyCsrfToken = async (req: NextRequest): Promise<boolean> => {
     let parsedCsrfTokenAndHash = getCookie(req);
 
     if (!parsedCsrfTokenAndHash) {
-      parsedCsrfTokenAndHash = req.headers.get(NEXT_CSRF_HEADER) ?? undefined;
+      parsedCsrfTokenAndHash =
+        req.headers.get(NEXT_CSRF_HEADER_TOKEN) ?? undefined;
     }
 
     if (!parsedCsrfTokenAndHash) {
@@ -31,6 +30,13 @@ export const verifyCsrfToken = async (req: NextRequest): Promise<boolean> => {
 
     const [requestToken, requestHash] =
       parsedCsrfTokenAndHash.split(tokenHashDelimiter);
+
+    const rawToken = req.headers.get(NEXT_CSRF_HEADER);
+
+    if (rawToken !== requestToken) {
+      console.error("Raw token does not match request token", req);
+      return logErrorAndReturn(req);
+    }
 
     const secret = process.env.NEXTAUTH_SECRET;
 

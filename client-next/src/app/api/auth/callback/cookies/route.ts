@@ -26,8 +26,7 @@ export async function GET(req: NextRequest) {
       },
     },
   );
-  console.log(backendResponse);
-  console.log(await backendResponse.json());
+
   if (!backendResponse.ok) {
     return new NextResponse("Failed to initiate Google login", {
       status: backendResponse.status,

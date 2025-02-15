@@ -1,3 +1,4 @@
+"use client";
 import { useCallback, useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { BaseError } from "@/types/responses";
