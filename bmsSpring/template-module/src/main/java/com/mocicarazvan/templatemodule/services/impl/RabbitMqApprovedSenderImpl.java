@@ -16,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @RequiredArgsConstructor
 @Builder
+@Getter
 public class RabbitMqApprovedSenderImpl<T extends ApproveDto> implements RabbitMqApprovedSender<T> {
 
     private final String extraLink;
@@ -49,7 +50,7 @@ public class RabbitMqApprovedSenderImpl<T extends ApproveDto> implements RabbitM
                 e.printStackTrace();
                 throw new RuntimeException("Error sending message to rabbitmq", e);
             }
-        });
+        }, rabbitMqSender.getRetrySpec());
     }
 
     @Data
