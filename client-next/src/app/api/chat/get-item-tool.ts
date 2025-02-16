@@ -25,7 +25,10 @@ export async function getItemTool<T extends TitleBodyUserDto>(
   try {
     const csrf = await getCsrfNextAuthHeader();
     const response = await fetch(
-      `${springUrl}${path}?title=${input.trim()}&approved=true`,
+      `${springUrl}${path}?${new URLSearchParams({
+        title: input.trim(),
+        approved: "true",
+      }).toString()}`,
       {
         method: "PATCH",
         cache: "no-cache",

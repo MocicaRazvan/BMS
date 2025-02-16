@@ -36,11 +36,9 @@ export async function loadGlobalModel(): Promise<toxicity.ToxicityClassifier> {
 }
 export async function getToxicity(text: string) {
   const tinyDet = detect(text) === "en";
-  const landeDet = lande(text)[0][0] === "eng";
+  const areBothEnglish = tinyDet && lande(text)[0][0] === "eng";
 
-  const isOneEnglish = tinyDet || landeDet;
-
-  if (!isOneEnglish && text.length > 10) {
+  if (!areBothEnglish && text.length > 10) {
     return {
       failure: true,
       reason: TOXIC_REASON.LANGUAGE,
