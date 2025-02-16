@@ -1228,13 +1228,13 @@
           "orders": "Comenzi",
           "plans": "Planuri",
           "rank": "Clasament",
-          "amountPerOrderTitle": "Suma pe comandă",
+          "amountPerOrderTitle": "Suma",
           "planDistributionTitle": "Distribuția planului",
           "objective": "Obiectiv",
           "type": "Tip dietă"
         },
         "userAmountPerOderChartTexts": {
-          "amountPerOrder": "Suma pe comandă",
+          "amountPerOrder": "Suma",
           "meanAmountPerOrder": "Media pentru top: "
         }
       },

@@ -1229,13 +1229,13 @@
           "orders": "Orders",
           "plans": "Plans",
           "rank": "Rank",
-          "amountPerOrderTitle": "Amount per Order",
+          "amountPerOrderTitle": "Amount",
           "planDistributionTitle": "Plan Distribution",
           "objective": "Objective",
           "type": "Diet Type"
         },
         "userAmountPerOderChartTexts": {
-          "amountPerOrder": "Amount per Order",
+          "amountPerOrder": "Amount",
           "meanAmountPerOrder": "Mean for top: "
         }
       },

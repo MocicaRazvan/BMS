@@ -353,7 +353,7 @@ const UserAmountPerOderChart = memo(
     <TopChartMeanRelative
       chartKey="amountPerOrder"
       chartLabel={texts.amountPerOrder}
-      barData={topSum.totalAmount / topSum.ordersNumber}
+      barData={topSum.totalAmount}
       maxBar={maxAmountPerOrder}
       referenceValue={meanAmountPerOrder}
       referenceLabel={texts.meanAmountPerOrder}

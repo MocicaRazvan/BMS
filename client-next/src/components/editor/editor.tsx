@@ -2,7 +2,7 @@ import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import EditorToolbar from "./toolbar";
 import { cn } from "@/lib/utils";
-import * as DOMPurify from "dompurify";
+import DOMPurify from "dompurify";
 
 interface Props {
   descritpion: string;

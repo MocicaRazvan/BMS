@@ -221,7 +221,7 @@ export function TopChartMeanRelative({
         ]}
       >
         <XAxis dataKey="name" />
-        <YAxis domain={[0, maxBar + maxOffset]} />
+        <YAxis domain={[0, Math.floor(maxBar + maxOffset)]} />
         <ChartTooltip content={<ChartTooltipContent hideLabel={true} />} />
         <Bar
           dataKey={chartKey}
