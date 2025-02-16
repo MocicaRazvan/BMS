@@ -550,7 +550,13 @@ public class OrderServiceImpl implements OrderService {
                         .flatMap(o -> planClient.getByIds(o.getPlanIds().stream().map(Object::toString).toList(), userId).collectList()
                                 .flatMap(plans ->
                                         planOrderService.deleteAllByOrderId(o.getId())
-                                                .then(planOrderService.savePlansForOrder(plans, o.getId())
+                                                .then(planOrderService.savePlansForOrder(plans
+                                                                .stream()
+                                                                .peek(p -> {
+                                                                    p.setCreatedAt(o.getCreatedAt());
+                                                                    p.setUpdatedAt(o.getUpdatedAt());
+                                                                }).toList()
+                                                        , o.getId())
                                                 )
                                 )
                         )).as(transactionalOperator::transactional)
