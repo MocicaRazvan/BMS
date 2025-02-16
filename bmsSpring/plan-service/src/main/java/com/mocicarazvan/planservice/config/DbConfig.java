@@ -4,32 +4,18 @@ import com.mocicarazvan.planservice.convertors.DietTypeReadingConvertor;
 import com.mocicarazvan.planservice.convertors.DietTypeWritingConvertor;
 import com.mocicarazvan.planservice.convertors.ObjectiveTypeReadingConvertor;
 import com.mocicarazvan.planservice.convertors.ObjectiveTypeWritingConvertor;
-import io.r2dbc.spi.ConnectionFactories;
 import io.r2dbc.spi.ConnectionFactory;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.r2dbc.config.AbstractR2dbcConfiguration;
-
-import java.util.Arrays;
-import java.util.List;
+import org.springframework.data.r2dbc.convert.R2dbcCustomConversions;
+import org.springframework.data.r2dbc.dialect.DialectResolver;
 
 @Configuration
-@RequiredArgsConstructor
-public class DbConfig extends AbstractR2dbcConfiguration {
+public class DbConfig {
 
-
-    @Value("${spring.r2dbc.url}")
-    private String url;
-
-    @Override
-    public ConnectionFactory connectionFactory() {
-        return ConnectionFactories.get(url);
-    }
-
-    @Override
-    protected List<Object> getCustomConverters() {
-        return Arrays.asList(
+    @Bean
+    public R2dbcCustomConversions getCustomConverters(ConnectionFactory connectionFactory) {
+        return R2dbcCustomConversions.of(DialectResolver.getDialect(connectionFactory),
                 new DietTypeReadingConvertor(),
                 new DietTypeWritingConvertor(),
                 new ObjectiveTypeReadingConvertor(),

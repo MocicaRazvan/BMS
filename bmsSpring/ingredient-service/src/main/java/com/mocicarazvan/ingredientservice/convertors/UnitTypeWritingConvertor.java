@@ -7,7 +7,6 @@ import org.springframework.data.convert.WritingConverter;
 
 @WritingConverter
 public class UnitTypeWritingConvertor extends BaseWritingConverter<UnitType> {
-
     public UnitTypeWritingConvertor() {
         super(UnitType.class);
     }

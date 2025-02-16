@@ -1,13 +1,13 @@
 package com.mocicarazvan.cartservice.config;
 
 import com.mocicarazvan.cartservice.services.UserCartService;
+import com.mocicarazvan.cartservice.utils.CronUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.util.Pair;
-import org.springframework.scheduling.support.CronExpression;
 import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
 
@@ -35,10 +35,10 @@ public class TasksConfig {
 
         if (!isClearEnabled) {
             log.info("Clear old carts task is disabled");
-            return null;
+            return Flux.never().subscribe();
         }
 
-        Pair<Duration, Duration> durations = computeDurations(clearOldCartsCron, LocalDateTime.now());
+        Pair<Duration, Duration> durations = CronUtils.computeDurations(clearOldCartsCron, LocalDateTime.now());
         return Flux.interval(durations.getFirst(), durations.getSecond())
                 .concatMap(_ -> {
                     log.info("Clearing old carts");
@@ -53,22 +53,4 @@ public class TasksConfig {
                 .subscribe();
     }
 
-
-    public Pair<Duration, Duration> computeDurations(String cron, LocalDateTime currentTime) {
-        CronExpression cronExpression = CronExpression.parse(cron);
-
-        LocalDateTime initExecutionTime = cronExpression.next(currentTime);
-        if (initExecutionTime == null) {
-            initExecutionTime = LocalDateTime.now();
-        }
-        LocalDateTime nextExecutionTime = cronExpression.next(initExecutionTime);
-
-        log.info("Init execution time: {}", initExecutionTime);
-        log.info("Next execution time: {}", nextExecutionTime);
-
-        Duration initDelay = Duration.between(currentTime, initExecutionTime);
-        Duration interval = Duration.between(initExecutionTime, nextExecutionTime);
-
-        return Pair.of(initDelay, interval);
-    }
 }
