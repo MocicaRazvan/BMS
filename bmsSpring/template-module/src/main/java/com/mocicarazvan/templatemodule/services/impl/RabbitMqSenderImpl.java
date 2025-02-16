@@ -2,10 +2,7 @@ package com.mocicarazvan.templatemodule.services.impl;
 
 import com.mocicarazvan.templatemodule.services.RabbitMqSender;
 import com.mocicarazvan.templatemodule.utils.MonoWrapper;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import reactor.core.publisher.Flux;
@@ -22,6 +19,7 @@ import java.util.List;
 @Slf4j
 @Setter
 @Getter
+@AllArgsConstructor
 public class RabbitMqSenderImpl implements RabbitMqSender {
 
 
@@ -29,7 +27,9 @@ public class RabbitMqSenderImpl implements RabbitMqSender {
     private final String routingKey;
     private final RabbitTemplate rabbitTemplate;
     private final int concurrency;
+    @Builder.Default
     private int retryCount = 3;
+    @Builder.Default
     private int retryDelaySeconds = 2;
 
     public <T> void sendMessage(T message) {
