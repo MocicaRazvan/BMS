@@ -121,7 +121,6 @@ public class UserControllerImpl implements UserController {
     @ResponseStatus(HttpStatus.OK)
     @GetMapping(value = "/byIds", produces = {MediaType.APPLICATION_NDJSON_VALUE, MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
     public Flux<CustomEntityModel<UserDto>> getUsersByIdIn(@RequestParam(required = false) List<Long> ids) {
-        log.info("getUsersByIdIn: {}", ids);
         if (ids == null || ids.isEmpty()) {
             return Flux.empty();
         }
