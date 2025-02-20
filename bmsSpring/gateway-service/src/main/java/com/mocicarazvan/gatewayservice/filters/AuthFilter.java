@@ -50,7 +50,7 @@ public class AuthFilter implements GatewayFilter {
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
 
         if (exchange.getRequest().getMethod() == HttpMethod.OPTIONS) {
-            log.error("Request: {}", exchange.getRequest().getMethod());
+//            log.error("Request: {}", exchange.getRequest().getMethod());
             return chain.filter(exchange);
         }
 
@@ -62,7 +62,7 @@ public class AuthFilter implements GatewayFilter {
 
     private Mono<Void> validateExchange(ServerWebExchange exchange, GatewayFilterChain chain) {
         Role role = routeValidator.getMinRole(exchange.getRequest());
-        log.info("Role: {}", role);
+//        log.info("Role: {}", role);
         if (role == null) {
             return chain.filter(exchange);
         }
@@ -70,17 +70,17 @@ public class AuthFilter implements GatewayFilter {
 
         final String authHeader = exchange.getRequest().getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
 
-        log.error(exchange.getRequest().getHeaders().toString());
-
-        log.info("AuthHeader: {}", authHeader);
+//        log.error(exchange.getRequest().getHeaders().toString());
+//
+//        log.info("AuthHeader: {}", authHeader);
 
         final String authQueryParam = exchange.getRequest().getQueryParams().getFirst("authToken");
 
-        log.info("AuthQueryParam: {}", authQueryParam);
+//        log.info("AuthQueryParam: {}", authQueryParam);
 
         final String encodedCookie = cookieUtils.getCookie(exchange, NEXT_AUTH_COOKIES);
 
-        log.info("Encoded Cookie: {}", encodedCookie);
+//        log.info("Encoded Cookie: {}", encodedCookie);
 
         boolean isAuthHeaderPresent = authHeader != null && authHeader.startsWith("Bearer ");
 
@@ -91,7 +91,7 @@ public class AuthFilter implements GatewayFilter {
         return authCookieMono
                 .flatMap(authCookie -> {
 
-                    log.info("AuthCookie: {}", authCookie);
+//                    log.info("AuthCookie: {}", authCookie);
 
                     if (!isAuthHeaderPresent &&
                             (Objects.equals(authCookie, NextJWEDecrypt.NULL_COOKIE)) &&

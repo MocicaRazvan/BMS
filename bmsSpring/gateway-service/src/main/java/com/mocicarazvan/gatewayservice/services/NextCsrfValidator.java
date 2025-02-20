@@ -45,7 +45,7 @@ public class NextCsrfValidator {
         } else if (rawToken == null || rawToken.isBlank()) {
             return Mono.just(false);
         }
-        log.info("CSRF: {}", csrf);
+//        log.info("CSRF: {}", csrf);
         return Mono.fromCallable(() -> {
                     String[] csrfParts = splitCsrf(csrf);
                     String requestToken = csrfParts[0];
