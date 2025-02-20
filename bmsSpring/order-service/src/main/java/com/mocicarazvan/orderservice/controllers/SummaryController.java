@@ -7,6 +7,7 @@ import com.mocicarazvan.orderservice.services.SummaryService;
 import com.mocicarazvan.templatemodule.dtos.response.MonthlyEntityGroup;
 import com.mocicarazvan.templatemodule.utils.RequestsUtils;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -37,6 +38,30 @@ public class SummaryController {
                                                              @RequestParam @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate to,
                                                              ServerWebExchange exchange) {
         return summaryService.getOrdersSummaryByMonth(from, to, requestsUtils.extractAuthUser(exchange));
+    }
+
+    @GetMapping("/admin/countAndAmount/prediction")
+    @ResponseStatus(HttpStatus.OK)
+    public Flux<MonthlyOrderSummaryPrediction> getOrdersSummaryByMonthPrediction(
+            @RequestParam(required = false, defaultValue = "3") @Valid @Min(1) @Max(12) int predictionLength) {
+        return summaryService.getOrderSummaryPrediction(predictionLength);
+    }
+
+    @GetMapping("/admin/plans/countAndAmount/prediction")
+    @ResponseStatus(HttpStatus.OK)
+    public Flux<MonthlyOrderSummaryPrediction> getPlansSummaryByMonthPrediction(
+            @RequestParam(required = false, defaultValue = "3") @Valid @Min(1) @Max(12) int predictionLength) {
+        return summaryService.getPlanSummaryPrediction(predictionLength);
+    }
+
+    @GetMapping("/trainer/countAndAmount/prediction/{trainerId}")
+    @ResponseStatus(HttpStatus.OK)
+    public Flux<MonthlyOrderSummaryPrediction> getTrainerOrdersSummaryByMontPrediction(
+            @PathVariable Long trainerId,
+            @RequestParam(required = false, defaultValue = "3") @Valid @Min(1) @Max(12) int predictionLength,
+            ServerWebExchange exchange
+    ) {
+        return summaryService.getTrainerPlanSummaryPrediction(predictionLength, trainerId, requestsUtils.extractAuthUser(exchange));
     }
 
     @GetMapping("/admin/plans/countAndAmount")

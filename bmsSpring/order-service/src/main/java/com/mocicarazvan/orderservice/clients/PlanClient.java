@@ -7,6 +7,7 @@ import com.mocicarazvan.orderservice.dtos.clients.RecipeResponse;
 import com.mocicarazvan.orderservice.dtos.clients.collect.FullDayResponse;
 import com.mocicarazvan.orderservice.enums.DietType;
 import com.mocicarazvan.orderservice.enums.ObjectiveType;
+import com.mocicarazvan.templatemodule.clients.ClientExceptionHandler;
 import com.mocicarazvan.templatemodule.clients.ValidIdsClient;
 import com.mocicarazvan.templatemodule.dtos.PageableBody;
 import com.mocicarazvan.templatemodule.dtos.response.PageableResponse;
@@ -16,9 +17,6 @@ import com.mocicarazvan.templatemodule.hateos.CustomEntityModel;
 import com.mocicarazvan.templatemodule.utils.RequestsUtils;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 import io.github.resilience4j.ratelimiter.RateLimiterRegistry;
-import io.github.resilience4j.reactor.circuitbreaker.operator.CircuitBreakerOperator;
-import io.github.resilience4j.reactor.ratelimiter.operator.RateLimiterOperator;
-import io.github.resilience4j.reactor.retry.RetryOperator;
 import io.github.resilience4j.retry.RetryRegistry;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -73,12 +71,10 @@ public class PlanClient extends ValidIdsClient<PlanResponse> {
                 .accept(MediaType.APPLICATION_NDJSON)
                 .header(RequestsUtils.AUTH_HEADER, userId)
                 .retrieve()
-                .onStatus(HttpStatusCode::isError, response -> handleClientException(response, serviceUrl))
+                .onStatus(HttpStatusCode::isError, response -> ClientExceptionHandler.handleClientException(response, serviceUrl, service))
                 .bodyToFlux(PlanResponse.class)
-                .transformDeferred(RetryOperator.of(retry))
-                .transformDeferred(CircuitBreakerOperator.of(circuitBreaker))
-                .transformDeferred(RateLimiterOperator.of(rateLimiter))
-                .onErrorResume(WebClientRequestException.class, this::handleWebRequestException)
+                .transform(this::applyResilience)
+                .onErrorResume(WebClientRequestException.class, ClientExceptionHandler::handleWebRequestException)
                 .onErrorResume(ThrowFallback.class, e -> Flux.empty());
     }
 
@@ -108,13 +104,11 @@ public class PlanClient extends ValidIdsClient<PlanResponse> {
                 .accept(MediaType.APPLICATION_NDJSON)
                 .header(RequestsUtils.AUTH_HEADER, userId)
                 .retrieve()
-                .onStatus(HttpStatusCode::isError, response -> handleClientException(response, serviceUrl))
+                .onStatus(HttpStatusCode::isError, response -> ClientExceptionHandler.handleClientException(response, serviceUrl, service))
                 .bodyToFlux(new ParameterizedTypeReference<PageableResponse<ResponseWithUserDtoEntity<PlanResponse>>>() {
                 })
-                .transformDeferred(RetryOperator.of(retry))
-                .transformDeferred(CircuitBreakerOperator.of(circuitBreaker))
-                .transformDeferred(RateLimiterOperator.of(rateLimiter))
-                .onErrorResume(WebClientRequestException.class, this::handleWebRequestException)
+                .transform(this::applyResilience)
+                .onErrorResume(WebClientRequestException.class, ClientExceptionHandler::handleWebRequestException)
                 .onErrorResume(ThrowFallback.class, e -> Flux.error(new IllegalArgumentException("Invalid plans " + ids)));
     }
 

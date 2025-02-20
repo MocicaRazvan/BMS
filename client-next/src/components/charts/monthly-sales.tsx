@@ -27,6 +27,10 @@ import {
   PlanCharacteristicWrapper,
   PlanCharacteristicWrapperTexts,
 } from "@/components/charts/plan-charctersitic";
+import {
+  PredictionChart,
+  PredictionChartTexts,
+} from "@/components/charts/prediction-chart";
 
 const now = new Date();
 const oneMonthAgo = subMonths(now, 1);
@@ -41,9 +45,11 @@ export interface MonthlySalesTexts {
   totalAmountCountOrdersTexts: TotalAmountCountOrdersTexts;
   dateRangePickerTexts: DateRangePickerTexts;
   planCharacteristicWrapperTexts: PlanCharacteristicWrapperTexts;
+  predictionTexts: PredictionChartTexts;
 }
 interface Props extends WithUser, MonthlySalesTexts {
   path: string;
+  predictionPath: string;
   countColorIndex?: number;
   totalAmountColorIndex?: number;
   hideTotalAmount?: boolean;
@@ -66,6 +72,8 @@ export default function MonthlySales({
   hideTotalAmount = false,
   characteristicProps = undefined,
   planCharacteristicWrapperTexts,
+  predictionTexts,
+  predictionPath,
 }: Props) {
   const locale = useLocale();
 
@@ -183,6 +191,15 @@ export default function MonthlySales({
               color: `hsl(var(--chart-${countColorIndex}))`,
             },
           }}
+          countColorIndex={countColorIndex}
+          totalAmountColorIndex={totalAmountColorIndex}
+        />
+      </div>
+      <Separator />
+      <div>
+        <PredictionChart
+          path={predictionPath}
+          texts={predictionTexts}
           countColorIndex={countColorIndex}
           totalAmountColorIndex={totalAmountColorIndex}
         />

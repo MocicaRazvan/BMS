@@ -1270,6 +1270,19 @@
           "ordersCount": "În comenzi",
           "madeBy": "Creat de"
         }
+      },
+      "PredictionChartTexts": {
+        "title": "Grafic de predicție alimentat de AI",
+        "disclaimer": "Predicția se bazează pe datele anterioare și nu este 100% precisă",
+        "predictionLengthLabel": "Lungimea predicției: ",
+        "countLabel": "Numărul de {type}",
+        "totalAmountLabel": "Suma totală pentru {type}",
+        "totalAmountAreaLabel": "q25,q75 suma totală",
+        "countAreaLabel": "q25,q75 numărul de {type}",
+        "type": {
+          "orders": "comenzi",
+          "plans": "planuri"
+        }
       }
     },
     "plans": {

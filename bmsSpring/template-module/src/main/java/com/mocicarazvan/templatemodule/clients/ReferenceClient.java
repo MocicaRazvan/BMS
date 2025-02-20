@@ -6,9 +6,6 @@ import com.mocicarazvan.templatemodule.exceptions.notFound.NotFoundEntity;
 import com.mocicarazvan.templatemodule.hateos.CustomEntityModel;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 import io.github.resilience4j.ratelimiter.RateLimiterRegistry;
-import io.github.resilience4j.reactor.circuitbreaker.operator.CircuitBreakerOperator;
-import io.github.resilience4j.reactor.ratelimiter.operator.RateLimiterOperator;
-import io.github.resilience4j.reactor.retry.RetryOperator;
 import io.github.resilience4j.retry.RetryRegistry;
 import lombok.Setter;
 import org.springframework.core.ParameterizedTypeReference;
@@ -42,12 +39,10 @@ public abstract class ReferenceClient extends ClientBase {
                 .uri(uriBuilder -> uriBuilder.path("/internal/existsApproved/{referenceId}").build(referenceId))
                 .accept(MediaType.APPLICATION_NDJSON)
                 .retrieve()
-                .onStatus(HttpStatusCode::isError, response -> handleClientException(response, serviceUrl))
+                .onStatus(HttpStatusCode::isError, response -> ClientExceptionHandler.handleClientException(response, serviceUrl, service))
                 .bodyToMono(Void.class)
-                .transformDeferred(RetryOperator.of(retry))
-                .transformDeferred(CircuitBreakerOperator.of(circuitBreaker))
-                .transformDeferred(RateLimiterOperator.of(rateLimiter))
-                .onErrorResume(WebClientRequestException.class, this::handleWebRequestException)
+                .transform(this::applyResilience)
+                .onErrorResume(WebClientRequestException.class, ClientExceptionHandler::handleWebRequestException)
                 .onErrorResume(ThrowFallback.class, e -> Mono.error(new NotFoundEntity(referenceName, Long.valueOf(referenceId))));
     }
 

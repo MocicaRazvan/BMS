@@ -21,6 +21,7 @@ import {
   PlanCharacteristicWrapperTexts,
 } from "@/components/charts/plan-charctersitic";
 import { TopTrainersTexts } from "@/components/charts/top-trainers";
+import { PredictionChartTexts } from "@/components/charts/prediction-chart";
 
 export async function getIngredientPieChartTexts(): Promise<IngredientPieChartTexts> {
   const t = await getTranslations("components.charts.IngredientPieChartTexts");
@@ -122,15 +123,18 @@ export async function getMonthlySalesTexts(
     dateRangePickerTexts,
     totalAmountCountOrdersTexts,
     planCharacteristicWrapperTexts,
+    predictionTexts,
   ] = await Promise.all([
     getDateRangePickerTexts(),
     getTotalAmountCountOrdersTexts(type),
     getPlanCharacteristicWrapperTexts(),
+    getPredictionChartTexts(type),
   ]);
   return {
     dateRangePickerTexts,
     totalAmountCountOrdersTexts,
     planCharacteristicWrapperTexts,
+    predictionTexts,
   };
 }
 
@@ -270,5 +274,21 @@ export async function getTopTrainersTexts(): Promise<TopTrainersTexts> {
       objectivePieChartTitle: t("trainerCardTexts.objectivePieChartTitle"),
     },
     title: t("title"),
+  };
+}
+
+export async function getPredictionChartTexts(
+  type: "orders" | "plans",
+): Promise<PredictionChartTexts> {
+  const t = await getTranslations("components.charts.PredictionChartTexts");
+  const intlType = t("type." + type);
+  return {
+    countAreaLabel: t("countAreaLabel", { type: intlType }),
+    countLabel: t("countLabel", { type: intlType }),
+    totalAmountLabel: t("totalAmountLabel", { type: intlType }),
+    disclaimer: t("disclaimer"),
+    title: t("title"),
+    totalAmountAreaLabel: t("totalAmountAreaLabel"),
+    predictionLengthLabel: t("predictionLengthLabel"),
   };
 }

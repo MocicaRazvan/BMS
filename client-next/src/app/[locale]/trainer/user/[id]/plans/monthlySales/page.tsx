@@ -61,6 +61,7 @@ export default async function UsersMonthlySalesPage({
           <div className="mt-10 h-full">
             <MonthlySales
               path={`/orders/trainer/countAndAmount/${id}`}
+              predictionPath={`/orders/trainer/countAndAmount/prediction/${id}`}
               {...texts.monthlySalesTexts}
               authUser={authUser}
               characteristicProps={{

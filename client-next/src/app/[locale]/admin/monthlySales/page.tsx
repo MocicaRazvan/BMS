@@ -14,6 +14,7 @@ import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
 import { Metadata } from "next";
 import { getIntlMetadata } from "@/texts/metadata";
 import { Separator } from "@/components/ui/separator";
+import { PredictionChartTexts } from "@/components/charts/prediction-chart";
 
 interface Props {
   params: { locale: Locale };
@@ -60,6 +61,7 @@ export default async function AdminMonthlySales({ params: { locale } }: Props) {
           <div className="mt-10 h-full">
             <MonthlySales
               path={"/orders/admin/countAndAmount"}
+              predictionPath={"/orders/admin/countAndAmount/prediction"}
               authUser={authUser}
               {...texts.monthlySalesTexts}
             />
@@ -73,6 +75,7 @@ export default async function AdminMonthlySales({ params: { locale } }: Props) {
           <div className="mt-10 h-full">
             <MonthlySales
               path={"/orders/admin/plans/countAndAmount"}
+              predictionPath={"/orders/admin/plans/countAndAmount/prediction"}
               authUser={authUser}
               {...texts.plansMonthlySales}
               hideTotalAmount={true}

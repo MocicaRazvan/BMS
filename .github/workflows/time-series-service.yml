@@ -1,0 +1,19 @@
+name: Time Series Service Docker Image
+
+on:
+  workflow_dispatch: { }
+  push:
+    branches:
+      - main
+    paths:
+      - 'timeSeriesChronos/**'
+jobs:
+  build-and-push-time-series-chronos-service:
+    uses: ./.github/workflows/build-and-push.yml
+    with:
+      image-name: time-series-chronos-service-bms
+      context: ./timeSeriesChronos
+      dockerfile: ./timeSeriesChronos/Dockerfile
+    secrets:
+      DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}

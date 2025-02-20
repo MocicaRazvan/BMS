@@ -1271,6 +1271,19 @@
           "ordersCount": "In orders",
           "madeBy": "Made by"
         }
+      },
+      "PredictionChartTexts": {
+        "title": "Prediction Chart Powered by AI",
+        "disclaimer": "The predication is based on the previous data and it is not 100% accurate",
+        "predictionLengthLabel": "Prediction length: ",
+        "countLabel": "Number of {type}",
+        "totalAmountLabel": "Total amount for {type}",
+        "totalAmountAreaLabel": "q25,q75 total amount",
+        "countAreaLabel": "q25,q75 number of {type}",
+        "type": {
+          "orders": "orders",
+          "plans": "plans"
+        }
       }
     },
     "plans": {

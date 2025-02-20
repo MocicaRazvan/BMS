@@ -8,6 +8,7 @@ import {
 } from "@/texts/components/recommandation";
 import {
   getPlanCharacteristicWrapperTexts,
+  getPredictionChartTexts,
   getTopChartWrapperTexts,
   getTopTrainersTexts,
 } from "@/texts/components/charts";
@@ -18,6 +19,6 @@ interface Props {
   };
 }
 export default async function TestPage({ params }: Props) {
-  const texts = await getTopTrainersTexts();
+  const texts = await getPredictionChartTexts("orders");
   return <TestPageContent texts={texts} />;
 }

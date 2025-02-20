@@ -46,10 +46,13 @@ export interface TotalAmountCountOrdersData {
   totalAmount: number;
   date: string;
 }
-export interface TotalAmountCountOrdersTexts {
+
+interface DropDownTexts {
   countLabel: string;
   totalAmountLabel: string;
   bothLabel: string;
+}
+export interface TotalAmountCountOrdersTexts extends DropDownTexts {
   averageTotalAmountLabel: string;
   averageCountLabel: string;
   showTrendLineLabel: string;
@@ -174,7 +177,7 @@ export function TotalAmountCountOrders({
         className="aspect-auto h-[450px] w-full "
       >
         {!debounceDataAvailable ? (
-          <Skeleton className={"w-full h-full"} />
+          <Skeleton className="w-full h-full" />
         ) : data.length === 0 ? (
           <motion.div
             initial={{ scale: 0, opacity: 0 }}
@@ -280,7 +283,7 @@ export function TotalAmountCountOrders({
               axisLine={false}
               tickMargin={8}
               tickFormatter={(tick) => (Number.isInteger(tick) ? tick : "")}
-              interval={"preserveStartEnd"}
+              interval="preserveStartEnd"
               domain={[
                 0,
                 showCount && showTotalAmount
@@ -380,8 +383,7 @@ export const CountTotalAmountRadioOptions = [
 export type CountTotalAmountRadioOptionsType =
   (typeof CountTotalAmountRadioOptions)[number];
 
-export interface DropDownMenuCountTotalAmountSelectProps
-  extends TotalAmountCountOrdersTexts {
+export interface DropDownMenuCountTotalAmountSelectProps extends DropDownTexts {
   radioOption: CountTotalAmountRadioOptionsType;
   onRadioOptionChange: (option: CountTotalAmountRadioOptionsType) => void;
   showBoth?: boolean;

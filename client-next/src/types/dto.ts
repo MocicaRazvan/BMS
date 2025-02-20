@@ -395,10 +395,11 @@ export interface CountAmount {
   totalAmount: number;
 }
 
-export interface MonthlyOrderSummary extends CountAmount {
+export interface MonthYear {
   month: number;
   year: number;
 }
+export interface MonthlyOrderSummary extends CountAmount, MonthYear {}
 export interface DailyOrderSummary extends MonthlyOrderSummary {
   day: number;
 }
@@ -640,4 +641,9 @@ export interface UserCartResponse extends WithUserDto {
 
 export interface UserCartBody {
   planIds: number[];
+}
+
+export interface MonthlyOrderSummaryPrediction extends MonthYear {
+  countQuantiles: number[];
+  totalAmountQuantiles: number[];
 }

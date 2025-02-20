@@ -819,6 +819,32 @@ services:
     networks:
       - bms
 
+  time-series:
+    build:
+      context: ./timeSeriesChronos
+      dockerfile: Dockerfile
+    container_name: time-series-container-bms
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - capabilities: [ gpu ]
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=all
+      - ZIPKIN_URL=http://zipkin:9411/api/v2/spans
+      - CACHE_REDIS_HOST=redis
+      #      - ZIPKIN_SAMPLE_RATE=1
+      #      - LOKI_URL=http://host.docker.internal:3100/loki/api/v1/push
+      #      - HUGGING_FACE_HUB_TOKEN=${HUGGING_FACE_HUB_TOKEN}
+    ports:
+      - "5001:5001"
+    volumes:
+      - timeseries_fs:/app/cache_dir
+    networks:
+      - bms
+    depends_on:
+      - redis
   archive-service:
     container_name: archive-service-container-bms
     build:
@@ -848,6 +874,7 @@ volumes:
   pgadmin_data:
   diffusion_fs:
   zipkin_mysql_data:
+  timeseries_fs:
 networks:
   bms:
     driver: bridge

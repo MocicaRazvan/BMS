@@ -13,6 +13,12 @@ public interface SummaryService {
 
     Flux<MonthlyOrderSummary> getOrdersSummaryByMonth(LocalDate from, LocalDate to, String userId);
 
+    Flux<MonthlyOrderSummaryPrediction> getOrderSummaryPrediction(int predictionLength);
+
+    Flux<MonthlyOrderSummaryPrediction> getPlanSummaryPrediction(int predictionLength);
+
+    Flux<MonthlyOrderSummaryPrediction> getTrainerPlanSummaryPrediction(int predictionLength, Long trainerId, String userId);
+
     Flux<MonthlyOrderSummary> getOrdersPlanSummaryByMonth(LocalDate from, LocalDate to, String userId);
 
     Flux<TopUsersSummary> getTopUsersSummary(LocalDate from, LocalDate to, int top);

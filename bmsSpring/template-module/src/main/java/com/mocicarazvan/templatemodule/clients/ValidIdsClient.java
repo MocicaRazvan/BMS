@@ -5,9 +5,6 @@ import com.mocicarazvan.templatemodule.exceptions.client.ThrowFallback;
 import com.mocicarazvan.templatemodule.utils.RequestsUtils;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 import io.github.resilience4j.ratelimiter.RateLimiterRegistry;
-import io.github.resilience4j.reactor.circuitbreaker.operator.CircuitBreakerOperator;
-import io.github.resilience4j.reactor.ratelimiter.operator.RateLimiterOperator;
-import io.github.resilience4j.reactor.retry.RetryOperator;
 import io.github.resilience4j.retry.RetryRegistry;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
@@ -37,12 +34,10 @@ public abstract class ValidIdsClient<R extends WithUserDto> extends ClientBase {
                 .accept(MediaType.APPLICATION_NDJSON)
                 .header(RequestsUtils.AUTH_HEADER, userId)
                 .retrieve()
-                .onStatus(HttpStatusCode::isError, response -> handleClientException(response, serviceUrl))
+                .onStatus(HttpStatusCode::isError, response -> ClientExceptionHandler.handleClientException(response, serviceUrl, service))
                 .bodyToMono(Void.class)
-                .transformDeferred(RetryOperator.of(retry))
-                .transformDeferred(CircuitBreakerOperator.of(circuitBreaker))
-                .transformDeferred(RateLimiterOperator.of(rateLimiter))
-                .onErrorResume(WebClientRequestException.class, this::handleWebRequestException)
+                .transform(this::applyResilience)
+                .onErrorResume(WebClientRequestException.class, ClientExceptionHandler::handleWebRequestException)
                 .onErrorResume(ThrowFallback.class, fallback);
     }
 
@@ -58,12 +53,10 @@ public abstract class ValidIdsClient<R extends WithUserDto> extends ClientBase {
                 .accept(MediaType.APPLICATION_NDJSON)
                 .header(RequestsUtils.AUTH_HEADER, userId)
                 .retrieve()
-                .onStatus(HttpStatusCode::isError, response -> handleClientException(response, serviceUrl))
+                .onStatus(HttpStatusCode::isError, response -> ClientExceptionHandler.handleClientException(response, serviceUrl, service))
                 .bodyToFlux(clazz)
-                .transformDeferred(RetryOperator.of(retry))
-                .transformDeferred(CircuitBreakerOperator.of(circuitBreaker))
-                .transformDeferred(RateLimiterOperator.of(rateLimiter))
-                .onErrorResume(WebClientRequestException.class, this::handleWebRequestException)
+                .transform(this::applyResilience)
+                .onErrorResume(WebClientRequestException.class, ClientExceptionHandler::handleWebRequestException)
                 .onErrorResume(ThrowFallback.class, fallback);
     }
 

@@ -9,9 +9,6 @@ import com.mocicarazvan.templatemodule.exceptions.notFound.NotFoundEntity;
 import com.mocicarazvan.templatemodule.hateos.CustomEntityModel;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 import io.github.resilience4j.ratelimiter.RateLimiterRegistry;
-import io.github.resilience4j.reactor.circuitbreaker.operator.CircuitBreakerOperator;
-import io.github.resilience4j.reactor.ratelimiter.operator.RateLimiterOperator;
-import io.github.resilience4j.reactor.retry.RetryOperator;
 import io.github.resilience4j.retry.RetryRegistry;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -56,10 +53,8 @@ public class UserClient extends ClientBase {
                 .onStatus(HttpStatusCode::isError, response -> handleNotFoundException(response, uri))
                 .bodyToMono(new ParameterizedTypeReference<CustomEntityModel<UserDto>>() {
                 })
-                .transformDeferred(RetryOperator.of(retry))
-                .transformDeferred(CircuitBreakerOperator.of(circuitBreaker))
-                .transformDeferred(RateLimiterOperator.of(rateLimiter))
-                .onErrorResume(WebClientRequestException.class, this::handleWebRequestException)
+                .transform(this::applyResilience)
+                .onErrorResume(WebClientRequestException.class, ClientExceptionHandler::handleWebRequestException)
                 .onErrorResume(ThrowFallback.class, e -> Mono.error(new NotFoundEntity(
                         "user", Long.valueOf(uri.substring(uri.lastIndexOf("/") + 1))
                 )))
@@ -108,10 +103,8 @@ public class UserClient extends ClientBase {
                 .retrieve()
                 .onStatus(HttpStatusCode::isError, response -> handleNotFoundException(response, uri))
                 .bodyToMono(Void.class)
-                .transformDeferred(RetryOperator.of(retry))
-                .transformDeferred(CircuitBreakerOperator.of(circuitBreaker))
-                .transformDeferred(RateLimiterOperator.of(rateLimiter))
-                .onErrorResume(WebClientRequestException.class, this::handleWebRequestException)
+                .transform(this::applyResilience)
+                .onErrorResume(WebClientRequestException.class, ClientExceptionHandler::handleWebRequestException)
                 .onErrorResume(ThrowFallback.class, e -> Mono.error(new NotFoundEntity(
                         "user", Long.valueOf(uri.substring(uri.lastIndexOf("/") + 1))
                 )));
@@ -132,10 +125,8 @@ public class UserClient extends ClientBase {
                 .onStatus(HttpStatusCode::isError, response -> handleNotFoundException(response, uri))
                 .bodyToFlux(new ParameterizedTypeReference<CustomEntityModel<UserDto>>() {
                 })
-                .transformDeferred(RetryOperator.of(retry))
-                .transformDeferred(CircuitBreakerOperator.of(circuitBreaker))
-                .transformDeferred(RateLimiterOperator.of(rateLimiter))
-                .onErrorResume(WebClientRequestException.class, this::handleWebRequestException)
+                .transform(this::applyResilience)
+                .onErrorResume(WebClientRequestException.class, ClientExceptionHandler::handleWebRequestException)
                 .onErrorResume(ThrowFallback.class, e -> Flux.empty())
                 .map(CustomEntityModel::getContent);
     }

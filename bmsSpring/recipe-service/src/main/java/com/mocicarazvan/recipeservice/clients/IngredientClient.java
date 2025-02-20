@@ -2,15 +2,13 @@ package com.mocicarazvan.recipeservice.clients;
 
 import com.mocicarazvan.recipeservice.dtos.ingredients.IngredientNutritionalFactResponse;
 import com.mocicarazvan.recipeservice.dtos.ingredients.IngredientResponse;
+import com.mocicarazvan.templatemodule.clients.ClientExceptionHandler;
 import com.mocicarazvan.templatemodule.clients.ValidIdsClient;
 import com.mocicarazvan.templatemodule.exceptions.action.IllegalActionException;
 import com.mocicarazvan.templatemodule.exceptions.client.ThrowFallback;
 import com.mocicarazvan.templatemodule.utils.RequestsUtils;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 import io.github.resilience4j.ratelimiter.RateLimiterRegistry;
-import io.github.resilience4j.reactor.circuitbreaker.operator.CircuitBreakerOperator;
-import io.github.resilience4j.reactor.ratelimiter.operator.RateLimiterOperator;
-import io.github.resilience4j.reactor.retry.RetryOperator;
 import io.github.resilience4j.retry.RetryRegistry;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -46,12 +44,10 @@ public class IngredientClient extends ValidIdsClient<IngredientResponse> {
                 .accept(MediaType.APPLICATION_NDJSON)
                 .header(RequestsUtils.AUTH_HEADER, userId)
                 .retrieve()
-                .onStatus(HttpStatusCode::isError, response -> handleClientException(response, serviceUrl))
+                .onStatus(HttpStatusCode::isError, response -> ClientExceptionHandler.handleClientException(response, serviceUrl, service))
                 .bodyToMono(IngredientNutritionalFactResponse.class)
-                .transformDeferred(RetryOperator.of(retry))
-                .transformDeferred(CircuitBreakerOperator.of(circuitBreaker))
-                .transformDeferred(RateLimiterOperator.of(rateLimiter))
-                .onErrorResume(WebClientRequestException.class, this::handleWebRequestException)
+                .transform(this::applyResilience)
+                .onErrorResume(WebClientRequestException.class, ClientExceptionHandler::handleWebRequestException)
                 .onErrorResume(ThrowFallback.class, e -> Mono.error(new IllegalActionException("Invalid ingredient " + id)));
     }
 

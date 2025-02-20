@@ -48,6 +48,7 @@ export default function UserAdminMonthlySalesPageContent({
             <div className="mt-10 h-full">
               <MonthlySales
                 path={`/orders/trainer/countAndAmount/${id}`}
+                predictionPath={`/orders/trainer/countAndAmount/prediction/${id}`}
                 {...monthlySalesTexts}
                 authUser={authUser}
               />

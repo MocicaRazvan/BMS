@@ -1,13 +1,7 @@
 package com.mocicarazvan.templatemodule.clients;
 
 
-import com.mocicarazvan.templatemodule.dtos.errors.BaseErrorResponse;
-import com.mocicarazvan.templatemodule.dtos.errors.IdNameResponse;
-import com.mocicarazvan.templatemodule.exceptions.action.IllegalActionException;
-import com.mocicarazvan.templatemodule.exceptions.action.PrivateRouteException;
 import com.mocicarazvan.templatemodule.exceptions.client.ThrowFallback;
-import com.mocicarazvan.templatemodule.exceptions.common.ServiceCallFailedException;
-import com.mocicarazvan.templatemodule.exceptions.notFound.NotFoundEntity;
 import com.mocicarazvan.templatemodule.utils.RequestsUtils;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
@@ -21,10 +15,8 @@ import io.github.resilience4j.retry.RetryRegistry;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
-import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientRequestException;
 import org.springframework.web.util.UriBuilder;
@@ -66,12 +58,10 @@ public abstract class ClientBase {
                 .accept(MediaType.APPLICATION_NDJSON)
                 .header(RequestsUtils.AUTH_HEADER, userId)
                 .retrieve()
-                .onStatus(HttpStatusCode::isError, response -> handleClientException(response, serviceUrl))
+                .onStatus(HttpStatusCode::isError, response -> ClientExceptionHandler.handleClientException(response, serviceUrl, service))
                 .bodyToFlux(typeRef)
-                .transformDeferred(RetryOperator.of(retry))
-                .transformDeferred(CircuitBreakerOperator.of(circuitBreaker))
-                .transformDeferred(RateLimiterOperator.of(rateLimiter))
-                .onErrorResume(WebClientRequestException.class, this::handleWebRequestException)
+                .transform(this::applyResilience)
+                .onErrorResume(WebClientRequestException.class, ClientExceptionHandler::handleWebRequestException)
                 .onErrorResume(ThrowFallback.class, fallback);
     }
 
@@ -85,12 +75,10 @@ public abstract class ClientBase {
                 .accept(MediaType.APPLICATION_NDJSON)
                 .header(RequestsUtils.AUTH_HEADER, userId)
                 .retrieve()
-                .onStatus(HttpStatusCode::isError, response -> handleClientException(response, serviceUrl))
+                .onStatus(HttpStatusCode::isError, response -> ClientExceptionHandler.handleClientException(response, serviceUrl, service))
                 .bodyToMono(typeRef)
-                .transformDeferred(RetryOperator.of(retry))
-                .transformDeferred(CircuitBreakerOperator.of(circuitBreaker))
-                .transformDeferred(RateLimiterOperator.of(rateLimiter))
-                .onErrorResume(WebClientRequestException.class, this::handleWebRequestException)
+                .transform(this::applyResilience)
+                .onErrorResume(WebClientRequestException.class, ClientExceptionHandler::handleWebRequestException)
                 .onErrorResume(ThrowFallback.class, fallback);
     }
 
@@ -123,42 +111,23 @@ public abstract class ClientBase {
                 .accept(MediaType.APPLICATION_NDJSON)
                 .header(RequestsUtils.AUTH_HEADER, userId)
                 .retrieve()
-                .onStatus(HttpStatusCode::isError, response -> handleClientException(response, serviceUrl))
+                .onStatus(HttpStatusCode::isError, response -> ClientExceptionHandler.handleClientException(response, serviceUrl, service))
                 .bodyToMono(typeRef)
-                .transformDeferred(RetryOperator.of(retry))
-                .transformDeferred(CircuitBreakerOperator.of(circuitBreaker))
-                .transformDeferred(RateLimiterOperator.of(rateLimiter))
-                .onErrorResume(WebClientRequestException.class, this::handleWebRequestException)
+                .transform(this::applyResilience)
+                .onErrorResume(WebClientRequestException.class, ClientExceptionHandler::handleWebRequestException)
                 .onErrorResume(ThrowFallback.class, fallback);
     }
 
-
-    protected Mono<? extends Throwable> handleClientException(ClientResponse response, String uri) {
-        log.error("Status code: {}, uri: {}", response.statusCode(), uri);
-        if (response.statusCode().equals(HttpStatus.NOT_FOUND)) {
-            return response
-                    .bodyToMono(IdNameResponse.class)
-                    .log()
-                    .flatMap(idNameResponse -> Mono.error(new NotFoundEntity(idNameResponse.getName(), idNameResponse.getId())));
-        } else if (response.statusCode().equals(HttpStatus.FORBIDDEN)) {
-            return response.bodyToMono(BaseErrorResponse.class)
-                    .flatMap(baseErrorResponse -> Mono.error(new PrivateRouteException()));
-        } else if (response.statusCode().equals(HttpStatus.BAD_REQUEST)) {
-            return response.bodyToMono(BaseErrorResponse.class)
-                    .flatMap(baseErrorResponse -> Mono.error(new IllegalActionException(baseErrorResponse.getMessage())));
-        } else if (response.statusCode().equals(HttpStatus.SERVICE_UNAVAILABLE) || response.statusCode().is5xxServerError()) {
-            return Mono.error(new ThrowFallback());
-        } else {
-            return response.bodyToMono(String.class)
-                    .flatMap(body -> Mono.error(new ServiceCallFailedException(body, service, uri)));
-        }
-
-
+    protected <A> Mono<A> applyResilience(Mono<A> m) {
+        return m.transformDeferred(RetryOperator.of(retry))
+                .transformDeferred(CircuitBreakerOperator.of(circuitBreaker))
+                .transformDeferred(RateLimiterOperator.of(rateLimiter));
     }
 
-    protected <T> Mono<T> handleWebRequestException(Throwable e) {
-        log.error("Error: ", e);
-        return Mono.error(new ThrowFallback());
+    protected <A> Flux<A> applyResilience(Flux<A> f) {
+        return f.transformDeferred(RetryOperator.of(retry))
+                .transformDeferred(CircuitBreakerOperator.of(circuitBreaker))
+                .transformDeferred(RateLimiterOperator.of(rateLimiter));
     }
 
 

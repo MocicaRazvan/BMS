@@ -2,6 +2,7 @@ package com.mocicarazvan.orderservice.services.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mocicarazvan.orderservice.clients.PlanClient;
+import com.mocicarazvan.orderservice.clients.TimeSeriesClient;
 import com.mocicarazvan.orderservice.dtos.OrderDto;
 import com.mocicarazvan.orderservice.dtos.clients.PlanResponse;
 import com.mocicarazvan.orderservice.dtos.summaries.*;
@@ -29,6 +30,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.util.Locale;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -40,6 +42,8 @@ public class SummaryServiceImpl implements SummaryService {
     private final UserClient userClient;
     private final SummaryServiceRedisCacheWrapper self;
     private final PlanClient planClient;
+    private final SummaryRepository summaryRepository;
+    private final TimeSeriesClient timeSeriesClient;
 
 
     @Override
@@ -59,6 +63,50 @@ public class SummaryServiceImpl implements SummaryService {
 
         return
                 self.getOrdersSummaryByMonthBase(intervalDates.getFirst(), intervalDates.getSecond());
+
+    }
+
+    @RedisReactiveChildCache(key = OrderCacheKeys.CACHE_KEY_PATH, idPath = "2*month+year+66005")
+    @Override
+    public Flux<MonthlyOrderSummaryPrediction> getOrderSummaryPrediction(int predictionLength) {
+        return getSummaryPrediction(summaryRepository::getOrdersSummaryByDateRangeGroupedByMonth, predictionLength);
+
+    }
+
+    @RedisReactiveChildCache(key = OrderCacheKeys.CACHE_KEY_PATH, idPath = "2*month+year+71006")
+    @Override
+    public Flux<MonthlyOrderSummaryPrediction> getPlanSummaryPrediction(int predictionLength) {
+        return getSummaryPrediction(summaryRepository::getAdminOrdersPlanSummaryByDateRangeGroupedByMonth, predictionLength);
+
+    }
+
+    @RedisReactiveChildCache(key = OrderCacheKeys.CACHE_KEY_PATH, idPath = "2*month+year+76007", masterId = "#trainerId")
+    @Override
+    public Flux<MonthlyOrderSummaryPrediction> getTrainerPlanSummaryPrediction(int predictionLength, Long trainerId, String userId) {
+        return getTrainerSummary(trainerId, userId,
+                () -> getSummaryPrediction((f, e) -> summaryRepository.getTrainerOrdersSummaryByDateRangeGroupedByMonth(f, e, trainerId),
+                        predictionLength));
+
+    }
+
+    private Flux<MonthlyOrderSummaryPrediction> getSummaryPrediction(BiFunction<LocalDateTime, LocalDateTime, Flux<MonthlyOrderSummary>> repositoryFunction,
+                                                                     int predictionLength) {
+        LocalDateTime current = LocalDateTime.now();
+        LocalDateTime start2YearsAgo = current.minusYears(2).withDayOfYear(1).withHour(0).withMinute(0).withSecond(0);
+
+        return timeSeriesClient.getCountAmountPredictions(repositoryFunction.apply(start2YearsAgo, current), predictionLength)
+                .flatMapMany(r -> Flux.range(0, predictionLength)
+                        .map(i -> {
+                                    LocalDateTime curIns = current.plusMonths(i + 1);
+                                    return MonthlyOrderSummaryPrediction.builder()
+                                            .countQuantiles(r.getCount_quantiles().get(i))
+                                            .totalAmountQuantiles(r.getTotal_amount_quantiles().get(i))
+                                            .year(curIns.getYear())
+                                            .month(curIns.getMonthValue())
+                                            .build();
+                                }
+                        )
+                );
 
     }
 

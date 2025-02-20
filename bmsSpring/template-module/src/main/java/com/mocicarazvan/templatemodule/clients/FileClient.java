@@ -51,12 +51,10 @@ public class FileClient extends ClientBase {
                     .contentType(MediaType.MULTIPART_FORM_DATA)
                     .body(BodyInserters.fromMultipartData(bodyBuilder.build()))
                     .retrieve()
-                    .onStatus(HttpStatusCode::isError, response -> handleClientException(response, fileServiceUrl))
+                    .onStatus(HttpStatusCode::isError, response -> ClientExceptionHandler.handleClientException(response, serviceUrl, service))
                     .bodyToMono(FileUploadResponse.class)
-                    .transformDeferred(RetryOperator.of(retry))
-                    .transformDeferred(CircuitBreakerOperator.of(circuitBreaker))
-                    .transformDeferred(RateLimiterOperator.of(rateLimiter))
-                    .onErrorResume(WebClientRequestException.class, this::handleWebRequestException)
+                    .transform(this::applyResilience)
+                    .onErrorResume(WebClientRequestException.class, ClientExceptionHandler::handleWebRequestException)
                     .onErrorResume(ThrowFallback.class, e ->
                     {
                         log.error("Error uploading files", e);
@@ -76,12 +74,12 @@ public class FileClient extends ClientBase {
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(ids)
                 .retrieve()
-                .onStatus(HttpStatusCode::isError, response -> handleClientException(response, fileServiceUrl))
+                .onStatus(HttpStatusCode::isError, response -> ClientExceptionHandler.handleClientException(response, serviceUrl, service))
                 .bodyToMono(Void.class)
                 .transformDeferred(RetryOperator.of(retry))
                 .transformDeferred(CircuitBreakerOperator.of(circuitBreaker))
                 .transformDeferred(RateLimiterOperator.of(rateLimiter))
-                .onErrorResume(WebClientRequestException.class, this::handleWebRequestException)
+                .onErrorResume(WebClientRequestException.class, ClientExceptionHandler::handleWebRequestException)
                 .onErrorResume(ThrowFallback.class, e ->
                 {
                     log.error("Error deleting files", e);

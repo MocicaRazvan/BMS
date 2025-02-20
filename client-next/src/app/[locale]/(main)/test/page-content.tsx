@@ -17,42 +17,21 @@ import {
 import { getCsrfToken } from "next-auth/react";
 import useCsrfToken from "@/hoooks/useCsrfToken";
 import { Button } from "@/components/ui/button";
+import {
+  PredictionChart,
+  PredictionChartTexts,
+} from "@/components/charts/prediction-chart";
 
 interface Props {
-  texts: TopTrainersTexts;
+  texts: PredictionChartTexts;
 }
 export default function PageContent({ texts }: Props) {
-  const [state, setState] = useState(false);
-  const locale = useLocale();
-  const { csrfRawToken, addTokenConditionally } = useCsrfToken();
-  useEffect(() => {
-    if (csrfRawToken) {
-      fetch("/api/test/post", {
-        method: "POST",
-        headers: {
-          ...addTokenConditionally(),
-        },
-      })
-        .then((r) => r.json())
-        .then((r) => console.log("/api/test/post Response", r))
-        .catch((e) => console.error("/api/test/post Error", e));
-    }
-  }, [addTokenConditionally, csrfRawToken]);
   return (
-    <div>
-      <Button onClick={() => setState((prev) => !prev)}>Click me</Button>
-      {state && <InnerComponent state={state} />}
+    <div className="w-full h-full">
+      <PredictionChart
+        path="/orders/admin/countAndAmount/prediction"
+        texts={texts}
+      />
     </div>
   );
 }
-
-const InnerComponent = ({ state }: { state: boolean }) => {
-  const { csrfRawToken, addTokenConditionally } = useCsrfToken();
-
-  return (
-    <div>
-      Inner + {JSON.stringify(csrfRawToken)}
-      <p>State {`${state}`}</p>
-    </div>
-  );
-};
