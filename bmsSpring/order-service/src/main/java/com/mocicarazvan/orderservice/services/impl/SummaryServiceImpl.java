@@ -20,6 +20,7 @@ import com.mocicarazvan.templatemodule.enums.Role;
 import com.mocicarazvan.templatemodule.exceptions.action.PrivateRouteException;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
@@ -44,6 +45,8 @@ public class SummaryServiceImpl implements SummaryService {
     private final PlanClient planClient;
     private final SummaryRepository summaryRepository;
     private final TimeSeriesClient timeSeriesClient;
+    @Value("${prediction.start.years:3}")
+    private int predictionStartYears;
 
 
     @Override
@@ -92,9 +95,9 @@ public class SummaryServiceImpl implements SummaryService {
     private Flux<MonthlyOrderSummaryPrediction> getSummaryPrediction(BiFunction<LocalDateTime, LocalDateTime, Flux<MonthlyOrderSummary>> repositoryFunction,
                                                                      int predictionLength) {
         LocalDateTime current = LocalDateTime.now();
-        LocalDateTime start2YearsAgo = current.minusYears(2).withDayOfYear(1).withHour(0).withMinute(0).withSecond(0);
+        LocalDateTime startPrediction = current.minusYears(predictionStartYears).withDayOfYear(1).withHour(0).withMinute(0).withSecond(0);
 
-        return timeSeriesClient.getCountAmountPredictions(repositoryFunction.apply(start2YearsAgo, current), predictionLength)
+        return timeSeriesClient.getCountAmountPredictions(repositoryFunction.apply(startPrediction, current), predictionLength)
                 .flatMapMany(r -> Flux.range(0, predictionLength)
                         .map(i -> {
                                     LocalDateTime curIns = current.plusMonths(i + 1);
