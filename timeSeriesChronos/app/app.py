@@ -78,7 +78,7 @@ def countAmount():
 
     except Exception as e:
         logger.exception("Error Traceback:", traceback.format_exc())
-        return error_response("Exception", 500, str(e)), 500
+        return error_response("Exception", 500, str(e))
     finally:
         torch.cuda.empty_cache()
 
