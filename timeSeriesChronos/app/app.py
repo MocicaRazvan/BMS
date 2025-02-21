@@ -16,7 +16,7 @@ from config import APP_NAME, APP_VERSION, FLASK_DEBUG, ZIPKIN_SAMPLE_RATE, ZIPKI
 from config import CACHE_REDIS_DB, CACHE_REDIS_HOST, CACHE_REDIS_PASSWORD, CACHE_REDIS_PORT, CACHE_REDIS_EXPIRATION
 from logger import logger
 from model import predict_series
-from utils import make_cache_key,error_response
+from utils import make_cache_key, error_response
 
 app = Flask(__name__)
 metrics = GunicornInternalPrometheusMetrics(
