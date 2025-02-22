@@ -6,7 +6,7 @@ import lande from "lande";
 
 const threshold = process.env.TOXICITY_THRESHOLD
   ? parseFloat(process.env.TOXICITY_THRESHOLD)
-  : 0.5;
+  : 0.35;
 let globalModel: toxicity.ToxicityClassifier | null = null;
 
 enum TOXIC_REASON {
