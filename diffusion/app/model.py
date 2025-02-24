@@ -2,7 +2,8 @@ import os
 import threading
 
 import torch
-from diffusers import StableDiffusionPipeline, DDIMScheduler
+from diffusers import StableDiffusionPipeline, DPMSolverMultistepScheduler
+from xformers.ops import MemoryEfficientAttentionFlashAttentionOp
 
 from config import MODEL_ID, LOCAL_MODEL_PATH, DEVICE, RESERVED_VRAM_GB, MEMORY_FRACTION, RESERVED_TENSOR, \
     PIPE_DISABLE_SAFETY_CHECKER, PIPE_ENABLE_GRADIENT_CHECKPOINTING
@@ -68,14 +69,16 @@ def get_pipeline() -> StableDiffusionPipeline:
             return pipeline
 
         safety_checker = None if PIPE_DISABLE_SAFETY_CHECKER else True
+        torch_dtype = torch.bfloat16 if torch.cuda.get_device_capability(0)[0] >= 8 else torch.float16
 
+        logger.info(f"Using torch dtype: {torch_dtype}")
         if os.path.exists(LOCAL_MODEL_PATH):
             logger.info(f"Loading model from local path: {LOCAL_MODEL_PATH}")
-            pipe = load_from_local(safety_checker)
+            pipe = load_from_local(safety_checker, torch_dtype)
         else:
             logger.info(f"Downloading model: {MODEL_ID}")
             pipe = StableDiffusionPipeline.from_pretrained(
-                MODEL_ID, torch_dtype=torch.float16
+                MODEL_ID, torch_dtype=torch_dtype
             )
             logger.info(f"Saving model locally to: {LOCAL_MODEL_PATH}")
             pipe.save_pretrained(LOCAL_MODEL_PATH)
@@ -83,6 +86,10 @@ def get_pipeline() -> StableDiffusionPipeline:
 
         pipe = pipe.to(DEVICE)
         pipe.enable_attention_slicing("auto")
+        pipe.enable_xformers_memory_efficient_attention(attention_op=MemoryEfficientAttentionFlashAttentionOp)
+        pipe.vae.enable_xformers_memory_efficient_attention(attention_op=None)
+        pipe.unet.to(dtype=torch_dtype)
+        pipe.vae.to(dtype=torch_dtype)
 
         if PIPE_ENABLE_GRADIENT_CHECKPOINTING:
             pipe.unet.enable_gradient_checkpointing()
@@ -96,19 +103,19 @@ def get_pipeline() -> StableDiffusionPipeline:
         return pipeline
 
 
-def load_from_local(safety_checker):
+def load_from_local(safety_checker, torch_dtype):
     if safety_checker is None:
-        scheduler = DDIMScheduler.from_pretrained(
-            LOCAL_MODEL_PATH, subfolder="scheduler", torch_dtype=torch.float16, safety_checker=None)
+        scheduler = DPMSolverMultistepScheduler.from_pretrained(
+            LOCAL_MODEL_PATH, subfolder="scheduler", torch_dtype=torch_dtype, safety_checker=None)
         pipe = StableDiffusionPipeline.from_pretrained(
-            LOCAL_MODEL_PATH, torch_dtype=torch.float16, safety_checker=None, scheduler=scheduler
+            LOCAL_MODEL_PATH, torch_dtype=torch_dtype, safety_checker=None, scheduler=scheduler
         )
         logger.info("Safety checker disabled for local model.")
     else:
-        scheduler = DDIMScheduler.from_pretrained(
-            LOCAL_MODEL_PATH, subfolder="scheduler", torch_dtype=torch.float16)
+        scheduler = DPMSolverMultistepScheduler.from_pretrained(
+            LOCAL_MODEL_PATH, subfolder="scheduler", torch_dtype=torch_dtype)
         pipe = StableDiffusionPipeline.from_pretrained(
-            LOCAL_MODEL_PATH, torch_dtype=torch.float16, scheduler=scheduler
+            LOCAL_MODEL_PATH, torch_dtype=torch_dtype, scheduler=scheduler
         )
         logger.info("Safety checker enabled for local model.")
     return pipe

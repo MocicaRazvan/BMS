@@ -2,15 +2,14 @@ FROM python:3.10-slim AS builder
 
 WORKDIR /app
 
-
-COPY requirements.txt .
-
 RUN apt-get update && apt-get install -y \
     build-essential \
     && rm -rf /var/lib/apt/lists/*
 
-
 RUN pip install --upgrade pip==24.3.1
+
+COPY requirements.txt .
+
 RUN pip install  -r requirements.txt
 
 FROM python:3.10-slim AS runtime
