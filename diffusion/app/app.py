@@ -13,7 +13,7 @@ from opentelemetry.sdk.trace.export import BatchSpanProcessor
 from opentelemetry.sdk.trace.sampling import ParentBased, TraceIdRatioBased
 from prometheus_flask_exporter.multiprocess import GunicornInternalPrometheusMetrics
 
-from config import APP_NAME, APP_VERSION, FLASK_DEBUG, ZIPKIN_SAMPLE_RATE, ZIPKIN_URL, MAX_IMAGE_THREADS
+from app_config import APP_NAME, APP_VERSION, FLASK_DEBUG, ZIPKIN_SAMPLE_RATE, ZIPKIN_URL, MAX_IMAGE_THREADS
 from logger import logger
 from model import get_pipeline, reserve_vram, release_vram, clear_cache
 from utils import process_image_to_bytes
@@ -24,7 +24,7 @@ metrics = GunicornInternalPrometheusMetrics(
     default_labels={"application": APP_NAME}
 )
 
-metrics.info(APP_NAME, "Application info prometheus", version=APP_VERSION)
+metrics.info(APP_NAME.replace("-", "_"), "Application info prometheus", version=APP_VERSION)
 
 provider = TracerProvider(resource=Resource(attributes={"service.name": APP_NAME}),
                           sampler=ParentBased(TraceIdRatioBased(ZIPKIN_SAMPLE_RATE)))

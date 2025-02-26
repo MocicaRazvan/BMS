@@ -2,7 +2,7 @@ import logging
 import logging_loki
 from multiprocessing import Queue
 
-from config import APP_NAME,LOKI_URL
+from app_config import APP_NAME, LOKI_URL
 
 handler = None
 
@@ -22,4 +22,3 @@ logger = logging.getLogger(APP_NAME)
 
 if LOKI_URL and handler:
     logger.addHandler(handler)
-

@@ -3,7 +3,7 @@ from multiprocessing import Queue
 
 import logging_loki
 
-from config import APP_NAME, LOKI_URL
+from app_config import APP_NAME, LOKI_URL
 
 handler = None
 

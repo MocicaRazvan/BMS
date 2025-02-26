@@ -805,10 +805,8 @@ services:
     environment:
       - NVIDIA_VISIBLE_DEVICES=all
       - NVIDIA_DRIVER_CAPABILITIES=all
-      - RESERVED_VRAM_GB=1.11
-      - MEMORY_FRACTION=0.4
-      - ZIPKIN_URL=http://zipkin:9411/api/v2/spans
-      - PIPE_ENABLE_GRADIENT_CHECKPOINTING=false
+      - PYTHON_PROFILES_ACTIVE=docker
+      - CUDA_LAUNCH_BLOCKING=1
       #      - ZIPKIN_SAMPLE_RATE=1
       #      - LOKI_URL=http://host.docker.internal:3100/loki/api/v1/push
       #      - HUGGING_FACE_HUB_TOKEN=${HUGGING_FACE_HUB_TOKEN}
@@ -832,8 +830,8 @@ services:
     environment:
       - NVIDIA_VISIBLE_DEVICES=all
       - NVIDIA_DRIVER_CAPABILITIES=all
-      - ZIPKIN_URL=http://zipkin:9411/api/v2/spans
-      - CACHE_REDIS_HOST=redis
+      - PYTHON_PROFILES_ACTIVE=docker
+      - CUDA_ENABLED=false
       #      - ZIPKIN_SAMPLE_RATE=1
       #      - LOKI_URL=http://host.docker.internal:3100/loki/api/v1/push
       #      - HUGGING_FACE_HUB_TOKEN=${HUGGING_FACE_HUB_TOKEN}

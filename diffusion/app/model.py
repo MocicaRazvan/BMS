@@ -5,7 +5,7 @@ import torch
 from diffusers import StableDiffusionPipeline, DPMSolverMultistepScheduler
 from xformers.ops import MemoryEfficientAttentionFlashAttentionOp
 
-from config import MODEL_ID, LOCAL_MODEL_PATH, DEVICE, RESERVED_VRAM_GB, MEMORY_FRACTION, RESERVED_TENSOR, \
+from app_config import MODEL_ID, LOCAL_MODEL_PATH, DEVICE, RESERVED_VRAM_GB, MEMORY_FRACTION, RESERVED_TENSOR, \
     PIPE_DISABLE_SAFETY_CHECKER, PIPE_ENABLE_GRADIENT_CHECKPOINTING
 from logger import logger
 

@@ -12,8 +12,8 @@ from opentelemetry.sdk.trace.export import BatchSpanProcessor
 from opentelemetry.sdk.trace.sampling import ParentBased, TraceIdRatioBased
 from prometheus_flask_exporter.multiprocess import GunicornInternalPrometheusMetrics
 
-from config import APP_NAME, APP_VERSION, FLASK_DEBUG, ZIPKIN_SAMPLE_RATE, ZIPKIN_URL
-from config import CACHE_REDIS_DB, CACHE_REDIS_HOST, CACHE_REDIS_PASSWORD, CACHE_REDIS_PORT, CACHE_REDIS_EXPIRATION
+from app_config import APP_NAME, APP_VERSION, FLASK_DEBUG, ZIPKIN_SAMPLE_RATE, ZIPKIN_URL
+from app_config import CACHE_REDIS_DB, CACHE_REDIS_HOST, CACHE_REDIS_PASSWORD, CACHE_REDIS_PORT, CACHE_REDIS_EXPIRATION
 from logger import logger
 from model import predict_series
 from utils import make_cache_key, error_response
@@ -24,7 +24,7 @@ metrics = GunicornInternalPrometheusMetrics(
     default_labels={"application": APP_NAME}
 )
 
-metrics.info(APP_NAME, "Application info prometheus", version=APP_VERSION)
+metrics.info(APP_NAME.replace("-","_"), "Application info prometheus", version=APP_VERSION)
 
 provider = TracerProvider(resource=Resource(attributes={"service.name": APP_NAME}),
                           sampler=ParentBased(TraceIdRatioBased(ZIPKIN_SAMPLE_RATE)))

@@ -4,7 +4,7 @@ import torch
 import transformers
 from chronos import ChronosPipeline
 
-from config import LOCAL_CACHE_DIR, CUDA_ENABLED, MODEL_ID
+from app_config import LOCAL_CACHE_DIR, CUDA_ENABLED, MODEL_ID
 from logger import logger
 
 
@@ -19,7 +19,10 @@ def get_pipline():
     device = "cuda" if torch.cuda.is_available() and CUDA_ENABLED else "cpu"
     logger.info(f"Device: {device}")
     logger.info(f"LOCAL_CACHE_DIR: {LOCAL_CACHE_DIR}")
-    torch_dtype = torch.bfloat16 if torch.cuda.get_device_capability(0)[0] >= 8 else torch.float16
+    try:
+        torch_dtype = torch.bfloat16 if torch.cuda.get_device_capability(0)[0] >= 8 else torch.float16
+    except:
+        torch_dtype = torch.float16
     logger.info(f"Using torch dtype: {torch_dtype}")
     pipeline = ChronosPipeline.from_pretrained(
         MODEL_ID,
