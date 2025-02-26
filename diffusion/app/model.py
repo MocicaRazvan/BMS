@@ -69,7 +69,8 @@ def get_pipeline() -> StableDiffusionPipeline:
             return pipeline
 
         safety_checker = None if PIPE_DISABLE_SAFETY_CHECKER else True
-        torch_dtype = torch.bfloat16 if torch.cuda.get_device_capability(0)[0] >= 8 else torch.float16
+        p8_cuda = torch.cuda.get_device_capability(0)[0] >= 8
+        torch_dtype = torch.bfloat16 if p8_cuda else torch.float16
 
         logger.info(f"Using torch dtype: {torch_dtype}")
         if os.path.exists(LOCAL_MODEL_PATH):
@@ -86,8 +87,11 @@ def get_pipeline() -> StableDiffusionPipeline:
 
         pipe = pipe.to(DEVICE)
         pipe.enable_attention_slicing("auto")
-        pipe.enable_xformers_memory_efficient_attention(attention_op=MemoryEfficientAttentionFlashAttentionOp)
-        pipe.vae.enable_xformers_memory_efficient_attention(attention_op=None)
+        if p8_cuda:
+            pipe.enable_xformers_memory_efficient_attention(attention_op=MemoryEfficientAttentionFlashAttentionOp)
+            pipe.vae.enable_xformers_memory_efficient_attention(attention_op=None)
+            logger.info("Memory-efficient attention enabled.")
+
         pipe.unet.to(dtype=torch_dtype)
         pipe.vae.to(dtype=torch_dtype)
 
