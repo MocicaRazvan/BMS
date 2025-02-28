@@ -73,14 +73,11 @@ public class MediaServiceImpl implements MediaService {
                                     progressWebSocketHandler.sendProgressUpdate(metadataDto.getClientId() != null ? metadataDto.getClientId() : "default", metadataDto.getFileType(), tuple.getT1());
                                 })
                 )
-                .collectList()
-                .map(urls -> {
-                    urls.sort(Comparator.comparing(Tuple2::getT1));
-                    return FileUploadResponse.builder()
-                            .files(urls.stream().map(Tuple2::getT2).toList())
-                            .fileType(metadataDto.getFileType())
-                            .build();
-                })
+                .collectSortedList(Comparator.comparing(Tuple2::getT1))
+                .map(urls -> FileUploadResponse.builder()
+                        .files(urls.stream().map(Tuple2::getT2).toList())
+                        .fileType(metadataDto.getFileType())
+                        .build())
                 .doOnNext(_ ->
                         progressWebSocketHandler.sendCompletionMessage(
                                 metadataDto.getClientId() != null ? metadataDto.getClientId() : "default",
