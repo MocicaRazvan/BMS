@@ -23,10 +23,10 @@ public class GoogleUserInfo implements OauthUserInfoHandler {
 
     @Override
     public Mono<AuthResponse> handleUserInfo(OAuth2AccessTokenResponse accessTokenResponse, AuthProvider provider, Map<String, Object> userInfo) {
-        String lastName = userInfo.getOrDefault("family_name", "") != null ? userInfo.get("family_name").toString() : "";
-        String firstName = userInfo.getOrDefault("given_name", "") != null ? userInfo.get("given_name").toString() : "";
-        String picture = userInfo.getOrDefault("picture", "") != null ? userInfo.get("picture").toString() : "";
-        String email = userInfo.getOrDefault("email", "") != null ? userInfo.get("email").toString() : "";
+        String lastName = getFromMap(userInfo, "family_name");
+        String firstName = getFromMap(userInfo, "given_name");
+        String picture = getFromMap(userInfo, "picture");
+        String email = getFromMap(userInfo, "email");
 
         UserCustom user = UserCustom.builder()
                 .lastName(lastName)

@@ -27,22 +27,26 @@ public class GithubUserInfo implements OauthUserInfoHandler {
 
     @Override
     public Mono<AuthResponse> handleUserInfo(OAuth2AccessTokenResponse accessTokenResponse, AuthProvider provider, Map<String, Object> userInfo) {
-        String name = userInfo.getOrDefault("name", "") != null ? userInfo.get("name").toString() : "";
+        String name = getFromMap(userInfo, "name");
         String[] nameParts = name.split(" ");
         String lastName = nameParts.length > 0 ? nameParts[0] : "";
         String firstName = nameParts.length > 1 ? nameParts[1] : "";
 
-
+        String avatarUrl = getFromMap(userInfo, "avatar_url");
         UserCustom user = UserCustom.builder()
                 .lastName(lastName)
                 .firstName(firstName)
                 .role(Role.ROLE_USER)
                 .provider(provider)
-                .image(userInfo.get("avatar_url").toString())
+//                .image(userInfo.get("avatar_url").toString())
                 .emailVerified(true)
                 .build();
 
-        String email = userInfo.getOrDefault("email", "") != null ? userInfo.get("email").toString() : "";
+        if (avatarUrl != null && !avatarUrl.isEmpty()) {
+            user.setImage(avatarUrl);
+        }
+
+        String email = getFromMap(userInfo, "email");
 
         if (email.isEmpty()) {
             return fetchPrimaryEmail(accessTokenResponse.getAccessToken().getTokenValue())

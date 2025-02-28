@@ -203,7 +203,7 @@ public class UserServiceImpl implements UserService {
         return
                 userRepository.existsByIdAndRoleIn(userId, roles)
                         .filter(Boolean::booleanValue)
-                        .log()
+//                        .log()
                         .switchIfEmpty(Mono.error(new NotFoundEntity("user", userId)));
     }
 

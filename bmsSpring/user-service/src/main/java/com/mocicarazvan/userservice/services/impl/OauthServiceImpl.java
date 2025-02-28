@@ -62,19 +62,19 @@ public class OauthServiceImpl implements OauthService {
                 .body(BodyInserters.fromFormData(formData))
                 .retrieve()
                 .onStatus(HttpStatusCode::is4xxClientError, clientResponse -> {
-                    log.error("Client error during token exchange: {}", clientResponse);
+//                    log.error("Client error during token exchange: {}", clientResponse);
                     return clientResponse.bodyToMono(String.class)
                             .flatMap(errorBody -> {
-                                log.error("Error body: {}", errorBody);
+//                                log.error("Error body: {}", errorBody);
                                 return Mono.error(new RuntimeException("4xx error during token exchange: " + errorBody));
                             });
 
                 })
                 .onStatus(HttpStatusCode::is5xxServerError, clientResponse -> {
-                    log.error("Server error during token exchange: {}", clientResponse);
+//                    log.error("Server error during token exchange: {}", clientResponse);
                     return clientResponse.bodyToMono(String.class)
                             .flatMap(errorBody -> {
-                                log.error("Error body: {}", errorBody);
+//                                log.error("Error body: {}", errorBody);
                                 return Mono.error(new RuntimeException("5xx error during token exchange: " + errorBody));
                             });
                 })
@@ -106,8 +106,8 @@ public class OauthServiceImpl implements OauthService {
                 .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {
                 })
                 .flatMap(userInfo -> oauthUserInfoHandler.handleUserInfo(accessTokenResponse, provider, userInfo)).onErrorResume(e -> {
-                    log.error("Error while creating oauth2 jwt token");
-                    log.error(e.getMessage());
+//                    log.error("Error while creating oauth2 jwt token");
+//                    log.error(e.getMessage());
                     return Mono.error(e);
                 });
     }

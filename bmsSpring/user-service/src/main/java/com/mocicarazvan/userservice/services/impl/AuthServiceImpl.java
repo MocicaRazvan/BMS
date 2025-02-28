@@ -53,7 +53,7 @@ public class AuthServiceImpl extends BasicUserProvider implements AuthService {
     @Override
     @RedisReactiveRoleCacheEvict(key = "userService")
     public Mono<AuthResponse> register(RegisterRequest registerRequest) {
-        log.error(userMapper.fromRegisterRequestToUserCustom(registerRequest).toString());
+//        log.error(userMapper.fromRegisterRequestToUserCustom(registerRequest).toString());
         return userRepository.existsByEmail(registerRequest.getEmail())
                 .flatMap(exists -> {
                     if (exists) {
@@ -70,18 +70,18 @@ public class AuthServiceImpl extends BasicUserProvider implements AuthService {
     public Mono<AuthResponse> login(LoginRequest loginRequest) {
         return userRepository.findByEmail(loginRequest.getEmail())
                 .filter(u -> {
-                    log.info("User Provider: {}", u.getProvider());
+//                    log.info("User Provider: {}", u.getProvider());
                     return u.getProvider().equals(AuthProvider.LOCAL);
                 })
                 .switchIfEmpty(Mono.error(new UsernameNotFoundException("User with email: " + loginRequest.getEmail() + " not found")))
                 .flatMap(u ->
-                        revokeOldTokens(u).then(Mono.defer(() -> {
-                            if (!passwordEncoder.matches(loginRequest.getPassword(), u.getPassword())) {
-                                log.error("Password not match");
-                                return Mono.error(new UsernameNotFoundException("User with email: " + loginRequest.getEmail() + " not found"));
-                            }
-                            return generateResponse(u, AuthProvider.LOCAL);
-                        }))
+                                revokeOldTokens(u).then(Mono.defer(() -> {
+                                    if (!passwordEncoder.matches(loginRequest.getPassword(), u.getPassword())) {
+//                                log.error("Password not match");
+                                        return Mono.error(new UsernameNotFoundException("User with email: " + loginRequest.getEmail() + " not found"));
+                                    }
+                                    return generateResponse(u, AuthProvider.LOCAL);
+                                }))
                 );
     }
 

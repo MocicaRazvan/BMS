@@ -30,7 +30,7 @@ public class BasicUserProvider implements HandleUserProvider {
 
     public Mono<AuthResponse> saveOrUpdateUserProvider(AuthProvider provider, UserCustom user) {
         return userRepository.findByEmail(user.getEmail())
-                .log()
+//                .log()
                 .flatMap(u -> {
                     if (!u.getProvider().equals(provider)) {
                         return basicUserProviderRedisCache.invalidateOnProviderChange(u, Mono.just(u));

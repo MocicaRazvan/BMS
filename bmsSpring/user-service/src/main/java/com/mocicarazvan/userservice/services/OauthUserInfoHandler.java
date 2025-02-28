@@ -13,5 +13,7 @@ public interface OauthUserInfoHandler {
 
     Mono<AuthResponse> handleUserInfo(OAuth2AccessTokenResponse accessTokenResponse, AuthProvider provider, Map<String, Object> userInfo);
 
-
+    default String getFromMap(Map<String, Object> map, String key) {
+        return (map.containsKey(key) && map.get(key) != null) ? map.get(key).toString() : "";
+    }
 }

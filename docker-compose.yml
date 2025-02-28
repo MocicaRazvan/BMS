@@ -816,6 +816,7 @@ services:
       - diffusion_fs:/app/models
     networks:
       - bms
+    runtime: nvidia
 
   time-series:
     build:
@@ -831,7 +832,7 @@ services:
       - NVIDIA_VISIBLE_DEVICES=all
       - NVIDIA_DRIVER_CAPABILITIES=all
       - PYTHON_PROFILES_ACTIVE=docker
-      - CUDA_ENABLED=false
+      - CUDA_ENABLED=true
       #      - ZIPKIN_SAMPLE_RATE=1
       #      - LOKI_URL=http://host.docker.internal:3100/loki/api/v1/push
       #      - HUGGING_FACE_HUB_TOKEN=${HUGGING_FACE_HUB_TOKEN}
@@ -843,6 +844,7 @@ services:
       - bms
     depends_on:
       - redis
+    runtime: nvidia
   archive-service:
     container_name: archive-service-container-bms
     build:

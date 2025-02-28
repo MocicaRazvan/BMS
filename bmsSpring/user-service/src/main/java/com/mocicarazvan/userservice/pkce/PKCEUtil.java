@@ -1,25 +1,36 @@
 package com.mocicarazvan.userservice.pkce;
 
+import lombok.extern.slf4j.Slf4j;
+
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.util.Base64;
-import java.util.Random;
 
+@Slf4j
 public class PKCEUtil {
+    private static final SecureRandom SECURE_RANDOM = new SecureRandom();
+    private static final ThreadLocal<MessageDigest> MESSAGE_DIGEST_THREAD_LOCAL = ThreadLocal.withInitial(() -> {
+        try {
+            return MessageDigest.getInstance("SHA-256");
+        } catch (NoSuchAlgorithmException e) {
+            log.error("Failed to create message digest in PKCEUtil");
+            throw new RuntimeException(e);
+        }
+    });
 
     public static String generateCodeVerifier() {
+//        log.info("Generating code verifier");
         byte[] codeVerifier = new byte[32];
-        new Random().nextBytes(codeVerifier);
+        SECURE_RANDOM.nextBytes(codeVerifier);
         return Base64.getUrlEncoder().withoutPadding().encodeToString(codeVerifier);
     }
 
     public static String generateCodeChallenge(String codeVerifier) {
-        try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            byte[] hash = digest.digest(codeVerifier.getBytes());
-            return Base64.getUrlEncoder().withoutPadding().encodeToString(hash);
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
-        }
+//        log.info("Generating code challenge");
+        byte[] hash = MESSAGE_DIGEST_THREAD_LOCAL.get().digest(codeVerifier.getBytes(StandardCharsets.US_ASCII));
+        return Base64.getUrlEncoder().withoutPadding().encodeToString(hash);
+
     }
 }

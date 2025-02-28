@@ -68,10 +68,10 @@ public class MediaServiceImpl implements MediaService {
         return files.index()
 //                .subscribeOn(Schedulers.parallel())
                 .flatMap(indexedFilePart -> saveFileWithIndex(indexedFilePart.getT1(), indexedFilePart.getT2(), metadataDto)
-                        .doOnNext(tuple -> {
-                            log.error("Sending progress update " + tuple.getT1());
-                            progressWebSocketHandler.sendProgressUpdate(metadataDto.getClientId() != null ? metadataDto.getClientId() : "default", metadataDto.getFileType(), tuple.getT1());
-                        })
+                                .doOnNext(tuple -> {
+//                            log.error("Sending progress update " + tuple.getT1());
+                                    progressWebSocketHandler.sendProgressUpdate(metadataDto.getClientId() != null ? metadataDto.getClientId() : "default", metadataDto.getFileType(), tuple.getT1());
+                                })
                 )
                 .collectList()
                 .map(urls -> {
@@ -122,7 +122,7 @@ public class MediaServiceImpl implements MediaService {
                         .flatMap(gridFSFile -> {
                             FileType fileType = FileType.valueOf(file.getOptions().getMetadata().getString("fileType"));
                             MediaType mediaType = MediaType.fromValue(file.getOptions().getMetadata().getString("mediaType"));
-                            log.info("File type: {}", fileType);
+//                            log.info("File type: {}", fileType);
                             ServerHttpRequest request = exchange.getRequest();
                             ServerHttpResponse response = exchange.getResponse();
 

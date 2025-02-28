@@ -29,26 +29,27 @@ public abstract class PKCEHandlerImpl implements PKCEHandler {
     private final String authUri;
 
     public Mono<CodeVerifierResponse> handleAuthorizationCode(@RequestParam String state) {
-        log.error("Initiating Google login");
+//        log.error("Initiating Google login");
 
         String codeVerifier = PKCEUtil.generateCodeVerifier();
         String codeChallenge = PKCEUtil.generateCodeChallenge(codeVerifier);
-        log.error("State: {}", state);
+//        log.error("State: {}", state);
 
-        OauthState oauthState = new OauthState();
-        oauthState.setState(state);
-        oauthState.setCodeVerifier(codeVerifier);
-        log.error("Generated code_verifier: {}", codeVerifier);
+        OauthState oauthState = OauthState.builder()
+                .state(state)
+                .codeVerifier(codeVerifier)
+                .build();
+//        log.error("Generated code_verifier: {}", codeVerifier);
 
         return oauthStateRepository.save(oauthState)
                 .map(o -> {
-                    log.error("Saved state: {}", o);
+//                    log.error("Saved state: {}", o);
                     return o;
                 })
                 .then(Mono.defer(() -> {
                     String authorizationUrl = pkceService.generateAuthorizationUrl(authUri,
                             clientId, redirectUri, state, codeChallenge);
-                    log.error("Generated authorization URL: {}", authorizationUrl);
+//                    log.error("Generated authorization URL: {}", authorizationUrl);
 
                     return Mono.just(CodeVerifierResponse.builder().url(authorizationUrl).build());
                 }));
@@ -57,12 +58,12 @@ public abstract class PKCEHandlerImpl implements PKCEHandler {
     public Mono<AuthResponse> handleAuthResponse(
             CallbackBody callbackBody, BiFunction<CallbackBody, String, Mono<AuthResponse>> handleCallback
     ) {
-        log.error("Received callback: {}", callbackBody);
+//        log.error("Received callback: {}", callbackBody);
         return oauthStateRepository.findByState(callbackBody.getState())
                 .switchIfEmpty(Mono.error(new StateNotFound()))
                 .flatMap(oauthState -> {
                     String codeVerifier = oauthState.getCodeVerifier();
-                    log.error("Retrieved code_verifier from store: {}", codeVerifier);
+//                    log.error("Retrieved code_verifier from store: {}", codeVerifier);
                     return handleCallback.apply(callbackBody, codeVerifier)
                             .flatMap(resp -> oauthStateRepository.deleteByState(callbackBody.getState())
                                     .thenReturn(resp));

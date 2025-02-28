@@ -81,8 +81,12 @@ public class RedisReactiveRoleCacheEvictAspect extends RedisReactiveCacheEvictAs
 
         RoleAnn oldRole = RoleAnn.fromRole(redisRoleCacheUtils.assertRole(aspectUtils.evaluateSpelExpressionForObject(oldRolePath, methodResponse, joinPoint)));
 
-        invalidateByRoles(joinPoint, key, idSpel, oldRole, oldRole)
-                .subscribe(success -> log.info("Invalidated key: " + key + " for id: " + idSpel + " with success: " + success));
+        invalidateByRoles(joinPoint, key, idSpel, newRole, oldRole)
+                .subscribe(success ->
+                        {
+//                            log.info("Invalidated key: " + key + " for id: " + idSpel + " with success: " + success);
+                        }
+                );
     }
 
 
@@ -106,7 +110,7 @@ public class RedisReactiveRoleCacheEvictAspect extends RedisReactiveCacheEvictAs
         if (!newRole.equals(oldRole) && !RoleAnn.NULL_ANN.equals(oldRole)) {
             patterns.add(redisCacheUtils.getListKey(key) + redisRoleCacheUtils.getRoleKey(oldRole) + "*");
         }
-        log.info("keysToInvalidateRole to invalidate: " + patterns);
+//        log.info("keysToInvalidateRole to invalidate: " + patterns);
         return redisRoleCacheUtils.getActualKeys(patterns, reactiveRedisTemplate);
     }
 
