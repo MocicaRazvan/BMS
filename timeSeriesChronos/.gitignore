@@ -1,2 +1,3 @@
 cache_dir
 .venv
+app/__pycache__

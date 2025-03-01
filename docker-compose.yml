@@ -581,7 +581,7 @@ services:
         condition: service_started
 
   ollama:
-    image: ollama/ollama:0.5.1
+    image: ollama/ollama:0.5.12
     container_name: ollama-container-bms
     deploy:
       resources:
@@ -608,6 +608,7 @@ services:
     networks:
       - bms
     restart: unless-stopped
+    runtime: nvidia
 
   redis:
     image: eqalpha/keydb:latest
@@ -845,6 +846,7 @@ services:
     depends_on:
       - redis
     runtime: nvidia
+
   archive-service:
     container_name: archive-service-container-bms
     build:
