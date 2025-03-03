@@ -25,6 +25,7 @@ import {
 } from "@/texts/components/list";
 import {
   getAdminEmailTexts,
+  getAnswerFromBodyFormTexts,
   getButtonSubmitTexts,
   getCheckoutDrawerTexts,
   getDayFromTexts,
@@ -166,17 +167,20 @@ export async function getSinglePostPageTexts(): Promise<SinglePostPageTexts> {
     t,
     postCommentsTexts,
     postRecommendationListTexts,
+    answerFromBodyFormTexts,
   ] = await Promise.all([
     getElementHeaderTexts(),
     getTranslations("pages.posts.SinglePageTexts"),
     getPostCommentsTexts(),
     getPostRecommendationListTexts(),
+    getAnswerFromBodyFormTexts(),
   ]);
   return {
     elementHeaderTexts,
     updateButton: t("updateButton"),
     postCommentsTexts,
     postRecommendationListTexts,
+    answerFromBodyFormTexts,
   };
 }
 
@@ -291,17 +295,20 @@ export async function getSingleRecipePageTexts(): Promise<SingleRecipePageTexts>
     elementHeaderTexts,
     nutritionalTableTexts,
     ingredientPieChartTexts,
+    answerFromBodyFormTexts,
     t,
   ] = await Promise.all([
     getElementHeaderTexts(),
     getNutritionalTableTexts(),
     getIngredientPieChartTexts(),
+    getAnswerFromBodyFormTexts(),
     getTranslations("pages.recipes.SingleRecipePageTexts"),
   ]);
   return {
     elementHeaderTexts,
     nutritionalTableTexts,
     ingredientPieChartTexts,
+    answerFromBodyFormTexts,
     showIngredients: t("showIngredients"),
   };
 }
@@ -1198,6 +1205,7 @@ export async function getSingleTrainerPlanPageTexts(): Promise<SingleTrainerPlan
     ingredientPieChartTexts,
     singleDayTexts,
     daysListTexts,
+    answerFromBodyFormTexts,
     t,
   ] = await Promise.all([
     getElementHeaderTexts(),
@@ -1205,6 +1213,7 @@ export async function getSingleTrainerPlanPageTexts(): Promise<SingleTrainerPlan
     getIngredientPieChartTexts(),
     getSingleDayTexts(),
     getDaysListTexts(),
+    getAnswerFromBodyFormTexts(),
     getTranslations("pages.plans.SingleTrainerPlanPageTexts"),
   ]);
 
@@ -1216,6 +1225,7 @@ export async function getSingleTrainerPlanPageTexts(): Promise<SingleTrainerPlan
     daysListTexts,
     displayed: t("displayed"),
     notDisplayed: t("notDisplayed"),
+    answerFromBodyFormTexts,
     price: t("price"),
   };
 }
@@ -1340,6 +1350,7 @@ export async function getSingleSubscriptionTexts(): Promise<SingleSubscriptionTe
     singleDayTexts,
     daysListTexts,
     planRecommendationListTexts,
+    answerFromBodyFormTexts,
   ] = await Promise.all([
     getElementHeaderTexts(),
     getNutritionalTableTexts(),
@@ -1347,6 +1358,7 @@ export async function getSingleSubscriptionTexts(): Promise<SingleSubscriptionTe
     getSingleDayTexts(),
     getDaysListTexts(),
     getPlanRecommendationListTexts(),
+    getAnswerFromBodyFormTexts(),
   ]);
 
   return {
@@ -1356,6 +1368,7 @@ export async function getSingleSubscriptionTexts(): Promise<SingleSubscriptionTe
     singleDayTexts,
     daysListTexts,
     planRecommendationListTexts,
+    answerFromBodyFormTexts,
   };
 }
 

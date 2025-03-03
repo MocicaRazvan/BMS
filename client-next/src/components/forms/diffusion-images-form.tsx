@@ -6,7 +6,7 @@ import {
   getDiffusionSchema,
 } from "@/types/forms";
 import { useCallback, useMemo, useState } from "react";
-import { FieldValues, Path, useForm, UseFormReturn } from "react-hook-form";
+import { Path, useForm, UseFormReturn } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Accordion,

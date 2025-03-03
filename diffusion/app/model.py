@@ -83,7 +83,7 @@ def get_pipeline() -> StableDiffusionPipeline:
             )
             logger.info(f"Saving model locally to: {LOCAL_MODEL_PATH}")
             pipe.save_pretrained(LOCAL_MODEL_PATH)
-            pipe = load_from_local(safety_checker)
+            pipe = load_from_local(safety_checker, torch_dtype)
 
         pipe = pipe.to(DEVICE)
         pipe.enable_attention_slicing("auto")

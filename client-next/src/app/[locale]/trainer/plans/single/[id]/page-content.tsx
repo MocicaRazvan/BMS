@@ -9,7 +9,6 @@ import { ElementHeaderTexts } from "@/components/common/element-header";
 import { NutritionalTableTexts } from "@/components/common/nutritional-table";
 import { IngredientPieChartTexts } from "@/components/charts/ingredient-macros-pie-chart";
 import CustomImageCarousel from "@/components/common/custom-image-crousel";
-import ProseText from "@/components/common/prose-text";
 import AuthorProfile from "@/components/common/author-profile";
 import { useFormatter } from "next-intl";
 import useClientNotFound from "@/hoooks/useClientNotFound";
@@ -19,6 +18,8 @@ import { SingleDayTexts } from "@/components/days/single-day";
 import LikesDislikes from "@/components/common/likes-dislikes";
 import DietBadge from "@/components/common/diet-badge";
 import { fetchStream } from "@/hoooks/fetchStream";
+import { AnswerFromBodyFormTexts } from "@/components/forms/answer-from-body-form";
+import ItemBodyQa from "@/components/common/item-body-qa";
 
 export interface SingleTrainerPlanPageTexts {
   elementHeaderTexts: ElementHeaderTexts;
@@ -29,6 +30,7 @@ export interface SingleTrainerPlanPageTexts {
   notDisplayed: string;
   singleDayTexts: SingleDayTexts;
   daysListTexts: DaysListTexts;
+  answerFromBodyFormTexts: AnswerFromBodyFormTexts;
 }
 
 interface Props extends WithUser, SingleTrainerPlanPageTexts {
@@ -46,6 +48,7 @@ export default function SingleTrainerPlanPageContent({
   price,
   singleDayTexts,
   daysListTexts,
+  answerFromBodyFormTexts,
 }: Props) {
   const {
     itemState: planState,
@@ -180,7 +183,10 @@ export default function SingleTrainerPlanPageContent({
         </div>
       )}
       <div className="mt-20 px-14">
-        <ProseText html={plan?.body} />
+        <ItemBodyQa
+          html={planState.body}
+          formProps={{ body: planState.body, texts: answerFromBodyFormTexts }}
+        />
         <AuthorProfile author={user} />
       </div>
       <div className={"mt-20"}>

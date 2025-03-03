@@ -1,15 +1,28 @@
 import { Redis } from "ioredis";
 import { RedisCache } from "@langchain/community/caches/ioredis";
+import murmur from "murmurhash";
 
+class CustomRedis extends Redis {
+  static REDIS_TTL = process.env.LANGCHAIN_CACHE_REDIS_TTL
+    ? parseInt(process.env.LANGCHAIN_CACHE_REDIS_TTL)
+    : 300;
+  setWithTTL(key: string, value: string, ttl?: number) {
+    return this.set(key, value, "EX", ttl || CustomRedis.REDIS_TTL);
+  }
+}
 declare const globalThis: {
   redisCache: RedisCache | undefined;
-  redisInstance: Redis | undefined;
+  redisInstance: CustomRedis | undefined;
 } & typeof global;
+
+export function generateHashKey(string: string, antet?: string) {
+  return `${antet ? antet + ":" : ""}${murmur.v3(string)}`;
+}
 
 function initRedis() {
   if (!globalThis.redisInstance) {
     console.log("Creating a new Redis connection...");
-    globalThis.redisInstance = new Redis({
+    globalThis.redisInstance = new CustomRedis({
       db: process.env.LANGCHAIN_CACHE_REDIS_DB
         ? parseInt(process.env.LANGCHAIN_CACHE_REDIS_DB)
         : 11,
@@ -29,9 +42,7 @@ function initRedis() {
 
   if (!globalThis.redisCache) {
     globalThis.redisCache = new RedisCache(globalThis.redisInstance, {
-      ttl: process.env.LANGCHAIN_CACHE_REDIS_TTL
-        ? parseInt(process.env.LANGCHAIN_CACHE_REDIS_TTL)
-        : 300,
+      ttl: CustomRedis.REDIS_TTL,
     });
   }
 }
@@ -44,4 +55,14 @@ export function getRedisCache(): RedisCache {
     throw new Error("Redis cache is not initialized");
   }
   return globalThis.redisCache;
+}
+
+export function getRedisInstance(): CustomRedis {
+  if (!globalThis.redisInstance) {
+    initRedis();
+  }
+  if (!globalThis.redisInstance) {
+    throw new Error("Redis instance is not initialized");
+  }
+  return globalThis.redisInstance;
 }

@@ -10,7 +10,6 @@ import ElementHeader, {
   ElementHeaderTexts,
 } from "@/components/common/element-header";
 import CustomImageCarousel from "@/components/common/custom-image-crousel";
-import ProseText from "@/components/common/prose-text";
 import AuthorProfile from "@/components/common/author-profile";
 import AlertDialogDeletePost from "@/components/dialogs/posts/delete-post";
 import { Button } from "@/components/ui/button";
@@ -23,12 +22,15 @@ import PostRecommendationList, {
   PostRecommendationListTexts,
 } from "@/components/recomandation/post-recommendation-list";
 import { Separator } from "@/components/ui/separator";
+import { AnswerFromBodyFormTexts } from "@/components/forms/answer-from-body-form";
+import ItemBodyQa from "@/components/common/item-body-qa";
 
 export interface SinglePostPageTexts {
   elementHeaderTexts: ElementHeaderTexts;
   updateButton: string;
   postCommentsTexts: PostCommentsTexts;
   postRecommendationListTexts: PostRecommendationListTexts;
+  answerFromBodyFormTexts: AnswerFromBodyFormTexts;
 }
 
 interface Props extends WithUser, SinglePostPageTexts {
@@ -42,6 +44,7 @@ export default function SinglePostPageContent({
   postCommentsTexts,
   showRecommendations = false,
   postRecommendationListTexts,
+  answerFromBodyFormTexts,
 }: Props) {
   const {
     itemState: postState,
@@ -127,14 +130,17 @@ export default function SinglePostPageContent({
         isLiked={isLiked}
         isDisliked={isDisliked}
         {...elementHeaderTexts}
-      />{" "}
+      />
       {item?.images.length > 0 && (
         <div className="mt-10">
           <CustomImageCarousel images={item?.images} />
         </div>
       )}
       <div className="mt-20 px-14">
-        <ProseText html={item?.body} />
+        <ItemBodyQa
+          html={item?.body}
+          formProps={{ body: item?.body, texts: answerFromBodyFormTexts }}
+        />
         <AuthorProfile author={user} />
       </div>
       {postState.approved && (

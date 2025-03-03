@@ -66,6 +66,8 @@ def generate_images():
         num_inference_steps = data.get("num_inference_steps", 50)
         guidance_scale = data.get("guidance_scale", 7.5)
         num_images = data.get("num_images", 1)
+        if num_images < 1:
+            num_images = 1
         height = data.get("height", 512)
         width = data.get("width", 512)
 

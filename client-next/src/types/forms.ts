@@ -944,6 +944,24 @@ export const getAdminAICreatePostSchema = ({
     })
     .and(getDiffusionSchema(diffusion));
 
+export interface AnswerFromBodySchemaTexts {
+  minQuestion: string;
+}
+
+export function getAnswerFromBodySchemaTexts(): Promise<AnswerFromBodySchemaTexts> {
+  return getTranslations("zod.AnswerFromBodySchemaTexts").then((t) => ({
+    minQuestion: t("minQuestion"),
+  }));
+}
+
+export const getAnswerFromBodySchema = ({
+  minQuestion,
+}: AnswerFromBodySchemaTexts) =>
+  z.object({
+    question: z.string().min(10, minQuestion),
+    k: z.coerce.number().int().min(1).max(100),
+  });
+
 export type CommentSchemaType = z.infer<ReturnType<typeof getCommentSchema>>;
 
 export type CalculatorSchemaType = z.infer<
@@ -1004,4 +1022,8 @@ export type ConversationMessageType = z.infer<typeof conversationMessageSchema>;
 
 export type AdminAICreatePostSchemaType = z.infer<
   ReturnType<typeof getAdminAICreatePostSchema>
+>;
+
+export type AnswerFromBodySchemaType = z.infer<
+  ReturnType<typeof getAnswerFromBodySchema>
 >;

@@ -6,7 +6,6 @@ import { checkOwnerOrAdmin, cn, isSuccessCheckReturn } from "@/lib/utils";
 import React from "react";
 import { ElementHeaderTexts } from "@/components/common/element-header";
 import CustomImageCarousel from "@/components/common/custom-image-crousel";
-import ProseText from "@/components/common/prose-text";
 import AuthorProfile from "@/components/common/author-profile";
 import CustomVideoCarousel from "@/components/common/custom-videos-crousel";
 import { NutritionalTableTexts } from "@/components/common/nutritional-table";
@@ -17,12 +16,15 @@ import useClientNotFound from "@/hoooks/useClientNotFound";
 import LikesDislikes from "@/components/common/likes-dislikes";
 import DietBadge from "@/components/common/diet-badge";
 import RecipeIngredients from "@/components/recipes/recipe-ingredients";
+import { AnswerFromBodyFormTexts } from "@/components/forms/answer-from-body-form";
+import ItemBodyQa from "@/components/common/item-body-qa";
 
 export interface SingleRecipePageTexts {
   elementHeaderTexts: ElementHeaderTexts;
   nutritionalTableTexts: NutritionalTableTexts;
   ingredientPieChartTexts: IngredientPieChartTexts;
   showIngredients: string;
+  answerFromBodyFormTexts: AnswerFromBodyFormTexts;
 }
 
 interface Props extends WithUser, SingleRecipePageTexts {
@@ -35,6 +37,7 @@ export default function SingeRecipePageContent({
   nutritionalTableTexts,
   ingredientPieChartTexts,
   showIngredients,
+  answerFromBodyFormTexts,
 }: Props) {
   const {
     recipeState,
@@ -131,7 +134,10 @@ export default function SingeRecipePageContent({
         </div>
       )}
       <div className="mt-20 px-14">
-        <ProseText html={recipe?.body} />
+        <ItemBodyQa
+          html={recipe?.body}
+          formProps={{ body: recipe?.body, texts: answerFromBodyFormTexts }}
+        />
         <AuthorProfile author={user} />
       </div>
       {recipe?.videos.length > 0 && (

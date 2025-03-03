@@ -10,6 +10,7 @@ import { formatDistanceToNow } from "date-fns";
 import { enUS, ro } from "date-fns/locale";
 import { Locale } from "@/navigation";
 import isEqual from "lodash.isequal";
+import { stripHtml } from "string-strip-html";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -351,3 +352,6 @@ export function formatChartValue(value: number | string) {
 }
 
 export const wrapItemToString = (i: unknown) => `${i}`;
+export function removeHTML(html: string) {
+  return stripHtml(html).result.replace(/\s+/g, " ").trim();
+}

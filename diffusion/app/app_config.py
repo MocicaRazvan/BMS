@@ -27,10 +27,11 @@ MAX_IMAGE_THREADS = int(cc.get("max.image.threads", 4))
 
 # model settings
 MODEL_ID = cc.get("model.id")
+model_name = MODEL_ID.split("/")[-1]
 ENV_LOCAL_MODEL_PATH = (
     os.path.join(os.getenv("DIFFUSION_MODEL_PATH", ""), "./models")
     if "DIFFUSION_MODEL_PATH" in os.environ
-    else "./models/stable_diffusion_v1_4"
+    else f"./models/{model_name}"
 )
 LOCAL_MODEL_PATH = cc.get("local.model.path", ENV_LOCAL_MODEL_PATH)
 

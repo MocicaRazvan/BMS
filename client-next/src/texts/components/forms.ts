@@ -5,6 +5,7 @@ import { InputMultipleSelectorTexts } from "@/components/forms/input-multiselect
 import {
   CommentSchemaTexts,
   getAdminEmailSchemaTexts,
+  getAnswerFromBodySchemaTexts,
   getCommentSchemaTexts,
   getDaySchemaTexts,
   getDiffusionSchemaTexts,
@@ -38,6 +39,7 @@ import { AIGeneratePopTexts } from "@/components/forms/ai-generate-pop";
 import { DiffusionImagesFormTexts } from "@/components/forms/diffusion-images-form";
 import { UseNavigationGuardI18nTexts } from "@/hoooks/use-navigation-guard-i18n-form";
 import { PasswordStrengthIndicatorTexts } from "@/components/forms/passowrd-strength-indicator";
+import { AnswerFromBodyFormTexts } from "@/components/forms/answer-from-body-form";
 
 export type FormType = "create" | "update";
 
@@ -649,5 +651,28 @@ export async function getPasswordStrengthIndicatorTexts(): Promise<PasswordStren
     hasNumber: t("hasNumber"),
     hasSpecialChar: t("hasSpecialChar"),
     minLength: t("minLength"),
+  };
+}
+
+export async function getAnswerFromBodyFormTexts(): Promise<AnswerFromBodyFormTexts> {
+  const [t, schemaTexts, buttonSubmitTexts] = await Promise.all([
+    getTranslations("components.forms.AnswerFromBodyFormTexts"),
+    getAnswerFromBodySchemaTexts(),
+    getButtonSubmitTexts(),
+  ]);
+
+  return {
+    schemaTexts,
+    toxicError: t("toxicError"),
+    englishError: t("englishError"),
+    answerError: t("answerError"),
+    questionLabel: t("questionLabel"),
+    kLabel: t("kLabel"),
+    questionPlaceholder: t("questionPlaceholder"),
+    kPlaceholder: t("kPlaceholder"),
+    disclaimerText: t("disclaimerText"),
+    triggerText: t("triggerText"),
+    matchScore: t("matchScore"),
+    buttonSubmitTexts,
   };
 }

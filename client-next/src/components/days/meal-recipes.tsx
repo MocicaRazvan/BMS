@@ -8,7 +8,6 @@ import { AnimatePresence, motion } from "framer-motion";
 import { NutritionalTableTexts } from "@/components/common/nutritional-table";
 import { IngredientPieChartTexts } from "@/components/charts/ingredient-macros-pie-chart";
 import CustomImageCarousel from "@/components/common/custom-image-crousel";
-import ProseText from "@/components/common/prose-text";
 import CustomVideoCarousel from "@/components/common/custom-videos-crousel";
 import RecipeMacros from "@/components/recipes/recipe-macros";
 import { fetchStream } from "@/hoooks/fetchStream";
@@ -18,6 +17,8 @@ import LoadingSpinner from "@/components/common/loading-spinner";
 import useClientNotFound from "@/hoooks/useClientNotFound";
 import RecipeIngredients from "@/components/recipes/recipe-ingredients";
 import DietBadge from "@/components/common/diet-badge";
+import { AnswerFromBodyFormTexts } from "@/components/forms/answer-from-body-form";
+import ItemBodyQa from "@/components/common/item-body-qa";
 
 export interface MealRecipeProps extends WithUser {
   recipeIds: number[];
@@ -27,6 +28,7 @@ export interface MealRecipeProps extends WithUser {
   showLikes?: boolean;
   disableLikes?: boolean;
   showIngredients: string;
+  answerFromBodyFormTexts: AnswerFromBodyFormTexts;
 }
 
 export const MealRecipeList = memo(
@@ -39,6 +41,7 @@ export const MealRecipeList = memo(
     showLikes,
     disableLikes = false,
     showIngredients,
+    answerFromBodyFormTexts,
   }: MealRecipeProps) => {
     const [currentIndex, setCurrentIndex] = useState(0);
     return (
@@ -72,6 +75,7 @@ export const MealRecipeList = memo(
                 showLikes={showLikes}
                 disableLikes={disableLikes}
                 showIngredients={showIngredients}
+                answerFromBodyFormTexts={answerFromBodyFormTexts}
               />
             </motion.div>
           ))}
@@ -99,6 +103,7 @@ interface RecipePlanItemProps extends WithUser {
   showLikes?: boolean;
   disableLikes?: boolean;
   showIngredients: string;
+  answerFromBodyFormTexts: AnswerFromBodyFormTexts;
 }
 export const RecipePlanItem = memo(
   ({
@@ -110,6 +115,7 @@ export const RecipePlanItem = memo(
     showLikes = true,
     disableLikes = false,
     showIngredients,
+    answerFromBodyFormTexts,
   }: RecipePlanItemProps) => {
     const {
       recipeState,
@@ -205,8 +211,14 @@ export const RecipePlanItem = memo(
           </div>
         )}
         <div className="mt-20 px-10">
-          <ProseText html={recipeState?.body} />
-        </div>{" "}
+          <ItemBodyQa
+            html={recipeState?.body}
+            formProps={{
+              body: recipeState?.body,
+              texts: answerFromBodyFormTexts,
+            }}
+          />
+        </div>
         {recipeState?.videos.length > 0 && (
           <div className="mt-20">
             <CustomVideoCarousel videos={recipeState?.videos} />

@@ -3,6 +3,7 @@ import * as toxicity from "@tensorflow-models/toxicity";
 import { detect } from "tinyld";
 import { emitInfo } from "@/logger";
 import lande from "lande";
+import LanguageDetect from "languagedetect";
 
 const threshold = process.env.TOXICITY_THRESHOLD
   ? parseFloat(process.env.TOXICITY_THRESHOLD)
@@ -36,9 +37,13 @@ export async function loadGlobalModel(): Promise<toxicity.ToxicityClassifier> {
 }
 export async function getToxicity(text: string) {
   const tinyDet = detect(text) === "en";
-  const areBothEnglish = tinyDet && lande(text)[0][0] === "eng";
+  const ladneDet = lande(text).some((e) => e[0] === "eng" && e[1] > 0.22);
+  const ld = new LanguageDetect()
+    .detect(text, 10)
+    .some((e) => e[0] === "english" && e[1] > 0.22);
 
-  if (!areBothEnglish && text.length > 10) {
+  const isOneEnglish = [tinyDet, ladneDet, ld].filter(Boolean).length >= 1;
+  if (!isOneEnglish && text.length > 10) {
     return {
       failure: true,
       reason: TOXIC_REASON.LANGUAGE,

@@ -144,6 +144,9 @@
       "period": "Vă rugăm să selectați un interval de timp",
       "minRecipes": "Este necesar cel puțin o rețetă"
     },
+    "AnswerFromBodySchemaTexts": {
+      "minQuestion": "Întrebarea trebuie să aibă cel puțin 10 de caractere"
+    },
     "forms": {
       "components": {
         "InputFile": {
@@ -345,6 +348,18 @@
     "forms": {
       "UseNavigationGuardI18nTexts": {
         "confirm": "Ați făcut modificări care nu au fost salvate. Sunteți sigur că doriți să părăsiți pagina?"
+      },
+      "AnswerFromBodyFormTexts": {
+        "toxicError": "Întrebarea nu ar trebui să conțină limbaj toxic",
+        "englishError": "Întrebarea trebuie să fie în engleză",
+        "answerError": "A apărut o eroare în generarea răspunsului",
+        "questionLabel": "Întrebare",
+        "kLabel": "Numărul de elemente de returnat",
+        "questionPlaceholder": "Introduceți întrebarea",
+        "kPlaceholder": "Introduceți numărul de elemente de returnat",
+        "triggerText": "Căutare în conținut cu AI",
+        "disclaimerText": "AI-ul va căuta doar în conținutul actual și va da raspunsuri scurte",
+        "matchScore": "Scorul asemănării"
       },
       "PasswordStrengthIndicatorTexts": {
         "weak": "Slabă",

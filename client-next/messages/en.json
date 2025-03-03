@@ -116,6 +116,9 @@
       "minRecipes": "At least one recipe is required",
       "periodUsed": "Period is already used"
     },
+    "AnswerFromBodySchemaTexts": {
+      "minQuestion": "The question must be at least 10 characters long"
+    },
     "forms": {
       "components": {
         "InputFile": {
@@ -344,6 +347,18 @@
   },
   "components": {
     "forms": {
+      "AnswerFromBodyFormTexts": {
+        "toxicError": "The question should not contain toxic language",
+        "englishError": "The question must be in English",
+        "answerError": "The was an error while generating the answer",
+        "questionLabel": "Question",
+        "kLabel": "Number of items to return",
+        "questionPlaceholder": "Enter the question",
+        "kPlaceholder": "Enter the number of items to return",
+        "triggerText": "Search in the content with AI",
+        "disclaimerText": "The AI will just look inside the current content and gives short answers",
+        "matchScore": "Match score"
+      },
       "PasswordStrengthIndicatorTexts": {
         "weak": "Weak",
         "medium": "Medium",

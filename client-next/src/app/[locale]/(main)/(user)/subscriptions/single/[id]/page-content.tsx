@@ -10,7 +10,6 @@ import LoadingSpinner from "@/components/common/loading-spinner";
 import React, { useCallback } from "react";
 import { fetchStream } from "@/hoooks/fetchStream";
 import CustomImageCarousel from "@/components/common/custom-image-crousel";
-import ProseText from "@/components/common/prose-text";
 import AuthorProfile from "@/components/common/author-profile";
 import useClientNotFound from "@/hoooks/useClientNotFound";
 import LikesDislikes from "@/components/common/likes-dislikes";
@@ -22,6 +21,8 @@ import PlanRecommendationList, {
   PlanRecommendationListTexts,
 } from "@/components/recomandation/plan-recommendation-list";
 import { Separator } from "@/components/ui/separator";
+import { AnswerFromBodyFormTexts } from "@/components/forms/answer-from-body-form";
+import ItemBodyQa from "@/components/common/item-body-qa";
 
 export interface SingleSubscriptionTexts {
   elementHeaderTexts: ElementHeaderTexts;
@@ -30,6 +31,7 @@ export interface SingleSubscriptionTexts {
   singleDayTexts: SingleDayTexts;
   daysListTexts: DaysListTexts;
   planRecommendationListTexts: PlanRecommendationListTexts;
+  answerFromBodyFormTexts: AnswerFromBodyFormTexts;
 }
 
 interface Props extends WithUser, SingleSubscriptionTexts {
@@ -43,6 +45,7 @@ export default function SingleSubscriptionPageContent({
   singleDayTexts,
   daysListTexts,
   planRecommendationListTexts,
+  answerFromBodyFormTexts,
 }: Props) {
   const {
     itemState: planState,
@@ -134,7 +137,10 @@ export default function SingleSubscriptionPageContent({
         </div>
       )}
       <div className="mt-20 px-14">
-        <ProseText html={plan?.body} />
+        <ItemBodyQa
+          html={plan?.body}
+          formProps={{ body: plan?.body, texts: answerFromBodyFormTexts }}
+        />
         <AuthorProfile author={user} />
       </div>
       <div className={"mt-20"}>

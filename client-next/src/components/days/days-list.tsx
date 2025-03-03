@@ -16,14 +16,16 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
+import { AnswerFromBodyFormTexts } from "@/components/forms/answer-from-body-form";
 
 export interface DaysListTexts {
   header: string;
+  answerFromBodyFormTexts: AnswerFromBodyFormTexts;
 }
 
 export interface DaysListProps
   extends DaysListTexts,
-    Omit<SingleDayItemProps, "dayId"> {
+    Omit<SingleDayItemProps, "dayId" | "answerFromBodyFormTexts"> {
   dayIds: number[];
 }
 

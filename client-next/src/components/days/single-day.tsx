@@ -1,7 +1,6 @@
 "use client";
 import LikesDislikes from "@/components/common/likes-dislikes";
 import { cn } from "@/lib/utils";
-import ProseText from "@/components/common/prose-text";
 import AuthorProfile from "@/components/common/author-profile";
 import MealsList, { MealListProps } from "@/components/days/meals-list";
 import React, { memo, useCallback, useState } from "react";
@@ -16,6 +15,8 @@ import DayTypeBadge, {
   DayTypeBadgeTexts,
 } from "@/components/days/day-type-badge";
 import LoadingSpinner from "@/components/common/loading-spinner";
+import { AnswerFromBodyFormTexts } from "@/components/forms/answer-from-body-form";
+import ItemBodyQa from "@/components/common/item-body-qa";
 
 export interface SingleDayTexts {
   meals: string;
@@ -23,12 +24,16 @@ export interface SingleDayTexts {
   ingredientPieChartTexts: IngredientPieChartTexts;
   showIngredients: string;
   dayBadgeTexts: DayTypeBadgeTexts;
+  answerFromBodyFormTexts: AnswerFromBodyFormTexts;
 }
 
 export interface SingleDayProps
   extends Omit<
     MealListProps,
-    "nutritionalTableTexts" | "ingredientPieChartTexts" | "showIngredients"
+    | "nutritionalTableTexts"
+    | "ingredientPieChartTexts"
+    | "showIngredients"
+    | "answerFromBodyFormTexts"
   > {
   day: DayResponse;
   author: UserDto;
@@ -48,6 +53,7 @@ const SingleDay = memo(
     authUser,
     recipeBasePath,
     hideAuthor = false,
+
     ...rest
   }: SingleDayProps) => {
     const [dayState, setDayState] = useState<DayResponse>(day);
@@ -135,7 +141,13 @@ const SingleDay = memo(
           </div>
         </div>
         <div className="mt-20 px-14">
-          <ProseText html={dayState.body} />
+          <ItemBodyQa
+            html={dayState.body}
+            formProps={{
+              body: dayState.body,
+              texts: texts.answerFromBodyFormTexts,
+            }}
+          />
           {!hideAuthor && <AuthorProfile author={author} />}
         </div>
         <div className="mt-20 px-2">
@@ -153,6 +165,7 @@ const SingleDay = memo(
               recipeBasePath ? recipeBasePath + `/${day.id}` : undefined
             }
             showIngredients={texts.showIngredients}
+            answerFromBodyFormTexts={texts.answerFromBodyFormTexts}
           />
         </div>
       </section>
