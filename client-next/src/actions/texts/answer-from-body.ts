@@ -14,17 +14,26 @@ function generateAnsCacheKey(text: string, query: string, k: number) {
   return generateHashKey(`${text}${query}${k}`, "ans");
 }
 
+const parseString = (str: string) => str.replace(/\s/g, " ").trim();
+
 interface AnsReturnType {
   content: string;
   score: number;
 }
 
+interface AggregatedResult {
+  idx: number;
+  content: string;
+}
 async function getHTMLAggregate(
   splits: string[],
   embeddings: OllamaEmbeddings,
   query: string,
   k: number,
 ) {
+  if (k === 0) {
+    k = 1;
+  }
   const docs = splits.map(
     (chunk) =>
       new LangDocument({
@@ -34,48 +43,57 @@ async function getHTMLAggregate(
 
   const vectorDb = await MemoryVectorStore.fromDocuments(docs, embeddings);
 
-  return removeHTML(
-    (
-      await vectorDb.maxMarginalRelevanceSearch(query, {
-        fetchK: k * 4,
-        lambda: 0.6,
-        k: k * 2,
-      })
-    ).reduce(
-      (acc, cur) => {
-        acc += cur.pageContent;
-        return acc;
-      },
-
-      "",
-    ),
-  );
+  return (
+    await vectorDb.maxMarginalRelevanceSearch(query, {
+      fetchK: k * 4 + 2,
+      lambda: 0.6,
+      k: k * 2 + 1,
+    })
+  ).reduce((acc, cur, idx) => {
+    acc.push({
+      idx,
+      content: removeHTML(parseString(cur.pageContent)),
+    });
+    return acc;
+  }, [] as AggregatedResult[]);
 }
 
 async function getSentenceResults(
-  aggregatedResult: string,
+  aggregatedResult: AggregatedResult[],
   embeddings: OllamaEmbeddings,
   query: string,
   k: number,
 ) {
-  const sentenceDocs = split(aggregatedResult)
-    .filter((r) => r.raw.replace(/\s/g, "").length > 0)
-    .reduce(
-      (acc, _, i, arr) => {
-        if (i % 2 === 0) {
-          const nextItem = arr.at(i + 1) ? arr.at(i + 1)?.raw : "";
-          acc.push({ raw: arr[i].raw + " " + nextItem });
-        }
-        return acc;
-      },
-      [] as { raw: string }[],
+  const sentenceDocs = aggregatedResult
+    .map(({ idx, content }) =>
+      [
+        ...new Set(
+          split(content)
+            .filter((r) => r.raw.replace(/\s/g, "").length > 0)
+            .map((r) => parseString(r.raw)),
+        ),
+      ]
+        .reduce(
+          (acc, _, i, arr) => {
+            if (i % 2 === 0) {
+              const nextItem = arr.at(i + 1) ? arr.at(i + 1) : "";
+              acc.push({ raw: arr[i] + " " + nextItem });
+            } else if (i === arr.length - 1 && i % 2 == 1) {
+              acc.push({ raw: arr[i] });
+            }
+            return acc;
+          },
+          [] as { raw: string }[],
+        )
+        .map(
+          (r) =>
+            new LangDocument({
+              pageContent: parseString(r.raw),
+              metadata: { idx },
+            }),
+        ),
     )
-    .map(
-      (r) =>
-        new LangDocument({
-          pageContent: r.raw,
-        }),
-    );
+    .flat();
 
   const sentenceVectorDb = await MemoryVectorStore.fromDocuments(
     sentenceDocs,
@@ -109,7 +127,7 @@ export async function getAnswerFromBody(
   const [splits, embeddings] = await Promise.all([
     RecursiveCharacterTextSplitter.fromLanguage("html", {
       chunkSize: 600,
-      chunkOverlap: 100,
+      chunkOverlap: 150,
     }).splitText(body),
     vectorStoreInstance.getEmbeddings(),
   ]);
