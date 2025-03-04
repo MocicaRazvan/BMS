@@ -103,10 +103,22 @@ async function getSentenceResults(
   );
 
   return Object.values(retrievedSentences)
-    .map(({ contents, cumScore }) => ({
-      content: contents.join(" "),
-      score: cumScore / contents.length,
-    }))
+    .map(({ contents, cumScore }) => {
+      const joinedContent = contents.join(" ");
+      const lengthBoost = 1 + 0.025 * Math.log(1 + joinedContent.length);
+      const boostedScore =
+        Math.min((cumScore / contents.length) * lengthBoost, 1) - 0.1;
+      // console.log(
+      //   joinedContent.length,
+      //   cumScore / contents.length,
+      //   boostedScore + 0.1,
+      // );
+
+      return {
+        content: joinedContent,
+        score: boostedScore,
+      };
+    })
     .sort((a, b) => b.score - a.score)
     .slice(0, k);
 }
