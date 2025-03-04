@@ -45,9 +45,9 @@ async function getHTMLAggregate(
 
   return (
     await vectorDb.maxMarginalRelevanceSearch(query, {
-      fetchK: k * 4 + 2,
-      lambda: 0.6,
-      k: k * 2 + 1,
+      fetchK: (k + 1) * 4,
+      lambda: 0.65,
+      k: (k + 1) * 2,
     })
   ).reduce((acc, cur, idx) => {
     acc.push({
@@ -72,26 +72,13 @@ async function getSentenceResults(
             .filter((r) => r.raw.replace(/\s/g, "").length > 0)
             .map((r) => parseString(r.raw)),
         ),
-      ]
-        .reduce(
-          (acc, _, i, arr) => {
-            if (i % 2 === 0) {
-              const nextItem = arr.at(i + 1) ? arr.at(i + 1) : "";
-              acc.push({ raw: arr[i] + " " + nextItem });
-            } else if (i === arr.length - 1 && i % 2 == 1) {
-              acc.push({ raw: arr[i] });
-            }
-            return acc;
-          },
-          [] as { raw: string }[],
-        )
-        .map(
-          (r) =>
-            new LangDocument({
-              pageContent: parseString(r.raw),
-              metadata: { idx },
-            }),
-        ),
+      ].map(
+        (r) =>
+          new LangDocument({
+            pageContent: parseString(r),
+            metadata: { idx },
+          }),
+      ),
     )
     .flat();
 
@@ -100,12 +87,28 @@ async function getSentenceResults(
     embeddings,
   );
 
-  return (await sentenceVectorDb.similaritySearchWithScore(query, k)).map(
-    (d) => ({
-      content: d[0].pageContent.trim(),
-      score: d[1],
-    }),
+  const retrievedSentences = (
+    await sentenceVectorDb.similaritySearchWithScore(query, 2 * (k + 1))
+  ).reduce(
+    (acc, [doc, score]) => {
+      const idx = doc.metadata.idx;
+      if (!acc[idx]) {
+        acc[idx] = { contents: [], cumScore: 0 };
+      }
+      acc[idx].contents.push(doc.pageContent.trim());
+      acc[idx].cumScore += score;
+      return acc;
+    },
+    {} as Record<number, { contents: string[]; cumScore: number }>,
   );
+
+  return Object.values(retrievedSentences)
+    .map(({ contents, cumScore }) => ({
+      content: contents.join(" "),
+      score: cumScore / contents.length,
+    }))
+    .sort((a, b) => b.score - a.score)
+    .slice(0, k);
 }
 
 export async function getAnswerFromBody(
