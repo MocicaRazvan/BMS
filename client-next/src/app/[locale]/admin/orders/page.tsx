@@ -12,7 +12,8 @@ import { Suspense } from "react";
 import LoadingSpinner from "@/components/common/loading-spinner";
 import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
 import { Metadata } from "next";
-import { getIntlMetadata } from "@/texts/metadata";
+import { getIntlMetadata, getMetadataValues } from "@/texts/metadata";
+import { FindInSiteTexts } from "@/components/nav/find-in-site";
 
 interface Props {
   params: { locale: Locale };
@@ -30,6 +31,7 @@ export interface AdminOrdersPageTexts {
   title: string;
   header: string;
   menuTexts: SidebarMenuTexts;
+  findInSiteTexts: FindInSiteTexts;
 }
 
 export default async function AdminOrdersPage({ params: { locale } }: Props) {
@@ -43,12 +45,14 @@ export default async function AdminOrdersPage({ params: { locale } }: Props) {
       sortingOrdersSortingOptions,
       header,
       menuTexts,
+      findInSiteTexts,
     },
     authUser,
   ] = await Promise.all([
     getAdminOrdersPageTexts(),
     getUserWithMinRole("ROLE_ADMIN"),
   ]);
+  const metadataValues = await getMetadataValues(authUser, locale);
 
   const orderOptions = getSortingOptions(
     sortingOrdersSortingOptionsKeys,
@@ -63,6 +67,8 @@ export default async function AdminOrdersPage({ params: { locale } }: Props) {
         authUser,
         menuTexts,
         mappingKey: "admin",
+        findInSiteTexts,
+        metadataValues,
       }}
     >
       <div className="w-full h-full bg-background">

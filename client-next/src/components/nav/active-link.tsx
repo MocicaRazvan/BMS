@@ -19,14 +19,16 @@ const ActiveLink: FC<ActiveLinkProps> = ({
       {...props}
       className={cn(
         "inline-block relative cursor-pointer text-center hover:scale-[1.03] transition-all group",
-        isActive ? "font-bold" : "font-semibold",
+        isActive
+          ? "font-bold text-foreground"
+          : "font-normal text-foreground/80",
         props.className,
       )}
     >
       {children}
       <span
         className={cn(
-          "absolute bottom-0 left-0 w-full h-[2px] bg-primary transform transition-transform duration-300 ease-out ",
+          "absolute bottom-0 left-0 w-full h-[2px] bg-foreground transform transition-transform duration-300 ease-out ",
           {
             "scale-x-0 origin-right": !isActive,
             "scale-x-100 origin-left": isActive,

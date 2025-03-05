@@ -9,9 +9,11 @@ import PostsTable from "@/components/table/posts-table";
 import { UseListProps } from "@/hoooks/useList";
 import useGetUser from "@/hoooks/useGetUser";
 import useClientNotFound from "@/hoooks/useClientNotFound";
+import { MetadataValue } from "@/components/nav/find-in-site";
 
 interface Props extends UserPostsAdminPageTexts, WithUser, UseListProps {
   id: string;
+  metadataValues: MetadataValue[];
 }
 
 export default function UserPostsAdminPageContent({
@@ -25,6 +27,8 @@ export default function UserPostsAdminPageContent({
   path,
   sortingOptions,
   menuTexts,
+  findInSiteTexts,
+  metadataValues,
 }: Props) {
   // const { messages, error, refetch, isFinished } = useFetchStream<
   //   CustomEntityModel<UserDto>,
@@ -55,6 +59,8 @@ export default function UserPostsAdminPageContent({
         themeSwitchTexts,
         menuTexts,
         mappingKey: "admin",
+        findInSiteTexts,
+        metadataValues,
       }}
     >
       <div className="w-full h-full bg-background">

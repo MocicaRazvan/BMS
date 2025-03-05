@@ -11,8 +11,9 @@ import SidebarContentLayout from "@/components/sidebar/sidebar-content-layout";
 import { Suspense } from "react";
 import LoadingSpinner from "@/components/common/loading-spinner";
 import { Metadata } from "next";
-import { getIntlMetadata } from "@/texts/metadata";
+import { getIntlMetadata, getMetadataValues } from "@/texts/metadata";
 import ScrollProgress from "@/components/common/scroll-progress";
+import { FindInSiteTexts } from "@/components/nav/find-in-site";
 
 interface Props {
   params: { locale: Locale; id: string };
@@ -24,6 +25,7 @@ export interface AdminPlanPageTexts {
   title: string;
   menuTexts: SidebarMenuTexts;
   singleTrainerPlanPageTexts: SingleTrainerPlanPageTexts;
+  findInSiteTexts: FindInSiteTexts;
 }
 
 export async function generateMetadata({
@@ -43,6 +45,7 @@ export default async function AdminPlanPage({ params: { locale, id } }: Props) {
     getUser(),
     getAdminPlanPageTexts(),
   ]);
+  const metadataValues = await getMetadataValues(authUser, locale);
 
   return (
     <SidebarContentLayout
@@ -50,6 +53,7 @@ export default async function AdminPlanPage({ params: { locale, id } }: Props) {
         ...texts,
         authUser,
         mappingKey: "admin",
+        metadataValues,
       }}
     >
       <ScrollProgress />

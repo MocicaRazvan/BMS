@@ -24,6 +24,7 @@ import { TopPlans, TopPlansTexts } from "@/components/charts/top-plans";
 import TopTrainers, {
   TopTrainersTexts,
 } from "@/components/charts/top-trainers";
+import { FindInSiteTexts } from "@/components/nav/find-in-site";
 
 export interface AdminDashboardPageTexts {
   title: string;
@@ -38,6 +39,7 @@ export interface AdminDashboardPageTexts {
   topUsersTexts: TopUsersTexts;
   topPlansTexts: TopPlansTexts;
   topTrainersTexts: TopTrainersTexts;
+  findInSiteTexts: FindInSiteTexts;
 }
 
 interface Props extends WithUser, AdminDashboardPageTexts {

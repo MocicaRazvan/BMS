@@ -12,7 +12,8 @@ import LoadingSpinner from "@/components/common/loading-spinner";
 import SidebarContentLayout from "@/components/sidebar/sidebar-content-layout";
 import { Suspense } from "react";
 import { Metadata } from "next";
-import { getIntlMetadata } from "@/texts/metadata";
+import { getIntlMetadata, getMetadataValues } from "@/texts/metadata";
+import { FindInSiteTexts } from "@/components/nav/find-in-site";
 
 interface Props {
   params: { locale: Locale; id: string };
@@ -35,6 +36,7 @@ export interface UserDaysPageTexts {
   header: string;
   themeSwitchTexts: ThemeSwitchTexts;
   menuTexts: SidebarMenuTexts;
+  findInSiteTexts: FindInSiteTexts;
 }
 
 export default async function UserDaysPage({ params: { locale, id } }: Props) {
@@ -44,6 +46,7 @@ export default async function UserDaysPage({ params: { locale, id } }: Props) {
     getUserDaysPageTexts(),
     getTheSameUserOrAdmin(id),
   ]);
+  const metadataValues = await getMetadataValues(authUser, locale);
 
   const daysOptions = getSortingOptions(
     sortingDaysSortingOptionsKeys,
@@ -58,6 +61,8 @@ export default async function UserDaysPage({ params: { locale, id } }: Props) {
         authUser,
         menuTexts: userDaysPageTexts.menuTexts,
         mappingKey: "trainer",
+        findInSiteTexts: userDaysPageTexts.findInSiteTexts,
+        metadataValues,
       }}
     >
       <div className="space-y-10 lg:space-y-16 w-full transition-all py-5 px-4 mx-auto ">

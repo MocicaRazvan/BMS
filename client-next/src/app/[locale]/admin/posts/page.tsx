@@ -12,11 +12,12 @@ import LoadingSpinner from "@/components/common/loading-spinner";
 import { sortingPostsSortingOptionsKeys } from "@/texts/components/list";
 import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
 import { Metadata } from "next";
-import { getIntlMetadata } from "@/texts/metadata";
+import { getIntlMetadata, getMetadataValues } from "@/texts/metadata";
 import ArchiveQueueCards, {
   ArchiveQueueCardsTexts,
 } from "@/components/common/archive-queue-card";
 import { Separator } from "@/components/ui/separator";
+import { FindInSiteTexts } from "@/components/nav/find-in-site";
 
 interface Props {
   params: { locale: Locale };
@@ -31,6 +32,7 @@ export interface AdminPostsPageTexts {
   menuTexts: SidebarMenuTexts;
   archivePostsTexts: ArchiveQueueCardsTexts;
   archiveCommentsTexts: ArchiveQueueCardsTexts;
+  findInSiteTexts: FindInSiteTexts;
 }
 export async function generateMetadata({
   params: { locale },
@@ -50,12 +52,14 @@ export default async function AdminPostsPage({ params: { locale } }: Props) {
       menuTexts,
       archivePostsTexts,
       archiveCommentsTexts,
+      findInSiteTexts,
     },
     authUser,
   ] = await Promise.all([
     getAdminPostsPageTexts(),
     getUserWithMinRole("ROLE_ADMIN"),
   ]);
+  const metadataValues = await getMetadataValues(authUser, locale);
 
   const postOptions = getSortingOptions(
     sortingPostsSortingOptionsKeys,
@@ -69,6 +73,8 @@ export default async function AdminPostsPage({ params: { locale } }: Props) {
         authUser,
         menuTexts,
         mappingKey: "admin",
+        findInSiteTexts,
+        metadataValues,
       }}
     >
       <div className="w-full h-full bg-background">

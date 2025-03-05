@@ -6,12 +6,13 @@ import SingleIngredientPageContent, {
 } from "@/app/[locale]/trainer/ingredients/single/[id]/page-content";
 import { getTrainerSingleIngredientPageTexts } from "@/texts/pages";
 import { Metadata } from "next";
-import { getIntlMetadata } from "@/texts/metadata";
+import { getIntlMetadata, getMetadataValues } from "@/texts/metadata";
 import { ThemeSwitchTexts } from "@/texts/components/nav";
 import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
 import SidebarContentLayout from "@/components/sidebar/sidebar-content-layout";
 import { Suspense } from "react";
 import LoadingSpinner from "@/components/common/loading-spinner";
+import { FindInSiteTexts } from "@/components/nav/find-in-site";
 
 interface Props {
   params: { id: string; locale: Locale };
@@ -32,6 +33,7 @@ export interface TrainerSingleIngredientPageTexts {
   title: string;
   menuTexts: SidebarMenuTexts;
   singleIngredientPageTexts: SingleIngredientPageTexts;
+  findInSiteTexts: FindInSiteTexts;
 }
 export default async function SingleIngredientPage({
   params: { id, locale },
@@ -41,6 +43,7 @@ export default async function SingleIngredientPage({
     getUserWithMinRole("ROLE_TRAINER"),
     getTrainerSingleIngredientPageTexts(),
   ]);
+  const metadataValues = await getMetadataValues(authUser, locale);
 
   return (
     <SidebarContentLayout
@@ -48,6 +51,7 @@ export default async function SingleIngredientPage({
         ...texts,
         authUser,
         mappingKey: "trainer",
+        metadataValues,
       }}
     >
       <div className="w-full bg-background ">

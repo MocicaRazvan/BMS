@@ -7,7 +7,8 @@ import { getUserWithMinRole } from "@/lib/user";
 import { getUserAdminMonthlySalesPageTexts } from "@/texts/pages";
 import UserAdminMonthlySalesPageContent from "@/app/[locale]/admin/users/[id]/monthlySales/page-content";
 import { Metadata } from "next";
-import { getIntlMetadata } from "@/texts/metadata";
+import { getIntlMetadata, getMetadataValues } from "@/texts/metadata";
+import { FindInSiteTexts } from "@/components/nav/find-in-site";
 
 interface Props {
   params: { locale: Locale; id: string };
@@ -18,6 +19,7 @@ export interface UserAdminMonthlySalesPageTexts {
   monthlySalesTexts: MonthlySalesTexts;
   menuTexts: SidebarMenuTexts;
   themeSwitchTexts: ThemeSwitchTexts;
+  findInSiteTexts: FindInSiteTexts;
 }
 export async function generateMetadata({
   params: { locale, id },
@@ -37,8 +39,14 @@ export default async function UserAdminMonthlySalesPage({
     getUserAdminMonthlySalesPageTexts(),
     getUserWithMinRole("ROLE_ADMIN"),
   ]);
+  const metadataValues = await getMetadataValues(authUser, locale);
 
   return (
-    <UserAdminMonthlySalesPageContent id={id} {...texts} authUser={authUser} />
+    <UserAdminMonthlySalesPageContent
+      id={id}
+      {...texts}
+      authUser={authUser}
+      metadataValues={metadataValues}
+    />
   );
 }

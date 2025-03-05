@@ -10,8 +10,9 @@ import LoadingSpinner from "@/components/common/loading-spinner";
 import DailySales, { DailySalesTexts } from "@/components/charts/daily-sales";
 import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
 import { Metadata } from "next";
-import { getIntlMetadata } from "@/texts/metadata";
+import { getIntlMetadata, getMetadataValues } from "@/texts/metadata";
 import { Separator } from "@/components/ui/separator";
+import { FindInSiteTexts } from "@/components/nav/find-in-site";
 
 interface Props {
   params: { locale: Locale };
@@ -25,6 +26,7 @@ export interface AdminDailySalesTexts {
   plansDailySalesTexts: DailySalesTexts;
   themeSwitchTexts: ThemeSwitchTexts;
   menuTexts: SidebarMenuTexts;
+  findInSiteTexts: FindInSiteTexts;
 }
 
 export async function generateMetadata({
@@ -38,6 +40,8 @@ export default async function AdminDailySales({ params: { locale } }: Props) {
     getAdminDailySalesTexts(),
     getUserWithMinRole("ROLE_ADMIN"),
   ]);
+  const metadataValues = await getMetadataValues(authUser, locale);
+
   return (
     <SidebarContentLayout
       navbarProps={{
@@ -46,6 +50,8 @@ export default async function AdminDailySales({ params: { locale } }: Props) {
         authUser,
         menuTexts: texts.menuTexts,
         mappingKey: "admin",
+        findInSiteTexts: texts.findInSiteTexts,
+        metadataValues,
       }}
     >
       <div className="w-full h-full bg-background">

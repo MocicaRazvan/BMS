@@ -10,9 +10,11 @@ import LoadingSpinner from "@/components/common/loading-spinner";
 import { Suspense } from "react";
 import OrdersTable from "@/components/table/orders-table";
 import useClientNotFound from "@/hoooks/useClientNotFound";
+import { MetadataValue } from "@/components/nav/find-in-site";
 
 interface Props extends UserOrdersAdminPageTexts, WithUser, UseListProps {
   id: string;
+  metadataValues: MetadataValue[];
 }
 
 export default function UserOrdersAdminPageContent({
@@ -26,6 +28,8 @@ export default function UserOrdersAdminPageContent({
   path,
   sortingOptions,
   menuTexts,
+  findInSiteTexts,
+  metadataValues,
 }: Props) {
   const { user, messages, error, isFinished } = useGetUser(id);
   const { navigateToNotFound } = useClientNotFound();
@@ -40,6 +44,8 @@ export default function UserOrdersAdminPageContent({
         themeSwitchTexts,
         menuTexts,
         mappingKey: "admin",
+        findInSiteTexts,
+        metadataValues,
       }}
     >
       <div className="w-full h-full bg-background">

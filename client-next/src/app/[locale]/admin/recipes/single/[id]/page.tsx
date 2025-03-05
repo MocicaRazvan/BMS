@@ -11,8 +11,9 @@ import SidebarContentLayout from "@/components/sidebar/sidebar-content-layout";
 import LoadingSpinner from "@/components/common/loading-spinner";
 import { Suspense } from "react";
 import { Metadata } from "next";
-import { getIntlMetadata } from "@/texts/metadata";
+import { getIntlMetadata, getMetadataValues } from "@/texts/metadata";
 import ScrollProgress from "@/components/common/scroll-progress";
+import { FindInSiteTexts } from "@/components/nav/find-in-site";
 
 export interface AdminRecipePageTexts {
   themeSwitchTexts: ThemeSwitchTexts;
@@ -20,6 +21,7 @@ export interface AdminRecipePageTexts {
   title: string;
   menuTexts: SidebarMenuTexts;
   singleRecipePageTexts: SingleRecipePageTexts;
+  findInSiteTexts: FindInSiteTexts;
 }
 interface Props {
   params: { locale: Locale; id: string };
@@ -43,6 +45,7 @@ export default async function AdminRecipePage({
     getUser(),
     getAdminRecipePageTexts(),
   ]);
+  const metadataValues = await getMetadataValues(authUser, locale);
 
   return (
     <SidebarContentLayout
@@ -50,6 +53,7 @@ export default async function AdminRecipePage({
         ...texts,
         authUser,
         mappingKey: "admin",
+        metadataValues,
       }}
     >
       <ScrollProgress />

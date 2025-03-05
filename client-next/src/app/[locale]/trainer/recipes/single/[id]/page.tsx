@@ -8,11 +8,12 @@ import { Locale } from "@/navigation";
 import { unstable_setRequestLocale } from "next-intl/server";
 import { getTrainerSingleRecipePageTexts } from "@/texts/pages";
 import { Metadata } from "next";
-import { getIntlMetadata } from "@/texts/metadata";
+import { getIntlMetadata, getMetadataValues } from "@/texts/metadata";
 import { ThemeSwitchTexts } from "@/texts/components/nav";
 import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
 import SidebarContentLayout from "@/components/sidebar/sidebar-content-layout";
 import ScrollProgress from "@/components/common/scroll-progress";
+import { FindInSiteTexts } from "@/components/nav/find-in-site";
 
 interface Props {
   params: { locale: Locale; id: string };
@@ -35,6 +36,7 @@ export interface TrainerSingleRecipePageTexts {
   themeSwitchTexts: ThemeSwitchTexts;
   menuTexts: SidebarMenuTexts;
   title: string;
+  findInSiteTexts: FindInSiteTexts;
 }
 
 export default async function SingleRecipePage({
@@ -46,6 +48,7 @@ export default async function SingleRecipePage({
     getUserWithMinRole("ROLE_TRAINER"),
     getTrainerSingleRecipePageTexts(),
   ]);
+  const metadataValues = await getMetadataValues(authUser, locale);
 
   return (
     <SidebarContentLayout
@@ -53,6 +56,7 @@ export default async function SingleRecipePage({
         ...texts,
         authUser,
         mappingKey: "trainer",
+        metadataValues,
       }}
     >
       <ScrollProgress />

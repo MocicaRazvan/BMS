@@ -1,9 +1,12 @@
 import { Locale } from "@/navigation";
 import { Metadata } from "next";
-import { getIntlMetadata } from "@/texts/metadata";
+import { getIntlMetadata, getMetadataValues } from "@/texts/metadata";
 import { unstable_setRequestLocale } from "next-intl/server";
 import { getSignOutPageTexts } from "@/texts/pages";
-import { getThemeSwitchTexts } from "@/texts/components/nav";
+import {
+  getFindInSiteTexts,
+  getThemeSwitchTexts,
+} from "@/texts/components/nav";
 import { getSidebarMenuTexts } from "@/texts/components/sidebar";
 import {
   trainerGroupLabels,
@@ -29,17 +32,21 @@ export async function generateMetadata({
 
 export default async function TrainerSignOut({ params: { locale } }: Props) {
   unstable_setRequestLocale(locale);
-  const [authUser, texts, themeSwitchTexts, menuTexts] = await Promise.all([
-    getUser(),
-    getSignOutPageTexts(),
-    getThemeSwitchTexts(),
-    getSidebarMenuTexts(
-      "trainer",
-      trainerGroupLabels,
-      trainerLabels,
-      trainerSubLabels,
-    ),
-  ]);
+  const [authUser, texts, themeSwitchTexts, menuTexts, findInSiteTexts] =
+    await Promise.all([
+      getUser(),
+      getSignOutPageTexts(),
+      getThemeSwitchTexts(),
+      getSidebarMenuTexts(
+        "trainer",
+        trainerGroupLabels,
+        trainerLabels,
+        trainerSubLabels,
+      ),
+      getFindInSiteTexts(),
+    ]);
+  const metadataValues = await getMetadataValues(authUser, locale);
+
   return (
     <SidebarContentLayout
       navbarProps={{
@@ -48,6 +55,8 @@ export default async function TrainerSignOut({ params: { locale } }: Props) {
         authUser,
         menuTexts: menuTexts,
         mappingKey: "trainer",
+        findInSiteTexts,
+        metadataValues,
       }}
     >
       <div className="w-full h-full bg-background">

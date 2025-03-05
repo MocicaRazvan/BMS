@@ -7,7 +7,7 @@ import { getTheSameUserOrAdmin } from "@/lib/user";
 import { sortingPlansSortingOptionsKeys } from "@/texts/components/list";
 import Heading from "@/components/common/heading";
 import { Metadata } from "next";
-import { getIntlMetadata } from "@/texts/metadata";
+import { getIntlMetadata, getMetadataValues } from "@/texts/metadata";
 import { ThemeSwitchTexts } from "@/texts/components/nav";
 import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
 import LoadingSpinner from "@/components/common/loading-spinner";
@@ -16,6 +16,7 @@ import { Suspense } from "react";
 import UsersPlansPageContent from "@/app/[locale]/trainer/user/[id]/plans/page-content";
 import { Separator } from "@/components/ui/separator";
 import TopPlans, { TopPlansTexts } from "@/components/charts/top-plans";
+import { FindInSiteTexts } from "@/components/nav/find-in-site";
 
 export interface UserPlansPageTexts {
   planTableTexts: PlanTableTexts;
@@ -25,6 +26,7 @@ export interface UserPlansPageTexts {
   themeSwitchTexts: ThemeSwitchTexts;
   menuTexts: SidebarMenuTexts;
   topPlansTexts: TopPlansTexts;
+  findInSiteTexts: FindInSiteTexts;
 }
 interface Props {
   params: { locale: Locale; id: string };
@@ -51,6 +53,7 @@ export default async function UsersPlansPage({
     getUserPlansPageTexts(),
     getTheSameUserOrAdmin(id),
   ]);
+  const metadataValues = await getMetadataValues(authUser, locale);
 
   const plansOptions = getSortingOptions(
     sortingPlansSortingOptionsKeys,
@@ -62,6 +65,7 @@ export default async function UsersPlansPage({
         ...userPlansPageTexts,
         authUser,
         mappingKey: "trainer",
+        metadataValues,
       }}
     >
       <div className="space-y-10 lg:space-y-16 w-full transition-all py-5 px-4 mx-auto ">

@@ -7,9 +7,11 @@ import LoadingSpinner from "@/components/common/loading-spinner";
 import Heading from "@/components/common/heading";
 import MonthlySales from "@/components/charts/monthly-sales";
 import useClientNotFound from "@/hoooks/useClientNotFound";
+import { MetadataValue } from "@/components/nav/find-in-site";
 
 interface Props extends UserAdminMonthlySalesPageTexts, WithUser {
   id: string;
+  metadataValues: MetadataValue[];
 }
 
 export default function UserAdminMonthlySalesPageContent({
@@ -20,6 +22,8 @@ export default function UserAdminMonthlySalesPageContent({
   authUser,
   header,
   title,
+  findInSiteTexts,
+  metadataValues,
 }: Props) {
   const { user, messages, error, isFinished } = useGetUser(id);
   const { navigateToNotFound } = useClientNotFound();
@@ -34,6 +38,8 @@ export default function UserAdminMonthlySalesPageContent({
         themeSwitchTexts,
         menuTexts,
         mappingKey: "admin",
+        findInSiteTexts,
+        metadataValues,
       }}
     >
       <div className="w-full h-full bg-background">

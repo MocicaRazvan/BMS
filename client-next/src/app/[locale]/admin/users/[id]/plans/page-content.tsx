@@ -14,10 +14,12 @@ import useClientNotFound from "@/hoooks/useClientNotFound";
 import { Separator } from "@/components/ui/separator";
 import TopPlans from "@/components/charts/top-plans";
 import { Locale } from "@/navigation";
+import { MetadataValue } from "@/components/nav/find-in-site";
 
 interface Props extends UserPlansAdminPageTexts, WithUser, UseListProps {
   id: string;
   locale: Locale;
+  metadataValues: MetadataValue[];
 }
 
 export default function UserPlansAdminPageContent({
@@ -32,6 +34,8 @@ export default function UserPlansAdminPageContent({
   menuTexts,
   topPlansTexts,
   locale,
+  findInSiteTexts,
+  metadataValues,
 }: Props) {
   const { isOpen } = useSidebarToggle();
   const { user, messages, error, isFinished } = useGetUser(id);
@@ -47,6 +51,8 @@ export default function UserPlansAdminPageContent({
         themeSwitchTexts,
         menuTexts,
         mappingKey: "admin",
+        findInSiteTexts,
+        metadataValues,
       }}
     >
       <div className="w-full h-full bg-background">

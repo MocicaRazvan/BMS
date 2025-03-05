@@ -7,12 +7,13 @@ import { getUserMonthlySalesPageTexts } from "@/texts/pages";
 import { getTheSameUserOrAdmin } from "@/lib/user";
 import Heading from "@/components/common/heading";
 import { Metadata } from "next";
-import { getIntlMetadata } from "@/texts/metadata";
+import { getIntlMetadata, getMetadataValues } from "@/texts/metadata";
 import { ThemeSwitchTexts } from "@/texts/components/nav";
 import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
 import LoadingSpinner from "@/components/common/loading-spinner";
 import SidebarContentLayout from "@/components/sidebar/sidebar-content-layout";
 import { Suspense } from "react";
+import { FindInSiteTexts } from "@/components/nav/find-in-site";
 
 export interface UserMonthlySalesPageTexts {
   monthlySalesTexts: MonthlySalesTexts;
@@ -20,6 +21,7 @@ export interface UserMonthlySalesPageTexts {
   header: string;
   themeSwitchTexts: ThemeSwitchTexts;
   menuTexts: SidebarMenuTexts;
+  findInSiteTexts: FindInSiteTexts;
 }
 interface Props {
   params: { locale: Locale; id: string };
@@ -45,6 +47,8 @@ export default async function UsersMonthlySalesPage({
     getUserMonthlySalesPageTexts(),
     getTheSameUserOrAdmin(id),
   ]);
+  const metadataValues = await getMetadataValues(authUser, locale);
+
   return (
     <SidebarContentLayout
       navbarProps={{
@@ -53,6 +57,8 @@ export default async function UsersMonthlySalesPage({
         authUser,
         menuTexts: texts.menuTexts,
         mappingKey: "trainer",
+        findInSiteTexts: texts.findInSiteTexts,
+        metadataValues,
       }}
     >
       <div className="w-full h-full bg-background">

@@ -15,6 +15,7 @@ import { NotificationPopTexts } from "@/components/nav/notification-pop";
 import { NavTexts } from "@/components/nav/nav";
 import { CartPopsTexts } from "@/components/nav/cart-pop";
 import { BoughtNotificationContentTexts } from "@/components/nav/bought-notification-content";
+import { FindInSiteTexts } from "@/components/nav/find-in-site";
 
 export interface ThemeSwitchTexts {
   srButton: string;
@@ -47,35 +48,43 @@ export async function getMenuLinkTexts(mainKey: string, keys: string[]) {
 }
 
 export async function getNavTexts(): Promise<NavTexts> {
-  const [themeSwitchTexts, postsTexts, recipesTexts, plansTexts, links] =
-    await Promise.all([
-      getThemeSwitchTexts(),
-      getMenuLinkTexts("PostsTexts", [
-        "approvedPosts",
-        "allPosts",
-        "yourPosts",
-        "createPost",
-      ]),
-      getMenuLinkTexts("RecipesTexts", [
-        "allRecipes",
-        "yourRecipes",
-        "createRecipe",
-      ]),
-      getMenuLinkTexts("PlansTexts", [
-        "allPlans",
-        "yourPlans",
-        "createPlan",
-        "approvedPlans",
-        "monthlyPlan",
-        "dailyPlan",
-      ]),
-      getTranslations("components.nav.Links"),
-    ]);
+  const [
+    themeSwitchTexts,
+    postsTexts,
+    recipesTexts,
+    plansTexts,
+    findInSiteTexts,
+    links,
+  ] = await Promise.all([
+    getThemeSwitchTexts(),
+    getMenuLinkTexts("PostsTexts", [
+      "approvedPosts",
+      "allPosts",
+      "yourPosts",
+      "createPost",
+    ]),
+    getMenuLinkTexts("RecipesTexts", [
+      "allRecipes",
+      "yourRecipes",
+      "createRecipe",
+    ]),
+    getMenuLinkTexts("PlansTexts", [
+      "allPlans",
+      "yourPlans",
+      "createPlan",
+      "approvedPlans",
+      "monthlyPlan",
+      "dailyPlan",
+    ]),
+    getFindInSiteTexts(),
+    getTranslations("components.nav.Links"),
+  ]);
   return {
     themeSwitchTexts,
     postsTexts,
     recipesTexts,
     plansTexts,
+    findInSiteTexts,
     links: {
       posts: links("posts"),
       home: links("home"),
@@ -231,5 +240,18 @@ export async function getCartPopsTexts(): Promise<CartPopsTexts> {
     total: t("total"),
     undo: t("undo"),
     emptyCart: t("emptyCart"),
+  };
+}
+
+export async function getFindInSiteTexts(): Promise<FindInSiteTexts> {
+  const t = await getTranslations("components.nav.FindInSiteTexts");
+  return {
+    navigateText: t("navigateText"),
+    closeText: t("closeText"),
+    selectText: t("selectText"),
+    title: t("title"),
+    noResults: t("noResults"),
+    placeholder: t("placeholder"),
+    pressText: t("pressText"),
   };
 }

@@ -8,8 +8,9 @@ import { getCreateDayPageTexts } from "@/texts/pages";
 import SidebarContentLayout from "@/components/sidebar/sidebar-content-layout";
 import { Locale } from "@/navigation";
 import { Metadata } from "next";
-import { getIntlMetadata } from "@/texts/metadata";
+import { getIntlMetadata, getMetadataValues } from "@/texts/metadata";
 import { unstable_setRequestLocale } from "next-intl/server";
+import { FindInSiteTexts } from "@/components/nav/find-in-site";
 
 interface Props {
   params: { locale: Locale };
@@ -28,6 +29,7 @@ export interface CreateDayPageTexts {
   dayFormTexts: DayFromTexts;
   themeSwitchTexts: ThemeSwitchTexts;
   menuTexts: SidebarMenuTexts;
+  findInSiteTexts: FindInSiteTexts;
 }
 
 export default async function CreateDayPage({ params: { locale } }: Props) {
@@ -36,6 +38,7 @@ export default async function CreateDayPage({ params: { locale } }: Props) {
     getUser(),
     getCreateDayPageTexts(),
   ]);
+  const metadataValues = await getMetadataValues(authUser, locale);
 
   return (
     <SidebarContentLayout
@@ -44,6 +47,7 @@ export default async function CreateDayPage({ params: { locale } }: Props) {
         ...rest,
         authUser,
         mappingKey: "trainer",
+        metadataValues,
       }}
     >
       <main className="flex items-center justify-center px-6 py-10">

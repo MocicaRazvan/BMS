@@ -641,7 +641,7 @@
       "Links": {
         "home": "Acasă",
         "posts": "Postări",
-        "adminDashboard": "Panou de administrare",
+        "adminDashboard": "Șefuiala",
         "recipes": "Rețete",
         "chat": "Chat",
         "ingredients": "Ingrediente",
@@ -691,6 +691,15 @@
         "checkout": "Comandă",
         "toastDescription": "Produsul a fost eliminat din coș",
         "emptyCart": "Coșul este gol. Vizitați planurile pentru a adăuga produse"
+      },
+      "FindInSiteTexts": {
+        "navigateText": "pentru a naviga,",
+        "closeText": "pentru a închide",
+        "selectText": "pentru a selecta,",
+        "title": "Caută...",
+        "noResults": "Niciun rezultat pentru",
+        "placeholder": "Scrie pentru a căuta",
+        "pressText": "Apasă"
       }
     },
     "dialogs": {
@@ -2154,9 +2163,9 @@
         "keywords": "plan, nutriție, cumpără, adaugă, coș, finalizează, comandă"
       },
       "ApprovedPosts": {
-        "title": "Posts",
-        "description": "Read posts to gain knowledge and insights about different nutritional topics written by professionals.",
-        "keywords": "posts, read, knowledge, insights, topics, professionals, free, platform"
+        "title": "Postări",
+        "description": "Citește postările de pe Bro Meets Science pentru a-ți îmbunătăți cunoștințele și pentru a afla mai multe despre diferite subiecte.",
+        "keywords": "postări, citește, cunoștințe, perspective, subiecte, profesioniști, gratuit, platformă"
       },
       "SinglePost": {
         "title": "Postare",

@@ -19,6 +19,7 @@ import { Link, usePathname } from "@/navigation";
 import { NavTexts } from "@/components/nav/nav";
 import { DashboardIcon } from "@radix-ui/react-icons";
 import ActiveLink from "@/components/nav/active-link";
+import FindInSite, { MetadataValue } from "@/components/nav/find-in-site";
 
 interface Props {
   authUser: Session["user"];
@@ -30,6 +31,7 @@ interface Props {
   isTrainer: boolean;
   isAdmin: boolean;
   texts: NavTexts;
+  metadataValues: MetadataValue[];
 }
 
 const BurgerNav = memo<Props>(
@@ -43,6 +45,7 @@ const BurgerNav = memo<Props>(
     texts,
     recipesLinks,
     plansLinks,
+    metadataValues,
   }: Props) => {
     const [sheetOpen, setSheetOpen] = useState(false);
     const pathName = usePathname();
@@ -69,7 +72,12 @@ const BurgerNav = memo<Props>(
                 </SheetClose>
               </Link>
             </div>
-
+            <div>
+              <FindInSite
+                texts={texts.findInSiteTexts}
+                metadataValues={metadataValues}
+              />
+            </div>
             {authUser && (
               <>
                 <div className="mt-5 transition-all ps-2 hover:scale-[1.02] text-lg">

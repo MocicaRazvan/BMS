@@ -4,13 +4,14 @@ import { getUserWithMinRole } from "@/lib/user";
 import { getRecipeFormTexts } from "@/texts/components/forms";
 import { Suspense } from "react";
 import { Metadata } from "next";
-import { getIntlMetadata } from "@/texts/metadata";
+import { getIntlMetadata, getMetadataValues } from "@/texts/metadata";
 import { ThemeSwitchTexts } from "@/texts/components/nav";
 import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
 import LoadingSpinner from "@/components/common/loading-spinner";
 import SidebarContentLayout from "@/components/sidebar/sidebar-content-layout";
 import { getDuplicateRecipePageTexts } from "@/texts/pages";
 import DuplicateRecipePageContent from "@/app/[locale]/trainer/recipes/duplicate/[id]/page-content";
+import { FindInSiteTexts } from "@/components/nav/find-in-site";
 
 interface Props {
   params: {
@@ -34,6 +35,7 @@ export interface DuplicateRecipePageTexts {
   recipeFormTexts: Awaited<ReturnType<typeof getRecipeFormTexts>>;
   themeSwitchTexts: ThemeSwitchTexts;
   menuTexts: SidebarMenuTexts;
+  findInSiteTexts: FindInSiteTexts;
 }
 
 export default async function DuplicateRecipePage({
@@ -44,6 +46,8 @@ export default async function DuplicateRecipePage({
     getUserWithMinRole("ROLE_TRAINER"),
     getDuplicateRecipePageTexts(),
   ]);
+  const metadataValues = await getMetadataValues(authUser, locale);
+
   return (
     <SidebarContentLayout
       navbarProps={{
@@ -51,6 +55,7 @@ export default async function DuplicateRecipePage({
         ...rest,
         authUser,
         mappingKey: "trainer",
+        metadataValues,
       }}
     >
       <main className="flex items-center justify-center px-6 py-10">

@@ -10,8 +10,9 @@ import { SingleDayTexts } from "@/components/days/single-day";
 import { getSingleDayTrainerPageTexts } from "@/texts/pages";
 import SidebarContentLayout from "@/components/sidebar/sidebar-content-layout";
 import { Metadata } from "next";
-import { getIntlMetadata } from "@/texts/metadata";
+import { getIntlMetadata, getMetadataValues } from "@/texts/metadata";
 import ScrollProgress from "@/components/common/scroll-progress";
+import { FindInSiteTexts } from "@/components/nav/find-in-site";
 
 interface Props {
   params: { locale: Locale; id: string };
@@ -32,6 +33,7 @@ export interface SingleDayTrainerPageTexts {
   title: string;
   menuTexts: SidebarMenuTexts;
   themeSwitchTexts: ThemeSwitchTexts;
+  findInSiteTexts: FindInSiteTexts;
 }
 
 export default async function SingleDayTrainerPage({
@@ -43,6 +45,7 @@ export default async function SingleDayTrainerPage({
     getUserWithMinRole("ROLE_TRAINER"),
     getSingleDayTrainerPageTexts(),
   ]);
+  const metadataValues = await getMetadataValues(authUser, locale);
 
   return (
     <SidebarContentLayout
@@ -50,6 +53,7 @@ export default async function SingleDayTrainerPage({
         ...texts,
         authUser,
         mappingKey: "trainer",
+        metadataValues,
       }}
     >
       <ScrollProgress />

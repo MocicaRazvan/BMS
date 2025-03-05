@@ -6,11 +6,12 @@ import { Suspense } from "react";
 import LoadingSpinner from "@/components/common/loading-spinner";
 import UpdatePostPageContent from "@/app/[locale]/trainer/posts/update/[id]/page-content";
 import { Metadata } from "next";
-import { getIntlMetadata } from "@/texts/metadata";
+import { getIntlMetadata, getMetadataValues } from "@/texts/metadata";
 import { ThemeSwitchTexts } from "@/texts/components/nav";
 import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
 import { getUpdatePostPageTexts } from "@/texts/pages";
 import SidebarContentLayout from "@/components/sidebar/sidebar-content-layout";
+import { FindInSiteTexts } from "@/components/nav/find-in-site";
 
 interface Props {
   params: {
@@ -34,6 +35,7 @@ export interface UpdatePostPageTexts {
   themeSwitchTexts: ThemeSwitchTexts;
   menuTexts: SidebarMenuTexts;
   postFormTexts: Awaited<ReturnType<typeof getPostFormTexts>>;
+  findInSiteTexts: FindInSiteTexts;
 }
 export default async function UpdatePostPage({
   params: { locale, id },
@@ -61,6 +63,8 @@ export default async function UpdatePostPage({
     getUpdatePostPageTexts(),
     getUserWithMinRole("ROLE_TRAINER"),
   ]);
+  const metadataValues = await getMetadataValues(authUser, locale);
+
   return (
     <SidebarContentLayout
       navbarProps={{
@@ -68,6 +72,7 @@ export default async function UpdatePostPage({
         ...rest,
         authUser,
         mappingKey: "trainer",
+        metadataValues,
       }}
     >
       <main className="flex items-center justify-center px-6 py-10">

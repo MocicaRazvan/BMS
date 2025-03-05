@@ -11,10 +11,11 @@ import Heading from "@/components/common/heading";
 import { Suspense } from "react";
 import LoadingSpinner from "@/components/common/loading-spinner";
 import { Metadata } from "next";
-import { getIntlMetadata } from "@/texts/metadata";
+import { getIntlMetadata, getMetadataValues } from "@/texts/metadata";
 import { ThemeSwitchTexts } from "@/texts/components/nav";
 import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
 import SidebarContentLayout from "@/components/sidebar/sidebar-content-layout";
+import { FindInSiteTexts } from "@/components/nav/find-in-site";
 
 export interface UserRecipesPageTexts {
   recipesTableTexts: RecipeTableTexts;
@@ -23,6 +24,7 @@ export interface UserRecipesPageTexts {
   header: string;
   themeSwitchTexts: ThemeSwitchTexts;
   menuTexts: SidebarMenuTexts;
+  findInSiteTexts: FindInSiteTexts;
 }
 interface Props {
   params: { locale: Locale; id: string };
@@ -48,6 +50,8 @@ export default async function UsersRecipesPage({
     getUserRecipesPageContentTexts(),
     getTheSameUserOrAdmin(id),
   ]);
+  const metadataValues = await getMetadataValues(authUser, locale);
+
   const recipesOptions = getSortingOptions(
     sortingRecipesSortingOptionsKeys,
     userRecipesPageTexts.sortingRecipesSortingOptions,
@@ -61,6 +65,8 @@ export default async function UsersRecipesPage({
         authUser,
         menuTexts: userRecipesPageTexts.menuTexts,
         mappingKey: "trainer",
+        findInSiteTexts: userRecipesPageTexts.findInSiteTexts,
+        metadataValues,
       }}
     >
       <div className="space-y-10 lg:space-y-16 w-full transition-all py-5 px-4 mx-auto ">

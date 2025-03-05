@@ -12,7 +12,7 @@ import { getSortingOptions, SortingOptionsTexts } from "@/lib/constants";
 import { sortingUsersSortingOptionsKeys } from "@/texts/components/list";
 import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
 import { Metadata } from "next";
-import { getIntlMetadata } from "@/texts/metadata";
+import { getIntlMetadata, getMetadataValues } from "@/texts/metadata";
 import ArchiveQueueCards, {
   ArchiveQueueCardsTexts,
 } from "@/components/common/archive-queue-card";
@@ -21,6 +21,7 @@ import { Separator } from "@/components/ui/separator";
 import TopTrainers, {
   TopTrainersTexts,
 } from "@/components/charts/top-trainers";
+import { FindInSiteTexts } from "@/components/nav/find-in-site";
 
 interface Props {
   params: { locale: Locale };
@@ -36,6 +37,7 @@ export interface AdminUsersPageTexts {
   archiveUsersTexts: ArchiveQueueCardsTexts;
   topUsersTexts: TopUsersTexts;
   topTrainersTexts: TopTrainersTexts;
+  findInSiteTexts: FindInSiteTexts;
 }
 export async function generateMetadata({
   params: { locale },
@@ -56,12 +58,14 @@ export default async function AdminUsersPage({ params: { locale } }: Props) {
       archiveUsersTexts,
       topUsersTexts,
       topTrainersTexts,
+      findInSiteTexts,
     },
     authUser,
   ] = await Promise.all([
     getAdminUsersPageTexts(),
     getUserWithMinRole("ROLE_ADMIN"),
   ]);
+  const metadataValues = await getMetadataValues(authUser, locale);
 
   const userOptions = getSortingOptions(
     sortingUsersSortingOptionsKeys,
@@ -76,6 +80,8 @@ export default async function AdminUsersPage({ params: { locale } }: Props) {
         authUser,
         menuTexts,
         mappingKey: "admin",
+        metadataValues,
+        findInSiteTexts,
       }}
     >
       <div className="w-full bg-background">

@@ -12,9 +12,9 @@ import MonthlySales, {
 } from "@/components/charts/monthly-sales";
 import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
 import { Metadata } from "next";
-import { getIntlMetadata } from "@/texts/metadata";
+import { getIntlMetadata, getMetadataValues } from "@/texts/metadata";
 import { Separator } from "@/components/ui/separator";
-import { PredictionChartTexts } from "@/components/charts/prediction-chart";
+import { FindInSiteTexts } from "@/components/nav/find-in-site";
 
 interface Props {
   params: { locale: Locale };
@@ -27,6 +27,7 @@ export interface AdminMonthlySalesTexts {
   themeSwitchTexts: ThemeSwitchTexts;
   menuTexts: SidebarMenuTexts;
   plansMonthlySales: MonthlySalesTexts;
+  findInSiteTexts: FindInSiteTexts;
 }
 
 export async function generateMetadata({
@@ -45,6 +46,8 @@ export default async function AdminMonthlySales({ params: { locale } }: Props) {
     getAdminMonthlySalesTexts(),
     getUserWithMinRole("ROLE_ADMIN"),
   ]);
+  const metadataValues = await getMetadataValues(authUser, locale);
+
   return (
     <SidebarContentLayout
       navbarProps={{
@@ -53,6 +56,8 @@ export default async function AdminMonthlySales({ params: { locale } }: Props) {
         authUser,
         menuTexts: texts.menuTexts,
         mappingKey: "admin",
+        findInSiteTexts: texts.findInSiteTexts,
+        metadataValues,
       }}
     >
       <div className="w-full h-full bg-background">

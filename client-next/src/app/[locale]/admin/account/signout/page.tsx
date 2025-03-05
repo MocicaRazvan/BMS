@@ -1,9 +1,12 @@
 import { Locale } from "@/navigation";
 import { Metadata } from "next";
-import { getIntlMetadata } from "@/texts/metadata";
+import { getIntlMetadata, getMetadataValues } from "@/texts/metadata";
 import { unstable_setRequestLocale } from "next-intl/server";
 import { getSignOutPageTexts } from "@/texts/pages";
-import { getThemeSwitchTexts } from "@/texts/components/nav";
+import {
+  getFindInSiteTexts,
+  getThemeSwitchTexts,
+} from "@/texts/components/nav";
 import { getSidebarMenuTexts } from "@/texts/components/sidebar";
 import {
   adminGroupLabels,
@@ -29,12 +32,21 @@ export async function generateMetadata({
 
 export default async function AdminSignOut({ params: { locale } }: Props) {
   unstable_setRequestLocale(locale);
-  const [authUser, texts, themeSwitchTexts, menuTexts] = await Promise.all([
-    getUser(),
-    getSignOutPageTexts(),
-    getThemeSwitchTexts(),
-    getSidebarMenuTexts("admin", adminGroupLabels, adminLabels, adminSubLabels),
-  ]);
+  const [authUser, texts, themeSwitchTexts, menuTexts, findInSiteTexts] =
+    await Promise.all([
+      getUser(),
+      getSignOutPageTexts(),
+      getThemeSwitchTexts(),
+      getSidebarMenuTexts(
+        "admin",
+        adminGroupLabels,
+        adminLabels,
+        adminSubLabels,
+      ),
+      getFindInSiteTexts(),
+    ]);
+  const metadataValues = await getMetadataValues(authUser, locale);
+
   return (
     <SidebarContentLayout
       navbarProps={{
@@ -43,6 +55,8 @@ export default async function AdminSignOut({ params: { locale } }: Props) {
         authUser,
         menuTexts: menuTexts,
         mappingKey: "admin",
+        findInSiteTexts,
+        metadataValues,
       }}
     >
       <div className="w-full h-full bg-background">

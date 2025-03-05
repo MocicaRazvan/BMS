@@ -10,12 +10,14 @@ import { Suspense } from "react";
 import LoadingSpinner from "@/components/common/loading-spinner";
 import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
 import { Metadata } from "next";
-import { getIntlMetadata } from "@/texts/metadata";
+import { getIntlMetadata, getMetadataValues } from "@/texts/metadata";
+import { FindInSiteTexts } from "@/components/nav/find-in-site";
 
 export interface AdminIngredientsCreatePageTexts {
   ingredientForm: IngredientFormTexts;
   title: string;
   menuTexts: SidebarMenuTexts;
+  findInSiteTexts: FindInSiteTexts;
 }
 interface Props {
   params: { locale: Locale };
@@ -39,6 +41,7 @@ export default async function AdminIngredientsCreatePage({
     getUserWithMinRole("ROLE_ADMIN"),
     getAdminIngredientsCreatePageTexts(),
   ]);
+  const metadataValues = await getMetadataValues(authUser, locale);
 
   return (
     <SidebarContentLayout
@@ -48,6 +51,8 @@ export default async function AdminIngredientsCreatePage({
         authUser,
         menuTexts: texts.menuTexts,
         mappingKey: "admin",
+        findInSiteTexts: texts.findInSiteTexts,
+        metadataValues,
       }}
     >
       <Suspense fallback={<LoadingSpinner />}>

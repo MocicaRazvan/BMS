@@ -14,11 +14,12 @@ import { Suspense } from "react";
 import LoadingSpinner from "@/components/common/loading-spinner";
 import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
 import { Metadata } from "next";
-import { getIntlMetadata } from "@/texts/metadata";
+import { getIntlMetadata, getMetadataValues } from "@/texts/metadata";
 import ArchiveQueueCards, {
   ArchiveQueueCardsTexts,
 } from "@/components/common/archive-queue-card";
 import { Separator } from "@/components/ui/separator";
+import { FindInSiteTexts } from "@/components/nav/find-in-site";
 
 interface Props {
   params: { locale: Locale };
@@ -33,6 +34,7 @@ export interface AdminRecipesPageTexts {
   menuTexts: SidebarMenuTexts;
   archiveRecipesTexts: ArchiveQueueCardsTexts;
   archiveMealsTexts: ArchiveQueueCardsTexts;
+  findInSiteTexts: FindInSiteTexts;
 }
 export async function generateMetadata({
   params: { locale },
@@ -51,12 +53,14 @@ export default async function AdminRecipesPage({ params: { locale } }: Props) {
       menuTexts,
       archiveRecipesTexts,
       archiveMealsTexts,
+      findInSiteTexts,
     },
     authUser,
   ] = await Promise.all([
     getAdminRecipesPageTexts(),
     getUserWithMinRole("ROLE_ADMIN"),
   ]);
+  const metadataValues = await getMetadataValues(authUser, locale);
 
   const recipesOptions = getSortingOptions(
     sortingRecipesSortingOptionsKeys,
@@ -70,6 +74,8 @@ export default async function AdminRecipesPage({ params: { locale } }: Props) {
         authUser,
         menuTexts,
         mappingKey: "admin",
+        findInSiteTexts,
+        metadataValues,
       }}
     >
       <div className="w-full h-full bg-background">

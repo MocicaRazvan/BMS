@@ -11,7 +11,8 @@ import LoadingSpinner from "@/components/common/loading-spinner";
 import SidebarContentLayout from "@/components/sidebar/sidebar-content-layout";
 import { Suspense } from "react";
 import { Metadata } from "next";
-import { getIntlMetadata } from "@/texts/metadata";
+import { getIntlMetadata, getMetadataValues } from "@/texts/metadata";
+import { FindInSiteTexts } from "@/components/nav/find-in-site";
 
 interface Props {
   params: { locale: Locale; id: string };
@@ -23,6 +24,7 @@ export interface AdminOrderPageTexts {
   title: string;
   menuTexts: SidebarMenuTexts;
   singleOrderPageContentTexts: SingleOrderPageContentTexts;
+  findInSiteTexts: FindInSiteTexts;
 }
 
 export async function generateMetadata({
@@ -43,12 +45,15 @@ export default async function AdminOrderPage({
     getUser(),
     getAdminOrderPageTexts(),
   ]);
+  const metadataValues = await getMetadataValues(authUser, locale);
+
   return (
     <SidebarContentLayout
       navbarProps={{
         ...texts,
         authUser,
         mappingKey: "admin",
+        metadataValues,
       }}
     >
       <div className="w-full bg-background ">

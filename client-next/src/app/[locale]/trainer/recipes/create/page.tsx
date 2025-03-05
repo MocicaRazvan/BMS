@@ -6,11 +6,12 @@ import LoadingSpinner from "@/components/common/loading-spinner";
 import { Suspense } from "react";
 import RecipeForm from "@/components/forms/recipe-form";
 import { Metadata } from "next";
-import { getIntlMetadata } from "@/texts/metadata";
+import { getIntlMetadata, getMetadataValues } from "@/texts/metadata";
 import { ThemeSwitchTexts } from "@/texts/components/nav";
 import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
 import { getCreateRecipePageTexts } from "@/texts/pages";
 import SidebarContentLayout from "@/components/sidebar/sidebar-content-layout";
+import { FindInSiteTexts } from "@/components/nav/find-in-site";
 
 interface Props {
   params: { locale: Locale };
@@ -30,15 +31,19 @@ export interface CreateRecipePageTexts {
   recipeFormTexts: Awaited<ReturnType<typeof getRecipeFormTexts>>;
   themeSwitchTexts: ThemeSwitchTexts;
   menuTexts: SidebarMenuTexts;
+  findInSiteTexts: FindInSiteTexts;
 }
 
 export default async function CreateRecipePage({ params: { locale } }: Props) {
   unstable_setRequestLocale(locale);
-  const [authUser, { recipeFormTexts, themeSwitchTexts, menuTexts }] =
-    await Promise.all([
-      getUserWithMinRole("ROLE_TRAINER"),
-      getCreateRecipePageTexts(),
-    ]);
+  const [
+    authUser,
+    { recipeFormTexts, themeSwitchTexts, menuTexts, findInSiteTexts },
+  ] = await Promise.all([
+    getUserWithMinRole("ROLE_TRAINER"),
+    getCreateRecipePageTexts(),
+  ]);
+  const metadataValues = await getMetadataValues(authUser, locale);
 
   return (
     <SidebarContentLayout
@@ -48,6 +53,8 @@ export default async function CreateRecipePage({ params: { locale } }: Props) {
         menuTexts,
         authUser,
         mappingKey: "trainer",
+        findInSiteTexts,
+        metadataValues,
       }}
     >
       <main className="flex items-center justify-center px-6 py-10">

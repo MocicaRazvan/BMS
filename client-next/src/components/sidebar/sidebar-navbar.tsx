@@ -8,12 +8,18 @@ import {
   MappingListFunctionKeys,
   SidebarMenuTexts,
 } from "@/components/sidebar/menu-list";
+import FindInSite, {
+  FindInSiteTexts,
+  MetadataValue,
+} from "@/components/nav/find-in-site";
 
 export interface SidebarNavbarProps extends WithUser {
   title: string;
   themeSwitchTexts: ThemeSwitchTexts;
   menuTexts: SidebarMenuTexts;
   mappingKey: MappingListFunctionKeys;
+  findInSiteTexts: FindInSiteTexts;
+  metadataValues: MetadataValue[];
 }
 
 export function SidebarNavbar({
@@ -22,6 +28,8 @@ export function SidebarNavbar({
   authUser,
   menuTexts,
   mappingKey,
+  findInSiteTexts,
+  metadataValues,
 }: SidebarNavbarProps) {
   return (
     <header
@@ -38,6 +46,7 @@ export function SidebarNavbar({
           <h1 className="font-bold">{title}</h1>
         </div>
         <div className="flex flex-1 items-center space-x-4 justify-end">
+          <FindInSite texts={findInSiteTexts} metadataValues={metadataValues} />
           <NotificationPop authUser={authUser} />
           <LocaleSwitcher />
           <ModeToggle {...themeSwitchTexts} />

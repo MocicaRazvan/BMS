@@ -10,7 +10,8 @@ import LoadingSpinner from "@/components/common/loading-spinner";
 import SidebarContentLayout from "@/components/sidebar/sidebar-content-layout";
 import { Suspense } from "react";
 import { Metadata } from "next";
-import { getIntlMetadata } from "@/texts/metadata";
+import { getIntlMetadata, getMetadataValues } from "@/texts/metadata";
+import { FindInSiteTexts } from "@/components/nav/find-in-site";
 
 interface Props {
   params: { locale: Locale };
@@ -22,6 +23,7 @@ export interface AdminEmailPageTexts {
   title: string;
   header: string;
   menuTexts: SidebarMenuTexts;
+  findInSiteTexts: FindInSiteTexts;
 }
 export async function generateMetadata({
   params: { locale },
@@ -35,12 +37,15 @@ export default async function AdminEmailPage({ params: { locale } }: Props) {
     getUserWithMinRole("ROLE_ADMIN"),
     getAdminEmailPageTexts(),
   ]);
+  const metadataValues = await getMetadataValues(authUser, locale);
+
   return (
     <SidebarContentLayout
       navbarProps={{
         authUser,
         ...texts,
         mappingKey: "admin",
+        metadataValues,
       }}
     >
       <div className="w-full h-full bg-background">

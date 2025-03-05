@@ -6,6 +6,8 @@ import { UserPageTexts } from "@/app/[locale]/(main)/(user)/users/single/[id]/pa
 import { ThemeSwitchTexts } from "@/texts/components/nav";
 import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
 import AdminUserPageContent from "@/app/[locale]/admin/users/[id]/page-content";
+import { FindInSiteTexts } from "@/components/nav/find-in-site";
+import { getMetadataValues } from "@/texts/metadata";
 
 interface Props {
   params: { locale: Locale; id: string };
@@ -17,6 +19,7 @@ export interface AdminUserPageTexts {
   header: string;
   title: string;
   menuTexts: SidebarMenuTexts;
+  findInSiteTexts: FindInSiteTexts;
 }
 
 export default async function AdminUserPage({ params: { locale, id } }: Props) {
@@ -26,6 +29,14 @@ export default async function AdminUserPage({ params: { locale, id } }: Props) {
     getUser(),
     getAdminUserPageTexts(),
   ]);
+  const metadataValues = await getMetadataValues(authUser, locale);
 
-  return <AdminUserPageContent authUser={authUser} id={id} {...texts} />;
+  return (
+    <AdminUserPageContent
+      authUser={authUser}
+      id={id}
+      {...texts}
+      metadataValues={metadataValues}
+    />
+  );
 }

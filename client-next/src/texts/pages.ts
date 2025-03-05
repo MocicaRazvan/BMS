@@ -47,7 +47,10 @@ import {
   getUserTableTexts,
 } from "@/texts/components/table";
 import { AdminPostsPageTexts } from "@/app/[locale]/admin/posts/page";
-import { getThemeSwitchTexts } from "@/texts/components/nav";
+import {
+  getFindInSiteTexts,
+  getThemeSwitchTexts,
+} from "@/texts/components/nav";
 import { UserPostsAdminPageTexts } from "@/app/[locale]/admin/users/[id]/posts/page";
 import { AdminUsersPageTexts } from "@/app/[locale]/admin/users/page";
 import { UserPageTexts } from "@/app/[locale]/(main)/(user)/users/single/[id]/page-content";
@@ -218,9 +221,34 @@ export async function getUserPostsPageContentTexts(): Promise<UserPostsPageConte
 }
 
 export async function getUserPostsPageTexts(): Promise<UserPostsPageTexts> {
-  const [userPostsPageContentTexts, themeSwitchTexts, menuTexts] =
+  const [
+    userPostsPageContentTexts,
+    themeSwitchTexts,
+    menuTexts,
+    findInSiteTexts,
+  ] = await Promise.all([
+    getUserPostsPageContentTexts(),
+    getThemeSwitchTexts(),
+    getSidebarMenuTexts(
+      "trainer",
+      trainerGroupLabels,
+      trainerLabels,
+      trainerSubLabels,
+    ),
+    getFindInSiteTexts(),
+  ]);
+  return {
+    userPostsPageContentTexts,
+    themeSwitchTexts,
+    menuTexts,
+    findInSiteTexts,
+  };
+}
+
+export async function getCreatePostPageTexts(): Promise<CreatePostPageTexts> {
+  const [postFormTexts, themeSwitchTexts, menuTexts, findInSiteTexts] =
     await Promise.all([
-      getUserPostsPageContentTexts(),
+      getPostFormTexts("create"),
       getThemeSwitchTexts(),
       getSidebarMenuTexts(
         "trainer",
@@ -228,65 +256,55 @@ export async function getUserPostsPageTexts(): Promise<UserPostsPageTexts> {
         trainerLabels,
         trainerSubLabels,
       ),
+      getFindInSiteTexts(),
     ]);
-  return {
-    userPostsPageContentTexts,
-    themeSwitchTexts,
-    menuTexts,
-  };
-}
-
-export async function getCreatePostPageTexts(): Promise<CreatePostPageTexts> {
-  const [postFormTexts, themeSwitchTexts, menuTexts] = await Promise.all([
-    getPostFormTexts("create"),
-    getThemeSwitchTexts(),
-    getSidebarMenuTexts(
-      "trainer",
-      trainerGroupLabels,
-      trainerLabels,
-      trainerSubLabels,
-    ),
-  ]);
   return {
     postFormTexts,
     themeSwitchTexts,
     menuTexts,
+    findInSiteTexts,
   };
 }
 
 export async function getCreatePlanPageTexts(): Promise<CreatePlanPageTexts> {
-  const [planFormTexts, themeSwitchTexts, menuTexts] = await Promise.all([
-    getPlanFormTexts("create"),
-    getThemeSwitchTexts(),
-    getSidebarMenuTexts(
-      "trainer",
-      trainerGroupLabels,
-      trainerLabels,
-      trainerSubLabels,
-    ),
-  ]);
+  const [planFormTexts, themeSwitchTexts, menuTexts, findInSiteTexts] =
+    await Promise.all([
+      getPlanFormTexts("create"),
+      getThemeSwitchTexts(),
+      getSidebarMenuTexts(
+        "trainer",
+        trainerGroupLabels,
+        trainerLabels,
+        trainerSubLabels,
+      ),
+      getFindInSiteTexts(),
+    ]);
   return {
     planFormTexts,
     themeSwitchTexts,
     menuTexts,
+    findInSiteTexts,
   };
 }
 
 export async function getCreateDayPageTexts(): Promise<CreateDayPageTexts> {
-  const [dayFormTexts, themeSwitchTexts, menuTexts] = await Promise.all([
-    getDayFromTexts("create"),
-    getThemeSwitchTexts(),
-    getSidebarMenuTexts(
-      "trainer",
-      trainerGroupLabels,
-      trainerLabels,
-      trainerSubLabels,
-    ),
-  ]);
+  const [dayFormTexts, themeSwitchTexts, menuTexts, findInSiteTexts] =
+    await Promise.all([
+      getDayFromTexts("create"),
+      getThemeSwitchTexts(),
+      getSidebarMenuTexts(
+        "trainer",
+        trainerGroupLabels,
+        trainerLabels,
+        trainerSubLabels,
+      ),
+      getFindInSiteTexts(),
+    ]);
   return {
     dayFormTexts,
     themeSwitchTexts,
     menuTexts,
+    findInSiteTexts,
   };
 }
 
@@ -314,151 +332,9 @@ export async function getSingleRecipePageTexts(): Promise<SingleRecipePageTexts>
 }
 
 export async function getCreateRecipePageTexts(): Promise<CreateRecipePageTexts> {
-  const [recipeFormTexts, themeSwitchTexts, menuTexts] = await Promise.all([
-    getRecipeFormTexts("create"),
-    getThemeSwitchTexts(),
-    getSidebarMenuTexts(
-      "trainer",
-      trainerGroupLabels,
-      trainerLabels,
-      trainerSubLabels,
-    ),
-  ]);
-  return {
-    recipeFormTexts,
-    themeSwitchTexts,
-    menuTexts,
-  };
-}
-
-export async function getUpdatePostPageTexts(): Promise<UpdatePostPageTexts> {
-  const [postFormTexts, themeSwitchTexts, menuTexts] = await Promise.all([
-    getPostFormTexts("update"),
-    getThemeSwitchTexts(),
-    getSidebarMenuTexts(
-      "trainer",
-      trainerGroupLabels,
-      trainerLabels,
-      trainerSubLabels,
-    ),
-  ]);
-  return {
-    postFormTexts,
-    themeSwitchTexts,
-    menuTexts,
-  };
-}
-
-export async function getUserDuplicatePostPage(): Promise<UserDuplicatePostPage> {
-  const [postFormTexts, themeSwitchTexts, menuTexts] = await Promise.all([
-    getPostFormTexts("create"),
-    getThemeSwitchTexts(),
-    getSidebarMenuTexts(
-      "trainer",
-      trainerGroupLabels,
-      trainerLabels,
-      trainerSubLabels,
-    ),
-  ]);
-  return {
-    postFormTexts,
-    themeSwitchTexts,
-    menuTexts,
-  };
-}
-
-export async function getUpdatePlanPageTexts() {
-  const [planFormTexts, themeSwitchTexts, menuTexts] = await Promise.all([
-    getPlanFormTexts("update"),
-    getThemeSwitchTexts(),
-    getSidebarMenuTexts(
-      "trainer",
-      trainerGroupLabels,
-      trainerLabels,
-      trainerSubLabels,
-    ),
-  ]);
-  return {
-    planFormTexts,
-    themeSwitchTexts,
-    menuTexts,
-  };
-}
-export async function getDuplicatePlanPageTexts() {
-  const [planFormTexts, themeSwitchTexts, menuTexts] = await Promise.all([
-    getPlanFormTexts("create"),
-    getThemeSwitchTexts(),
-    getSidebarMenuTexts(
-      "trainer",
-      trainerGroupLabels,
-      trainerLabels,
-      trainerSubLabels,
-    ),
-  ]);
-  return {
-    planFormTexts,
-    themeSwitchTexts,
-    menuTexts,
-  };
-}
-
-export async function getUpdateDayPageTexts(): Promise<UpdateDayPageTexts> {
-  const [dayFormTexts, themeSwitchTexts, menuTexts] = await Promise.all([
-    getDayFromTexts("update"),
-    getThemeSwitchTexts(),
-    getSidebarMenuTexts(
-      "trainer",
-      trainerGroupLabels,
-      trainerLabels,
-      trainerSubLabels,
-    ),
-  ]);
-  return {
-    dayFormTexts,
-    themeSwitchTexts,
-    menuTexts,
-  };
-}
-
-export async function getUpdateRecipePageTexts(): Promise<UpdateRecipePageTexts> {
-  const [recipeFormTexts, themeSwitchTexts, menuTexts] = await Promise.all([
-    getRecipeFormTexts("update"),
-    getThemeSwitchTexts(),
-    getSidebarMenuTexts(
-      "trainer",
-      trainerGroupLabels,
-      trainerLabels,
-      trainerSubLabels,
-    ),
-  ]);
-  return {
-    recipeFormTexts,
-    themeSwitchTexts,
-    menuTexts,
-  };
-}
-export async function getDuplicateRecipePageTexts(): Promise<DuplicateRecipePageTexts> {
-  const [recipeFormTexts, themeSwitchTexts, menuTexts] = await Promise.all([
-    getRecipeFormTexts("create"),
-    getThemeSwitchTexts(),
-    getSidebarMenuTexts(
-      "trainer",
-      trainerGroupLabels,
-      trainerLabels,
-      trainerSubLabels,
-    ),
-  ]);
-  return {
-    recipeFormTexts,
-    themeSwitchTexts,
-    menuTexts,
-  };
-}
-
-export async function getTrainerSingleRecipePageTexts(): Promise<TrainerSingleRecipePageTexts> {
-  const [singleRecipePageTexts, themeSwitchTexts, menuTexts, t] =
+  const [recipeFormTexts, themeSwitchTexts, menuTexts, findInSiteTexts] =
     await Promise.all([
-      getSingleRecipePageTexts(),
+      getRecipeFormTexts("create"),
       getThemeSwitchTexts(),
       getSidebarMenuTexts(
         "trainer",
@@ -466,13 +342,186 @@ export async function getTrainerSingleRecipePageTexts(): Promise<TrainerSingleRe
         trainerLabels,
         trainerSubLabels,
       ),
-      getTranslations("pages.trainer.TrainerSingleRecipePageTexts"),
+      getFindInSiteTexts(),
     ]);
+  return {
+    recipeFormTexts,
+    themeSwitchTexts,
+    menuTexts,
+    findInSiteTexts,
+  };
+}
+
+export async function getUpdatePostPageTexts(): Promise<UpdatePostPageTexts> {
+  const [postFormTexts, themeSwitchTexts, menuTexts, findInSiteTexts] =
+    await Promise.all([
+      getPostFormTexts("update"),
+      getThemeSwitchTexts(),
+      getSidebarMenuTexts(
+        "trainer",
+        trainerGroupLabels,
+        trainerLabels,
+        trainerSubLabels,
+      ),
+      getFindInSiteTexts(),
+    ]);
+  return {
+    postFormTexts,
+    themeSwitchTexts,
+    menuTexts,
+    findInSiteTexts,
+  };
+}
+
+export async function getUserDuplicatePostPage(): Promise<UserDuplicatePostPage> {
+  const [postFormTexts, themeSwitchTexts, menuTexts, findInSiteTexts] =
+    await Promise.all([
+      getPostFormTexts("create"),
+      getThemeSwitchTexts(),
+      getSidebarMenuTexts(
+        "trainer",
+        trainerGroupLabels,
+        trainerLabels,
+        trainerSubLabels,
+      ),
+      getFindInSiteTexts(),
+    ]);
+  return {
+    postFormTexts,
+    themeSwitchTexts,
+    menuTexts,
+    findInSiteTexts,
+  };
+}
+
+export async function getUpdatePlanPageTexts() {
+  const [planFormTexts, themeSwitchTexts, menuTexts, findInSiteTexts] =
+    await Promise.all([
+      getPlanFormTexts("update"),
+      getThemeSwitchTexts(),
+      getSidebarMenuTexts(
+        "trainer",
+        trainerGroupLabels,
+        trainerLabels,
+        trainerSubLabels,
+      ),
+      getFindInSiteTexts(),
+    ]);
+  return {
+    planFormTexts,
+    themeSwitchTexts,
+    menuTexts,
+    findInSiteTexts,
+  };
+}
+export async function getDuplicatePlanPageTexts() {
+  const [planFormTexts, themeSwitchTexts, menuTexts, findInSiteTexts] =
+    await Promise.all([
+      getPlanFormTexts("create"),
+      getThemeSwitchTexts(),
+      getSidebarMenuTexts(
+        "trainer",
+        trainerGroupLabels,
+        trainerLabels,
+        trainerSubLabels,
+      ),
+      getFindInSiteTexts(),
+    ]);
+  return {
+    planFormTexts,
+    themeSwitchTexts,
+    menuTexts,
+    findInSiteTexts,
+  };
+}
+
+export async function getUpdateDayPageTexts(): Promise<UpdateDayPageTexts> {
+  const [dayFormTexts, themeSwitchTexts, menuTexts, findInSiteTexts] =
+    await Promise.all([
+      getDayFromTexts("update"),
+      getThemeSwitchTexts(),
+      getSidebarMenuTexts(
+        "trainer",
+        trainerGroupLabels,
+        trainerLabels,
+        trainerSubLabels,
+      ),
+      getFindInSiteTexts(),
+    ]);
+  return {
+    dayFormTexts,
+    themeSwitchTexts,
+    menuTexts,
+    findInSiteTexts,
+  };
+}
+
+export async function getUpdateRecipePageTexts(): Promise<UpdateRecipePageTexts> {
+  const [recipeFormTexts, themeSwitchTexts, menuTexts, findInSiteTexts] =
+    await Promise.all([
+      getRecipeFormTexts("update"),
+      getThemeSwitchTexts(),
+      getSidebarMenuTexts(
+        "trainer",
+        trainerGroupLabels,
+        trainerLabels,
+        trainerSubLabels,
+      ),
+      getFindInSiteTexts(),
+    ]);
+  return {
+    recipeFormTexts,
+    themeSwitchTexts,
+    menuTexts,
+    findInSiteTexts,
+  };
+}
+export async function getDuplicateRecipePageTexts(): Promise<DuplicateRecipePageTexts> {
+  const [recipeFormTexts, themeSwitchTexts, menuTexts, findInSiteTexts] =
+    await Promise.all([
+      getRecipeFormTexts("create"),
+      getThemeSwitchTexts(),
+      getSidebarMenuTexts(
+        "trainer",
+        trainerGroupLabels,
+        trainerLabels,
+        trainerSubLabels,
+      ),
+      getFindInSiteTexts(),
+    ]);
+  return {
+    recipeFormTexts,
+    themeSwitchTexts,
+    menuTexts,
+    findInSiteTexts,
+  };
+}
+
+export async function getTrainerSingleRecipePageTexts(): Promise<TrainerSingleRecipePageTexts> {
+  const [
+    singleRecipePageTexts,
+    themeSwitchTexts,
+    menuTexts,
+    findInSiteTexts,
+    t,
+  ] = await Promise.all([
+    getSingleRecipePageTexts(),
+    getThemeSwitchTexts(),
+    getSidebarMenuTexts(
+      "trainer",
+      trainerGroupLabels,
+      trainerLabels,
+      trainerSubLabels,
+    ),
+    getFindInSiteTexts(),
+    getTranslations("pages.trainer.TrainerSingleRecipePageTexts"),
+  ]);
   return {
     singleRecipePageTexts,
     themeSwitchTexts,
     menuTexts,
     title: t("title"),
+    findInSiteTexts,
   };
 }
 
@@ -485,6 +534,7 @@ export async function getAdminPostsPageTexts(): Promise<AdminPostsPageTexts> {
     menuTexts,
     archivePostsTexts,
     archiveCommentsTexts,
+    findInSiteTexts,
   ] = await Promise.all([
     getTranslations("pages.admin.AdminPostsPageTexts"),
     getPostTableTexts(),
@@ -493,6 +543,7 @@ export async function getAdminPostsPageTexts(): Promise<AdminPostsPageTexts> {
     getSidebarMenuTexts("admin", adminGroupLabels, adminLabels, adminSubLabels),
     getArchiveQueueCardsTexts("post"),
     getArchiveQueueCardsTexts("comment"),
+    getFindInSiteTexts(),
   ]);
 
   return {
@@ -504,6 +555,7 @@ export async function getAdminPostsPageTexts(): Promise<AdminPostsPageTexts> {
     menuTexts,
     archivePostsTexts,
     archiveCommentsTexts,
+    findInSiteTexts,
   };
 }
 
@@ -516,6 +568,7 @@ export async function getAdminRecipesPageTexts(): Promise<AdminRecipesPageTexts>
     menuTexts,
     archiveRecipesTexts,
     archiveMealsTexts,
+    findInSiteTexts,
   ] = await Promise.all([
     getTranslations("pages.admin.AdminRecipesPageTexts"),
     getRecipeTableTexts(),
@@ -524,6 +577,7 @@ export async function getAdminRecipesPageTexts(): Promise<AdminRecipesPageTexts>
     getSidebarMenuTexts("admin", adminGroupLabels, adminLabels, adminSubLabels),
     getArchiveQueueCardsTexts("recipe"),
     getArchiveQueueCardsTexts("meal"),
+    getFindInSiteTexts(),
   ]);
 
   return {
@@ -535,6 +589,7 @@ export async function getAdminRecipesPageTexts(): Promise<AdminRecipesPageTexts>
     menuTexts,
     archiveRecipesTexts,
     archiveMealsTexts,
+    findInSiteTexts,
   };
 }
 
@@ -545,12 +600,14 @@ export async function getUserPostsAdminPageTexts(): Promise<UserPostsAdminPageTe
     sortingPostsSortingOptions,
     themeSwitchTexts,
     menuTexts,
+    findInSiteTexts,
   ] = await Promise.all([
     getTranslations("pages.admin.UserPostsAdminPageTexts"),
     getPostTableTexts(),
     getSortingItemSortingOptions("posts", sortingPostsSortingOptionsKeys),
     getThemeSwitchTexts(),
     getSidebarMenuTexts("admin", adminGroupLabels, adminLabels, adminSubLabels),
+    getFindInSiteTexts(),
   ]);
 
   return {
@@ -560,6 +617,7 @@ export async function getUserPostsAdminPageTexts(): Promise<UserPostsAdminPageTe
     sortingPostsSortingOptions,
     themeSwitchTexts,
     menuTexts,
+    findInSiteTexts,
   };
 }
 
@@ -573,6 +631,7 @@ export async function getAdminUsersPageTexts(): Promise<AdminUsersPageTexts> {
     archiveUsersTexts,
     topUsersTexts,
     topTrainersTexts,
+    findInSiteTexts,
   ] = await Promise.all([
     getUserTableTexts(),
     getThemeSwitchTexts(),
@@ -582,6 +641,7 @@ export async function getAdminUsersPageTexts(): Promise<AdminUsersPageTexts> {
     getArchiveQueueCardsTexts("user"),
     getTopUsersTexts(),
     getTopTrainersTexts(),
+    getFindInSiteTexts(),
   ]);
   return {
     userTableTexts,
@@ -593,27 +653,36 @@ export async function getAdminUsersPageTexts(): Promise<AdminUsersPageTexts> {
     archiveUsersTexts,
     topUsersTexts,
     topTrainersTexts,
+    findInSiteTexts,
   };
 }
 
 export async function getAdminUserPageTexts(): Promise<AdminUserPageTexts> {
-  const [userPageTexts, themeSwitchTexts, t, menuTexts] = await Promise.all([
-    getUserPageTexts(),
-    getThemeSwitchTexts(),
-    getTranslations("pages.admin.AdminUserPageTexts"),
-    getSidebarMenuTexts("admin", adminGroupLabels, adminLabels, adminSubLabels),
-  ]);
+  const [userPageTexts, themeSwitchTexts, t, menuTexts, findInSiteTexts] =
+    await Promise.all([
+      getUserPageTexts(),
+      getThemeSwitchTexts(),
+      getTranslations("pages.admin.AdminUserPageTexts"),
+      getSidebarMenuTexts(
+        "admin",
+        adminGroupLabels,
+        adminLabels,
+        adminSubLabels,
+      ),
+      getFindInSiteTexts(),
+    ]);
   return {
     userPageTexts,
     themeSwitchTexts,
     header: t("header"),
     title: t("title"),
     menuTexts,
+    findInSiteTexts,
   };
 }
 
 export async function getAdminPostPageTexts(): Promise<AdminPostPageTexts> {
-  const [t, themeSwitchTexts, menuTexts, singlePostPageTexts] =
+  const [t, themeSwitchTexts, menuTexts, singlePostPageTexts, findInSiteTexts] =
     await Promise.all([
       getTranslations("pages.admin.AdminPostPageTexts"),
       getThemeSwitchTexts(),
@@ -624,6 +693,7 @@ export async function getAdminPostPageTexts(): Promise<AdminPostPageTexts> {
         adminSubLabels,
       ),
       getSinglePostPageTexts(),
+      getFindInSiteTexts(),
     ]);
   return {
     themeSwitchTexts,
@@ -631,11 +701,12 @@ export async function getAdminPostPageTexts(): Promise<AdminPostPageTexts> {
     title: t("title"),
     menuTexts,
     singlePostPageTexts,
+    findInSiteTexts,
   };
 }
 
 export async function getTrainerPostPageTexts(): Promise<TrainerPostPageTexts> {
-  const [themeSwitchTexts, t, menuTexts, singlePostPageTexts] =
+  const [themeSwitchTexts, t, menuTexts, singlePostPageTexts, findInSiteTexts] =
     await Promise.all([
       getThemeSwitchTexts(),
       getTranslations("pages.trainer.TrainerPostPageTexts"),
@@ -646,162 +717,179 @@ export async function getTrainerPostPageTexts(): Promise<TrainerPostPageTexts> {
         adminSubLabels,
       ),
       getSinglePostPageTexts(),
+      getFindInSiteTexts(),
     ]);
   return {
     themeSwitchTexts,
     title: t("title"),
     menuTexts,
     singlePostPageTexts,
+    findInSiteTexts,
   };
 }
 
 export async function getTrainerPlanPageTexts(): Promise<TrainerPlanPageTexts> {
-  const [singleTrainerPlanPageTexts, t, menuTexts, themeSwitchTexts] =
-    await Promise.all([
-      getSingleTrainerPlanPageTexts(),
-      getTranslations("pages.trainer.TrainerPlanPageTexts"),
-      getSidebarMenuTexts(
-        "admin",
-        adminGroupLabels,
-        adminLabels,
-        adminSubLabels,
-      ),
-      getThemeSwitchTexts(),
-    ]);
+  const [
+    singleTrainerPlanPageTexts,
+    t,
+    menuTexts,
+    themeSwitchTexts,
+    findInSiteTexts,
+  ] = await Promise.all([
+    getSingleTrainerPlanPageTexts(),
+    getTranslations("pages.trainer.TrainerPlanPageTexts"),
+    getSidebarMenuTexts("admin", adminGroupLabels, adminLabels, adminSubLabels),
+    getThemeSwitchTexts(),
+    getFindInSiteTexts(),
+  ]);
   return {
     singleTrainerPlanPageTexts,
     title: t("title"),
     menuTexts,
     themeSwitchTexts,
+    findInSiteTexts,
   };
 }
 
 export async function getSingleDayTrainerPageTexts(): Promise<SingleDayTrainerPageTexts> {
-  const [singleDayTexts, t, menuTexts, themeSwitchTexts] = await Promise.all([
-    getSingleDayTexts(),
-    getTranslations("pages.trainer.SingleDayTrainerPageTexts"),
-    getSidebarMenuTexts(
-      "trainer",
-      trainerGroupLabels,
-      trainerLabels,
-      trainerSubLabels,
-    ),
-    getThemeSwitchTexts(),
-  ]);
+  const [singleDayTexts, t, menuTexts, themeSwitchTexts, findInSiteTexts] =
+    await Promise.all([
+      getSingleDayTexts(),
+      getTranslations("pages.trainer.SingleDayTrainerPageTexts"),
+      getSidebarMenuTexts(
+        "trainer",
+        trainerGroupLabels,
+        trainerLabels,
+        trainerSubLabels,
+      ),
+      getThemeSwitchTexts(),
+      getFindInSiteTexts(),
+    ]);
   return {
     singleDayTexts,
     title: t("title"),
     menuTexts,
     themeSwitchTexts,
+    findInSiteTexts,
   };
 }
 
 export async function getAdminIngredientPageTexts(): Promise<AdminIngredientPageTexts> {
-  const [themeSwitchTexts, t, menuTexts, singleIngredientPageTexts] =
-    await Promise.all([
-      getThemeSwitchTexts(),
-      getTranslations("pages.admin.AdminIngredientPageTexts"),
-      getSidebarMenuTexts(
-        "admin",
-        adminGroupLabels,
-        adminLabels,
-        adminSubLabels,
-      ),
-      getSingleIngredientPageTexts(),
-    ]);
+  const [
+    themeSwitchTexts,
+    t,
+    menuTexts,
+    singleIngredientPageTexts,
+    findInSiteTexts,
+  ] = await Promise.all([
+    getThemeSwitchTexts(),
+    getTranslations("pages.admin.AdminIngredientPageTexts"),
+    getSidebarMenuTexts("admin", adminGroupLabels, adminLabels, adminSubLabels),
+    getSingleIngredientPageTexts(),
+    getFindInSiteTexts(),
+  ]);
   return {
     themeSwitchTexts,
     header: t("header"),
     title: t("title"),
     menuTexts,
     singleIngredientPageTexts,
+    findInSiteTexts,
   };
 }
 
 export async function getTrainerSingleIngredientPageTexts(): Promise<TrainerSingleIngredientPageTexts> {
-  const [themeSwitchTexts, t, menuTexts, singleIngredientPageTexts] =
-    await Promise.all([
-      getThemeSwitchTexts(),
-      getTranslations("pages.trainer.TrainerSingleIngredientPageTexts"),
-      getSidebarMenuTexts(
-        "admin",
-        adminGroupLabels,
-        adminLabels,
-        adminSubLabels,
-      ),
-      getSingleIngredientPageTexts(),
-    ]);
+  const [
+    themeSwitchTexts,
+    t,
+    menuTexts,
+    singleIngredientPageTexts,
+    findInSiteTexts,
+  ] = await Promise.all([
+    getThemeSwitchTexts(),
+    getTranslations("pages.trainer.TrainerSingleIngredientPageTexts"),
+    getSidebarMenuTexts("admin", adminGroupLabels, adminLabels, adminSubLabels),
+    getSingleIngredientPageTexts(),
+    getFindInSiteTexts(),
+  ]);
   return {
     themeSwitchTexts,
     title: t("title"),
     menuTexts,
     singleIngredientPageTexts,
+    findInSiteTexts,
   };
 }
 
 export async function getAdminPlanPageTexts(): Promise<AdminPlanPageTexts> {
-  const [t, themeSwitchTexts, menuTexts, singleTrainerPlanPageTexts] =
-    await Promise.all([
-      getTranslations("pages.admin.AdminPlanPageTexts"),
-      getThemeSwitchTexts(),
-      getSidebarMenuTexts(
-        "admin",
-        adminGroupLabels,
-        adminLabels,
-        adminSubLabels,
-      ),
-      getSingleTrainerPlanPageTexts(),
-    ]);
+  const [
+    t,
+    themeSwitchTexts,
+    menuTexts,
+    singleTrainerPlanPageTexts,
+    findInSiteTexts,
+  ] = await Promise.all([
+    getTranslations("pages.admin.AdminPlanPageTexts"),
+    getThemeSwitchTexts(),
+    getSidebarMenuTexts("admin", adminGroupLabels, adminLabels, adminSubLabels),
+    getSingleTrainerPlanPageTexts(),
+    getFindInSiteTexts(),
+  ]);
   return {
     themeSwitchTexts,
     header: t("header"),
     title: t("title"),
     menuTexts,
     singleTrainerPlanPageTexts,
+    findInSiteTexts,
   };
 }
 
 export async function getAdminRecipePageTexts(): Promise<AdminRecipePageTexts> {
-  const [themeSwitchTexts, t, menuTexts, singleRecipePageTexts] =
-    await Promise.all([
-      getThemeSwitchTexts(),
-      getTranslations("pages.admin.AdminRecipePageTexts"),
-      getSidebarMenuTexts(
-        "admin",
-        adminGroupLabels,
-        adminLabels,
-        adminSubLabels,
-      ),
-      getSingleRecipePageTexts(),
-    ]);
+  const [
+    themeSwitchTexts,
+    t,
+    menuTexts,
+    singleRecipePageTexts,
+    findInSiteTexts,
+  ] = await Promise.all([
+    getThemeSwitchTexts(),
+    getTranslations("pages.admin.AdminRecipePageTexts"),
+    getSidebarMenuTexts("admin", adminGroupLabels, adminLabels, adminSubLabels),
+    getSingleRecipePageTexts(),
+    getFindInSiteTexts(),
+  ]);
   return {
     themeSwitchTexts,
     header: t("header"),
     title: t("title"),
     menuTexts,
     singleRecipePageTexts,
+    findInSiteTexts,
   };
 }
 
 export async function getAdminOrderPageTexts(): Promise<AdminOrderPageTexts> {
-  const [themeSwitchTexts, t, menuTexts, singleOrderPageContentTexts] =
-    await Promise.all([
-      getThemeSwitchTexts(),
-      getTranslations("pages.admin.AdminOrderPageTexts"),
-      getSidebarMenuTexts(
-        "admin",
-        adminGroupLabels,
-        adminLabels,
-        adminSubLabels,
-      ),
-      getSingleOrderPageContentTexts(),
-    ]);
+  const [
+    themeSwitchTexts,
+    t,
+    menuTexts,
+    singleOrderPageContentTexts,
+    findInSiteTexts,
+  ] = await Promise.all([
+    getThemeSwitchTexts(),
+    getTranslations("pages.admin.AdminOrderPageTexts"),
+    getSidebarMenuTexts("admin", adminGroupLabels, adminLabels, adminSubLabels),
+    getSingleOrderPageContentTexts(),
+    getFindInSiteTexts(),
+  ]);
   return {
     themeSwitchTexts,
     header: t("header"),
     title: t("title"),
     menuTexts,
     singleOrderPageContentTexts,
+    findInSiteTexts,
   };
 }
 
@@ -826,25 +914,34 @@ export const getUserPageTexts: () => Promise<UserPageTexts> = async () => {
 };
 
 export async function getAdminIngredientsCreatePageTexts(): Promise<AdminIngredientsCreatePageTexts> {
-  const [ingredientForm, t, menuTexts] = await Promise.all([
+  const [ingredientForm, t, menuTexts, findInSiteTexts] = await Promise.all([
     getIngredientFormTexts("create"),
     getTranslations("pages.admin.AdminIngredientsCreatePage"),
     getSidebarMenuTexts("admin", adminGroupLabels, adminLabels, adminSubLabels),
+    getFindInSiteTexts(),
   ]);
 
   return {
     ingredientForm,
     title: t("title"),
     menuTexts,
+    findInSiteTexts,
   };
 }
 export async function getAdminAIPostsCreate(): Promise<AdminAIPostsCreateTexts> {
-  const [t, menuTexts, schemaTexts, buttonSubmitTexts] = await Promise.all([
-    getTranslations("pages.admin.AdminAIPostsCreatePage"),
-    getSidebarMenuTexts("admin", adminGroupLabels, adminLabels, adminSubLabels),
-    getAdminAICreatePostSchemaTexts(),
-    getButtonSubmitTexts(),
-  ]);
+  const [t, menuTexts, schemaTexts, buttonSubmitTexts, findInSiteTexts] =
+    await Promise.all([
+      getTranslations("pages.admin.AdminAIPostsCreatePage"),
+      getSidebarMenuTexts(
+        "admin",
+        adminGroupLabels,
+        adminLabels,
+        adminSubLabels,
+      ),
+      getAdminAICreatePostSchemaTexts(),
+      getButtonSubmitTexts(),
+      getFindInSiteTexts(),
+    ]);
 
   return {
     title: t("title"),
@@ -872,11 +969,12 @@ export async function getAdminAIPostsCreate(): Promise<AdminAIPostsCreateTexts> 
       submitted: t("uploadingState.submitted"),
     },
     singlePostLabel: t("singlePostLabel"),
+    findInSiteTexts,
   };
 }
 
 export async function getAdminPageUpdateIngredientTexts(): Promise<AdminPageUpdateIngredientTexts> {
-  const [themeSwitchTexts, ingredientFormTexts, t, menuTexts] =
+  const [themeSwitchTexts, ingredientFormTexts, t, menuTexts, findInSiteTexts] =
     await Promise.all([
       getThemeSwitchTexts(),
       getIngredientFormTexts("update"),
@@ -887,16 +985,18 @@ export async function getAdminPageUpdateIngredientTexts(): Promise<AdminPageUpda
         adminLabels,
         adminSubLabels,
       ),
+      getFindInSiteTexts(),
     ]);
   return {
     themeSwitchTexts,
     ingredientFormTexts,
     title: t("title"),
     menuTexts,
+    findInSiteTexts,
   };
 }
 export async function getAdminPageDuplicateIngredientTexts(): Promise<AdminPageDuplicateIngredientTexts> {
-  const [themeSwitchTexts, ingredientFormTexts, t, menuTexts] =
+  const [themeSwitchTexts, ingredientFormTexts, t, menuTexts, findInSiteTexts] =
     await Promise.all([
       getThemeSwitchTexts(),
       getIngredientFormTexts("create"),
@@ -907,12 +1007,14 @@ export async function getAdminPageDuplicateIngredientTexts(): Promise<AdminPageD
         adminLabels,
         adminSubLabels,
       ),
+      getFindInSiteTexts(),
     ]);
   return {
     themeSwitchTexts,
     ingredientFormTexts,
     title: t("title"),
     menuTexts,
+    findInSiteTexts,
   };
 }
 
@@ -924,6 +1026,7 @@ export async function getAdminIngredientsPageTexts(): Promise<AdminIngredientsPa
     t,
     menuTexts,
     archiveIngredientsTexts,
+    findInSiteTexts,
   ] = await Promise.all([
     getIngredientTableTexts(),
     getSortingItemSortingOptions(
@@ -934,6 +1037,7 @@ export async function getAdminIngredientsPageTexts(): Promise<AdminIngredientsPa
     getTranslations("pages.admin.AdminIngredientsPageTexts"),
     getSidebarMenuTexts("admin", adminGroupLabels, adminLabels, adminSubLabels),
     getArchiveQueueCardsTexts("ingredient"),
+    getFindInSiteTexts(),
   ]);
 
   return {
@@ -944,6 +1048,7 @@ export async function getAdminIngredientsPageTexts(): Promise<AdminIngredientsPa
     header: t("header"),
     menuTexts,
     archiveIngredientsTexts,
+    findInSiteTexts,
   };
 }
 
@@ -953,6 +1058,7 @@ export async function getIngredientsPageTexts(): Promise<IngredientsPageTexts> {
     sortingIngredientsSortingOptions,
     themeSwitchTexts,
     menuTexts,
+    findInSiteTexts,
     t,
   ] = await Promise.all([
     getIngredientTableTexts(),
@@ -967,6 +1073,7 @@ export async function getIngredientsPageTexts(): Promise<IngredientsPageTexts> {
       trainerLabels,
       trainerSubLabels,
     ),
+    getFindInSiteTexts(),
     getTranslations("pages.ingredients.IngredientsPageTexts"),
   ]);
 
@@ -977,6 +1084,7 @@ export async function getIngredientsPageTexts(): Promise<IngredientsPageTexts> {
     menuTexts,
     title: t("title"),
     header: t("header"),
+    findInSiteTexts,
   };
 }
 
@@ -1005,6 +1113,7 @@ export async function getUserRecipesPageContentTexts(): Promise<UserRecipesPageT
     t,
     themeSwitchTexts,
     menuTexts,
+    findInSiteTexts,
   ] = await Promise.all([
     getRecipeTableTexts(),
     getSortingItemSortingOptions("recipes", sortingRecipesSortingOptionsKeys),
@@ -1016,6 +1125,7 @@ export async function getUserRecipesPageContentTexts(): Promise<UserRecipesPageT
       trainerLabels,
       trainerSubLabels,
     ),
+    getFindInSiteTexts(),
   ]);
   return {
     recipesTableTexts,
@@ -1024,6 +1134,7 @@ export async function getUserRecipesPageContentTexts(): Promise<UserRecipesPageT
     title: t("title"),
     themeSwitchTexts,
     menuTexts,
+    findInSiteTexts,
   };
 }
 
@@ -1035,12 +1146,14 @@ export async function getUserRecipesAdminPageTexts(): Promise<UserRecipesAdminPa
     themeSwitchTexts,
     t,
     menuTexts,
+    findInSiteTexts,
   ] = await Promise.all([
     getRecipeTableTexts(),
     getSortingItemSortingOptions("recipes", sortingRecipesSortingOptionsKeys),
     getThemeSwitchTexts(),
     getTranslations("pages.admin.UserRecipesAdminPageTexts"),
     getSidebarMenuTexts("admin", adminGroupLabels, adminLabels, adminSubLabels),
+    getFindInSiteTexts(),
   ]);
   return {
     recipesTableTexts,
@@ -1049,6 +1162,7 @@ export async function getUserRecipesAdminPageTexts(): Promise<UserRecipesAdminPa
     header: t("header"),
     title: t("title"),
     menuTexts,
+    findInSiteTexts,
   };
 }
 
@@ -1060,6 +1174,7 @@ export async function getUserPlansAdminPageTexts(): Promise<UserPlansAdminPageTe
     t,
     menuTexts,
     topPlansTexts,
+    findInSiteTexts,
   ] = await Promise.all([
     getPlanTableTexts(),
     getSortingItemSortingOptions("plans", sortingPlansSortingOptionsKeys),
@@ -1067,6 +1182,7 @@ export async function getUserPlansAdminPageTexts(): Promise<UserPlansAdminPageTe
     getTranslations("pages.admin.UserPlansAdminPageTexts"),
     getSidebarMenuTexts("admin", adminGroupLabels, adminLabels, adminSubLabels),
     getTopPlansTexts(),
+    getFindInSiteTexts(),
   ]);
   return {
     plansTableTexts,
@@ -1076,6 +1192,7 @@ export async function getUserPlansAdminPageTexts(): Promise<UserPlansAdminPageTe
     title: t("title"),
     header: t("header"),
     menuTexts,
+    findInSiteTexts,
   };
 }
 
@@ -1086,12 +1203,14 @@ export async function getUserOrdersAdminPageTexts(): Promise<UserOrdersAdminPage
     themeSwitchTexts,
     t,
     menuTexts,
+    findInSiteTexts,
   ] = await Promise.all([
     getOrderTableTexts(),
     getSortingItemSortingOptions("orders", sortingOrdersSortingOptionsKeys),
     getThemeSwitchTexts(),
     getTranslations("pages.admin.UserOrdersAdminPageTexts"),
     getSidebarMenuTexts("admin", adminGroupLabels, adminLabels, adminSubLabels),
+    getFindInSiteTexts(),
   ]);
   return {
     orderTableTexts,
@@ -1100,6 +1219,7 @@ export async function getUserOrdersAdminPageTexts(): Promise<UserOrdersAdminPage
     title: t("title"),
     header: t("header"),
     menuTexts,
+    findInSiteTexts,
   };
 }
 
@@ -1113,6 +1233,7 @@ export async function getAdminPlansPageTexts(): Promise<AdminPlansPageTexts> {
     archivePlansTexts,
     archiveDayTexts,
     topPlansTexts,
+    findInSiteTexts,
   ] = await Promise.all([
     getTranslations("pages.admin.AdminPlansPageTexts"),
     getPlanTableTexts(),
@@ -1122,6 +1243,7 @@ export async function getAdminPlansPageTexts(): Promise<AdminPlansPageTexts> {
     getArchiveQueueCardsTexts("plan"),
     getArchiveQueueCardsTexts("day"),
     getTopPlansTexts(),
+    getFindInSiteTexts(),
   ]);
 
   return {
@@ -1134,6 +1256,7 @@ export async function getAdminPlansPageTexts(): Promise<AdminPlansPageTexts> {
     archivePlansTexts,
     archiveDayTexts,
     topPlansTexts,
+    findInSiteTexts,
   };
 }
 
@@ -1144,6 +1267,7 @@ export async function getUserDaysPageTexts(): Promise<UserDaysPageTexts> {
     t,
     themeSwitchTexts,
     menuTexts,
+    findInSiteTexts,
   ] = await Promise.all([
     getDayTableTexts(),
     getSortingItemSortingOptions("days", sortingDaysSortingOptionsKeys),
@@ -1155,6 +1279,7 @@ export async function getUserDaysPageTexts(): Promise<UserDaysPageTexts> {
       trainerLabels,
       trainerSubLabels,
     ),
+    getFindInSiteTexts(),
   ]);
   return {
     dayTableTexts,
@@ -1163,6 +1288,7 @@ export async function getUserDaysPageTexts(): Promise<UserDaysPageTexts> {
     title: t("title"),
     menuTexts,
     themeSwitchTexts,
+    findInSiteTexts,
   };
 }
 
@@ -1174,6 +1300,7 @@ export async function getUserPlansPageTexts(): Promise<UserPlansPageTexts> {
     themeSwitchTexts,
     menuTexts,
     topPlansTexts,
+    findInSiteTexts,
   ] = await Promise.all([
     getPlanTableTexts(),
     getSortingItemSortingOptions("plans", sortingPlansSortingOptionsKeys),
@@ -1186,6 +1313,7 @@ export async function getUserPlansPageTexts(): Promise<UserPlansPageTexts> {
       trainerSubLabels,
     ),
     getTopPlansTexts(),
+    getFindInSiteTexts(),
   ]);
   return {
     planTableTexts,
@@ -1195,6 +1323,7 @@ export async function getUserPlansPageTexts(): Promise<UserPlansPageTexts> {
     themeSwitchTexts,
     menuTexts,
     topPlansTexts,
+    findInSiteTexts,
   };
 }
 
@@ -1379,12 +1508,14 @@ export async function getAdminOrdersPageTexts(): Promise<AdminOrdersPageTexts> {
     sortingOrdersSortingOptions,
     themeSwitchTexts,
     menuTexts,
+    findInSiteTexts,
   ] = await Promise.all([
     getTranslations("pages.admin.AdminOrdersPageTexts"),
     getOrderTableTexts(),
     getSortingItemSortingOptions("orders", sortingOrdersSortingOptionsKeys),
     getThemeSwitchTexts(),
     getSidebarMenuTexts("admin", adminGroupLabels, adminLabels, adminSubLabels),
+    getFindInSiteTexts(),
   ]);
 
   return {
@@ -1394,6 +1525,7 @@ export async function getAdminOrdersPageTexts(): Promise<AdminOrdersPageTexts> {
     sortingOrdersSortingOptions,
     themeSwitchTexts,
     menuTexts,
+    findInSiteTexts,
   };
 }
 
@@ -1431,6 +1563,7 @@ export async function getAdminDashboardPageTexts(): Promise<AdminDashboardPageTe
     topUsersTexts,
     topPlansTexts,
     topTrainersTexts,
+    findInSiteTexts,
   ] = await Promise.all([
     getTranslations("pages.admin.AdminDashboardPageTexts"),
     getAllRelativeItemTexts(),
@@ -1441,6 +1574,7 @@ export async function getAdminDashboardPageTexts(): Promise<AdminDashboardPageTe
     getTopUsersTexts(),
     getTopPlansTexts(),
     getTopTrainersTexts(),
+    getFindInSiteTexts(),
   ]);
 
   return {
@@ -1454,6 +1588,7 @@ export async function getAdminDashboardPageTexts(): Promise<AdminDashboardPageTe
     topUsersTexts,
     topPlansTexts,
     topTrainersTexts,
+    findInSiteTexts,
     archiveTitle: t("archiveTitle"),
     selectItems: {
       comment: t("selectItems.comment"),
@@ -1470,19 +1605,21 @@ export async function getAdminDashboardPageTexts(): Promise<AdminDashboardPageTe
 }
 
 export async function getAdminMonthlySalesTexts(): Promise<AdminMonthlySalesTexts> {
-  const [t, monthlySalesTexts, plansMonthlySales, themeSwitchTexts, menuTexts] =
-    await Promise.all([
-      getTranslations("pages.admin.AdminMonthlySalesTexts"),
-      getMonthlySalesTexts("orders"),
-      getMonthlySalesTexts("plans"),
-      getThemeSwitchTexts(),
-      getSidebarMenuTexts(
-        "admin",
-        adminGroupLabels,
-        adminLabels,
-        adminSubLabels,
-      ),
-    ]);
+  const [
+    t,
+    monthlySalesTexts,
+    plansMonthlySales,
+    themeSwitchTexts,
+    menuTexts,
+    findInSiteTexts,
+  ] = await Promise.all([
+    getTranslations("pages.admin.AdminMonthlySalesTexts"),
+    getMonthlySalesTexts("orders"),
+    getMonthlySalesTexts("plans"),
+    getThemeSwitchTexts(),
+    getSidebarMenuTexts("admin", adminGroupLabels, adminLabels, adminSubLabels),
+    getFindInSiteTexts(),
+  ]);
   return {
     title: t("title"),
     header: t("header"),
@@ -1491,11 +1628,12 @@ export async function getAdminMonthlySalesTexts(): Promise<AdminMonthlySalesText
     themeSwitchTexts,
     menuTexts,
     plansMonthlySales,
+    findInSiteTexts,
   };
 }
 
 export async function getAdminCountriesTexts(): Promise<AdminCountriesTexts> {
-  const [t, themeSwitchTexts, geographyChartTexts, menuTexts] =
+  const [t, themeSwitchTexts, geographyChartTexts, menuTexts, findInSiteTexts] =
     await Promise.all([
       getTranslations("pages.admin.AdminCountriesTexts"),
       getThemeSwitchTexts(),
@@ -1506,6 +1644,7 @@ export async function getAdminCountriesTexts(): Promise<AdminCountriesTexts> {
         adminLabels,
         adminSubLabels,
       ),
+      getFindInSiteTexts(),
     ]);
   return {
     title: t("title"),
@@ -1513,6 +1652,7 @@ export async function getAdminCountriesTexts(): Promise<AdminCountriesTexts> {
     themeSwitchTexts,
     geographyChartTexts,
     menuTexts,
+    findInSiteTexts,
   };
 }
 
@@ -1523,12 +1663,14 @@ export async function getAdminDailySalesTexts(): Promise<AdminDailySalesTexts> {
     plansDailySalesTexts,
     themeSwitchTexts,
     menuTexts,
+    findInSiteTexts,
   ] = await Promise.all([
     getTranslations("pages.admin.AdminDailySalesTexts"),
     getDailySalesTexts("orders"),
     getDailySalesTexts("plans"),
     getThemeSwitchTexts(),
     getSidebarMenuTexts("admin", adminGroupLabels, adminLabels, adminSubLabels),
+    getFindInSiteTexts(),
   ]);
   return {
     title: t("title"),
@@ -1538,12 +1680,13 @@ export async function getAdminDailySalesTexts(): Promise<AdminDailySalesTexts> {
     themeSwitchTexts,
     menuTexts,
     plansDailySalesTexts,
+    findInSiteTexts,
   };
 }
 
 export async function getUserMonthlySalesPageTexts(): Promise<UserMonthlySalesPageTexts> {
-  const [t, monthlySalesTexts, themeSwitchTexts, menuTexts] = await Promise.all(
-    [
+  const [t, monthlySalesTexts, themeSwitchTexts, menuTexts, findInSiteTexts] =
+    await Promise.all([
       getTranslations("pages.plans.UserMonthlySalesPageTexts"),
       getMonthlySalesTexts("plans"),
       getThemeSwitchTexts(),
@@ -1553,41 +1696,45 @@ export async function getUserMonthlySalesPageTexts(): Promise<UserMonthlySalesPa
         trainerLabels,
         trainerSubLabels,
       ),
-    ],
-  );
+      getFindInSiteTexts(),
+    ]);
   return {
     title: t("title"),
     header: t("header"),
     monthlySalesTexts,
     themeSwitchTexts,
     menuTexts,
+    findInSiteTexts,
   };
 }
 
 export async function getUserDailySalesPageTexts(): Promise<UserDailySalesPageTexts> {
-  const [t, dailySalesTexts, themeSwitchTexts, menuTexts] = await Promise.all([
-    getTranslations("pages.plans.UserDailySalesPageTexts"),
-    getDailySalesTexts("plans"),
-    getThemeSwitchTexts(),
-    getSidebarMenuTexts(
-      "trainer",
-      trainerGroupLabels,
-      trainerLabels,
-      trainerSubLabels,
-    ),
-  ]);
+  const [t, dailySalesTexts, themeSwitchTexts, menuTexts, findInSiteTexts] =
+    await Promise.all([
+      getTranslations("pages.plans.UserDailySalesPageTexts"),
+      getDailySalesTexts("plans"),
+      getThemeSwitchTexts(),
+      getSidebarMenuTexts(
+        "trainer",
+        trainerGroupLabels,
+        trainerLabels,
+        trainerSubLabels,
+      ),
+      getFindInSiteTexts(),
+    ]);
   return {
     title: t("title"),
     header: t("header"),
     dailySalesTexts,
     themeSwitchTexts,
     menuTexts,
+    findInSiteTexts,
   };
 }
 
 export async function getUserAdminMonthlySalesPageTexts(): Promise<UserAdminMonthlySalesPageTexts> {
-  const [t, monthlySalesTexts, menuTexts, themeSwitchTexts] = await Promise.all(
-    [
+  const [t, monthlySalesTexts, menuTexts, themeSwitchTexts, findInSiteTexts] =
+    await Promise.all([
       getTranslations("pages.admin.UserAdminMonthlySalesPageTexts"),
       getMonthlySalesTexts("plans"),
       getSidebarMenuTexts(
@@ -1597,30 +1744,39 @@ export async function getUserAdminMonthlySalesPageTexts(): Promise<UserAdminMont
         adminSubLabels,
       ),
       getThemeSwitchTexts(),
-    ],
-  );
+      getFindInSiteTexts(),
+    ]);
   return {
     title: t("title"),
     header: t("header"),
     monthlySalesTexts,
     menuTexts,
     themeSwitchTexts,
+    findInSiteTexts,
   };
 }
 
 export async function getUserAdminDailySalesPageTexts(): Promise<UserAdminDailySalesPageTexts> {
-  const [t, dailySalesTexts, menuTexts, themeSwitchTexts] = await Promise.all([
-    getTranslations("pages.admin.UserAdminDailySalesPageTexts"),
-    getDailySalesTexts("plans"),
-    getSidebarMenuTexts("admin", adminGroupLabels, adminLabels, adminSubLabels),
-    getThemeSwitchTexts(),
-  ]);
+  const [t, dailySalesTexts, menuTexts, themeSwitchTexts, findInSiteTexts] =
+    await Promise.all([
+      getTranslations("pages.admin.UserAdminDailySalesPageTexts"),
+      getDailySalesTexts("plans"),
+      getSidebarMenuTexts(
+        "admin",
+        adminGroupLabels,
+        adminLabels,
+        adminSubLabels,
+      ),
+      getThemeSwitchTexts(),
+      getFindInSiteTexts(),
+    ]);
   return {
     title: t("title"),
     header: t("header"),
     dailySalesTexts,
     menuTexts,
     themeSwitchTexts,
+    findInSiteTexts,
   };
 }
 
@@ -1661,12 +1817,19 @@ export async function getHomeTexts(): Promise<HomeTexts> {
 }
 
 export async function getAdminEmailPageTexts(): Promise<AdminEmailPageTexts> {
-  const [adminEmail, themeSwitchTexts, menuTexts, t] = await Promise.all([
-    getAdminEmailTexts(),
-    getThemeSwitchTexts(),
-    getSidebarMenuTexts("admin", adminGroupLabels, adminLabels, adminSubLabels),
-    getTranslations("pages.admin.AdminEmailPageTexts"),
-  ]);
+  const [adminEmail, themeSwitchTexts, menuTexts, findInSiteTexts, t] =
+    await Promise.all([
+      getAdminEmailTexts(),
+      getThemeSwitchTexts(),
+      getSidebarMenuTexts(
+        "admin",
+        adminGroupLabels,
+        adminLabels,
+        adminSubLabels,
+      ),
+      getFindInSiteTexts(),
+      getTranslations("pages.admin.AdminEmailPageTexts"),
+    ]);
 
   return {
     adminEmail,
@@ -1674,43 +1837,55 @@ export async function getAdminEmailPageTexts(): Promise<AdminEmailPageTexts> {
     title: t("title"),
     header: t("header"),
     menuTexts,
+    findInSiteTexts,
   };
 }
 
 export async function getAdminKanbanTexts(): Promise<AdminKanbanTexts> {
-  const [t, themeSwitchTexts, menuTexts, kanbanBoardTexts] = await Promise.all([
-    getTranslations("pages.admin.AdminKanbanTexts"),
-    getThemeSwitchTexts(),
-    getSidebarMenuTexts("admin", adminGroupLabels, adminLabels, adminSubLabels),
-    getKanbanBoardTexts(),
-  ]);
+  const [t, themeSwitchTexts, menuTexts, kanbanBoardTexts, findInSiteTexts] =
+    await Promise.all([
+      getTranslations("pages.admin.AdminKanbanTexts"),
+      getThemeSwitchTexts(),
+      getSidebarMenuTexts(
+        "admin",
+        adminGroupLabels,
+        adminLabels,
+        adminSubLabels,
+      ),
+      getKanbanBoardTexts(),
+      getFindInSiteTexts(),
+    ]);
   return {
     title: t("title"),
     header: t("header"),
     themeSwitchTexts,
     menuTexts,
     kanbanBoardTexts,
+    findInSiteTexts,
   };
 }
 
 export async function getTrainerKanbanPageTexts(): Promise<TrainerKanbanPageTexts> {
-  const [t, themeSwitchTexts, menuTexts, kanbanBoardTexts] = await Promise.all([
-    getTranslations("pages.trainer.TrainerKanbanPageTexts"),
-    getThemeSwitchTexts(),
-    getSidebarMenuTexts(
-      "trainer",
-      trainerGroupLabels,
-      trainerLabels,
-      trainerSubLabels,
-    ),
-    getKanbanBoardTexts(),
-  ]);
+  const [t, themeSwitchTexts, menuTexts, kanbanBoardTexts, findInSiteTexts] =
+    await Promise.all([
+      getTranslations("pages.trainer.TrainerKanbanPageTexts"),
+      getThemeSwitchTexts(),
+      getSidebarMenuTexts(
+        "trainer",
+        trainerGroupLabels,
+        trainerLabels,
+        trainerSubLabels,
+      ),
+      getKanbanBoardTexts(),
+      getFindInSiteTexts(),
+    ]);
   return {
     title: t("title"),
     header: t("header"),
     themeSwitchTexts,
     menuTexts,
     kanbanBoardTexts,
+    findInSiteTexts,
   };
 }
 

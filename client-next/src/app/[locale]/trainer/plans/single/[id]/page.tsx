@@ -8,11 +8,12 @@ import SingleTrainerPlanPageContent, {
 import { getTrainerPlanPageTexts } from "@/texts/pages";
 import { unstable_setRequestLocale } from "next-intl/server";
 import { Metadata } from "next";
-import { getIntlMetadata } from "@/texts/metadata";
+import { getIntlMetadata, getMetadataValues } from "@/texts/metadata";
 import { ThemeSwitchTexts } from "@/texts/components/nav";
 import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
 import SidebarContentLayout from "@/components/sidebar/sidebar-content-layout";
 import ScrollProgress from "@/components/common/scroll-progress";
+import { FindInSiteTexts } from "@/components/nav/find-in-site";
 
 interface Props {
   params: { locale: Locale; id: string };
@@ -34,6 +35,7 @@ export interface TrainerPlanPageTexts {
   themeSwitchTexts: ThemeSwitchTexts;
   title: string;
   menuTexts: SidebarMenuTexts;
+  findInSiteTexts: FindInSiteTexts;
 }
 
 export default async function SingleTrainerPlanPage({
@@ -43,6 +45,7 @@ export default async function SingleTrainerPlanPage({
   const [authUser, { singleTrainerPlanPageTexts, ...rest }] = await Promise.all(
     [getUserWithMinRole("ROLE_TRAINER"), getTrainerPlanPageTexts()],
   );
+  const metadataValues = await getMetadataValues(authUser, locale);
 
   return (
     <SidebarContentLayout
@@ -50,6 +53,7 @@ export default async function SingleTrainerPlanPage({
         ...rest,
         authUser,
         mappingKey: "trainer",
+        metadataValues,
       }}
     >
       <ScrollProgress />

@@ -13,12 +13,13 @@ import { Suspense } from "react";
 import AdminPlansPageContent from "@/app/[locale]/admin/plans/page-content";
 import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
 import { Metadata } from "next";
-import { getIntlMetadata } from "@/texts/metadata";
+import { getIntlMetadata, getMetadataValues } from "@/texts/metadata";
 import ArchiveQueueCards, {
   ArchiveQueueCardsTexts,
 } from "@/components/common/archive-queue-card";
 import { Separator } from "@/components/ui/separator";
 import TopPlans, { TopPlansTexts } from "@/components/charts/top-plans";
+import { FindInSiteTexts } from "@/components/nav/find-in-site";
 
 interface Props {
   params: { locale: Locale };
@@ -34,6 +35,7 @@ export interface AdminPlansPageTexts {
   archivePlansTexts: ArchiveQueueCardsTexts;
   archiveDayTexts: ArchiveQueueCardsTexts;
   topPlansTexts: TopPlansTexts;
+  findInSiteTexts: FindInSiteTexts;
 }
 
 export async function generateMetadata({
@@ -54,12 +56,14 @@ export default async function AdminPlansPage({ params: { locale } }: Props) {
       menuTexts,
       archivePlansTexts,
       topPlansTexts,
+      findInSiteTexts,
     },
     authUser,
   ] = await Promise.all([
     getAdminPlansPageTexts(),
     getUserWithMinRole("ROLE_ADMIN"),
   ]);
+  const metadataValues = await getMetadataValues(authUser, locale);
 
   const plansOptions = getSortingOptions(
     sortingPlansSortingOptionsKeys,
@@ -74,6 +78,8 @@ export default async function AdminPlansPage({ params: { locale } }: Props) {
         authUser,
         menuTexts,
         mappingKey: "admin",
+        findInSiteTexts,
+        metadataValues,
       }}
     >
       <div className="w-full h-full bg-background">

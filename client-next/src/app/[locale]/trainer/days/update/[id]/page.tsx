@@ -10,7 +10,8 @@ import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
 import { getUpdateDayPageTexts } from "@/texts/pages";
 import SidebarContentLayout from "@/components/sidebar/sidebar-content-layout";
 import { Metadata } from "next";
-import { getIntlMetadata } from "@/texts/metadata";
+import { getIntlMetadata, getMetadataValues } from "@/texts/metadata";
+import { FindInSiteTexts } from "@/components/nav/find-in-site";
 
 interface Props {
   params: {
@@ -32,6 +33,7 @@ export interface UpdateDayPageTexts {
   dayFormTexts: DayFromTexts;
   themeSwitchTexts: ThemeSwitchTexts;
   menuTexts: SidebarMenuTexts;
+  findInSiteTexts: FindInSiteTexts;
 }
 
 export default async function UpdateDayPage({ params: { locale, id } }: Props) {
@@ -40,6 +42,8 @@ export default async function UpdateDayPage({ params: { locale, id } }: Props) {
     getUserWithMinRole("ROLE_TRAINER"),
     getUpdateDayPageTexts(),
   ]);
+  const metadataValues = await getMetadataValues(authUser, locale);
+
   return (
     <SidebarContentLayout
       navbarProps={{
@@ -47,6 +51,7 @@ export default async function UpdateDayPage({ params: { locale, id } }: Props) {
         ...rest,
         authUser,
         mappingKey: "trainer",
+        metadataValues,
       }}
     >
       <main className="flex items-center justify-center px-6 py-10">

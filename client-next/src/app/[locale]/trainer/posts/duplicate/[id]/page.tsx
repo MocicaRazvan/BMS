@@ -10,7 +10,8 @@ import SidebarContentLayout from "@/components/sidebar/sidebar-content-layout";
 import { Suspense } from "react";
 import LoadingSpinner from "@/components/common/loading-spinner";
 import { Metadata } from "next";
-import { getIntlMetadata } from "@/texts/metadata";
+import { getIntlMetadata, getMetadataValues } from "@/texts/metadata";
+import { FindInSiteTexts } from "@/components/nav/find-in-site";
 
 interface Props {
   params: {
@@ -22,6 +23,7 @@ export interface UserDuplicatePostPage {
   themeSwitchTexts: ThemeSwitchTexts;
   menuTexts: SidebarMenuTexts;
   postFormTexts: Awaited<ReturnType<typeof getPostFormTexts>>;
+  findInSiteTexts: FindInSiteTexts;
 }
 
 export async function generateMetadata({
@@ -61,6 +63,8 @@ export default async function UserDuplicatePostPage({
     getUserWithMinRole("ROLE_TRAINER"),
     getUserDuplicatePostPage(),
   ]);
+  const metadataValues = await getMetadataValues(authUser, locale);
+
   return (
     <SidebarContentLayout
       navbarProps={{
@@ -68,6 +72,7 @@ export default async function UserDuplicatePostPage({
         ...rest,
         authUser,
         mappingKey: "trainer",
+        metadataValues,
       }}
     >
       <main className="flex items-center justify-center px-6 py-10">

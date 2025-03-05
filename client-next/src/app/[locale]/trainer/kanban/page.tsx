@@ -11,7 +11,8 @@ import LoadingSpinner from "@/components/common/loading-spinner";
 import KanbanBoardWrapper from "@/components/kanban/kanban-board-wrapper";
 import { getUser } from "@/lib/user";
 import { Metadata } from "next";
-import { getIntlMetadata } from "@/texts/metadata";
+import { getIntlMetadata, getMetadataValues } from "@/texts/metadata";
+import { FindInSiteTexts } from "@/components/nav/find-in-site";
 
 interface Props {
   params: { locale: Locale };
@@ -29,6 +30,7 @@ export interface TrainerKanbanPageTexts {
   themeSwitchTexts: ThemeSwitchTexts;
   menuTexts: SidebarMenuTexts;
   kanbanBoardTexts: KanbanBoardTexts;
+  findInSiteTexts: FindInSiteTexts;
 }
 
 export default async function TrainerKanban({ params: { locale } }: Props) {
@@ -38,6 +40,8 @@ export default async function TrainerKanban({ params: { locale } }: Props) {
     getUser(),
     getTrainerKanbanPageTexts(),
   ]);
+  const metadataValues = await getMetadataValues(authUser, locale);
+
   return (
     <SidebarContentLayout
       navbarProps={{
@@ -46,6 +50,8 @@ export default async function TrainerKanban({ params: { locale } }: Props) {
         authUser,
         menuTexts: texts.menuTexts,
         mappingKey: "admin",
+        findInSiteTexts: texts.findInSiteTexts,
+        metadataValues,
       }}
     >
       <div className="w-full h-full bg-background">

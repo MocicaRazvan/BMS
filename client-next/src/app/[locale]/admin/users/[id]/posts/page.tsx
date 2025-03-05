@@ -10,7 +10,8 @@ import UserPostsAdminPageContent from "@/app/[locale]/admin/users/[id]/posts/pag
 import { sortingPostsSortingOptionsKeys } from "@/texts/components/list";
 import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
 import { Metadata } from "next";
-import { getIntlMetadata } from "@/texts/metadata";
+import { getIntlMetadata, getMetadataValues } from "@/texts/metadata";
+import { FindInSiteTexts } from "@/components/nav/find-in-site";
 
 export interface UserPostsAdminPageTexts {
   postTableTexts: PostTableTexts;
@@ -19,6 +20,7 @@ export interface UserPostsAdminPageTexts {
   title: string;
   header: string;
   menuTexts: SidebarMenuTexts;
+  findInSiteTexts: FindInSiteTexts;
 }
 
 interface Props {
@@ -43,6 +45,8 @@ export default async function UserPostsAdminPage({
     getUserPostsAdminPageTexts(),
     getUserWithMinRole("ROLE_ADMIN"),
   ]);
+  const metadataValues = await getMetadataValues(authUser, locale);
+
   const postOptions = getSortingOptions(
     sortingPostsSortingOptionsKeys,
     texts.sortingPostsSortingOptions,
@@ -57,6 +61,7 @@ export default async function UserPostsAdminPage({
       {...texts}
       sortingOptions={postOptions}
       path={`/posts/trainer/tags/${id}`}
+      metadataValues={metadataValues}
     />
   );
 }

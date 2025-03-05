@@ -7,7 +7,8 @@ import { getUserAdminDailySalesPageTexts } from "@/texts/pages";
 import { getUserWithMinRole } from "@/lib/user";
 import UserAdminDailySalesPageContent from "@/app/[locale]/admin/users/[id]/dailySales/page-content";
 import { Metadata } from "next";
-import { getIntlMetadata } from "@/texts/metadata";
+import { getIntlMetadata, getMetadataValues } from "@/texts/metadata";
+import { FindInSiteTexts } from "@/components/nav/find-in-site";
 
 interface Props {
   params: { locale: Locale; id: string };
@@ -19,6 +20,7 @@ export interface UserAdminDailySalesPageTexts {
   menuTexts: SidebarMenuTexts;
   themeSwitchTexts: ThemeSwitchTexts;
   dailySalesTexts: DailySalesTexts;
+  findInSiteTexts: FindInSiteTexts;
 }
 export async function generateMetadata({
   params: { locale, id },
@@ -39,7 +41,14 @@ export default async function UserAdminDailySalesPage({
     getUserAdminDailySalesPageTexts(),
     getUserWithMinRole("ROLE_ADMIN"),
   ]);
+  const metadataValues = await getMetadataValues(authUser, locale);
+
   return (
-    <UserAdminDailySalesPageContent id={id} {...texts} authUser={authUser} />
+    <UserAdminDailySalesPageContent
+      id={id}
+      {...texts}
+      authUser={authUser}
+      metadataValues={metadataValues}
+    />
   );
 }

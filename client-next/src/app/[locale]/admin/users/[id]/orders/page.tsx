@@ -9,7 +9,8 @@ import { sortingOrdersSortingOptionsKeys } from "@/texts/components/list";
 import UserOrdersAdminPageContent from "@/app/[locale]/admin/users/[id]/orders/page-content";
 import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
 import { Metadata } from "next";
-import { getIntlMetadata } from "@/texts/metadata";
+import { getIntlMetadata, getMetadataValues } from "@/texts/metadata";
+import { FindInSiteTexts } from "@/components/nav/find-in-site";
 
 interface Props {
   params: { locale: Locale; id: string };
@@ -21,6 +22,7 @@ export interface UserOrdersAdminPageTexts {
   title: string;
   header: string;
   menuTexts: SidebarMenuTexts;
+  findInSiteTexts: FindInSiteTexts;
 }
 export async function generateMetadata({
   params: { locale, id },
@@ -45,6 +47,7 @@ export default async function UserOrdersAdminPage({
     sortingOrdersSortingOptionsKeys,
     texts.sortingOrdersSortingOptions,
   );
+  const metadataValues = await getMetadataValues(authUser, locale);
 
   return (
     <UserOrdersAdminPageContent
@@ -53,6 +56,7 @@ export default async function UserOrdersAdminPage({
       sortingOptions={ordersOptions}
       {...texts}
       path={`/orders/filtered/${id}`}
+      metadataValues={metadataValues}
     />
   );
 }

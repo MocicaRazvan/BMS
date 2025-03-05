@@ -10,9 +10,11 @@ import { Suspense } from "react";
 import RecipeTable from "@/components/table/recipes-table";
 import useGetUser from "@/hoooks/useGetUser";
 import useClientNotFound from "@/hoooks/useClientNotFound";
+import { MetadataValue } from "@/components/nav/find-in-site";
 
 interface Props extends UserRecipesAdminPageTexts, WithUser, UseListProps {
   id: string;
+  metadataValues: MetadataValue[];
 }
 
 export default function UserRecipesAdminPageContent({
@@ -26,6 +28,8 @@ export default function UserRecipesAdminPageContent({
   path,
   sortingOptions,
   menuTexts,
+  findInSiteTexts,
+  metadataValues,
 }: Props) {
   // const { messages, error, refetch, isFinished } = useFetchStream<
   //   CustomEntityModel<UserDto>,
@@ -55,6 +59,8 @@ export default function UserRecipesAdminPageContent({
         themeSwitchTexts,
         menuTexts,
         mappingKey: "admin",
+        findInSiteTexts,
+        metadataValues,
       }}
     >
       <div className="w-full h-full bg-background">

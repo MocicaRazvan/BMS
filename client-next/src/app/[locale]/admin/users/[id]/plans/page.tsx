@@ -10,8 +10,9 @@ import { notFound } from "next/navigation";
 import UserPlansAdminPageContent from "@/app/[locale]/admin/users/[id]/plans/page-content";
 import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
 import { Metadata } from "next";
-import { getIntlMetadata } from "@/texts/metadata";
+import { getIntlMetadata, getMetadataValues } from "@/texts/metadata";
 import { TopPlansTexts } from "@/components/charts/top-plans";
+import { FindInSiteTexts } from "@/components/nav/find-in-site";
 
 export interface UserPlansAdminPageTexts {
   plansTableTexts: PlanTableTexts;
@@ -21,6 +22,7 @@ export interface UserPlansAdminPageTexts {
   header: string;
   menuTexts: SidebarMenuTexts;
   topPlansTexts: TopPlansTexts;
+  findInSiteTexts: FindInSiteTexts;
 }
 interface Props {
   params: { locale: Locale; id: string };
@@ -43,6 +45,7 @@ export default async function UserPlansAdminPage({
     getUserPlansAdminPageTexts(),
     getUserWithMinRole("ROLE_ADMIN"),
   ]);
+  const metadataValues = await getMetadataValues(authUser, locale);
 
   const plansOptions = getSortingOptions(
     sortingPlansSortingOptionsKeys,
@@ -61,6 +64,7 @@ export default async function UserPlansAdminPage({
       locale={locale}
       {...texts}
       path={`/plans/trainer/filteredWithCount/${id}`}
+      metadataValues={metadataValues}
     />
   );
 }

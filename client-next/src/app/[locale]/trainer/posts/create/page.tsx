@@ -6,11 +6,12 @@ import LoadingSpinner from "@/components/common/loading-spinner";
 import PostForm from "@/components/forms/post-form";
 import { getUserWithMinRole } from "@/lib/user";
 import { Metadata } from "next";
-import { getIntlMetadata } from "@/texts/metadata";
+import { getIntlMetadata, getMetadataValues } from "@/texts/metadata";
 import { ThemeSwitchTexts } from "@/texts/components/nav";
 import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
 import { getCreatePostPageTexts } from "@/texts/pages";
 import SidebarContentLayout from "@/components/sidebar/sidebar-content-layout";
+import { FindInSiteTexts } from "@/components/nav/find-in-site";
 
 interface Props {
   params: { locale: Locale };
@@ -32,6 +33,7 @@ export interface CreatePostPageTexts {
   themeSwitchTexts: ThemeSwitchTexts;
   menuTexts: SidebarMenuTexts;
   postFormTexts: Awaited<ReturnType<typeof getPostFormTexts>>;
+  findInSiteTexts: FindInSiteTexts;
 }
 
 export default async function CreatePostPage({ params: { locale } }: Props) {
@@ -58,6 +60,7 @@ export default async function CreatePostPage({ params: { locale } }: Props) {
     getCreatePostPageTexts(),
     getUserWithMinRole("ROLE_TRAINER"),
   ]);
+  const metadataValues = await getMetadataValues(authUser, locale);
 
   return (
     <SidebarContentLayout
@@ -66,6 +69,7 @@ export default async function CreatePostPage({ params: { locale } }: Props) {
         ...rest,
         authUser,
         mappingKey: "trainer",
+        metadataValues,
       }}
     >
       <main className="flex items-center justify-center px-6 py-10">

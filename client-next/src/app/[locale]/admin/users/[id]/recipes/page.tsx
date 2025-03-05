@@ -10,7 +10,8 @@ import UserRecipesAdminPageContent from "@/app/[locale]/admin/users/[id]/recipes
 import { notFound } from "next/navigation";
 import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
 import { Metadata } from "next";
-import { getIntlMetadata } from "@/texts/metadata";
+import { getIntlMetadata, getMetadataValues } from "@/texts/metadata";
+import { FindInSiteTexts } from "@/components/nav/find-in-site";
 
 export interface UserRecipesAdminPageTexts {
   recipesTableTexts: RecipeTableTexts;
@@ -19,6 +20,7 @@ export interface UserRecipesAdminPageTexts {
   title: string;
   header: string;
   menuTexts: SidebarMenuTexts;
+  findInSiteTexts: FindInSiteTexts;
 }
 interface Props {
   params: { locale: Locale; id: string };
@@ -42,6 +44,8 @@ export default async function UserRecipesAdminPage({
     getUserRecipesAdminPageTexts(),
     getUserWithMinRole("ROLE_ADMIN"),
   ]);
+  const metadataValues = await getMetadataValues(authUser, locale);
+
   const recipesOptions = getSortingOptions(
     sortingRecipesSortingOptionsKeys,
     texts.sortingRecipesSortingOptions,
@@ -56,6 +60,7 @@ export default async function UserRecipesAdminPage({
       sortingOptions={recipesOptions}
       {...texts}
       path={`/recipes/trainer/filteredWithCount/${id}`}
+      metadataValues={metadataValues}
     />
   );
 }

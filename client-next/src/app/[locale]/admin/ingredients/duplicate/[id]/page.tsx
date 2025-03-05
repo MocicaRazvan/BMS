@@ -9,8 +9,9 @@ import { Suspense } from "react";
 import { IngredientFormTexts } from "@/components/forms/ingredient-form";
 import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
 import { Metadata } from "next";
-import { getIntlMetadata } from "@/texts/metadata";
+import { getIntlMetadata, getMetadataValues } from "@/texts/metadata";
 import AdminPageDuplicateIngredientContent from "@/app/[locale]/admin/ingredients/duplicate/[id]/page-content";
+import { FindInSiteTexts } from "@/components/nav/find-in-site";
 
 interface Props {
   params: {
@@ -24,6 +25,7 @@ export interface AdminPageDuplicateIngredientTexts {
   ingredientFormTexts: IngredientFormTexts;
   title: string;
   menuTexts: SidebarMenuTexts;
+  findInSiteTexts: FindInSiteTexts;
 }
 export async function generateMetadata({
   params: { locale, id },
@@ -43,6 +45,8 @@ export default async function AdminPageDuplicateIngredient({
     getUserWithMinRole("ROLE_ADMIN"),
     getAdminPageDuplicateIngredientTexts(),
   ]);
+  const metadataValues = await getMetadataValues(authUser, locale);
+
   return (
     <SidebarContentLayout
       navbarProps={{
@@ -51,6 +55,8 @@ export default async function AdminPageDuplicateIngredient({
         authUser,
         menuTexts: texts.menuTexts,
         mappingKey: "admin",
+        findInSiteTexts: texts.findInSiteTexts,
+        metadataValues,
       }}
     >
       <Suspense fallback={<LoadingSpinner />}>

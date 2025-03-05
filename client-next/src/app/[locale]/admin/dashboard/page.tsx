@@ -9,7 +9,7 @@ import Heading from "@/components/common/heading";
 import LoadingSpinner from "@/components/common/loading-spinner";
 import { Suspense } from "react";
 import { Metadata } from "next";
-import { getIntlMetadata } from "@/texts/metadata";
+import { getIntlMetadata, getMetadataValues } from "@/texts/metadata";
 
 interface Props {
   params: { locale: Locale };
@@ -26,6 +26,8 @@ export default async function AdminDashboard({ params: { locale } }: Props) {
     getAdminDashboardPageTexts(),
     getUserWithMinRole("ROLE_ADMIN"),
   ]);
+  const metadataValues = await getMetadataValues(authUser, locale);
+
   return (
     <SidebarContentLayout
       navbarProps={{
@@ -34,6 +36,8 @@ export default async function AdminDashboard({ params: { locale } }: Props) {
         authUser,
         menuTexts: texts.menuTexts,
         mappingKey: "admin",
+        findInSiteTexts: texts.findInSiteTexts,
+        metadataValues,
       }}
     >
       <div className="w-full h-full bg-background">

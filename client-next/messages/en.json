@@ -642,7 +642,7 @@
         "home": "Home",
         "posts": "Posts",
         "recipes": "Recipes",
-        "adminDashboard": "Admin Dashboard",
+        "adminDashboard": "Bossmode",
         "chat": "Chat",
         "ingredients": "Ingredients",
         "plans": "Plans",
@@ -691,6 +691,15 @@
         "checkout": "Checkout",
         "toastDescription": "The product was removed from cart",
         "emptyCart": "The cart is empty go to the plans page to add some"
+      },
+      "FindInSiteTexts": {
+        "navigateText": "to navigate,",
+        "closeText": "to close",
+        "selectText": "to select,",
+        "title": "Search...",
+        "noResults": "No results for",
+        "placeholder": "Type to search",
+        "pressText": "Press"
       }
     },
     "dialogs": {

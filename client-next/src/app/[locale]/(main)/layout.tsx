@@ -15,7 +15,7 @@ export default function MainLayout({
 
   return (
     <div>
-      <NavWrapper />
+      <NavWrapper locale={locale} />
       {children}
       <Footer />
     </div>

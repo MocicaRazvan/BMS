@@ -11,10 +11,11 @@ import Heading from "@/components/common/heading";
 import LoadingSpinner from "@/components/common/loading-spinner";
 import { Suspense } from "react";
 import { Metadata } from "next";
-import { getIntlMetadata } from "@/texts/metadata";
+import { getIntlMetadata, getMetadataValues } from "@/texts/metadata";
 import { ThemeSwitchTexts } from "@/texts/components/nav";
 import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
 import SidebarContentLayout from "@/components/sidebar/sidebar-content-layout";
+import { FindInSiteTexts } from "@/components/nav/find-in-site";
 
 interface Props {
   params: { locale: Locale };
@@ -37,6 +38,7 @@ export interface IngredientsPageTexts {
   title: string;
   header: string;
   menuTexts: SidebarMenuTexts;
+  findInSiteTexts: FindInSiteTexts;
 }
 
 export default async function IngredientsPage({ params: { locale } }: Props) {
@@ -45,6 +47,7 @@ export default async function IngredientsPage({ params: { locale } }: Props) {
     getIngredientsPageTexts(),
     getUserWithMinRole("ROLE_TRAINER"),
   ]);
+  const metadataValues = await getMetadataValues(authUser, locale);
 
   const ingredientOptions = getSortingOptions(
     sortingIngredientsSortingOptionsKeys,
@@ -56,6 +59,7 @@ export default async function IngredientsPage({ params: { locale } }: Props) {
         ...ingredientsPageTexts,
         authUser,
         mappingKey: "trainer",
+        metadataValues,
       }}
     >
       <div className="w-full h-full bg-background ">

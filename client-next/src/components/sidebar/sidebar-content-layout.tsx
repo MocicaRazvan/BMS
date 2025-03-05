@@ -2,9 +2,10 @@ import {
   SidebarNavbar,
   SidebarNavbarProps,
 } from "@/components/sidebar/sidebar-navbar";
+import { ReactNode } from "react";
 
 interface ContentLayoutProps {
-  children: React.ReactNode;
+  children: ReactNode;
   navbarProps: SidebarNavbarProps;
 }
 

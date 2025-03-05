@@ -12,7 +12,8 @@ import { Suspense } from "react";
 import SidebarContentLayout from "@/components/sidebar/sidebar-content-layout";
 import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
 import { Metadata } from "next";
-import { getIntlMetadata } from "@/texts/metadata";
+import { getIntlMetadata, getMetadataValues } from "@/texts/metadata";
+import { FindInSiteTexts } from "@/components/nav/find-in-site";
 
 export interface AdminCountriesTexts {
   title: string;
@@ -20,6 +21,7 @@ export interface AdminCountriesTexts {
   themeSwitchTexts: ThemeSwitchTexts;
   geographyChartTexts: GeographyChartTexts;
   menuTexts: SidebarMenuTexts;
+  findInSiteTexts: FindInSiteTexts;
 }
 interface Props {
   params: { locale: Locale };
@@ -37,6 +39,7 @@ export default async function AdminCountries({ params: { locale } }: Props) {
     getAdminCountriesTexts(),
     getUserWithMinRole("ROLE_ADMIN"),
   ]);
+  const metadataValues = await getMetadataValues(authUser, locale);
 
   return (
     <SidebarContentLayout
@@ -46,6 +49,8 @@ export default async function AdminCountries({ params: { locale } }: Props) {
         authUser,
         menuTexts: texts.menuTexts,
         mappingKey: "admin",
+        findInSiteTexts: texts.findInSiteTexts,
+        metadataValues,
       }}
     >
       <div className="w-full h-full bg-background">

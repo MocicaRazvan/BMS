@@ -22,6 +22,10 @@ import { LockKeyhole } from "lucide-react";
 import ActiveLink from "@/components/nav/active-link";
 import { useMemo } from "react";
 import { appendCreatedAtDesc } from "@/lib/utils";
+import FindInSite, {
+  FindInSiteTexts,
+  MetadataValue,
+} from "@/components/nav/find-in-site";
 
 export interface NavTexts {
   themeSwitchTexts: ThemeSwitchTexts;
@@ -42,10 +46,12 @@ export interface NavTexts {
     trainerDashboard: string;
     calculator: string;
   };
+  findInSiteTexts: FindInSiteTexts;
 }
 
 interface NavProps extends NavTexts {
   cartPopTexts: CartPopsTexts;
+  metadataValues: MetadataValue[];
 }
 
 export default function Nav({
@@ -55,6 +61,8 @@ export default function Nav({
   links,
   plansTexts,
   cartPopTexts,
+  findInSiteTexts,
+  metadataValues,
 }: NavProps) {
   const session = useSession();
 
@@ -87,23 +95,21 @@ export default function Nav({
       id="top-item"
     >
       <div className="hidden xl:flex items-center justify-between w-full">
-        <div className="flex items-center justify-center gap-1.5 me-1.5">
-          <div className="mr-8 flex items-center justify-start gap-1.5">
+        <div className="flex items-center justify-center gap-1 ">
+          <div className="mr-[9px] 2xl:mr-5 flex items-center justify-start gap-1 ">
             <Link
               href="/"
-              className="font-bold hover:underline flex items-center justify-center gap-2 hover:scale-[1.03] transition-all
-           px-3
-              "
+              className="font-bold hover:underline flex items-center justify-center gap-2 hover:scale-[1.05] transition-all px-3"
             >
-              <Logo />
-              {links.home}
+              <Logo width={40} height={40} />
+              {/*{links.home}*/}
             </Link>
             {isAdmin && (
               <Link
                 href="/admin/dashboard"
-                className="text-balance gap-1 font-bold hover:underline flex items-center justify-center hover:scale-[1.03] transition-all px-1"
+                className="text-balance gap-1 font-bold hover:underline flex items-center justify-center hover:scale-[1.03] transition-all px-1 text-foreground/80"
               >
-                <LockKeyhole className="w-6 h-6" />
+                <LockKeyhole className="w-5 h-5 text-foreground/80" />
                 <p>{links.adminDashboard}</p>
               </Link>
             )}
@@ -112,15 +118,15 @@ export default function Nav({
                 href={appendCreatedAtDesc(
                   `/trainer/user/${authUser?.id}/posts`,
                 )}
-                className="text-balance gap-1 font-bold hover:underline flex items-center justify-center hover:scale-[1.03] transition-all px-1"
+                className="text-balance gap-1 font-bold hover:underline flex items-center justify-center hover:scale-[1.03] transition-all px-1 text-foreground/80"
               >
-                <DashboardIcon className="w-6 h-6" />
+                <DashboardIcon className="w-5 h-5 text-foreground/80" />
                 <p>{links.trainerDashboard}</p>
               </Link>
             )}
           </div>
           {authUser && (
-            <div className="flex items-center text-lg  justify-center gap-4 flex-wrap">
+            <div className="flex items-start text-lg  justify-center gap-4 flex-wrap">
               <ActiveLink
                 isActive={pathName === "/subscriptions"}
                 href={appendCreatedAtDesc("/subscriptions")}
@@ -161,10 +167,11 @@ export default function Nav({
           )}
         </div>
         <div
-          className="mx-auto md:ml-auto md:mr-1 flex items-center justify-center gap-6
+          className="mx-auto  md:mr-1 flex items-center justify-center gap-6 md:gap-2.5
       mt-2 sm:mt-0
       "
         >
+          <FindInSite texts={findInSiteTexts} metadataValues={metadataValues} />
           {authUser && (
             <>
               <NavProfile authUser={authUser} />
@@ -177,7 +184,7 @@ export default function Nav({
               href={"/auth/signin"}
               className="font-bold hover:underline hover:scale-110 transition-all"
             >
-              Sign In
+              {"Sign In"}
             </Link>
           )}
           <LocaleSwitcher />
@@ -194,12 +201,14 @@ export default function Nav({
           isUser={isUser}
           isTrainer={isTrainer}
           isAdmin={isAdmin}
+          metadataValues={metadataValues}
           texts={{
             themeSwitchTexts,
             postsTexts,
             links,
             recipesTexts,
             plansTexts,
+            findInSiteTexts,
           }}
         />
         <div className="flex items-center justify-center gap-5">

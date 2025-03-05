@@ -3,7 +3,7 @@ import { unstable_setRequestLocale } from "next-intl/server";
 import { getUserWithMinRole } from "@/lib/user";
 import { Suspense } from "react";
 import { Metadata } from "next";
-import { getIntlMetadata } from "@/texts/metadata";
+import { getIntlMetadata, getMetadataValues } from "@/texts/metadata";
 import { ThemeSwitchTexts } from "@/texts/components/nav";
 import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
 import { PlanFormTexts } from "@/components/forms/plan-form";
@@ -11,6 +11,7 @@ import { getDuplicatePlanPageTexts } from "@/texts/pages";
 import LoadingSpinner from "@/components/common/loading-spinner";
 import SidebarContentLayout from "@/components/sidebar/sidebar-content-layout";
 import DuplicatePlanPageContent from "@/app/[locale]/trainer/plans/duplicate/[id]/page-content";
+import { FindInSiteTexts } from "@/components/nav/find-in-site";
 
 interface Props {
   params: {
@@ -35,6 +36,7 @@ export interface DuplicatePlanPageTexts {
   themeSwitchTexts: ThemeSwitchTexts;
   menuTexts: SidebarMenuTexts;
   planFormTexts: PlanFormTexts;
+  findInSiteTexts: FindInSiteTexts;
 }
 
 export default async function DuplicatePlanPage({
@@ -45,6 +47,7 @@ export default async function DuplicatePlanPage({
     getUserWithMinRole("ROLE_TRAINER"),
     getDuplicatePlanPageTexts(),
   ]);
+  const metadataValues = await getMetadataValues(authUser, locale);
 
   return (
     <SidebarContentLayout
@@ -53,6 +56,7 @@ export default async function DuplicatePlanPage({
         ...rest,
         authUser,
         mappingKey: "trainer",
+        metadataValues,
       }}
     >
       <main className="flex items-center justify-center px-6 py-10">

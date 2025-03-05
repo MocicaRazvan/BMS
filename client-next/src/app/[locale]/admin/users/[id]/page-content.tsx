@@ -9,13 +9,16 @@ import LoadingSpinner from "@/components/common/loading-spinner";
 import UserPageContent from "@/app/[locale]/(main)/(user)/users/single/[id]/page-content";
 import useGetUser from "@/hoooks/useGetUser";
 import useClientNotFound from "@/hoooks/useClientNotFound";
+import { MetadataValue } from "@/components/nav/find-in-site";
 
 interface Props extends AdminUserPageTexts, WithUser {
   id: string;
+  metadataValues: MetadataValue[];
 }
 export default function AdminUserPageContent({
   id,
   authUser,
+  metadataValues,
   ...texts
 }: Props) {
   const { user, messages, error, isFinished } = useGetUser(id);
@@ -30,6 +33,7 @@ export default function AdminUserPageContent({
         authUser,
         title: `${texts.title} ${user?.email || ""}`,
         mappingKey: "admin",
+        metadataValues,
       }}
     >
       <div className="w-full bg-background ">

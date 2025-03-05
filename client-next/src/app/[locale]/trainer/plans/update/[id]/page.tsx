@@ -4,13 +4,14 @@ import { getUserWithMinRole } from "@/lib/user";
 import { Suspense } from "react";
 import UpdatePlanPageContent from "@/app/[locale]/trainer/plans/update/[id]/page-content";
 import { Metadata } from "next";
-import { getIntlMetadata } from "@/texts/metadata";
+import { getIntlMetadata, getMetadataValues } from "@/texts/metadata";
 import { ThemeSwitchTexts } from "@/texts/components/nav";
 import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
 import { PlanFormTexts } from "@/components/forms/plan-form";
 import { getUpdatePlanPageTexts } from "@/texts/pages";
 import LoadingSpinner from "@/components/common/loading-spinner";
 import SidebarContentLayout from "@/components/sidebar/sidebar-content-layout";
+import { FindInSiteTexts } from "@/components/nav/find-in-site";
 
 interface Props {
   params: {
@@ -35,6 +36,7 @@ export interface UpdatePlanPageTexts {
   themeSwitchTexts: ThemeSwitchTexts;
   menuTexts: SidebarMenuTexts;
   planFormTexts: PlanFormTexts;
+  findInSiteTexts: FindInSiteTexts;
 }
 
 export default async function UpdatePlanPage({
@@ -45,6 +47,7 @@ export default async function UpdatePlanPage({
     getUserWithMinRole("ROLE_TRAINER"),
     getUpdatePlanPageTexts(),
   ]);
+  const metadataValues = await getMetadataValues(authUser, locale);
 
   return (
     <SidebarContentLayout
@@ -53,6 +56,7 @@ export default async function UpdatePlanPage({
         ...rest,
         authUser,
         mappingKey: "trainer",
+        metadataValues,
       }}
     >
       <main className="flex items-center justify-center px-6 py-10">
