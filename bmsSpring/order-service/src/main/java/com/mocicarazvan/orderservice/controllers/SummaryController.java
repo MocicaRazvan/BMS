@@ -12,9 +12,11 @@ import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.time.LocalDate;
 
@@ -204,6 +206,11 @@ public class SummaryController {
                                                                @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate to
     ) {
         return summaryService.getOrdersSummaryByCountry(type, from, to);
+    }
+
+    @GetMapping("/overall")
+    public Mono<ResponseEntity<OverallSummary>> getOverallSummary() {
+        return summaryService.getOverallSummary().map(ResponseEntity::ok);
     }
 
 }

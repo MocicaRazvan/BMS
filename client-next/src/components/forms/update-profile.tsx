@@ -154,7 +154,7 @@ export default function UpdateProfile({
                 <FormMessage />
               </FormItem>
             )}
-          />{" "}
+          />
           <FormField
             control={form.control}
             name="lastName"
@@ -180,6 +180,7 @@ export default function UpdateProfile({
             fieldTexts={fieldTexts}
             multiple={false}
             initialLength={authUser.image ? 1 : 0}
+            cropShape="round"
           />
           <ErrorMessage message={errorText} show={!!errorMsg} />
           <ButtonSubmit

@@ -647,3 +647,8 @@ export interface MonthlyOrderSummaryPrediction extends MonthYear {
   countQuantiles: number[];
   totalAmountQuantiles: number[];
 }
+
+export interface OverallSummary {
+  ordersCount: number;
+  plansCount: number;
+}

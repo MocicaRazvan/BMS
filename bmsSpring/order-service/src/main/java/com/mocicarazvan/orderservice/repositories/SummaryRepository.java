@@ -5,6 +5,7 @@ import com.mocicarazvan.orderservice.models.Order;
 import org.springframework.data.r2dbc.repository.Query;
 import org.springframework.data.repository.Repository;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -396,5 +397,12 @@ public interface SummaryRepository extends Repository<Order, Long> {
             GROUP BY a.country
             """)
     Flux<CountryOrderSummary> getOrdersTotalByCountry(LocalDate from, LocalDate to);
+
+    @Query("""
+               select
+                (select count(*) from custom_order) as orders_count,
+                (select count(*) from plan_order) as plans_count
+            """)
+    Mono<OverallSummary> getOverallSummary();
 
 }

@@ -254,6 +254,12 @@ public class SummaryServiceImpl implements SummaryService {
                 self.getTrainerOrdersSummaryByDateRangeGroupedByMonthObjectivesTypesBase(intervalDates, -1L);
     }
 
+    @Override
+    @RedisReactiveChildCache(key = OrderCacheKeys.CACHE_KEY_PATH, id = "-100")
+    public Mono<OverallSummary> getOverallSummary() {
+        return summaryRepository.getOverallSummary();
+    }
+
     @Component
     @Getter
     @RequiredArgsConstructor

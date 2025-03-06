@@ -40,6 +40,7 @@ import { DiffusionImagesFormTexts } from "@/components/forms/diffusion-images-fo
 import { UseNavigationGuardI18nTexts } from "@/hoooks/use-navigation-guard-i18n-form";
 import { PasswordStrengthIndicatorTexts } from "@/components/forms/passowrd-strength-indicator";
 import { AnswerFromBodyFormTexts } from "@/components/forms/answer-from-body-form";
+import { getImageCropTexts } from "@/texts/components/common";
 
 export type FormType = "create" | "update";
 
@@ -47,9 +48,10 @@ export async function getInputFileText(
   type: "image" | "video",
   cnt: "multiple" | "single" = "multiple",
 ): Promise<FieldInputTexts> {
-  const [t, t1] = await Promise.all([
+  const [t, t1, imageCropTexts] = await Promise.all([
     getTranslations("zod.forms.components.InputFile"),
     getTranslations("zod.forms.components.FieldInputTexts"),
+    getImageCropTexts(),
   ]);
   const singular = t("types." + type);
   const plural = t("types." + type + "s");
@@ -75,6 +77,7 @@ export async function getInputFileText(
         type,
       }),
     },
+    imageCropTexts,
   };
 }
 

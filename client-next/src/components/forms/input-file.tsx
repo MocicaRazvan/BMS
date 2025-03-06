@@ -28,6 +28,7 @@ import { Loader2 } from "lucide-react";
 import { UploadIcon } from "@radix-ui/react-icons";
 import DotPattern from "@/components/magicui/dot-pattern";
 import ProgressText from "@/components/common/progres-text";
+import { ImageCropTexts } from "@/components/common/image-cropper";
 
 export type InputFieldName = "images" | "videos";
 
@@ -42,6 +43,7 @@ export interface FieldInputTexts {
   loadCount1: string;
   loadCountMany: string;
   loading: string;
+  imageCropTexts: ImageCropTexts;
 }
 
 interface Props<T extends FieldValues> {
@@ -52,11 +54,11 @@ interface Props<T extends FieldValues> {
   initialLength: number;
   parentListCollapsed?: boolean;
   loadingProgress?: number;
+  cropShape?: "rect" | "round";
 }
 
 export interface FieldInputItem extends SortableItem {
   file: File;
-  src: string;
 }
 
 const variantOne = {
@@ -95,11 +97,13 @@ export default function InputFile<T extends FieldValues>({
     loadCount1,
     loadCountMany,
     loading,
+    imageCropTexts,
   },
   initialLength = 0,
   multiple = true,
   parentListCollapsed,
   loadingProgress,
+  cropShape = "rect",
 }: Props<T>) {
   const fieldValue = useWatch({
     control,
@@ -174,6 +178,8 @@ export default function InputFile<T extends FieldValues>({
     [fieldName, fieldValue, setValue],
   );
 
+  console.log("FieldValues", fieldValue);
+
   const deleteAllItems = useCallback(() => {
     fieldValue.forEach((item: FieldInputItem) => {
       URL.revokeObjectURL(item.src);
@@ -181,6 +187,27 @@ export default function InputFile<T extends FieldValues>({
     setValue(fieldName as Path<T>, [] as PathValue<T, Path<T>>);
     clearErrors(fieldName as Path<T>);
   }, [clearErrors, fieldName, fieldValue, setValue]);
+
+  const cropItem = useCallback(
+    (id: number | string, src: string, blob: Blob) => {
+      const itemToCrop = fieldValue.find(
+        (item: FieldInputItem) => item.id === id,
+      );
+      if (itemToCrop) {
+        const castedItem = itemToCrop as FieldInputItem;
+        URL.revokeObjectURL(castedItem.src);
+        castedItem.src = src;
+        castedItem.file = new File([blob], castedItem.file.name, {
+          type: castedItem.file.type,
+        });
+        const newItems = fieldValue.map((item: FieldInputItem) =>
+          item.id === id ? itemToCrop : item,
+        );
+        setValue(fieldName as Path<T>, newItems as PathValue<T, Path<T>>);
+      }
+    },
+    [fieldName, fieldValue, setValue],
+  );
 
   useEffect(() => {
     if (fieldValue?.length === 0) {
@@ -327,6 +354,9 @@ export default function InputFile<T extends FieldValues>({
             type={fieldName.includes("image") ? "IMAGE" : "VIDEO"}
             itemTexts={itemTexts}
             multiple={multiple}
+            cropImage={cropItem}
+            cropShape={cropShape}
+            imageCropTexts={imageCropTexts}
           />
         </motion.div>
       )}

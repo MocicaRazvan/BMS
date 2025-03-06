@@ -111,6 +111,7 @@
     "react-day-picker": "^8.10.1",
     "react-dom": "^18",
     "react-dropzone": "^14.2.3",
+    "react-easy-crop": "^5.4.1",
     "react-hook-form": "^7.51.0",
     "react-infinite-scroll-component": "^6.1.0",
     "react-lottie-player": "^2.1.0",

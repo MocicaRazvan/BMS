@@ -782,6 +782,10 @@
       "MonthPickerTexts": {
         "placeholder": "Pick a month"
       },
+      "ImageCropTexts": {
+        "buttonText": "Crop",
+        "tooltipText": "Crop image"
+      },
       "ArchiveQueueCardsTexts": {
         "description": "Elements waiting to be archived",
         "types": {
@@ -1493,7 +1497,9 @@
         "title": "Why to choose our platform?",
         "content1": "At Bro Meets Science, we bridge the gap between cutting-edge nutritional research and practical, everyday advice. Our team of certified nutritionists and fitness experts is dedicated to providing personalized nutritional plans that are not only effective but also sustainable. Unlike generic diet fads, our plans are rooted in scientific evidence and tailored to meet your unique health goals and lifestyle needs. We believe that proper nutrition is the cornerstone of a healthy life, and we're committed to empowering you with the knowledge and tools you need to make informed decisions about your diet and well-being.",
         "content2": "Our platform is more than just a place to buy nutritional plans; it's a community of like-minded individuals seeking to improve their health and fitness. Through our regularly updated blog, we share the latest insights in nutrition science, debunk common myths, and offer practical tips to help you stay on track. Whether you're looking to lose weight, build muscle, or simply adopt a healthier lifestyle, our content is designed to educate and inspire you every step of the way. We understand that the journey to optimal health is a personal one, and we're here to support you with expert advice and encouragement.",
-        "content3": "Choosing Bro Meets Science means choosing a partner in your health journey. We pride ourselves on our transparent approach and are committed to providing you with reliable information and high-quality services. Our nutritional plans are customizable, ensuring they align with your specific dietary preferences and restrictions. Plus, with our user-friendly platform, accessing your plans and our wealth of blog content is seamless and convenient. Join us at Bro Meets Science and take the first step towards a healthier, happier you—backed by science and supported by a community that cares."
+        "content3": "Choosing Bro Meets Science means choosing a partner in your health journey. We pride ourselves on our transparent approach and are committed to providing you with reliable information and high-quality services. Our nutritional plans are customizable, ensuring they align with your specific dietary preferences and restrictions. Plus, with our user-friendly platform, accessing your plans and our wealth of blog content is seamless and convenient. Join us at Bro Meets Science and take the first step towards a healthier, happier you—backed by science and supported by a community that cares.",
+        "ordersCompleted": "Orders completed",
+        "plansSold": "Plans sold"
       },
       "HomeTimelineTexts": {
         "be-aware": {
@@ -2408,7 +2414,7 @@
         "keywords": "plan, nutrition, read, admin"
       },
       "Posts": {
-        "title": "Posts",
+        "title": "All Posts",
         "description": "Manage all the posts on Bro Meets Science",
         "keywords": "posts, view, topics, approve, admin, manage"
       },

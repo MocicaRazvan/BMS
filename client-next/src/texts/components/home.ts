@@ -73,6 +73,8 @@ export async function getHomeAboutTexts(): Promise<HomeAboutTexts> {
     content1: t("content1"),
     content2: t("content2"),
     content3: t("content3"),
+    ordersCompleted: t("ordersCompleted"),
+    plansSold: t("plansSold"),
   };
 }
 

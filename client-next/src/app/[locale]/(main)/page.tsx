@@ -19,6 +19,7 @@ import person3 from "@/../public/images/people/person3.jpg";
 import person4 from "@/../public/images/people/person4.jpg";
 import Logo from "@/components/logo/logo";
 import LogoWall from "@/components/reactbits/logo-wall";
+import HomeAboutWrapper from "@/components/home/home-about-wrapper";
 
 interface Props {
   params: { locale: Locale };
@@ -70,7 +71,7 @@ export default async function Home({ params: { locale } }: Props) {
       <HomeHero {...homeHeroTexts} />
       <HomeCards {...homeCardsTexts} />
       <div className="h-8 lg:h-14" />
-      <HomeAbout {...homeAboutTexts} />
+      <HomeAboutWrapper texts={homeAboutTexts} />
       <HomeTimeline {...homeTimelineTexts} />
       <div className="h-10 md:h-14" />
       <HomeTestimonials

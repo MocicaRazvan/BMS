@@ -9,13 +9,18 @@ import { SortableItem, SortableListType } from "@/components/dnd/sortable-list";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Trash2 } from "lucide-react";
+import { CircleAlert, Trash2 } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import ImageCropper, {
+  ImageCropperProps,
+  ImageCropTexts,
+} from "@/components/common/image-cropper";
+import { useDebounce } from "react-use";
 
 type Props = {
   item: SortableItem;
@@ -28,7 +33,10 @@ type Props = {
   itemCount?: number;
   itemTexts: ItemTexts;
   multiple?: boolean;
-} & HTMLAttributes<HTMLDivElement>;
+  cropImage?: (id: string | number, src: string, blob: Blob) => void;
+  imageCropTexts: ImageCropTexts;
+} & HTMLAttributes<HTMLDivElement> &
+  Partial<Pick<ImageCropperProps, "dialogOpenObserver" | "cropShape">>;
 
 export interface ItemTexts {
   header: string;
@@ -49,11 +57,25 @@ const Item = forwardRef<HTMLDivElement, Props>(
       itemCount,
       itemTexts: { header, tooltipContent },
       deleteItem,
+      cropImage,
+      dialogOpenObserver,
+      cropShape = "rect",
+      imageCropTexts,
       ...props
     },
     ref,
   ) => {
     const [videoSrc, setVideoSrc] = useState<string | null>(null);
+    const [isDeletePressed, setIsDeletePressed] = useState(false);
+    useDebounce(
+      () => {
+        if (isDeletePressed) {
+          setIsDeletePressed(false);
+        }
+      },
+      3000,
+      [isDeletePressed],
+    );
 
     useEffect(() => {
       if (type === "VIDEO" && item.src) {
@@ -89,6 +111,7 @@ const Item = forwardRef<HTMLDivElement, Props>(
               className={cn(
                 "rounded-lg max-w-100 object-cover w-full  h-[250px]",
                 isDragging ? "shadow-none" : "shadow-md",
+                cropShape === "round" && "rounded-full max-w-[120px] h-[120px]",
               )}
               height={0}
               width={0}
@@ -127,18 +150,44 @@ const Item = forwardRef<HTMLDivElement, Props>(
               </TooltipProvider>
             </div>
           )}
-          {deleteItem && (
-            <Button
-              size={"icon"}
-              variant={"destructive"}
-              className="absolute top-1 right-2"
-              onClick={(e) => {
-                e.stopPropagation();
-                deleteItem?.(item.id);
-              }}
-            >
-              <Trash2 />
-            </Button>
+          {deleteItem &&
+            (!isDeletePressed ? (
+              <Button
+                size="icon"
+                variant="destructive"
+                className="absolute top-1 right-2"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsDeletePressed(true);
+                }}
+                type="button"
+              >
+                <Trash2 />
+              </Button>
+            ) : (
+              <Button
+                size="icon"
+                variant="amber"
+                className="absolute top-1 right-2"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  deleteItem?.(item.id);
+                }}
+                type="button"
+              >
+                <CircleAlert />
+              </Button>
+            ))}
+          {type === "IMAGE" && cropImage && (
+            <div className="absolute bottom-1 right-1">
+              <ImageCropper
+                src={item.src}
+                dialogOpenObserver={dialogOpenObserver}
+                onCropComplete={(src, blob) => cropImage(item.id, src, blob)}
+                cropShape={cropShape}
+                texts={imageCropTexts}
+              />
+            </div>
           )}
         </div>
       </>

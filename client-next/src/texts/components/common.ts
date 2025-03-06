@@ -9,6 +9,7 @@ import {
   MonthPicker,
   MonthPickerTexts,
 } from "@/components/common/month-picker";
+import { ImageCropTexts } from "@/components/common/image-cropper";
 
 export async function getElementHeaderTexts(): Promise<ElementHeaderTexts> {
   const t = await getTranslations("components.common.ElementHeaderTexts");
@@ -99,5 +100,13 @@ export async function getMonthPickerTexts(): Promise<MonthPickerTexts> {
   const t = await getTranslations("components.common.MonthPickerTexts");
   return {
     placeholder: t("placeholder"),
+  };
+}
+
+export async function getImageCropTexts(): Promise<ImageCropTexts> {
+  const t = await getTranslations("components.common.ImageCropTexts");
+  return {
+    buttonText: t("buttonText"),
+    tooltipText: t("tooltipText"),
   };
 }

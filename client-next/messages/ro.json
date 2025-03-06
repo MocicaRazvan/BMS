@@ -782,6 +782,10 @@
       "MonthPickerTexts": {
         "placeholder": "Selectați luna"
       },
+      "ImageCropTexts": {
+        "buttonText": "Decupează",
+        "tooltipText": "Decupează imaginea"
+      },
       "ArchiveQueueCardsTexts": {
         "description": "Elemente care așteaptă să fie arhivate",
         "types": {
@@ -1468,7 +1472,9 @@
         "title": "De ce să alegi platforma noastră?",
         "content1": "La Bro Meets Science, facem legătura între cercetările nutriționale de ultimă oră și sfaturile practice, de zi cu zi. Echipa noastră de nutriționiști certificați și experți în fitness este dedicată furnizării de planuri nutriționale personalizate care nu sunt doar eficiente, ci și sustenabile. Spre deosebire de dietele generice la modă, planurile noastre sunt bazate pe dovezi științifice și adaptate pentru a îndeplini obiectivele tale unice de sănătate și nevoile stilului tău de viață. Credem că o nutriție corespunzătoare este piatra de temelie a unei vieți sănătoase și suntem angajați să te împuternicim cu cunoștințele și instrumentele de care ai nevoie pentru a lua decizii informate despre dieta și bunăstarea ta.",
         "content2": "Platforma noastră este mai mult decât un loc unde poți cumpăra planuri nutriționale; este o comunitate de indivizi cu aceleași idealuri, care caută să își îmbunătățească sănătatea și condiția fizică. Prin intermediul blogului nostru actualizat regulat, împărtășim cele mai recente informații din știința nutriției, demontăm mituri comune și oferim sfaturi practice pentru a te ajuta să rămâi pe drumul cel bun. Fie că dorești să slăbești, să îți dezvolți masa musculară sau pur și simplu să adopți un stil de viață mai sănătos, conținutul nostru este conceput să te educe și să te inspire la fiecare pas. Înțelegem că drumul către o sănătate optimă este unul personal și suntem aici să te sprijinim cu sfaturi experte și încurajare.",
-        "content3": "Alegând Bro Meets Science înseamnă să alegi un partener în călătoria ta spre sănătate. Ne mândrim cu abordarea noastră transparentă și suntem dedicați să îți oferim informații de încredere și servicii de înaltă calitate. Planurile noastre nutriționale sunt personalizabile, asigurându-ne că se aliniază preferințelor și restricțiilor tale alimentare specifice. În plus, cu platforma noastră ușor de utilizat, accesarea planurilor tale și a bogăției noastre de conținut pe blog este simplă și convenabilă. Alătură-te nouă la Bro Meets Science și fă primul pas către un tu mai sănătos și mai fericit—susținut de știință și sprijinit de o comunitate care îți pasă."
+        "content3": "Alegând Bro Meets Science înseamnă să alegi un partener în călătoria ta spre sănătate. Ne mândrim cu abordarea noastră transparentă și suntem dedicați să îți oferim informații de încredere și servicii de înaltă calitate. Planurile noastre nutriționale sunt personalizabile, asigurându-ne că se aliniază preferințelor și restricțiilor tale alimentare specifice. În plus, cu platforma noastră ușor de utilizat, accesarea planurilor tale și a bogăției noastre de conținut pe blog este simplă și convenabilă. Alătură-te nouă la Bro Meets Science și fă primul pas către un tu mai sănătos și mai fericit—susținut de știință și sprijinit de o comunitate care îți pasă.",
+        "ordersCompleted": "Comenzi finalizate",
+        "plansSold": "Planuri vândute"
       },
       "HomeTimelineTexts": {
         "be-aware": {

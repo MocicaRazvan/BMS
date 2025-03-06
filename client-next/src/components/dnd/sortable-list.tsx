@@ -19,6 +19,7 @@ import {
 import Item, { ItemTexts } from "@/components/dnd/item";
 import SortableItemWrapper from "@/components/dnd/sortable-item";
 import { FieldInputItem } from "@/components/forms/input-file";
+import { ImageCropTexts } from "@/components/common/image-cropper";
 
 export type SortableListType = "IMAGE" | "VIDEO";
 
@@ -38,6 +39,9 @@ interface Props {
   deleteItem: (id: string | number) => void;
   itemTexts: ItemTexts;
   multiple?: boolean;
+  cropImage: (id: string | number, src: string, blob: Blob) => void;
+  cropShape?: "rect" | "round";
+  imageCropTexts: ImageCropTexts;
 }
 
 export default function SortableList({
@@ -47,6 +51,9 @@ export default function SortableList({
   deleteItem,
   itemTexts,
   multiple = true,
+  cropImage,
+  cropShape = "rect",
+  imageCropTexts,
 }: Props) {
   const [activeItem, setActiveItem] = useState<SortableItem>();
 
@@ -120,6 +127,9 @@ export default function SortableList({
               itemCount={items.length}
               itemTexts={itemTexts}
               multiple={multiple}
+              cropImage={cropImage}
+              cropShape={cropShape}
+              imageCropTexts={imageCropTexts}
             />
           ))}
         </div>
@@ -132,6 +142,7 @@ export default function SortableList({
             type={type}
             preview={true}
             itemTexts={itemTexts}
+            imageCropTexts={imageCropTexts}
           />
         ) : null}
       </DragOverlay>

@@ -5,6 +5,7 @@ import com.mocicarazvan.orderservice.dtos.summaries.*;
 import com.mocicarazvan.orderservice.enums.CountrySummaryType;
 import com.mocicarazvan.templatemodule.dtos.response.MonthlyEntityGroup;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.time.LocalDate;
 
@@ -51,4 +52,5 @@ public interface SummaryService {
 
     Flux<MonthlyOrderSummaryObjectiveType> getAdminOrdersSummaryByDateRangeGroupedByMonthObjectiveTypes(LocalDate month, String userId);
 
+    Mono<OverallSummary> getOverallSummary();
 }

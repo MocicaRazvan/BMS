@@ -52,7 +52,9 @@ public class RouteValidator {
             "/auth/github/callback",
             "/auth/google/callback", "/auth/google/login",
             "/auth/resetPassword", "/auth/changePassword", "/auth/**",
-            "/files/download/**", "/orders/webhook/**");
+            "/files/download/**", "/orders/webhook/**",
+            "/orders/overall"
+    );
 
     private static final List<String> TRAINER_LIST = List.of("/test/trainer",
 
