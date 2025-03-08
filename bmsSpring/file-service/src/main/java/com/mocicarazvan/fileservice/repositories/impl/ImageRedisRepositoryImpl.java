@@ -40,7 +40,7 @@ public class ImageRedisRepositoryImpl implements ImageRedisRepository {
 
     @Override
     public Mono<byte[]> getImage(String gridId, Integer width, Integer height, Double quality) {
-        log.info("Generated cache key: {}", generateCacheKey(gridId, width, height, quality));
+//        log.info("Generated cache key: {}", generateCacheKey(gridId, width, height, quality));
 
         return reactiveByteArrayRedisTemplate.opsForValue()
                 .get(generateCacheKey(gridId, width, height, quality));
@@ -55,13 +55,13 @@ public class ImageRedisRepositoryImpl implements ImageRedisRepository {
 
     @Override
     public Mono<Void> deleteAllImagesByGridId(String gridId) {
-        log.error("Deleting pattern: {}", String.format(IMAGE_CACHE_KEY_PATTERN, gridId));
+//        log.error("Deleting pattern: {}", String.format(IMAGE_CACHE_KEY_PATTERN, gridId));
         return scanAndDeleteKeys(String.format(IMAGE_CACHE_KEY_PATTERN, gridId)).then();
     }
 
     @Override
     public Mono<Void> deleteAllImagesByGridIds(List<String> gridIds) {
-        log.error("Deleting images for gridIds: {}", gridIds);
+//        log.error("Deleting images for gridIds: {}", gridIds);
         return Flux.fromIterable(gridIds)
                 .doOnNext(id -> log.info("Deleting images for gridId: {}", id))
                 .flatMap(this::deleteAllImagesByGridId)
