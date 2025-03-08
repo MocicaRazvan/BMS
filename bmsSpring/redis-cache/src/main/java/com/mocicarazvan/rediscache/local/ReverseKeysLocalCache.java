@@ -7,7 +7,6 @@ import com.mocicarazvan.rediscache.dtos.CacheRemoveType;
 import com.mocicarazvan.rediscache.dtos.NotifyCacheRemoveDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.stereotype.Component;
 
 import java.util.Collection;
 import java.util.List;
@@ -18,7 +17,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Slf4j
-@Component
+//@Component
 public class ReverseKeysLocalCache implements RemoveFromCache {
     protected final Cache<String, List<String>> cacheMap;
     protected final NotifyLocalRemove notifyLocalRemove;

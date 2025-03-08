@@ -2,7 +2,12 @@ package com.mocicarazvan.rediscache.config;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mocicarazvan.rediscache.local.LocalCacheProperties;
+import com.mocicarazvan.rediscache.local.LocalReactiveCache;
+import com.mocicarazvan.rediscache.local.NotifyLocalRemove;
+import com.mocicarazvan.rediscache.local.ReverseKeysLocalCache;
 import com.mocicarazvan.rediscache.utils.AspectUtils;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -18,6 +23,8 @@ import org.springframework.data.redis.core.ReactiveRedisTemplate;
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
+
+import java.util.concurrent.Executor;
 
 @Configuration
 public class BeanConfigRedisCache {
@@ -83,6 +90,27 @@ public class BeanConfigRedisCache {
                 .threadNamePrefix("SimpleAsyncTaskRedisExecutorInstance-")
                 .concurrencyLimit(executorAsyncConcurrencyLimit)
                 .build();
+    }
+
+//    @Bean
+//    @ConditionalOnMissingBean
+//    public NotifyLocalRemove notifyLocalRemovePlaceholder() {
+//        return (_)->{};
+//    }
+
+    @Bean
+    @ConditionalOnBean(NotifyLocalRemove.class)
+    public LocalReactiveCache localReactiveCache(LocalCacheProperties localCacheProperties,
+                                                 @Qualifier("redisAsyncTaskExecutor") Executor executor,
+                                                 NotifyLocalRemove notifyLocalRemove) {
+        return new LocalReactiveCache(localCacheProperties, executor, notifyLocalRemove);
+    }
+
+    @Bean
+    @ConditionalOnBean(NotifyLocalRemove.class)
+    public ReverseKeysLocalCache reverseKeysLocalCache(LocalCacheProperties localCacheProperties,
+                                                       @Qualifier("redisAsyncTaskExecutor") Executor executor, NotifyLocalRemove notifyLocalRemove) {
+        return new ReverseKeysLocalCache(localCacheProperties, executor, notifyLocalRemove);
     }
 }
 
