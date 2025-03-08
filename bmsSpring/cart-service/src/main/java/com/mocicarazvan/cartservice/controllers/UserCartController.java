@@ -69,4 +69,12 @@ public class UserCartController {
                 .map(ResponseEntity::ok);
     }
 
+    @DeleteMapping("/clearOldCarts")
+    public Mono<ResponseEntity<Long>> clearOldCarts(
+            @RequestParam(required = false, defaultValue = "${cart.clear-old-carts.days-cutoff:60}") @Min(1) Long daysCutoff
+    ) {
+        return userCartService.clearOldCarts(daysCutoff)
+                .map(ResponseEntity::ok);
+    }
+
 }

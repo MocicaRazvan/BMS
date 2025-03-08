@@ -43,14 +43,13 @@ public class TasksConfig {
                 .concatMap(_ -> {
                     log.info("Clearing old carts");
                     return
-                            userCartService.countAll()
-                                    .doOnNext(count -> log.info("Old carts count before delete: {}", count))
-                                    .then(userCartService.deleteOldCars(LocalDateTime.now().minusDays(clearOldCartsDaysCutoff)))
-                                    .then(userCartService.countAll()
-                                            .doOnNext(count -> log.info("Old carts count after delete: {}", count))
-                                    );
+                            userCartService.clearOldCarts(clearOldCartsDaysCutoff);
                 })
-                .subscribe();
+                .subscribe(
+                        result -> log.info("Old carts cleared: {}", result),
+                        error -> log.error("Error clearing old carts", error),
+                        () -> log.info("Clearing old carts task completed")
+                );
     }
 
 }

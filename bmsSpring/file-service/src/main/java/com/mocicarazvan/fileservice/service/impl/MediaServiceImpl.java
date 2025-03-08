@@ -3,11 +3,13 @@ package com.mocicarazvan.fileservice.service.impl;
 import com.mocicarazvan.fileservice.dtos.FileUploadResponse;
 import com.mocicarazvan.fileservice.dtos.GridIdsDto;
 import com.mocicarazvan.fileservice.dtos.MetadataDto;
+import com.mocicarazvan.fileservice.dtos.ToBeDeletedCounts;
 import com.mocicarazvan.fileservice.enums.FileType;
 import com.mocicarazvan.fileservice.enums.MediaType;
 import com.mocicarazvan.fileservice.exceptions.FileNotFound;
 import com.mocicarazvan.fileservice.models.Media;
 import com.mocicarazvan.fileservice.models.MediaMetadata;
+import com.mocicarazvan.fileservice.repositories.ExtendedMediaRepository;
 import com.mocicarazvan.fileservice.repositories.ImageRedisRepository;
 import com.mocicarazvan.fileservice.repositories.MediaMetadataRepository;
 import com.mocicarazvan.fileservice.repositories.MediaRepository;
@@ -57,11 +59,16 @@ public class MediaServiceImpl implements MediaService {
     private final ProgressWebSocketHandler progressWebSocketHandler;
     private final BytesService bytesService;
     private final ImageRedisRepository imageRedisRepository;
+    private final ExtendedMediaRepository extendedMediaRepository;
+
     @Value("${images.url}")
     private String imagesUrl;
 
     @Value("${videos.url}")
     private String videosUrl;
+
+    @Value("${hard-delete.batch-size:25}")
+    private Integer batchSize;
 
     @Override
     public Mono<FileUploadResponse> uploadFiles(Flux<FilePart> files, MetadataDto metadataDto) {
@@ -233,8 +240,12 @@ public class MediaServiceImpl implements MediaService {
                         mediaRepository.findAllByGridFsIdIn(gridIds)
                                 .map(Media::getId)
                                 .collectList()
-                                .flatMap(mediaMetadataRepository::deleteAllByMediaIdIn)
-                                .then(mediaRepository.deleteAllByGridFsIdIn(gridIds))
+                                .flatMap(mediaIds -> Mono.zip(
+                                        mediaMetadataRepository.deleteAllByMediaIdIn(mediaIds).thenReturn(true),
+                                        mediaRepository.deleteAllByGridFsIdIn(gridIds).thenReturn(true)
+                                ))
+//                                .flatMap(mediaMetadataRepository::deleteAllByMediaIdIn)
+//                                .then(mediaRepository.deleteAllByGridFsIdIn(gridIds))
                                 .thenReturn(true)
                 )
                 .doOnSuccess(tuple -> {
@@ -249,9 +260,26 @@ public class MediaServiceImpl implements MediaService {
     }
 
     @Override
+    public Mono<ToBeDeletedCounts> countToBeDeleted() {
+        return extendedMediaRepository.countAllByToBeDeletedIsTrue();
+    }
+
+    @Override
     public Mono<Void> deleteFileWithCacheInvalidate(GridIdsDto ids) {
-        return deleteFiles(ids.getGridFsIds())
+//        return deleteFiles(ids.getGridFsIds())
+//                .then(imageRedisRepository.deleteAllImagesByGridIds(ids.getGridFsIds()));
+        return extendedMediaRepository.markToBeDeletedByGridFsIds(ids.getGridFsIds())
                 .then(imageRedisRepository.deleteAllImagesByGridIds(ids.getGridFsIds()));
+    }
+
+    @Override
+    public Flux<ToBeDeletedCounts> hardDeleteFiles() {
+        return mediaRepository.findAllByToBeDeletedIsTrue()
+                .map(Media::getGridFsId)
+                .buffer(batchSize)
+                .concatMap(batch -> deleteFiles(batch)
+                        .then(countToBeDeleted())
+                );
     }
 
     private String generateFileUrl(String id, FileType fileType) {
@@ -269,6 +297,7 @@ public class MediaServiceImpl implements MediaService {
         return gridFsTemplate.store(filePart.content(), filePart.filename(), Objects.requireNonNull(filePart.headers().getContentType()).toString(), metadata)
                 .flatMap(gridFSId -> {
                     Media media = Media.builder()
+                            .fileSize(filePart.headers().getContentLength())
                             .fileName(filePart.filename())
                             .fileType(metadataDto.getFileType().name())
                             .gridFsId(gridFSId.toHexString())

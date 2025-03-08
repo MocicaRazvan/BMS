@@ -21,4 +21,6 @@ public interface UserCartService {
     Mono<Void> deleteOldCars(LocalDateTime updatedAtIsLessThan);
 
     Mono<Long> countAll();
+
+    Mono<Long> clearOldCarts(Long clearOldCartsDaysCutoff);
 }

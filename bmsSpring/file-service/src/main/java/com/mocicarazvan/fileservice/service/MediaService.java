@@ -3,6 +3,7 @@ package com.mocicarazvan.fileservice.service;
 import com.mocicarazvan.fileservice.dtos.FileUploadResponse;
 import com.mocicarazvan.fileservice.dtos.GridIdsDto;
 import com.mocicarazvan.fileservice.dtos.MetadataDto;
+import com.mocicarazvan.fileservice.dtos.ToBeDeletedCounts;
 import com.mongodb.client.gridfs.model.GridFSFile;
 import org.springframework.data.mongodb.gridfs.ReactiveGridFsResource;
 import org.springframework.http.codec.multipart.FilePart;
@@ -28,5 +29,9 @@ public interface MediaService {
 
     Mono<Void> deleteFiles(List<String> gridIds);
 
+    Mono<ToBeDeletedCounts> countToBeDeleted();
+
     Mono<Void> deleteFileWithCacheInvalidate(GridIdsDto ids);
+
+    Flux<ToBeDeletedCounts> hardDeleteFiles();
 }

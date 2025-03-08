@@ -15,4 +15,11 @@ public interface MediaRepository extends ReactiveMongoRepository<Media, String> 
     Flux<Media> findAllByGridFsId(String gridFsId);
 
     Mono<Void> deleteAllByGridFsId(String gridFsId);
+
+    Mono<Void> deleteAllByToBeDeletedIsTrue();
+
+    Mono<Long> countAllByToBeDeletedIsTrue();
+
+    Flux<Media> findAllByToBeDeletedIsTrue();
+
 }

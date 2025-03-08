@@ -118,11 +118,7 @@ public class BeanConfig {
     public RepositoryUtils repositoryUtils() {
         return new RepositoryUtils();
     }
-
-//    @Bean
-//    public FilteredListCaffeineCacheApproveFilterKey<PostResponse> filteredListCaffeineCache() {
-//        return new FilteredListCaffeineCacheApproveFilterKeyImpl<>("postService");
-//    }
+    
 
     @Bean
     public RedisApprovedCacheUtils redisApprovedCacheUtils(ReactiveRedisTemplate<String, Object> reactiveRedisTemplate,

@@ -151,6 +151,22 @@ public class UserCartServiceImpl implements UserCartService {
         return userCartRepository.countAllBy();
     }
 
+    @Override
+    public Mono<Long> clearOldCarts(Long clearOldCartsDaysCutoff) {
+        log.info("Clearing old carts with cutoff days: {}", clearOldCartsDaysCutoff);
+        return countAll()
+                .flatMap(count -> {
+                    log.info("Old carts count before delete: {}", count);
+                    return deleteOldCars(LocalDateTime.now().minusDays(clearOldCartsDaysCutoff))
+                            .then(countAll().map(
+                                    newCount -> {
+                                        log.info("Old carts count after delete: {}", newCount);
+                                        return count - newCount;
+                                    }
+                            ));
+                });
+    }
+
     private Mono<Void> deleteUserCartBase(Long userId) {
         return userCartRepository.existsByUserId(userId)
                 .filter(Boolean::booleanValue)

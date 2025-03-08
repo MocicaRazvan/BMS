@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mocicarazvan.fileservice.dtos.FileUploadResponse;
 import com.mocicarazvan.fileservice.dtos.GridIdsDto;
 import com.mocicarazvan.fileservice.dtos.MetadataDto;
+import com.mocicarazvan.fileservice.dtos.ToBeDeletedCounts;
 import com.mocicarazvan.fileservice.service.MediaService;
 import com.mongodb.client.gridfs.model.GridFSFile;
 import lombok.RequiredArgsConstructor;
@@ -68,5 +69,16 @@ public class FileController {
                 .then(Mono.just(ResponseEntity.noContent().build()));
     }
 
+    @GetMapping("/countToBeDeleted")
+    public Mono<ResponseEntity<ToBeDeletedCounts>> countToBeDeleted() {
+        return mediaService.countToBeDeleted()
+                .map(count -> ResponseEntity.ok().body(count));
+    }
+
+    @DeleteMapping(value = "/hardDelete", produces = {MediaType.APPLICATION_NDJSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
+    @ResponseStatus(HttpStatus.OK)
+    public Flux<ToBeDeletedCounts> hardDeleteFiles() {
+        return mediaService.hardDeleteFiles();
+    }
 
 }
