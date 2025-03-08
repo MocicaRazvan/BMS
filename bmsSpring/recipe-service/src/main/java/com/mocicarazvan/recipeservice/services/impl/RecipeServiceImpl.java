@@ -329,7 +329,9 @@ public class RecipeServiceImpl extends ApprovedServiceImpl<Recipe, RecipeBody, R
         return
                 modelRepository.countInParent(childId)
                         .collectList()
-                        .map(EntityCount::new).log();
+                        .map(EntityCount::new)
+//                        .log()
+                ;
     }
 
     @Override

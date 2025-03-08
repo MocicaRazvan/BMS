@@ -91,7 +91,7 @@ public class DayController implements TitleBodyController<
     @GetMapping(value = "/withUser/{id}", produces = {MediaType.APPLICATION_NDJSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
     public Mono<ResponseEntity<ResponseWithUserDtoEntity<DayResponse>>> getModelByIdWithUser(@PathVariable Long id, ServerWebExchange exchange) {
         return dayService.getModelByIdWithUser(id, requestsUtils.extractAuthUser(exchange))
-                .log()
+//                .log()
                 .flatMap(m -> dayReactiveResponseBuilder.toModelWithUser(m, DayController.class))
                 .map(ResponseEntity::ok);
     }

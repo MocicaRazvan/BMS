@@ -106,7 +106,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public Mono<SessionResponse> checkoutHosted(CheckoutRequestBody checkoutRequestBody, String userId) {
         return planClient.verifyIds(checkoutRequestBody.getPlans().stream().map(o -> o.getId().toString()).toList(), userId)
-                .log()
+//                .log()
                 .then(checkIfUserOwnsAPlan(userId, checkoutRequestBody.getPlans().stream().map(IdGenerateDto::getId).toList()))
                 .then(checkTotalPrice(checkoutRequestBody.getPlans(), checkoutRequestBody.getTotal()))
                 .then(customerUtil.findOrCreateCustomer(userId))

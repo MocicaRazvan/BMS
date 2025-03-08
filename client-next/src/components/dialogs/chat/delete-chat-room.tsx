@@ -11,36 +11,47 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import {
-  DeleteDialogTexts,
-  getDeleteChatRoomDialogTexts,
-} from "@/texts/components/dialog";
-import { useEffect, useState } from "react";
+import { DeleteDialogTexts } from "@/texts/components/dialog";
 
 interface Props {
   anchor?: React.ReactNode;
   handleDelete: () => Promise<void>;
   receiverEmail: string;
+  deleteChatDialogTexts: DeleteDialogTexts;
 }
 
 export default function DeleteChatRoomDialog({
   anchor,
   handleDelete,
   receiverEmail,
+  deleteChatDialogTexts,
 }: Props) {
-  const [dialogDeleteTexts, setDialogDeleteTexts] =
-    useState<DeleteDialogTexts | null>(null);
-  useEffect(() => {
-    getDeleteChatRoomDialogTexts(receiverEmail).then(setDialogDeleteTexts);
-  }, [receiverEmail]);
+  //todo dc nu merge aici si n altele merge nu stiu si nici nu voi afla, maretele sunt caile lui nextjs
 
-  if (!dialogDeleteTexts) {
-    if (anchor) return anchor;
-    else return null;
+  // const [dialogTexts, setDialogDeleteTexts] =
+  //   useState<DeleteDialogTexts | null>(null);
+  // useEffect(() => {
+  //   getDeleteChatRoomDialogTexts(receiverEmail).then(setDialogDeleteTexts);
+  // }, [receiverEmail]);
+
+  // console.log("DeleteChatRoomDialog", deleteChatDialogTexts);
+  let description = deleteChatDialogTexts.description;
+  if (typeof description === "string") {
+    description = description.replace("place_holder", receiverEmail);
   }
+  // console.log(
+  //   "deleteChatDialogTexts",
+  //   dialogTexts,
+  //   JSON.stringify(description),
+  // );
+  // if (!dialogTexts) {
+  //   // if (anchor) return anchor;
+  //   // else return null;
+  //   return;
+  // }
   return (
     <AlertDialog>
-      <AlertDialogTrigger asChild>
+      <AlertDialogTrigger asChild onClick={(e) => e.stopPropagation()}>
         {anchor ? (
           anchor
         ) : (
@@ -48,21 +59,23 @@ export default function DeleteChatRoomDialog({
             variant="outline"
             className="border-destructive text-destructive"
           >
-            {dialogDeleteTexts.anchor}
+            {deleteChatDialogTexts.anchor}
           </Button>
         )}
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>{dialogDeleteTexts.title}</AlertDialogTitle>
-          <AlertDialogDescription>
-            {dialogDeleteTexts.description}
-          </AlertDialogDescription>
+          <AlertDialogTitle>{deleteChatDialogTexts.title}</AlertDialogTitle>
+          <AlertDialogDescription>{description}</AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>{dialogDeleteTexts.cancel}</AlertDialogCancel>
+          <AlertDialogCancel onClick={(e) => e.stopPropagation()}>
+            {deleteChatDialogTexts.cancel}
+          </AlertDialogCancel>
           <AlertDialogAction asChild onClick={() => handleDelete()}>
-            <Button variant="destructive">{dialogDeleteTexts.confirm}</Button>
+            <Button variant="destructive" onClick={(e) => e.stopPropagation()}>
+              {deleteChatDialogTexts.confirm}
+            </Button>
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

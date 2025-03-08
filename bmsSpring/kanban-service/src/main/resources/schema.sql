@@ -1,53 +1,50 @@
 CREATE TABLE IF NOT EXISTS kanban_column
 (
     id
-    SERIAL
-    PRIMARY
-    KEY,
+        SERIAL
+        PRIMARY
+            KEY,
     title
-    TEXT
-    NOT
-    NULL,
+        TEXT
+        NOT
+            NULL,
     user_id
-    BIGINT,
+        BIGINT,
     order_index
-    INT
-    NOT
-    NULL,
+        INT
+        NOT
+            NULL,
     created_at
-    TIMESTAMP
-    DEFAULT
-    CURRENT_TIMESTAMP,
+        TIMESTAMP
+        DEFAULT
+            CURRENT_TIMESTAMP,
     updated_at
-    TIMESTAMP
-    DEFAULT
-    CURRENT_TIMESTAMP
+        TIMESTAMP
+        DEFAULT
+            CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS kanban_task
 (
     id
-    SERIAL
-    PRIMARY
-    KEY,
+                SERIAL
+        PRIMARY
+            KEY,
     content
-    TEXT
-    NOT
-    NULL,
+                TEXT
+                            NOT
+                                NULL,
     type
-    varchar
-(
-    50
-) NOT NULL,
-    user_id BIGINT,
-    order_index INT NOT NULL,
-    column_id BIGINT NOT NULL REFERENCES kanban_column
-(
-    id
-) ON DELETE CASCADE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    );
+                varchar(50) NOT NULL,
+    user_id     BIGINT,
+    order_index INT         NOT NULL,
+    column_id   BIGINT      NOT NULL REFERENCES kanban_column
+        (
+         id
+            ) ON DELETE CASCADE,
+    created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 
 
 CREATE INDEX IF NOT EXISTS idx_kanban_task_column_id ON kanban_task (column_id);

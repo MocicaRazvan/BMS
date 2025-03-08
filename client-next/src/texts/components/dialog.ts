@@ -41,6 +41,25 @@ export async function getDeleteChatRoomDialogTexts(
   );
   return getAlertDialogDeleteTexts(t("chatWith", { email }));
 }
+
+export async function getDeleteChatRoomDialogTexts_FallBack(
+  email: string,
+): Promise<DeleteDialogTexts> {
+  const [t, dc] = await Promise.all([
+    getTranslations("components.dialogs.DeleteDialogTexts"),
+    await getTranslations("components.dialogs.DeleteChatRoomDialogTexts"),
+  ]);
+  return {
+    anchor: t("anchor"),
+    title: t("title"),
+    description: t("description_fallback", {
+      title: dc("chatWith", { email }).toLowerCase(),
+    }),
+    cancel: t("cancel"),
+    confirm: t("confirm"),
+  };
+}
+
 export async function getAlertDialogApproveTexts(
   title: string,
   approved: string,

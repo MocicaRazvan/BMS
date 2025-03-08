@@ -27,7 +27,7 @@ import {
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
-import * as DOMPurify from "dompurify";
+import DOMPurify from "dompurify";
 import removeMd from "remove-markdown";
 
 export interface TitleBodyTexts {

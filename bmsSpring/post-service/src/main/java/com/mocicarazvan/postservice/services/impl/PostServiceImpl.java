@@ -138,7 +138,7 @@ public class PostServiceImpl extends ApprovedServiceImpl<Post, PostBody, PostRes
     public Mono<Void> existsByIdAndApprovedIsTrue(Long id) {
         return
                 self.existByIdApproved(id)
-                        .doOnNext(e -> log.error("existsByIdAndApprovedIsTrue: " + id))
+//                        .doOnNext(e -> log.error("existsByIdAndApprovedIsTrue: " + id))
                         .filter(Boolean::booleanValue)
                         .switchIfEmpty(Mono.error(new NotFoundEntity("post", id))
                         ).then();

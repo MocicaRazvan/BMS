@@ -4,6 +4,8 @@ package com.mocicarazvan.orderservice.config;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mocicarazvan.rediscache.aspects.RedisReactiveCacheChildAspect;
 import com.mocicarazvan.rediscache.aspects.RedisReactiveChildCacheEvictAspect;
+import com.mocicarazvan.rediscache.local.LocalReactiveCache;
+import com.mocicarazvan.rediscache.local.ReverseKeysLocalCache;
 import com.mocicarazvan.rediscache.utils.AspectUtils;
 import com.mocicarazvan.rediscache.utils.RedisChildCacheUtils;
 import com.mocicarazvan.templatemodule.clients.UserClient;
@@ -108,12 +110,6 @@ public class BeanConfig {
         return new UserClient("userService", userWebClient, circuitBreakerRegistry, retryRegistry, rateLimiterRegistry);
     }
 
-//    @Bean
-//    public FileClient fileClient(
-//            CircuitBreakerRegistry circuitBreakerRegistry, RetryRegistry retryRegistry, RateLimiterRegistry rateLimiterRegistry
-//    ) {
-//        return new FileClient("fileService", webClient(), circuitBreakerRegistry, retryRegistry, rateLimiterRegistry);
-//    }
 
     @Bean
     public Validator localValidatorFactoryBean() {
@@ -132,19 +128,8 @@ public class BeanConfig {
 
     @Bean
     public EmailUtils emailUtils(JavaMailSender jml) {
-
         return new EmailUtilsImpl(jml);
     }
-
-//    @Bean
-//    public FilteredListCaffeineCacheChildFilterKey<OrderDto> orderDtoFilteredListCaffeineCacheChildFilterKey() {
-//        return new FilteredListCaffeineCacheChildFilterKeyImpl<>("orderService");
-//    }
-//
-//    @Bean
-//    public FilteredListCaffeineCacheChildFilterKey<OrderDtoWithAddress> orderDtoWithAddressFilteredListCaffeineCacheChildFilterKey() {
-//        return new FilteredListCaffeineCacheChildFilterKeyImpl<>("orderService");
-//    }
 
     @Bean
     public RedisChildCacheUtils redisChildCacheUtils(ReactiveRedisTemplate<String, Object> reactiveRedisTemplate,
@@ -157,15 +142,22 @@ public class BeanConfig {
                                                                           AspectUtils aspectUtils,
                                                                           ObjectMapper objectMapper,
                                                                           @Qualifier("redisAsyncTaskExecutor") SimpleAsyncTaskExecutor executorService,
-                                                                          RedisChildCacheUtils redisChildUtils) {
-        return new RedisReactiveCacheChildAspect(reactiveRedisTemplate, aspectUtils, objectMapper, executorService, redisChildUtils);
+                                                                          RedisChildCacheUtils redisChildUtils,
+                                                                          ReverseKeysLocalCache reverseKeysLocalCache,
+                                                                          LocalReactiveCache localReactiveCache) {
+        return new RedisReactiveCacheChildAspect(reactiveRedisTemplate, aspectUtils, objectMapper, executorService, redisChildUtils,
+                reverseKeysLocalCache, localReactiveCache);
+
     }
 
     @Bean
     public RedisReactiveChildCacheEvictAspect redisReactiveChildCacheEvictAspect(ReactiveRedisTemplate<String, Object> reactiveRedisTemplate,
                                                                                  AspectUtils aspectUtils,
-                                                                                 RedisChildCacheUtils redisChildCacheUtils) {
-        return new RedisReactiveChildCacheEvictAspect(reactiveRedisTemplate, aspectUtils, redisChildCacheUtils);
+                                                                                 RedisChildCacheUtils redisChildCacheUtils, ReverseKeysLocalCache reverseKeysLocalCache,
+                                                                                 LocalReactiveCache localReactiveCache,
+                                                                                 @Qualifier("redisAsyncTaskExecutor") SimpleAsyncTaskExecutor executorService) {
+        return new RedisReactiveChildCacheEvictAspect(reactiveRedisTemplate, aspectUtils, redisChildCacheUtils,
+                reverseKeysLocalCache, localReactiveCache, executorService);
     }
 
     @Bean

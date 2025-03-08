@@ -711,7 +711,8 @@
         "title": "Are you absolutely sure?",
         "description": "This action cannot be undone. This will delete <b>{title}</b> and it will be lost forever.",
         "cancel": "Cancel",
-        "confirm": "Delete"
+        "confirm": "Delete",
+        "description_fallback": "This action cannot be undone. This will delete {title} and it will be lost forever."
       },
       "AlertDialogApproveTexts": {
         "anchor": "{approved, select, true {Disapprove} false {Approve} other {Approve}}",

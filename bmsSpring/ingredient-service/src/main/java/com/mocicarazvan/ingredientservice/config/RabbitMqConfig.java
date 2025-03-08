@@ -2,21 +2,21 @@ package com.mocicarazvan.ingredientservice.config;
 
 import com.mocicarazvan.ingredientservice.models.Ingredient;
 import com.mocicarazvan.ingredientservice.models.NutritionalFact;
+import com.mocicarazvan.templatemodule.services.RabbitMqSender;
 import com.mocicarazvan.templatemodule.services.RabbitMqUpdateDeleteService;
 import com.mocicarazvan.templatemodule.services.impl.RabbitMqSenderImpl;
 import com.mocicarazvan.templatemodule.services.impl.RabbitMqUpdateDeleteServiceImpl;
 import com.mocicarazvan.templatemodule.utils.SimpleTaskExecutorsInstance;
-import org.springframework.amqp.core.Binding;
-import org.springframework.amqp.core.BindingBuilder;
-import org.springframework.amqp.core.DirectExchange;
-import org.springframework.amqp.core.Queue;
+import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.task.SimpleAsyncTaskExecutor;
 
 @Configuration
 public class RabbitMqConfig {
@@ -56,6 +56,9 @@ public class RabbitMqConfig {
     @Value("${spring.custom.rabbitmq.concurrency:8}")
     private int concurrency;
 
+    @Value("${ingredient.fanout.exchange.name}")
+    private String ingredientFanoutExchangeName;
+
     @Bean
     public Queue ingredientDeleteQueue() {
         return new Queue(ingredientDeleteQueueName, true);
@@ -64,6 +67,11 @@ public class RabbitMqConfig {
     @Bean
     public Queue ingredientUpdateQueue() {
         return new Queue(ingredientUpdateQueueName, true);
+    }
+
+    @Bean
+    public Queue ingredientCacheInvalidateQueue() {
+        return new AnonymousQueue();
     }
 
     @Bean
@@ -84,15 +92,26 @@ public class RabbitMqConfig {
     }
 
     @Bean
+    public FanoutExchange ingredientFanoutExchange() {
+        return new FanoutExchange(ingredientFanoutExchangeName);
+    }
+
+    @Bean
     public MessageConverter jsonMessageConverter() {
         return new Jackson2JsonMessageConverter();
     }
 
     @Bean
-    public RabbitTemplate rabbitTemplate(ConnectionFactory connectionFactory) {
+    public SimpleAsyncTaskExecutor rabbitMqAsyncTaskExecutor() {
+        return new SimpleTaskExecutorsInstance().initializeVirtual(executorAsyncConcurrencyLimit);
+    }
+
+    @Bean
+    public RabbitTemplate rabbitTemplate(ConnectionFactory connectionFactory,
+                                         @Qualifier("rabbitMqAsyncTaskExecutor") SimpleAsyncTaskExecutor rabbitMqAsyncTaskExecutor) {
         RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
         rabbitTemplate.setMessageConverter(jsonMessageConverter());
-        rabbitTemplate.setTaskExecutor(new SimpleTaskExecutorsInstance().initializeVirtual(executorAsyncConcurrencyLimit));
+        rabbitTemplate.setTaskExecutor(rabbitMqAsyncTaskExecutor);
         return rabbitTemplate;
     }
 
@@ -138,5 +157,10 @@ public class RabbitMqConfig {
                 .deleteSender(new RabbitMqSenderImpl(nutritionalFactExchangeName, nutritionalFactDeleteRoutingKey, rabbitTemplate, concurrency))
                 .updateSender(new RabbitMqSenderImpl(nutritionalFactExchangeName, nutritionalFactUpdateRoutingKey, rabbitTemplate, concurrency))
                 .build();
+    }
+
+    @Bean
+    public RabbitMqSender ingredientCacheInvalidateSender(RabbitTemplate rabbitTemplate) {
+        return new RabbitMqSenderImpl(ingredientFanoutExchangeName, "", rabbitTemplate, concurrency);
     }
 }

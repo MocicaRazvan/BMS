@@ -23,6 +23,8 @@ import com.mocicarazvan.websocketservice.utils.PageableUtilsCustom;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
@@ -105,10 +107,19 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     @CustomRetryable
     public PageableResponse<List<ChatRoomResponse>> getChatRoomsFiltered(String email, String filterEmail, PageableBody pageableBody) {
 
+
+        PageRequest pageRequest = pageableUtilsCustom.createPageRequest(pageableBody);
+
+        if (!pageRequest.getSort().isSorted() && filterEmail != null && !filterEmail.isEmpty()) {
+            pageRequest = PageRequest.of(pageRequest.getPageNumber(), pageRequest.getPageSize(),
+                    Sort.by(Sort.Order.desc("email_similarity"))
+            );
+        }
+
+        // findFilteredChatRooms asta fu inainte
         return
                 pageableUtilsCustom.createPageableResponse(
-                        chatRoomRepository.findFilteredChatRooms(email, filterEmail,
-                                pageableUtilsCustom.createPageRequest(pageableBody)),
+                        chatRoomRepository.findFilteredChatRoomsWithSimilarity(email, filterEmail, pageRequest),
                         chatRoomMapper::fromModelToResponse);
 
     }

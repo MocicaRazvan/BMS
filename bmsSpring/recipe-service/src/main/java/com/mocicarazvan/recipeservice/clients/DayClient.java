@@ -29,9 +29,10 @@ public class DayClient extends CountInParentClient {
 
     @Override
     public Mono<EntityCount> getCountInParent(Long childId, String userId) {
-        log.error("GET COUNT IN PARENT");
+//        log.error("GET COUNT IN PARENT");
         return super.getCountInParent(childId, userId, e -> Mono.just(new EntityCount(1L)))
-                .log();
+//                .log()
+                ;
     }
 
     @Override

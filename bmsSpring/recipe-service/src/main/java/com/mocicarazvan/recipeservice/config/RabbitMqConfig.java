@@ -10,17 +10,16 @@ import com.mocicarazvan.templatemodule.services.impl.RabbitMqApprovedSenderImpl;
 import com.mocicarazvan.templatemodule.services.impl.RabbitMqSenderImpl;
 import com.mocicarazvan.templatemodule.services.impl.RabbitMqUpdateDeleteServiceImpl;
 import com.mocicarazvan.templatemodule.utils.SimpleTaskExecutorsInstance;
-import org.springframework.amqp.core.Binding;
-import org.springframework.amqp.core.BindingBuilder;
-import org.springframework.amqp.core.DirectExchange;
-import org.springframework.amqp.core.Queue;
+import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.task.SimpleAsyncTaskExecutor;
 
 
 @Configuration
@@ -55,9 +54,17 @@ public class RabbitMqConfig {
     @Value("${spring.custom.rabbitmq.concurrency:8}")
     private int concurrency;
 
+    @Value("${recipe.fanout.exchange.name}")
+    private String recipeFanoutExchangeName;
+
     @Bean
     public Queue recipeQueue() {
         return new Queue(recipeQueueName, true);
+    }
+
+    @Bean
+    public Queue recipeCacheInvalidateQueue() {
+        return new AnonymousQueue();
     }
 
     @Bean
@@ -71,26 +78,44 @@ public class RabbitMqConfig {
     }
 
     @Bean
+    public FanoutExchange recipeFanoutExchange() {
+        return new FanoutExchange(recipeFanoutExchangeName);
+    }
+
+    @Bean
     public MessageConverter jsonMessageConverter() {
         return new Jackson2JsonMessageConverter();
     }
 
     @Bean
-    public RabbitTemplate rabbitTemplate(ConnectionFactory connectionFactory) {
+    public SimpleAsyncTaskExecutor rabbitMqAsyncTaskExecutor() {
+        return new SimpleTaskExecutorsInstance().initializeVirtual(executorAsyncConcurrencyLimit);
+    }
+
+    @Bean
+    public RabbitTemplate rabbitTemplate(ConnectionFactory connectionFactory
+            , @Qualifier("rabbitMqAsyncTaskExecutor") SimpleAsyncTaskExecutor rabbitMqAsyncTaskExecutor
+
+    ) {
         RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
         rabbitTemplate.setMessageConverter(jsonMessageConverter());
-        rabbitTemplate.setTaskExecutor(new SimpleTaskExecutorsInstance().initializeVirtual(executorAsyncConcurrencyLimit));
+        rabbitTemplate.setTaskExecutor(rabbitMqAsyncTaskExecutor);
         return rabbitTemplate;
     }
 
+//    @Bean
+//    public RabbitMqSender rabbitMqSender(RabbitTemplate rabbitTemplate) {
+//        return new RabbitMqSenderImpl(recipeExchangeName, recipeRoutingKey, rabbitTemplate, concurrency);
+//    }
+
     @Bean
-    public RabbitMqSender rabbitMqSender(RabbitTemplate rabbitTemplate) {
-        return new RabbitMqSenderImpl(recipeExchangeName, recipeRoutingKey, rabbitTemplate, concurrency);
+    public RabbitMqApprovedSender<RecipeResponse> recipeResponseRabbitMqApprovedSenderWrapper(RabbitTemplate rabbitTemplate) {
+        return new RabbitMqApprovedSenderImpl<>(extraLink, new RabbitMqSenderImpl(recipeExchangeName, recipeRoutingKey, rabbitTemplate, concurrency));
     }
 
     @Bean
-    public RabbitMqApprovedSender<RecipeResponse> recipeResponseRabbitMqApprovedSenderWrapper(RabbitMqSender rabbitMqSender) {
-        return new RabbitMqApprovedSenderImpl<>(extraLink, rabbitMqSender);
+    public RabbitMqSender recipeCacheInvalidateSender(RabbitTemplate rabbitTemplate) {
+        return new RabbitMqSenderImpl(recipeFanoutExchangeName, "", rabbitTemplate, concurrency);
     }
 
     @Bean

@@ -57,7 +57,9 @@ public class PageableUtilsCustom {
                         )
                 ).collect(Collectors.toList())
 
-        )).log();
+        ))
+//                .log()
+                ;
 
 
     }

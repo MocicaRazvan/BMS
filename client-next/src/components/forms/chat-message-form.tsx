@@ -27,7 +27,7 @@ import ButtonSubmit, {
   ButtonSubmitTexts,
 } from "@/components/forms/button-submit";
 import { CornerDownLeft } from "lucide-react";
-import * as DOMPurify from "dompurify";
+import DOMPurify from "dompurify";
 
 export interface ChatMessageFormTexts {
   titleBodySchemaTexts: TitleBodySchemaTexts;

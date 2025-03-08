@@ -20,9 +20,11 @@ import {
 } from "@/components/ui/tooltip";
 import { AnimatePresence, motion } from "framer-motion";
 import { useDebounceWithCallBack } from "@/hoooks/useDebounceWithCallback";
+import { DeleteDialogTexts } from "@/texts/components/dialog";
 
 export interface ChatRoomTexts {
   numberUnread: string;
+  deleteChatDialogTexts: DeleteDialogTexts;
 }
 
 interface BaseProps extends WithUser, ChatRoomTexts {
@@ -44,6 +46,7 @@ export const ChatRoom = ({
   handleRoomDelete,
   baseChat,
   numberUnread,
+  deleteChatDialogTexts,
 }: ChatRoomProps) => {
   const router = useRouter();
 
@@ -92,6 +95,7 @@ export const ChatRoom = ({
               room={room}
               handleRoomDelete={handleRoomDelete}
               numberUnread={numberUnread}
+              deleteChatDialogTexts={deleteChatDialogTexts}
             />
           </div>
         ))}
@@ -116,6 +120,7 @@ const ChatRoomItem = memo(
     room,
     handleRoomDelete,
     numberUnread,
+    deleteChatDialogTexts,
   }: ChatRoomItemProps) => {
     const otherUser = useMemo(
       () => room.users.find(({ email }) => email !== authUser.email),
@@ -170,10 +175,12 @@ const ChatRoomItem = memo(
               <AnimatePresence>
                 {otherUser?.connectedChatRoom?.id !== room.id && (
                   <DeleteChatRoomDialog
+                    deleteChatDialogTexts={deleteChatDialogTexts}
                     receiverEmail={otherUser?.email || ""}
                     handleDelete={() => handleRoomDelete(room.id)}
                     anchor={
                       <motion.div
+                        className="z-10"
                         initial={{ scale: 0 }}
                         animate={{
                           scale: 1,
@@ -191,7 +198,7 @@ const ChatRoomItem = memo(
                           variant="destructive"
                           size="sm"
                           className=" transition-all hover:shadow-sm hover:scale-110"
-                          onClick={(e) => e.stopPropagation()}
+                          // onClick={(e) => e.stopPropagation()}
                         >
                           <Trash2 className="w-4 h-6" />
                         </Button>

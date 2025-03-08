@@ -28,9 +28,9 @@ public class PlanClient extends CountInParentClient {
 
     @Override
     public Mono<EntityCount> getCountInParent(Long childId, String userId) {
-        // todo change to be good
         return super.getCountInParent(childId, userId, e -> Mono.just(new EntityCount(1L)))
-                .log();
+//                .log()
+                ;
 //        return Mono.just(new EntityCount(0L));
     }
 

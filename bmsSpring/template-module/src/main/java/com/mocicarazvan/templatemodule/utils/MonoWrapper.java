@@ -24,6 +24,10 @@ public class MonoWrapper {
                     }
                 })
                 .transform(mono -> retrySpec != null ? mono.retryWhen(retrySpec) : mono)
-                .subscribeOn(Schedulers.boundedElastic()).subscribe();
+                .subscribeOn(Schedulers.boundedElastic()).subscribe(
+                        success -> {
+                        },
+                        error -> log.error("Error in blocking function: {}", error.getMessage(), error)
+                );
     }
 }

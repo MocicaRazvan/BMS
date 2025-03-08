@@ -80,4 +80,56 @@ public interface ChatRoomRepository extends IdGeneratedRepository<ChatRoom> {
                 )
             """)
     Page<ChatRoom> findFilteredChatRooms(String email, String filterEmail, Pageable pageable);
+
+    @Query(value = """
+                SELECT * FROM (
+                    SELECT cr.*,
+                        similarity(
+                            (SELECT LOWER(u.email)
+                             FROM chat_room_users cru
+                             JOIN conversation_user u ON cru.user_id = u.id
+                             WHERE cru.chat_room_id = cr.id AND u.email != :email
+                             LIMIT 1),
+                            LOWER(:filterEmail)
+                        ) AS email_similarity
+                    FROM chat_room cr
+                    WHERE cr.id IN (
+                        SELECT cru.chat_room_id
+                        FROM chat_room_users cru
+                        JOIN conversation_user u ON cru.user_id = u.id
+                        GROUP BY cru.chat_room_id
+                        HAVING COUNT(DISTINCT u.id) = 2
+                            AND COUNT(*) FILTER (WHERE LOWER(u.email) = LOWER(:email)) > 0
+                            AND COUNT(*) FILTER (WHERE
+                                u.email != :email AND (
+                                    u.email ILIKE CONCAT('%', :filterEmail, '%')
+                                    OR similarity(LOWER(u.email), LOWER(:filterEmail)) > 0.3
+                                )
+                            ) > 0
+                    )
+                ) AS subquery
+            """,
+            countQuery = """
+                        SELECT COUNT(*) FROM (
+                            SELECT cr.*
+                            FROM chat_room cr
+                            WHERE cr.id IN (
+                                SELECT cru.chat_room_id
+                                FROM chat_room_users cru
+                                JOIN conversation_user u ON cru.user_id = u.id
+                                GROUP BY cru.chat_room_id
+                                HAVING COUNT(DISTINCT u.id) = 2
+                                    AND COUNT(*) FILTER (WHERE LOWER(u.email) = LOWER(:email)) > 0
+                                    AND COUNT(*) FILTER (WHERE
+                                        u.email != :email AND (
+                                            u.email ILIKE CONCAT('%', :filterEmail, '%')
+                                            OR similarity(LOWER(u.email), LOWER(:filterEmail)) > 0.3
+                                        )
+                                    ) > 0
+                            )
+                        ) AS count_subquery
+                    """,
+            nativeQuery = true)
+    Page<ChatRoom> findFilteredChatRoomsWithSimilarity(String email, String filterEmail, Pageable pageable);
+
 }

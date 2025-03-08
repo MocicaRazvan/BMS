@@ -118,7 +118,7 @@ public class MealServiceImpl
     @Override
     public Flux<ResponseWithChildList<MealResponse, RecipeResponse>> getMealsByDayWithRecipes(Long dayId, String userId) {
         return getMealsByDay(dayId, userId)
-                .doOnNext(mealResponse -> log.error("mealResponse: {}", mealResponse))
+//                .doOnNext(mealResponse -> log.error("mealResponse: {}", mealResponse))
                 .flatMapSequential(mr -> recipeClient.getByIds(mr.getRecipes().stream().map(Object::toString).toList(), userId)
                         .collectList()
                         .map(recipes -> new ResponseWithChildList<>(mr, recipes)));

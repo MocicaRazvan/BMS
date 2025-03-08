@@ -34,6 +34,7 @@ public class RabbitMqSenderImpl implements RabbitMqSender {
 
     public <T> void sendMessage(T message) {
         checkArgs(List.of(message));
+//        log.info("Sending message: {} in exchange: {} with routing key: {}", message, exchangeName, routingKey);
         MonoWrapper.wrapBlockingFunction(() -> rabbitTemplate.convertAndSend(exchangeName, routingKey, message), getRetrySpec());
     }
 
@@ -44,8 +45,8 @@ public class RabbitMqSenderImpl implements RabbitMqSender {
         if (exchangeName == null || exchangeName.isEmpty()) {
             throw new IllegalArgumentException("Exchange name cannot be null or empty");
         }
-        if (routingKey == null || routingKey.isEmpty()) {
-            throw new IllegalArgumentException("Routing key cannot be null or empty");
+        if (routingKey == null) {
+            throw new IllegalArgumentException("Routing key cannot be null");
         }
     }
 

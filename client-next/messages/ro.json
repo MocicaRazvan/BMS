@@ -711,7 +711,8 @@
         "title": "Sunteți absolut sigur?",
         "description": "Această acțiune nu poate fi anulată. Aceasta va șterge <b>{title}</b> permanent și nu va mai putea fi recuperată.",
         "cancel": "Anulează",
-        "confirm": "Șterge"
+        "confirm": "Șterge",
+        "description_fallback": "Această acțiune nu poate fi anulată. Aceasta va șterge permanent {title} și nu va mai putea fi recuperată."
       },
       "AlertDialogApproveTexts": {
         "anchor": "{approved, select, true {Dezaprobă} false {Aprobă} other {Aprobă}}",

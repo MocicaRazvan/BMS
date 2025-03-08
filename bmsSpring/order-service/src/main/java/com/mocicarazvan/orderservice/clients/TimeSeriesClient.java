@@ -59,7 +59,7 @@ public class TimeSeriesClient {
                             acc.addAmount(cur.getTotalAmount());
                             return acc;
                         })
-                .log()
+//                .log()
                 .flatMap(request ->
                         webClient
                                 .patch()

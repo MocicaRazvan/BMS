@@ -28,7 +28,7 @@ public interface ValidIds<M extends ManyToOneUser, R extends ManyToOneUserReposi
                 })
                 .filter(Boolean::booleanValue)
                 .switchIfEmpty(Mono.error(new IllegalActionException(name + " " + ids.toString() + " are not valid")))
-                .log()
+//                .log()
                 .then();
     }
 

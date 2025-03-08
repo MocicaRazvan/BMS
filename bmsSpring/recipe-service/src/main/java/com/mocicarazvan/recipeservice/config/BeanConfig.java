@@ -4,6 +4,8 @@ package com.mocicarazvan.recipeservice.config;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mocicarazvan.rediscache.aspects.RedisReactiveCacheApprovedAspect;
 import com.mocicarazvan.rediscache.aspects.RedisReactiveCacheApprovedEvictAspect;
+import com.mocicarazvan.rediscache.local.LocalReactiveCache;
+import com.mocicarazvan.rediscache.local.ReverseKeysLocalCache;
 import com.mocicarazvan.rediscache.utils.AspectUtils;
 import com.mocicarazvan.rediscache.utils.RedisApprovedCacheUtils;
 import com.mocicarazvan.templatemodule.clients.FileClient;
@@ -149,17 +151,21 @@ public class BeanConfig {
             AspectUtils aspectUtils,
             ObjectMapper objectMapper,
             @Qualifier("redisAsyncTaskExecutor") SimpleAsyncTaskExecutor executorService,
-            RedisApprovedCacheUtils redisApprovedCacheUtils
+            RedisApprovedCacheUtils redisApprovedCacheUtils,
+            ReverseKeysLocalCache reverseKeysLocalCache,
+            LocalReactiveCache localReactiveCache
     ) {
-        return new RedisReactiveCacheApprovedAspect(reactiveRedisTemplate, aspectUtils, objectMapper, executorService, redisApprovedCacheUtils);
+        return new RedisReactiveCacheApprovedAspect(reactiveRedisTemplate, aspectUtils, objectMapper,
+                executorService, redisApprovedCacheUtils, reverseKeysLocalCache, localReactiveCache);
     }
 
     @Bean
     public RedisReactiveCacheApprovedEvictAspect redisReactiveCacheApprovedEvictAspect(
             ReactiveRedisTemplate<String, Object> reactiveRedisTemplate,
-            AspectUtils aspectUtils, RedisApprovedCacheUtils redisApprovedCacheUtils
-
+            AspectUtils aspectUtils, RedisApprovedCacheUtils redisApprovedCacheUtils, ReverseKeysLocalCache reverseKeysLocalCache,
+            LocalReactiveCache localReactiveCache, @Qualifier("redisAsyncTaskExecutor") SimpleAsyncTaskExecutor executorService
     ) {
-        return new RedisReactiveCacheApprovedEvictAspect(reactiveRedisTemplate, aspectUtils, redisApprovedCacheUtils);
+        return new RedisReactiveCacheApprovedEvictAspect(reactiveRedisTemplate, aspectUtils, redisApprovedCacheUtils
+                , reverseKeysLocalCache, localReactiveCache, executorService);
     }
 }

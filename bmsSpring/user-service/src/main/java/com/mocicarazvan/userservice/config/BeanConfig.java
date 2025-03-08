@@ -40,9 +40,9 @@ public class BeanConfig {
         http
                 .authorizeExchange(authorizeExchangeSpec ->
                         authorizeExchangeSpec
-                                .anyExchange().permitAll()  // Allow all requests without authentication
+                                .anyExchange().permitAll()
                 )
-                .csrf(ServerHttpSecurity.CsrfSpec::disable);  // Disable CSRF if necessary
+                .csrf(ServerHttpSecurity.CsrfSpec::disable);
 
         return http.build();
     }

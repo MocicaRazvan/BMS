@@ -5,10 +5,14 @@ import { MainContentTexts } from "@/app/[locale]/(main)/(user)/chat/main-content
 import { ChatMainContentWrapperTexts } from "@/app/[locale]/(main)/(user)/chat/main-content-wrapper";
 import { getDataTablePaginationTexts } from "@/texts/components/table";
 import { ChatRoomTexts } from "@/components/chat/chat-room";
+import { getDeleteChatRoomDialogTexts_FallBack } from "@/texts/components/dialog";
 
 export async function getChatRoomTexts(): Promise<ChatRoomTexts> {
-  const t = await getTranslations("components.chat.ChatRoomTexts");
-  return { numberUnread: t("numberUnread") };
+  const [t, deleteChatDialogTexts] = await Promise.all([
+    getTranslations("components.chat.ChatRoomTexts"),
+    getDeleteChatRoomDialogTexts_FallBack("place_holder"),
+  ]);
+  return { numberUnread: t("numberUnread"), deleteChatDialogTexts };
 }
 
 export async function getConversationTexts(): Promise<ConversationTexts> {

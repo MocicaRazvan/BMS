@@ -25,7 +25,7 @@ import {
 import { Input } from "@/components/ui/input";
 import Editor from "@/components/editor/editor";
 import ErrorMessage from "@/components/forms/error-message";
-import * as DOMPurify from "dompurify";
+import DOMPurify from "dompurify";
 import { useDebounce } from "@/components/ui/multiple-selector";
 import { EmailRequest } from "@/types/dto";
 import { fetchStream } from "@/hoooks/fetchStream";
