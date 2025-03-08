@@ -75,7 +75,7 @@ public class FileController {
                 .map(count -> ResponseEntity.ok().body(count));
     }
 
-    @DeleteMapping(value = "/hardDelete", produces = {MediaType.APPLICATION_NDJSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
+    @DeleteMapping(value = "/internal/hardDelete", produces = {MediaType.APPLICATION_NDJSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
     @ResponseStatus(HttpStatus.OK)
     public Flux<ToBeDeletedCounts> hardDeleteFiles() {
         return mediaService.hardDeleteFiles();
