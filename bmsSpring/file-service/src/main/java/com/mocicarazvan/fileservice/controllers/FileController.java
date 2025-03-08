@@ -69,7 +69,7 @@ public class FileController {
                 .then(Mono.just(ResponseEntity.noContent().build()));
     }
 
-    @GetMapping("/countToBeDeleted")
+    @GetMapping("/internal/countToBeDeleted")
     public Mono<ResponseEntity<ToBeDeletedCounts>> countToBeDeleted() {
         return mediaService.countToBeDeleted()
                 .map(count -> ResponseEntity.ok().body(count));

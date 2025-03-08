@@ -327,7 +327,10 @@ public class Config {
                         "/orders/internal/**",
                         "/kanban/internal/**",
                         "/days/internal/**",
-                        "/meals/internal/**"
+                        "/meals/internal/**",
+                        "/archive/internal/**",
+                        "/cart/internal/**",
+                        "/diffusion/internal/**"
                 )
                 .filters(f -> f.filter(((exchange, chain) -> {
                     exchange.getResponse().setStatusCode(HttpStatus.NOT_FOUND);
