@@ -3,6 +3,8 @@ package com.mocicarazvan.rediscache.aspects;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mocicarazvan.rediscache.annotation.RedisReactiveChildCache;
+import com.mocicarazvan.rediscache.local.LocalReactiveCache;
+import com.mocicarazvan.rediscache.local.ReverseKeysLocalCache;
 import com.mocicarazvan.rediscache.utils.AspectUtils;
 import com.mocicarazvan.rediscache.utils.RedisChildCacheUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -26,8 +28,10 @@ public class RedisReactiveCacheChildAspect extends RedisReactiveCacheAspect {
     private final RedisChildCacheUtils redisChildCacheUtils;
 
     public RedisReactiveCacheChildAspect(ReactiveRedisTemplate<String, Object> reactiveRedisTemplate, AspectUtils aspectUtils, ObjectMapper objectMapper,
-                                         @Qualifier("redisAsyncTaskExecutor") SimpleAsyncTaskExecutor asyncTaskExecutor, RedisChildCacheUtils redisChildCacheUtil) {
-        super(reactiveRedisTemplate, aspectUtils, objectMapper, asyncTaskExecutor, redisChildCacheUtil);
+                                         @Qualifier("redisAsyncTaskExecutor") SimpleAsyncTaskExecutor asyncTaskExecutor, RedisChildCacheUtils redisChildCacheUtil,
+                                         ReverseKeysLocalCache reverseKeysLocalCache, LocalReactiveCache localReactiveCache
+    ) {
+        super(reactiveRedisTemplate, aspectUtils, objectMapper, asyncTaskExecutor, redisChildCacheUtil, reverseKeysLocalCache, localReactiveCache);
         this.redisChildCacheUtils = redisChildCacheUtil;
     }
 

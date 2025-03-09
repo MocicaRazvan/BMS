@@ -5,9 +5,10 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.springframework.data.redis.connection.DataType;
 import org.springframework.data.redis.core.ReactiveRedisTemplate;
 import org.springframework.data.redis.core.ScanOptions;
-import org.springframework.data.util.Pair;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.util.function.Tuple3;
+import reactor.util.function.Tuples;
 
 import java.util.List;
 
@@ -54,15 +55,24 @@ public class RedisCacheUtils {
                         ));
     }
 
-    public Pair<Flux<String>, Mono<Long>> getOptionalIdDelete(ProceedingJoinPoint joinPoint, String key, String idSpel) {
+    public Tuple3<Flux<String>, Mono<Long>, Long> getOptionalIdDelete(ProceedingJoinPoint joinPoint, String key, String idSpel) {
         Flux<String> members = Flux.empty();
         Mono<Long> zipWith = Mono.empty();
+        Long annId = -100L;
         if (idSpel != null && !idSpel.isBlank()) {
-            Long annId = aspectUtils.assertLong(aspectUtils.evaluateSpelExpression(idSpel, joinPoint));
+            annId = aspectUtils.assertLong(aspectUtils.evaluateSpelExpression(idSpel, joinPoint));
             members = reactiveRedisTemplate.opsForSet().members(createReverseIndexKey(key, annId)).cast(String.class);
             zipWith = reactiveRedisTemplate.delete(createReverseIndexKey(key, annId));
 
         }
-        return Pair.of(members, zipWith);
+        return Tuples.of(members, zipWith, annId);
+    }
+
+    public Mono<Long> deleteListFromRedis(List<String> keys) {
+        if (keys == null || keys.isEmpty()) {
+            return Mono.just(0L);
+        }
+        return reactiveRedisTemplate.delete(keys.toArray(String[]::new))
+                .defaultIfEmpty(0L);
     }
 }

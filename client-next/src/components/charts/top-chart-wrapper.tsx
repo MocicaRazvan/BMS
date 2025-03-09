@@ -202,6 +202,9 @@ export function TopChartMeanRelative({
   chartColorNumber = 6,
 }: TopChartMeanRelativeProps) {
   const stackId = uuid();
+  if (maxBar - referenceValue < maxOffset) {
+    maxOffset += Math.min(maxBar / 25, 80);
+  }
   return (
     <ChartContainer
       config={{

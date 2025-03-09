@@ -3,6 +3,8 @@ package com.mocicarazvan.rediscache.aspects;
 
 import com.mocicarazvan.rediscache.annotation.RedisReactiveApprovedCacheEvict;
 import com.mocicarazvan.rediscache.enums.BooleanEnum;
+import com.mocicarazvan.rediscache.local.LocalReactiveCache;
+import com.mocicarazvan.rediscache.local.ReverseKeysLocalCache;
 import com.mocicarazvan.rediscache.utils.AspectUtils;
 import com.mocicarazvan.rediscache.utils.RedisApprovedCacheUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -10,10 +12,12 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.data.redis.core.ReactiveRedisTemplate;
 import org.springframework.data.util.Pair;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.util.function.Tuple3;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -27,8 +31,10 @@ public class RedisReactiveCacheApprovedEvictAspect extends RedisReactiveCacheEvi
 
     protected final RedisApprovedCacheUtils redisApprovedCacheUtils;
 
-    public RedisReactiveCacheApprovedEvictAspect(ReactiveRedisTemplate<String, Object> reactiveRedisTemplate, AspectUtils aspectUtils, RedisApprovedCacheUtils redisApprovedCacheUtils) {
-        super(reactiveRedisTemplate, aspectUtils, redisApprovedCacheUtils);
+    public RedisReactiveCacheApprovedEvictAspect(ReactiveRedisTemplate<String, Object> reactiveRedisTemplate, AspectUtils aspectUtils, RedisApprovedCacheUtils redisApprovedCacheUtils
+            , ReverseKeysLocalCache reverseKeysLocalCache, LocalReactiveCache localReactiveCache, SimpleAsyncTaskExecutor asyncTaskExecutor
+    ) {
+        super(reactiveRedisTemplate, aspectUtils, redisApprovedCacheUtils, localReactiveCache, reverseKeysLocalCache, asyncTaskExecutor);
         this.redisApprovedCacheUtils = redisApprovedCacheUtils;
     }
 
@@ -47,6 +53,7 @@ public class RedisReactiveCacheApprovedEvictAspect extends RedisReactiveCacheEvi
 
     }
 
+    @SuppressWarnings("unchecked")
     protected Mono<Object> methodMonoResponseToCacheInvalidateApproved(ProceedingJoinPoint joinPoint, String key, String idSpel, String forWhomPath) {
         try {
             return ((Mono<Object>) joinPoint.proceed(joinPoint.getArgs()))
@@ -65,13 +72,17 @@ public class RedisReactiveCacheApprovedEvictAspect extends RedisReactiveCacheEvi
     }
 
     protected Mono<Long> invalidateForByIdAndOriginalApproved(ProceedingJoinPoint joinPoint, String key, String idSpel, String forWhomPath, Object item, BooleanEnum originalApproved) {
-        Pair<Flux<String>, Mono<Long>> result = redisApprovedCacheUtils.getOptionalIdDelete(joinPoint, key, idSpel);
-        return reactiveRedisTemplate.delete(Flux.concat(result.getFirst(),
-                        keysToInvalidateByOriginalApproved(joinPoint, item, key, forWhomPath, originalApproved))
-                ).defaultIfEmpty(0L)
-                .zipWith(result.getSecond().defaultIfEmpty(0L))
-                .map(t -> t.getT1() + t.getT2())
-                ;
+        Tuple3<Flux<String>, Mono<Long>, Long> result = redisApprovedCacheUtils.getOptionalIdDelete(joinPoint, key, idSpel);
+        return
+                Flux.concat(result.getT1(),
+                                keysToInvalidateByOriginalApproved(joinPoint, item, key, forWhomPath, originalApproved)).collectList()
+                        .flatMap(redisKeys ->
+//                                reactiveRedisTemplate.delete(redisKeys.toArray(String[]::new))
+                                redisCacheUtils.deleteListFromRedis(redisKeys)
+                                        .defaultIfEmpty(0L)
+                                        .doOnSuccess(_ -> invalidateForIdLocalPrefix(key, result.getT3(), redisKeys))
+                                        .zipWith(result.getT2().defaultIfEmpty(0L))
+                                        .map(t -> t.getT1() + t.getT2()));
     }
 
 

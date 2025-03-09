@@ -1,6 +1,8 @@
 package com.mocicarazvan.userservice.cache.redis.asepects;
 
 import com.mocicarazvan.rediscache.aspects.RedisReactiveCacheEvictAspect;
+import com.mocicarazvan.rediscache.local.LocalReactiveCache;
+import com.mocicarazvan.rediscache.local.ReverseKeysLocalCache;
 import com.mocicarazvan.rediscache.utils.AspectUtils;
 import com.mocicarazvan.rediscache.utils.RedisApprovedCacheUtils;
 import com.mocicarazvan.templatemodule.enums.Role;
@@ -15,10 +17,10 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.data.redis.core.ReactiveRedisTemplate;
-import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.util.function.Tuple3;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -29,11 +31,13 @@ import java.util.List;
 @Component
 @ConditionalOnClass({ReactiveRedisTemplate.class, AspectUtils.class, RedisApprovedCacheUtils.class})
 public class RedisReactiveRoleCacheEvictAspect extends RedisReactiveCacheEvictAspect {
-    protected final SimpleAsyncTaskExecutor asyncTaskExecutor;
+    private final SimpleAsyncTaskExecutor asyncTaskExecutor;
     private final RedisRoleCacheUtils redisRoleCacheUtils;
 
-    public RedisReactiveRoleCacheEvictAspect(ReactiveRedisTemplate<String, Object> reactiveRedisTemplate, AspectUtils aspectUtils, RedisRoleCacheUtils redisRoleCacheUtils, @Qualifier("redisAsyncTaskExecutor") SimpleAsyncTaskExecutor asyncTaskExecutor) {
-        super(reactiveRedisTemplate, aspectUtils, redisRoleCacheUtils);
+    public RedisReactiveRoleCacheEvictAspect(ReactiveRedisTemplate<String, Object> reactiveRedisTemplate,
+                                             AspectUtils aspectUtils, RedisRoleCacheUtils redisRoleCacheUtils,
+                                             @Qualifier("redisAsyncTaskExecutor") SimpleAsyncTaskExecutor asyncTaskExecutor, ReverseKeysLocalCache reverseKeysLocalCache, LocalReactiveCache localReactiveCache) {
+        super(reactiveRedisTemplate, aspectUtils, redisRoleCacheUtils, localReactiveCache, reverseKeysLocalCache, asyncTaskExecutor);
         this.asyncTaskExecutor = asyncTaskExecutor;
         this.redisRoleCacheUtils = redisRoleCacheUtils;
     }
@@ -91,15 +95,19 @@ public class RedisReactiveRoleCacheEvictAspect extends RedisReactiveCacheEvictAs
 
 
     protected Mono<Long> invalidateByRoles(ProceedingJoinPoint joinPoint, String key, String idSpel, RoleAnn newRole, RoleAnn oldRole) {
-        Pair<Flux<String>, Mono<Long>> result = redisRoleCacheUtils.getOptionalIdDelete(joinPoint, key, idSpel);
+        Tuple3<Flux<String>, Mono<Long>, Long> result = redisRoleCacheUtils.getOptionalIdDelete(joinPoint, key, idSpel);
 
-        return reactiveRedisTemplate.delete(Flux.concat(result.getFirst(),
-                                keysToInvalidateRole(key, newRole, oldRole)
-
-                        )
-                ).defaultIfEmpty(0L)
-                .zipWith(result.getSecond().defaultIfEmpty(0L))
-                .map(t -> t.getT1() + t.getT2());
+        return
+                Flux.concat(result.getT1(),
+                                keysToInvalidateRole(key, newRole, oldRole)).collectList()
+                        .flatMap(redisKeys ->
+//                                reactiveRedisTemplate.delete(redisKeys.toArray(String[]::new)
+//                                        ).defaultIfEmpty(0L)
+                                        redisRoleCacheUtils.deleteListFromRedis(redisKeys)
+                                                .doOnSuccess(_ -> invalidateForIdLocalPrefix(key, result.getT3(), redisKeys))
+                                                .zipWith(result.getT2().defaultIfEmpty(0L))
+                                                .map(t -> t.getT1() + t.getT2())
+                        );
     }
 
 

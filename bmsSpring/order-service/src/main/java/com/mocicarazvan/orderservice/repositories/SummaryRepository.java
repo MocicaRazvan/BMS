@@ -304,18 +304,19 @@ public interface SummaryRepository extends Repository<Order, Long> {
                     LEFT JOIN type_counts tc ON ta.user_id = tc.user_id
                     LEFT JOIN objective_counts oc ON ta.user_id = oc.user_id
                     GROUP BY ta.user_id, ta.total_amount, ta.plan_count, ta.average_amount
+                ),
+                filtered AS (
+                        SELECT * FROM aggregated WHERE rank <= :top
                 )
-                SELECT a.*,
-                       MAX(a.total_amount) OVER () AS max_group_total,
-                       MIN(a.total_amount) OVER () AS min_group_total,
-                       AVG(a.total_amount) OVER () AS avg_group_total,
-                       MAX(a.plan_count) OVER () AS max_group_plan_count,
-                       MIN(a.plan_count) OVER () AS min_group_plan_count,
-                       AVG(a.plan_count) OVER () AS avg_group_plan_count
-                FROM aggregated a
-                WHERE a.rank <= :top
-                ORDER BY a.rank;
-            
+                SELECT f.*,
+                       MAX(f.total_amount) OVER () AS max_group_total,
+                       MIN(f.total_amount) OVER () AS min_group_total,
+                       AVG(f.total_amount) OVER () AS avg_group_total,
+                       MAX(f.plan_count) OVER () AS max_group_plan_count,
+                       MIN(f.plan_count) OVER () AS min_group_plan_count,
+                       AVG(f.plan_count) OVER () AS avg_group_plan_count
+                FROM filtered f
+                ORDER BY f.rank
             """)
     Flux<TopTrainersSummaryR2dbc> getTopTrainersSummary(LocalDateTime startDate,
                                                         LocalDateTime endDate,

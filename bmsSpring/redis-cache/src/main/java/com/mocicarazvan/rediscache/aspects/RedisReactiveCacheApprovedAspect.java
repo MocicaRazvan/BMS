@@ -4,6 +4,8 @@ package com.mocicarazvan.rediscache.aspects;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mocicarazvan.rediscache.annotation.RedisReactiveApprovedCache;
 import com.mocicarazvan.rediscache.enums.BooleanEnum;
+import com.mocicarazvan.rediscache.local.LocalReactiveCache;
+import com.mocicarazvan.rediscache.local.ReverseKeysLocalCache;
 import com.mocicarazvan.rediscache.utils.AspectUtils;
 import com.mocicarazvan.rediscache.utils.RedisApprovedCacheUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -22,14 +24,16 @@ import java.lang.reflect.Method;
 @Slf4j
 @Aspect
 //@Component
-@ConditionalOnClass({ReactiveRedisTemplate.class, ObjectMapper.class, AspectUtils.class})
+@ConditionalOnClass({ReactiveRedisTemplate.class, ObjectMapper.class, AspectUtils.class,LocalReactiveCache.class, ReverseKeysLocalCache.class})
 
 public class RedisReactiveCacheApprovedAspect extends RedisReactiveCacheAspect {
     private final RedisApprovedCacheUtils redisApprovedCacheUtils;
 
     public RedisReactiveCacheApprovedAspect(ReactiveRedisTemplate<String, Object> reactiveRedisTemplate, AspectUtils aspectUtils, ObjectMapper objectMapper,
-                                            @Qualifier("redisAsyncTaskExecutor") SimpleAsyncTaskExecutor asyncTaskExecutor, RedisApprovedCacheUtils redisApprovedCacheUtils) {
-        super(reactiveRedisTemplate, aspectUtils, objectMapper, asyncTaskExecutor, redisApprovedCacheUtils);
+                                            @Qualifier("redisAsyncTaskExecutor") SimpleAsyncTaskExecutor asyncTaskExecutor, RedisApprovedCacheUtils redisApprovedCacheUtils,
+                                            ReverseKeysLocalCache reverseKeysLocalCache, LocalReactiveCache localReactiveCache
+    ) {
+        super(reactiveRedisTemplate, aspectUtils, objectMapper, asyncTaskExecutor, redisApprovedCacheUtils, reverseKeysLocalCache, localReactiveCache);
         this.redisApprovedCacheUtils = redisApprovedCacheUtils;
     }
 

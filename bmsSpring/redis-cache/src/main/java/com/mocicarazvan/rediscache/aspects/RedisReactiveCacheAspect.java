@@ -3,9 +3,10 @@ package com.mocicarazvan.rediscache.aspects;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mocicarazvan.rediscache.annotation.RedisReactiveCache;
+import com.mocicarazvan.rediscache.local.LocalReactiveCache;
+import com.mocicarazvan.rediscache.local.ReverseKeysLocalCache;
 import com.mocicarazvan.rediscache.utils.AspectUtils;
 import com.mocicarazvan.rediscache.utils.RedisCacheUtils;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -21,6 +22,7 @@ import reactor.util.function.Tuple2;
 import java.lang.reflect.Method;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -29,7 +31,6 @@ import java.util.concurrent.ConcurrentMap;
 @Aspect
 //@Component
 @ConditionalOnClass({ReactiveRedisTemplate.class, ObjectMapper.class, AspectUtils.class})
-@RequiredArgsConstructor
 public class RedisReactiveCacheAspect {
 
     protected final ReactiveRedisTemplate<String, Object> reactiveRedisTemplate;
@@ -37,9 +38,29 @@ public class RedisReactiveCacheAspect {
     protected final ObjectMapper objectMapper;
     protected final SimpleAsyncTaskExecutor asyncTaskExecutor;
     protected final RedisCacheUtils redisCacheUtils;
+    protected final ReverseKeysLocalCache reverseKeysLocalCache;
+    protected final LocalReactiveCache localReactiveCache;
 
     @Value("${spring.custom.cache.redis.expire.minutes:30}")
     protected Long expireMinutes;
+
+    @Value("${spring.custom.cache.redis.local.max.size:1000}")
+    protected Integer maxSize;
+
+    public RedisReactiveCacheAspect(ReactiveRedisTemplate<String, Object> reactiveRedisTemplate,
+                                    AspectUtils aspectUtils, ObjectMapper objectMapper,
+                                    SimpleAsyncTaskExecutor asyncTaskExecutor,
+                                    RedisCacheUtils redisCacheUtils,
+                                    ReverseKeysLocalCache reverseKeysLocalCache, LocalReactiveCache localReactiveCache
+    ) {
+        this.reactiveRedisTemplate = reactiveRedisTemplate;
+        this.aspectUtils = aspectUtils;
+        this.objectMapper = objectMapper;
+        this.asyncTaskExecutor = asyncTaskExecutor;
+        this.redisCacheUtils = redisCacheUtils;
+        this.reverseKeysLocalCache = reverseKeysLocalCache;
+        this.localReactiveCache = localReactiveCache;
+    }
 
     @Around("execution(* *(..)) && @annotation(com.mocicarazvan.rediscache.annotation.RedisReactiveCache)")
     public Object redisReactiveCacheAdd(ProceedingJoinPoint joinPoint) {
@@ -72,20 +93,42 @@ public class RedisReactiveCacheAspect {
     }
 
     protected Flux<Object> createBaseFlux(String savingKey, Method method) {
-        return reactiveRedisTemplate.opsForValue().get(savingKey)
-                .flatMapMany(cr -> Flux.fromIterable((List<?>) cr))
-//                .log()
-                .map(cr -> objectMapper.convertValue(cr, aspectUtils.getTypeReference(method)))
-                .cast(Object.class)
-                .onErrorResume(e -> Flux.empty());
+        return
+                localReactiveCache.getFluxOrEmpty(savingKey)
+                        .switchIfEmpty(
+                                reactiveRedisTemplate.opsForValue().get(savingKey)
+//                                        .map(cr -> (List<?>) cr)
+//                                        .flatMapMany(cr ->
+//                                                {
+//                                                    localReactiveCache.put(savingKey, cr);
+//                                                    return Flux.fromIterable(cr);
+//                                                }
+//                                        )
+//                                        .map(cr -> objectMapper.convertValue(cr, aspectUtils.getTypeReference(method)))
+//                                        .cast(Object.class)
+                                        .map(collection -> (Collection<?>) objectMapper.convertValue(collection, objectMapper.getTypeFactory()
+                                                .constructCollectionType(Collection.class,
+                                                        objectMapper.getTypeFactory().constructType(method.getGenericReturnType())
+                                                )))
+                                        .doOnNext(collection -> localReactiveCache.put(savingKey, collection))
+                                        .flatMapMany(Flux::fromIterable)
+                                        .cast(Object.class)
+
+                        )
+                        .onErrorResume(e -> Flux.empty());
     }
 
     protected Mono<Object> createBaseMono(String savingKey, Method method) {
-        return reactiveRedisTemplate.opsForValue()
-                .get(savingKey)
-                .map(cr -> objectMapper.convertValue(cr, aspectUtils.getTypeReference(method)))
-                .cast(Object.class)
-                .onErrorResume(e -> Mono.empty());
+        return
+                localReactiveCache.getMonoOrEmpty(savingKey)
+                        .switchIfEmpty(
+                                reactiveRedisTemplate.opsForValue()
+                                        .get(savingKey)
+                                        .map(cr -> objectMapper.convertValue(cr, aspectUtils.getTypeReference(method)))
+                                        .cast(Object.class)
+                                        .doOnSuccess(ob -> localReactiveCache.put(savingKey, ob))
+                        )
+                        .onErrorResume(e -> Mono.empty());
     }
 
 
@@ -106,7 +149,10 @@ public class RedisReactiveCacheAspect {
     protected void saveMonoResultToCache(ProceedingJoinPoint joinPoint, String key, String savingKey, Long annId, Object methodResponse) {
         saveMonoToCacheNoSubscribe(key, savingKey, annId, methodResponse)
                 .subscribe(
-                        success -> log.info("Key: " + savingKey + " set successfully"), // Log success
+                        success -> {
+//                            log.info("Key: " + savingKey + " set successfully");
+                            localReactiveCache.put(savingKey, methodResponse);
+                        }, // Log success
                         error -> log.error("Failed to set key: " + savingKey, error) // Log errors
                 );
     }
@@ -117,6 +163,7 @@ public class RedisReactiveCacheAspect {
                 .then(addToReverseIndex(key, annId, savingKey));
     }
 
+    @SuppressWarnings("unchecked")
     protected Flux<Object> methodFluxResponseToCache(ProceedingJoinPoint joinPoint, String key, String savingKey, String idPath, boolean saveToCache) {
         try {
             ConcurrentMap<Long, Object> indexMap = new ConcurrentHashMap<>();
@@ -164,6 +211,7 @@ public class RedisReactiveCacheAspect {
                         success ->
                         {
 //                            log.info("Key: " + savingKey + " set successfully");
+                            localReactiveCache.put(savingKey, sortedList);
                             return;
                         },// Log success
                         error -> log.error("Failed to set key: " + savingKey, error) // Log errors
@@ -184,9 +232,10 @@ public class RedisReactiveCacheAspect {
                         .flatMap(v -> reactiveRedisTemplate.expire(reverseIndexKey, Duration.ofMinutes(expireMinutes + 1))
                                 .thenReturn(v))
                         .doOnNext(success -> {
-                            log.info("Added to reverse index: " + key + ":" + id + " value: " + indexKey);
+//                            log.info("Added to reverse index: " + key + ":" + id + " value: " + indexKey);
                             return;
                         })
+                        .doOnSuccess(_ -> reverseKeysLocalCache.add(reverseIndexKey, indexKey))
                         .doOnError(error -> log.error("Failed to add to reverse index: " + key + ":" + id + " value: " + indexKey, error));
     }
 

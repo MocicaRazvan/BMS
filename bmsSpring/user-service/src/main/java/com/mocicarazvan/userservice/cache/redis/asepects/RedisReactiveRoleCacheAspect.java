@@ -2,6 +2,8 @@ package com.mocicarazvan.userservice.cache.redis.asepects;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mocicarazvan.rediscache.aspects.RedisReactiveCacheAspect;
+import com.mocicarazvan.rediscache.local.LocalReactiveCache;
+import com.mocicarazvan.rediscache.local.ReverseKeysLocalCache;
 import com.mocicarazvan.rediscache.utils.AspectUtils;
 import com.mocicarazvan.templatemodule.enums.Role;
 import com.mocicarazvan.userservice.cache.redis.annotations.RedisReactiveRoleCache;
@@ -28,8 +30,8 @@ import java.lang.reflect.Method;
 public class RedisReactiveRoleCacheAspect extends RedisReactiveCacheAspect {
     private final RedisRoleCacheUtils redisRoleCacheUtils;
 
-    public RedisReactiveRoleCacheAspect(ReactiveRedisTemplate<String, Object> reactiveRedisTemplate, AspectUtils aspectUtils, ObjectMapper objectMapper, @Qualifier("redisAsyncTaskExecutor") SimpleAsyncTaskExecutor asyncTaskExecutor, RedisRoleCacheUtils redisRoleCacheUtils) {
-        super(reactiveRedisTemplate, aspectUtils, objectMapper, asyncTaskExecutor, redisRoleCacheUtils);
+    public RedisReactiveRoleCacheAspect(ReactiveRedisTemplate<String, Object> reactiveRedisTemplate, AspectUtils aspectUtils, ObjectMapper objectMapper, @Qualifier("redisAsyncTaskExecutor") SimpleAsyncTaskExecutor asyncTaskExecutor, RedisRoleCacheUtils redisRoleCacheUtils, ReverseKeysLocalCache reverseKeysLocalCache, LocalReactiveCache localReactiveCache) {
+        super(reactiveRedisTemplate, aspectUtils, objectMapper, asyncTaskExecutor, redisRoleCacheUtils, reverseKeysLocalCache, localReactiveCache);
         this.redisRoleCacheUtils = redisRoleCacheUtils;
     }
 

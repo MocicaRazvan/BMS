@@ -3,6 +3,8 @@ package com.mocicarazvan.rediscache.aspects;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mocicarazvan.rediscache.annotation.RedisReactiveChildCacheEvict;
+import com.mocicarazvan.rediscache.local.LocalReactiveCache;
+import com.mocicarazvan.rediscache.local.ReverseKeysLocalCache;
 import com.mocicarazvan.rediscache.utils.AspectUtils;
 import com.mocicarazvan.rediscache.utils.RedisChildCacheUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -11,6 +13,7 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.data.redis.connection.DataType;
 import org.springframework.data.redis.core.ReactiveRedisTemplate;
 import org.springframework.data.redis.core.ScanOptions;
@@ -27,13 +30,16 @@ import java.util.List;
 @ConditionalOnClass({ReactiveRedisTemplate.class, ObjectMapper.class, AspectUtils.class})
 public class RedisReactiveChildCacheEvictAspect extends RedisReactiveCacheEvictAspect {
     protected final RedisChildCacheUtils redisChildCacheUtils;
+    protected final SimpleAsyncTaskExecutor asyncTaskExecutor;
 
     @Value("${spring.custom.scan.batch.size:50}")
     private int scanBatchSize;
 
-    public RedisReactiveChildCacheEvictAspect(ReactiveRedisTemplate<String, Object> reactiveRedisTemplate, AspectUtils aspectUtils, RedisChildCacheUtils redisChildCacheUtils) {
-        super(reactiveRedisTemplate, aspectUtils, redisChildCacheUtils);
+    public RedisReactiveChildCacheEvictAspect(ReactiveRedisTemplate<String, Object> reactiveRedisTemplate, AspectUtils aspectUtils,
+                                              RedisChildCacheUtils redisChildCacheUtils, ReverseKeysLocalCache reverseKeysLocalCache, LocalReactiveCache localReactiveCache, SimpleAsyncTaskExecutor asyncTaskExecutor) {
+        super(reactiveRedisTemplate, aspectUtils, redisChildCacheUtils, localReactiveCache, reverseKeysLocalCache, asyncTaskExecutor);
         this.redisChildCacheUtils = redisChildCacheUtils;
+        this.asyncTaskExecutor = asyncTaskExecutor;
     }
 
     @Around("execution(* *(..)) && @annotation(com.mocicarazvan.rediscache.annotation.RedisReactiveChildCacheEvict)")
@@ -93,19 +99,25 @@ public class RedisReactiveChildCacheEvictAspect extends RedisReactiveCacheEvictA
 
     protected Mono<Long> invalidateForChild(String key, Long id, Long masterId) {
         Flux<String> keysFromReverse = Flux.empty();
-        Mono<Long> zipReverse = Mono.empty();
+        Mono<Long> zipReverse;
         if (id != null) {
             keysFromReverse = reactiveRedisTemplate.opsForSet().members(redisChildCacheUtils.createReverseIndexKey(key, id)).cast(String.class);
             zipReverse = reactiveRedisTemplate.delete(redisChildCacheUtils.createReverseIndexKey(key, id));
+        } else {
+            zipReverse = Mono.empty();
         }
 
 
-        return
-                reactiveRedisTemplate.delete(Flux.concat(keysFromReverse,
-                                keysToInvalidateByMaster(key, masterId))
-                        ).defaultIfEmpty(0L)
-                        .zipWith(zipReverse.defaultIfEmpty(0L))
-                        .map(t -> t.getT1() + t.getT2());
+        return Flux.concat(keysFromReverse,
+                        keysToInvalidateByMaster(key, masterId)).collectList()
+                .flatMap(mainKeys ->
+//                        reactiveRedisTemplate.delete(mainKeys.toArray(String[]::new)
+//                                ).defaultIfEmpty(0L)
+                                redisChildCacheUtils.deleteListFromRedis(mainKeys)
+                                        .zipWith(zipReverse.defaultIfEmpty(0L))
+                                        .map(t -> t.getT1() + t.getT2())
+                                        .doOnSuccess(_ -> invalidateForIdLocalPrefix(key, id, mainKeys))
+                );
 
 
     }
@@ -129,4 +141,6 @@ public class RedisReactiveChildCacheEvictAspect extends RedisReactiveCacheEvictA
                                         .match(p).build()
                         ));
     }
+
+
 }

@@ -176,18 +176,18 @@ const TrainerCard = memo(
             </div>
             <div className="w-full h-full grid gap-4 grid-cols-1 md:grid-cols-2 place-items-center">
               <div className="grid ">
-                <p className="text-sm font-medium mb-2">{"plans amount"}</p>
+                <p className="text-sm font-medium mb-2">{totalAmount}</p>
                 <TopChartMeanRelative
                   chartKey="totalAmount"
                   chartLabel={totalAmount}
                   barData={topSummary.totalAmount}
-                  maxBar={topSummary.avgGroupTotal}
-                  referenceValue={topSummary.averageAmount}
+                  maxBar={topSummary.maxGroupTotal}
+                  referenceValue={topSummary.avgGroupTotal}
                   referenceLabel={totalAmountReference}
                 />
               </div>
               <div className="grid ">
-                <p className="text-sm font-medium mb-2">{"plans count"}</p>
+                <p className="text-sm font-medium mb-2">{countPlans}</p>
                 <TopChartMeanRelative
                   chartKey="planCount"
                   chartLabel={countPlans}

@@ -4,6 +4,8 @@ package com.mocicarazvan.recipeservice.config;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mocicarazvan.rediscache.aspects.RedisReactiveCacheApprovedAspect;
 import com.mocicarazvan.rediscache.aspects.RedisReactiveCacheApprovedEvictAspect;
+import com.mocicarazvan.rediscache.local.LocalReactiveCache;
+import com.mocicarazvan.rediscache.local.ReverseKeysLocalCache;
 import com.mocicarazvan.rediscache.utils.AspectUtils;
 import com.mocicarazvan.rediscache.utils.RedisApprovedCacheUtils;
 import com.mocicarazvan.templatemodule.clients.FileClient;
@@ -17,6 +19,7 @@ import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 import io.github.resilience4j.ratelimiter.RateLimiterRegistry;
 import io.github.resilience4j.retry.RetryRegistry;
 import jakarta.validation.Validator;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.context.annotation.Bean;
@@ -30,8 +33,11 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 
 @Configuration
+@RequiredArgsConstructor
 public class BeanConfig {
 
+    private final LocalReactiveCache localReactiveCache;
+    private final ReverseKeysLocalCache reverseKeysLocalCache;
 
     @Bean
     public ObjectMapper customObjectMapper(final Jackson2ObjectMapperBuilder builder) {
@@ -152,14 +158,16 @@ public class BeanConfig {
             RedisApprovedCacheUtils redisApprovedCacheUtils
     ) {
         return new RedisReactiveCacheApprovedAspect(reactiveRedisTemplate, aspectUtils, objectMapper,
-                executorService, redisApprovedCacheUtils);
+                executorService, redisApprovedCacheUtils, reverseKeysLocalCache, localReactiveCache);
     }
 
     @Bean
     public RedisReactiveCacheApprovedEvictAspect redisReactiveCacheApprovedEvictAspect(
             ReactiveRedisTemplate<String, Object> reactiveRedisTemplate,
-            AspectUtils aspectUtils, RedisApprovedCacheUtils redisApprovedCacheUtils
+            AspectUtils aspectUtils, RedisApprovedCacheUtils redisApprovedCacheUtils,
+            @Qualifier("redisAsyncTaskExecutor") SimpleAsyncTaskExecutor executorService
     ) {
-        return new RedisReactiveCacheApprovedEvictAspect(reactiveRedisTemplate, aspectUtils, redisApprovedCacheUtils);
+        return new RedisReactiveCacheApprovedEvictAspect(reactiveRedisTemplate, aspectUtils, redisApprovedCacheUtils,
+                reverseKeysLocalCache, localReactiveCache, executorService);
     }
 }

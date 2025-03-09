@@ -2,6 +2,8 @@ package com.mocicarazvan.rediscache.aspects;
 
 
 import com.mocicarazvan.rediscache.annotation.RedisReactiveCacheEvict;
+import com.mocicarazvan.rediscache.local.LocalReactiveCache;
+import com.mocicarazvan.rediscache.local.ReverseKeysLocalCache;
 import com.mocicarazvan.rediscache.utils.AspectUtils;
 import com.mocicarazvan.rediscache.utils.RedisCacheUtils;
 import lombok.RequiredArgsConstructor;
@@ -10,10 +12,15 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.data.redis.core.ReactiveRedisTemplate;
 import reactor.core.publisher.Mono;
 
 import java.lang.reflect.Method;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.function.Consumer;
 
 @Slf4j
 @Aspect
@@ -24,6 +31,9 @@ public class RedisReactiveCacheEvictAspect {
     protected final ReactiveRedisTemplate<String, Object> reactiveRedisTemplate;
     protected final AspectUtils aspectUtils;
     protected final RedisCacheUtils redisCacheUtils;
+    protected final LocalReactiveCache localReactiveCache;
+    protected final ReverseKeysLocalCache reverseKeysLocalCache;
+    protected final SimpleAsyncTaskExecutor asyncTaskExecutor;
 
 
     @Around("execution(* *(..)) && @annotation(com.mocicarazvan.rediscache.annotation.RedisReactiveCacheEvict)")
@@ -44,6 +54,7 @@ public class RedisReactiveCacheEvictAspect {
         throw new RuntimeException("RedisReactiveCacheEvict: Annotated method has invalid return type, expected return type to be Mono<?>");
     }
 
+    @SuppressWarnings("unchecked")
     protected Mono<Object> methodResponse(ProceedingJoinPoint joinPoint) {
         try {
             return ((Mono<Object>) joinPoint.proceed(joinPoint.getArgs()))
@@ -55,10 +66,39 @@ public class RedisReactiveCacheEvictAspect {
     }
 
     protected Mono<Long> invalidateForId(String key, Long id) {
-        return reactiveRedisTemplate.delete(reactiveRedisTemplate.opsForSet().members(redisCacheUtils.createReverseIndexKey(key, id)).cast(String.class))
-                .defaultIfEmpty(0L)
-                .zipWith(reactiveRedisTemplate.delete(redisCacheUtils.createReverseIndexKey(key, id)).defaultIfEmpty(0L))
-                .doOnNext(success -> log.info("Invalidated key: " + key + " for id: " + id))
-                .map(t -> t.getT1() + t.getT2());
+        return reactiveRedisTemplate.opsForSet().members(redisCacheUtils.createReverseIndexKey(key, id))
+                .cast(String.class).collectList().flatMap(reverseKeys ->
+//                        reactiveRedisTemplate.delete(reverseKeys.toArray(String[]::new))
+//                                .defaultIfEmpty(0L)
+                                redisCacheUtils.deleteListFromRedis(reverseKeys)
+                                        .zipWith(reactiveRedisTemplate.delete(redisCacheUtils.createReverseIndexKey(key, id))
+                                                .defaultIfEmpty(0L))
+//                                        .doOnNext(success -> log.info("Invalidated key: " + key + " for id: " + id))
+                                        .map(t -> t.getT1() + t.getT2())
+                                        .doOnSuccess(_ -> invalidateForIdLocal(key, id, reverseKeys))
+                );
     }
+
+    protected void invalidateForIdLocal(String key, Long id, List<String> redisKeys) {
+        invalidateForIdGeneric(key, id, redisKeys, localReactiveCache::removeNotify);
+    }
+
+    protected void invalidateForIdLocalPrefix(String key, Long id, List<String> redisKeys) {
+        invalidateForIdGeneric(key, id, redisKeys, localReactiveCache::removeByPrefixNotify);
+    }
+
+    protected void invalidateForIdGeneric(String key, Long id, List<String> redisKeys,
+                                          Consumer<Set<String>> consumer
+    ) {
+        asyncTaskExecutor.submit(() -> {
+            Set<String> allKeys = new HashSet<>(redisKeys);
+            if (id != null) {
+                String reverseKey = redisCacheUtils.createReverseIndexKey(key, id);
+                allKeys.addAll(reverseKeysLocalCache.get(reverseKey));
+                reverseKeysLocalCache.removeNotify(reverseKey);
+            }
+            consumer.accept(allKeys);
+        });
+    }
+
 }

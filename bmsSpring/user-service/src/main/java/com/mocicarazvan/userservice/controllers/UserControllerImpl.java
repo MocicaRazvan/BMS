@@ -86,7 +86,6 @@ public class UserControllerImpl implements UserController {
                                                                           @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate updatedAtUpperBound
     ) {
         return userService.getAllUsers(pageableBody, email, roles, providers, emailVerified, admin, createdAtLowerBound, createdAtUpperBound, updatedAtLowerBound, updatedAtUpperBound)
-                .log()
                 .flatMapSequential(pageableUserAssembler::toModel);
     }
 
