@@ -111,7 +111,7 @@ export async function getHtmlDocs(field: AiIdeasField) {
   );
 }
 export function cleanString(str: string, targetedField: TargetedFields) {
-  let newStr = str.replace(/```html|```/gi, "");
+  let newStr = str.replace(/```html|```|html/gi, "");
   if (targetedField === "title") {
     newStr = removeMd(newStr).replace(/["`*]/g, "");
   }

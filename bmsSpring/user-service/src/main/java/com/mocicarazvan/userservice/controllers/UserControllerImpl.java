@@ -63,7 +63,7 @@ public class UserControllerImpl implements UserController {
     }
 
     @Override
-    @GetMapping(value = "/{id}", produces = {MediaType.APPLICATION_NDJSON_VALUE, MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
+    @GetMapping(value = "/{id}", produces = {MediaType.APPLICATION_NDJSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
     public Mono<ResponseEntity<CustomEntityModel<UserDto>>> getUser(@PathVariable Long id) {
         return userService.getUser(id)
                 .flatMap(u -> pageableUserAssembler.getItemAssembler().toModel(u))
@@ -73,7 +73,7 @@ public class UserControllerImpl implements UserController {
 
     @Override
     @ResponseStatus(HttpStatus.OK)
-    @PatchMapping(produces = {MediaType.APPLICATION_NDJSON_VALUE, MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
+    @PatchMapping(produces = {MediaType.APPLICATION_NDJSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
     public Flux<PageableResponse<CustomEntityModel<UserDto>>> getAllUsers(@Valid @RequestBody PageableBody pageableBody,
                                                                           @RequestParam(required = false) String email,
                                                                           @RequestParam(required = false) Set<Role> roles,
@@ -86,11 +86,12 @@ public class UserControllerImpl implements UserController {
                                                                           @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate updatedAtUpperBound
     ) {
         return userService.getAllUsers(pageableBody, email, roles, providers, emailVerified, admin, createdAtLowerBound, createdAtUpperBound, updatedAtLowerBound, updatedAtUpperBound)
+                .log()
                 .flatMapSequential(pageableUserAssembler::toModel);
     }
 
     @Override
-    @PatchMapping(value = "/admin/{id}", produces = {MediaType.APPLICATION_NDJSON_VALUE, MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
+    @PatchMapping(value = "/admin/{id}", produces = {MediaType.APPLICATION_NDJSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
     public Mono<ResponseEntity<CustomEntityModel<UserDto>>> makeTrainer(@PathVariable Long id) {
         return userService.makeTrainer(id)
                 .flatMap(u -> pageableUserAssembler.getItemAssembler().toModel(u))
@@ -98,7 +99,7 @@ public class UserControllerImpl implements UserController {
     }
 
     @Override
-    @PutMapping(value = "/{id}", produces = {MediaType.APPLICATION_NDJSON_VALUE, MediaType.APPLICATION_JSON_VALUE, MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE}, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PutMapping(value = "/{id}", produces = {MediaType.APPLICATION_NDJSON_VALUE, MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE}, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public Mono<ResponseEntity<CustomEntityModel<UserDto>>> updateUser(@PathVariable Long id, @RequestPart(value = "files", required = false) Flux<FilePart> files,
                                                                        @RequestPart("body") String body,
                                                                        ServerWebExchange exchange) {
@@ -111,7 +112,7 @@ public class UserControllerImpl implements UserController {
 
     @Override
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @GetMapping(value = "/exists/{userId}", produces = {MediaType.APPLICATION_NDJSON_VALUE, MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
+    @GetMapping(value = "/exists/{userId}", produces = {MediaType.APPLICATION_NDJSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
     public Mono<ResponseEntity<Void>> existsUserByIdAndRoleIn(@PathVariable Long userId, @RequestParam(required = false) Set<Role> roles) {
         return userService.existsUserByIdAndRoleIn(userId, roles)
                 .map((p) -> ResponseEntity.noContent().build());
@@ -119,7 +120,7 @@ public class UserControllerImpl implements UserController {
 
     @Override
     @ResponseStatus(HttpStatus.OK)
-    @GetMapping(value = "/byIds", produces = {MediaType.APPLICATION_NDJSON_VALUE, MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
+    @GetMapping(value = "/byIds", produces = {MediaType.APPLICATION_NDJSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
     public Flux<CustomEntityModel<UserDto>> getUsersByIdIn(@RequestParam(required = false) List<Long> ids) {
         if (ids == null || ids.isEmpty()) {
             return Flux.empty();
