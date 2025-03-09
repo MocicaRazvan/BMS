@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 @Slf4j
 //@Component
 public class ReverseKeysLocalCache implements RemoveFromCache {
-    protected final Cache<String, List<String>> cacheMap;
+    protected final Cache<String, CopyOnWriteArrayList<String>> cacheMap;
     protected final NotifyLocalRemove notifyLocalRemove;
 
     public ReverseKeysLocalCache(LocalCacheProperties localCacheProperties,
@@ -41,31 +41,36 @@ public class ReverseKeysLocalCache implements RemoveFromCache {
 
     public void add(String key, String value) {
 //        log.info("Adding key: {} value: {}", key, value);
-        cacheMap.asMap().compute(key, (k, list) -> {
-            if (list == null) {
-                list = new CopyOnWriteArrayList<>();
+        cacheMap.asMap().compute(key, (k, oldList) -> {
+            //to reset the list if it is null
+            if (oldList == null) {
+                return new CopyOnWriteArrayList<>(List.of(value));
             }
-            list.add(value);
-            return list;
+            CopyOnWriteArrayList<String> newList = new CopyOnWriteArrayList<>(oldList);
+            newList.add(value);
+            return newList;
         });
     }
 
+    private CopyOnWriteArrayList<String> getListFromCache(String key) {
+        return cacheMap.get(key, _ -> new CopyOnWriteArrayList<>());
+    }
 
     public void add(String key, Collection<String> values) {
 //        log.info("Adding key: {} values: {}", key, values);
-        cacheMap.asMap().compute(key, (k, list) -> {
-            if (list == null) {
-                list = new CopyOnWriteArrayList<>();
+        cacheMap.asMap().compute(key, (k, oldList) -> {
+            if (oldList == null) {
+                return new CopyOnWriteArrayList<>(values);
             }
-            list.addAll(values);
-            return list;
+            CopyOnWriteArrayList<String> newList = new CopyOnWriteArrayList<>(oldList);
+            newList.addAll(values);
+            return newList;
         });
     }
 
     public List<String> get(String key) {
 //        log.info("Getting key: {}", key);
-        List<String> list = cacheMap.getIfPresent(key);
-        return list == null ? new CopyOnWriteArrayList<>() : new CopyOnWriteArrayList<>(list);
+        return getListFromCache(key);
     }
 
     @Override
