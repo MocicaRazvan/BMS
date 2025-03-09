@@ -92,21 +92,13 @@ public class RedisReactiveCacheAspect {
 
     }
 
+    @SuppressWarnings("unchecked")
     protected Flux<Object> createBaseFlux(String savingKey, Method method) {
         return
                 localReactiveCache.getFluxOrEmpty(savingKey)
                         .switchIfEmpty(
                                 reactiveRedisTemplate.opsForValue().get(savingKey)
-//                                        .map(cr -> (List<?>) cr)
-//                                        .flatMapMany(cr ->
-//                                                {
-//                                                    localReactiveCache.put(savingKey, cr);
-//                                                    return Flux.fromIterable(cr);
-//                                                }
-//                                        )
-//                                        .map(cr -> objectMapper.convertValue(cr, aspectUtils.getTypeReference(method)))
-//                                        .cast(Object.class)
-                                        .map(collection -> (Collection<?>) objectMapper.convertValue(collection, objectMapper.getTypeFactory()
+                                        .map(collection -> (Collection<Object>) objectMapper.convertValue(collection, objectMapper.getTypeFactory()
                                                 .constructCollectionType(Collection.class,
                                                         objectMapper.getTypeFactory().constructType(method.getGenericReturnType())
                                                 )))
