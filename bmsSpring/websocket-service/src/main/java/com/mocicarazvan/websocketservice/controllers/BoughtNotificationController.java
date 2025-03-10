@@ -30,7 +30,7 @@ public class BoughtNotificationController
 
     @MessageMapping("/boughtNotification/sendNotification")
     @Override
-    public void sendNotification(@Payload BoughtNotificationBody body) {
+    public void sendNotification(@Valid @Payload BoughtNotificationBody body) {
         boughtNotificationService.saveNotification(body);
     }
 
@@ -48,7 +48,7 @@ public class BoughtNotificationController
 
     @MessageMapping("/boughtNotification/deleteAllBySenderEmailAndType")
     @Override
-    public void deleteAllBySenderEmailAndType(@Payload SenderTypeDto<BoughtNotificationType> senderTypeDto) {
+    public void deleteAllBySenderEmailAndType(@Valid @Payload SenderTypeDto<BoughtNotificationType> senderTypeDto) {
         boughtNotificationService.deleteAllBySenderEmailAndType(senderTypeDto.getSenderEmail(), senderTypeDto.getType());
     }
 
@@ -60,13 +60,13 @@ public class BoughtNotificationController
 
     @MessageMapping("/boughtNotification/deleteAllByReceiverEmailAndType")
     @Override
-    public void deleteAllByReceiverEmailAndType(@Payload SenderTypeDto<BoughtNotificationType> senderTypeDto) {
+    public void deleteAllByReceiverEmailAndType(@Valid @Payload SenderTypeDto<BoughtNotificationType> senderTypeDto) {
         boughtNotificationService.deleteAllByReceiverEmailAndType(senderTypeDto.getSenderEmail(), senderTypeDto.getType());
     }
 
     @MessageMapping("/boughtNotification/deleteAllByReceiverEmailSenderEmail")
     @Override
-    public void deleteAllByReceiverEmailSenderEmail(@Payload SenderEmailReceiverEmailDto senderEmailReceiverEmailDto) {
+    public void deleteAllByReceiverEmailSenderEmail(@Valid @Payload SenderEmailReceiverEmailDto senderEmailReceiverEmailDto) {
         boughtNotificationService.deleteAllByReceiverEmailSenderEmailAndType(senderEmailReceiverEmailDto.getSenderEmail(), senderEmailReceiverEmailDto.getReceiverEmail(), null);
     }
 

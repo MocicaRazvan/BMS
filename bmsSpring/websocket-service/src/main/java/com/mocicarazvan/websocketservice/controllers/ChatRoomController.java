@@ -26,7 +26,7 @@ public class ChatRoomController {
     private final ChatRoomService chatRoomService;
 
     @MessageMapping("/addChatRoom")
-    public void addChatRoom(@Payload ChatRoomPayload chatRoomPayload) {
+    public void addChatRoom(@Valid @Payload ChatRoomPayload chatRoomPayload) {
         chatRoomService.createChatRoom(chatRoomPayload);
     }
 

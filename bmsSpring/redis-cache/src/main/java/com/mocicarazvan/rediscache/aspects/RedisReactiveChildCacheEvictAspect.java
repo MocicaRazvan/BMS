@@ -79,6 +79,7 @@ public class RedisReactiveChildCacheEvictAspect extends RedisReactiveCacheEvictA
 
     }
 
+    @SuppressWarnings("unchecked")
     protected Mono<Object> methodMonoResponseToCacheByMasterPath(ProceedingJoinPoint joinPoint, String key, Long annId, String masterPath) {
         try {
             return ((Mono<Object>) joinPoint.proceed(joinPoint.getArgs()))

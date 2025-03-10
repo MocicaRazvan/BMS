@@ -29,6 +29,8 @@ public class AiChatMessage extends IdGenerated implements Transformable<AiChatMe
 
     @Column(columnDefinition = "TEXT")
     private String content;
+
+    // its not unique, its kinda annoying
     @Column(columnDefinition = "TEXT")
     private String vercelId;
 

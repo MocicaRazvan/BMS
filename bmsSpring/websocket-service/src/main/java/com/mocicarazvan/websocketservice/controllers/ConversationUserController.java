@@ -6,6 +6,7 @@ import com.mocicarazvan.websocketservice.dtos.user.ConversationUserPayload;
 import com.mocicarazvan.websocketservice.dtos.user.ConversationUserResponse;
 import com.mocicarazvan.websocketservice.enums.ConnectedStatus;
 import com.mocicarazvan.websocketservice.service.ConversationUserService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -26,7 +27,7 @@ public class ConversationUserController {
     private final SimpMessagingTemplate simpMessagingTemplate;
 
     @MessageMapping("/addUser")
-    public void addUser(@Payload ConversationUserPayload conversationUserPayload) {
+    public void addUser(@Valid @Payload ConversationUserPayload conversationUserPayload) {
         conversationUserService.addUser(conversationUserPayload)
                 .map(cur ->
                 {
@@ -64,7 +65,7 @@ public class ConversationUserController {
     }
 
     @MessageMapping("/changeRoom")
-    public void changeRoom(@Payload ChatRoomUserDto chatRoomUserDto) {
+    public void changeRoom(@Valid @Payload ChatRoomUserDto chatRoomUserDto) {
 //        log.error("Change room: {}", chatRoomUserDto);
         conversationUserService.changeUserChatRoom(chatRoomUserDto)
                 .map(cur -> {

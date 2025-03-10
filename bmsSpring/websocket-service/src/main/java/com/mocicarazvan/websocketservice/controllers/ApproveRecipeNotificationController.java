@@ -29,7 +29,7 @@ public class ApproveRecipeNotificationController implements ApproveNotificationT
 
     @Override
     @MessageMapping("/approveRecipeNotification/sendNotificationCreateReference/{appId}")
-    public void sendNotificationCreateReference(@Payload ApproveRecipeNotificationBody body,
+    public void sendNotificationCreateReference(@Valid @Payload ApproveRecipeNotificationBody body,
                                                 @DestinationVariable Long appId) {
         approveRecipeNotificationService.saveApprovedNotificationCreateReference(body, appId);
     }
@@ -42,7 +42,7 @@ public class ApproveRecipeNotificationController implements ApproveNotificationT
 
     @Override
     @MessageMapping("/approveRecipeNotification/sendNotification")
-    public void sendNotification(@Payload ApproveRecipeNotificationBody body) {
+    public void sendNotification(@Valid @Payload ApproveRecipeNotificationBody body) {
         approveRecipeNotificationService.saveNotification(body);
     }
 
@@ -60,7 +60,7 @@ public class ApproveRecipeNotificationController implements ApproveNotificationT
 
     @Override
     @MessageMapping("/approveRecipeNotification/deleteAllBySenderEmailAndType")
-    public void deleteAllBySenderEmailAndType(@Payload SenderTypeDto<ApprovedNotificationType> senderTypeDto) {
+    public void deleteAllBySenderEmailAndType(@Valid @Payload SenderTypeDto<ApprovedNotificationType> senderTypeDto) {
         approveRecipeNotificationService.deleteAllBySenderEmailAndType(senderTypeDto.getSenderEmail(), senderTypeDto.getType());
     }
 
@@ -72,13 +72,13 @@ public class ApproveRecipeNotificationController implements ApproveNotificationT
 
     @Override
     @MessageMapping("/approveRecipeNotification/deleteAllByReceiverEmailAndType")
-    public void deleteAllByReceiverEmailAndType(@Payload SenderTypeDto<ApprovedNotificationType> senderTypeDto) {
+    public void deleteAllByReceiverEmailAndType(@Valid @Payload SenderTypeDto<ApprovedNotificationType> senderTypeDto) {
         approveRecipeNotificationService.deleteAllByReceiverEmailAndType(senderTypeDto.getSenderEmail(), senderTypeDto.getType());
     }
 
     @Override
     @MessageMapping("/approveRecipeNotification/deleteAllByReceiverEmailSenderEmail")
-    public void deleteAllByReceiverEmailSenderEmail(@Payload SenderEmailReceiverEmailDto senderEmailReceiverEmailDto) {
+    public void deleteAllByReceiverEmailSenderEmail(@Valid @Payload SenderEmailReceiverEmailDto senderEmailReceiverEmailDto) {
         approveRecipeNotificationService.deleteAllByReceiverEmailSenderEmailAndType(senderEmailReceiverEmailDto.getSenderEmail(), senderEmailReceiverEmailDto.getReceiverEmail(), null);
     }
 }

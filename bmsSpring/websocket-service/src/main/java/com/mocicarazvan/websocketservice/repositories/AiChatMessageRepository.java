@@ -30,4 +30,8 @@ public interface AiChatMessageRepository extends IdGeneratedRepository<AiChatMes
             )
             """, nativeQuery = true)
     void deleteMessagesBeyondLimit(@Param("chatRoomId") Long chatRoomId, @Param("limit") int limit);
+
+    void deleteAllByVercelIdAndChatRoom_UserEmail(String vercelId, String email);
+
+    List<AiChatMessage> findAllByVercelId(String vercelId);
 }

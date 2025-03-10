@@ -36,7 +36,7 @@ public class LocalReactiveCache implements RemoveFromCache {
         this.internalExpirationMinutes = localCacheProperties.getExpireMinutes() + 1;
         this.notifyLocalRemove = notifyLocalRemove;
 
-        int initialCapacity = (int) (0.1 * localCacheProperties.getMaxSize());
+        int initialCapacity = (int) (0.2 * localCacheProperties.getMaxSize());
         Caffeine<Object, Object> caffeine = Caffeine.newBuilder()
                 .maximumSize(localCacheProperties.getMaxSize())
                 .initialCapacity(initialCapacity)
@@ -153,6 +153,7 @@ public class LocalReactiveCache implements RemoveFromCache {
             return Mono.empty();
         }
         if (!(mono instanceof Mono)) {
+            log.error("Expected Mono but not for key: {}", key);
             return Mono.empty();
         }
         return (Mono<Object>) mono;
@@ -165,6 +166,7 @@ public class LocalReactiveCache implements RemoveFromCache {
             return Flux.empty();
         }
         if (!(flux instanceof Flux)) {
+            log.error("Expected Flux but not for key: {}", key);
             return Flux.empty();
         }
         return (Flux<Object>) flux;

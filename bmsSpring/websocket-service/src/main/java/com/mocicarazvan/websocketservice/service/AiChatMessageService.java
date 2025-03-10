@@ -14,4 +14,7 @@ public interface AiChatMessageService {
 
     List<AiChatMessageResponse> getMessagesByUserEmail(String email);
 
+    List<AiChatMessageResponse> addMessageBulk(List<AiChatMessagePayload> payload);
+
+    void deleteByVercelIdAndUser(String vercelId, String email);
 }

@@ -29,7 +29,7 @@ public class ApprovePostNotificationController implements ApproveNotificationTem
 
     @Override
     @MessageMapping("/approvePostNotification/sendNotificationCreateReference/{appId}")
-    public void sendNotificationCreateReference(@Payload ApprovePostNotificationBody body,
+    public void sendNotificationCreateReference(@Valid @Payload ApprovePostNotificationBody body,
                                                 @DestinationVariable Long appId) {
         approvePostNotificationService.saveApprovedNotificationCreateReference(body, appId);
     }
@@ -42,7 +42,7 @@ public class ApprovePostNotificationController implements ApproveNotificationTem
 
     @Override
     @MessageMapping("/approvePostNotification/sendNotification")
-    public void sendNotification(@Payload ApprovePostNotificationBody body) {
+    public void sendNotification(@Valid @Payload ApprovePostNotificationBody body) {
         approvePostNotificationService.saveNotification(body);
     }
 
@@ -60,7 +60,7 @@ public class ApprovePostNotificationController implements ApproveNotificationTem
 
     @Override
     @MessageMapping("/approvePostNotification/deleteAllBySenderEmailAndType")
-    public void deleteAllBySenderEmailAndType(@Payload SenderTypeDto<ApprovedNotificationType> senderTypeDto) {
+    public void deleteAllBySenderEmailAndType(@Valid @Payload SenderTypeDto<ApprovedNotificationType> senderTypeDto) {
         approvePostNotificationService.deleteAllBySenderEmailAndType(senderTypeDto.getSenderEmail(), senderTypeDto.getType());
     }
 
@@ -72,13 +72,13 @@ public class ApprovePostNotificationController implements ApproveNotificationTem
 
     @Override
     @MessageMapping("/approvePostNotification/deleteAllByReceiverEmailAndType")
-    public void deleteAllByReceiverEmailAndType(@Payload SenderTypeDto<ApprovedNotificationType> senderTypeDto) {
+    public void deleteAllByReceiverEmailAndType(@Valid @Payload SenderTypeDto<ApprovedNotificationType> senderTypeDto) {
         approvePostNotificationService.deleteAllByReceiverEmailAndType(senderTypeDto.getSenderEmail(), senderTypeDto.getType());
     }
 
     @Override
     @MessageMapping("/approvePostNotification/deleteAllByReceiverEmailSenderEmail")
-    public void deleteAllByReceiverEmailSenderEmail(@Payload SenderEmailReceiverEmailDto senderEmailReceiverEmailDto) {
+    public void deleteAllByReceiverEmailSenderEmail(@Valid @Payload SenderEmailReceiverEmailDto senderEmailReceiverEmailDto) {
         approvePostNotificationService.deleteAllByReceiverEmailSenderEmailAndType(senderEmailReceiverEmailDto.getSenderEmail(), senderEmailReceiverEmailDto.getReceiverEmail(), null);
     }
 }

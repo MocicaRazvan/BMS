@@ -581,7 +581,7 @@ services:
         condition: service_started
 
   ollama:
-    image: ollama/ollama:0.5.12
+    image: ollama/ollama:0.5.13
     container_name: ollama-container-bms
     deploy:
       resources:

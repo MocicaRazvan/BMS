@@ -31,7 +31,7 @@ public class ChatMessageNotificationController implements
 
     @MessageMapping("/chatMessageNotification/sendNotification")
     @Override
-    public void sendNotification(@Payload ChatMessageNotificationBody body) {
+    public void sendNotification(@Valid @Payload ChatMessageNotificationBody body) {
         chatMessageNotificationService.saveNotification(body);
     }
 
@@ -49,7 +49,7 @@ public class ChatMessageNotificationController implements
 
     @MessageMapping("/chatMessageNotification/deleteAllBySenderEmailAndType")
     @Override
-    public void deleteAllBySenderEmailAndType(@Payload SenderTypeDto<ChatMessageNotificationType> senderTypeDto) {
+    public void deleteAllBySenderEmailAndType(@Valid @Payload SenderTypeDto<ChatMessageNotificationType> senderTypeDto) {
         chatMessageNotificationService.deleteAllBySenderEmailAndType(senderTypeDto.getSenderEmail(), senderTypeDto.getType());
     }
 
@@ -61,13 +61,13 @@ public class ChatMessageNotificationController implements
 
     @MessageMapping("/chatMessageNotification/deleteAllByReceiverEmailAndType")
     @Override
-    public void deleteAllByReceiverEmailAndType(@Payload SenderTypeDto<ChatMessageNotificationType> senderTypeDto) {
+    public void deleteAllByReceiverEmailAndType(@Valid @Payload SenderTypeDto<ChatMessageNotificationType> senderTypeDto) {
         chatMessageNotificationService.deleteAllByReceiverEmailAndType(senderTypeDto.getSenderEmail(), senderTypeDto.getType());
     }
 
     @MessageMapping("/chatMessageNotification/deleteAllByReceiverEmailSenderEmail")
     @Override
-    public void deleteAllByReceiverEmailSenderEmail(@Payload SenderEmailReceiverEmailDto senderEmailReceiverEmailDto) {
+    public void deleteAllByReceiverEmailSenderEmail(@Valid @Payload SenderEmailReceiverEmailDto senderEmailReceiverEmailDto) {
         chatMessageNotificationService.deleteAllByReceiverEmailSenderEmailAndType(senderEmailReceiverEmailDto.getSenderEmail(), senderEmailReceiverEmailDto.getReceiverEmail(), null);
     }
 
