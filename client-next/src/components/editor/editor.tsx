@@ -24,7 +24,7 @@ export default function Editor({
       attributes: {
         class: cn(
           "prose max-w-none [&_ol]:list-decimal [&_ul]:list-disc dark:prose-invert",
-          "rounded-md border min-h-[140px] border-input bg-background ring-offset-2 px-2",
+          "rounded-md border min-h-[140px] border-input bg-background ring-offset-2 px-2 py-1",
         ),
       },
     },
@@ -36,6 +36,7 @@ export default function Editor({
   return (
     <div className="flex flex-col justify-center min-h-[250px] ">
       <EditorToolbar editor={editor} sticky={sticky} />
+      <div className="h-1" />
       <EditorContent editor={editor} placeholder={placeholder} />
     </div>
   );

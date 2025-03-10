@@ -4,6 +4,7 @@ import {
   LangChainStream,
   Message as VercelMessage,
   StreamingTextResponse,
+  StreamData,
 } from "ai";
 import {
   ChatPromptTemplate,
@@ -74,6 +75,23 @@ export async function POST(req: NextRequest) {
     const siteNoPort = siteUrl?.replace(/:\d+/, "") as string;
 
     const { stream, handlers } = LangChainStream();
+
+    // retrievers and documents
+    const [chatHistory, userChatHistory, previousToolCalls] =
+      await getChatHistory(messages);
+
+    // console.log("chatHistory", chatHistory);
+    // console.log("userChatHistory", userChatHistory);
+    // console.log("previousToolCalls", previousToolCalls);
+
+    const toolMessages = await getToolsForInput({
+      input: currentMessageContent,
+      tools: token ? generateToolsForUser(token, siteNoPort, locale) : [],
+      userChatHistory,
+      previousToolCalls,
+    });
+    // console.log("toolMessages", toolMessages);
+
     const newHandlers: ReturnType<typeof LangChainStream>["handlers"] = {
       ...handlers,
       handleLLMEnd: (output, id) => {
@@ -81,15 +99,7 @@ export async function POST(req: NextRequest) {
         return handlers.handleLLMEnd(output, id);
       },
     };
-    // retrievers and documents
-    const [chatHistory, userChatHistory] = await getChatHistory(messages);
 
-    const toolMessages = await getToolsForInput({
-      input: currentMessageContent,
-      tools: token ? generateToolsForUser(token, siteNoPort, locale) : [],
-      userChatHistory,
-    });
-    console.log("toolMessages", toolMessages);
     const [historyAwareRetrieverChain, combineDocsChain] = await Promise.all([
       createHistoryChain(
         vectorStore,
@@ -120,8 +130,11 @@ export async function POST(req: NextRequest) {
       user_chat_history: userChatHistory,
       question: currentMessageContent, // bc multi query is fucked
     });
+    const toolData = new StreamData();
+    toolData.append(JSON.stringify(toolMessages));
+    await toolData.close();
 
-    return new StreamingTextResponse(stream);
+    return new StreamingTextResponse(stream, {}, toolData);
   } catch (error) {
     console.error("AIError", error);
     return NextResponse.json(
@@ -138,11 +151,19 @@ async function getChatHistory(messages: VercelMessage[]) {
   return (async () => messages.slice(chatCount, -1))().then((slicedMessages) =>
     Promise.all([
       (async () =>
-        slicedMessages.map((m: VercelMessage) =>
-          m.role === "user"
-            ? new HumanMessage(m.content.replace(/\s+/g, " ").trim())
-            : new AIMessage(m.content.replace(/\s+/g, " ").trim()),
-        ))(),
+        slicedMessages.map((m: VercelMessage) => {
+          if (m.role === "user") {
+            return new HumanMessage(m.content.replace(/\s+/g, " ").trim());
+          } else if (m.role === "assistant") {
+            return new AIMessage(m.content.replace(/\s+/g, " ").trim());
+          } else if (m.role === "tool") {
+            return new AIMessage(
+              `[Previous Tool Response For Reference]: Tool Name - ${m.tool_call_id} \t Tool Content - ${m.content} \t Input - ${m.function_call || "unknown"}`,
+            );
+          } else {
+            return new AIMessage(m.content.replace(/\s+/g, " ").trim());
+          }
+        }))(),
       (async () =>
         slicedMessages
           .filter((m) => m.role === "user")
@@ -150,6 +171,14 @@ async function getChatHistory(messages: VercelMessage[]) {
             (m: VercelMessage) =>
               new HumanMessage(m.content.replace(/\s+/g, " ").trim()),
           ))(),
+      (async () =>
+        slicedMessages
+          .filter((m) => m.role === "tool")
+          .map((me) => ({
+            tool_call_id: me.tool_call_id,
+            content: me.content,
+            input: `${me.function_call}`,
+          })))(),
     ]),
   );
 }
@@ -296,7 +325,7 @@ function getChatSystemPrompt(
 4. Never send images to the user, you are a text based chat, but you can send emojis. 
 5. Always format your messages in markdown.
 6. Never mention other sites and always focus on the site you are assisting with.
-7. Include the tools output in your response, if they are present.
+7. Include the tools output in your response, if they are present. Don't explicitly say that you are using a tool, just include the output in your response.
 8. Always include the site's base URL : ${siteNoPort} in any links you provide.
 
 **Context and Tool Integration**:
@@ -306,7 +335,8 @@ function getChatSystemPrompt(
 **Important Notes**:
 - Always format your messages in markdown to improve readability and user experience.
 - Always steer the conversation back to the current site's content and features.
-- Never invent information or make up details/plans/posts that do not exist on the site. It is crucial to provide accurate and relevant information to users.
+- NEVER invent information or make up details/plans/posts that do not exist on the site. It is crucial to provide accurate and relevant information to users.
+- Include tools output, but do not explicitly mention that you are using a tool. Integrate the tool output naturally into your response.
 
 The context of the current conversation is as follows:
 {context}`;

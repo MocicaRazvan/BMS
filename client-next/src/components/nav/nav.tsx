@@ -167,7 +167,7 @@ export default function Nav({
           )}
         </div>
         <div
-          className="mx-auto  md:mr-1 flex items-center justify-center gap-6 md:gap-2.5
+          className="mx-auto  md:mr-1 flex items-center justify-center gap-6 md:gap-3
       mt-2 sm:mt-0
       "
         >

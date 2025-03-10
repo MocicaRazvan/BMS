@@ -71,8 +71,14 @@ export class LineListOutputParser extends BaseOutputParser<LineList> {
       .slice(inputsStartIndex, inputsEndIndex)
       .trim()
       .split("\n")
-      .filter((line) => line.trim() !== "")
-      .map((line) => line.trim());
+      .filter((line) => line.replace(/\s+/g, " ").trim() !== "")
+      .map((line) =>
+        line
+          .replace(/\s+/g, " ")
+          .replace(/\binput(?:\s+\d+|\d+|:\s*\d*|\s+\d+:?)\b:?/gi, "")
+          .replace(/\s+/g, " ")
+          .trim(),
+      );
 
     if (this.extraInput && this.extraInput.trim().length > 0) {
       lines.push(this.extraInput.trim());

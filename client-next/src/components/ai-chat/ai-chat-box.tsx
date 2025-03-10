@@ -1,8 +1,15 @@
 "use client";
 import { motion } from "framer-motion";
-import { cn } from "@/lib/utils";
-import { useEffect, useRef, useState } from "react";
-import { Bot, Minus, SendHorizontal, StopCircle, Trash } from "lucide-react";
+import { cn, isDeepEqual } from "@/lib/utils";
+import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  Bot,
+  Minus,
+  RefreshCw,
+  SendHorizontal,
+  StopCircle,
+  Trash,
+} from "lucide-react";
 import { Message, useChat } from "ai/react";
 import ReactMarkdown from "react-markdown";
 import { Link } from "@/navigation";
@@ -14,6 +21,8 @@ import { ChatScrollAnchor } from "@/components/ai-chat/chat-scroll-anchor";
 import useAiChatPersist from "@/hoooks/useAiChatPersist";
 import remarkGfm from "remark-gfm";
 import useCsrfToken from "@/hoooks/useCsrfToken";
+import { v4 as uuid } from "uuid";
+import { LangchainExtraToolTypeMessage } from "@/lib/langchain/langhcain-extra-types";
 
 export interface AiChatBoxTexts {
   loadingContent: string;
@@ -47,6 +56,8 @@ export default function AiChatBox({
     error,
     stop,
     setMessages,
+    data,
+    reload,
   } = useChat({
     api: "/api/chat",
     initialMessages,
@@ -57,10 +68,52 @@ export default function AiChatBox({
   const [isAtBottom, setIsAtBottom] = useState<boolean>(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const { deletePersistedMessages } = useAiChatPersist(
-    messages,
-    initialMessages,
+  const noToolsMessages = useMemo(
+    () => messages.filter((m) => m.role === "assistant" || m.role === "user"),
+    [messages],
   );
+  const { deletePersistedMessages, addPersistMessages, deleteByVercelId } =
+    useAiChatPersist(noToolsMessages, initialMessages);
+
+  useEffect(() => {
+    if (!isLoading && data && data.length > 0) {
+      const lastData = data.at(-1);
+      if (lastData) {
+        const arrayData = JSON.parse(`${lastData}`);
+        if (Array.isArray(arrayData)) {
+          const parsedData = arrayData
+            .filter((value) => value !== null && value !== undefined)
+            .map((item) => {
+              const kwargs = (item as unknown as LangchainExtraToolTypeMessage)
+                .kwargs;
+              const message: Message = {
+                id: kwargs.id || uuid(),
+                createdAt: new Date(),
+                content: `${kwargs.content}`,
+                tool_call_id: kwargs.tool_call_id,
+                role: "tool",
+                name: kwargs.name,
+                // ca input
+                function_call: kwargs.response_metadata?.input || "",
+              };
+              return message;
+            });
+
+          setMessages((prev) => {
+            const newMessages = parsedData.filter(
+              (newMsg) =>
+                !prev.some((existingMsg) => isDeepEqual(existingMsg, newMsg)),
+            );
+            if (newMessages.length) {
+              addPersistMessages(newMessages);
+              return [...prev, ...newMessages];
+            }
+            return prev;
+          });
+        }
+      }
+    }
+  }, [isLoading, data]);
 
   const handleScroll = () => {
     if (!scrollRef.current) return;
@@ -94,6 +147,15 @@ export default function AiChatBox({
   }, [isOpen]);
 
   const lastMessageIsUser = messages[messages.length - 1]?.role === "user";
+
+  const handleReload = async () => {
+    const lastMessage = noToolsMessages.at(-1);
+    if (lastMessage && lastMessage.role === "assistant") {
+      setMessages((prev) => prev.filter((msg) => msg.id !== lastMessage.id));
+      deleteByVercelId(lastMessage);
+      await reload();
+    }
+  };
 
   return (
     <aside className="z-20 fixed bottom-6 right-4 ">
@@ -153,7 +215,7 @@ export default function AiChatBox({
               }}
               ref={scrollRef}
             >
-              {messages.map((messages) => (
+              {noToolsMessages.map((messages) => (
                 <ChatMessage message={messages} key={messages.id} />
               ))}
               {isLoading && lastMessageIsUser && (
@@ -223,10 +285,25 @@ export default function AiChatBox({
                 type="button"
                 size="icon"
                 variant="ghost"
-                className="fllex w-10 flex-none items-center justify-center"
+                className="fllex w-8 flex-none items-center justify-center"
                 onClick={() => stop()}
               >
-                <StopCircle size={24} />
+                <StopCircle size={22} />
+              </Button>
+              <Button
+                type="button"
+                size="icon"
+                variant="ghost"
+                disabled={
+                  !noToolsMessages ||
+                  noToolsMessages.length === 0 ||
+                  noToolsMessages.at(-1)?.role !== "assistant" ||
+                  isLoading
+                }
+                className="fllex w-8 flex-none items-center justify-center"
+                onClick={handleReload}
+              >
+                <RefreshCw size={22} />
               </Button>
               <Input
                 ref={inputRef}
@@ -241,7 +318,7 @@ export default function AiChatBox({
                 className="flex w-10 flex-none items-center justify-center disabled:opacity-50"
                 disabled={input.length === 0}
               >
-                <SendHorizontal size={24} />
+                <SendHorizontal size={22} />
               </Button>
             </form>
           </div>

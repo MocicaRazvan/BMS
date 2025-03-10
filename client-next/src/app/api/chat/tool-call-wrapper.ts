@@ -18,6 +18,11 @@ interface ToolCallWrapperArgs {
   tools: DynamicTool[];
   input: string;
   userChatHistory: HumanMessage[];
+  previousToolCalls: {
+    tool_call_id?: string;
+    content: string;
+    input: string;
+  }[];
 }
 
 const modelName = process.env.OLLAMA_MODEL;
@@ -45,7 +50,10 @@ const formatInstructions = `Respond only in valid JSON. The JSON object you retu
 An array of JSON objects: Where the tool_name is one of the following: "get_posts_by_title", "get_meal_plans_by_title", "no_op", and the input is a string for the tool.
 `;
 
-const systemMessage = new SystemMessage(`
+const getSystemMessage = (
+  previousToolCalls: ToolCallWrapperArgs["previousToolCalls"],
+) =>
+  new SystemMessage(`
 ### Task:
 You are an AI model designed to select the **all the most relevant functions** based on the user's query and chat history.  
 Your primary objective is to identify ALL the functions that best fulfill the user's intent by analyzing their query and the chat history.  
@@ -89,17 +97,37 @@ You MUST infer words or collocations of words like "some", "any", "it", etc. fro
 - **Hint words**: If you see the word "post" or "plan" in the query, it is a good hint to use the corresponding function.
 - **Think**: Do not blindly just choose base on the words "post" or "plan", think about the context and the user's intent.
 - **Select ALL relevant functions**: Choose ALL functions that are relevant to the query and context. You can select more than one function if necessary.
+${previousToolCalls.length === 0 ? "" : `- **Previous Tool Calls**: Try to avoid repeating the same tool calls with the same input.`}
 
 ### Important: The output MUST follow this specific instructions:\n${formatInstructions}.\n DO NOT ADD ANY ADDITIONAL INFORMATION.
 
-### User Chat History:
-Below is the user chat history for context:
+${
+  previousToolCalls.length === 0
+    ? `### User Chat History:
+Below is the user chat history for context:`
+    : `### User Chat History And Previous Tool Calls:
+    Below is the user chat history and previous tool calls for context:`
+}
 `);
 
-function getHumanMessage(input: string) {
+const parsePreviousToolCalls = (
+  previousToolCalls: ToolCallWrapperArgs["previousToolCalls"],
+) =>
+  previousToolCalls
+    .map(
+      (m) =>
+        `Tool Name - ${m.tool_call_id} \\t Tool Content - ${m.content} \\t Input - ${m.input || "unknown"}\``,
+    )
+    .join("\n");
+
+function getHumanMessage(
+  input: string,
+  previousToolCalls: ToolCallWrapperArgs["previousToolCalls"],
+) {
   return new HumanMessage(`
 ### Current Query:
 The current query is: "${input}"
+${previousToolCalls.length > 0 ? `### Previous Tool Calls: ${parsePreviousToolCalls(previousToolCalls)}` : ""}
 
 ### Reminders:
 1. You MUST fix typos in the query, but do not change its original intent.
@@ -108,9 +136,12 @@ The current query is: "${input}"
 4. You MUST infer words or collocations of words like "some", "any", "it", etc from the context. Enhance words: "post", "plan" in the inference, the more RECENT the better.
 5. You can select **ALL relevant functions** that are applicable to the query and context.
 6. When in doubt, default to the **no_op** function.
-7. The output MUST follow this specific instructions:\n${formatInstructions}.\n DO NOT ADD ANY ADDITIONAL INFORMATION.
-
-    `);
+${
+  previousToolCalls.length === 0
+    ? `7. The output MUST follow this specific instructions:\n${formatInstructions}.\n DO NOT ADD ANY ADDITIONAL INFORMATION.`
+    : `7. Try to avoid repeating the same tool calls with the same input.
+8. The output MUST follow this specific instructions:\n${formatInstructions}.\n DO NOT ADD ANY ADDITIONAL INFORMATION.`
+}`);
 }
 
 const toolModel = new ChatOllama({
@@ -147,7 +178,11 @@ function mapToResponse(toolsByName: Record<string, DynamicTool>, t: ToolCall) {
   };
 }
 
-function mapToToolMessage(t: { tool: DynamicTool; result: string }) {
+function mapToToolMessage(t: {
+  tool: DynamicTool;
+  result: string;
+  input: string;
+}) {
   return new ToolMessage({
     content: t.result,
     name: t.tool.name,
@@ -156,6 +191,7 @@ function mapToToolMessage(t: { tool: DynamicTool; result: string }) {
     status: "success",
     response_metadata: {
       timestamp: new Date().getTime(),
+      input: t.input,
     },
   });
 }
@@ -164,6 +200,7 @@ export async function getToolsForInput({
   tools,
   input,
   userChatHistory,
+  previousToolCalls,
 }: ToolCallWrapperArgs): Promise<ToolMessage[]> {
   input = normalizeText(input);
   userChatHistory = userChatHistory.map((t) => {
@@ -178,7 +215,11 @@ export async function getToolsForInput({
     return [];
   }
 
-  const messages = [systemMessage, ...userChatHistory, getHumanMessage(input)];
+  const messages = [
+    getSystemMessage(previousToolCalls),
+    ...userChatHistory,
+    getHumanMessage(input, previousToolCalls),
+  ];
 
   try {
     const toolResp = await toolModel.invoke(messages);
@@ -197,6 +238,7 @@ export async function getToolsForInput({
           .map(async ({ tool, sanitizedInput }) => ({
             tool,
             result: await tool.invoke(sanitizedInput),
+            input: sanitizedInput,
           })),
       )
     )
