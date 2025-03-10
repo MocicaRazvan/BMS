@@ -16,6 +16,7 @@ export async function POST(req: NextRequest) {
       "en",
     ),
     userChatHistory: history.map((t) => new HumanMessage(t)),
+    previousToolCalls: [],
   });
   return NextResponse.json(
     { success: true, response: toolMessages },
