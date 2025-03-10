@@ -88,7 +88,7 @@ export async function POST(req: NextRequest) {
       input: currentMessageContent,
       tools: token ? generateToolsForUser(token, siteNoPort, locale) : [],
       userChatHistory,
-      previousToolCalls,
+      previousToolCalls: previousToolCalls ?? [],
     });
     // console.log("toolMessages", toolMessages);
 
@@ -175,7 +175,7 @@ async function getChatHistory(messages: VercelMessage[]) {
         slicedMessages
           .filter((m) => m.role === "tool")
           .map((me) => ({
-            tool_call_id: me.tool_call_id,
+            tool_call_id: me.tool_call_id || "unknown",
             content: me.content,
             input: `${me.function_call}`,
           })))(),
