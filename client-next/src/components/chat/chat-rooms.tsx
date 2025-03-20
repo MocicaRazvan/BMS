@@ -125,7 +125,9 @@ export function ChatRoomsContent({
   if (chatRooms.length === 0) {
     return (
       <div className="w-full h-full p-20 flex items-center justify-center">
-        <p className="text-xl font-bold tracking-tight">{noRoomsTexts}</p>
+        <p className="text-xl font-bold tracking-tight text-center">
+          {noRoomsTexts}
+        </p>
       </div>
     );
   }
