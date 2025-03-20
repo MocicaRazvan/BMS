@@ -62,7 +62,9 @@ export default async function AdminAIPostsCreate({
       }}
     >
       <Suspense fallback={<LoadingSpinner />}>
-        <AdminAIPostsCreateContent {...texts} authUser={authUser} />
+        <div className="w-full flex items-center justify-center">
+          <AdminAIPostsCreateContent {...texts} authUser={authUser} />
+        </div>
       </Suspense>
     </SidebarContentLayout>
   );
