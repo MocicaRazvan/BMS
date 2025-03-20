@@ -28,6 +28,7 @@ import ButtonSubmit, {
 } from "@/components/forms/button-submit";
 import { CornerDownLeft } from "lucide-react";
 import DOMPurify from "dompurify";
+import { cn } from "@/lib/utils";
 
 export interface ChatMessageFormTexts {
   titleBodySchemaTexts: TitleBodySchemaTexts;
@@ -43,6 +44,7 @@ interface ChatMessageFormProps extends ChatMessageFormTexts {
   sender: ConversationUserResponse;
   receiver: ConversationUserResponse;
   onValueChange?: (value: string) => void;
+  wrapperClassName?: string;
 }
 
 export default function ChatMessageForm({
@@ -56,6 +58,7 @@ export default function ChatMessageForm({
   editorTexts,
   onValueChange,
   buttonText,
+  wrapperClassName = "",
 }: ChatMessageFormProps) {
   const stompClient = useStompClient();
   const [editorKey, setEditorKey] = useState(Math.random());
@@ -133,7 +136,12 @@ export default function ChatMessageForm({
   }).trim();
 
   return (
-    <div className=" border-t flex items-center pb-5 md:pb-0 pt-3 md:px-1">
+    <div
+      className={cn(
+        " border-t flex items-center pb-5 md:pb-0 pt-3 md:px-1",
+        wrapperClassName,
+      )}
+    >
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
@@ -164,20 +172,22 @@ export default function ChatMessageForm({
             )}
           />
           <ErrorMessage message={errorText} show={!!errorMsg} />
-          <ButtonSubmit
-            isLoading={isLoading}
-            disable={!form.formState.isDirty || body === ""}
-            size="sm"
-            buttonSubmitTexts={{
-              ...buttonSubmitTexts,
-              submitText: (
-                <>
-                  <p>{buttonText} </p>
-                  <CornerDownLeft className={"ms-2 size-4"} />
-                </>
-              ),
-            }}
-          />
+          <div className="flex items-center justify-center h-full">
+            <ButtonSubmit
+              isLoading={isLoading}
+              disable={!form.formState.isDirty || body === ""}
+              size="sm"
+              buttonSubmitTexts={{
+                ...buttonSubmitTexts,
+                submitText: (
+                  <>
+                    <p>{buttonText} </p>
+                    <CornerDownLeft className={"ms-2 size-4"} />
+                  </>
+                ),
+              }}
+            />
+          </div>
         </form>
       </Form>
     </div>

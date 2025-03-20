@@ -393,6 +393,9 @@ export const CurRoomsProvider = ({ children, authUser }: Props) => {
 
   const handleRoomHover = useCallback(
     (room: ChatRoomResponseJoined) => {
+      if (room.id === curRoom?.id) {
+        return;
+      }
       const abortController = new AbortController();
       messagesManualFetcher({
         fetchProps: {
@@ -411,7 +414,7 @@ export const CurRoomsProvider = ({ children, authUser }: Props) => {
         console.error("Error manual fetching messages", e);
       });
     },
-    [messagesManualFetcher],
+    [messagesManualFetcher, curRoom?.id],
   );
 
   useEffect(() => {

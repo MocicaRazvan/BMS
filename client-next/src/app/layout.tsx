@@ -26,7 +26,6 @@ import { KanbanRouteChangeProvider } from "@/context/kanban-route-change-context
 import { NavigationGuardProvider } from "next-navigation-guard";
 import { CacheProvider } from "@/providers/cache-provider";
 import { Metadata } from "next";
-import { CurRoomsProvider } from "@/context/cur-rooms-context";
 import ChatConnectContext from "@/context/chat-connect-context";
 
 const fontSans = FontSans({

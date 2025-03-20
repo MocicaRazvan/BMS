@@ -152,6 +152,7 @@ interface ConversationContentProps extends ConversationContentTexts {
   refetch: () => void;
 }
 const pageSize = 10;
+const SCROLL_BOTTOM_THRESHOLD = 135;
 
 const ConversationContent = memo(
   ({
@@ -167,7 +168,9 @@ const ConversationContent = memo(
     refetch,
   }: ConversationContentProps) => {
     const { authUser, resetCurEmail } = useCurRooms();
-    const [chatMessages, setChatMessages] = useState<ChatMessageResponse[]>([]);
+    const [chatMessages, setChatMessages] = useState<ChatMessageResponse[]>(
+      initialMessages.toReversed(),
+    );
     const { onValueChange } = useSendTyping({
       otherUser,
       curUser,
@@ -196,7 +199,7 @@ const ConversationContent = memo(
       setTotalMessages(initialTotalElements);
     }, [initialTotalElements]);
 
-    const [scrollPosition, setScrollPosition] = useState<boolean>(true);
+    const [scrollPosition, setScrollPosition] = useState<boolean>(false);
 
     const [isLoading, setIsLoading] = useState<boolean>(false);
 
@@ -300,25 +303,25 @@ const ConversationContent = memo(
 
     useEffect(() => {
       if (isOtherTyping && chatContainerRef.current) {
-        const container = chatContainerRef.current;
-        //todo mai verifica val asta poate mai mult
-        const isNearBottom = Math.abs(container.scrollTop) < 135;
-        if (isNearBottom) {
-          setScrollPosition(true);
-        }
+        setScrollPosition(true);
       }
     }, [isOtherTyping]);
 
     useEffect(() => {
       if (scrollPosition && chatContainerRef.current) {
-        chatContainerRef.current.scrollTop =
-          chatContainerRef.current.scrollHeight;
+        const isNearBottom =
+          Math.abs(chatContainerRef.current.scrollTop) <
+          SCROLL_BOTTOM_THRESHOLD;
+        if (isNearBottom) {
+          chatContainerRef.current.scrollTop =
+            chatContainerRef.current.scrollHeight;
+        }
         setScrollPosition(false);
       }
     }, [scrollPosition]);
 
     return (
-      <div className="w-full h-full flex flex-col">
+      <div className="w-full h-full flex flex-col scroll-smooth">
         <header className="border-b px-4 py-3 relative ">
           <AnimatePresence mode="wait">
             {!isAbsoluteFinished && (
@@ -398,7 +401,7 @@ const ConversationContent = memo(
         </header>
         <div
           className="w-full flex-1 bg-background/95 backdrop-blur
-                    supports-[backdrop-filter]:bg-background/65 h-full  relative overflow-auto flex flex-col-reverse"
+                    supports-[backdrop-filter]:bg-background/65  relative overflow-auto flex flex-col-reverse h-[calc(100%-310px)] md:h-[calc(100%-225px)]"
           id="scrollableDiv"
           ref={chatContainerRef}
         >
@@ -439,19 +442,21 @@ const ConversationContent = memo(
             </div>
           </InfiniteScroll>
         </div>
-        <div>
+        <div className=" h-[310px] md:h-[225px]">
           <ChatMessageForm
             chatRoomId={curRoom.id}
             sender={curUser.conversationUser}
             receiver={otherUser.conversationUser}
             {...chatMessageFormTexts}
             onValueChange={onValueChange}
+            wrapperClassName="h-full"
           />
         </div>
       </div>
     );
   },
-  isDeepEqual,
+  ({ refetch: pR, ...restP }, { refetch: nR, ...restN }) =>
+    isDeepEqual(restP, restN),
 );
 
 ConversationContent.displayName = "ConversationContent";

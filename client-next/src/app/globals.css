@@ -139,9 +139,14 @@
 
 .EmojiPickerReact,
 .EmojiPickerReact.epr-dark-theme {
-    --epr-hover-bg-color: var(--muted);
+    --epr-hover-bg-color: var(--accent);
     --epr-bg-color: var(--background);
     --epr-text-color: var(--foreground);
+}
+
+.EmojiPickerReact,
+.EmojiPickerReact.epr-dark-theme > button:hover {
+    background-color: var(--accent) !important;
 }
 
 .EmojiPickerReact input::placeholder {

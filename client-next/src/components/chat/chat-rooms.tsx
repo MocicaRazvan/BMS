@@ -88,7 +88,7 @@ export default function ChatRooms({
         />
       </div>
       {!isFinished && <Skeleton className="w-full h-full " />}
-      {messages.length > 0 && (
+      {isFinished && messages.length > 0 && (
         <div className="flex-1 w-full ">
           <ChatRoomsContent {...chatRoomContentTexts} />
         </div>
