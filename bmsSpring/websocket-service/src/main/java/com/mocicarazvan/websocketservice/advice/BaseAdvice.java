@@ -46,6 +46,10 @@ public abstract class BaseAdvice {
                                        CustomConvertAndSendToUser customConvertAndSendToUser
     ) {
         WebSocketErrorResponse resp = respWithMessageWs(e, accessor, status, message);
+        if (accessor == null || accessor.getUser() == null) {
+            simpMessagingTemplate.convertAndSend("/queue/errors", resp);
+            return;
+        }
         String username = Objects.requireNonNull(accessor.getUser()).getName();
         if (username != null) {
 //            simpMessagingTemplate.convertAndSendToUser(username, "/queue/errors", resp);

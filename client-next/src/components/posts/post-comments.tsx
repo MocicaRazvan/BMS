@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import Loader from "@/components/ui/spinner";
-import { fetchStream } from "@/hoooks/fetchStream";
+import { fetchStream } from "@/lib/fetchers/fetchStream";
 import useFetchStream from "@/hoooks/useFetchStream";
 import {
   CommentResponse,
@@ -44,6 +44,7 @@ export default function PostComments({
   commentAccordionTexts,
   deleteCommentDialog,
   editCommentLabel,
+  editorTexts,
 }: Props) {
   const pageSize = 10;
   const [comments, setComments] = useState<
@@ -212,6 +213,7 @@ export default function PostComments({
           toxicError={commentAccordionTexts.toxicError}
           deleteCommentDialog={deleteCommentDialog}
           editCommentLabel={editCommentLabel}
+          editorTexts={editorTexts}
         />
       )}
       {!isFinished && <Loader />}

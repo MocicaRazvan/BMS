@@ -4,7 +4,9 @@ package com.mocicarazvan.websocketservice.controllers;
 import com.mocicarazvan.websocketservice.dtos.chatRoom.ChatRoomUserDto;
 import com.mocicarazvan.websocketservice.dtos.user.ConversationUserPayload;
 import com.mocicarazvan.websocketservice.dtos.user.ConversationUserResponse;
+import com.mocicarazvan.websocketservice.dtos.user.reactive.ReactiveUserDto;
 import com.mocicarazvan.websocketservice.enums.ConnectedStatus;
+import com.mocicarazvan.websocketservice.rpc.UserRPCClient;
 import com.mocicarazvan.websocketservice.service.ConversationUserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -15,9 +17,11 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Set;
 
 @RestController
 @RequiredArgsConstructor
@@ -25,6 +29,7 @@ import java.util.List;
 public class ConversationUserController {
     private final ConversationUserService conversationUserService;
     private final SimpMessagingTemplate simpMessagingTemplate;
+    private final UserRPCClient userRPCClient;
 
     @MessageMapping("/addUser")
     public void addUser(@Valid @Payload ConversationUserPayload conversationUserPayload) {
@@ -75,5 +80,17 @@ public class ConversationUserController {
                 });
     }
 
+    @GetMapping("/testEmails")
+    public ResponseEntity<List<ReactiveUserDto>> testEmails(
+            @RequestParam String email
+
+    ) {
+        return ResponseEntity.ok(userRPCClient.getUsersByEmails(Set.of(email)).join());
+    }
+
+    @GetMapping("/testExist")
+    public ResponseEntity<Boolean> testExist(@RequestParam String email) {
+        return ResponseEntity.ok(userRPCClient.existsUserByEmail(email).join());
+    }
 
 }

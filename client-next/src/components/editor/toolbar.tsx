@@ -17,14 +17,29 @@ import {
 import { ToggleGroup } from "../ui/toggle-group";
 import { Toggle } from "./toggle";
 import { Toolbar } from "./base-toolbar";
-import { FormatType } from "./format-type";
+import { FormatType, FormatTypeTexts } from "./format-type";
+import EditorEmojiPicker, {
+  EditorEmojiPickerTexts,
+} from "@/components/editor/editor-emoji-picker";
 
-interface EditorToolbarProps {
-  editor: Editor;
-  sticky?: boolean;
+export interface EditorToolbarTexts {
+  formatTypeTexts: FormatTypeTexts;
+  editorEmojiPickerTexts: EditorEmojiPickerTexts;
 }
 
-const EditorToolbar = ({ editor, sticky }: EditorToolbarProps) => {
+interface EditorToolbarProps extends EditorToolbarTexts {
+  editor: Editor;
+  sticky?: boolean;
+  useEmojis?: boolean;
+}
+
+const EditorToolbar = ({
+  editor,
+  sticky,
+  editorEmojiPickerTexts,
+  formatTypeTexts,
+  useEmojis = true,
+}: EditorToolbarProps) => {
   return (
     <Toolbar
       className="m-0 z-10 flex items-center md:justify-between px-0 md:px-2 py-2 md:flex-row flex-col justify-center "
@@ -123,14 +138,36 @@ const EditorToolbar = ({ editor, sticky }: EditorToolbarProps) => {
           <Minus className="h-4 w-4" />
         </Toggle>
 
+        {useEmojis && (
+          <EditorEmojiPicker
+            onEmojiSelect={(e) => {
+              editor
+                .chain()
+                .focus()
+                .insertContent([
+                  {
+                    type: "customSpan",
+                    attrs: {
+                      style:
+                        "font-size: 1.5rem; min-width: 1em; display: inline-block;",
+                    },
+                    content: [{ type: "text", text: `${e}` }],
+                  },
+                  { type: "text", text: " " },
+                ])
+                .run();
+            }}
+            texts={editorEmojiPickerTexts}
+          />
+        )}
         <div className="hidden md:block">
-          <FormatType editor={editor} />
+          <FormatType editor={editor} texts={formatTypeTexts} />
         </div>
       </ToggleGroup>
 
       <ToggleGroup className="flex flex-row items-center" type="multiple">
         <div className="block md:hidden">
-          <FormatType editor={editor} />
+          <FormatType editor={editor} texts={formatTypeTexts} />
         </div>
         <Toggle
           size="icon"

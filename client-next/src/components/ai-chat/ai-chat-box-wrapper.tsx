@@ -3,7 +3,7 @@
 import { useSession } from "next-auth/react";
 import { Message } from "ai/react";
 import { useEffect, useState } from "react";
-import { fetchStream } from "@/hoooks/fetchStream";
+import { fetchStream } from "@/lib/fetchers/fetchStream";
 import { AiChatMessageResponse } from "@/types/dto";
 import AiChatBox, { AiChatBoxTexts } from "@/components/ai-chat/ai-chat-box";
 import { motion } from "framer-motion";

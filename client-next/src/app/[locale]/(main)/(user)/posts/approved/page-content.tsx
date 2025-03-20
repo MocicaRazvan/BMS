@@ -78,6 +78,12 @@ export default function PostApprovedPageContent({
           approved: "true",
           ...(liked ? { liked: "true" } : {}),
         }}
+        // passExtraContent={(item) => (
+        //   <div>
+        //     {item.model.content.userLikes.length}
+        //     <div>{item.model.content.userDislikes.length}</div>
+        //   </div>
+        // )}
         {...gridListTexts}
         extraCriteriaWithCallBack={(callback) => (
           <div className="flex items-start justify-center flex-wrap gap-10  flex-1">

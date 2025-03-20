@@ -12,6 +12,7 @@ import {
 import { ImageType } from "@/types/forms";
 import { getCsrfToken } from "next-auth/react";
 import { NEXT_CSRF_HEADER } from "@/lib/constants";
+import fetchFactory from "@/lib/fetchers/fetchWithRetry";
 
 export type DiffusionCallback = (images: FieldInputItem[]) => void;
 
@@ -44,7 +45,7 @@ export default function useGetDiffusionImages<T extends ImageType = ImageType>({
       } else if (num_images > 3) {
         num_images = 3;
       }
-      const response = await fetch("/api/diffusion", {
+      const response = await fetchFactory(fetch)("/api/diffusion", {
         method: "POST",
         body: JSON.stringify({
           num_images,

@@ -36,7 +36,7 @@ import ErrorMessage from "@/components/forms/error-message";
 import ButtonSubmit, {
   ButtonSubmitTexts,
 } from "@/components/forms/button-submit";
-import { fetchStream } from "@/hoooks/fetchStream";
+import { fetchStream } from "@/lib/fetchers/fetchStream";
 import {
   CustomEntityModel,
   IngredientNutritionalFactResponse,

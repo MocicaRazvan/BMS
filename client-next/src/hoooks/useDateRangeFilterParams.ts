@@ -43,12 +43,6 @@ export default function useDateRangeFilterParams(
     [lowerBoundKey, upperBoundKey],
   );
 
-  console.log(
-    "defaultRangeLowerBound",
-    defaultRangeLowerBound,
-    verifyDate(defaultRangeLowerBound),
-  );
-
   const queryParams = useMemo(
     () => ({
       ...(dateRange[lowerBoundKey] && {

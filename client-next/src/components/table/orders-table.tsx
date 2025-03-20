@@ -339,6 +339,7 @@ export default function OrdersTable({
             setSortValue,
             sortValue,
             callback: resetCurrentPage,
+            filterKey: searchKey,
           }}
           extraCriteria={
             <div className="order-[2]">

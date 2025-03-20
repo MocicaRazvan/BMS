@@ -4,7 +4,7 @@ import {
   DeleteDialogTexts,
   getAlertDialogDeleteTexts,
 } from "@/texts/components/dialog";
-import { fetchStream } from "@/hoooks/fetchStream";
+import { fetchStream } from "@/lib/fetchers/fetchStream";
 import { toast } from "@/components/ui/use-toast";
 import {
   AlertDialog,

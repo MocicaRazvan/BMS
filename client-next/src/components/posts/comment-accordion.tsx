@@ -30,14 +30,15 @@ import { CommentFormTexts } from "@/texts/components/forms";
 import ErrorMessage from "@/components/forms/error-message";
 import ButtonSubmit from "@/components/forms/button-submit";
 import { getToxicity } from "@/actions/toxcity";
-import { fetchStream } from "@/hoooks/fetchStream";
-import Editor from "@/components/editor/editor";
+import { fetchStream } from "@/lib/fetchers/fetchStream";
+import Editor, { EditorTexts } from "@/components/editor/editor";
 
 export interface CommentAccordionTexts {
   commentFormTexts: CommentFormTexts;
   englishError: string;
   toxicError: string;
   englishHeading: string;
+  editorTexts: EditorTexts;
 }
 
 interface Props extends CommentAccordionTexts {
@@ -68,6 +69,7 @@ export default function CommentAccordion({
   englishHeading,
   englishError,
   toxicError,
+  editorTexts,
 }: Props) {
   const [value, setValue] = useState("");
   const schema = useMemo(
@@ -227,6 +229,7 @@ export default function CommentAccordion({
                           descritpion={field.value as string}
                           onChange={field.onChange}
                           placeholder={titleBodyTexts.bodyPlaceholder}
+                          texts={editorTexts}
                         />
                       </FormControl>
                       <FormMessage />

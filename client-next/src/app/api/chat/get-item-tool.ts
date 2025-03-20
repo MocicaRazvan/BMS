@@ -10,6 +10,7 @@ import { tool } from "@langchain/core/tools";
 import { z } from "zod";
 import { getCsrfNextAuthHeader } from "@/actions/get-csr-next-auth";
 import { emitError } from "@/logger";
+import fetchFactory from "@/lib/fetchers/fetchWithRetry";
 
 const springUrl = process.env.NEXT_PUBLIC_SPRING!;
 
@@ -24,7 +25,7 @@ export async function getItemTool<T extends TitleBodyUserDto>(
 ) {
   try {
     const csrf = await getCsrfNextAuthHeader();
-    const response = await fetch(
+    const response = await fetchFactory(fetch)(
       `${springUrl}${path}?${new URLSearchParams({
         title: input.trim(),
         approved: "true",

@@ -1,5 +1,6 @@
 import { BaseError } from "@/types/responses";
 import { getCsrfNextAuthHeader } from "@/actions/get-csr-next-auth";
+import fetchFactory from "@/lib/fetchers/fetchWithRetry";
 
 interface BaseArgs {
   token: string;
@@ -37,7 +38,7 @@ export async function fetchWithFilesMultipleFiles<
     }
   });
 
-  const res = await fetch(
+  const res = await fetchFactory(fetch)(
     `${process.env.NEXT_PUBLIC_SPRING_CLIENT}${path}?clientId=${clientId}`,
     {
       method,

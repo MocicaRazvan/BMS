@@ -2,7 +2,7 @@
 
 import { WithUser } from "@/lib/user";
 import React, { Suspense, useCallback } from "react";
-import { fetchStream } from "@/hoooks/fetchStream";
+import { fetchStream } from "@/lib/fetchers/fetchStream";
 import { CustomEntityModel, PostResponse } from "@/types/dto";
 import LoadingSpinner from "@/components/common/loading-spinner";
 import { checkApprovePrivilege, isSuccessCheckReturn } from "@/lib/utils";

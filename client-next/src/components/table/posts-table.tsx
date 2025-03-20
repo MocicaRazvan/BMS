@@ -387,6 +387,7 @@ export default function PostsTable({
             setSortValue,
             sortValue,
             callback: resetCurrentPage,
+            filterKey: "title",
           }}
           extraCriteria={
             <div className="flex items-start justify-center gap-8 flex-1 flex-wrap">

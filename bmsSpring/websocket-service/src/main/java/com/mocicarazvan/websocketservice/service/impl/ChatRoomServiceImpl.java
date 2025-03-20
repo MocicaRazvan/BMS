@@ -5,7 +5,11 @@ import com.mocicarazvan.websocketservice.dtos.PageableBody;
 import com.mocicarazvan.websocketservice.dtos.PageableResponse;
 import com.mocicarazvan.websocketservice.dtos.chatRoom.ChatRoomPayload;
 import com.mocicarazvan.websocketservice.dtos.chatRoom.ChatRoomResponse;
+import com.mocicarazvan.websocketservice.dtos.chatRoom.ChatRoomResponseJoined;
+import com.mocicarazvan.websocketservice.dtos.chatRoom.ChatRoomUserDto;
 import com.mocicarazvan.websocketservice.dtos.user.ConversationUserBase;
+import com.mocicarazvan.websocketservice.dtos.user.ConversationUserResponse;
+import com.mocicarazvan.websocketservice.dtos.user.JoinedConversationUser;
 import com.mocicarazvan.websocketservice.exceptions.MoreThenOneChatRoom;
 import com.mocicarazvan.websocketservice.exceptions.SameUserChatRoom;
 import com.mocicarazvan.websocketservice.exceptions.UserIsConnectedToTheRoom;
@@ -30,11 +34,9 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -59,11 +61,19 @@ public class ChatRoomServiceImpl implements ChatRoomService {
                 .stream().map(ConversationUserBase::getEmail)
                 .collect(Collectors.toSet());
 
-        emails.forEach(conversationUserService::saveUserByEmailIfNotExist);
-
         if (emails.size() == 1) {
             throw new SameUserChatRoom();
         }
+//        emails.forEach(conversationUserService::saveUserByEmailIfNotExist);
+        CompletableFuture.allOf(
+                emails.stream()
+                        .map(e -> CompletableFuture.runAsync(
+                                () -> conversationUserService.saveUserByEmailIfNotExist(e),
+                                asyncExecutor
+                        ))
+                        .toArray(CompletableFuture[]::new)
+        ).join();
+
 
         List<ChatRoom> rooms = getRoomsByUsers(emails);
         if (rooms.size() > 1) {
@@ -172,7 +182,54 @@ public class ChatRoomServiceImpl implements ChatRoomService {
         if (rooms.size() > 1) {
             throw new MoreThenOneChatRoom(new HashSet<>(emails));
         }
+        if (rooms.isEmpty()) {
+            throw new NoChatRoomFound(emails);
+        }
         return chatRoomMapper.fromModelToResponse(rooms.get(0));
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, isolation = Isolation.READ_COMMITTED)
+    @CustomRetryable
+    public PageableResponse<List<ChatRoomResponseJoined>> getChatRoomsFilteredJoined(String email, String filterReceiver, PageableBody pageableBody) {
+        PageableResponse<List<ChatRoomResponse>> chatRoomsFiltered = getChatRoomsFiltered(email, filterReceiver, pageableBody);
+        List<ChatRoomResponse> chatRooms = chatRoomsFiltered.getContent();
+        List<ChatRoomResponseJoined> responseList = fromChatRoomResponseToJoined(chatRooms);
+        return new PageableResponse<>(responseList, chatRoomsFiltered.getPageInfo(), chatRoomsFiltered.getLinks());
+    }
+
+    private List<ChatRoomResponseJoined> fromChatRoomResponseToJoined(List<ChatRoomResponse> chatRooms) {
+        List<ConversationUserResponse> allUsers = chatRooms.stream()
+                .flatMap(chatRoom -> chatRoom.getUsers().stream())
+                .collect(Collectors.toList());
+        CompletableFuture<Map<String, JoinedConversationUser>> joinedUsersFuture = conversationUserService
+                .fromConversationToJoinedUsers(allUsers)
+                .thenApply(joinedUsers -> joinedUsers.stream()
+                        .collect(Collectors.toMap(
+                                user -> user.getConversationUser().getEmail(),
+                                user -> user,
+                                (u1, u2) -> u1
+                        )));
+
+        return joinedUsersFuture.thenApplyAsync(joinedUsersMap -> chatRooms.stream()
+                .map(chatRoom -> {
+                    Set<JoinedConversationUser> joinedUsers = chatRoom.getUsers().stream()
+                            .map(user -> joinedUsersMap.get(user.getEmail()))
+                            .filter(Objects::nonNull)
+                            .collect(Collectors.toSet());
+
+                    return new ChatRoomResponseJoined(chatRoom, joinedUsers);
+                })
+                .collect(Collectors.toList()), asyncExecutor).join();
+    }
+
+
+    @Override
+    public ChatRoomResponseJoined findAllByEmailsJoined(List<String> emails) {
+        return
+                findAllByEmails(emails)
+                        .map(chatRoomResponse -> new ChatRoomResponseJoined(chatRoomResponse, new HashSet<>(conversationUserService.fromConversationToJoinedUsers(chatRoomResponse.getUsers())
+                                .join())));
     }
 
 
@@ -202,12 +259,64 @@ public class ChatRoomServiceImpl implements ChatRoomService {
 
 
     public void notifyUsers(Set<ConversationUserBase> users, ChatRoomResponse chatRoomResponse, String path) {
-        users.forEach(u -> customConvertAndSendToUser.sendToUser(u.getEmail(), "/queue/chatRooms" + path, chatRoomResponse));
+//        users.forEach(u -> customConvertAndSendToUser.sendToUser(u.getEmail(), "/queue/chatRooms" + path, chatRoomResponse));
+        CompletableFuture<Void> sendToQueueFuture = CompletableFuture.runAsync(() ->
+                users.forEach(u -> customConvertAndSendToUser.sendToUser(
+                        u.getEmail(), "/queue/chatRooms" + path, chatRoomResponse
+                )), asyncExecutor
+        );
+
+        ChatRoomResponseJoined chatRoomResponseJoined = fromChatRoomResponseToJoined(List.of(chatRoomResponse)).get(0);
+
+        CompletableFuture<Void> sendToJoinedQueueFuture = CompletableFuture.runAsync(() -> {
+            if (chatRoomResponseJoined != null) {
+                users.forEach(u -> customConvertAndSendToUser.sendToUser(
+                        u.getEmail(), "/queue/chatRooms-joined" + path, chatRoomResponseJoined
+                ));
+            }
+        }, asyncExecutor);
+
+        CompletableFuture.allOf(sendToQueueFuture, sendToJoinedQueueFuture).join();
     }
 
 
     public void notifyUsersModel(Set<ConversationUser> users, ChatRoomResponse chatRoomResponse, String path) {
-        users.forEach(u -> customConvertAndSendToUser.sendToUser(u.getEmail(), "/queue/chatRooms" + path, chatRoomResponse));
+//        users.forEach(u -> customConvertAndSendToUser.sendToUser(u.getEmail(), "/queue/chatRooms" + path, chatRoomResponse));
+        CompletableFuture<Void> sendToQueueFuture = CompletableFuture.runAsync(() ->
+                users.forEach(u -> customConvertAndSendToUser.sendToUser(
+                        u.getEmail(), "/queue/chatRooms" + path, chatRoomResponse
+                )), asyncExecutor
+        );
+
+        ChatRoomResponseJoined chatRoomResponseJoined = fromChatRoomResponseToJoined(List.of(chatRoomResponse)).get(0);
+
+        CompletableFuture<Void> sendToJoinedQueueFuture = CompletableFuture.runAsync(() -> {
+            if (chatRoomResponseJoined != null) {
+                users.forEach(u -> customConvertAndSendToUser.sendToUser(
+                        u.getEmail(), "/queue/chatRooms-joined" + path, chatRoomResponseJoined
+                ));
+            }
+        }, asyncExecutor);
+
+        CompletableFuture.allOf(sendToQueueFuture, sendToJoinedQueueFuture).join();
+    }
+
+    @Override
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    @CustomRetryable
+    public void notifyOtherUsersRoomChange(String senderEmail, Function<ChatRoomUserDto, ChatRoomResponse> createRoom) {
+        CompletableFuture.allOf(chatRoomRepository.findOthersEmailsBySenderEmail(senderEmail)
+                .stream().map(d -> CompletableFuture.runAsync(() -> {
+                    ChatRoomResponse chatRoomResponse = createRoom.apply(d);
+                    customConvertAndSendToUser.sendToUser(d.getUserEmail(), "/queue/chatRooms",
+                            chatRoomResponse);
+                    ChatRoomResponseJoined chatRoomResponseJoined = fromChatRoomResponseToJoined(List.of(chatRoomResponse)).get(0);
+                    customConvertAndSendToUser.sendToUser(d.getUserEmail(), "/queue/chatRooms-joined",
+                            chatRoomResponseJoined);
+                }))
+                .toArray(CompletableFuture[]::new)
+        ).join();
+
     }
 
 

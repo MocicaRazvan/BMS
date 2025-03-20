@@ -3,6 +3,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import GitHubProvider from "next-auth/providers/github";
 import { CustomGoogleProvider } from "@/app/api/auth/[...nextauth]/custom-google-provider";
 import { getCsrfNextAuthHeader } from "@/actions/get-csr-next-auth";
+import fetchFactory from "@/lib/fetchers/fetchWithRetry";
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -24,7 +25,7 @@ export const authOptions: NextAuthOptions = {
           }
           const csrfHeader = await getCsrfNextAuthHeader();
 
-          const resp = await fetch(
+          const resp = await fetchFactory(fetch)(
             `${process.env.NEXT_PUBLIC_SPRING}/auth/login`,
             {
               method: "POST",

@@ -14,7 +14,7 @@ import {
   FormItem,
   FormMessage,
 } from "@/components/ui/form";
-import Editor from "@/components/editor/editor";
+import Editor, { EditorTexts } from "@/components/editor/editor";
 import { useStompClient } from "react-stomp-hooks";
 import {
   ChatMessageNotificationBody,
@@ -34,12 +34,15 @@ export interface ChatMessageFormTexts {
   titleBodyTexts: TitleBodyTexts;
   errorText: string;
   buttonSubmitTexts: ButtonSubmitTexts;
+  editorTexts: EditorTexts;
+  buttonText: string;
 }
 
 interface ChatMessageFormProps extends ChatMessageFormTexts {
   chatRoomId: number;
   sender: ConversationUserResponse;
   receiver: ConversationUserResponse;
+  onValueChange?: (value: string) => void;
 }
 
 export default function ChatMessageForm({
@@ -50,6 +53,9 @@ export default function ChatMessageForm({
   titleBodyTexts,
   errorText,
   buttonSubmitTexts,
+  editorTexts,
+  onValueChange,
+  buttonText,
 }: ChatMessageFormProps) {
   const stompClient = useStompClient();
   const [editorKey, setEditorKey] = useState(Math.random());
@@ -67,7 +73,7 @@ export default function ChatMessageForm({
     },
   });
 
-  const { isLoading, setIsLoading, router, errorMsg, setErrorMsg } =
+  const { isLoading, setIsLoading, errorMsg, setErrorMsg } =
     useLoadingErrorState();
 
   const onSubmit = useCallback(
@@ -127,23 +133,30 @@ export default function ChatMessageForm({
   }).trim();
 
   return (
-    <div className="py-2 border-t flex items-center px-5">
+    <div className=" border-t flex items-center pb-5 md:pb-0 pt-3 md:px-1">
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className={" w-full h-full"}
+          className={
+            " w-full h-full flex flex-col md:flex-row items-center justify-between gap-5"
+          }
         >
           <FormField
             control={form.control}
             name={"body" as Path<TitleBodyType>}
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="flex-1 w-full max-h-[300px] ">
                 <FormControl>
                   <Editor
+                    editorContentWrapperClassname="overflow-y-auto max-h-[150px]"
                     descritpion={field.value as string}
-                    onChange={field.onChange}
+                    onChange={(e) => {
+                      onValueChange?.(e);
+                      field.onChange(e);
+                    }}
                     placeholder={titleBodyTexts.bodyPlaceholder}
                     key={editorKey}
+                    texts={editorTexts}
                   />
                 </FormControl>
                 <FormMessage />
@@ -154,12 +167,13 @@ export default function ChatMessageForm({
           <ButtonSubmit
             isLoading={isLoading}
             disable={!form.formState.isDirty || body === ""}
+            size="sm"
             buttonSubmitTexts={{
               ...buttonSubmitTexts,
               submitText: (
                 <>
-                  <p>{buttonSubmitTexts.submitText} </p>
-                  <CornerDownLeft className={"ms-2 size-4"} />{" "}
+                  <p>{buttonText} </p>
+                  <CornerDownLeft className={"ms-2 size-4"} />
                 </>
               ),
             }}

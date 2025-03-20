@@ -9,7 +9,7 @@ import {
   useReducer,
 } from "react";
 import { Session } from "next-auth";
-import { fetchStream } from "@/hoooks/fetchStream";
+import { fetchStream } from "@/lib/fetchers/fetchStream";
 import { UserSubscriptionDto } from "@/types/dto";
 
 export interface UserSubscriptions {

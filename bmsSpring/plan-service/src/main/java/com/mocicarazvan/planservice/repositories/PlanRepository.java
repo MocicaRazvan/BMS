@@ -45,7 +45,7 @@ public interface PlanRepository extends ApprovedRepository<Plan>, CountInParent,
                 from plan p
                          join plan_embedding pe on p.id = pe.entity_id)
             select
-                (sub.ip+sub.ti)/2 as similarity,
+                (2*sub.ip+2*sub.ti+sub.ps)/5 as similarity,
                 sub.*
             from (
                      select
@@ -57,6 +57,7 @@ public interface PlanRepository extends ApprovedRepository<Plan>, CountInParent,
                                               JOIN unnest(e2.arr) y(arr) ON x.arr = y.arr
                                  )::float, 0
                          ) /cardinality(e1.arr) as ti, -- gandeste mai bine decat
+                        COALESCE(1 - (ABS(e1.price - e2.price) / NULLIF(GREATEST(e1.price, e2.price), 0)), 0) AS ps,
                          e2.*
                      from
                          emb e1, emb e2
@@ -67,7 +68,7 @@ public interface PlanRepository extends ApprovedRepository<Plan>, CountInParent,
                                )
                                 or e2.id=e1.id)
                  ) as sub
-            where ( (ip+ti)/2 ) >= :minSimilarity
+            where (2*sub.ip+2*sub.ti+sub.ps)/5 >= :minSimilarity
             order by  similarity desc
             limit :limit
             

@@ -92,6 +92,7 @@ export default function GridList<T extends TitleBodyImagesUserDto>({
     resetCurrentPage,
     updateCreatedAtRange,
     updateUpdatedAtRange,
+    nextMessages,
   } = useList<ResponseWithUserDtoEntity<T>>({
     path,
     extraQueryParams,
@@ -121,6 +122,7 @@ export default function GridList<T extends TitleBodyImagesUserDto>({
               setSortValue={setSortValue}
               {...radioSortTexts}
               callback={resetCurrentPage}
+              filterKey={"title"}
             />
             {extraCriteria && extraCriteria}
             {extraCriteriaWithCallBack &&
@@ -162,6 +164,7 @@ export default function GridList<T extends TitleBodyImagesUserDto>({
           {items.map((item, i) => (
             <motion.div
               key={
+                item.model.content.id +
                 item.model.content.title +
                 i +
                 item.model.content.body.substring(1)
@@ -206,6 +209,23 @@ export default function GridList<T extends TitleBodyImagesUserDto>({
             {...dataTablePaginationTexts}
           />
         </div>
+        {nextMessages && nextMessages.length > 0 && (
+          <div className="hidden">
+            {nextMessages.map((item, i) => (
+              <div
+                key={
+                  item.content.model.content.id +
+                  item.content.model.content.title +
+                  i +
+                  item.content.model.content.body.substring(1) +
+                  "____next"
+                }
+              >
+                <ItemCard item={item.content} texts={itemCardTexts} />
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

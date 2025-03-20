@@ -19,6 +19,7 @@ interface Props<T extends TitleBodyImagesUserDto> {
   generateExtraHeader?: (item: ResponseWithUserDtoEntity<T>) => ReactNode;
   generateImageOverlay?: (item: ResponseWithUserDtoEntity<T>) => ReactNode;
   texts: ItemCardTexts;
+  eagerImage?: boolean;
 }
 
 export default function ItemCard<T extends TitleBodyImagesUserDto>({
@@ -27,6 +28,7 @@ export default function ItemCard<T extends TitleBodyImagesUserDto>({
   generateExtraContent,
   generateExtraHeader,
   generateImageOverlay,
+  eagerImage = true,
   texts: { author },
 }: Props<T>) {
   const body = useMemo(
@@ -59,6 +61,7 @@ export default function ItemCard<T extends TitleBodyImagesUserDto>({
           }}
           onClick={() => onClick && onClick()}
           width="400"
+          loading={eagerImage ? "eager" : undefined}
         />
         {generateImageOverlay && generateImageOverlay(item)}
       </div>

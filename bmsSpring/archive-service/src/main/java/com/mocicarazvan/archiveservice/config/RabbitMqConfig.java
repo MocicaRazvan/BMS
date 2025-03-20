@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
+import org.springframework.retry.support.RetryTemplate;
 import org.springframework.scheduling.concurrent.SimpleAsyncTaskScheduler;
 
 import java.util.Map;
@@ -57,6 +58,7 @@ public class RabbitMqConfig {
     public RabbitAdmin admin(ConnectionFactory cf, @Qualifier("simpleAsyncTaskExecutor") SimpleAsyncTaskExecutor simpleAsyncTaskExecutor) {
         RabbitAdmin rabbitAdmin = new RabbitAdmin(cf);
         rabbitAdmin.setTaskExecutor(simpleAsyncTaskExecutor);
+        rabbitAdmin.setRetryTemplate(RetryTemplate.defaultInstance());
         return rabbitAdmin;
     }
 

@@ -4,6 +4,7 @@ import com.mocicarazvan.websocketservice.dtos.PageableBody;
 import com.mocicarazvan.websocketservice.dtos.PageableResponse;
 import com.mocicarazvan.websocketservice.dtos.chatRoom.ChatRoomPayload;
 import com.mocicarazvan.websocketservice.dtos.chatRoom.ChatRoomResponse;
+import com.mocicarazvan.websocketservice.dtos.chatRoom.ChatRoomResponseJoined;
 import com.mocicarazvan.websocketservice.dtos.chatRoom.DeleteChatRoomRequest;
 import com.mocicarazvan.websocketservice.service.ChatRoomService;
 import jakarta.validation.Valid;
@@ -42,6 +43,13 @@ public class ChatRoomController {
         return ResponseEntity.ok(chatRoomService.getChatRoomsFiltered(email, filterReceiver, pageableBody));
     }
 
+    @PatchMapping("/chatRooms/filter-joined/{email}")
+    public ResponseEntity<PageableResponse<List<ChatRoomResponseJoined>>> getChatRoomsFilterJoined(@PathVariable String email,
+                                                                                                   @RequestParam(required = false, defaultValue = "") String filterReceiver,
+                                                                                                   @Valid @RequestBody PageableBody pageableBody) {
+        return ResponseEntity.ok(chatRoomService.getChatRoomsFilteredJoined(email, filterReceiver, pageableBody));
+    }
+
     @DeleteMapping("/chatRooms")
     public ResponseEntity<Void> deleteChatRoom(@Valid @RequestBody DeleteChatRoomRequest deleteChatRoomRequest) {
         chatRoomService.deleteChatRoom(deleteChatRoomRequest.getChatRoomId(), deleteChatRoomRequest.getSenderEmail());
@@ -51,6 +59,11 @@ public class ChatRoomController {
     @GetMapping("/chatRooms/findAllByEmails")
     public ResponseEntity<ChatRoomResponse> findAllByEmails(@RequestParam List<String> emails) {
         return ResponseEntity.ok(chatRoomService.findAllByEmails(emails));
+    }
+
+    @GetMapping("/chatRooms/findAllByEmails-joined")
+    public ResponseEntity<ChatRoomResponseJoined> findAllByEmailsJoined(@RequestParam List<String> emails) {
+        return ResponseEntity.ok(chatRoomService.findAllByEmailsJoined(emails));
     }
 
 }

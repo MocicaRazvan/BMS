@@ -28,6 +28,11 @@ public class ChatMessageController {
         chatMessageService.sendMessage(chatMessagePayload);
     }
 
+    @MessageMapping("/sendTyping")
+    public void sendTyping(@Valid @Payload ChatMessagePayload chatMessagePayload) {
+        chatMessageService.sendTyping(chatMessagePayload);
+    }
+
     @GetMapping("/messages/{chatRoomId}")
     public ResponseEntity<PageableResponse<List<ChatMessageResponse>>> getMessages(@PathVariable Long chatRoomId,
                                                                                    @RequestParam int offset,

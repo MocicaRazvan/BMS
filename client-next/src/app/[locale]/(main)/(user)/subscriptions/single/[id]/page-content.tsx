@@ -8,7 +8,7 @@ import { useGetTitleBodyUser } from "@/hoooks/useGetTitleBodyUser";
 import { CustomEntityModel, PlanResponse } from "@/types/dto";
 import LoadingSpinner from "@/components/common/loading-spinner";
 import React, { useCallback } from "react";
-import { fetchStream } from "@/hoooks/fetchStream";
+import { fetchStream } from "@/lib/fetchers/fetchStream";
 import CustomImageCarousel from "@/components/common/custom-image-crousel";
 import AuthorProfile from "@/components/common/author-profile";
 import useClientNotFound from "@/hoooks/useClientNotFound";

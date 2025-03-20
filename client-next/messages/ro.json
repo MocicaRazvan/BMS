@@ -345,6 +345,14 @@
     }
   },
   "components": {
+    "editor": {
+      "FormatTypeTexts": {
+        "paragraph": "Paragraf"
+      },
+      "EditorEmojiPickerTexts": {
+        "searchPlaceholder": "Caută emoji"
+      }
+    },
     "forms": {
       "UseNavigationGuardI18nTexts": {
         "confirm": "Ați făcut modificări care nu au fost salvate. Sunteți sigur că doriți să părăsiți pagina?"
@@ -428,7 +436,8 @@
         "lastName": "Nume"
       },
       "ChatMessageFormTexts": {
-        "errorText": "Mesajul nu a putut fi trimis"
+        "errorText": "Mesajul nu a putut fi trimis",
+        "buttonText": "Trimite"
       },
       "IngredientFormTexts": {
         "titleTaken": "Acest ingredient există deja",
@@ -1155,22 +1164,24 @@
       }
     },
     "chat": {
+      "ChatRoomItemTexts": {
+        "unreadMessagesText": "necitite",
+        "typingText": "Scrie..."
+      },
+      "ChatRoomContentTexts": {
+        "noRoomsTexts": "Nicio cameră de chat"
+      },
+      "ChatRoomsTexts": {
+        "searchPlaceholder": "Caută după email...",
+        "errorText": "Eroare la încărcarea camerelor",
+        "headerText": "Camere de chat"
+      },
+      "ConversationContentTexts": {
+        "sameChatText": "Utilizatorul este în același chat",
+        "typingText": "Scrie..."
+      },
       "ConversationTexts": {
-        "userInTheSameChat": "Utilizatorul este în același chat",
-        "loadMore": "Încarcă mai multe mesaje...",
-        "loadMoreLoading": "Se încarcă mai multe mesaje...",
-        "errorLoading": "Ceva nu a mers bine, vă rugăm să reîncercați"
-      },
-      "MainContentTexts": {
-        "chatRoomsLabel": "Camere de chat",
-        "noSelectedChatRoom": "Nicio cameră selectată"
-      },
-      "ChatMainContentWrapperTexts": {
-        "search": "Caută după email...",
-        "errorLoading": "Ceva nu a mers bine, vă rugăm să reîncercați"
-      },
-      "ChatRoomTexts": {
-        "numberUnread": "Mesaje necitite: "
+        "errorText": "Eroare la încărcarea mesajelor"
       }
     },
     "charts": {
@@ -2087,6 +2098,12 @@
             "body": "Cu excepția cazului în care legea aplicabilă prevede altfel, avem dreptul să prelucrăm datele dumneavoastră cu caracter personal într-o formă care să vă permită identificarea pentru perioada necesară atingerii scopului pentru care au fost furnizate datele cu caracter personal (aceasta poate include perioada în care vizitați site-ul nostru web sau utilizați serviciile noastre și/sau pentru întreaga perioadă în care scopul prelucrării datelor cu caracter personal continuă să existe)."
           }
         }
+      }
+    },
+    "chat": {
+      "ChatPageTexts": {
+        "noChatSelectedText": "Selectează un chat pentru a începe conversația",
+        "headingText": "Vorbește cu alți utilizatori pe Bro Meets Science"
       }
     }
   },

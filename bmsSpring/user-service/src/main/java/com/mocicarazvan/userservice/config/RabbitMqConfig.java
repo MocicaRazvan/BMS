@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
+import org.springframework.retry.support.RetryTemplate;
 
 @Configuration
 public class RabbitMqConfig {
@@ -97,6 +98,7 @@ public class RabbitMqConfig {
         RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
         rabbitTemplate.setMessageConverter(jsonMessageConverter());
         rabbitTemplate.setTaskExecutor(rabbitMqAsyncTaskExecutor);
+        rabbitTemplate.setRetryTemplate(RetryTemplate.defaultInstance());
         return rabbitTemplate;
     }
 
@@ -111,6 +113,37 @@ public class RabbitMqConfig {
     @Bean
     public RabbitMqSender userCacheInvalidateSender(RabbitTemplate rabbitTemplate) {
         return new RabbitMqSenderImpl(userFanoutExchangeName, "", rabbitTemplate, concurrency);
+    }
+
+    @Bean
+    public Queue usersEmailsRpcQueue() {
+        return new Queue("users.rpc.queue", true, false, true);
+    }
+
+    @Bean
+    public Queue usersEmailExistsQueue() {
+        return new Queue("users.email.exists", true, false, true);
+    }
+
+    @Bean
+    public DirectExchange usersRpcExchange() {
+        return new DirectExchange("users.rpc.exchange", true, false);
+    }
+
+    @Bean
+    public Binding usersEmailsRpcBinding(Queue usersEmailsRpcQueue, DirectExchange usersRpcExchange) {
+        return BindingBuilder
+                .bind(usersEmailsRpcQueue)
+                .to(usersRpcExchange)
+                .with("users.rpc.getUsersByEmails");
+    }
+
+    @Bean
+    public Binding userEmailExistsBinding(Queue usersEmailExistsQueue, DirectExchange usersRpcExchange) {
+        return BindingBuilder
+                .bind(usersEmailExistsQueue)
+                .to(usersRpcExchange)
+                .with("users.rpc.existsUserByEmail");
     }
 
 }

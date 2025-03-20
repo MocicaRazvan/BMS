@@ -15,6 +15,7 @@ import {
   NutritionalFactResponse,
 } from "@/types/dto";
 import { cn } from "@/lib/utils";
+import { Fragment } from "react";
 
 const tableColsKeys: (keyof NutritionalFactResponse &
   keyof IngredientTableColumnTexts)[] = [
@@ -56,8 +57,8 @@ export default function NutritionalTable({
         <TableCaption className="mt-2">{tableCaption}</TableCaption>
         <TableHeader>
           <TableRow>
-            {finalCols.map((col) => (
-              <TableHead key={col + "lg"}>
+            {finalCols.map((col, i) => (
+              <TableHead key={col + "lg" + i}>
                 {" "}
                 {ingredientColumnTexts[col] as string}{" "}
               </TableHead>
@@ -65,34 +66,38 @@ export default function NutritionalTable({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {tableColsKeys.map((col) => (
-            <TableCell key={col}>
-              {typeof ing.nutritionalFact[col] === "number"
-                ? ing.nutritionalFact[col]?.toFixed(2)
-                : ing.nutritionalFact[col]}
-            </TableCell>
-          ))}
-          <TableCell>{getCalories(ing)}</TableCell>
-          {showUnit && (
-            <TableCell>
-              {" "}
-              <Badge
-                variant={
-                  ing.nutritionalFact.unit === "GRAM" ? "secondary" : "default"
-                }
-              >
-                {ing.nutritionalFact.unit}
-              </Badge>
-            </TableCell>
-          )}
+          <TableRow>
+            {tableColsKeys.map((col, i) => (
+              <TableCell key={col + i}>
+                {typeof ing.nutritionalFact[col] === "number"
+                  ? ing.nutritionalFact[col]?.toFixed(2)
+                  : ing.nutritionalFact[col]}
+              </TableCell>
+            ))}
+            <TableCell>{getCalories(ing)}</TableCell>
+            {showUnit && (
+              <TableCell>
+                {" "}
+                <Badge
+                  variant={
+                    ing.nutritionalFact.unit === "GRAM"
+                      ? "secondary"
+                      : "default"
+                  }
+                >
+                  {ing.nutritionalFact.unit}
+                </Badge>
+              </TableCell>
+            )}
+          </TableRow>
         </TableBody>
       </Table>
       <div className="lg:hidden space-y-8 px-6 w-full">
         <p className="mt-4 text-sm text-muted-foreground">{tableCaption}</p>
 
-        {tableColsKeys.map((col) => (
-          <>
-            <div key={col + "sm"} className="flex justify-between">
+        {tableColsKeys.map((col, i) => (
+          <Fragment key={col + "sm" + i}>
+            <div key={col + "sm" + i} className="flex justify-between">
               <p>{ingredientColumnTexts[col] as string}</p>
               <p>
                 {typeof ing.nutritionalFact[col] === "number"
@@ -101,7 +106,7 @@ export default function NutritionalTable({
               </p>
             </div>
             <hr className="border" />
-          </>
+          </Fragment>
         ))}
         <div className="flex justify-between">
           <p>{ingredientColumnTexts.calories}</p>

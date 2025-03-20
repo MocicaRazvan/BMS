@@ -559,6 +559,7 @@ export default function IngredientsTable({
             setSortValue,
             sortValue,
             callback: resetCurrentPage,
+            filterKey: "name",
           }}
           extraCriteria={
             <div className="flex items-start justify-center gap-8 flex-1 flex-wrap">

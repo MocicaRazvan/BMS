@@ -1,7 +1,7 @@
 import { ChatMessageNotificationResponse } from "@/types/dto";
 import { MessageCircleIcon } from "lucide-react";
 import { parseISO } from "date-fns";
-import { Locale } from "@/navigation";
+import { Locale, useRouter } from "@/navigation";
 import { useLocale } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { useCallback } from "react";
@@ -26,18 +26,21 @@ export default function ChatNotificationsContent({
 }: Props) {
   const locale = useLocale();
   const stompClient = useStompClient();
+  const router = useRouter();
 
   const handleNavigation = useCallback(
     (senderNotif: ChatMessageNotificationResponse) => {
-      if (stompClient && stompClient.connected) {
-        stompClient.publish({
-          destination: "/app/changeRoom",
-          body: JSON.stringify({
-            chatId: senderNotif.reference.id,
-            userEmail: senderNotif.receiver.email,
-          }),
-        });
-      }
+      // if (stompClient && stompClient.connected) {
+      //   stompClient.publish({
+      //     destination: "/app/changeRoom",
+      //     body: JSON.stringify({
+      //       chatId: senderNotif.reference.id,
+      //       userEmail: senderNotif.receiver.email,
+      //     }),
+      //   });
+      // }
+      console.log("handleNavigation", senderNotif);
+      router.push("/chat/" + senderNotif.reference.id);
     },
     [stompClient?.connected],
   );

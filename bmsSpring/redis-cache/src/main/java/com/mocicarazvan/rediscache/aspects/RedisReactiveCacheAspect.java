@@ -22,7 +22,6 @@ import reactor.util.function.Tuple2;
 import java.lang.reflect.Method;
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -98,11 +97,11 @@ public class RedisReactiveCacheAspect {
                 localReactiveCache.getFluxOrEmpty(savingKey)
                         .switchIfEmpty(
                                 reactiveRedisTemplate.opsForValue().get(savingKey)
-                                        .map(collection -> (Collection<Object>) objectMapper.convertValue(collection, objectMapper.getTypeFactory()
-                                                .constructCollectionType(Collection.class,
+                                        .map(collection -> (List<Object>) objectMapper.convertValue(collection, objectMapper.getTypeFactory()
+                                                .constructCollectionType(List.class,
                                                         objectMapper.getTypeFactory().constructType(method.getGenericReturnType())
                                                 )))
-                                        .doOnNext(collection -> localReactiveCache.put(savingKey, collection))
+                                        .doOnNext(list -> localReactiveCache.put(savingKey, list))
                                         .flatMapMany(Flux::fromIterable)
                                         .cast(Object.class)
 

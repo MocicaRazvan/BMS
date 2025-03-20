@@ -17,7 +17,7 @@ import DaysList, { DaysListTexts } from "@/components/days/days-list";
 import { SingleDayTexts } from "@/components/days/single-day";
 import LikesDislikes from "@/components/common/likes-dislikes";
 import DietBadge from "@/components/common/diet-badge";
-import { fetchStream } from "@/hoooks/fetchStream";
+import { fetchStream } from "@/lib/fetchers/fetchStream";
 import { AnswerFromBodyFormTexts } from "@/components/forms/answer-from-body-form";
 import ItemBodyQa from "@/components/common/item-body-qa";
 

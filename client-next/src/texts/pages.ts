@@ -163,6 +163,8 @@ import {
   getPlanRecommendationListTexts,
   getPostRecommendationListTexts,
 } from "@/texts/components/recommandation";
+import { ChatPageTexts } from "@/app/[locale]/(main)/(user)/chat/page-content";
+import { getChatRoomsTexts } from "@/texts/components/chat";
 
 export async function getSinglePostPageTexts(): Promise<SinglePostPageTexts> {
   const [
@@ -1999,5 +2001,17 @@ export async function getTermsOfServiceTexts(): Promise<TermsOfServiceTexts> {
       }),
       {} as Record<(typeof terms)[number], { title: string; body: string }>,
     ),
+  };
+}
+
+export async function getChatPageTexts(): Promise<ChatPageTexts> {
+  const [chatRoomsTexts, t] = await Promise.all([
+    getChatRoomsTexts(),
+    getTranslations("pages.chat.ChatPageTexts"),
+  ]);
+  return {
+    chatRoomsTexts,
+    noChatSelectedText: t("noChatSelectedText"),
+    headingText: t("headingText"),
   };
 }

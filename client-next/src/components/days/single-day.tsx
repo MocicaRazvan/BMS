@@ -10,7 +10,7 @@ import { IngredientPieChartTexts } from "@/components/charts/ingredient-macros-p
 import useFetchStream from "@/hoooks/useFetchStream";
 import useClientNotFound from "@/hoooks/useClientNotFound";
 import DietBadge from "@/components/common/diet-badge";
-import { fetchStream } from "@/hoooks/fetchStream";
+import { fetchStream } from "@/lib/fetchers/fetchStream";
 import DayTypeBadge, {
   DayTypeBadgeTexts,
 } from "@/components/days/day-type-badge";

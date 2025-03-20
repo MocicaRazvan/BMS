@@ -34,10 +34,10 @@ import ButtonSubmit, {
   ButtonSubmitTexts,
 } from "@/components/forms/button-submit";
 import useLoadingErrorState from "@/hoooks/useLoadingErrorState";
-import { fetchStream } from "@/hoooks/fetchStream";
+import { fetchStream } from "@/lib/fetchers/fetchStream";
 import { getToxicity } from "@/actions/toxcity";
 import DOMPurify from "dompurify";
-import Editor from "@/components/editor/editor";
+import Editor, { EditorTexts } from "@/components/editor/editor";
 
 export interface BaseSingleCommentProps {
   deleteCommentCallback: (commentId: number) => void;
@@ -45,6 +45,7 @@ export interface BaseSingleCommentProps {
   titleBodyTexts: TitleBodyTexts;
   commentSchemaTexts: CommentSchemaTexts;
   buttonSubmitTexts: ButtonSubmitTexts;
+  editorTexts: EditorTexts;
   errorText: string;
   updateCallback: (
     id: number,
@@ -86,6 +87,7 @@ export const SingleComment = memo<Props>(
     englishError,
     deleteCommentDialog,
     editCommentLabel,
+    editorTexts,
   }) => {
     const schema = useMemo(
       () => getCommentSchema(commentSchemaTexts),
@@ -259,6 +261,7 @@ export const SingleComment = memo<Props>(
                                 descritpion={field.value as string}
                                 onChange={field.onChange}
                                 placeholder={titleBodyTexts.bodyPlaceholder}
+                                texts={editorTexts}
                               />
                             </FormControl>
                             <FormMessage />

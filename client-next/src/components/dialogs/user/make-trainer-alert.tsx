@@ -10,7 +10,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button, ButtonProps } from "@/components/ui/button";
-import { fetchStream } from "@/hoooks/fetchStream";
+import { fetchStream } from "@/lib/fetchers/fetchStream";
 import { UserDto } from "@/types/dto";
 import { WithUser } from "@/lib/user";
 import { toast } from "@/components/ui/use-toast";

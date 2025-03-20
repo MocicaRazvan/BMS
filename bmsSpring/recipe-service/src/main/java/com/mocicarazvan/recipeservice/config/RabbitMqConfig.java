@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
+import org.springframework.retry.support.RetryTemplate;
 
 
 @Configuration
@@ -100,6 +101,7 @@ public class RabbitMqConfig {
         RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
         rabbitTemplate.setMessageConverter(jsonMessageConverter());
         rabbitTemplate.setTaskExecutor(rabbitMqAsyncTaskExecutor);
+        rabbitTemplate.setRetryTemplate(RetryTemplate.defaultInstance());
         return rabbitTemplate;
     }
 

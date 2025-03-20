@@ -4,6 +4,8 @@ import {
 } from "@/texts/components/forms";
 import { getTranslations } from "next-intl/server";
 import { CommentAccordionTexts } from "@/components/posts/comment-accordion";
+import { getEditorTexts } from "@/texts/components/editor";
+import { EditorTexts } from "@/components/editor/editor";
 
 export interface PostCommentsTexts {
   author: string;
@@ -17,15 +19,19 @@ export interface PostCommentsTexts {
   commentAccordionTexts: CommentAccordionTexts;
   deleteCommentDialog: string;
   editCommentLabel: string;
+  editorTexts: EditorTexts;
 }
 
 export async function getPostCommentsTexts(): Promise<PostCommentsTexts> {
-  const [t, commentsFormTexts, commentAccordionTexts] = await Promise.all([
-    getTranslations("components.posts.PostCommentsTexts"),
-    getCommentFormTexts(),
-    getCommentAccordionTexts(),
-  ]);
+  const [t, commentsFormTexts, commentAccordionTexts, editorTexts] =
+    await Promise.all([
+      getTranslations("components.posts.PostCommentsTexts"),
+      getCommentFormTexts(),
+      getCommentAccordionTexts(),
+      getEditorTexts(),
+    ]);
   return {
+    editorTexts,
     author: t("author"),
     loadMore: t("loadMore"),
     commentsFormTexts,
@@ -40,11 +46,13 @@ export async function getPostCommentsTexts(): Promise<PostCommentsTexts> {
   };
 }
 export async function getCommentAccordionTexts(): Promise<CommentAccordionTexts> {
-  const [t, commentsFormTexts] = await Promise.all([
+  const [t, commentsFormTexts, editorTexts] = await Promise.all([
     getTranslations("components.posts.CommentAccordionTexts"),
     getCommentFormTexts(),
+    getEditorTexts(),
   ]);
   return {
+    editorTexts,
     commentFormTexts: commentsFormTexts,
     englishError: t("englishError"),
     toxicError: t("toxicError"),

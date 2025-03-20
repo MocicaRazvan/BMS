@@ -3,7 +3,7 @@
 import { signOut, useSession } from "next-auth/react";
 import { ReactNode, useEffect } from "react";
 import { useRouter } from "@/navigation";
-import { fetchStream } from "@/hoooks/fetchStream";
+import { fetchStream } from "@/lib/fetchers/fetchStream";
 
 export default function ValidUserSessionContext({
   children,

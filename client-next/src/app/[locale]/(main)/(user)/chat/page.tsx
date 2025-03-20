@@ -1,11 +1,10 @@
-import { Suspense } from "react";
-import LoadingSpinner from "@/components/common/loading-spinner";
-import ChatMainContentWrapper from "@/app/[locale]/(main)/(user)/chat/main-content-wrapper";
-import { getUser } from "@/lib/user";
-import { getChatMainContentWrapperTexts } from "@/texts/components/chat";
 import { Locale } from "@/navigation";
 import { Metadata } from "next";
 import { getIntlMetadata } from "@/texts/metadata";
+import { unstable_setRequestLocale } from "next-intl/server";
+import { getUser } from "@/lib/user";
+import ChatPageMainPageContent from "@/app/[locale]/(main)/(user)/chat/page-content";
+import { getChatPageTexts } from "@/texts/pages";
 
 interface Props {
   searchParams: any;
@@ -21,21 +20,18 @@ export async function generateMetadata({
     ...(await getIntlMetadata("user.Chat", "/chat", locale)),
   };
 }
-
-export default async function ChatPage({ searchParams }: Props) {
-  const [authUser, chatMainContentWrapperTexts] = await Promise.all([
+export default async function ChatPage({
+  searchParams,
+  params: { locale },
+}: Props) {
+  unstable_setRequestLocale(locale);
+  const [authUser, chatPageTexts] = await Promise.all([
     getUser(),
-    getChatMainContentWrapperTexts(),
+    getChatPageTexts(),
   ]);
-
   return (
-    <div>
-      <Suspense fallback={<LoadingSpinner />}>
-        <ChatMainContentWrapper
-          authUser={authUser}
-          {...chatMainContentWrapperTexts}
-        />
-      </Suspense>
+    <div className="w-full h-full">
+      <ChatPageMainPageContent authUser={authUser} {...chatPageTexts} />
     </div>
   );
 }

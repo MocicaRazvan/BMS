@@ -21,7 +21,7 @@ import {
   roundToDecimalPlaces,
   wrapItemToString,
 } from "@/lib/utils";
-import { fetchStream } from "@/hoooks/fetchStream";
+import { fetchStream } from "@/lib/fetchers/fetchStream";
 import { Session } from "next-auth";
 import { BaseError } from "@/types/responses";
 

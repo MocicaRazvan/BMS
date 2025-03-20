@@ -22,7 +22,7 @@ import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/ui/password-input";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
-import { fetchStream } from "@/hoooks/fetchStream";
+import { fetchStream } from "@/lib/fetchers/fetchStream";
 import { useRouter } from "@/navigation";
 import { Session } from "next-auth";
 import { signIn, useSession } from "next-auth/react";

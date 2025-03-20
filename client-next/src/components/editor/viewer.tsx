@@ -20,7 +20,7 @@ export default function Viewer({ description }: Props) {
   });
   if (!editor) return null;
   return (
-    <div className="">
+    <div>
       <EditorContent editor={editor} readOnly={true} />
     </div>
   );

@@ -259,7 +259,7 @@ function AnswerItemCard({
   matchScore,
 }: AnswerItemProps) {
   const scoreColor =
-    score > 0.5 ? "bg-success" : score > 0.3 ? "bg-amber" : "bg-error";
+    score > 0.65 ? "bg-success" : score > 0.4 ? "bg-amber" : "bg-destructive";
   const fixedValue = Math.round(score * 100);
   return (
     <Card className="w-full h-full flex flex-col items-center justify-between gap-2 shadow-sm shadow-shadow_color">

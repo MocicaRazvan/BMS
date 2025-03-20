@@ -20,7 +20,7 @@ import UpdateProfile from "@/components/forms/update-profile";
 import { useCallback, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Loader2 } from "lucide-react";
-import { fetchStream } from "@/hoooks/fetchStream";
+import { fetchStream } from "@/lib/fetchers/fetchStream";
 import { useRouter } from "@/navigation";
 import { UpdateProfileTexts } from "@/texts/components/forms";
 import { useStompClient } from "react-stomp-hooks";
@@ -163,7 +163,10 @@ export default function UserPageContent({
         </h1>
         <div className="flex items-center justify-center gap-4">
           <Avatar className="w-16 h-16">
-            <AvatarImage src={user?.image || noImg} alt={user?.email} />
+            <AvatarImage
+              src={user?.image || noImg}
+              alt={user?.email?.substring(0, 2)}
+            />
           </Avatar>
 
           <h3 className="text-lg lg:text-xl font-bold text-center">

@@ -14,7 +14,7 @@ import { UseFetchStreamReturn } from "@/hoooks/useFetchStream";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useFormatter } from "next-intl";
 import { Button } from "@/components/ui/button";
-import { fetchStream } from "@/hoooks/fetchStream";
+import { fetchStream } from "@/lib/fetchers/fetchStream";
 import { motion } from "framer-motion";
 import { Check, RefreshCw, XIcon } from "lucide-react";
 import { Locale } from "@/navigation";
@@ -91,6 +91,14 @@ const ArchiveQueueCards = memo(
     const updateQueue = useGetQueueArchive({
       queueName: updateQueueName,
     });
+
+    // console.log(
+    //   "ARCHIVE QUEUE DATA",
+    //   "/archive/queue/" + deleteQueueName,
+    //   "/archive/queue/" + updateQueueName,
+    //   deleteQueue,
+    //   updateQueue,
+    // );
     return (
       <div className="w-full h-full space-y-5 md:space-y-10 pb-5">
         {showHeader && (
@@ -204,9 +212,9 @@ const DashboardCard = memo(
         </div>
       );
     }
-    if (!isFinished) {
+    if (!isFinished || !messages.length) {
       return (
-        <>
+        <div className="min-h-[250px]">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-[15px] font-medium capitalize">
               {title}
@@ -215,7 +223,7 @@ const DashboardCard = memo(
           <CardContent>
             <Skeleton className="w-full h-full" />
           </CardContent>
-        </>
+        </div>
       );
     }
     const { messageCount, timestamp, cronExpression, consumerCount } =
@@ -391,7 +399,7 @@ const DashboardSuccessCard = memo(
     // }, []);
 
     return (
-      <div className="h-full w-full">
+      <div className="h-full w-full min-h-[250px]">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-[15px] font-medium capitalize">
             {title}

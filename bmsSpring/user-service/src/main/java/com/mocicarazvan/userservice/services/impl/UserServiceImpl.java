@@ -37,6 +37,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
@@ -207,6 +208,11 @@ public class UserServiceImpl implements UserService {
                         .switchIfEmpty(Mono.error(new NotFoundEntity("user", userId)));
     }
 
+    @Override
+    public Mono<Boolean> existsByEmail(String email) {
+        return userRepository.existsByEmail(email);
+    }
+
 
     @Override
     @RedisReactiveCache(key = USER_SERVICE_NAME, idPath = "id")
@@ -220,6 +226,13 @@ public class UserServiceImpl implements UserService {
     public Mono<Void> sendEmailAdmin(EmailRequest emailRequest) {
         return emailUtils.sendEmail(emailRequest.getRecipientEmail(), emailRequest.getSubject(),
                 EmailTemplates.adminTemplate(frontUrl, emailRequest.getContent()));
+    }
+
+    @RedisReactiveCache(key = USER_SERVICE_NAME, idPath = "id")
+    @Override
+    public Flux<UserDto> findAllByEmailIn(Collection<String> emails) {
+        return userRepository.findAllByEmailIn(emails)
+                .map(userMapper::fromUserCustomToUserDto);
     }
 
     public Mono<UserCustom> getAuthUser(Long userId) {

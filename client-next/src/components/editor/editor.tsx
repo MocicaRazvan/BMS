@@ -1,14 +1,22 @@
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
-import EditorToolbar from "./toolbar";
+import EditorToolbar, { EditorToolbarTexts } from "./toolbar";
 import { cn } from "@/lib/utils";
 import DOMPurify from "dompurify";
+import { ClassValue } from "clsx";
+import { CustomSpan } from "@/components/editor/custom-span";
 
+export interface EditorTexts {
+  editorToolbarTexts: EditorToolbarTexts;
+}
 interface Props {
   descritpion: string;
   onChange: (value: string) => void;
   placeholder?: string;
   sticky?: boolean;
+  texts: EditorTexts;
+  editorContentWrapperClassname?: ClassValue;
+  useEmojis?: boolean;
 }
 
 export default function Editor({
@@ -16,9 +24,12 @@ export default function Editor({
   onChange,
   placeholder,
   sticky,
+  texts,
+  editorContentWrapperClassname,
+  useEmojis = true,
 }: Props) {
   const editor = useEditor({
-    extensions: [StarterKit],
+    extensions: [StarterKit, CustomSpan],
     content: descritpion,
     editorProps: {
       attributes: {
@@ -34,10 +45,17 @@ export default function Editor({
   });
   if (!editor) return null;
   return (
-    <div className="flex flex-col justify-center min-h-[250px] ">
-      <EditorToolbar editor={editor} sticky={sticky} />
+    <div className="flex flex-col justify-center min-h-[200px] ">
+      <EditorToolbar
+        editor={editor}
+        sticky={sticky}
+        useEmojis={useEmojis}
+        {...texts.editorToolbarTexts}
+      />
       <div className="h-1" />
-      <EditorContent editor={editor} placeholder={placeholder} />
+      <div className={cn(editorContentWrapperClassname)}>
+        <EditorContent editor={editor} placeholder={placeholder} />
+      </div>
     </div>
   );
 }

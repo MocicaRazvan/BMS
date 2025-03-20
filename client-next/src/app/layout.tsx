@@ -7,7 +7,6 @@ import { Toaster } from "@/components/ui/toaster";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/auth-options";
 import { StompProvider } from "@/providers/stomp-provider";
-import { ChatProvider } from "@/context/chat-context";
 import { ChatMessageNotificationProvider } from "@/context/chat-message-notification-context";
 import { NextIntlClientProvider } from "next-intl";
 import { PostApproveNotificationProvider } from "@/context/post-approve-notification-context";
@@ -25,6 +24,10 @@ import { NotificationPopProvider } from "@/context/notification-pop-context";
 import { AiChatBoxWrapper } from "@/components/ai-chat/ai-chat-box-wrapper";
 import { KanbanRouteChangeProvider } from "@/context/kanban-route-change-context";
 import { NavigationGuardProvider } from "next-navigation-guard";
+import { CacheProvider } from "@/providers/cache-provider";
+import { Metadata } from "next";
+import { CurRoomsProvider } from "@/context/cur-rooms-context";
+import ChatConnectContext from "@/context/chat-connect-context";
 
 const fontSans = FontSans({
   subsets: ["latin"],
@@ -39,6 +42,23 @@ interface Props {
 export function generateStaticParams() {
   return locales.map((locale) => ({ locale }));
 }
+
+export const metadata: Metadata = {
+  icons: {
+    icon: [
+      {
+        media: "(prefers-color-scheme: light)",
+        url: "/images/logo-dark.svg",
+        href: "/images/logo-dark.svg",
+      },
+      {
+        media: "(prefers-color-scheme: dark)",
+        url: "/images/logo-light.svg",
+        href: "/images/logo-light-dark.svg",
+      },
+    ],
+  },
+};
 
 export default async function BaseLayout({
   children,
@@ -76,22 +96,22 @@ export default async function BaseLayout({
           fontSans.variable,
         )}
       >
-        <NextIntlClientProvider locale={locale}>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            enableSystem
-            disableTransitionOnChange
-          >
-            <NavigationGuardProvider>
-              <NextAuthSessionProvider>
-                <ScrollTopProvider>
-                  <ValidUserSessionContext>
-                    <StompProvider
-                      url={spring + "/ws/ws-service"}
-                      authUser={session?.user}
-                    >
-                      <ChatProvider authUser={session?.user}>
+        <CacheProvider>
+          <NextIntlClientProvider locale={locale}>
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="system"
+              enableSystem
+              disableTransitionOnChange
+            >
+              <NavigationGuardProvider>
+                <NextAuthSessionProvider>
+                  <ScrollTopProvider>
+                    <ValidUserSessionContext>
+                      <StompProvider
+                        url={spring + "/ws/ws-service"}
+                        authUser={session?.user}
+                      >
                         <ChatMessageNotificationProvider
                           authUser={session?.user}
                         >
@@ -115,10 +135,14 @@ export default async function BaseLayout({
                                         authUser={session?.user}
                                       >
                                         <KanbanRouteChangeProvider>
-                                          <>
-                                            {children}
-                                            <AiChatBoxWrapper {...aiTexts} />
-                                          </>
+                                          <ChatConnectContext
+                                            authUser={session?.user}
+                                          >
+                                            <>
+                                              {children}
+                                              <AiChatBoxWrapper {...aiTexts} />
+                                            </>
+                                          </ChatConnectContext>
                                         </KanbanRouteChangeProvider>
                                       </SubscriptionProvider>
                                     </CartProvider>
@@ -128,15 +152,15 @@ export default async function BaseLayout({
                             </RecipeApproveNotificationProvider>
                           </PostApproveNotificationProvider>
                         </ChatMessageNotificationProvider>
-                      </ChatProvider>
-                    </StompProvider>
-                  </ValidUserSessionContext>
-                </ScrollTopProvider>
-              </NextAuthSessionProvider>
-              <Toaster />
-            </NavigationGuardProvider>
-          </ThemeProvider>
-        </NextIntlClientProvider>
+                      </StompProvider>
+                    </ValidUserSessionContext>
+                  </ScrollTopProvider>
+                </NextAuthSessionProvider>
+                <Toaster />
+              </NavigationGuardProvider>
+            </ThemeProvider>
+          </NextIntlClientProvider>
+        </CacheProvider>
       </body>
     </html>
   );

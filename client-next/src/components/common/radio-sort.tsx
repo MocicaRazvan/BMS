@@ -7,6 +7,7 @@ import {
   useCallback,
   useEffect,
   useRef,
+  useState,
 } from "react";
 import {
   DropdownMenu,
@@ -33,6 +34,7 @@ export interface RadioSortProps extends RadioSortTexts {
   setSortValue: (value: SetStateAction<string>) => void;
   callback?: () => void;
   useDefaultSort?: boolean;
+  filterKey: string;
 }
 
 export default function RadioSort({
@@ -44,17 +46,20 @@ export default function RadioSort({
   noSort,
   callback,
   useDefaultSort = true,
+  filterKey,
 }: RadioSortProps) {
   const useDefaultSortRef = useRef(useDefaultSort);
   const currentSearchParams = useSearchParams();
+  const [isDefaultSort, setIsDefaultSort] = useState(false);
 
   useEffect(() => {
     if (useDefaultSortRef.current && sortingOptions.length > 0) {
       useDefaultSortRef.current = false;
       const sortString = currentSearchParams.get("sort");
       const sortQ = parseSortString(sortString, sortingOptions);
+      const curFilter = currentSearchParams.get(filterKey);
 
-      if (!sortQ || !sortQ.length) {
+      if (curFilter === "" && (!sortQ || !sortQ.length)) {
         const defaultOption = sortingOptions.find(
           (o) => o.property === "createdAt" && o.direction === "desc",
         );
@@ -62,14 +67,31 @@ export default function RadioSort({
         if (defaultOption) {
           setSort([defaultOption]);
           setSortValue("createdAt-desc");
+          setIsDefaultSort(true);
           callback?.();
         }
       }
     }
   }, [sortingOptions.length]);
 
+  useEffect(() => {
+    const sortString = currentSearchParams.get("sort");
+    const sortQ = parseSortString(sortString, sortingOptions);
+    const sortIsDefault =
+      sortQ.length === 1 &&
+      sortQ[0].property === "createdAt" &&
+      sortQ[0].direction === "desc";
+    if (sortValue === "" && sortIsDefault) {
+      setIsDefaultSort(true);
+      setSortValue("createdAt-desc");
+    }
+  }, [sortValue, sortingOptions.length]);
+
   const handleValueChange = useCallback(
     (val: string) => {
+      if (isDefaultSort) {
+        setIsDefaultSort(false);
+      }
       if (val === sortValue) {
         setSort([]);
         setSortValue("");
@@ -90,7 +112,6 @@ export default function RadioSort({
     },
     [callback, setSort, setSortValue, sortValue, sortingOptions],
   );
-
   if (sortingOptions?.length === 0) return null;
   return (
     <DropdownMenu>
@@ -108,6 +129,11 @@ export default function RadioSort({
                 value={`${property}-${direction}`}
                 icon={direction === "asc" ? <ArrowUp /> : <ArrowDown />}
                 iconClassnames={"w-4 h-4 fill-current"}
+                disabled={
+                  isDefaultSort &&
+                  property === "createdAt" &&
+                  direction === "desc"
+                }
               >
                 {text}
               </DropdownMenuRadioItem>

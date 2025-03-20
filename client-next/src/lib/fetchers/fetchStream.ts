@@ -4,6 +4,7 @@ import { BaseError } from "@/types/responses";
 import { AcceptHeader } from "@/types/fetch-utils";
 import { NEXT_CSRF_HEADER, NEXT_CSRF_HEADER_TOKEN } from "@/lib/constants";
 import { getCsrfToken } from "next-auth/react";
+import fetchFactory from "@/lib/fetchers/fetchWithRetry";
 
 const mutatingActions = ["POST", "PUT", "DELETE", "PATCH"];
 
@@ -18,11 +19,15 @@ export interface FetchStreamProps<T> {
   cache?: RequestCache;
   aboveController?: AbortController;
   successCallback?: (data: T) => void;
-  successArrayCallback?: (data: T[]) => void;
+  successArrayCallback?: (data: T[], batchIndex: number) => void;
   errorCallback?: (error: BaseError) => void;
   acceptHeader?: AcceptHeader;
   batchSize?: number;
   csrf?: string;
+  updateOnEmpty?: boolean;
+  nextRequestConfig?: NextFetchRequestConfig;
+  onAbort?: () => void;
+  extraOptions?: RequestInit;
 }
 
 export async function fetchStream<
@@ -44,8 +49,13 @@ export async function fetchStream<
   acceptHeader = "application/x-ndjson",
   batchSize = 6,
   csrf,
+  updateOnEmpty = false,
+  nextRequestConfig,
+  onAbort,
+  extraOptions,
 }: FetchStreamProps<T>) {
   let batchBuffer: T[] = [];
+  let batchIndex = 0;
   let messages: T[] = [];
   let error: E | null = null;
   let isFinished = false;
@@ -104,6 +114,8 @@ export async function fetchStream<
     signal: abortController.signal,
     cache,
     credentials: "include",
+    ...(nextRequestConfig && { next: nextRequestConfig }),
+    ...(extraOptions || {}),
   };
 
   if (body !== null && method !== "GET" && method !== "HEAD") {
@@ -113,15 +125,22 @@ export async function fetchStream<
   const url = combinedQuery ? `${path}?${combinedQuery}` : path;
 
   const handleBatchUpdate = () => {
+    // console.log(
+    //   "handleBatchUpdate inner",
+    //   path,
+    //   batchBuffer.length,
+    //   batchBuffer,
+    //   acceptHeader,
+    // );
     messages.push(...batchBuffer);
-    successArrayCallback?.(batchBuffer);
+    successArrayCallback?.(batchBuffer, batchIndex);
     batchBuffer = [];
   };
 
   try {
     messages = [];
     batchBuffer = [];
-    const res = await fetch(
+    const res = await fetchFactory(fetch)(
       `${process.env.NEXT_PUBLIC_SPRING_CLIENT}${url}`,
       fetchOptions,
     );
@@ -132,8 +151,10 @@ export async function fetchStream<
       const { done, value } = await reader.read();
       if (done) {
         isFinished = true;
-        if (batchBuffer.length > 0) {
-          console.log("handleBatchUpdateDone", path, batchBuffer.length);
+        if (!updateOnEmpty && batchBuffer.length > 0) {
+          // console.log("handleBatchUpdateDone", path, batchBuffer.length);
+          handleBatchUpdate();
+        } else {
           handleBatchUpdate();
         }
         return;
@@ -145,8 +166,9 @@ export async function fetchStream<
         batchBuffer.push(value as T);
         // messages = [...messages, value as T];
         if (batchBuffer.length === batchSize) {
-          console.log("handleBatchUpdateSize", path, batchBuffer.length);
+          // console.log("handleBatchUpdateSize", path, batchBuffer.length);
           handleBatchUpdate();
+          batchIndex++;
         }
         successCallback?.(value as T);
       }
@@ -166,7 +188,10 @@ export async function fetchStream<
 
   const cleanUp = () => {
     if (!abortController?.signal?.aborted) {
+      onAbort?.();
       batchBuffer = [];
+      batchIndex = 0;
+
       abortController?.abort();
     }
   };

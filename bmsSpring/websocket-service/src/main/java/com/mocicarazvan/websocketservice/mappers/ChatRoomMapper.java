@@ -22,6 +22,8 @@ public abstract class ChatRoomMapper implements ModelResponseMapper<ChatRoom, Ch
     public ChatRoomResponse fromModelToResponse(ChatRoom chatRoom) {
         return ChatRoomResponse.builder()
                 .id(chatRoom.getId())
+                .createdAt(chatRoom.getCreatedAt())
+                .updatedAt(chatRoom.getUpdatedAt())
                 .users(chatRoom.getUsers()
                         .stream()
                         .map(u -> conversationUserMapper.fromModelToResponse(u))

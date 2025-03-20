@@ -138,7 +138,7 @@ const TopChartWrapper = <T extends RankSummary>({
         </div>
       </div>
       {!isFinished ? (
-        <LoadingSpinner sectionClassName="min-h-[450px] md:min-h-[650px] w-full h-full pb-10" />
+        <LoadingSpinner sectionClassName="min-h-[450px] md:min-h-[650px] w-full h-full pb-10 " />
       ) : noMessageOrError ? (
         <div className="block w-full h-full">
           <h2 className="text-4xl tracking-tighter font-bold w-full max-w-3xl max-h-[550px] mx-auto">

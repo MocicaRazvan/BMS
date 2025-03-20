@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -40,5 +41,6 @@ public interface UserRepository extends R2dbcRepository<UserCustom, Long> {
 
     Mono<Boolean> existsByIdAndRoleIn(Long userId, Set<Role> roles);
 
+    Flux<UserCustom> findAllByEmailIn(Collection<String> emails);
 
 }

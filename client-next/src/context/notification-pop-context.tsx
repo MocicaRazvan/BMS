@@ -453,27 +453,28 @@ function NotificationPopProviderUser({
   authUser,
   content,
 }: NotificationPopProviderUserProps) {
-  const stompClient = useStompClient();
-  const router = useRouter();
-  const { removeBySender } = useChatNotification();
-  useSubscription(`/queue/chat-changed-${authUser?.email}`, (message) => {
-    const newMessage = JSON.parse(message.body) as ConversationUserResponse;
-
-    // navigate to chat room after it is created
-    if (newMessage.connectedChatRoom?.id) {
-      const sender = newMessage.connectedChatRoom?.users.find(
-        (user) => user.email !== authUser?.email,
-      );
-      if (sender && stompClient && stompClient.connected) {
-        removeBySender({
-          stompClient,
-          senderEmail: sender.email,
-          receiverEmail: authUser?.email || "",
-        });
-        router.push(`/chat/?chatId=${newMessage.connectedChatRoom?.id}`);
-      }
-    }
-  });
+  // const stompClient = useStompClient();
+  // const router = useRouter();
+  // const { removeBySender } = useChatNotification();
+  // useSubscription(`/queue/chat-changed-${authUser?.email}`, (message) => {
+  //   const newMessage = JSON.parse(message.body) as ConversationUserResponse;
+  //
+  //   // navigate to chat room after it is created
+  //   if (newMessage.connectedChatRoom?.id) {
+  //     const sender = newMessage.connectedChatRoom?.users.find(
+  //       (user) => user.email !== authUser?.email,
+  //     );
+  //     if (sender && stompClient && stompClient.connected) {
+  //       removeBySender({
+  //         stompClient,
+  //         senderEmail: sender.email,
+  //         receiverEmail: authUser?.email || "",
+  //       });
+  //       //todo vezi aici
+  //       // router.push(`/chat/?chatId=${newMessage.connectedChatRoom?.id}`);
+  //     }
+  //   }
+  // });
 
   return content;
 }

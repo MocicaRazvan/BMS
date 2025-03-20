@@ -2,7 +2,6 @@ package com.mocicarazvan.websocketservice.dtos.chatRoom;
 
 import com.mocicarazvan.websocketservice.utils.Transformable;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
@@ -11,7 +10,6 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @SuperBuilder
 public class ChatRoomUserDto implements Transformable<ChatRoomUserDto> {
-    @NotNull(message = "Chat id is required")
     private Long chatId;
     @NotBlank(message = "User email is required")
     private String userEmail;

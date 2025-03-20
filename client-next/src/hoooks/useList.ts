@@ -14,14 +14,14 @@ import {
   makeSortString,
   parseSortString,
 } from "@/lib/utils";
-import useFetchStream from "@/hoooks/useFetchStream";
+import useFetchStream, { UseFetchStreamProps } from "@/hoooks/useFetchStream";
 import {
   PageableResponse,
   PageInfo,
   ResponseWithUserDtoEntity,
   TitleBodyDto,
 } from "@/types/dto";
-import { FetchStreamProps } from "@/hoooks/fetchStream";
+import { FetchStreamProps } from "@/lib/fetchers/fetchStream";
 import { useDebounceWithCallBack } from "@/hoooks/useDebounceWithCallback";
 import useDateRangeFilterParams from "@/hoooks/useDateRangeFilterParams";
 
@@ -69,6 +69,8 @@ interface Args<T>
   filterKey?: FilterKey;
   useAbortController?: boolean;
   navigate?: boolean;
+  defaultSort?: boolean;
+  preloadNext?: boolean;
 }
 
 type Constrained<T> = T extends TitleBodyDto
@@ -90,6 +92,8 @@ export default function useList<T>({
   filterKey = "title",
   useAbortController = true,
   navigate = true,
+  defaultSort = true,
+  preloadNext = true,
   ...props
 }: Args<T>) {
   const pathname = usePathname();
@@ -139,8 +143,6 @@ export default function useList<T>({
     defaultUpdatedAtUpperBound ?? undefined,
   );
 
-  console.log("currentPage", currentPage);
-
   const sortString = currentSearchParams.get("sort");
   const sortQ = parseSortString(sortString, sortingOptions);
   const [sort, setSort] = useState(sortQ);
@@ -158,9 +160,8 @@ export default function useList<T>({
   const [filter, setFilter] = useState<Filter>({
     [filterKey]: filterValue,
   });
-  const { messages, error, isFinished, refetch } = useFetchStream<
-    PageableResponse<T>
-  >({
+
+  const fetchArgs: UseFetchStreamProps = {
     path,
     method: "PATCH",
     authToken: true,
@@ -181,7 +182,13 @@ export default function useList<T>({
     },
     // todo verify
     ...props,
-  });
+  };
+
+  const { messages, error, isFinished, refetch, manualFetcher } =
+    useFetchStream<PageableResponse<T>>(fetchArgs);
+  const [nextMessages, setNextMessages] = useState<
+    PageableResponse<T>[] | null
+  >(null);
 
   const debounceCallback = useCallback(() => {
     setPageInfo((prev) => ({
@@ -202,6 +209,63 @@ export default function useList<T>({
     () => messages?.map((m) => m.content) || [],
     [JSON.stringify(messages)],
   );
+
+  useEffect(() => {
+    let isMounted = true;
+    const abortController = new AbortController();
+    if (
+      isFinished &&
+      preloadNext &&
+      messages &&
+      messages.length > 0 &&
+      messages[0].pageInfo &&
+      !error
+    ) {
+      const maxPage = messages[0].pageInfo.totalPages;
+      if (pageInfo.currentPage === maxPage || !isMounted) {
+        return;
+      }
+
+      const nextPage = pageInfo.currentPage + 1;
+      const newArgs = {
+        ...fetchArgs,
+        body: {
+          ...fetchArgs.body,
+          page: nextPage,
+        },
+      };
+      // console.log("newArgs", newArgs);
+      manualFetcher({
+        fetchProps: newArgs,
+        aboveController: abortController,
+        localAuthToken: true,
+        batchCallback: (data) => {
+          setNextMessages((prev) => [...(prev || []), ...data]);
+        },
+        errorCallback: () => {
+          setNextMessages(null);
+        },
+      }).catch((e) => {
+        console.log("manualFetcher Error fetching", e);
+      });
+    }
+    return () => {
+      isMounted = false;
+      if (abortController && !abortController?.signal?.aborted) {
+        abortController?.abort();
+        (abortController as any)?.customAbort?.();
+      }
+    };
+  }, [
+    JSON.stringify(error),
+    JSON.stringify(fetchArgs),
+    manualFetcher,
+    JSON.stringify(messages),
+    pageInfo.currentPage,
+    pageInfo.pageSize,
+    preloadNext,
+    isFinished,
+  ]);
 
   useEffect(() => {
     if (messages && messages.length > 0 && messages[0].pageInfo) {
@@ -225,7 +289,11 @@ export default function useList<T>({
 
       const curSortParams = makeSortFetchParams(sort);
 
-      if (curFilter === "" && Object.keys(curSortParams).length === 0) {
+      if (
+        defaultSort &&
+        curFilter === "" &&
+        Object.keys(curSortParams).length === 0
+      ) {
         const createdAt = sortingOptions.find(
           (o) => o.property === "createdAt" && o.direction === "desc",
         );
@@ -271,6 +339,7 @@ export default function useList<T>({
     sortingOptions,
     updateCreatedAtSearchParams,
     updateUpdatedAtSearchParams,
+    defaultSort,
     JSON.stringify(updateCreatedAtRange),
     JSON.stringify(updateUpdatedAtRange),
   ]);
@@ -296,7 +365,6 @@ export default function useList<T>({
             ),
         );
       } else {
-        console.log("here", option);
         return [...prev.filter((o) => o.property !== option.property), option];
       }
     });
@@ -345,5 +413,6 @@ export default function useList<T>({
     updateUpdatedAtRange,
     updatedAtRangeParams,
     createdAtRangeParams,
+    nextMessages,
   };
 }

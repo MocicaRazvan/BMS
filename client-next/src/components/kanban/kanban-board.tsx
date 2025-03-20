@@ -33,7 +33,7 @@ import { WithUser } from "@/lib/user";
 import AddKanbanColumn, {
   AddKanbanColumnTexts,
 } from "@/components/dialogs/kanban/add-kanban-column";
-import { fetchStream } from "@/hoooks/fetchStream";
+import { fetchStream } from "@/lib/fetchers/fetchStream";
 import {
   createDndIdColumn,
   createDndIdTask,

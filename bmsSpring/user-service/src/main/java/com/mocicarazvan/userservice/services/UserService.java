@@ -13,6 +13,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -30,7 +31,11 @@ public interface UserService {
 
     Mono<Boolean> existsUserByIdAndRoleIn(Long userId, Set<Role> roles);
 
+    Mono<Boolean> existsByEmail(String email);
+
     Flux<UserDto> getUsersByIdIn(List<Long> ids);
 
     Mono<Void> sendEmailAdmin(EmailRequest emailRequest);
+
+    Flux<UserDto> findAllByEmailIn(Collection<String> emails);
 }

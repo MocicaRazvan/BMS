@@ -14,7 +14,7 @@ import KanbanBoard, {
   KanbanBoardTexts,
   KanbanColumn,
 } from "@/components/kanban/kanban-board";
-import { fetchStream } from "@/hoooks/fetchStream";
+import { fetchStream } from "@/lib/fetchers/fetchStream";
 
 interface Props extends WithUser, KanbanBoardTexts {}
 export const createDndIdColumn = (id: number) => `column-${id}`;

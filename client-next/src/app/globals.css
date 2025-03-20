@@ -137,6 +137,25 @@
 
 }
 
+.EmojiPickerReact,
+.EmojiPickerReact.epr-dark-theme {
+    --epr-hover-bg-color: var(--muted);
+    --epr-bg-color: var(--background);
+    --epr-text-color: var(--foreground);
+}
+
+.EmojiPickerReact input::placeholder {
+    color: var(--accent) !important;
+    opacity: 0.5;
+}
+
+.epr-category-nav {
+    display: none !important;
+}
+
+.epr-main > div:last-of-type {
+    display: none !important;
+}
 
 ::-webkit-scrollbar {
     width: 14px;

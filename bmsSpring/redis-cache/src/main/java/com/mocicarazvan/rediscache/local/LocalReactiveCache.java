@@ -54,7 +54,7 @@ public class LocalReactiveCache implements RemoveFromCache {
         cacheMap.put(removeStar(key), Mono.just(value).cache(Duration.ofMinutes(internalExpirationMinutes)));
     }
 
-    public void put(String key, Collection<Object> values) {
+    public void put(String key, List<Object> values) {
         if (values == null || values.isEmpty()) {
             return;
         }

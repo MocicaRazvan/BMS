@@ -58,7 +58,7 @@ import { Option } from "@/components/ui/multiple-selector";
 import { Input } from "@/components/ui/input";
 import { determineMostRestrictiveDiet, handleBaseError } from "@/lib/utils";
 import ErrorMessage from "@/components/forms/error-message";
-import { fetchStream } from "@/hoooks/fetchStream";
+import { fetchStream } from "@/lib/fetchers/fetchStream";
 import { toast } from "@/components/ui/use-toast";
 import { useRouter } from "@/navigation";
 import { AiIdeasField } from "@/types/ai-ideas-types";

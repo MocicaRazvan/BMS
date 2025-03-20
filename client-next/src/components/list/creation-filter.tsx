@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  DateRange,
   DateRangePicker,
   DateRangePickerProps,
   DateRangePickerTexts,
@@ -10,6 +11,7 @@ import { ro } from "date-fns/locale";
 import { useLocale } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { addDays } from "date-fns";
 
 export interface CreationFilterTexts {
   dateRangePickerTexts: DateRangePickerTexts;
@@ -23,6 +25,18 @@ interface Props extends CreationFilterTexts {
   updateCreatedAtRange?: DateRangePickerProps["onUpdate"];
   updateUpdatedAtRange?: DateRangePickerProps["onUpdate"];
 }
+
+function changeEndRange(values: {
+  range: DateRange;
+  rangeCompare?: DateRange;
+}) {
+  let endRange = values.range.to;
+  if (endRange) {
+    endRange = addDays(endRange, 1);
+  }
+  return endRange;
+}
+
 export default function CreationFilter({
   dateRangePickerTexts,
   createdAtLabel,
@@ -63,7 +77,18 @@ export default function CreationFilter({
   const createAtDateRangePicker = useMemo(
     () => (
       <DateRangePicker
-        onUpdate={updateCreatedAtRange}
+        onUpdate={(values, none) =>
+          updateCreatedAtRange(
+            {
+              range: {
+                from: values.range.from,
+                to: changeEndRange(values),
+              },
+              rangeCompare: values.rangeCompare,
+            },
+            none,
+          )
+        }
         align="center"
         locale={locale === "ro" ? ro : undefined}
         hiddenPresets={["today", "yesterday", "lastWeek"]}
@@ -79,7 +104,18 @@ export default function CreationFilter({
   const updatedAtDateRangePicker = useMemo(
     () => (
       <DateRangePicker
-        onUpdate={updateUpdatedAtRange}
+        onUpdate={(values, none) =>
+          updateUpdatedAtRange(
+            {
+              range: {
+                from: values.range.from,
+                to: changeEndRange(values),
+              },
+              rangeCompare: values.rangeCompare,
+            },
+            none,
+          )
+        }
         align="center"
         locale={locale === "ro" ? ro : undefined}
         hiddenPresets={["today", "yesterday", "lastWeek"]}

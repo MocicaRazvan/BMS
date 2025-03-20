@@ -8,7 +8,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import Editor from "../editor/editor";
+import Editor, { EditorTexts } from "../editor/editor";
 import { TitleBodyDto } from "@/types/dto";
 import { AiIdeasField } from "@/types/ai-ideas-types";
 import AIGeneratePop, {
@@ -36,6 +36,7 @@ export interface TitleBodyTexts {
   titlePlaceholder?: string;
   bodyPlaceholder?: string;
   aiResponseTexts: AIResponseTexts;
+  editorTexts: EditorTexts;
 }
 
 interface CustomFieldProps<TFieldValues extends TitleBodyDto> {
@@ -63,6 +64,7 @@ export const TitleBodyForm = <TFieldValues extends TitleBodyDto>({
     titlePlaceholder,
     title,
     aiResponseTexts,
+    editorTexts,
   },
   hideTitle = false,
   editorKey,
@@ -218,6 +220,7 @@ export const TitleBodyForm = <TFieldValues extends TitleBodyDto>({
                   onChange={field.onChange}
                   placeholder={bodyPlaceholder}
                   key={editorKey}
+                  texts={editorTexts}
                 />
               </div>
             </FormControl>

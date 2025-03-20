@@ -41,6 +41,7 @@ import { UseNavigationGuardI18nTexts } from "@/hoooks/use-navigation-guard-i18n-
 import { PasswordStrengthIndicatorTexts } from "@/components/forms/passowrd-strength-indicator";
 import { AnswerFromBodyFormTexts } from "@/components/forms/answer-from-body-form";
 import { getImageCropTexts } from "@/texts/components/common";
+import { getEditorTexts } from "@/texts/components/editor";
 
 export type FormType = "create" | "update";
 
@@ -82,8 +83,12 @@ export async function getInputFileText(
 }
 
 export async function getTitleBodyText(): Promise<TitleBodyTexts> {
-  const t = await getTranslations("zod.forms.components.TitleBodyTexts");
+  const [t, editorTexts] = await Promise.all([
+    getTranslations("zod.forms.components.TitleBodyTexts"),
+    getEditorTexts(),
+  ]);
   return {
+    editorTexts,
     title: t("title"),
     body: t("body"),
     titlePlaceholder: t("titlePlaceholder"),
@@ -254,18 +259,26 @@ export const getUpdateProfileTexts = async (): Promise<UpdateProfileTexts> => {
 };
 
 export async function getChatMessageFormTexts(): Promise<ChatMessageFormTexts> {
-  const [buttonSubmitTexts, titleBodyTexts, titleBodySchemaTexts, t] =
-    await Promise.all([
-      getButtonSubmitTexts(),
-      getTitleBodyText(),
-      getTitleBodySchemaTexts(),
-      getTranslations("components.forms.ChatMessageFormTexts"),
-    ]);
-  return {
-    errorText: t("errorText"),
+  const [
     buttonSubmitTexts,
     titleBodyTexts,
     titleBodySchemaTexts,
+    editorTexts,
+    t,
+  ] = await Promise.all([
+    getButtonSubmitTexts(),
+    getTitleBodyText(),
+    getTitleBodySchemaTexts(),
+    getEditorTexts(),
+    getTranslations("components.forms.ChatMessageFormTexts"),
+  ]);
+  return {
+    errorText: t("errorText"),
+    buttonText: t("buttonText"),
+    buttonSubmitTexts,
+    titleBodyTexts,
+    titleBodySchemaTexts,
+    editorTexts,
   };
 }
 export async function getIngredientFormTexts(
@@ -557,14 +570,17 @@ export async function getCheckoutDrawerTexts(): Promise<CheckoutDrawerTexts> {
 }
 
 export async function getAdminEmailTexts(): Promise<AdminEmailTexts> {
-  const [adminEmailSchemaTexts, buttonSubmitTexts, t] = await Promise.all([
-    getAdminEmailSchemaTexts(),
-    getButtonSubmitTexts(),
-    getTranslations("components.forms.AdminEmailTexts"),
-  ]);
+  const [adminEmailSchemaTexts, buttonSubmitTexts, editorTexts, t] =
+    await Promise.all([
+      getAdminEmailSchemaTexts(),
+      getButtonSubmitTexts(),
+      getEditorTexts(),
+      getTranslations("components.forms.AdminEmailTexts"),
+    ]);
   return {
     adminEmailSchemaTexts,
     buttonSubmitTexts,
+    editorTexts,
     title: t("title"),
     error: t("error"),
     preview: t("preview"),

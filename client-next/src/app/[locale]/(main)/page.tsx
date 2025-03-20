@@ -73,12 +73,12 @@ export default async function Home({ params: { locale } }: Props) {
       <div className="h-8 lg:h-14" />
       <HomeAboutWrapper texts={homeAboutTexts} />
       <HomeTimeline {...homeTimelineTexts} />
-      <div className="h-10 md:h-14" />
+      <div className="h-10 md:h-16" />
       <HomeTestimonials
         testimonials={testimonials}
         title={homeTestimonialsTexts.title}
       />
-      <div className="mb-3 mt-5">
+      <div className="mb-3 mt-5 md:mt-8">
         <LogoWall
           items={logoWallArr}
           size={"clamp(4rem, 1rem + 15vmin, 13rem)"}

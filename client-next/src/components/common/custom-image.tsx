@@ -1,6 +1,6 @@
 "use client";
 import Image, { ImageProps } from "next/image";
-import { ComponentProps, useState } from "react";
+import { ComponentProps, useLayoutEffect, useRef, useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 
@@ -13,7 +13,14 @@ export default function CustomImage({
   thumblinator?: boolean;
   alt?: string;
 }) {
+  const imgRef = useRef<HTMLImageElement | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
+
+  useLayoutEffect(() => {
+    if (imgRef.current?.complete) {
+      setIsLoaded(true);
+    }
+  }, []);
 
   if (
     thumblinator &&
@@ -36,6 +43,7 @@ export default function CustomImage({
         className={`w-full h-full absolute top-0 left-0 ${isLoaded ? "hidden" : "block"}`}
       />
       <Image
+        ref={imgRef}
         alt={alt}
         {...rest}
         src={src}

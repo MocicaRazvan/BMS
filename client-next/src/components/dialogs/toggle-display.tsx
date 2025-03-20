@@ -4,7 +4,7 @@ import { memo, ReactNode, useEffect, useState } from "react";
 import { WithUser } from "@/lib/user";
 import { BaseDialogTexts } from "@/components/dialogs/delete-model";
 import { getAlertDialogToggleDisplayTexts } from "@/texts/components/dialog";
-import { fetchStream } from "@/hoooks/fetchStream";
+import { fetchStream } from "@/lib/fetchers/fetchStream";
 import { toast } from "@/components/ui/use-toast";
 import {
   AlertDialog,

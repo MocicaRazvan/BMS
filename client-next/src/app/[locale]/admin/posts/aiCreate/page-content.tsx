@@ -53,6 +53,7 @@ import { Check, X } from "lucide-react";
 import { motion } from "framer-motion";
 import { purifyAIDescription } from "@/components/forms/title-body";
 import useCsrfToken, { CsrfToken } from "@/hoooks/useCsrfToken";
+import fetchFactory from "@/lib/fetchers/fetchWithRetry";
 
 export interface AdminAIPostsCreateContentTexts {
   schemaTexts: AdminAICreatePostSchemaTexts;
@@ -100,7 +101,7 @@ async function getAIIdeaResponse(
   targetedField: "title" | "description",
   csrfToken: CsrfToken,
 ) {
-  const res = await fetch("/api/ai-idea/json", {
+  const res = await fetchFactory(fetch)("/api/ai-idea/json", {
     method: "POST",
     body: JSON.stringify({
       fields: fields,

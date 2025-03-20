@@ -122,6 +122,14 @@ const TrainerCard = memo(
       authToken: true,
     });
 
+    // console.log(
+    //   "STATES AND CACHE",
+    //   `/users/${topSummary.userId}`,
+    //   users,
+    //   isUserFinished,
+    //   userError,
+    // );
+
     if (!isUserFinished || !users.length) {
       return <LoadingSpinner sectionClassName="min-h-[575px] w-full h-full" />;
     }

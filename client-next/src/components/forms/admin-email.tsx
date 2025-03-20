@@ -23,12 +23,12 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import Editor from "@/components/editor/editor";
+import Editor, { EditorTexts } from "@/components/editor/editor";
 import ErrorMessage from "@/components/forms/error-message";
 import DOMPurify from "dompurify";
 import { useDebounce } from "@/components/ui/multiple-selector";
 import { EmailRequest } from "@/types/dto";
-import { fetchStream } from "@/hoooks/fetchStream";
+import { fetchStream } from "@/lib/fetchers/fetchStream";
 import { toast } from "@/components/ui/use-toast";
 import { handleBaseError } from "@/lib/utils";
 import { useNavigationGuardI18nForm } from "@/hoooks/use-navigation-guard-i18n-form";
@@ -47,6 +47,7 @@ export interface AdminEmailTexts {
       placeholder: string;
     }
   >;
+  editorTexts: EditorTexts;
 }
 
 const render = (value: string) => `
@@ -110,6 +111,7 @@ export default function AdminEmail({
   preview,
   title,
   toastDescription,
+  editorTexts,
 }: Props) {
   const schema = useMemo(
     () => getAdminEmailSchema(adminEmailSchemaTexts),
@@ -222,6 +224,8 @@ export default function AdminEmail({
                       onChange={field.onChange}
                       placeholder={items.content.placeholder}
                       key={editorKey}
+                      texts={editorTexts}
+                      useEmojis={false}
                     />
                   </FormControl>
                   <FormMessage />

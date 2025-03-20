@@ -10,11 +10,16 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-interface FormatTypeProps {
-  editor: Editor;
+export interface FormatTypeTexts {
+  paragraph: string;
 }
 
-export function FormatType({ editor }: FormatTypeProps) {
+interface FormatTypeProps {
+  editor: Editor;
+  texts: FormatTypeTexts;
+}
+
+export function FormatType({ editor, texts }: FormatTypeProps) {
   const value = () => {
     if (editor.isActive("paragraph")) return "paragraph";
     if (editor.isActive("heading", { level: 1 })) return "h1";
@@ -58,13 +63,13 @@ export function FormatType({ editor }: FormatTypeProps) {
       </SelectTrigger>
       <SelectContent>
         <SelectGroup>
-          <SelectItem value="paragraph">Paragraph</SelectItem>
-          <SelectItem value="h1">H1</SelectItem>
-          <SelectItem value="h2">H2</SelectItem>
-          <SelectItem value="h3">H3</SelectItem>
-          <SelectItem value="h4">H4</SelectItem>
-          <SelectItem value="h5">H5</SelectItem>
-          <SelectItem value="h6">H6</SelectItem>
+          <SelectItem value="paragraph">{texts.paragraph}</SelectItem>
+          <SelectItem value="h1">{"H1"}</SelectItem>
+          <SelectItem value="h2">{"H2"}</SelectItem>
+          <SelectItem value="h3">{"H3"}</SelectItem>
+          <SelectItem value="h4">{"H4"}</SelectItem>
+          <SelectItem value="h5">{"H5"}</SelectItem>
+          <SelectItem value="h6">{"H6"}</SelectItem>
         </SelectGroup>
       </SelectContent>
     </Select>

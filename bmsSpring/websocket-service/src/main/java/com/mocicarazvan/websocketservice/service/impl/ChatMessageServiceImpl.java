@@ -96,5 +96,10 @@ public class ChatMessageServiceImpl implements ChatMessageService {
         );
     }
 
+    @Override
+    public void sendTyping(ChatMessagePayload chatMessagePayload) {
+        customConvertAndSendToUser.sendToUser(chatMessagePayload.getReceiverEmail(), "/topic/typing", chatMessagePayload);
+    }
+
 
 }

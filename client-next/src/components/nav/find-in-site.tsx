@@ -21,7 +21,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { IntlMetadata } from "@/texts/metadata";
 import { Role } from "@/types/fetch-utils";
 import Fuse, { FuseResultMatch } from "fuse.js";
-import { Link } from "@/navigation";
+import { Link, useRouter } from "@/navigation";
 import { useDebounceWithCallBack } from "@/hoooks/useDebounceWithCallback";
 import { isDeepEqual } from "@/lib/utils";
 
@@ -130,6 +130,7 @@ const FindInSite = memo(
     const [selectedIndex, setSelectedIndex] = useState(0);
     const inputRef = useRef<HTMLInputElement>(null);
     const debouncedQuery = useDebounceWithCallBack(searchQuery, DEBOUNCE_TIME);
+    const router = useRouter();
 
     const fuse = useMemo(
       () =>
@@ -223,8 +224,8 @@ const FindInSite = memo(
       } else if (e.key === "Enter") {
         e.preventDefault();
         if (results[selectedIndex]) {
-          window.location.href = results[selectedIndex].path;
           setOpen(false);
+          router.push(results[selectedIndex].path);
         }
       }
     };

@@ -499,6 +499,7 @@ export default function UsersTable({
             setSortValue,
             sortValue,
             callback: resetCurrentPage,
+            filterKey: "email",
           }}
           extraCriteria={
             <div className="flex items-start justify-center gap-8 flex-1 flex-wrap">

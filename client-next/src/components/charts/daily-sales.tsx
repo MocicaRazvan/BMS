@@ -90,7 +90,7 @@ export default function DailySales({
         hiddenPresets={["today", "yesterday", "lastWeek"]}
         align="center"
         locale={locale === "ro" ? ro : undefined}
-        defaultPreset={"lastMonth"}
+        defaultPreset={"thisMonth"}
         showCompare={false}
         {...dateRangePickerTexts}
       />

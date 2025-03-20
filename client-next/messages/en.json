@@ -346,6 +346,14 @@
     }
   },
   "components": {
+    "editor": {
+      "FormatTypeTexts": {
+        "paragraph": "Paragraph"
+      },
+      "EditorEmojiPickerTexts": {
+        "searchPlaceholder": "Search emoji"
+      }
+    },
     "forms": {
       "AnswerFromBodyFormTexts": {
         "toxicError": "The question should not contain toxic language",
@@ -429,7 +437,8 @@
         "lastName": "Last Name"
       },
       "ChatMessageFormTexts": {
-        "errorText": "The message could not be sent"
+        "errorText": "The message could not be sent",
+        "buttonText": "Send"
       },
       "IngredientFormTexts": {
         "titleTaken": "This ingredient already exists",
@@ -1156,22 +1165,24 @@
       }
     },
     "chat": {
+      "ChatRoomItemTexts": {
+        "unreadMessagesText": "unread",
+        "typingText": "Typing..."
+      },
+      "ChatRoomContentTexts": {
+        "noRoomsTexts": "No rooms where found"
+      },
+      "ChatRoomsTexts": {
+        "searchPlaceholder": "Search by email...",
+        "errorText": "Error loading chat rooms",
+        "headerText": "Chat rooms"
+      },
+      "ConversationContentTexts": {
+        "sameChatText": "User is currently in the same chat",
+        "typingText": "Typing..."
+      },
       "ConversationTexts": {
-        "userInTheSameChat": "User is currently in the same chat",
-        "loadMore": "Load more messages",
-        "loadMoreLoading": "Loading more messages...",
-        "errorLoading": "Error loading messages"
-      },
-      "MainContentTexts": {
-        "chatRoomsLabel": "Chat Rooms",
-        "noSelectedChatRoom": "No chat room selected"
-      },
-      "ChatMainContentWrapperTexts": {
-        "search": "Search by email...",
-        "errorLoading": "Error loading messages"
-      },
-      "ChatRoomTexts": {
-        "numberUnread": "Unread messages: "
+        "errorText": "Error loading messages"
       }
     },
     "charts": {
@@ -2088,6 +2099,12 @@
             "body": "Unless otherwise provided in applicable law, we have the right to process your Personal Data in a form that allows you to identify yourself for the time necessary to achieve the purpose for which the Personal Data was provided (this may include the time you visit our Website or use our Services and / or for the entire period during which the purpose of processing Personal Data lasts)."
           }
         }
+      }
+    },
+    "chat": {
+      "ChatPageTexts": {
+        "noChatSelectedText": "Select a chat to start messaging",
+        "headingText": "Chat with other users on Bro Meets Science"
       }
     }
   },

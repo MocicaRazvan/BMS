@@ -154,6 +154,15 @@ export interface ChatRoomResponse extends IdGenerateDto {
   users: ConversationUserResponse[];
 }
 
+export interface JoinedConversationUser {
+  conversationUser: ConversationUserResponse;
+  reactiveUser: UserDto;
+}
+
+export interface ChatRoomResponseJoined extends IdGenerateDto {
+  users: JoinedConversationUser[];
+}
+
 export interface ConversationUserResponse extends ConversationUserBase {
   connectedChatRoom?: ChatRoomResponse;
 }

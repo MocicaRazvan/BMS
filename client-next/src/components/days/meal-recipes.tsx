@@ -10,7 +10,7 @@ import { IngredientPieChartTexts } from "@/components/charts/ingredient-macros-p
 import CustomImageCarousel from "@/components/common/custom-image-crousel";
 import CustomVideoCarousel from "@/components/common/custom-videos-crousel";
 import RecipeMacros from "@/components/recipes/recipe-macros";
-import { fetchStream } from "@/hoooks/fetchStream";
+import { fetchStream } from "@/lib/fetchers/fetchStream";
 import { CustomEntityModel, RecipeResponse } from "@/types/dto";
 import LikesDislikes from "@/components/common/likes-dislikes";
 import LoadingSpinner from "@/components/common/loading-spinner";

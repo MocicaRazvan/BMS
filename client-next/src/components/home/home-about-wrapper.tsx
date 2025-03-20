@@ -1,6 +1,7 @@
 import { getCsrfNextAuthHeader } from "@/actions/get-csr-next-auth";
 import { OverallSummary } from "@/types/dto";
 import HomeAbout, { HomeAboutTexts } from "@/components/home/home-about";
+import fetchFactory from "@/lib/fetchers/fetchWithRetry";
 const springUrl = process.env.NEXT_PUBLIC_SPRING!;
 
 interface Props {
@@ -9,7 +10,7 @@ interface Props {
 export default async function HomeAboutWrapper({ texts }: Props) {
   const csrfHeader = await getCsrfNextAuthHeader();
 
-  const res = await fetch(springUrl + "/orders/overall", {
+  const res = await fetchFactory(fetch)(springUrl + "/orders/overall", {
     next: { revalidate: 600 },
     headers: {
       ...csrfHeader,

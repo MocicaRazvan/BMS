@@ -11,7 +11,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { fetchStream } from "@/hoooks/fetchStream";
+import { fetchStream } from "@/lib/fetchers/fetchStream";
 import { TitleBodyUserDto } from "@/types/dto";
 import { toast } from "@/components/ui/use-toast";
 import { memo, ReactNode, useEffect, useState } from "react";

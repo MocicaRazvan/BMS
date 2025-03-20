@@ -5,25 +5,33 @@ import com.mocicarazvan.websocketservice.dtos.chatRoom.ChatRoomResponse;
 import com.mocicarazvan.websocketservice.dtos.chatRoom.ChatRoomUserDto;
 import com.mocicarazvan.websocketservice.dtos.user.ConversationUserPayload;
 import com.mocicarazvan.websocketservice.dtos.user.ConversationUserResponse;
+import com.mocicarazvan.websocketservice.dtos.user.JoinedConversationUser;
 import com.mocicarazvan.websocketservice.enums.ConnectedStatus;
 import com.mocicarazvan.websocketservice.exceptions.notFound.ConversationUserNotFound;
 import com.mocicarazvan.websocketservice.exceptions.notFound.NoChatRoomFound;
+import com.mocicarazvan.websocketservice.exceptions.notFound.ReactiveUserNotFound;
 import com.mocicarazvan.websocketservice.mappers.ConversationUserMapper;
 import com.mocicarazvan.websocketservice.messaging.CustomConvertAndSendToUser;
 import com.mocicarazvan.websocketservice.models.ConversationUser;
 import com.mocicarazvan.websocketservice.repositories.ChatRoomRepository;
 import com.mocicarazvan.websocketservice.repositories.ConversationUserRepository;
+import com.mocicarazvan.websocketservice.rpc.UserRPCClient;
 import com.mocicarazvan.websocketservice.service.ConversationUserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -36,11 +44,14 @@ public class ConversationUserServiceImpl implements ConversationUserService {
     private final SimpMessagingTemplate messagingTemplate;
     private final ChatRoomRepository chatRoomRepository;
     private final CustomConvertAndSendToUser customConvertAndSendToUser;
+    private final UserRPCClient userRPCClient;
+    private final SimpleAsyncTaskExecutor asyncExecutor;
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, isolation = Isolation.READ_COMMITTED)
     @CustomRetryable
     public ConversationUserResponse addUser(ConversationUserPayload conversationUserPayload) {
+        checkReactiveUserExistence(conversationUserPayload.getEmail());
         return conversationUserRepository.findByEmail(conversationUserPayload.getEmail())
                 .map(cur -> conversationUserMapper.copyFromPayload(conversationUserPayload, cur))
                 .map(conversationUserRepository::save)
@@ -93,6 +104,7 @@ public class ConversationUserServiceImpl implements ConversationUserService {
     @Override
     @CustomRetryable
     public ConversationUser saveUser(ConversationUser conversationUser) {
+        checkReactiveUserExistence(conversationUser.getEmail());
         return
                 conversationUserRepository.findByEmail(conversationUser.getEmail())
                         .orElseGet(() ->
@@ -103,6 +115,7 @@ public class ConversationUserServiceImpl implements ConversationUserService {
     @Override
     @CustomRetryable
     public ConversationUser saveUserByEmailIfNotExist(String email) {
+        checkReactiveUserExistence(email);
         return conversationUserRepository.findByEmail(email)
                 .orElseGet(() -> conversationUserRepository.save(ConversationUser.builder().email(email)
                         .connectedStatus(ConnectedStatus.OFFLINE)
@@ -174,6 +187,36 @@ public class ConversationUserServiceImpl implements ConversationUserService {
                                                 .collect(Collectors.toSet())
                                 )
                                 .build()));
+    }
+
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW, isolation = Isolation.READ_COMMITTED)
+    @CustomRetryable
+    @Override
+    public CompletableFuture<List<JoinedConversationUser>> getJoinedConnectedConversationUsers() {
+        return fromConversationToJoinedUsers(getConnectedUsers());
+    }
+
+    @Override
+    public CompletableFuture<List<JoinedConversationUser>> fromConversationToJoinedUsers(Collection<ConversationUserResponse> conversationUserResponses) {
+        Map<String, ConversationUserResponse> userResponseMap = Set.copyOf(conversationUserResponses).stream()
+                .collect(Collectors.toMap(ConversationUserResponse::getEmail, Function.identity(),
+                        (a, b) -> a
+                ));
+        return userRPCClient.getUsersByEmails(userResponseMap.keySet())
+                .thenApplyAsync(reactiveUserDtos -> reactiveUserDtos
+                        .stream()
+                        .map(ru -> JoinedConversationUser.builder()
+                                .reactiveUser(ru)
+                                .conversationUser(userResponseMap.get(ru.getEmail()))
+                                .build())
+                        .collect(Collectors.toList()), asyncExecutor);
+    }
+
+    private void checkReactiveUserExistence(String email) {
+        if (!userRPCClient.existsUserByEmail(email).join()) {
+            throw new ReactiveUserNotFound(email);
+        }
     }
 
 
