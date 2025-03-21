@@ -52,7 +52,7 @@ type FilterKey =
 type Filter = { [key in FilterKey]?: string };
 
 //
-interface Args<T>
+export interface UseListArgs<T>
   extends Partial<
     Omit<
       FetchStreamProps<T>,
@@ -95,7 +95,7 @@ export default function useList<T>({
   defaultSort = true,
   preloadNext = true,
   ...props
-}: Args<T>) {
+}: UseListArgs<T>) {
   const pathname = usePathname();
   const router = useRouter();
   const currentSearchParams = useSearchParams();

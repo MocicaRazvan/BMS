@@ -18,7 +18,7 @@ import {
   dayTypes,
   ResponseWithEntityCount,
 } from "@/types/dto";
-import { Suspense, useMemo } from "react";
+import { Suspense, useCallback, useMemo } from "react";
 import { ColumnDef } from "@tanstack/react-table";
 import { format, parseISO } from "date-fns";
 import {
@@ -38,6 +38,7 @@ import { DayTypeBadgeTexts } from "@/components/days/day-type-badge";
 import CreationFilter, {
   CreationFilterTexts,
 } from "@/components/list/creation-filter";
+import { wrapItemToString } from "@/lib/utils";
 
 export interface DayTableColumnsTexts {
   id: string;
@@ -326,9 +327,16 @@ export default function DaysTable({
     [columns, isSidebarOpen],
   );
 
+  const getRowId = useCallback(
+    (row: ResponseWithEntityCount<DayResponse>) =>
+      wrapItemToString(row.model.id),
+    [],
+  );
+
   if (error?.status) {
     return navigateToNotFound();
   }
+
   return (
     <div className="px-1 pb-10 w-full  h-full space-y-8 lg:space-y-14">
       <Suspense fallback={<LoadingSpinner />}>
@@ -340,6 +348,7 @@ export default function DaysTable({
           data={data || []}
           pageInfo={pageInfo}
           setPageInfo={setPageInfo}
+          getRowId={getRowId}
           {...dataTableTexts}
           searchInputProps={{
             value: filter.title || "",

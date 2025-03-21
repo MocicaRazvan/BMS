@@ -946,6 +946,10 @@
       }
     },
     "table": {
+      "SelectedRowsTexts": {
+        "of": " of ",
+        "rowsSelected": "rows(s) selected"
+      },
       "DataTablePaginationTexts": {
         "pageSize": "Page size",
         "page": "Page ",
@@ -958,7 +962,8 @@
       "DataTableTexts": {
         "columnsLabel": "Columns",
         "noResults": "No results were found by the search criteria!",
-        "exportLabel": "Export"
+        "exportLabel": "Export",
+        "downloadSelected": "Download selected"
       },
       "PostTableTexts": {
         "search": "Search in title..."

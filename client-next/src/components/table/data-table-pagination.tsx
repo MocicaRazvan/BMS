@@ -70,7 +70,7 @@ export const DataTablePagination = memo(function DataTablePagination({
                 }));
               }}
             >
-              <SelectTrigger className="h-8 w-[70px]">
+              <SelectTrigger className="h-8 w-[70px] !outline-none !ring-0">
                 <SelectValue placeholder={pageInfo.pageSize} />
               </SelectTrigger>
               <SelectContent side="top">

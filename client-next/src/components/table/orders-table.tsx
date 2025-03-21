@@ -28,6 +28,7 @@ import useClientNotFound from "@/hoooks/useClientNotFound";
 import CreationFilter, {
   CreationFilterTexts,
 } from "@/components/list/creation-filter";
+import { wrapItemToString } from "@/lib/utils";
 
 export interface OrderTableColumnsTexts {
   id: string;
@@ -297,6 +298,12 @@ export default function OrdersTable({
       router,
     ],
   );
+
+  const getRowId = useCallback(
+    (row: OrderDtoWithAddress) => wrapItemToString(row.order.id),
+    [],
+  );
+
   if (error?.status) {
     return navigateToNotFound();
   }
@@ -312,6 +319,7 @@ export default function OrdersTable({
           data={data || []}
           pageInfo={pageInfo}
           setPageInfo={setPageInfo}
+          getRowId={getRowId}
           specialPDFColumns={[
             {
               key: "address",

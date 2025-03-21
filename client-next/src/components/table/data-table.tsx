@@ -6,6 +6,7 @@ import {
   flexRender,
   getCoreRowModel,
   Row,
+  RowSelectionState,
   useReactTable,
   VisibilityState,
 } from "@tanstack/react-table";
@@ -24,7 +25,9 @@ import {
   Dispatch,
   ReactNode,
   SetStateAction,
-  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
   useState,
 } from "react";
 import { PageInfo } from "@/types/dto";
@@ -46,15 +49,18 @@ import RadioSort, {
   RadioSortProps,
   RadioSortTexts,
 } from "@/components/common/radio-sort";
-import { download, generateCsv, mkConfig } from "export-to-csv";
-import jsPDF from "jspdf";
-import autoTable from "jspdf-autotable";
 import { Download } from "lucide-react";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { Skeleton } from "@/components/ui/skeleton";
-import { cn, fromStringOfDotToObjectValue } from "@/lib/utils";
-import { format, parseISO } from "date-fns";
-import { useFormatter } from "next-intl";
+import { cn } from "@/lib/utils";
+import useExportTable, {
+  UseExportTableArgs,
+} from "@/hoooks/table/use-export-table";
+import { Checkbox } from "@/components/ui/checkbox";
+import SelectedRows, {
+  SelectedRowsTexts,
+} from "@/components/table/selected-rows";
+import PulsatingButton from "@/components/magicui/pulsating-button";
 
 export interface TableFilter {
   key: string;
@@ -65,28 +71,27 @@ export interface TableFilter {
 export interface DataTableTexts {
   dataTablePaginationTexts: DataTablePaginationTexts;
   radioSortTexts: RadioSortTexts;
+  selectedRowsTexts: SelectedRowsTexts;
   columnsLabel: string;
   noResults: string;
   exportLabel: string;
+  downloadSelected: string;
 }
 
-interface DataTableProps<TData, TValue> extends DataTableTexts {
+interface DataTableProps<TData extends Record<string, any>, TValue>
+  extends DataTableTexts,
+    Omit<UseExportTableArgs<TData, TValue>, "table"> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   isFinished: boolean;
   pageInfo: PageInfo;
-  fileName: string;
   setPageInfo: Dispatch<SetStateAction<PageInfo>>;
   searchInputProps: SearchInputProps;
   radioSortProps: Omit<RadioSortProps, "noSort">;
   extraCriteria?: ReactNode;
   rangeDateFilter?: ReactNode;
   sizeOptions?: number[];
-  hidePDFColumnIds?: string[];
-  specialPDFColumns?: {
-    key: string;
-    handler: (value: object) => string;
-  }[];
+  getRowId: (row: TData) => string;
 }
 
 const MotionTableRow = motion(TableRow);
@@ -110,190 +115,102 @@ export function DataTable<TData extends Record<string, any>, TValue>({
   hidePDFColumnIds = [],
   specialPDFColumns = [],
   rangeDateFilter,
+  lastLengthColumns = ["userLikes", "userDislikes"],
+  dateColumns = ["createdAt", "updatedAt"],
+  currencyColumns = ["price", "total"],
+  getRowId,
+  selectedRowsTexts,
+  downloadSelected,
 }: DataTableProps<TData, TValue>) {
-  const formatIntl = useFormatter();
-
-  const csvConfig = mkConfig({
-    fieldSeparator: ",",
-    filename: `${fileName}-${new Date().toISOString()}`,
-    decimalSeparator: ".",
-    showColumnHeaders: true,
-  });
-
-  const getExport = useCallback(
-    (rows: Row<TData>[]) => {
-      const tableColumnHeaders = columns
-        .filter((c) =>
-          table
-            .getAllColumns()
-            .filter((column) => column.getIsVisible())
-            .map((column) => column.id)
-            .includes(c?.id || ""),
-        )
-        .reduce(
-          (acc, cur) => {
-            console.log("cur", cur);
-            const obj = {
-              id: "",
-              accessorKey: "",
-            };
-
-            if (cur.id) {
-              if (cur.id === "actions" || hidePDFColumnIds.includes(cur.id)) {
-                return acc;
-              }
-              obj.id = cur.id;
-            }
-            if ("accessorKey" in cur) {
-              obj.accessorKey = String(cur.accessorKey);
-            }
-            acc.push(obj);
-            return acc;
-          },
-          [] as {
-            id: string;
-            accessorKey: string;
-          }[],
-        );
-
-      const lastLengthColumns = ["userLikes", "userDislikes"];
-      const dateColumns = ["createdAt", "updatedAt"];
-      const numberColumns = ["price", "total"];
-      const tableRows = rows.map(({ original }) =>
-        tableColumnHeaders.map((h) => {
-          const {
-            isLastLengthColumn,
-            isDateColumn,
-            isNumberColumn,
-            isSpecial,
-          } = h.accessorKey.split(".").reduce(
-            (acc, key) => {
-              if (
-                lastLengthColumns.includes(key) ||
-                key.toLowerCase().includes("ids")
-              ) {
-                acc.isLastLengthColumn = true;
-              }
-              if (dateColumns.includes(key)) {
-                acc.isDateColumn = true;
-              }
-              if (numberColumns.includes(key)) {
-                acc.isNumberColumn = true;
-              }
-
-              if (specialPDFColumns.find((s) => s.key === h.accessorKey)) {
-                acc.isSpecial = true;
-              }
-
-              return acc;
-            },
-            {
-              isLastLengthColumn: false,
-              isDateColumn: false,
-              isNumberColumn: false,
-              isSpecial: false,
-            },
-          );
-          let value = fromStringOfDotToObjectValue(
-            h.accessorKey,
-            original,
-            isLastLengthColumn,
-          );
-          if (Array.isArray(value)) {
-            value = value.join(", ");
-          } else if (isDateColumn) {
-            value = format(parseISO(value), "dd/MM/yyyy");
-          } else if (isNumberColumn) {
-            value = formatIntl.number(value, {
-              style: "currency",
-              currency: "EUR",
-              maximumFractionDigits: 2,
-            });
-          } else if (typeof value === "object" && isSpecial) {
-            value = specialPDFColumns
-              .find((s) => s.key === h.accessorKey)
-              ?.handler(value);
-          }
-          return value as string | number;
-        }),
-      );
-      return () => ({
-        tableColumnHeaders,
-        tableRows,
-      });
-    },
-    [columns, formatIntl, hidePDFColumnIds, specialPDFColumns],
-  );
-
-  const exportCsv = useCallback(
-    (rows: Row<TData>[]) => {
-      const { tableColumnHeaders, tableRows } = getExport(rows)();
-      const formattedRows = tableRows.map((row) =>
-        tableColumnHeaders.reduce(
-          (acc, cur, index) => {
-            acc[cur.id] = row[index];
-            // optimization
-            return acc;
-          },
-          {} as Record<string, string | number>,
-        ),
-      );
-      const finalConfig = {
-        ...csvConfig,
-        columnHeaders: tableColumnHeaders.map((h) => h.id),
-      };
-      download(finalConfig)(generateCsv(finalConfig)(formattedRows));
-    },
-    [csvConfig, getExport],
-  );
-
-  const exportPdf = useCallback(
-    (rows: Row<TData>[]) => {
-      const doc = new jsPDF({
-        orientation: "landscape",
-      });
-
-      const { tableColumnHeaders, tableRows } = getExport(rows)();
-      autoTable(doc, {
-        head: [tableColumnHeaders.map((h) => h.id)],
-        body: tableRows,
-        useCss: true,
-        theme: "striped",
-        headStyles: { fillColor: [22, 160, 133] },
-        bodyStyles: { fillColor: [244, 244, 244] },
-        alternateRowStyles: { fillColor: [255, 255, 255] },
-        startY: 20,
-        margin: { top: 20, bottom: 20 },
-        styles: {
-          fontSize: 10,
-          cellPadding: 4,
-          overflow: "linebreak",
-          minCellWidth: 20,
-        },
-      });
-      doc.save(`${fileName}-${new Date().toISOString()}.pdf`);
-    },
-    [columns, fileName, getExport],
-  );
-
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
+  const persistedRowsRef = useRef<Row<TData>[]>([]);
+  const selectedLength = useMemo(
+    () => Object.keys(rowSelection).length,
+    [rowSelection],
+  );
+
+  const finalColumns: ColumnDef<TData, TValue>[] = useMemo(
+    () => [
+      {
+        id: "select",
+        header: ({ table }) => (
+          <Checkbox
+            checked={
+              table.getIsAllPageRowsSelected() ||
+              (table.getIsSomePageRowsSelected() && "indeterminate")
+            }
+            onCheckedChange={(value) =>
+              table.toggleAllPageRowsSelected(!!value)
+            }
+            aria-label="Select all"
+          />
+        ),
+        cell: ({ row }) => (
+          <Checkbox
+            checked={row.getIsSelected()}
+            onCheckedChange={(value) => row.toggleSelected(!!value)}
+            aria-label="Select row"
+          />
+        ),
+        enableSorting: false,
+        enableHiding: false,
+      },
+      ...columns,
+    ],
+    [JSON.stringify(columns)],
+  );
 
   const table = useReactTable({
     data,
-    columns,
+    columns: finalColumns,
     getCoreRowModel: getCoreRowModel(),
     manualPagination: true,
     autoResetPageIndex: true,
     manualFiltering: true,
-    enableRowSelection: false,
-    enableMultiRowSelection: false,
+    enableRowSelection: true,
+    enableMultiRowSelection: true,
+    manualSorting: true,
     onColumnVisibilityChange: setColumnVisibility,
     onColumnFiltersChange: setColumnFilters,
+    onRowSelectionChange: setRowSelection,
+    getRowId,
     state: {
       columnVisibility,
       columnFilters,
+      pagination: {
+        pageSize: pageInfo.pageSize,
+        pageIndex: pageInfo.currentPage,
+      },
+      rowSelection,
     },
+  });
+
+  useEffect(() => {
+    const ids = Object.keys(rowSelection);
+    const prev = persistedRowsRef.current;
+
+    const prevMap = new Map(prev.map((row) => [getRowId(row.original), row]));
+    const tableRows = table.getCoreRowModel().rows;
+    const tableRowMap = new Map(
+      tableRows.map((row) => [getRowId(row.original), row]),
+    );
+
+    persistedRowsRef.current = ids
+      .map((id) => prevMap.get(id) || tableRowMap.get(id))
+      .filter((row): row is Row<TData> => Boolean(row));
+  }, [getRowId, rowSelection, table]);
+
+  const { exportPdf, exportCsv } = useExportTable<TData, TValue>({
+    lastLengthColumns,
+    dateColumns,
+    currencyColumns,
+    fileName,
+    hidePDFColumnIds,
+    table,
+    columns: finalColumns,
+    specialPDFColumns,
   });
 
   return (
@@ -363,10 +280,42 @@ export function DataTable<TData extends Record<string, any>, TValue>({
                 })}
             </DropdownMenuContent>
           </DropdownMenu>
+          <div>
+            {selectedLength > 0 && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <div>
+                    <PulsatingButton className="flex items-center justify-center py-2 px-1.5">
+                      <div className="flex items-center justify-center gap-2">
+                        {downloadSelected}
+                        <Download className="h-5 w-5" />
+                      </div>
+                    </PulsatingButton>
+                  </div>
+                </DropdownMenuTrigger>
+
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem
+                    className="cursor-pointer py-2 "
+                    onClick={() => exportCsv(persistedRowsRef.current)}
+                  >
+                    {"CSV"}
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    className="cursor-pointer py-2 "
+                    onClick={() => exportPdf(persistedRowsRef.current)}
+                  >
+                    {"PDF"}
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
+          </div>
         </div>
       </div>
       {rangeDateFilter && <div className="w-full mb-4">{rangeDateFilter}</div>}
-      <div className="rounded-md border">
+      <div className="rounded-md border relative">
         {!isFinished ? (
           <div className="w-full h-full min-h-[60vh] space-y-4 p-2">
             {Array.from({ length: 10 }).map((_, i) => (
@@ -374,79 +323,97 @@ export function DataTable<TData extends Record<string, any>, TValue>({
                 <Skeleton className="w-full  h-[6vh]" />
               </div>
             ))}
-            {/*<Loader />*/}
           </div>
         ) : (
-          <Table wrapperClassName="lg:overflow-visible  ">
-            <TableHeader className="bg-accent/50">
-              {table.getHeaderGroups().map((headerGroup) => (
-                <TableRow key={headerGroup.id}>
-                  {headerGroup.headers.map((header) => {
-                    return (
-                      <TableHead key={header.id}>
-                        {header.isPlaceholder
-                          ? null
-                          : flexRender(
-                              header.column.columnDef.header,
-                              header.getContext(),
-                            )}
-                      </TableHead>
-                    );
-                  })}
-                </TableRow>
-              ))}
-            </TableHeader>
-            <TableBody className="relative !overflow-y-visible">
-              {isFinished && table.getRowModel().rows?.length ? (
-                table.getRowModel().rows.map((row, i) => (
-                  <MotionTableRow
-                    key={row.id}
-                    data-state={row.getIsSelected() && "selected"}
-                    className="lg:hover:relative z-20  hover:bg-muted "
-                    initial={{ opacity: 0, y: 20, scale: 0.8 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    transition={{
-                      duration: 0.1,
-                      // delay: i * 0.11,
-                      ease: "linear",
-                    }}
-                    whileHover={{
-                      scale: 1.02,
-                      transition: { duration: 0.1, delay: 0 },
-                    }}
-                  >
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id}>
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext(),
-                        )}
-                      </TableCell>
-                    ))}
-                  </MotionTableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell
-                    colSpan={columns.length}
-                    className="h-24 text-center"
-                  >
-                    {noResults}
-                  </TableCell>
-                </TableRow>
+          <>
+            <AnimatePresence mode="wait">
+              {selectedLength > 0 && (
+                <motion.div
+                  className="hidden md:flex absolute top-0 h-12 -left-6  items-center justify-center z-[2]"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  key="unselect-all"
+                >
+                  <Checkbox
+                    checked={selectedLength > 0}
+                    onCheckedChange={() => setRowSelection({})}
+                    aria-label="Unselect all"
+                  />
+                </motion.div>
               )}
-            </TableBody>
-          </Table>
+            </AnimatePresence>
+            <Table wrapperClassName="lg:overflow-visible">
+              <TableHeader className="bg-accent/50">
+                {table.getHeaderGroups().map((headerGroup) => (
+                  <TableRow key={headerGroup.id}>
+                    {headerGroup.headers.map((header) => {
+                      return (
+                        <TableHead key={header.id}>
+                          {header.isPlaceholder
+                            ? null
+                            : flexRender(
+                                header.column.columnDef.header,
+                                header.getContext(),
+                              )}
+                        </TableHead>
+                      );
+                    })}
+                  </TableRow>
+                ))}
+              </TableHeader>
+              <TableBody className="relative !overflow-y-visible">
+                {isFinished && table.getRowModel().rows?.length ? (
+                  table.getRowModel().rows.map((row, i) => (
+                    <MotionTableRow
+                      key={row.id}
+                      data-state={row.getIsSelected() && "selected"}
+                      className="lg:hover:relative z-20  hover:bg-muted "
+                      initial={{ opacity: 0, y: 20, scale: 0.8 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      transition={{
+                        duration: 0.1,
+                        // delay: i * 0.11,
+                        ease: "linear",
+                      }}
+                      whileHover={{
+                        scale: 1.02,
+                        transition: { duration: 0.1, delay: 0 },
+                      }}
+                    >
+                      {row.getVisibleCells().map((cell) => (
+                        <TableCell key={cell.id}>
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext(),
+                          )}
+                        </TableCell>
+                      ))}
+                    </MotionTableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell
+                      colSpan={finalColumns.length}
+                      className="h-24 text-center"
+                    >
+                      {noResults}
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </>
         )}
       </div>
 
-      <div className="mt-2 lg:mt-4">
+      <div className="mt-2 lg:mt-4 flex flex-col md:flex-row items-center justify-between w-full">
+        <SelectedRows
+          selectedLength={selectedLength}
+          totalLength={pageInfo.totalElements}
+          texts={selectedRowsTexts}
+        />
         <DataTablePagination
-          // table={table}
-          // totalPages={totalPages}
-          // totalElements={totalElements}
-          // setPagination={setPagination}
-          // pagination={pagination}
           pageInfo={pageInfo}
           setPageInfo={setPageInfo}
           {...dataTablePaginationTexts}

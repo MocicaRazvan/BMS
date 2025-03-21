@@ -18,7 +18,7 @@ import {
   RecipeResponse,
   ResponseWithEntityCount,
 } from "@/types/dto";
-import { Suspense, useMemo } from "react";
+import { Suspense, useCallback, useMemo } from "react";
 import { ColumnDef } from "@tanstack/react-table";
 import { format, parseISO } from "date-fns";
 import { Badge } from "@/components/ui/badge";
@@ -40,6 +40,7 @@ import AlertDialogDeleteRecipe from "@/components/dialogs/recipes/delete-recipe"
 import CreationFilter, {
   CreationFilterTexts,
 } from "@/components/list/creation-filter";
+import { wrapItemToString } from "@/lib/utils";
 
 export interface RecipeTableColumnsTexts {
   id: string;
@@ -464,12 +465,18 @@ export default function RecipeTable({
     [columns, isSidebarOpen],
   );
 
+  const getRowId = useCallback(
+    (row: ResponseWithEntityCount<RecipeResponse>) =>
+      wrapItemToString(row.model.id),
+    [],
+  );
+
   if (error?.status) {
     return navigateToNotFound();
   }
 
   return (
-    <div className="px-1 w-full space-y-8 lg:space-y-14 overflow-x-hidden ">
+    <div className="px-1 w-full space-y-8 lg:space-y-14 ">
       <Suspense fallback={<LoadingSpinner />}>
         <DataTable
           sizeOptions={sizeOptions}
@@ -479,6 +486,7 @@ export default function RecipeTable({
           data={data || []}
           pageInfo={pageInfo}
           setPageInfo={setPageInfo}
+          getRowId={getRowId}
           {...dataTableTexts}
           searchInputProps={{
             value: filter.title || "",

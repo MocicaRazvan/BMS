@@ -3,9 +3,11 @@
 import { SortingOption } from "@/hoooks/useList";
 import {
   Fragment,
+  ReactNode,
   SetStateAction,
   useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from "react";
@@ -17,7 +19,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
+import { Button, ButtonProps } from "@/components/ui/button";
 import { ArrowDown, ArrowUp } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { parseSortString } from "@/lib/utils";
@@ -26,9 +28,8 @@ export interface RadioSortTexts {
   noSort: string;
 }
 
-export interface RadioSortProps extends RadioSortTexts {
+export interface UseRadioSortArgs {
   sortingOptions: SortingOption[];
-  sort: SortingOption[];
   sortValue: string;
   setSort: (value: SetStateAction<SortingOption[]>) => void;
   setSortValue: (value: SetStateAction<string>) => void;
@@ -37,17 +38,19 @@ export interface RadioSortProps extends RadioSortTexts {
   filterKey: string;
 }
 
-export default function RadioSort({
-  setSort,
-  sortValue,
-  sort,
-  sortingOptions,
+export interface RadioSortProps extends RadioSortTexts, UseRadioSortArgs {
+  sort: SortingOption[];
+}
+
+export const useRadioSort = ({
+  useDefaultSort,
   setSortValue,
-  noSort,
-  callback,
-  useDefaultSort = true,
+  sortValue,
+  sortingOptions,
+  setSort,
   filterKey,
-}: RadioSortProps) {
+  callback,
+}: UseRadioSortArgs) => {
   const useDefaultSortRef = useRef(useDefaultSort);
   const currentSearchParams = useSearchParams();
   const [isDefaultSort, setIsDefaultSort] = useState(false);
@@ -81,18 +84,18 @@ export default function RadioSort({
       sortQ.length === 1 &&
       sortQ[0].property === "createdAt" &&
       sortQ[0].direction === "desc";
-    if (sortValue === "" && sortIsDefault) {
+    if ((sortValue === "" || sortValue === "createdAt-desc") && sortIsDefault) {
       setIsDefaultSort(true);
       setSortValue("createdAt-desc");
     }
-  }, [sortValue, sortingOptions.length]);
+  }, [currentSearchParams, setSortValue, sortValue, sortingOptions.length]);
 
   const handleValueChange = useCallback(
-    (val: string) => {
+    (val: string | undefined) => {
       if (isDefaultSort) {
         setIsDefaultSort(false);
       }
-      if (val === sortValue) {
+      if (val === sortValue || val === undefined) {
         setSort([]);
         setSortValue("");
         callback?.();
@@ -110,9 +113,105 @@ export default function RadioSort({
         callback?.();
       }
     },
-    [callback, setSort, setSortValue, sortValue, sortingOptions],
+    [
+      callback,
+      isDefaultSort,
+      setSort,
+      setSortValue,
+      sortValue,
+      JSON.stringify(sortingOptions),
+    ],
   );
+
+  return {
+    handleValueChange,
+    isDefaultSort,
+    sortValue,
+  };
+};
+
+interface RadioSortButtonProps extends ButtonProps {
+  sortingProperty: string;
+  radioArgs: UseRadioSortArgs;
+  children: ReactNode;
+}
+export const RadioSortButton = ({
+  sortingProperty,
+  radioArgs,
+  children,
+  ...args
+}: RadioSortButtonProps) => {
+  const curSO = radioArgs.sortingOptions.filter(
+    (s) => s.property.toLowerCase() === sortingProperty.toLowerCase(),
+  );
+  const { handleValueChange, isDefaultSort, sortValue } =
+    useRadioSort(radioArgs);
+  const canBeDefault = useMemo(
+    () =>
+      curSO.some((s) => s.property === "createdAt" && s.direction === "desc"),
+    [curSO],
+  );
+  const isDefaultActive = isDefaultSort && canBeDefault;
+  const [toggleSort, setToggleSort] = useState<SortingOption["direction"]>(
+    isDefaultSort ? "desc" : "none",
+  );
+
+  useEffect(() => {
+    if (isDefaultSort) {
+      setToggleSort("desc");
+    }
+  }, [isDefaultSort]);
+
+  if (curSO.length !== 2) return null;
+  const handleButtonClick = () => {
+    if (toggleSort === "asc") {
+      handleValueChange(`${sortingProperty}-desc`);
+      setToggleSort("desc");
+    } else if (toggleSort === "desc") {
+      handleValueChange(undefined);
+      setToggleSort("none");
+    } else {
+      handleValueChange(`${sortingProperty}-asc`);
+      setToggleSort("asc");
+    }
+  };
+
+  return (
+    <Button
+      onClick={handleButtonClick}
+      disabled={isDefaultActive}
+      variant="ghost"
+      {...args}
+    >
+      {children}
+      {toggleSort === "asc" && <ArrowUp />}
+      {toggleSort === "desc" && <ArrowDown />}
+    </Button>
+  );
+};
+
+export default function RadioSort({
+  setSort,
+  sortValue,
+  sort,
+  sortingOptions,
+  setSortValue,
+  noSort,
+  callback,
+  useDefaultSort = true,
+  filterKey,
+}: RadioSortProps) {
+  const { handleValueChange, isDefaultSort } = useRadioSort({
+    useDefaultSort,
+    setSortValue,
+    sortValue,
+    sortingOptions,
+    setSort,
+    callback,
+    filterKey,
+  });
   if (sortingOptions?.length === 0) return null;
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>

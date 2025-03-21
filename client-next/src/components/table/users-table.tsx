@@ -31,7 +31,7 @@ import { useStompClient } from "react-stomp-hooks";
 import { AlertDialogMakeTrainer } from "@/components/dialogs/user/make-trainer-alert";
 import useClientNotFound from "@/hoooks/useClientNotFound";
 import OverflowTextTooltip from "@/components/common/overflow-text-tooltip";
-import { appendCreatedAtDesc, cn } from "@/lib/utils";
+import { appendCreatedAtDesc, cn, wrapItemToString } from "@/lib/utils";
 import CreationFilter, {
   CreationFilterTexts,
 } from "@/components/list/creation-filter";
@@ -470,6 +470,8 @@ export default function UsersTable({
     ],
   );
 
+  const getRowId = useCallback((row: UserDto) => wrapItemToString(row.id), []);
+
   if (error?.status) {
     return navigateToNotFound();
   }
@@ -485,6 +487,7 @@ export default function UsersTable({
           data={data || []}
           pageInfo={pageInfo}
           setPageInfo={setPageInfo}
+          getRowId={getRowId}
           {...dataTableTexts}
           searchInputProps={{
             value: filter.email || "",

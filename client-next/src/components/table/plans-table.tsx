@@ -21,7 +21,7 @@ import {
   PlanResponse,
   ResponseWithEntityCount,
 } from "@/types/dto";
-import { Suspense, useMemo } from "react";
+import { Suspense, useCallback, useMemo } from "react";
 import { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "@/components/ui/badge";
 import { format, parseISO } from "date-fns";
@@ -45,6 +45,7 @@ import OverflowTextTooltip from "@/components/common/overflow-text-tooltip";
 import CreationFilter, {
   CreationFilterTexts,
 } from "@/components/list/creation-filter";
+import { wrapItemToString } from "@/lib/utils";
 
 export interface PlanTableColumnsTexts {
   id: string;
@@ -583,6 +584,12 @@ export default function PlansTable({
     [isSidebarOpen, columns],
   );
 
+  const getRowId = useCallback(
+    (row: ResponseWithEntityCount<PlanResponse>) =>
+      wrapItemToString(row.model.id),
+    [],
+  );
+
   if (error?.status) {
     return navigateToNotFound();
   }
@@ -600,6 +607,7 @@ export default function PlansTable({
           pageInfo={pageInfo}
           setPageInfo={setPageInfo}
           {...dataTableTexts}
+          getRowId={getRowId}
           searchInputProps={{
             value: filter.title || "",
             searchInputTexts: { placeholder: search },

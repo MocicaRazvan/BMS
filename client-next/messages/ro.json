@@ -945,6 +945,10 @@
       }
     },
     "table": {
+      "SelectedRowsTexts": {
+        "of": " din ",
+        "rowsSelected": "linii selectate"
+      },
       "DataTablePaginationTexts": {
         "pageSize": "Dimensiunea paginii",
         "page": "Pagina ",
@@ -957,7 +961,8 @@
       "DataTableTexts": {
         "columnsLabel": "Coloane",
         "noResults": "Nu s-au găsit rezultate conform criteriilor de căutare!",
-        "exportLabel": "Export"
+        "exportLabel": "Export",
+        "downloadSelected": "Descarcă selectate"
       },
       "PostTableTexts": {
         "search": "Caută în titlu..."

@@ -62,6 +62,7 @@ import {
 import { dayTypes, planObjectives } from "@/types/dto";
 import { getDayTypeBadgeTexts } from "@/texts/components/days";
 import { CreationFilterTexts } from "@/components/list/creation-filter";
+import { SelectedRowsTexts } from "@/components/table/selected-rows";
 
 export async function getDataTablePaginationTexts(): Promise<DataTablePaginationTexts> {
   const t = await getTranslations("components.table.DataTablePaginationTexts");
@@ -77,17 +78,21 @@ export async function getDataTablePaginationTexts(): Promise<DataTablePagination
 }
 
 export async function getDataTableTexts(): Promise<DataTableTexts> {
-  const [dataTablePaginationTexts, radioSortTexts, t] = await Promise.all([
-    getDataTablePaginationTexts(),
-    getRadioSortTexts(),
-    getTranslations("components.table.DataTableTexts"),
-  ]);
+  const [dataTablePaginationTexts, radioSortTexts, selectedRowsTexts, t] =
+    await Promise.all([
+      getDataTablePaginationTexts(),
+      getRadioSortTexts(),
+      getSelectedRowsTexts(),
+      getTranslations("components.table.DataTableTexts"),
+    ]);
   return {
     dataTablePaginationTexts,
     columnsLabel: t("columnsLabel"),
     noResults: t("noResults"),
     radioSortTexts,
     exportLabel: t("exportLabel"),
+    selectedRowsTexts,
+    downloadSelected: t("downloadSelected"),
   };
 }
 
@@ -469,5 +474,12 @@ export async function getOrderTableTexts(): Promise<OrderTableTexts> {
       country: t("searchKeyLabel.country"),
       state: t("searchKeyLabel.state"),
     },
+  };
+}
+export async function getSelectedRowsTexts(): Promise<SelectedRowsTexts> {
+  const t = await getTranslations("components.table.SelectedRowsTexts");
+  return {
+    of: t("of"),
+    rowsSelected: t("rowsSelected"),
   };
 }

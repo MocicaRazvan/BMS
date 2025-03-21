@@ -15,7 +15,7 @@ import { CustomEntityModel, PostResponse } from "@/types/dto";
 
 import { ColumnDef } from "@tanstack/react-table";
 import { MoreHorizontal } from "lucide-react";
-import { Suspense, useMemo } from "react";
+import { Suspense, useCallback, useMemo } from "react";
 
 import { ExtraTableProps } from "@/types/tables";
 import { format, parseISO } from "date-fns";
@@ -37,6 +37,7 @@ import OverflowTextTooltip from "@/components/common/overflow-text-tooltip";
 import CreationFilter, {
   CreationFilterTexts,
 } from "@/components/list/creation-filter";
+import { wrapItemToString } from "@/lib/utils";
 
 export interface PostTableColumnsTexts {
   id: string;
@@ -358,6 +359,11 @@ export default function PostsTable({
     ],
   );
 
+  const getRowId = useCallback(
+    (row: PostResponse) => wrapItemToString(row.id),
+    [],
+  );
+
   if (error?.status) {
     return navigateToNotFound();
   }
@@ -373,6 +379,7 @@ export default function PostsTable({
           data={data || []}
           pageInfo={pageInfo}
           setPageInfo={setPageInfo}
+          getRowId={getRowId}
           {...dataTableTexts}
           searchInputProps={{
             value: filter.title || "",

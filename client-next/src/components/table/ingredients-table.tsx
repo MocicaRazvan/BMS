@@ -15,7 +15,7 @@ import {
   IngredientNutritionalFactResponse,
   ResponseWithEntityCount,
 } from "@/types/dto";
-import { Suspense, useMemo } from "react";
+import { Suspense, useCallback, useMemo } from "react";
 import { ColumnDef } from "@tanstack/react-table";
 import { DataTable, DataTableTexts } from "@/components/table/data-table";
 import LoadingSpinner from "@/components/common/loading-spinner";
@@ -41,6 +41,7 @@ import OverflowTextTooltip from "@/components/common/overflow-text-tooltip";
 import CreationFilter, {
   CreationFilterTexts,
 } from "@/components/list/creation-filter";
+import { wrapItemToString } from "@/lib/utils";
 
 export interface IngredientTableColumnTexts {
   id: string;
@@ -529,12 +530,18 @@ export default function IngredientsTable({
     isSidebarOpen,
   ]);
 
+  const getRowId = useCallback(
+    (row: ResponseWithEntityCount<IngredientNutritionalFactResponse>) =>
+      wrapItemToString(row.model.ingredient.id),
+    [],
+  );
+
   if (error?.status) {
     return navigateToNotFound();
   }
 
   return (
-    <div className="px-1 w-full space-y-8 lg:space-y-14 overflow-x-hidden ">
+    <div className="px-1 w-full space-y-8 lg:space-y-14 ">
       <Suspense fallback={<LoadingSpinner />}>
         <DataTable
           sizeOptions={sizeOptions}
@@ -545,6 +552,7 @@ export default function IngredientsTable({
           pageInfo={pageInfo}
           setPageInfo={setPageInfo}
           hidePDFColumnIds={[ingredientTableColumnTexts.calories]}
+          getRowId={getRowId}
           {...dataTableTexts}
           searchInputProps={{
             value: filter.name || "",
