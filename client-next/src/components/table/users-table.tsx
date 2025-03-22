@@ -35,6 +35,11 @@ import { appendCreatedAtDesc, cn, wrapItemToString } from "@/lib/utils";
 import CreationFilter, {
   CreationFilterTexts,
 } from "@/components/list/creation-filter";
+import {
+  RadioSortButton,
+  RadioSortDropDownWithExtra,
+  RadioSortDropDownWithExtraDummy,
+} from "@/components/common/radio-sort";
 
 export interface UserTableColumnsTexts {
   id: string;
@@ -89,11 +94,16 @@ export default function UsersTable({
 
   const { navigateToNotFound } = useClientNotFound();
 
-  const { fieldCriteria, field, updateFieldSearch, fieldCriteriaCallBack } =
-    useBinaryFilter({
-      fieldKey: "emailVerified",
-      ...useBinaryEmailVerifiedTexts,
-    });
+  const {
+    fieldCriteria,
+    field,
+    updateFieldSearch,
+    fieldCriteriaCallBack,
+    fieldCriteriaRadioCallback,
+  } = useBinaryFilter({
+    fieldKey: "emailVerified",
+    ...useBinaryEmailVerifiedTexts,
+  });
 
   const {
     value: provider,
@@ -101,6 +111,7 @@ export default function UsersTable({
     fieldDropdownFilterQueryParam: providerDropdownFilterQueryParam,
     filedFilterCriteria: providerFilterCriteria,
     filedFilterCriteriaCallback: providerFilterCriteriaCallback,
+    fieldCriteriaRadioCallback: providerCriteriaRadioCallback,
   } = useFilterDropdown({
     items: ["LOCAL", "GITHUB", "GOOGLE"].map((value) => ({
       value,
@@ -115,6 +126,7 @@ export default function UsersTable({
     fieldDropdownFilterQueryParam: roleDropdownFilterQueryParam,
     filedFilterCriteria: roleFilterCriteria,
     filedFilterCriteriaCallback: roleFilterCriteriaCallback,
+    fieldCriteriaRadioCallback: roleCriteriaRadioCallback,
   } = useFilterDropdown({
     items: ["ROLE_USER", "ROLE_ADMIN", "ROLE_TRAINER"].map((value) => ({
       value,
@@ -168,6 +180,18 @@ export default function UsersTable({
 
   const data = useMemo(() => items.map((i) => i.content), [items]);
 
+  const radioArgs = useMemo(
+    () => ({
+      setSort,
+      sortingOptions,
+      setSortValue,
+      sortValue,
+      callback: resetCurrentPage,
+      filterKey: "email",
+    }),
+    [resetCurrentPage, setSort, setSortValue, sortValue, sortingOptions],
+  );
+
   const handleStartChat = useCallback(
     (recUser: UserDto) => {
       if (stompClient && stompClient?.connected && recUser && authUser) {
@@ -204,9 +228,16 @@ export default function UsersTable({
         id: userTableColumnsTexts.email,
         accessorKey: "email",
         header: () => (
-          <p className="font-bold text-lg text-left">
-            {userTableColumnsTexts.email}
-          </p>
+          <RadioSortDropDownWithExtra
+            radioArgs={radioArgs}
+            sortingProperty="email"
+            trigger={
+              <p className="font-bold text-lg text-left">
+                {userTableColumnsTexts.email}
+              </p>
+            }
+            extraContent={fieldCriteriaRadioCallback(resetCurrentPage)}
+          />
         ),
         cell: ({ row }) => (
           <OverflowTextTooltip
@@ -219,18 +250,22 @@ export default function UsersTable({
         id: userTableColumnsTexts.firstName,
         accessorKey: "firstName",
         header: () => (
-          <p className="font-bold text-lg text-left">
-            {userTableColumnsTexts.firstName}
-          </p>
+          <RadioSortButton sortingProperty="firstName" radioArgs={radioArgs}>
+            <p className="font-bold text-lg text-left">
+              {userTableColumnsTexts.firstName}
+            </p>
+          </RadioSortButton>
         ),
       },
       {
         id: userTableColumnsTexts.lastName,
         accessorKey: "lastName",
         header: () => (
-          <p className="font-bold text-lg text-left">
-            {userTableColumnsTexts.lastName}
-          </p>
+          <RadioSortButton sortingProperty="lastName" radioArgs={radioArgs}>
+            <p className="font-bold text-lg text-left">
+              {userTableColumnsTexts.lastName}
+            </p>
+          </RadioSortButton>
         ),
       },
 
@@ -254,9 +289,14 @@ export default function UsersTable({
         id: userTableColumnsTexts.provider,
         accessorKey: "provider",
         header: () => (
-          <p className="font-bold text-lg text-left">
-            {userTableColumnsTexts.provider}
-          </p>
+          <RadioSortDropDownWithExtraDummy
+            trigger={
+              <p className="font-bold text-lg text-left">
+                {userTableColumnsTexts.provider}
+              </p>
+            }
+            extraContent={providerCriteriaRadioCallback(resetCurrentPage)}
+          />
         ),
         cell: ({ row }) => (
           <p className="font-bold ">{row.original.provider}</p>
@@ -266,9 +306,14 @@ export default function UsersTable({
         id: userTableColumnsTexts.role,
         accessorKey: "role",
         header: () => (
-          <p className={"font-bold text-lg text-left"}>
-            {userTableColumnsTexts.role}
-          </p>
+          <RadioSortDropDownWithExtraDummy
+            trigger={
+              <p className={"font-bold text-lg text-left"}>
+                {userTableColumnsTexts.role}
+              </p>
+            }
+            extraContent={roleCriteriaRadioCallback(resetCurrentPage)}
+          />
         ),
         cell: ({ row }) => (
           <p
@@ -289,9 +334,26 @@ export default function UsersTable({
         id: userTableColumnsTexts.createdAt,
         accessorKey: "createdAt",
         header: () => (
-          <p className="font-bold text-lg text-left">
-            {userTableColumnsTexts.createdAt}
-          </p>
+          <RadioSortDropDownWithExtra
+            radioArgs={radioArgs}
+            sortingProperty="createdAt"
+            trigger={
+              <p className="font-bold text-lg text-left">
+                {userTableColumnsTexts.createdAt}
+              </p>
+            }
+            showNone={false}
+            extraContent={
+              <CreationFilter
+                triggerVariant="ghost"
+                triggerClassName="px-5"
+                {...creationFilterTexts}
+                updateCreatedAtRange={updateCreatedAtRange}
+                hideUpdatedAt={true}
+                showLabels={false}
+              />
+            }
+          />
         ),
         cell: ({ row }) => (
           <p>{format(parseISO(row.original.createdAt), "dd/MM/yyyy")}</p>
@@ -467,6 +529,12 @@ export default function UsersTable({
       authUser,
       router,
       handleStartChat,
+      radioArgs,
+      updateCreatedAtRange,
+      updateUpdatedAtRange,
+      providerCriteriaRadioCallback,
+      roleCriteriaRadioCallback,
+      resetCurrentPage,
     ],
   );
 
@@ -489,6 +557,7 @@ export default function UsersTable({
           setPageInfo={setPageInfo}
           getRowId={getRowId}
           {...dataTableTexts}
+          useRadioSort={false}
           searchInputProps={{
             value: filter.email || "",
             searchInputTexts: { placeholder: search },
@@ -508,19 +577,19 @@ export default function UsersTable({
             <div className="flex items-start justify-center gap-8 flex-1 flex-wrap">
               <div className="flex items-center justify-end gap-4 flex-1 flex-wrap">
                 {extraCriteria}
-                {fieldCriteriaCallBack(resetCurrentPage)}
-                {providerFilterCriteriaCallback(resetCurrentPage)}
-                {roleFilterCriteriaCallback(resetCurrentPage)}
+                {/*{fieldCriteriaCallBack(resetCurrentPage)}*/}
+                {/*{providerFilterCriteriaCallback(resetCurrentPage)}*/}
+                {/*{roleFilterCriteriaCallback(resetCurrentPage)}*/}
               </div>
             </div>
           }
-          rangeDateFilter={
-            <CreationFilter
-              {...creationFilterTexts}
-              updateCreatedAtRange={updateCreatedAtRange}
-              updateUpdatedAtRange={updateUpdatedAtRange}
-            />
-          }
+          // rangeDateFilter={
+          //   <CreationFilter
+          //     {...creationFilterTexts}
+          //     updateCreatedAtRange={updateCreatedAtRange}
+          //     updateUpdatedAtRange={updateUpdatedAtRange}
+          //   />
+          // }
         />
       </Suspense>
     </div>

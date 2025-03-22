@@ -9,7 +9,7 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { Button } from "./button";
+import { Button, ButtonProps } from "./button";
 import { Popover, PopoverContent, PopoverTrigger } from "./popover";
 import { Calendar } from "./calendar";
 import { DateInput } from "./date-input";
@@ -111,6 +111,8 @@ export interface DateRangePickerProps {
   hiddenPresets?: (typeof BASE_PRESETS)[number]["name"][];
   showNone?: boolean;
   defaultNone?: boolean;
+  triggerVariant?: ButtonProps["variant"];
+  triggerClassName?: string;
 }
 
 /** The DateRangePicker component allows a user to select a range of dates */
@@ -136,6 +138,8 @@ export const DateRangePicker: FC<
   showNone,
   defaultNone = false,
   noRangeSelected,
+  triggerVariant = "outline",
+  triggerClassName,
   none: { false: noneFalseText, true: noneTrueText },
 }): JSX.Element => {
   const [none, setNone] = useState(defaultNone);
@@ -425,8 +429,11 @@ export const DateRangePicker: FC<
       <PopoverTrigger asChild>
         <Button
           size={"lg"}
-          variant="outline"
-          className={cn("flex items-center justify-between gap-5 w-80")}
+          variant={triggerVariant}
+          className={cn(
+            "flex items-center justify-between gap-5 w-80",
+            triggerClassName,
+          )}
         >
           <CalendarIcon className="h-5 w-5" />
           <div className="text-right ">

@@ -10,7 +10,6 @@ import { ExtraTableProps } from "@/types/tables";
 import { WithUser } from "@/lib/user";
 import useList, { UseListProps } from "@/hoooks/useList";
 import { Link, useRouter } from "@/navigation";
-import { useFormatter } from "next-intl";
 import useClientNotFound from "@/hoooks/useClientNotFound";
 import {
   CustomEntityModel,
@@ -39,6 +38,11 @@ import CreationFilter, {
   CreationFilterTexts,
 } from "@/components/list/creation-filter";
 import { wrapItemToString } from "@/lib/utils";
+import {
+  RadioSortButton,
+  RadioSortDropDownWithExtra,
+  RadioSortDropDownWithExtraDummy,
+} from "@/components/common/radio-sort";
 
 export interface DayTableColumnsTexts {
   id: string;
@@ -88,13 +92,13 @@ export default function DaysTable({
   creationFilterTexts,
 }: DayTableProps) {
   const router = useRouter();
-  const formatIntl = useFormatter();
   const { navigateToNotFound } = useClientNotFound();
 
   const {
     value: dayType,
     updateFieldDropdownFilter: updateDayType,
     filedFilterCriteriaCallback: dayTypeFilterCriteriaCallback,
+    fieldCriteriaRadioCallback: dayTypeRadioCriteriaCallback,
   } = useFilterDropdown({
     items: dayTypes.map((value) => ({
       value,
@@ -143,6 +147,18 @@ export default function DaysTable({
     [items],
   );
 
+  const radioArgs = useMemo(
+    () => ({
+      setSort,
+      sortingOptions,
+      setSortValue,
+      sortValue,
+      callback: resetCurrentPage,
+      filterKey: "title",
+    }),
+    [resetCurrentPage, setSort, setSortValue, sortValue, sortingOptions],
+  );
+
   const columns: ColumnDef<ResponseWithEntityCount<DayResponse>>[] = useMemo(
     () => [
       {
@@ -159,9 +175,11 @@ export default function DaysTable({
         id: dayTableColumnTexts.title,
         accessorKey: "model.title",
         header: () => (
-          <p className="font-bold text-lg text-left">
-            {dayTableColumnTexts.title}
-          </p>
+          <RadioSortButton sortingProperty="title" radioArgs={radioArgs}>
+            <p className="font-bold text-lg text-left">
+              {dayTableColumnTexts.title}
+            </p>
+          </RadioSortButton>
         ),
         cell: ({ row }) => (
           <OverflowTextTooltip text={row.original.model.title} />
@@ -171,9 +189,14 @@ export default function DaysTable({
         id: dayTableColumnTexts.type,
         accessorKey: "model.type",
         header: () => (
-          <p className="font-bold text-lg text-left">
-            {dayTableColumnTexts.type}
-          </p>
+          <RadioSortDropDownWithExtraDummy
+            trigger={
+              <p className="font-bold text-lg text-left">
+                {dayTableColumnTexts.type}
+              </p>
+            }
+            extraContent={dayTypeRadioCriteriaCallback(resetCurrentPage)}
+          />
         ),
         cell: ({ row }) => (
           <div className="max-w-32 text-sm font-bold text-nowrap overflow-x-hidden">
@@ -219,9 +242,26 @@ export default function DaysTable({
         id: dayTableColumnTexts.createdAt,
         accessorKey: "model.createdAt",
         header: () => (
-          <p className="font-bold text-lg text-left">
-            {dayTableColumnTexts.createdAt}
-          </p>
+          <RadioSortDropDownWithExtra
+            radioArgs={radioArgs}
+            sortingProperty="createdAt"
+            trigger={
+              <p className="font-bold text-lg text-left">
+                {dayTableColumnTexts.createdAt}
+              </p>
+            }
+            showNone={false}
+            extraContent={
+              <CreationFilter
+                triggerVariant="ghost"
+                triggerClassName="px-5"
+                {...creationFilterTexts}
+                updateCreatedAtRange={updateCreatedAtRange}
+                hideUpdatedAt={true}
+                showLabels={false}
+              />
+            }
+          />
         ),
         cell: ({ row }) => (
           <p>{format(parseISO(row.original.model.createdAt), "dd/MM/yyyy")}</p>
@@ -231,9 +271,25 @@ export default function DaysTable({
         id: dayTableColumnTexts.updatedAt,
         accessorKey: "model.updatedAt",
         header: () => (
-          <p className="font-bold text-lg text-left">
-            {dayTableColumnTexts.updatedAt}
-          </p>
+          <RadioSortDropDownWithExtra
+            radioArgs={radioArgs}
+            sortingProperty="updatedAt"
+            trigger={
+              <p className="font-bold text-lg text-left">
+                {dayTableColumnTexts.updatedAt}
+              </p>
+            }
+            extraContent={
+              <CreationFilter
+                triggerVariant="ghost"
+                triggerClassName="px-5"
+                {...creationFilterTexts}
+                updateUpdatedAtRange={updateUpdatedAtRange}
+                hideCreatedAt={true}
+                showLabels={false}
+              />
+            }
+          />
         ),
         cell: ({ row }) => (
           <p>{format(parseISO(row.original.model.updatedAt), "dd/MM/yyyy")}</p>
@@ -319,6 +375,11 @@ export default function DaysTable({
       forWhom,
       refetch,
       router,
+      radioArgs,
+      updateCreatedAtRange,
+      updateUpdatedAtRange,
+      dayTypeRadioCriteriaCallback,
+      resetCurrentPage,
     ],
   );
 
@@ -356,6 +417,7 @@ export default function DaysTable({
             onChange: updateFilterValue,
             onClear: clearFilterValue,
           }}
+          useRadioSort={false}
           radioSortProps={{
             setSort,
             sort,
@@ -365,20 +427,20 @@ export default function DaysTable({
             callback: resetCurrentPage,
             filterKey: "title",
           }}
-          extraCriteria={
-            <div className="flex items-start justify-center gap-8 flex-1 flex-wrap">
-              <div className="flex items-center justify-end gap-4 flex-1 flex-wrap">
-                {dayTypeFilterCriteriaCallback(resetCurrentPage)}
-              </div>
-            </div>
-          }
-          rangeDateFilter={
-            <CreationFilter
-              {...creationFilterTexts}
-              updateCreatedAtRange={updateCreatedAtRange}
-              updateUpdatedAtRange={updateUpdatedAtRange}
-            />
-          }
+          // extraCriteria={
+          //   <div className="flex items-start justify-center gap-8 flex-1 flex-wrap">
+          //     <div className="flex items-center justify-end gap-4 flex-1 flex-wrap">
+          //       {dayTypeFilterCriteriaCallback(resetCurrentPage)}
+          //     </div>
+          //   </div>
+          // }
+          // rangeDateFilter={
+          //   <CreationFilter
+          //     {...creationFilterTexts}
+          //     updateCreatedAtRange={updateCreatedAtRange}
+          //     updateUpdatedAtRange={updateUpdatedAtRange}
+          //   />
+          // }
         />
       </Suspense>
     </div>

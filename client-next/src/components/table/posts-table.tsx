@@ -38,6 +38,11 @@ import CreationFilter, {
   CreationFilterTexts,
 } from "@/components/list/creation-filter";
 import { wrapItemToString } from "@/lib/utils";
+import {
+  RadioSortButton,
+  RadioSortDropDownWithExtra,
+  RadioSortDropDownWithExtraDummy,
+} from "@/components/common/radio-sort";
 
 export interface PostTableColumnsTexts {
   id: string;
@@ -89,13 +94,18 @@ export default function PostsTable({
   // const { updateApprovedSearch, approveCriteria, approved } = useApprovedFilter(
   //   useApprovedFilterTexts,
   // );
-  const { fieldCriteria, field, updateFieldSearch, fieldCriteriaCallBack } =
-    useBinaryFilter({
-      fieldKey: "approved",
-      trueText: useApprovedFilterTexts.approved,
-      falseText: useApprovedFilterTexts.notApproved,
-      all: useApprovedFilterTexts.all,
-    });
+  const {
+    fieldCriteria,
+    field,
+    updateFieldSearch,
+    fieldCriteriaCallBack,
+    fieldCriteriaRadioCallback: approvedCriteriaRadioCallback,
+  } = useBinaryFilter({
+    fieldKey: "approved",
+    trueText: useApprovedFilterTexts.approved,
+    falseText: useApprovedFilterTexts.notApproved,
+    all: useApprovedFilterTexts.all,
+  });
 
   const { navigateToNotFound } = useClientNotFound();
 
@@ -137,6 +147,17 @@ export default function PostsTable({
     sizeOptions,
     sortingOptions,
   });
+  const radioArgs = useMemo(
+    () => ({
+      setSort,
+      sortingOptions,
+      setSortValue,
+      sortValue,
+      callback: resetCurrentPage,
+      filterKey: "title",
+    }),
+    [setSort, sortingOptions, setSortValue, sortValue, resetCurrentPage],
+  );
 
   const data = useMemo(() => items.map((i) => i.content), [items]);
 
@@ -155,9 +176,11 @@ export default function PostsTable({
         id: postTableColumnsTexts.title,
         accessorKey: "title",
         header: () => (
-          <p className="font-bold text-lg text-left">
-            {postTableColumnsTexts.title}
-          </p>
+          <RadioSortButton sortingProperty="title" radioArgs={radioArgs}>
+            <p className="font-bold text-lg text-left">
+              {postTableColumnsTexts.title}
+            </p>
+          </RadioSortButton>
         ),
         cell: ({ row }) => <OverflowTextTooltip text={row.original.title} />,
       },
@@ -185,9 +208,26 @@ export default function PostsTable({
         id: postTableColumnsTexts.createdAt,
         accessorKey: "createdAt",
         header: () => (
-          <p className="font-bold text-lg text-left">
-            {postTableColumnsTexts.createdAt}
-          </p>
+          <RadioSortDropDownWithExtra
+            radioArgs={radioArgs}
+            sortingProperty="createdAt"
+            trigger={
+              <p className="font-bold text-lg text-left">
+                {postTableColumnsTexts.createdAt}
+              </p>
+            }
+            showNone={false}
+            extraContent={
+              <CreationFilter
+                triggerVariant="ghost"
+                triggerClassName="px-5"
+                {...creationFilterTexts}
+                updateCreatedAtRange={updateCreatedAtRange}
+                hideUpdatedAt={true}
+                showLabels={false}
+              />
+            }
+          />
         ),
         cell: ({ row }) => (
           <p>{format(parseISO(row.original.createdAt), "dd/MM/yyyy")}</p>
@@ -197,9 +237,25 @@ export default function PostsTable({
         id: postTableColumnsTexts.updatedAt,
         accessorKey: "updatedAt",
         header: () => (
-          <p className="font-bold text-lg text-left">
-            {postTableColumnsTexts.updatedAt}
-          </p>
+          <RadioSortDropDownWithExtra
+            radioArgs={radioArgs}
+            sortingProperty="updatedAt"
+            trigger={
+              <p className="font-bold text-lg text-left">
+                {postTableColumnsTexts.updatedAt}
+              </p>
+            }
+            extraContent={
+              <CreationFilter
+                triggerVariant="ghost"
+                triggerClassName="px-5"
+                {...creationFilterTexts}
+                updateUpdatedAtRange={updateUpdatedAtRange}
+                hideCreatedAt={true}
+                showLabels={false}
+              />
+            }
+          />
         ),
         cell: ({ row }) => (
           <p>{format(parseISO(row.original.updatedAt), "dd/MM/yyyy")}</p>
@@ -209,9 +265,14 @@ export default function PostsTable({
         id: postTableColumnsTexts.approved.header,
         accessorKey: "approved",
         header: () => (
-          <div className="font-bold text-lg text-left">
-            {postTableColumnsTexts.approved.header}
-          </div>
+          <RadioSortDropDownWithExtraDummy
+            trigger={
+              <div className="font-bold text-lg text-left">
+                {postTableColumnsTexts.approved.header}
+              </div>
+            }
+            extraContent={approvedCriteriaRadioCallback(resetCurrentPage)}
+          />
         ),
         cell: ({ row }) => (
           <Badge variant={row.original.approved ? "success" : "destructive"}>
@@ -356,6 +417,11 @@ export default function PostsTable({
       isAdmin,
       refetch,
       router,
+      radioArgs,
+      updateUpdatedAtRange,
+      updateCreatedAtRange,
+      resetCurrentPage,
+      approvedCriteriaRadioCallback,
     ],
   );
 
@@ -381,6 +447,7 @@ export default function PostsTable({
           setPageInfo={setPageInfo}
           getRowId={getRowId}
           {...dataTableTexts}
+          useRadioSort={false}
           searchInputProps={{
             value: filter.title || "",
             searchInputTexts: { placeholder: search },
@@ -401,16 +468,16 @@ export default function PostsTable({
               <div className="flex-1 flex-wrap">
                 {extraCriteriaWithCallBack(resetCurrentPage)}
               </div>
-              {fieldCriteriaCallBack(resetCurrentPage)}
+              {/*{fieldCriteriaCallBack(resetCurrentPage)}*/}
             </div>
           }
-          rangeDateFilter={
-            <CreationFilter
-              {...creationFilterTexts}
-              updateCreatedAtRange={updateCreatedAtRange}
-              updateUpdatedAtRange={updateUpdatedAtRange}
-            />
-          }
+          // rangeDateFilter={
+          //   <CreationFilter
+          //     {...creationFilterTexts}
+          //     updateCreatedAtRange={updateCreatedAtRange}
+          //     updateUpdatedAtRange={updateUpdatedAtRange}
+          //   />
+          // }
         />
       </Suspense>
     </div>

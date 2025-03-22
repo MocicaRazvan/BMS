@@ -46,6 +46,11 @@ import CreationFilter, {
   CreationFilterTexts,
 } from "@/components/list/creation-filter";
 import { wrapItemToString } from "@/lib/utils";
+import {
+  RadioSortButton,
+  RadioSortDropDownWithExtra,
+  RadioSortDropDownWithExtraDummy,
+} from "@/components/common/radio-sort";
 
 export interface PlanTableColumnsTexts {
   id: string;
@@ -119,6 +124,7 @@ export default function PlansTable({
     field: displayField,
     updateFieldSearch: updateDisplay,
     fieldCriteriaCallBack: displayCriteriaCallBack,
+    fieldCriteriaRadioCallback: displayCriteriaRadioCallback,
   } = useBinaryFilter({
     fieldKey: "display",
     ...displayFilterTexts,
@@ -127,6 +133,7 @@ export default function PlansTable({
     field: approvedField,
     updateFieldSearch: updateApproved,
     fieldCriteriaCallBack: approvedCriteriaCallBack,
+    fieldCriteriaRadioCallback: approvedCriteriaRadioCallback,
   } = useBinaryFilter({
     fieldKey: "approved",
     trueText: useApprovedFilterTexts.approved,
@@ -138,6 +145,7 @@ export default function PlansTable({
     fieldDropdownFilterQueryParam: dietTypeQP,
     updateFieldDropdownFilter: updateDietType,
     filedFilterCriteriaCallback: dietTypeCriteriaCallback,
+    fieldCriteriaRadioCallback: dietTypeCriteriaRadioCallback,
   } = useFilterDropdown({
     items: dietTypes.map((value) => ({
       value,
@@ -150,6 +158,7 @@ export default function PlansTable({
     value: objectiveType,
     updateFieldDropdownFilter: updateObjectiveType,
     filedFilterCriteriaCallback: objectiveTypeCriteriaCallback,
+    fieldCriteriaRadioCallback: objectiveTypeCriteriaRadioCallback,
   } = useFilterDropdown({
     items: planObjectives.map((value) => ({
       value,
@@ -202,8 +211,6 @@ export default function PlansTable({
     filterKey: "title",
   });
 
-  console.log("messages", messages);
-
   const data: ResponseWithEntityCount<PlanResponse>[] = useMemo(
     () =>
       items.map((i) => ({
@@ -212,6 +219,19 @@ export default function PlansTable({
       })),
     [items],
   );
+
+  const radioArgs = useMemo(
+    () => ({
+      setSort,
+      sortingOptions,
+      setSortValue,
+      sortValue,
+      callback: resetCurrentPage,
+      filterKey: "title",
+    }),
+    [setSort, sortingOptions, setSortValue, sortValue, resetCurrentPage],
+  );
+
   const columns: ColumnDef<ResponseWithEntityCount<PlanResponse>>[] = useMemo(
     () => [
       {
@@ -228,9 +248,11 @@ export default function PlansTable({
         id: planTableColumnsTexts.title,
         accessorKey: "model.title",
         header: () => (
-          <p className="font-bold text-lg text-left">
-            {planTableColumnsTexts.title}
-          </p>
+          <RadioSortButton sortingProperty="title" radioArgs={radioArgs}>
+            <p className="font-bold text-lg text-left">
+              {planTableColumnsTexts.title}
+            </p>
+          </RadioSortButton>
         ),
         cell: ({ row }) => (
           <OverflowTextTooltip text={row.original.model.title} />
@@ -240,9 +262,14 @@ export default function PlansTable({
         id: planTableColumnsTexts.type,
         accessorKey: "model.type",
         header: () => (
-          <p className="font-bold text-lg text-left">
-            {planTableColumnsTexts.type}
-          </p>
+          <RadioSortDropDownWithExtraDummy
+            trigger={
+              <p className="font-bold text-lg text-left">
+                {planTableColumnsTexts.type}
+              </p>
+            }
+            extraContent={dietTypeCriteriaRadioCallback(resetCurrentPage)}
+          />
         ),
         cell: ({ row }) => {
           const colorMap = {
@@ -275,9 +302,14 @@ export default function PlansTable({
         id: planTableColumnsTexts.objective,
         accessorKey: "model.objective",
         header: () => (
-          <p className="font-bold text-lg text-left">
-            {planTableColumnsTexts.objective}
-          </p>
+          <RadioSortDropDownWithExtraDummy
+            trigger={
+              <p className="font-bold text-lg text-left">
+                {planTableColumnsTexts.objective}
+              </p>
+            }
+            extraContent={objectiveTypeCriteriaRadioCallback(resetCurrentPage)}
+          />
         ),
         cell: ({ row }) => (
           <div className="max-w-30 text-xs font-bold text-nowrap overflow-x-hidden">
@@ -289,9 +321,14 @@ export default function PlansTable({
         id: planTableColumnsTexts.display.header,
         accessorKey: "model.display",
         header: () => (
-          <p className="font-bold text-lg text-left">
-            {planTableColumnsTexts.display.header}
-          </p>
+          <RadioSortDropDownWithExtraDummy
+            trigger={
+              <p className="font-bold text-lg text-left">
+                {planTableColumnsTexts.display.header}
+              </p>
+            }
+            extraContent={displayCriteriaRadioCallback(resetCurrentPage)}
+          />
         ),
         cell: ({ row }) => (
           <Badge
@@ -321,9 +358,11 @@ export default function PlansTable({
         id: planTableColumnsTexts.price,
         accessorKey: "model.price",
         header: () => (
-          <p className="font-bold text-lg text-left">
-            {planTableColumnsTexts.price}
-          </p>
+          <RadioSortButton sortingProperty="price" radioArgs={radioArgs}>
+            <p className="font-bold text-lg text-left">
+              {planTableColumnsTexts.price}
+            </p>
+          </RadioSortButton>
         ),
         cell: ({ row }) => (
           <div className="max-w-[4.5rem] text-nowrap overflow-x-hidden">
@@ -361,9 +400,26 @@ export default function PlansTable({
         id: planTableColumnsTexts.createdAt,
         accessorKey: "model.createdAt",
         header: () => (
-          <p className="font-bold text-lg text-left">
-            {planTableColumnsTexts.createdAt}
-          </p>
+          <RadioSortDropDownWithExtra
+            radioArgs={radioArgs}
+            sortingProperty="createdAt"
+            trigger={
+              <p className="font-bold text-lg text-left">
+                {planTableColumnsTexts.createdAt}
+              </p>
+            }
+            showNone={false}
+            extraContent={
+              <CreationFilter
+                triggerVariant="ghost"
+                triggerClassName="px-5"
+                {...creationFilterTexts}
+                updateCreatedAtRange={updateCreatedAtRange}
+                hideUpdatedAt={true}
+                showLabels={false}
+              />
+            }
+          />
         ),
         cell: ({ row }) => (
           <p>{format(parseISO(row.original.model.createdAt), "dd/MM/yyyy")}</p>
@@ -373,9 +429,25 @@ export default function PlansTable({
         id: planTableColumnsTexts.updatedAt,
         accessorKey: "model.updatedAt",
         header: () => (
-          <p className="font-bold text-lg text-left">
-            {planTableColumnsTexts.updatedAt}
-          </p>
+          <RadioSortDropDownWithExtra
+            radioArgs={radioArgs}
+            sortingProperty="updatedAt"
+            trigger={
+              <p className="font-bold text-lg text-left">
+                {planTableColumnsTexts.updatedAt}
+              </p>
+            }
+            extraContent={
+              <CreationFilter
+                triggerVariant="ghost"
+                triggerClassName="px-5"
+                {...creationFilterTexts}
+                updateUpdatedAtRange={updateUpdatedAtRange}
+                hideCreatedAt={true}
+                showLabels={false}
+              />
+            }
+          />
         ),
         cell: ({ row }) => (
           <p>{format(parseISO(row.original.model.updatedAt), "dd/MM/yyyy")}</p>
@@ -385,9 +457,14 @@ export default function PlansTable({
         id: planTableColumnsTexts.approved.header,
         accessorKey: "model.approved",
         header: () => (
-          <div className="font-bold text-lg text-left">
-            {planTableColumnsTexts.approved.header}
-          </div>
+          <RadioSortDropDownWithExtraDummy
+            trigger={
+              <div className="font-bold text-lg text-left">
+                {planTableColumnsTexts.approved.header}
+              </div>
+            }
+            extraContent={approvedCriteriaRadioCallback(resetCurrentPage)}
+          />
         ),
         cell: ({ row }) => (
           <Badge
@@ -577,6 +654,14 @@ export default function PlansTable({
       planTableColumnsTexts.userLikes,
       refetch,
       router,
+      radioArgs,
+      updateUpdatedAtRange,
+      updateCreatedAtRange,
+      resetCurrentPage,
+      dietTypeCriteriaRadioCallback,
+      displayCriteriaRadioCallback,
+      approvedCriteriaRadioCallback,
+      objectiveTypeCriteriaRadioCallback,
     ],
   );
   const finalCols = useMemo(
@@ -608,6 +693,7 @@ export default function PlansTable({
           setPageInfo={setPageInfo}
           {...dataTableTexts}
           getRowId={getRowId}
+          useRadioSort={false}
           searchInputProps={{
             value: filter.title || "",
             searchInputTexts: { placeholder: search },
@@ -626,20 +712,20 @@ export default function PlansTable({
           extraCriteria={
             <div className="flex items-start justify-center gap-8 flex-1 flex-wrap">
               <div className="flex items-center justify-end gap-4 flex-1 flex-wrap">
-                {dietTypeCriteriaCallback(resetCurrentPage)}
-                {objectiveTypeCriteriaCallback(resetCurrentPage)}
-                {displayCriteriaCallBack(resetCurrentPage)}
-                {approvedCriteriaCallBack(resetCurrentPage)}
+                {/*{dietTypeCriteriaCallback(resetCurrentPage)}*/}
+                {/*{objectiveTypeCriteriaCallback(resetCurrentPage)}*/}
+                {/*{displayCriteriaCallBack(resetCurrentPage)}*/}
+                {/*{approvedCriteriaCallBack(resetCurrentPage)}*/}
               </div>
             </div>
           }
-          rangeDateFilter={
-            <CreationFilter
-              {...creationFilterTexts}
-              updateCreatedAtRange={updateCreatedAtRange}
-              updateUpdatedAtRange={updateUpdatedAtRange}
-            />
-          }
+          // rangeDateFilter={
+          //   <CreationFilter
+          //     {...creationFilterTexts}
+          //     updateCreatedAtRange={updateCreatedAtRange}
+          //     updateUpdatedAtRange={updateUpdatedAtRange}
+          //   />
+          // }
         />
       </Suspense>
     </div>

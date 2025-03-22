@@ -29,6 +29,10 @@ import CreationFilter, {
   CreationFilterTexts,
 } from "@/components/list/creation-filter";
 import { wrapItemToString } from "@/lib/utils";
+import {
+  RadioSortButton,
+  RadioSortDropDownWithExtra,
+} from "@/components/common/radio-sort";
 
 export interface OrderTableColumnsTexts {
   id: string;
@@ -157,6 +161,25 @@ export default function OrdersTable({
     [items],
   );
 
+  const radioArgs = useMemo(
+    () => ({
+      setSort,
+      sortingOptions,
+      setSortValue,
+      sortValue,
+      callback: resetCurrentPage,
+      filterKey: searchKey,
+    }),
+    [
+      resetCurrentPage,
+      searchKey,
+      setSort,
+      setSortValue,
+      sortValue,
+      sortingOptions,
+    ],
+  );
+
   const columns: ColumnDef<OrderDtoWithAddress>[] = useMemo(
     () => [
       {
@@ -172,9 +195,26 @@ export default function OrdersTable({
         id: orderTableColumnsTexts.date,
         accessorKey: "order.createdAt",
         header: () => (
-          <p className="font-bold text-lg text-left">
-            {orderTableColumnsTexts.date}
-          </p>
+          <RadioSortDropDownWithExtra
+            radioArgs={radioArgs}
+            sortingProperty="createdAt"
+            trigger={
+              <p className="font-bold text-lg text-left">
+                {orderTableColumnsTexts.date}
+              </p>
+            }
+            showNone={false}
+            extraContent={
+              <CreationFilter
+                triggerVariant="ghost"
+                triggerClassName="px-5"
+                {...creationFilterTexts}
+                updateCreatedAtRange={updateCreatedAtRange}
+                hideUpdatedAt={true}
+                showLabels={false}
+              />
+            }
+          />
         ),
         cell: ({ row }) => (
           <p>{format(parseISO(row.original.order.createdAt), "dd/MM/yyyy")}</p>
@@ -184,9 +224,11 @@ export default function OrdersTable({
         id: orderTableColumnsTexts.total,
         accessorKey: "order.total",
         header: () => (
-          <p className="font-bold text-lg text-left">
-            {orderTableColumnsTexts.total}
-          </p>
+          <RadioSortButton sortingProperty="total" radioArgs={radioArgs}>
+            <p className="font-bold text-lg text-left">
+              {orderTableColumnsTexts.total}
+            </p>
+          </RadioSortButton>
         ),
         cell: ({ row }) => (
           <div className="max-w-16 text-nowrap overflow-x-hidden">
@@ -296,6 +338,9 @@ export default function OrdersTable({
       orderTableColumnsTexts.plans,
       orderTableColumnsTexts.total,
       router,
+      radioArgs,
+      updateCreatedAtRange,
+      resetCurrentPage,
     ],
   );
 
@@ -320,6 +365,7 @@ export default function OrdersTable({
           pageInfo={pageInfo}
           setPageInfo={setPageInfo}
           getRowId={getRowId}
+          useRadioSort={false}
           specialPDFColumns={[
             {
               key: "address",
@@ -354,13 +400,14 @@ export default function OrdersTable({
               {searchKeyCriteria(resetCurrentPage)}
             </div>
           }
-          rangeDateFilter={
-            <CreationFilter
-              {...creationFilterTexts}
-              updateCreatedAtRange={updateCreatedAtRange}
-              hideUpdatedAt={true}
-            />
-          }
+          // rangeDateFilter={
+          // <CreationFilter
+          //   {...creationFilterTexts}
+          //   updateCreatedAtRange={updateCreatedAtRange}
+          //   hideUpdatedAt={true}
+          // />
+
+          // }
         />
       </Suspense>
     </div>

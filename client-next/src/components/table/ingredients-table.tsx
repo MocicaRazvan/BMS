@@ -42,6 +42,10 @@ import CreationFilter, {
   CreationFilterTexts,
 } from "@/components/list/creation-filter";
 import { wrapItemToString } from "@/lib/utils";
+import {
+  RadioSortButton,
+  RadioSortDropDownWithExtraDummy,
+} from "@/components/common/radio-sort";
 
 export interface IngredientTableColumnTexts {
   id: string;
@@ -103,7 +107,12 @@ export default function IngredientsTable({
 }: IngredientTableProps) {
   const router = useRouter();
   const isAdmin = authUser?.role === "ROLE_ADMIN";
-  const { field, updateFieldSearch, fieldCriteriaCallBack } = useBinaryFilter({
+  const {
+    field,
+    updateFieldSearch,
+    fieldCriteriaCallBack,
+    fieldCriteriaRadioCallback: displayFieldRadioCallback,
+  } = useBinaryFilter({
     fieldKey: "display",
     ...displayFilterTexts,
   });
@@ -115,6 +124,7 @@ export default function IngredientsTable({
     fieldDropdownFilterQueryParam: dietTypeQP,
     updateFieldDropdownFilter: updateDietType,
     filedFilterCriteriaCallback: dietTypeCriteriaCallback,
+    fieldCriteriaRadioCallback: dietTypeRadioCallback,
   } = useFilterDropdown({
     items: dietTypes.map((value) => ({
       value,
@@ -179,6 +189,18 @@ export default function IngredientsTable({
       [items],
     );
 
+  const radioArgs = useMemo(
+    () => ({
+      setSort,
+      sortingOptions,
+      setSortValue,
+      sortValue,
+      callback: resetCurrentPage,
+      filterKey: "name",
+    }),
+    [resetCurrentPage, setSort, setSortValue, sortValue, sortingOptions],
+  );
+
   const columns: ColumnDef<
     ResponseWithEntityCount<IngredientNutritionalFactResponse>
   >[] = useMemo(
@@ -197,9 +219,11 @@ export default function IngredientsTable({
         id: ingredientTableColumnTexts.name,
         accessorKey: "model.ingredient.name",
         header: () => (
-          <p className="font-bold text-lg text-left">
-            {ingredientTableColumnTexts.name}
-          </p>
+          <RadioSortButton sortingProperty="name" radioArgs={radioArgs}>
+            <p className="font-bold text-lg text-left">
+              {ingredientTableColumnTexts.name}
+            </p>
+          </RadioSortButton>
         ),
         cell: ({ row }) => (
           <OverflowTextTooltip text={row.original.model.ingredient.name} />
@@ -209,9 +233,14 @@ export default function IngredientsTable({
         id: ingredientTableColumnTexts.type,
         accessorKey: "model.ingredient.type",
         header: () => (
-          <p className="font-bold text-lg text-left">
-            {ingredientTableColumnTexts.type}
-          </p>
+          <RadioSortDropDownWithExtraDummy
+            trigger={
+              <p className="font-bold text-lg text-left">
+                {ingredientTableColumnTexts.type}
+              </p>
+            }
+            extraContent={dietTypeRadioCallback(resetCurrentPage)}
+          />
         ),
         cell: ({ row }) => {
           const colorMap = {
@@ -244,9 +273,14 @@ export default function IngredientsTable({
         id: ingredientTableColumnTexts.display.header,
         accessorKey: "model.ingredient.display",
         header: () => (
-          <p className="font-bold text-lg text-left">
-            {ingredientTableColumnTexts.display.header}
-          </p>
+          <RadioSortDropDownWithExtraDummy
+            trigger={
+              <p className="font-bold text-lg text-left">
+                {ingredientTableColumnTexts.display.header}
+              </p>
+            }
+            extraContent={displayFieldRadioCallback(resetCurrentPage)}
+          />
         ),
         cell: ({ row }) => (
           <Badge
@@ -278,9 +312,11 @@ export default function IngredientsTable({
         id: ingredientTableColumnTexts.fat,
         accessorKey: "model.nutritionalFact.fat",
         header: () => (
-          <p className="font-bold text-lg text-left">
-            {ingredientTableColumnTexts.fat}
-          </p>
+          <RadioSortButton sortingProperty="fat" radioArgs={radioArgs}>
+            <p className="font-bold text-lg text-left">
+              {ingredientTableColumnTexts.fat}
+            </p>
+          </RadioSortButton>
         ),
         cell: ({ row }) => <p>{row.original.model.nutritionalFact.fat}</p>,
       },
@@ -288,9 +324,11 @@ export default function IngredientsTable({
         id: ingredientTableColumnTexts.saturatedFat,
         accessorKey: "model.nutritionalFact.saturatedFat",
         header: () => (
-          <p className="font-bold text-lg text-left">
-            {ingredientTableColumnTexts.saturatedFat}
-          </p>
+          <RadioSortButton sortingProperty="saturatedFat" radioArgs={radioArgs}>
+            <p className="font-bold text-lg text-left">
+              {ingredientTableColumnTexts.saturatedFat}
+            </p>
+          </RadioSortButton>
         ),
         cell: ({ row }) => (
           <p>{row.original.model.nutritionalFact.saturatedFat}</p>
@@ -300,11 +338,17 @@ export default function IngredientsTable({
         id: ingredientTableColumnTexts.carbohydrates,
         accessorKey: "model.nutritionalFact.carbohydrates",
         header: () => (
-          <div className="max-w-16 text-nowrap overflow-x-hidden">
-            <p className="font-bold text-lg text-left">
-              {ingredientTableColumnTexts.carbohydrates}
-            </p>
-          </div>
+          <RadioSortButton
+            sortingProperty="carbohydrates"
+            className="max-w-[80px] text-nowrap overflow-x-hidden"
+            radioArgs={radioArgs}
+          >
+            <div className="max-w-16 text-nowrap overflow-x-hidden">
+              <p className="font-bold text-lg text-left">
+                {ingredientTableColumnTexts.carbohydrates}
+              </p>
+            </div>
+          </RadioSortButton>
         ),
         cell: ({ row }) => (
           <p>{row.original.model.nutritionalFact.carbohydrates}</p>
@@ -315,9 +359,11 @@ export default function IngredientsTable({
         id: ingredientTableColumnTexts.sugar,
         accessorKey: "model.nutritionalFact.sugar",
         header: () => (
-          <p className="font-bold text-lg text-left">
-            {ingredientTableColumnTexts.sugar}
-          </p>
+          <RadioSortButton sortingProperty="sugar" radioArgs={radioArgs}>
+            <p className="font-bold text-lg text-left">
+              {ingredientTableColumnTexts.sugar}
+            </p>
+          </RadioSortButton>
         ),
         cell: ({ row }) => <p>{row.original.model.nutritionalFact.sugar}</p>,
       },
@@ -325,9 +371,11 @@ export default function IngredientsTable({
         id: ingredientTableColumnTexts.protein,
         accessorKey: "model.nutritionalFact.protein",
         header: () => (
-          <p className="font-bold text-lg text-left">
-            {ingredientTableColumnTexts.protein}
-          </p>
+          <RadioSortButton sortingProperty="protein" radioArgs={radioArgs}>
+            <p className="font-bold text-lg text-left">
+              {ingredientTableColumnTexts.protein}
+            </p>
+          </RadioSortButton>
         ),
         cell: ({ row }) => <p>{row.original.model.nutritionalFact.protein}</p>,
       },
@@ -336,18 +384,22 @@ export default function IngredientsTable({
         id: ingredientTableColumnTexts.salt,
         accessorKey: "model.nutritionalFact.salt",
         header: () => (
-          <p className="font-bold text-lg text-left">
-            {ingredientTableColumnTexts.salt}
-          </p>
+          <RadioSortButton sortingProperty="salt" radioArgs={radioArgs}>
+            <p className="font-bold text-lg text-left">
+              {ingredientTableColumnTexts.salt}
+            </p>
+          </RadioSortButton>
         ),
         cell: ({ row }) => <p>{row.original.model.nutritionalFact.salt}</p>,
       },
       {
         id: ingredientTableColumnTexts.calories,
         header: () => (
-          <p className="font-bold text-lg text-left">
-            {ingredientTableColumnTexts.calories}
-          </p>
+          <RadioSortButton sortingProperty="calories" radioArgs={radioArgs}>
+            <p className="font-bold text-lg text-left">
+              {ingredientTableColumnTexts.calories}
+            </p>
+          </RadioSortButton>
         ),
         cell: ({ row }) => <p>{getCalories(row.original.model)}</p>,
       },
@@ -509,6 +561,10 @@ export default function IngredientsTable({
       isAdmin,
       refetch,
       router,
+      radioArgs,
+      dietTypeRadioCallback,
+      resetCurrentPage,
+      displayFieldRadioCallback,
     ],
   );
 
@@ -554,6 +610,7 @@ export default function IngredientsTable({
           hidePDFColumnIds={[ingredientTableColumnTexts.calories]}
           getRowId={getRowId}
           {...dataTableTexts}
+          useRadioSort={false}
           searchInputProps={{
             value: filter.name || "",
             searchInputTexts: { placeholder: search },
@@ -573,10 +630,10 @@ export default function IngredientsTable({
             <div className="flex items-start justify-center gap-8 flex-1 flex-wrap">
               <div className="flex items-center justify-end gap-4 flex-1 flex-wrap">
                 {extraCriteria}
-                {dietTypeCriteriaCallback(resetCurrentPage)}
-                {isAdmin &&
-                  forWhom === "admin" &&
-                  fieldCriteriaCallBack(resetCurrentPage)}
+                {/*{dietTypeCriteriaCallback(resetCurrentPage)}*/}
+                {/*{isAdmin &&*/}
+                {/*  forWhom === "admin" &&*/}
+                {/*  fieldCriteriaCallBack(resetCurrentPage)}*/}
               </div>
             </div>
           }

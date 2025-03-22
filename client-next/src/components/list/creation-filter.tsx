@@ -12,6 +12,7 @@ import { useLocale } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { addDays } from "date-fns";
+import { ButtonProps } from "@/components/ui/button";
 
 export interface CreationFilterTexts {
   dateRangePickerTexts: DateRangePickerTexts;
@@ -19,11 +20,14 @@ export interface CreationFilterTexts {
   updatedAtLabel: string;
   hideCreatedAt?: boolean;
   hideUpdatedAt?: boolean;
+  showLabels?: boolean;
 }
 
 interface Props extends CreationFilterTexts {
   updateCreatedAtRange?: DateRangePickerProps["onUpdate"];
   updateUpdatedAtRange?: DateRangePickerProps["onUpdate"];
+  triggerVariant?: ButtonProps["variant"];
+  triggerClassName?: string;
 }
 
 function changeEndRange(values: {
@@ -45,6 +49,9 @@ export default function CreationFilter({
   updateUpdatedAtRange = (v, n) => {},
   hideUpdatedAt,
   hideCreatedAt,
+  showLabels = true,
+  triggerVariant = "outline",
+  triggerClassName,
 }: Props) {
   const locale = useLocale();
   const currentSearchParams = useSearchParams();
@@ -95,10 +102,19 @@ export default function CreationFilter({
         showCompare={false}
         showNone={true}
         defaultNone={defaultCreatedAtNone}
+        triggerVariant={triggerVariant}
+        triggerClassName={triggerClassName}
         {...dateRangePickerTexts}
       />
     ),
-    [dateRangePickerTexts, defaultCreatedAtNone, locale, updateCreatedAtRange],
+    [
+      dateRangePickerTexts,
+      defaultCreatedAtNone,
+      locale,
+      triggerClassName,
+      triggerVariant,
+      updateCreatedAtRange,
+    ],
   );
 
   const updatedAtDateRangePicker = useMemo(
@@ -122,10 +138,19 @@ export default function CreationFilter({
         showCompare={false}
         showNone={true}
         defaultNone={defaultUpdatedAtNone}
+        triggerVariant={triggerVariant}
+        triggerClassName={triggerClassName}
         {...dateRangePickerTexts}
       />
     ),
-    [dateRangePickerTexts, defaultUpdatedAtNone, locale, updateUpdatedAtRange],
+    [
+      dateRangePickerTexts,
+      defaultUpdatedAtNone,
+      locale,
+      triggerClassName,
+      triggerVariant,
+      updateUpdatedAtRange,
+    ],
   );
   return (
     <div
@@ -136,13 +161,17 @@ export default function CreationFilter({
     >
       {!hideCreatedAt && (
         <div className="flex items-center justify-center gap-2.5 md:gap-3">
-          <label className=" font-semibold">{createdAtLabel}</label>
+          {showLabels && (
+            <label className=" font-semibold">{createdAtLabel}</label>
+          )}
           {createAtDateRangePicker}
         </div>
       )}
       {!hideUpdatedAt && (
         <div className="flex items-center justify-center gap-2.5 md:gap-3">
-          <label className=" font-semibold">{updatedAtLabel}</label>
+          {showLabels && (
+            <label className=" font-semibold">{updatedAtLabel}</label>
+          )}
           {updatedAtDateRangePicker}
         </div>
       )}

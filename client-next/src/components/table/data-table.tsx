@@ -52,7 +52,6 @@ import RadioSort, {
 import { Download } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Skeleton } from "@/components/ui/skeleton";
-import { cn } from "@/lib/utils";
 import useExportTable, {
   UseExportTableArgs,
 } from "@/hoooks/table/use-export-table";
@@ -92,6 +91,7 @@ interface DataTableProps<TData extends Record<string, any>, TValue>
   rangeDateFilter?: ReactNode;
   sizeOptions?: number[];
   getRowId: (row: TData) => string;
+  useRadioSort?: boolean;
 }
 
 const MotionTableRow = motion(TableRow);
@@ -121,6 +121,7 @@ export function DataTable<TData extends Record<string, any>, TValue>({
   getRowId,
   selectedRowsTexts,
   downloadSelected,
+  useRadioSort = true,
 }: DataTableProps<TData, TValue>) {
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -220,9 +221,11 @@ export function DataTable<TData extends Record<string, any>, TValue>({
           <div className="order-0">
             <SearchInput {...searchInputProps} />
           </div>
-          <div className="order-10">
-            <RadioSort {...radioSortProps} {...radioSortTexts} />
-          </div>
+          {useRadioSort && (
+            <div className="order-10">
+              <RadioSort {...radioSortProps} {...radioSortTexts} />
+            </div>
+          )}
           {extraCriteria && extraCriteria}
         </div>
         <div className=" w-full lg:w-fit flex items-center justify-between gap-4 ml-auto">
@@ -316,95 +319,93 @@ export function DataTable<TData extends Record<string, any>, TValue>({
       </div>
       {rangeDateFilter && <div className="w-full mb-4">{rangeDateFilter}</div>}
       <div className="rounded-md border relative">
-        {!isFinished ? (
-          <div className="w-full h-full min-h-[60vh] space-y-4 p-2">
-            {Array.from({ length: 10 }).map((_, i) => (
-              <div key={i} className={cn(" h-[6vh] ")}>
-                <Skeleton className="w-full  h-[6vh]" />
-              </div>
-            ))}
-          </div>
-        ) : (
-          <>
-            <AnimatePresence mode="wait">
-              {selectedLength > 0 && (
-                <motion.div
-                  className="hidden md:flex absolute top-0 h-12 -left-6  items-center justify-center z-[2]"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  key="unselect-all"
-                >
-                  <Checkbox
-                    checked={selectedLength > 0}
-                    onCheckedChange={() => setRowSelection({})}
-                    aria-label="Unselect all"
-                  />
-                </motion.div>
-              )}
-            </AnimatePresence>
-            <Table wrapperClassName="lg:overflow-visible">
-              <TableHeader className="bg-accent/50">
-                {table.getHeaderGroups().map((headerGroup) => (
-                  <TableRow key={headerGroup.id}>
-                    {headerGroup.headers.map((header) => {
-                      return (
-                        <TableHead key={header.id}>
-                          {header.isPlaceholder
-                            ? null
-                            : flexRender(
-                                header.column.columnDef.header,
-                                header.getContext(),
-                              )}
-                        </TableHead>
-                      );
-                    })}
-                  </TableRow>
-                ))}
-              </TableHeader>
-              <TableBody className="relative !overflow-y-visible">
-                {isFinished && table.getRowModel().rows?.length ? (
-                  table.getRowModel().rows.map((row, i) => (
-                    <MotionTableRow
-                      key={row.id}
-                      data-state={row.getIsSelected() && "selected"}
-                      className="lg:hover:relative z-20  hover:bg-muted "
-                      initial={{ opacity: 0, y: 20, scale: 0.8 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      transition={{
-                        duration: 0.1,
-                        // delay: i * 0.11,
-                        ease: "linear",
-                      }}
-                      whileHover={{
-                        scale: 1.02,
-                        transition: { duration: 0.1, delay: 0 },
-                      }}
-                    >
-                      {row.getVisibleCells().map((cell) => (
-                        <TableCell key={cell.id}>
-                          {flexRender(
-                            cell.column.columnDef.cell,
-                            cell.getContext(),
+        <AnimatePresence mode="wait">
+          {selectedLength > 0 && (
+            <motion.div
+              className="hidden md:flex absolute top-0 h-12 -left-6  items-center justify-center z-[2]"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              key="unselect-all"
+            >
+              <Checkbox
+                checked={selectedLength > 0}
+                onCheckedChange={() => setRowSelection({})}
+                aria-label="Unselect all"
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
+        <Table wrapperClassName="lg:overflow-visible ">
+          <TableHeader className="bg-accent/50">
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map((header) => {
+                  return (
+                    <TableHead key={header.id}>
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(
+                            header.column.columnDef.header,
+                            header.getContext(),
                           )}
-                        </TableCell>
-                      ))}
-                    </MotionTableRow>
-                  ))
-                ) : (
-                  <TableRow>
-                    <TableCell
-                      colSpan={finalColumns.length}
-                      className="h-24 text-center"
-                    >
-                      {noResults}
+                    </TableHead>
+                  );
+                })}
+              </TableRow>
+            ))}
+          </TableHeader>
+          <TableBody className="relative !overflow-y-visible w-full">
+            {!isFinished ? (
+              Array.from({ length: 10 }).map((_, i) => (
+                <TableRow key={`loading-${i}`}>
+                  {finalColumns.map((_, j) => (
+                    <TableCell key={`loading-cell-${j}-row-${i}`}>
+                      <Skeleton className="w-full h-[5vh]" />
                     </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          </>
-        )}
+                  ))}
+                </TableRow>
+              ))
+            ) : table.getRowModel().rows?.length ? (
+              table.getRowModel().rows.map((row, i) => (
+                <MotionTableRow
+                  key={row.id}
+                  data-state={row.getIsSelected() && "selected"}
+                  className="lg:hover:relative z-20  hover:bg-muted "
+                  initial={{ opacity: 0, y: 20, scale: 0.8 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  transition={{
+                    duration: 0.1,
+                    // delay: i * 0.11,
+                    ease: "linear",
+                  }}
+                  whileHover={{
+                    scale: 1.02,
+                    transition: { duration: 0.1, delay: 0 },
+                  }}
+                >
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell key={cell.id}>
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext(),
+                      )}
+                    </TableCell>
+                  ))}
+                </MotionTableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell
+                  colSpan={finalColumns.length}
+                  className="h-24 text-center"
+                >
+                  {noResults}
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
       </div>
 
       <div className="mt-2 lg:mt-4 flex flex-col md:flex-row items-center justify-between w-full">

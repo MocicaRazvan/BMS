@@ -9,6 +9,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
 
 export interface FilterDropdownItem {
   label: string;
@@ -120,11 +122,59 @@ export default function useFilterDropdown({
     [field.label, field.value, handleChange, items],
   );
 
+  const fieldCriteriaRadioCallback = useCallback(
+    (callback: () => void) => (
+      <RadioGroup
+        defaultValue="null"
+        className="px-2 py-1.5 gap-4"
+        onValueChange={(value) => {
+          setField((prev) =>
+            value === "null"
+              ? {
+                  label: noFilterLabel,
+                  value: "",
+                }
+              : items.find((i) => i.value === value) || prev,
+          );
+          callback();
+        }}
+      >
+        {items.map(({ label, value }) => (
+          <Label
+            htmlFor={fieldKey + value}
+            className="flex items-center space-x-2 rounded hover:bg-muted cursor-pointer px-4 py-2 gap-2"
+            key={value}
+          >
+            <RadioGroupItem
+              value={value}
+              id={fieldKey + value}
+              className="ring-none outline-none border-none"
+            />
+            <p>{label}</p>
+          </Label>
+        ))}
+        <Label
+          htmlFor={fieldKey + "null"}
+          className="flex items-center space-x-2 rounded hover:bg-muted cursor-pointer px-4 py-2 gap-2"
+        >
+          <RadioGroupItem
+            value={"null"}
+            id={fieldKey + "null"}
+            className="ring-none outline-none border-none"
+          />
+          <p>{noFilterLabel}</p>
+        </Label>
+      </RadioGroup>
+    ),
+    [fieldKey, items, noFilterLabel],
+  );
+
   return {
     updateFieldDropdownFilter,
     filedFilterCriteria,
     fieldDropdownFilterQueryParam,
     value: field.value,
     filedFilterCriteriaCallback,
+    fieldCriteriaRadioCallback,
   };
 }

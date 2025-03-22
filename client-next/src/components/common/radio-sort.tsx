@@ -20,9 +20,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button, ButtonProps } from "@/components/ui/button";
-import { ArrowDown, ArrowUp } from "lucide-react";
+import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 import { useSearchParams } from "next/navigation";
-import { parseSortString } from "@/lib/utils";
+import { cn, parseSortString } from "@/lib/utils";
+import { Separator } from "@/components/ui/separator";
 
 export interface RadioSortTexts {
   noSort: string;
@@ -36,6 +37,7 @@ export interface UseRadioSortArgs {
   callback?: () => void;
   useDefaultSort?: boolean;
   filterKey: string;
+  clasName?: string;
 }
 
 export interface RadioSortProps extends RadioSortTexts, UseRadioSortArgs {
@@ -130,6 +132,89 @@ export const useRadioSort = ({
   };
 };
 
+const useRadioSortButton = ({
+  sortingProperty,
+  radioArgs,
+}: {
+  sortingProperty: string;
+  radioArgs: UseRadioSortArgs;
+}) => {
+  const sortParam = useSearchParams().get("sort");
+  const splitParams = sortParam?.split(":") || [];
+
+  const paramKey = splitParams?.at(0);
+  const paramValue = splitParams?.at(1);
+  const curSO = radioArgs.sortingOptions.filter(
+    (s) => s.property.toLowerCase() === sortingProperty.toLowerCase(),
+  );
+  const { handleValueChange, isDefaultSort } = useRadioSort(radioArgs);
+  const canBeDefault = useMemo(
+    () =>
+      curSO.some((s) => s.property === "createdAt" && s.direction === "desc"),
+    [curSO],
+  );
+  const isDefaultActive = isDefaultSort && canBeDefault;
+  const [toggleSort, setToggleSort] = useState<SortingOption["direction"]>(
+    () => {
+      if (
+        (paramKey === sortingProperty && paramValue === "desc") ||
+        paramValue === "asc"
+      ) {
+        return paramValue;
+      }
+      return "none";
+    },
+  );
+
+  useEffect(() => {
+    if (paramKey !== sortingProperty) {
+      setToggleSort("none");
+    } else if (
+      paramKey === "createdAt" &&
+      paramValue === "desc" &&
+      canBeDefault
+    ) {
+      setToggleSort("desc");
+    }
+  }, [canBeDefault, paramKey, paramValue, sortingProperty]);
+
+  if (curSO.length !== 2) return null;
+
+  const handleButtonClick = () => {
+    if (toggleSort === "none") {
+      handleValueChange(`${sortingProperty}-desc`);
+      setToggleSort("desc");
+    } else if (toggleSort === "desc") {
+      handleValueChange(`${sortingProperty}-asc`);
+      setToggleSort("asc");
+    } else if (toggleSort === "asc") {
+      if (isDefaultActive) {
+        handleValueChange(`${sortingProperty}-desc`);
+        setToggleSort("desc");
+      } else {
+        handleValueChange(undefined);
+        setToggleSort("none");
+      }
+    }
+  };
+
+  const handleManualClick = (direction: SortingOption["direction"]) => {
+    if (direction === "none" || direction === toggleSort) {
+      handleValueChange(undefined);
+      setToggleSort("none");
+    } else {
+      handleValueChange(`${sortingProperty}-${direction}`);
+      setToggleSort(direction);
+    }
+  };
+
+  return {
+    toggleSort,
+    handleButtonClick,
+    handleManualClick,
+  };
+};
+
 interface RadioSortButtonProps extends ButtonProps {
   sortingProperty: string;
   radioArgs: UseRadioSortArgs;
@@ -139,56 +224,192 @@ export const RadioSortButton = ({
   sortingProperty,
   radioArgs,
   children,
+  className,
   ...args
 }: RadioSortButtonProps) => {
-  const curSO = radioArgs.sortingOptions.filter(
-    (s) => s.property.toLowerCase() === sortingProperty.toLowerCase(),
-  );
-  const { handleValueChange, isDefaultSort, sortValue } =
-    useRadioSort(radioArgs);
-  const canBeDefault = useMemo(
-    () =>
-      curSO.some((s) => s.property === "createdAt" && s.direction === "desc"),
-    [curSO],
-  );
-  const isDefaultActive = isDefaultSort && canBeDefault;
-  const [toggleSort, setToggleSort] = useState<SortingOption["direction"]>(
-    isDefaultSort ? "desc" : "none",
-  );
-
-  useEffect(() => {
-    if (isDefaultSort) {
-      setToggleSort("desc");
-    }
-  }, [isDefaultSort]);
-
-  if (curSO.length !== 2) return null;
-  const handleButtonClick = () => {
-    if (toggleSort === "asc") {
-      handleValueChange(`${sortingProperty}-desc`);
-      setToggleSort("desc");
-    } else if (toggleSort === "desc") {
-      handleValueChange(undefined);
-      setToggleSort("none");
-    } else {
-      handleValueChange(`${sortingProperty}-asc`);
-      setToggleSort("asc");
-    }
-  };
-
+  const radioSortButtonHook = useRadioSortButton({
+    sortingProperty,
+    radioArgs,
+  });
+  if (!radioSortButtonHook) return children;
+  const { toggleSort, handleButtonClick } = radioSortButtonHook;
   return (
     <Button
       onClick={handleButtonClick}
-      disabled={isDefaultActive}
+      // disabled={isDefaultActive}
       variant="ghost"
+      className={cn(
+        "hover:bg-transparent flex items-center justify-between gap-1 px-0 py-0",
+        className,
+      )}
       {...args}
     >
       {children}
-      {toggleSort === "asc" && <ArrowUp />}
-      {toggleSort === "desc" && <ArrowDown />}
+      <div className="w-4 h-4 flex items-center justify-center">
+        {toggleSort === "asc" && <ArrowUp />}
+        {toggleSort === "desc" && <ArrowDown />}
+        {toggleSort === "none" && <ArrowUpDown />}
+      </div>
     </Button>
   );
 };
+
+const directionToArrow = (
+  direction: SortingOption["direction"],
+  className = "",
+) => {
+  if (direction === "asc") return <ArrowUp className={className} />;
+  if (direction === "desc") return <ArrowDown className={className} />;
+  return <ArrowUpDown className={className} />;
+};
+
+export type RadioButtonGroupProps = Omit<RadioSortButtonProps, "children"> & {
+  showNone?: boolean;
+  className?: string;
+};
+
+export const RadioSortButtonGroup = ({
+  sortingProperty,
+  radioArgs,
+  className,
+  showNone = true,
+  ...args
+}: RadioButtonGroupProps) => {
+  const radioSortButtonHook = useRadioSortButton({
+    sortingProperty,
+    radioArgs,
+  });
+  if (!radioSortButtonHook) return null;
+  const { toggleSort, handleManualClick } = radioSortButtonHook;
+  const directions = ["asc", "desc"];
+  if (showNone) directions.push("none");
+  return (
+    <div className={cn("flex flex-col items-center justify-center", className)}>
+      {directions.map((direction) => (
+        <Button
+          onClick={() =>
+            handleManualClick(direction as SortingOption["direction"])
+          }
+          // disabled={isDefaultActive}
+          variant="ghost"
+          className={cn(
+            "flex items-center justify-between w-full font-normal",
+            toggleSort === direction && "bg-muted",
+          )}
+          key={direction + sortingProperty}
+          {...args}
+        >
+          <p className="capitalize">{direction}</p>
+          {directionToArrow(direction as SortingOption["direction"], "w-4 h-4")}
+        </Button>
+      ))}
+    </div>
+  );
+};
+
+export interface RadioSortDropDownWithExtraProps extends RadioButtonGroupProps {
+  trigger: ReactNode;
+  extraContent?: ReactNode;
+  dummy?: boolean;
+  sortClassName?: string;
+}
+
+export function RadioSortDropDownWithExtra({
+  sortingProperty,
+  radioArgs,
+  className,
+  trigger,
+  showNone = true,
+  extraContent,
+  sortClassName,
+  ...args
+}: RadioSortDropDownWithExtraProps) {
+  const [isOpened, setIsOpened] = useState(false);
+  const radioSortButtonHook = useRadioSortButton({
+    sortingProperty,
+    radioArgs,
+  });
+  if (!radioSortButtonHook) return null;
+  const { toggleSort, handleManualClick } = radioSortButtonHook;
+  const directions = ["asc", "desc"];
+  if (showNone) directions.push("none");
+  return (
+    <DropdownMenu open={isOpened} onOpenChange={setIsOpened}>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="ghost"
+          className={cn(
+            "hover:bg-transparent flex items-center justify-between gap-1 px-0 py-0",
+            className,
+          )}
+        >
+          {trigger}
+          <div className="w-4 h-4 flex items-center justify-center">
+            {toggleSort === "asc" && <ArrowUp />}
+            {toggleSort === "desc" && <ArrowDown />}
+            {toggleSort === "none" && <ArrowUpDown />}
+          </div>
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent className={cn("px-1 pb-1.5", className)}>
+        <div className={cn("space-y-1 w-full", sortClassName)}>
+          {directions.map((direction) => (
+            <Button
+              onClick={() =>
+                handleManualClick(direction as SortingOption["direction"])
+              }
+              // disabled={isDefaultActive}
+              variant="ghost"
+              className={cn(
+                "flex items-center justify-between w-full font-normal ",
+                toggleSort === direction && "bg-muted",
+              )}
+              key={direction + sortingProperty}
+              {...args}
+            >
+              <p className="capitalize">{direction}</p>
+              {directionToArrow(
+                direction as SortingOption["direction"],
+                "w-4 h-4",
+              )}
+            </Button>
+          ))}
+        </div>
+        {extraContent && <Separator className="w-full my-2" />}
+
+        {extraContent}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+export function RadioSortDropDownWithExtraDummy({
+  trigger,
+  extraContent,
+  className,
+}: {
+  trigger: ReactNode;
+  extraContent?: ReactNode;
+  className?: string;
+}) {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="ghost"
+          className={cn(
+            "hover:bg-transparent flex items-center justify-between gap-1 px-0 py-0",
+            className,
+          )}
+        >
+          {trigger}
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent className={cn("px-1 py-1.5", className)}>
+        {extraContent}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
 
 export default function RadioSort({
   setSort,
@@ -200,6 +421,7 @@ export default function RadioSort({
   callback,
   useDefaultSort = true,
   filterKey,
+  clasName,
 }: RadioSortProps) {
   const { handleValueChange, isDefaultSort } = useRadioSort({
     useDefaultSort,
@@ -217,7 +439,9 @@ export default function RadioSort({
       <DropdownMenuTrigger asChild>
         <Button variant="outline">{`${sort[0]?.text || noSort} `}</Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-56 overflow-y-auto max-h-[250px]">
+      <DropdownMenuContent
+        className={cn("w-56 overflow-y-auto max-h-[250px]", clasName)}
+      >
         <DropdownMenuRadioGroup
           value={sortValue}
           onValueChange={handleValueChange}

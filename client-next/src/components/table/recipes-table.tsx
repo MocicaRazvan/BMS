@@ -41,6 +41,11 @@ import CreationFilter, {
   CreationFilterTexts,
 } from "@/components/list/creation-filter";
 import { wrapItemToString } from "@/lib/utils";
+import {
+  RadioSortButton,
+  RadioSortDropDownWithExtra,
+  RadioSortDropDownWithExtraDummy,
+} from "@/components/common/radio-sort";
 
 export interface RecipeTableColumnsTexts {
   id: string;
@@ -97,6 +102,7 @@ export default function RecipeTable({
     field: approvedField,
     updateFieldSearch: updateApproveField,
     fieldCriteriaCallBack: approvedFieldCriteriaCallBack,
+    fieldCriteriaRadioCallback: approvedCriteriaRadioCallback,
   } = useBinaryFilter({
     fieldKey: "approved",
     trueText: useApprovedFilterTexts.approved,
@@ -108,6 +114,7 @@ export default function RecipeTable({
     value: dietType,
     updateFieldDropdownFilter: updateDietType,
     filedFilterCriteriaCallback: dietTypeCriteriaCallback,
+    fieldCriteriaRadioCallback: dietTypeCriteriaRadioCallback,
   } = useFilterDropdown({
     items: dietTypes.map((value) => ({
       value,
@@ -169,6 +176,18 @@ export default function RecipeTable({
     [items],
   );
 
+  const radioArgs = useMemo(
+    () => ({
+      setSort,
+      sortingOptions,
+      setSortValue,
+      sortValue,
+      callback: resetCurrentPage,
+      filterKey: "title",
+    }),
+    [resetCurrentPage, setSort, setSortValue, sortValue, sortingOptions],
+  );
+
   const columns: ColumnDef<ResponseWithEntityCount<RecipeResponse>>[] = useMemo(
     () => [
       {
@@ -185,9 +204,11 @@ export default function RecipeTable({
         id: recipeTableColumnsTexts.title,
         accessorKey: "model.title",
         header: () => (
-          <p className="font-bold text-lg text-left">
-            {recipeTableColumnsTexts.title}
-          </p>
+          <RadioSortButton sortingProperty="title" radioArgs={radioArgs}>
+            <p className="font-bold text-lg text-left">
+              {recipeTableColumnsTexts.title}
+            </p>
+          </RadioSortButton>
         ),
         cell: ({ row }) => (
           <OverflowTextTooltip text={row.original.model.title} />
@@ -197,9 +218,14 @@ export default function RecipeTable({
         id: recipeTableColumnsTexts.type,
         accessorKey: "model.type",
         header: () => (
-          <p className="font-bold text-lg text-left">
-            {recipeTableColumnsTexts.type}
-          </p>
+          <RadioSortDropDownWithExtraDummy
+            trigger={
+              <p className="font-bold text-lg text-left">
+                {recipeTableColumnsTexts.type}
+              </p>
+            }
+            extraContent={dietTypeCriteriaRadioCallback(resetCurrentPage)}
+          />
         ),
         cell: ({ row }) => {
           const colorMap = {
@@ -266,9 +292,26 @@ export default function RecipeTable({
         id: recipeTableColumnsTexts.createdAt,
         accessorKey: "model.createdAt",
         header: () => (
-          <p className="font-bold text-lg text-left">
-            {recipeTableColumnsTexts.createdAt}
-          </p>
+          <RadioSortDropDownWithExtra
+            radioArgs={radioArgs}
+            sortingProperty="createdAt"
+            trigger={
+              <p className="font-bold text-lg text-left">
+                {recipeTableColumnsTexts.createdAt}
+              </p>
+            }
+            showNone={false}
+            extraContent={
+              <CreationFilter
+                triggerVariant="ghost"
+                triggerClassName="px-5"
+                {...creationFilterTexts}
+                updateCreatedAtRange={updateCreatedAtRange}
+                hideUpdatedAt={true}
+                showLabels={false}
+              />
+            }
+          />
         ),
         cell: ({ row }) => (
           <p>{format(parseISO(row.original.model.createdAt), "dd/MM/yyyy")}</p>
@@ -278,9 +321,25 @@ export default function RecipeTable({
         id: recipeTableColumnsTexts.updatedAt,
         accessorKey: "model.updatedAt",
         header: () => (
-          <p className="font-bold text-lg text-left">
-            {recipeTableColumnsTexts.updatedAt}
-          </p>
+          <RadioSortDropDownWithExtra
+            radioArgs={radioArgs}
+            sortingProperty="updatedAt"
+            trigger={
+              <p className="font-bold text-lg text-left">
+                {recipeTableColumnsTexts.updatedAt}
+              </p>
+            }
+            extraContent={
+              <CreationFilter
+                triggerVariant="ghost"
+                triggerClassName="px-5"
+                {...creationFilterTexts}
+                updateUpdatedAtRange={updateUpdatedAtRange}
+                hideCreatedAt={true}
+                showLabels={false}
+              />
+            }
+          />
         ),
         cell: ({ row }) => (
           <p>{format(parseISO(row.original.model.updatedAt), "dd/MM/yyyy")}</p>
@@ -290,9 +349,14 @@ export default function RecipeTable({
         id: recipeTableColumnsTexts.approved.header,
         accessorKey: "model.approved",
         header: () => (
-          <div className="font-bold text-lg text-left">
-            {recipeTableColumnsTexts.approved.header}
-          </div>
+          <RadioSortDropDownWithExtraDummy
+            trigger={
+              <div className="font-bold text-lg text-left">
+                {recipeTableColumnsTexts.approved.header}
+              </div>
+            }
+            extraContent={approvedCriteriaRadioCallback(resetCurrentPage)}
+          />
         ),
         cell: ({ row }) => (
           <Badge
@@ -457,6 +521,12 @@ export default function RecipeTable({
       isAdmin,
       refetch,
       router,
+      radioArgs,
+      updateUpdatedAtRange,
+      updateCreatedAtRange,
+      approvedCriteriaRadioCallback,
+      resetCurrentPage,
+      dietTypeCriteriaRadioCallback,
     ],
   );
 
@@ -488,6 +558,7 @@ export default function RecipeTable({
           setPageInfo={setPageInfo}
           getRowId={getRowId}
           {...dataTableTexts}
+          useRadioSort={false}
           searchInputProps={{
             value: filter.title || "",
             searchInputTexts: { placeholder: search },
@@ -506,18 +577,18 @@ export default function RecipeTable({
           extraCriteria={
             <div className="flex items-start justify-center gap-8 flex-1 flex-wrap">
               <div className="flex items-center justify-end gap-4 flex-1 flex-wrap">
-                {dietTypeCriteriaCallback(resetCurrentPage)}
-                {approvedFieldCriteriaCallBack(resetCurrentPage)}
+                {/*{dietTypeCriteriaCallback(resetCurrentPage)}*/}
+                {/*{approvedFieldCriteriaCallBack(resetCurrentPage)}*/}
               </div>
             </div>
           }
-          rangeDateFilter={
-            <CreationFilter
-              {...creationFilterTexts}
-              updateCreatedAtRange={updateCreatedAtRange}
-              updateUpdatedAtRange={updateUpdatedAtRange}
-            />
-          }
+          // rangeDateFilter={
+          //   <CreationFilter
+          //     {...creationFilterTexts}
+          //     updateCreatedAtRange={updateCreatedAtRange}
+          //     updateUpdatedAtRange={updateUpdatedAtRange}
+          //   />
+          // }
         />
       </Suspense>
     </div>
