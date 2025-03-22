@@ -1,12 +1,12 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { ReactNode, useCallback, useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface Props {
-  children: React.ReactNode;
+  children: ReactNode;
 }
 const MotionButton = motion(Button);
 export default function ScrollTopProvider({ children }: Props) {
@@ -49,7 +49,7 @@ export default function ScrollTopProvider({ children }: Props) {
               damping: 20,
             }}
             onClick={scrollToTop}
-            className="fixed bottom-6 left-4 z-20 p-2 rounded-full shadow-lg "
+            className="fixed bottom-6 left-4 z-50 p-2 rounded-full shadow-lg "
           >
             <ChevronUp />
           </MotionButton>
