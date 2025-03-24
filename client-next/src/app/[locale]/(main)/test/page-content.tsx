@@ -44,10 +44,6 @@ export default function TestPage({
   return (
     <div>
       <div className="h-48" />
-      <DayCalendarProvider authUser={authUser}>
-        <DayCalendarHeaderDate />
-        <DayCalendarBody />
-      </DayCalendarProvider>
     </div>
   );
 }
