@@ -38,18 +38,23 @@ export default function DayCalendarEvent({
       path: "/daysCalendar/delete/" + dayCalendar.id,
       method: "DELETE",
       token: authUser.token,
-    }).then(({ messages, error }) => {
-      if (error) {
+    })
+      .then(({ messages, error }) => {
+        if (error) {
+          setErrorMsg("Error");
+          console.log("Error", error);
+        } else if (messages.length > 0) {
+          removeDayCalendar(dayCalendar.id);
+          toast({
+            description: texts.toastDescription,
+            variant: "default",
+          });
+        }
+      })
+      .catch((error) => {
         setErrorMsg("Error");
         console.log("Error", error);
-      } else if (messages.length > 0) {
-        removeDayCalendar(dayCalendar.id);
-        toast({
-          description: texts.toastDescription,
-          variant: "default",
-        });
-      }
-    });
+      });
     setIsLoading(false);
   }, [
     authUser.token,
@@ -109,6 +114,7 @@ export default function DayCalendarEvent({
             variant="outlineDestructive"
             className="bg-destructive/20 shadow text-destructive"
             onClick={() => setIsDeletePress(true)}
+            disabled={isLoading}
           >
             <Trash2 />
           </Button>
@@ -118,6 +124,7 @@ export default function DayCalendarEvent({
             size="icon"
             variant="outlineAmber"
             className="bg-amber/20 shadow text-amber"
+            disabled={isLoading}
           >
             <Info />
           </Button>
