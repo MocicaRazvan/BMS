@@ -7,6 +7,7 @@ import com.mocicarazvan.planservice.dtos.dayClient.DayResponse;
 import com.mocicarazvan.planservice.dtos.dayClient.MealResponse;
 import com.mocicarazvan.planservice.dtos.dayClient.RecipeResponse;
 import com.mocicarazvan.planservice.dtos.dayClient.collect.FullDayResponse;
+import com.mocicarazvan.planservice.enums.DayType;
 import com.mocicarazvan.planservice.enums.DietType;
 import com.mocicarazvan.planservice.enums.ObjectiveType;
 import com.mocicarazvan.planservice.mappers.PlanMapper;
@@ -86,4 +87,10 @@ public interface PlanService
     Flux<CustomEntityModel<MealResponse>> getMealsByDayInternal(Long id, Long dayId, String userId);
 
     Flux<PlanResponseWithSimilarity> getSimilarPlans(Long id, List<Long> excludeIds, int limit, Double minSimilarity);
+
+    Flux<PageableResponse<CustomEntityModel<DayResponse>>> getDaysFilteredByPlanIdsIn(List<Long> plans,
+                                                                                      String title, DayType type, List<Long> excludeIds,
+                                                                                      LocalDate createdAtLowerBound, LocalDate createdAtUpperBound,
+                                                                                      LocalDate updatedAtLowerBound, LocalDate updatedAtUpperBound,
+                                                                                      PageableBody pageableBody, String userId, Boolean admin);
 }

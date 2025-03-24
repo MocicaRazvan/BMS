@@ -5,6 +5,7 @@ import com.mocicarazvan.orderservice.dtos.clients.MealResponse;
 import com.mocicarazvan.orderservice.dtos.clients.PlanResponse;
 import com.mocicarazvan.orderservice.dtos.clients.RecipeResponse;
 import com.mocicarazvan.orderservice.dtos.clients.collect.FullDayResponse;
+import com.mocicarazvan.orderservice.enums.DayType;
 import com.mocicarazvan.orderservice.enums.DietType;
 import com.mocicarazvan.orderservice.enums.ObjectiveType;
 import com.mocicarazvan.templatemodule.clients.ClientExceptionHandler;
@@ -178,6 +179,38 @@ public class PlanClient extends ValidIdsClient<PlanResponse> {
                 },
                 e -> Flux.error(new IllegalArgumentException("Invalid plan " + id))
         );
+    }
+
+    public Flux<PageableResponse<CustomEntityModel<DayResponse>>> getDaysFilteredByPlanIdsIn(
+            List<Long> plans, String title, DayType type, List<Long> excludeIds,
+            LocalDate createdAtLowerBound, LocalDate createdAtUpperBound,
+            LocalDate updatedAtLowerBound, LocalDate updatedAtUpperBound,
+            PageableBody pageableBody, String userId, Boolean admin) {
+        return getClient()
+                .patch()
+                .uri(uriBuilder ->
+                        uriBuilder.path("/internal/days/filteredByPlanIdsIn")
+                                .queryParam("plans", plans)
+                                .queryParamIfPresent("title", Optional.ofNullable(title))
+                                .queryParamIfPresent("type", Optional.ofNullable(type))
+                                .queryParamIfPresent("excludeIds", Optional.ofNullable(excludeIds))
+                                .queryParamIfPresent("createdAtLowerBound", Optional.ofNullable(createdAtLowerBound))
+                                .queryParamIfPresent("createdAtUpperBound", Optional.ofNullable(createdAtUpperBound))
+                                .queryParamIfPresent("updatedAtLowerBound", Optional.ofNullable(updatedAtLowerBound))
+                                .queryParamIfPresent("updatedAtUpperBound", Optional.ofNullable(updatedAtUpperBound))
+                                .queryParamIfPresent("admin", Optional.ofNullable(admin))
+                                .build()
+                )
+                .bodyValue(pageableBody)
+                .accept(MediaType.APPLICATION_NDJSON)
+                .header(RequestsUtils.AUTH_HEADER, userId)
+                .retrieve()
+                .onStatus(HttpStatusCode::isError, response -> ClientExceptionHandler.handleClientException(response, serviceUrl, service))
+                .bodyToFlux(new ParameterizedTypeReference<PageableResponse<CustomEntityModel<DayResponse>>>() {
+                })
+                .transform(this::applyResilience)
+                .onErrorResume(WebClientRequestException.class, ClientExceptionHandler::handleWebRequestException)
+                .onErrorResume(ThrowFallback.class, e -> Flux.empty());
     }
 
     @PostConstruct

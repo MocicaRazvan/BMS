@@ -14,6 +14,7 @@ import com.mocicarazvan.orderservice.dtos.clients.RecipeResponse;
 import com.mocicarazvan.orderservice.dtos.clients.collect.FullDayResponse;
 import com.mocicarazvan.orderservice.dtos.notifications.InternalBoughtBody;
 import com.mocicarazvan.orderservice.email.EmailTemplates;
+import com.mocicarazvan.orderservice.enums.DayType;
 import com.mocicarazvan.orderservice.enums.DietType;
 import com.mocicarazvan.orderservice.enums.ObjectiveType;
 import com.mocicarazvan.orderservice.mappers.OrderMapper;
@@ -25,8 +26,10 @@ import com.mocicarazvan.orderservice.services.OrderService;
 import com.mocicarazvan.orderservice.services.PlanOrderService;
 import com.mocicarazvan.orderservice.stripe.CustomerUtil;
 import com.mocicarazvan.orderservice.utils.OrderCacheKeys;
+import com.mocicarazvan.rediscache.annotation.RedisReactiveChildCache;
 import com.mocicarazvan.rediscache.annotation.RedisReactiveChildCacheEvict;
 import com.mocicarazvan.templatemodule.clients.UserClient;
+import com.mocicarazvan.templatemodule.dtos.IdsDto;
 import com.mocicarazvan.templatemodule.dtos.PageableBody;
 import com.mocicarazvan.templatemodule.dtos.generic.IdGenerateDto;
 import com.mocicarazvan.templatemodule.dtos.response.EntityCount;
@@ -563,6 +566,25 @@ public class OrderServiceImpl implements OrderService {
                 .then(Mono.just("Success"));
     }
 
+    @Override
+    public Flux<PageableResponse<CustomEntityModel<DayResponse>>> getDaysFilteredByPlanIdsIn(
+            String title, DayType type, List<Long> excludeIds,
+            LocalDate createdAtLowerBound, LocalDate createdAtUpperBound,
+            LocalDate updatedAtLowerBound, LocalDate updatedAtUpperBound,
+            PageableBody pageableBody, String userId, Boolean admin) {
+        return self.getPlansByUserId(userId)
+                .flatMapIterable(IdsDto::getReferenceIds)
+                .collectList()
+                .flatMapMany(plans ->
+                        planClient.getDaysFilteredByPlanIdsIn(
+                                plans, title, type, excludeIds,
+                                createdAtLowerBound, createdAtUpperBound
+                                , updatedAtLowerBound, updatedAtUpperBound,
+                                pageableBody, userId, admin
+                        )
+                );
+    }
+
 
     @Getter
     @Component
@@ -576,6 +598,11 @@ public class OrderServiceImpl implements OrderService {
             this.orderRepository = orderRepository;
             this.orderMapper = orderMapper;
             this.objectMapper = objectMapper;
+        }
+
+        @RedisReactiveChildCache(key = OrderCacheKeys.ORDER_NAME, masterId = "#userId", idPath = "id")
+        public Flux<IdsDto> getPlansByUserId(String userId) {
+            return orderRepository.findPlansByUserId(Long.valueOf(userId));
         }
 
 

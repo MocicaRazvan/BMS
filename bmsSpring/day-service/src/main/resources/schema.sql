@@ -76,6 +76,17 @@ CREATE TABLE IF NOT EXISTS meal
 
     );
 
+create table if not exists day_calendar(
+    id serial primary key,
+    user_id bigint,
+    day_id bigint not null references day(id) on delete cascade,
+    created_at timestamp default current_timestamp,
+    updated_at timestamp default current_timestamp,
+    custom_date timestamp not null,
+    UNIQUE (user_id, day_id, custom_date)
+);
+create index if not exists idx_day_calendar_user_id on day_calendar(user_id);
+
 CREATE INDEX IF NOT EXISTS idx_meal_user_id ON meal (user_id);
 CREATE INDEX IF NOT EXISTS idx_meal_day_id ON meal (day_id);
 CREATE

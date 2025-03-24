@@ -5,6 +5,7 @@ import com.mocicarazvan.dayservice.clients.RecipeClient;
 import com.mocicarazvan.dayservice.dtos.day.DayBody;
 import com.mocicarazvan.dayservice.dtos.day.DayBodyWithMeals;
 import com.mocicarazvan.dayservice.dtos.day.DayResponse;
+import com.mocicarazvan.dayservice.dtos.day.DayResponseWithMeals;
 import com.mocicarazvan.dayservice.dtos.meal.MealBody;
 import com.mocicarazvan.dayservice.dtos.meal.MealResponse;
 import com.mocicarazvan.dayservice.dtos.recipe.RecipeResponse;
@@ -28,6 +29,7 @@ import com.mocicarazvan.templatemodule.services.RabbitMqUpdateDeleteService;
 import com.mocicarazvan.templatemodule.services.ValidIds;
 import com.mocicarazvan.templatemodule.services.impl.TitleBodyServiceImpl;
 import com.mocicarazvan.templatemodule.utils.EntitiesUtils;
+import com.mocicarazvan.templatemodule.utils.OrderEnsurer;
 import com.mocicarazvan.templatemodule.utils.PageableUtilsCustom;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -39,7 +41,6 @@ import reactor.core.publisher.Mono;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Objects;
 
 @Service
 @Slf4j
@@ -102,13 +103,23 @@ public class DayServiceImpl
 
     // todo admin route
     @Override
-    @RedisReactiveChildCache(key = CACHE_KEY_PATH, idPath = "content.id", masterId = "#userId")
     public Flux<PageableResponse<DayResponse>> getDaysFiltered(String title, DayType type, List<Long> excludeIds,
                                                                LocalDate createdAtLowerBound, LocalDate createdAtUpperBound,
                                                                LocalDate updatedAtLowerBound, LocalDate updatedAtUpperBound,
                                                                PageableBody pageableBody, String userId, Boolean admin) {
 
         return self.getDaysFiltered(title, type, excludeIds,
+                createdAtLowerBound, createdAtUpperBound, updatedAtLowerBound, updatedAtUpperBound,
+                pageableBody, userId, admin, allowedSortingFields);
+    }
+
+    @Override
+    public Flux<PageableResponse<DayResponse>> getDaysFilteredByIds(String title, DayType type, List<Long> ids, List<Long> excludeIds,
+                                                                    LocalDate createdAtLowerBound, LocalDate createdAtUpperBound,
+                                                                    LocalDate updatedAtLowerBound, LocalDate updatedAtUpperBound,
+                                                                    PageableBody pageableBody, String userId, Boolean admin) {
+
+        return self.getDaysFilteredByIds(title, type, ids, excludeIds,
                 createdAtLowerBound, createdAtUpperBound, updatedAtLowerBound, updatedAtUpperBound,
                 pageableBody, userId, admin, allowedSortingFields);
     }
@@ -135,7 +146,6 @@ public class DayServiceImpl
     }
 
     @Override
-    @RedisReactiveChildCache(key = CACHE_KEY_PATH, idPath = "content.id", masterId = "#trainerId")
     public Flux<PageableResponse<DayResponse>> getDaysFilteredTrainer(String title, DayType type, List<Long> excludeIds,
                                                                       LocalDate createdAtLowerBound, LocalDate createdAtUpperBound,
                                                                       LocalDate updatedAtLowerBound, LocalDate updatedAtUpperBound,
@@ -255,11 +265,35 @@ public class DayServiceImpl
 
         return
                 modelRepository.findAllByIdIn(ids)
-                        .collectMap(Day::getId, modelMapper::fromModelToResponse)
-                        .flatMapMany(map -> Flux.fromIterable(ids)
-                                .map(map::get)
-                                .filter(Objects::nonNull)
-                        );
+                        .transform(
+                                f -> OrderEnsurer.orderFlux(
+                                        f,
+                                        ids,
+                                        Day::getId
+                                )
+                        )
+                        .map(modelMapper::fromModelToResponse);
+    }
+
+    @Override
+    public Mono<DayResponse> getModelById(Long id) {
+        return self.getModelById(id);
+    }
+
+    @Override
+    @RedisReactiveCache(key = CACHE_KEY_PATH, id = "#id")
+    public Mono<DayResponseWithMeals> getDayResponseWithMeals(
+            Long id
+    ) {
+        return modelRepository.findDayWithMeals(id)
+                .map(modelMapper::fromDbWithMealsToResponseWithMeals);
+    }
+
+    @Override
+    @RedisReactiveCache(key = CACHE_KEY_PATH, idPath = "id")
+    public Flux<DayResponseWithMeals> getDaysWithMeals(List<Long> ids) {
+        return modelRepository.findDaysWithMeals(ids)
+                .map(modelMapper::fromDbWithMealsToResponseWithMeals);
     }
 
     @Getter
@@ -336,6 +370,24 @@ public class DayServiceImpl
                             ));
         }
 
+        @RedisReactiveChildCache(key = CACHE_KEY_PATH, idPath = "content.id", masterId = "#userId")
+        public Flux<PageableResponse<DayResponse>> getDaysFilteredByIds(String title, DayType type, List<Long> ids, List<Long> excludeIds,
+                                                                        LocalDate createdAtLowerBound, LocalDate createdAtUpperBound,
+                                                                        LocalDate updatedAtLowerBound, LocalDate updatedAtUpperBound,
+                                                                        PageableBody pageableBody, String userId, Boolean admin, List<String> allowedSortingFields) {
+            return pageableUtils.isSortingCriteriaValid(pageableBody.getSortingCriteria(), allowedSortingFields)
+                    .then(pageableUtils.createPageRequest(pageableBody))
+                    .flatMapMany(pr ->
+                            pageableUtils.createPageableResponse(
+                                    extendedDayRepository.getDaysFilteredByIds(title, type, ids, excludeIds,
+                                            createdAtLowerBound, createdAtUpperBound, updatedAtLowerBound, updatedAtUpperBound,
+                                            pr).map(modelMapper::fromModelToResponse),
+                                    extendedDayRepository.countDayFilteredByIds(title, type, ids, excludeIds,
+                                            createdAtLowerBound, createdAtUpperBound, updatedAtLowerBound, updatedAtUpperBound),
+                                    pr
+                            ));
+        }
+
         @RedisReactiveChildCache(key = CACHE_KEY_PATH, idPath = "content.id", masterId = "#trainerId")
         public Flux<PageableResponse<DayResponse>> getDaysFilteredTrainer(String title, DayType type, List<Long> excludeIds,
                                                                           LocalDate createdAtLowerBound, LocalDate createdAtUpperBound,
@@ -365,6 +417,12 @@ public class DayServiceImpl
         public Mono<Boolean> getModelRecipeInternal(Long id, Long recipeId) {
             return getModel(id)
                     .then(mealService.existsByDayIdAndRecipeId(id, recipeId));
+        }
+
+        @RedisReactiveCache(key = CACHE_KEY_PATH, id = "#id")
+        public Mono<DayResponse> getModelById(Long id) {
+            return getModel(id)
+                    .map(modelMapper::fromModelToResponse);
         }
 
         @Override

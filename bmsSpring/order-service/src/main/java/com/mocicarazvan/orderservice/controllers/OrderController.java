@@ -6,6 +6,7 @@ import com.mocicarazvan.orderservice.dtos.clients.MealResponse;
 import com.mocicarazvan.orderservice.dtos.clients.PlanResponse;
 import com.mocicarazvan.orderservice.dtos.clients.RecipeResponse;
 import com.mocicarazvan.orderservice.dtos.clients.collect.FullDayResponse;
+import com.mocicarazvan.orderservice.enums.DayType;
 import com.mocicarazvan.orderservice.enums.DietType;
 import com.mocicarazvan.orderservice.enums.ObjectiveType;
 import com.mocicarazvan.orderservice.services.OrderService;
@@ -28,6 +29,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @RestController
 @RequestMapping("/orders")
@@ -134,6 +136,26 @@ public class OrderController implements CountInParentController {
                                                                          ServerWebExchange exchange) {
         return orderService.getDayByPlanForUser(id, dayId, requestsUtils.extractAuthUser(exchange))
                 .map(ResponseEntity::ok);
+    }
+
+    @PatchMapping(value = "/subscriptions/plans/days", produces = {MediaType.APPLICATION_NDJSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
+    public Flux<PageableResponse<CustomEntityModel<DayResponse>>> getDaysFilteredByPlanIdsIn(
+            @RequestParam(required = false) String title,
+            @RequestParam(required = false) DayType type,
+            @RequestParam(required = false) List<Long> excludeIds,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate createdAtLowerBound,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate createdAtUpperBound,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate updatedAtLowerBound,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate updatedAtUpperBound,
+            @Valid @RequestBody PageableBody pageableBody,
+            @RequestParam(name = "admin", required = false, defaultValue = "false") Boolean admin,
+            ServerWebExchange exchange
+    ) {
+        return orderService.getDaysFilteredByPlanIdsIn(
+                title, type, excludeIds,
+                createdAtLowerBound, createdAtUpperBound, updatedAtLowerBound, updatedAtUpperBound,
+                pageableBody, requestsUtils.extractAuthUser(exchange), admin
+        );
     }
 
 

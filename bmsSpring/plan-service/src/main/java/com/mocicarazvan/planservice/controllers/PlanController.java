@@ -9,6 +9,7 @@ import com.mocicarazvan.planservice.dtos.dayClient.DayResponse;
 import com.mocicarazvan.planservice.dtos.dayClient.MealResponse;
 import com.mocicarazvan.planservice.dtos.dayClient.RecipeResponse;
 import com.mocicarazvan.planservice.dtos.dayClient.collect.FullDayResponse;
+import com.mocicarazvan.planservice.enums.DayType;
 import com.mocicarazvan.planservice.enums.DietType;
 import com.mocicarazvan.planservice.enums.ObjectiveType;
 import com.mocicarazvan.planservice.hateos.PlansReactiveResponseBuilder;
@@ -24,6 +25,7 @@ import com.mocicarazvan.templatemodule.dtos.response.*;
 import com.mocicarazvan.templatemodule.hateos.CustomEntityModel;
 import com.mocicarazvan.templatemodule.utils.RequestsUtils;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.util.Pair;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -482,5 +484,24 @@ public class PlanController implements ApproveController<Plan, PlanBody, PlanRes
         return planService.getSimilarPlans(id, excludeIds, limit, minSimilarity)
                 .flatMapSequential(m -> plansReactiveResponseBuilder.toModelConvertSetContent(m, PlanController.class, m
                 ));
+    }
+
+    @PatchMapping(value = "/internal/days/filteredByPlanIdsIn", produces = {MediaType.APPLICATION_NDJSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
+    @ResponseStatus(HttpStatus.OK)
+    public Flux<PageableResponse<CustomEntityModel<DayResponse>>> getDaysFilteredByPlanIdsIn(
+            @NotEmpty @RequestParam List<Long> plans,
+            @RequestParam(required = false) String title,
+            @RequestParam(required = false) DayType type,
+            @RequestParam(required = false) List<Long> excludeIds,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate createdAtLowerBound,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate createdAtUpperBound,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate updatedAtLowerBound,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate updatedAtUpperBound,
+            @Valid @RequestBody PageableBody pageableBody,
+            @RequestParam(name = "admin", required = false, defaultValue = "false") Boolean admin,
+            ServerWebExchange exchange
+    ) {
+        return planService.getDaysFilteredByPlanIdsIn(plans, title, type, excludeIds, createdAtLowerBound, createdAtUpperBound, updatedAtLowerBound, updatedAtUpperBound
+                , pageableBody, requestsUtils.extractAuthUser(exchange), admin);
     }
 }

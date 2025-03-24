@@ -10,6 +10,7 @@ import com.mocicarazvan.planservice.dtos.dayClient.MealResponse;
 import com.mocicarazvan.planservice.dtos.dayClient.RecipeResponse;
 import com.mocicarazvan.planservice.dtos.dayClient.collect.FullDayResponse;
 import com.mocicarazvan.planservice.dtos.dayClient.collect.FullMealResponse;
+import com.mocicarazvan.planservice.enums.DayType;
 import com.mocicarazvan.planservice.enums.DietType;
 import com.mocicarazvan.planservice.enums.ObjectiveType;
 import com.mocicarazvan.planservice.mappers.PlanMapper;
@@ -51,6 +52,7 @@ import reactor.core.publisher.Mono;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @Slf4j
@@ -426,6 +428,25 @@ public class PlanServiceImpl
     @RedisReactiveCacheEvict(key = CACHE_KEY_PATH, id = "#id")
     public Mono<PlanResponse> reactToModel(Long id, String type, String userId) {
         return super.reactToModel(id, type, userId);
+    }
+
+
+    @Override
+    public Flux<PageableResponse<CustomEntityModel<DayResponse>>> getDaysFilteredByPlanIdsIn(List<Long> plans,
+                                                                                             String title, DayType type, List<Long> excludeIds,
+                                                                                             LocalDate createdAtLowerBound, LocalDate createdAtUpperBound,
+                                                                                             LocalDate updatedAtLowerBound, LocalDate updatedAtUpperBound,
+                                                                                             PageableBody pageableBody, String userId, Boolean admin) {
+        return self.findAllById(plans)
+                .map(Plan::getDays)
+                .flatMapIterable(longs -> longs)
+                .collectList()
+                .flatMapMany(daysIds -> dayClient.getDaysFilteredByIds(
+                        title, type, Set.copyOf(daysIds).stream().toList(), excludeIds,
+                        createdAtLowerBound, createdAtUpperBound,
+                        updatedAtLowerBound, updatedAtUpperBound,
+                        pageableBody, userId, admin
+                ));
     }
 
     @Component

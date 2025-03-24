@@ -29,5 +29,12 @@ export default async function UserPage({ params: { locale, id } }: Props) {
     getUserPageTexts(),
   ]);
 
-  return <UserPageContent authUser={authUser} id={id} {...userPageTexts} />;
+  return (
+    <UserPageContent
+      authUser={authUser}
+      id={id}
+      {...userPageTexts}
+      showDayCalendarCTA={true}
+    />
+  );
 }

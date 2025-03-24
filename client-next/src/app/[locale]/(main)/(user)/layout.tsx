@@ -3,6 +3,7 @@ import { unstable_setRequestLocale } from "next-intl/server";
 import { Locale, redirect } from "@/navigation";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/auth-options";
+import DayCalendarProvider from "@/context/day-calendar-context";
 
 export default async function UserLayout({
   children,
@@ -18,5 +19,11 @@ export default async function UserLayout({
     return redirect("/auth/signin");
   }
 
-  return <>{children}</>;
+  return (
+    <>
+      <DayCalendarProvider authUser={session.user}>
+        {children}
+      </DayCalendarProvider>
+    </>
+  );
 }

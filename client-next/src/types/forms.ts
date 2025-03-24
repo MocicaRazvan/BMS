@@ -954,6 +954,26 @@ export function getAnswerFromBodySchemaTexts(): Promise<AnswerFromBodySchemaText
   }));
 }
 
+export interface AddDayToCalendarSchemaTexts {
+  dateRequired: string;
+}
+
+export async function getAddDayToCalendarSchemaTexts(): Promise<AddDayToCalendarSchemaTexts> {
+  const t = await getTranslations("zod.AddDayToCalendarSchemaTexts");
+  return {
+    dateRequired: t("dateRequired"),
+  };
+}
+
+export const getAddDayToCalendarSchema = ({
+  dateRequired,
+}: AddDayToCalendarSchemaTexts) =>
+  z.object({
+    date: z.date({
+      required_error: dateRequired,
+    }),
+  });
+
 export const getAnswerFromBodySchema = ({
   minQuestion,
 }: AnswerFromBodySchemaTexts) =>
@@ -1026,4 +1046,8 @@ export type AdminAICreatePostSchemaType = z.infer<
 
 export type AnswerFromBodySchemaType = z.infer<
   ReturnType<typeof getAnswerFromBodySchema>
+>;
+
+export type AddDayToCalendarSchemaType = z.infer<
+  ReturnType<typeof getAddDayToCalendarSchema>
 >;

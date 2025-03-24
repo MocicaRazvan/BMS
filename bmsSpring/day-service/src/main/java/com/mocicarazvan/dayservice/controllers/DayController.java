@@ -18,6 +18,7 @@ import com.mocicarazvan.templatemodule.dtos.response.*;
 import com.mocicarazvan.templatemodule.hateos.CustomEntityModel;
 import com.mocicarazvan.templatemodule.utils.RequestsUtils;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -168,6 +169,25 @@ public class DayController implements TitleBodyController<
                                                                                   @RequestParam(name = "admin", required = false, defaultValue = "false") Boolean admin,
                                                                                   ServerWebExchange exchange) {
         return dayService.getDaysFiltered(title, type, excludeIds,
+                        createdAtLowerBound, createdAtUpperBound, updatedAtLowerBound, updatedAtUpperBound,
+                        pageableBody, requestsUtils.extractAuthUser(exchange), admin)
+                .flatMapSequential(m -> dayReactiveResponseBuilder.toModelPageable(m, DayController.class));
+    }
+
+    @PatchMapping(value = "/internal/filtered/byIds", produces = {MediaType.APPLICATION_NDJSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
+    @ResponseStatus(HttpStatus.OK)
+    public Flux<PageableResponse<CustomEntityModel<DayResponse>>> getDaysFilteredByIds(@RequestParam(required = false) String title,
+                                                                                       @RequestParam(required = false) DayType type,
+                                                                                       @RequestParam(required = false) List<Long> excludeIds,
+                                                                                       @NotEmpty @RequestParam List<Long> ids,
+                                                                                       @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate createdAtLowerBound,
+                                                                                       @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate createdAtUpperBound,
+                                                                                       @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate updatedAtLowerBound,
+                                                                                       @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate updatedAtUpperBound,
+                                                                                       @Valid @RequestBody PageableBody pageableBody,
+                                                                                       @RequestParam(name = "admin", required = false, defaultValue = "false") Boolean admin,
+                                                                                       ServerWebExchange exchange) {
+        return dayService.getDaysFilteredByIds(title, type, ids, excludeIds,
                         createdAtLowerBound, createdAtUpperBound, updatedAtLowerBound, updatedAtUpperBound,
                         pageableBody, requestsUtils.extractAuthUser(exchange), admin)
                 .flatMapSequential(m -> dayReactiveResponseBuilder.toModelPageable(m, DayController.class));

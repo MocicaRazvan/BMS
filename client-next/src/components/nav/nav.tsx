@@ -26,6 +26,7 @@ import FindInSite, {
   FindInSiteTexts,
   MetadataValue,
 } from "@/components/nav/find-in-site";
+import { DaysCalendarCTATexts } from "@/components/dayCalendar/days-calendar-cta";
 
 export interface NavTexts {
   themeSwitchTexts: ThemeSwitchTexts;
@@ -47,6 +48,7 @@ export interface NavTexts {
     calculator: string;
   };
   findInSiteTexts: FindInSiteTexts;
+  dayCalendarCTATexts: DaysCalendarCTATexts;
 }
 
 interface NavProps extends NavTexts {
@@ -63,6 +65,7 @@ export default function Nav({
   cartPopTexts,
   findInSiteTexts,
   metadataValues,
+  dayCalendarCTATexts,
 }: NavProps) {
   const session = useSession();
 
@@ -174,7 +177,10 @@ export default function Nav({
           <FindInSite texts={findInSiteTexts} metadataValues={metadataValues} />
           {authUser && (
             <>
-              <NavProfile authUser={authUser} />
+              <NavProfile
+                authUser={authUser}
+                dayCalendarCTATexts={dayCalendarCTATexts}
+              />
               <NotificationPop authUser={authUser} />
               <CartPop authUser={authUser} cartPopTexts={cartPopTexts} />
             </>
@@ -209,6 +215,7 @@ export default function Nav({
             recipesTexts,
             plansTexts,
             findInSiteTexts,
+            dayCalendarCTATexts,
           }}
         />
         <div className="flex items-center justify-center gap-5">

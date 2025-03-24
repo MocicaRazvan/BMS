@@ -16,6 +16,7 @@ import { NavTexts } from "@/components/nav/nav";
 import { CartPopsTexts } from "@/components/nav/cart-pop";
 import { BoughtNotificationContentTexts } from "@/components/nav/bought-notification-content";
 import { FindInSiteTexts } from "@/components/nav/find-in-site";
+import { getDaysCalendarCTATexts } from "@/texts/components/day-calendar";
 
 export interface ThemeSwitchTexts {
   srButton: string;
@@ -85,6 +86,9 @@ export async function getNavTexts(): Promise<NavTexts> {
     recipesTexts,
     plansTexts,
     findInSiteTexts,
+    dayCalendarCTATexts: {
+      header: links("dayCalendarCTA"),
+    },
     links: {
       posts: links("posts"),
       home: links("home"),

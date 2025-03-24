@@ -5,9 +5,13 @@ import { NutritionalTableTexts } from "@/components/common/nutritional-table";
 import { IngredientPieChartTexts } from "@/components/charts/ingredient-macros-pie-chart";
 import { WithUser } from "@/lib/user";
 import { useGetTitleBodyUser } from "@/hoooks/useGetTitleBodyUser";
-import { CustomEntityModel, PlanResponse } from "@/types/dto";
+import {
+  CustomEntityModel,
+  DayCalendarUserDates,
+  PlanResponse,
+} from "@/types/dto";
 import LoadingSpinner from "@/components/common/loading-spinner";
-import React, { useCallback } from "react";
+import React, { useCallback, useMemo } from "react";
 import { fetchStream } from "@/lib/fetchers/fetchStream";
 import CustomImageCarousel from "@/components/common/custom-image-crousel";
 import AuthorProfile from "@/components/common/author-profile";
@@ -23,6 +27,10 @@ import PlanRecommendationList, {
 import { Separator } from "@/components/ui/separator";
 import { AnswerFromBodyFormTexts } from "@/components/forms/answer-from-body-form";
 import ItemBodyQa from "@/components/common/item-body-qa";
+import AddDayToCalendar, {
+  AddDayToCalendarTexts,
+} from "@/components/forms/add-day-to-calendar";
+import useFetchStream from "@/hoooks/useFetchStream";
 
 export interface SingleSubscriptionTexts {
   elementHeaderTexts: ElementHeaderTexts;
@@ -32,6 +40,7 @@ export interface SingleSubscriptionTexts {
   daysListTexts: DaysListTexts;
   planRecommendationListTexts: PlanRecommendationListTexts;
   answerFromBodyFormTexts: AnswerFromBodyFormTexts;
+  addDayToCalendarTexts: AddDayToCalendarTexts;
 }
 
 interface Props extends WithUser, SingleSubscriptionTexts {
@@ -46,6 +55,7 @@ export default function SingleSubscriptionPageContent({
   daysListTexts,
   planRecommendationListTexts,
   answerFromBodyFormTexts,
+  addDayToCalendarTexts,
 }: Props) {
   const {
     itemState: planState,
@@ -61,6 +71,16 @@ export default function SingleSubscriptionPageContent({
   } = useGetTitleBodyUser<PlanResponse>({
     authUser,
     basePath: `/orders/subscriptions`,
+  });
+
+  const {
+    messages: userDates,
+    isFinished: isFinishedUserDates,
+    error: userDatesError,
+    refetch: refetchUserDates,
+  } = useFetchStream<DayCalendarUserDates>({
+    path: "/daysCalendar/userDates",
+    authToken: true,
   });
 
   const { navigateToNotFound } = useClientNotFound();
@@ -88,6 +108,11 @@ export default function SingleSubscriptionPageContent({
       }
     },
     [authUser.token, id, planState?.approved, setPlanState],
+  );
+
+  const forbiddenDates = useMemo(
+    () => userDates.map((d) => d.customDate),
+    [userDates],
   );
 
   if (error?.status) {
@@ -153,6 +178,19 @@ export default function SingleSubscriptionPageContent({
           recipeBasePath={`/orders/subscriptions/recipe/${id}`}
           disableLikes={false}
           {...daysListTexts}
+          subHeaderContent={(day) => (
+            <div className="flex items-center justify-end mt-8 mb-5">
+              {isFinishedUserDates && !userDatesError && (
+                <AddDayToCalendar
+                  day={day}
+                  {...addDayToCalendarTexts}
+                  forbiddenDates={forbiddenDates}
+                  onAddDayToCalendar={refetchUserDates}
+                  authUser={authUser}
+                />
+              )}
+            </div>
+          )}
         />
       </div>
       <Separator className="my-5 md:my-10 md:mt-14" />

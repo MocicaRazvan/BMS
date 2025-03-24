@@ -52,7 +52,7 @@ const BurgerNav = memo<Props>(
     return (
       <Sheet open={sheetOpen} onOpenChange={setSheetOpen} modal={true}>
         <SheetTrigger asChild>
-          <Button className="sticky top-4 left-6 z-50">
+          <Button className="sticky top-4 left-6 z-50" variant="outline">
             <Menu />
           </Button>
         </SheetTrigger>
@@ -141,7 +141,7 @@ const BurgerNav = memo<Props>(
                       className="flex items-center gap-2"
                     >
                       <LogOut size={18} />
-                      <p>Sign out</p>
+                      <p>{"Sign out"}</p>
                     </Link>
                   </Button>
                 </div>
@@ -176,7 +176,7 @@ const BurgerNav = memo<Props>(
                   href="/auth/signin"
                   className="font-bold hover:underline text-lg transition-all hover:scale-[1.02]"
                 >
-                  Sign In
+                  {"Sign In"}
                 </Link>
               </div>
             )}

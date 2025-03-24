@@ -376,26 +376,27 @@ export default function PlansTable({
           </div>
         ),
       },
-      {
-        id: planTableColumnsTexts.userLikes,
-        accessorKey: "model.userLikes",
-        header: () => (
-          <p className="font-bold text-lg text-left">
-            {planTableColumnsTexts.userLikes}
-          </p>
-        ),
-        cell: ({ row }) => <p>{row.original.model.userLikes.length}</p>,
-      },
-      {
-        id: planTableColumnsTexts.userDislikes,
-        accessorKey: "model.userDislikes",
-        header: () => (
-          <p className="font-bold text-lg text-left">
-            {planTableColumnsTexts.userDislikes}
-          </p>
-        ),
-        cell: ({ row }) => <p>{row.original.model.userDislikes.length}</p>,
-      },
+      //todo vezi cum le aduagi daca e ca e overflow
+      // {
+      //   id: planTableColumnsTexts.userLikes,
+      //   accessorKey: "model.userLikes",
+      //   header: () => (
+      //     <p className="font-bold text-lg text-left">
+      //       {planTableColumnsTexts.userLikes}
+      //     </p>
+      //   ),
+      //   cell: ({ row }) => <p>{row.original.model.userLikes.length}</p>,
+      // },
+      // {
+      //   id: planTableColumnsTexts.userDislikes,
+      //   accessorKey: "model.userDislikes",
+      //   header: () => (
+      //     <p className="font-bold text-lg text-left">
+      //       {planTableColumnsTexts.userDislikes}
+      //     </p>
+      //   ),
+      //   cell: ({ row }) => <p>{row.original.model.userDislikes.length}</p>,
+      // },
       {
         id: planTableColumnsTexts.createdAt,
         accessorKey: "model.createdAt",
@@ -681,7 +682,6 @@ export default function PlansTable({
 
   return (
     <div className="px-1 pb-10 w-full  h-full space-y-8 lg:space-y-14">
-      {planTableColumnsTexts.objective}
       <Suspense fallback={<LoadingSpinner />}>
         <DataTable
           sizeOptions={sizeOptions}

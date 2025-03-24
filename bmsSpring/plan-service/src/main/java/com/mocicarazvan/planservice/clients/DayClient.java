@@ -3,9 +3,15 @@ package com.mocicarazvan.planservice.clients;
 import com.mocicarazvan.planservice.dtos.dayClient.DayResponse;
 import com.mocicarazvan.planservice.dtos.dayClient.MealResponse;
 import com.mocicarazvan.planservice.dtos.dayClient.RecipeResponse;
+import com.mocicarazvan.planservice.enums.DayType;
+import com.mocicarazvan.templatemodule.clients.ClientExceptionHandler;
 import com.mocicarazvan.templatemodule.clients.ValidIdsClient;
+import com.mocicarazvan.templatemodule.dtos.PageableBody;
+import com.mocicarazvan.templatemodule.dtos.response.PageableResponse;
 import com.mocicarazvan.templatemodule.dtos.response.ResponseWithUserDtoEntity;
+import com.mocicarazvan.templatemodule.exceptions.client.ThrowFallback;
 import com.mocicarazvan.templatemodule.hateos.CustomEntityModel;
+import com.mocicarazvan.templatemodule.utils.RequestsUtils;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 import io.github.resilience4j.ratelimiter.RateLimiterRegistry;
 import io.github.resilience4j.retry.RetryRegistry;
@@ -13,12 +19,17 @@ import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientRequestException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Component
 public class DayClient extends ValidIdsClient<DayResponse> {
@@ -81,6 +92,38 @@ public class DayClient extends ValidIdsClient<DayResponse> {
                 getMealsClient(), userId, uriBuilder -> uriBuilder.path("/internal/recipes/{mealId}").build(mealId),
                 new ParameterizedTypeReference<>() {
                 }, e -> Flux.empty());
+    }
+
+    public Flux<PageableResponse<CustomEntityModel<DayResponse>>> getDaysFilteredByIds(String title, DayType type, List<Long> ids, List<Long> excludeIds,
+                                                                                       LocalDate createdAtLowerBound, LocalDate createdAtUpperBound,
+                                                                                       LocalDate updatedAtLowerBound, LocalDate updatedAtUpperBound,
+                                                                                       PageableBody pageableBody, String userId, Boolean admin) {
+        return getClient()
+                .patch()
+                .uri(uriBuilder ->
+                        uriBuilder.path("/internal/filtered/byIds")
+                                .queryParamIfPresent("title", Optional.ofNullable(title))
+                                .queryParamIfPresent("type", Optional.ofNullable(type))
+                                .queryParam("ids", ids)
+                                .queryParamIfPresent("excludeIds", Optional.ofNullable(excludeIds))
+                                .queryParamIfPresent("createdAtLowerBound", Optional.ofNullable(createdAtLowerBound))
+                                .queryParamIfPresent("createdAtUpperBound", Optional.ofNullable(createdAtUpperBound))
+                                .queryParamIfPresent("updatedAtLowerBound", Optional.ofNullable(updatedAtLowerBound))
+                                .queryParamIfPresent("updatedAtUpperBound", Optional.ofNullable(updatedAtUpperBound))
+                                .queryParamIfPresent("admin", Optional.ofNullable(admin))
+                                .build()
+                )
+                .bodyValue(pageableBody)
+                .accept(MediaType.APPLICATION_NDJSON)
+                .header(RequestsUtils.AUTH_HEADER, userId)
+                .retrieve()
+                .onStatus(HttpStatusCode::isError, response -> ClientExceptionHandler.handleClientException(response, serviceUrl, service))
+                .bodyToFlux(new ParameterizedTypeReference<PageableResponse<CustomEntityModel<DayResponse>>>() {
+                })
+                .transform(this::applyResilience)
+                .onErrorResume(WebClientRequestException.class, ClientExceptionHandler::handleWebRequestException)
+                .onErrorResume(ThrowFallback.class, _ -> Flux.empty());
+
     }
 
     public WebClient getMealsClient() {

@@ -8,6 +8,9 @@
     "description": "Ne pare rău, dar pagina pe care o căutați nu există."
   },
   "zod": {
+    "AddDayToCalendarSchemaTexts": {
+      "dateRequired": "Data este necesară"
+    },
     "RegisterSchemaTexts": {
       "minPassword": "Parola trebuie să aibă cel puțin 8 caractere",
       "mustLetters": "Parola trebuie să conțină cel puțin o literă",
@@ -345,6 +348,23 @@
     }
   },
   "components": {
+    "dayCalendar": {
+      "DayCalendarHeaderTexts": {
+        "tracked": "Urmărite"
+      },
+      "DayCalendarBodyMonthTexts": {
+        "addAnchor": "Adaugă o zi"
+      },
+      "DayCalendarEventTexts": {
+        "toastDescription": "Ziua a fost ștearsă cu succes"
+      },
+      "DayCalendarSingleDayTexts": {
+        "title": "Ziua"
+      },
+      "DaysCalendarCTATexts": {
+        "header": "Urmărește-ți progresul folosind zilele din planurile pe care l-ai achiziționat!"
+      }
+    },
     "editor": {
       "FormatTypeTexts": {
         "paragraph": "Paragraf"
@@ -354,6 +374,21 @@
       }
     },
     "forms": {
+      "AddDayToCalendarTexts": {
+        "errorText": "Ziua nu a putut fi adăugată",
+        "anchorText": "Adaugă ziua în calendar",
+        "titleText": "Selectează data și adaugă ziua",
+        "formPlaceholder": "Alege o dată",
+        "formLabel": "Data din calendar",
+        "formDescription": "Data nu poate fi una care deja existentă în calendar",
+        "toastDescription": "Ziua a fost adăugată cu succes"
+      },
+      "CalendarDayFormTexts": {
+        "title": "Selectați și adăugați o zi",
+        "error": "Ziua nu a putut fi adăugată",
+        "placeholder": "Selectați o zi",
+        "toastDescription": "Ziua a fost adăugată cu succes"
+      },
       "UseNavigationGuardI18nTexts": {
         "confirm": "Ați făcut modificări care nu au fost salvate. Sunteți sigur că doriți să părăsiți pagina?"
       },
@@ -659,7 +694,8 @@
         "orders": "Comenzi",
         "kanban": "Kanban",
         "trainerDashboard": "Panoul tău",
-        "calculator": "Calculator"
+        "calculator": "Calculator",
+        "dayCalendarCTA": "Calendarul tău"
       },
       "ChatMessageNotificationContentTexts": {
         "content": "{count, plural, one {Ai {count} mesaj nou de la {sender}} few {Ai {count} mesaje noi de la {sender}} other {Ai {count} de mesaje noi de la {sender}}}"
@@ -2113,6 +2149,11 @@
     }
   },
   "metadata": {
+    "DaysCalendar": {
+      "title": "Calendarul Zilelor",
+      "description": "Urmărește progresul tău",
+      "keywords": "zile, calendar, progres"
+    },
     "LocaleLayout": {
       "title": "Bro Meets Science",
       "description": "Bro Meets Science este o platformă care oferă o gamă largă de planuri, rețete și postări pentru a te ajuta să îți îmbunătățești sănătatea și stilul de viață. Alătură-te nouă și începe călătoria către o viață mai sănătoasă!",

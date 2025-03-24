@@ -24,6 +24,7 @@ import {
   sortingUsersSortingOptionsKeys,
 } from "@/texts/components/list";
 import {
+  getAddDayToCalendarTexts,
   getAdminEmailTexts,
   getAnswerFromBodyFormTexts,
   getButtonSubmitTexts,
@@ -165,6 +166,7 @@ import {
 } from "@/texts/components/recommandation";
 import { ChatPageTexts } from "@/app/[locale]/(main)/(user)/chat/page-content";
 import { getChatRoomsTexts } from "@/texts/components/chat";
+import { getDaysCalendarCTATexts } from "@/texts/components/day-calendar";
 
 export async function getSinglePostPageTexts(): Promise<SinglePostPageTexts> {
   const [
@@ -896,12 +898,14 @@ export async function getAdminOrderPageTexts(): Promise<AdminOrderPageTexts> {
 }
 
 export const getUserPageTexts: () => Promise<UserPageTexts> = async () => {
-  const [updateProfileTexts, t] = await Promise.all([
+  const [updateProfileTexts, dayCalendarCTATexts, t] = await Promise.all([
     getUpdateProfileTexts(),
+    getDaysCalendarCTATexts(),
     getTranslations("pages.users.UserPageTexts"),
   ]);
   return {
     updateProfileTexts,
+    dayCalendarCTATexts,
     changePassword: t("changePassword"),
     editProfile: t("editProfile"),
     firstNameLabel: t("firstNameLabel"),
@@ -1449,6 +1453,7 @@ export async function getSubscriptionsPageContentTexts(): Promise<SubscriptionsP
     sortingPlansSortingOptions,
     dietDropdownTexts,
     objectiveDropDownTexts,
+    dayCalendarCTATexts,
     t,
   ] = await Promise.all([
     getGridListTexts(),
@@ -1461,6 +1466,7 @@ export async function getSubscriptionsPageContentTexts(): Promise<SubscriptionsP
       "UseObjectiveDropdownTexts",
       planObjectives as unknown as string[],
     ),
+    getDaysCalendarCTATexts(),
     getTranslations("pages.subscriptions.SubscriptionsPageContentTexts"),
   ]);
   return {
@@ -1470,6 +1476,7 @@ export async function getSubscriptionsPageContentTexts(): Promise<SubscriptionsP
     objectiveDropDownTexts,
     title: t("title"),
     header: t("header"),
+    dayCalendarCTATexts,
   };
 }
 
@@ -1482,6 +1489,7 @@ export async function getSingleSubscriptionTexts(): Promise<SingleSubscriptionTe
     daysListTexts,
     planRecommendationListTexts,
     answerFromBodyFormTexts,
+    addDayToCalendarTexts,
   ] = await Promise.all([
     getElementHeaderTexts(),
     getNutritionalTableTexts(),
@@ -1490,6 +1498,7 @@ export async function getSingleSubscriptionTexts(): Promise<SingleSubscriptionTe
     getDaysListTexts(),
     getPlanRecommendationListTexts(),
     getAnswerFromBodyFormTexts(),
+    getAddDayToCalendarTexts(),
   ]);
 
   return {
@@ -1500,6 +1509,7 @@ export async function getSingleSubscriptionTexts(): Promise<SingleSubscriptionTe
     daysListTexts,
     planRecommendationListTexts,
     answerFromBodyFormTexts,
+    addDayToCalendarTexts,
   };
 }
 

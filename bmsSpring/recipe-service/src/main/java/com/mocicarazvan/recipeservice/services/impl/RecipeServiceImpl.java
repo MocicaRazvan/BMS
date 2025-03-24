@@ -31,6 +31,7 @@ import com.mocicarazvan.templatemodule.services.RabbitMqApprovedSender;
 import com.mocicarazvan.templatemodule.services.RabbitMqUpdateDeleteService;
 import com.mocicarazvan.templatemodule.services.impl.ApprovedServiceImpl;
 import com.mocicarazvan.templatemodule.utils.EntitiesUtils;
+import com.mocicarazvan.templatemodule.utils.OrderEnsurer;
 import com.mocicarazvan.templatemodule.utils.PageableUtilsCustom;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -458,7 +459,12 @@ public class RecipeServiceImpl extends ApprovedServiceImpl<Recipe, RecipeBody, R
         public Flux<RecipeResponse> getModelsByIdsBase(List<Long> ids) {
             return
                     modelRepository.findAllByIdIn(ids)
-                            .map(modelMapper::fromModelToResponse);
+                            .map(modelMapper::fromModelToResponse)
+                            .transform(f -> OrderEnsurer.orderFlux(
+                                    f,
+                                    ids,
+                                    RecipeResponse::getId
+                            ));
         }
 
 

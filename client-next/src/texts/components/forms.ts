@@ -4,6 +4,7 @@ import { TitleBodyTexts } from "@/components/forms/title-body";
 import { InputMultipleSelectorTexts } from "@/components/forms/input-multiselector";
 import {
   CommentSchemaTexts,
+  getAddDayToCalendarSchemaTexts,
   getAdminEmailSchemaTexts,
   getAnswerFromBodySchemaTexts,
   getCommentSchemaTexts,
@@ -42,6 +43,8 @@ import { PasswordStrengthIndicatorTexts } from "@/components/forms/passowrd-stre
 import { AnswerFromBodyFormTexts } from "@/components/forms/answer-from-body-form";
 import { getImageCropTexts } from "@/texts/components/common";
 import { getEditorTexts } from "@/texts/components/editor";
+import { CalendarDayFormTexts } from "@/components/forms/calendar-day-form";
+import { AddDayToCalendarTexts } from "@/components/forms/add-day-to-calendar";
 
 export type FormType = "create" | "update";
 
@@ -693,5 +696,43 @@ export async function getAnswerFromBodyFormTexts(): Promise<AnswerFromBodyFormTe
     triggerText: t("triggerText"),
     matchScore: t("matchScore"),
     buttonSubmitTexts,
+  };
+}
+export async function getCalendarDayFormTexts(): Promise<CalendarDayFormTexts> {
+  const [t, buttonSubmitTexts, childInputMultipleSelectorTexts] =
+    await Promise.all([
+      getTranslations("components.forms.CalendarDayFormTexts"),
+      getButtonSubmitTexts(),
+      getChildInputMultipleSelectorTexts("days"),
+    ]);
+  return {
+    buttonSubmitTexts,
+    childInputMultipleSelectorTexts,
+    title: t("title"),
+    error: t("error"),
+    placeholder: t("placeholder"),
+    toastDescription: t("toastDescription"),
+  };
+}
+
+export async function getAddDayToCalendarTexts(): Promise<AddDayToCalendarTexts> {
+  const [addDayToCalendarSchemaTexts, buttonSubmitTexts, t] = await Promise.all(
+    [
+      getAddDayToCalendarSchemaTexts(),
+      getButtonSubmitTexts(),
+      getTranslations("components.forms.AddDayToCalendarTexts"),
+    ],
+  );
+
+  return {
+    addDayToCalendarSchemaTexts,
+    buttonSubmitTexts,
+    errorText: t("errorText"),
+    anchorText: t("anchorText"),
+    titleText: t("titleText"),
+    formPlaceholder: t("formPlaceholder"),
+    formLabel: t("formLabel"),
+    formDescription: t("formDescription"),
+    toastDescription: t("toastDescription"),
   };
 }

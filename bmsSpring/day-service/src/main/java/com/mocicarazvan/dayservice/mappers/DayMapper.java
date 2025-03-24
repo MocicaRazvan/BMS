@@ -1,8 +1,13 @@
 package com.mocicarazvan.dayservice.mappers;
 
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.mocicarazvan.dayservice.dtos.day.DayBody;
 import com.mocicarazvan.dayservice.dtos.day.DayResponse;
+import com.mocicarazvan.dayservice.dtos.day.DayResponseWithMeals;
+import com.mocicarazvan.dayservice.dtos.day.DayWithMealsDb;
 import com.mocicarazvan.dayservice.enums.DayType;
 import com.mocicarazvan.dayservice.models.Day;
 import com.mocicarazvan.templatemodule.mappers.DtoMapper;
@@ -15,7 +20,15 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Component
+
 public class DayMapper extends DtoMapper<Day, DayBody, DayResponse> {
+    private final ObjectMapper objectMapper;
+
+    public DayMapper(ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper.copy()
+                .setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
+    }
+
     @Override
     public DayResponse fromModelToResponse(Day day) {
         return DayResponse.builder()
@@ -47,6 +60,31 @@ public class DayMapper extends DtoMapper<Day, DayBody, DayResponse> {
         day.setBody(dayBody.getBody());
         day.setUpdatedAt(LocalDateTime.now());
         return Mono.just(day);
+    }
+
+    public DayResponseWithMeals fromDbWithMealsToResponseWithMeals(DayWithMealsDb dayWithMealsDb) {
+        try {
+
+            return DayResponseWithMeals.builder()
+                    .type(dayWithMealsDb.getType())
+                    .body(dayWithMealsDb.getBody())
+                    .title(dayWithMealsDb.getTitle())
+                    .userDislikes(dayWithMealsDb.getUserDislikes())
+                    .userLikes(dayWithMealsDb.getUserLikes())
+                    .userId(dayWithMealsDb.getUserId())
+                    .id(dayWithMealsDb.getId())
+                    .createdAt(dayWithMealsDb.getCreatedAt())
+                    .updatedAt(dayWithMealsDb.getUpdatedAt())
+                    .mealResponses(
+                            objectMapper.readValue(dayWithMealsDb.getMeals(),
+                                    new TypeReference<>() {
+                                    })
+                    )
+                    .build();
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Failed to parse JSON fields", e);
+        }
     }
 
     public Day fromRowToModel(Row row) {

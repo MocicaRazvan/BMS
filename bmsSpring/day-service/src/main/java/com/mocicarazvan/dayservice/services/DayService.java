@@ -3,6 +3,7 @@ package com.mocicarazvan.dayservice.services;
 import com.mocicarazvan.dayservice.dtos.day.DayBody;
 import com.mocicarazvan.dayservice.dtos.day.DayBodyWithMeals;
 import com.mocicarazvan.dayservice.dtos.day.DayResponse;
+import com.mocicarazvan.dayservice.dtos.day.DayResponseWithMeals;
 import com.mocicarazvan.dayservice.dtos.recipe.RecipeResponse;
 import com.mocicarazvan.dayservice.enums.DayType;
 import com.mocicarazvan.dayservice.mappers.DayMapper;
@@ -32,6 +33,11 @@ public interface DayService extends TitleBodyService<
                                                         LocalDate updatedAtLowerBound, LocalDate updatedAtUpperBound,
                                                         PageableBody pageableBody, String userId, Boolean admin);
 
+    Flux<PageableResponse<DayResponse>> getDaysFilteredByIds(String title, DayType type, List<Long> ids, List<Long> excludeIds,
+                                                             LocalDate createdAtLowerBound, LocalDate createdAtUpperBound,
+                                                             LocalDate updatedAtLowerBound, LocalDate updatedAtUpperBound,
+                                                             PageableBody pageableBody, String userId, Boolean admin);
+
     Flux<PageableResponse<ResponseWithUserDto<DayResponse>>> getDaysFilteredWithUser(String title, DayType type, List<Long> excludeIds, LocalDate createdAtLowerBound, LocalDate createdAtUpperBound,
                                                                                      LocalDate updatedAtLowerBound, LocalDate updatedAtUpperBound, PageableBody pageableBody, String userId, Boolean admin);
 
@@ -54,4 +60,12 @@ public interface DayService extends TitleBodyService<
     Mono<ResponseWithUserDtoEntity<RecipeResponse>> getRecipeByIdWithUserInternal(Long id, Long recipeId, String userId);
 
     Mono<ResponseWithUserDto<DayResponse>> getModelByIdWithUserInternal(Long id, String userId);
+
+    Mono<DayResponse> getModelById(Long id);
+
+    Mono<DayResponseWithMeals> getDayResponseWithMeals(
+            Long id
+    );
+
+    Flux<DayResponseWithMeals> getDaysWithMeals(List<Long> ids);
 }

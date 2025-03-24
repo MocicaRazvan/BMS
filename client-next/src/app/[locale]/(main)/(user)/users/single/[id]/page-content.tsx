@@ -19,12 +19,15 @@ import {
 import UpdateProfile from "@/components/forms/update-profile";
 import { useCallback, useState } from "react";
 import { cn } from "@/lib/utils";
-import { Loader2 } from "lucide-react";
+import { Loader2, Notebook } from "lucide-react";
 import { fetchStream } from "@/lib/fetchers/fetchStream";
-import { useRouter } from "@/navigation";
+import { Link, useRouter } from "@/navigation";
 import { UpdateProfileTexts } from "@/texts/components/forms";
 import { useStompClient } from "react-stomp-hooks";
 import useClientNotFound from "@/hoooks/useClientNotFound";
+import DaysCalendarCTA, {
+  DaysCalendarCTATexts,
+} from "@/components/dayCalendar/days-calendar-cta";
 
 export interface UserPageTexts {
   updateProfileTexts: UpdateProfileTexts;
@@ -38,10 +41,12 @@ export interface UserPageTexts {
   startChat: string;
   errorText: string;
   emailSent: string;
+  dayCalendarCTATexts: DaysCalendarCTATexts;
 }
 
 interface Props extends WithUser, UserPageTexts {
   id: string;
+  showDayCalendarCTA?: boolean;
 }
 
 export default function UserPageContent({
@@ -58,6 +63,8 @@ export default function UserPageContent({
   verifyEmail,
   emailSent,
   errorText,
+  showDayCalendarCTA = false,
+  dayCalendarCTATexts,
 }: Props) {
   const router = useRouter();
   const stompClient = useStompClient();
@@ -220,6 +227,14 @@ export default function UserPageContent({
         {!isOwner && (
           <div className={"mt-8 flex items-center justify-center"}>
             <Button onClick={() => handleStartChat(user)}>{startChat}</Button>
+          </div>
+        )}
+        {showDayCalendarCTA && (
+          <div className="my-5 flex items-center justify-center z-[1]">
+            <DaysCalendarCTA
+              {...dayCalendarCTATexts}
+              className="text-primary"
+            />
           </div>
         )}
         {isOwner && (

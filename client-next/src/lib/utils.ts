@@ -7,7 +7,7 @@ import { SortingOption } from "@/components/list/grid-list";
 import { Dispatch, ReactNode, SetStateAction } from "react";
 import { getTimezoneOffset, toZonedTime } from "date-fns-tz";
 import { formatDistanceToNow } from "date-fns";
-import { enUS, ro } from "date-fns/locale";
+import { enUS, ro, Locale as DateFnsLocale } from "date-fns/locale";
 import { Locale } from "@/navigation";
 import isEqual from "lodash.isequal";
 import { stripHtml } from "string-strip-html";
@@ -355,3 +355,7 @@ export const wrapItemToString = (i: unknown) => `${i}`;
 export function removeHTML(html: string) {
   return stripHtml(html).result.replace(/\s+/g, " ").trim();
 }
+export const dateFnsLocaleMapper: Record<Locale, DateFnsLocale> = {
+  en: enUS,
+  ro: ro,
+};

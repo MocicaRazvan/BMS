@@ -57,6 +57,11 @@ const metadataValues = (id: string): MetadataValues[] => [
     role: "ROLE_USER",
   },
   {
+    key: "user.DaysCalendar",
+    path: "/daysCalendar",
+    role: "ROLE_USER",
+  },
+  {
     key: "user.Cart",
     path: "/cart",
     role: "ROLE_USER",

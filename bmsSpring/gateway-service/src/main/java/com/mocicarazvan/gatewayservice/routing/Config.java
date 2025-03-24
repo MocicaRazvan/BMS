@@ -132,7 +132,7 @@ public class Config {
                                 .filter(csrfFilter)
                                 .filter(authFilter))
                         .uri("lb://kanban-service"))
-                .route("day-service", r -> r.path("/days/**", "/meals/**")
+                .route("day-service", r -> r.path("/days/**", "/meals/**", "/daysCalendar/**")
                         .filters(f -> f
                                 .filter(csrfFilter)
                                 .filter(authFilter))
@@ -260,7 +260,7 @@ public class Config {
                                 .filter(csrfFilter)
                                 .filter(authFilter))
                         .uri("http://kanban-service:8088"))
-                .route("day-service", r -> r.path("/days/**", "/meals/**")
+                .route("day-service", r -> r.path("/days/**", "/meals/**", "/daysCalendar/**")
                         .filters(f -> f
                                 .filter(csrfFilter)
                                 .filter(authFilter))
@@ -330,7 +330,8 @@ public class Config {
                         "/meals/internal/**",
                         "/archive/internal/**",
                         "/cart/internal/**",
-                        "/diffusion/internal/**"
+                        "/diffusion/internal/**",
+                        "/daysCalendar/internal/**"
                 )
                 .filters(f -> f.filter(((exchange, chain) -> {
                     exchange.getResponse().setStatusCode(HttpStatus.NOT_FOUND);

@@ -12,6 +12,18 @@ const config = {
     "./src/**/*.{ts,tsx}",
     "./node_modules/@ferrucc-io/emoji-picker/dist/**/*.{js,jsx,ts,tsx}",
   ],
+  safelist: [
+    "bg-[hsl(var(--chart-1))]",
+    "bg-[hsl(var(--chart-2))]",
+    "bg-[hsl(var(--chart-3))]",
+    "bg-[hsl(var(--chart-4))]",
+    "bg-[hsl(var(--chart-5))]",
+    "bg-[hsl(var(--chart-6))]",
+    "bg-[hsl(var(--chart-7))]",
+    "bg-[hsl(var(--chart-8))]",
+    "bg-[hsl(var(--chart-9))]",
+    "bg-[hsl(var(--chart-10))]",
+  ],
   prefix: "",
   theme: {
     container: {

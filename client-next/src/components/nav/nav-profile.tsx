@@ -12,10 +12,15 @@ import { useRouter } from "@/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import noImg from "../../../public/noImage.jpg";
+import DaysCalendarCTA, {
+  DaysCalendarCTATexts,
+} from "@/components/dayCalendar/days-calendar-cta";
 
-interface Props extends WithUser {}
+interface Props extends WithUser {
+  dayCalendarCTATexts: DaysCalendarCTATexts;
+}
 
-export default function NavProfile({ authUser }: Props) {
+export default function NavProfile({ authUser, dayCalendarCTATexts }: Props) {
   const router = useRouter();
   return (
     <DropdownMenu modal={false}>
@@ -34,9 +39,9 @@ export default function NavProfile({ authUser }: Props) {
         className="cursor-pointer mt-3 z-10"
         onClick={() => router.push(`/users/single/${authUser?.id}`)}
       >
-        <DropdownMenuItem className="cursor-pointer hover:!bg-background">
-          <div className="flex flex-col items-center justify-center gap-3 hover:bg-background">
-            <div className="flex items-center justify-center w-full gap-3">
+        <DropdownMenuItem className="hover:!bg-background">
+          <div className="flex flex-col items-center justify-center hover:bg-background">
+            <div className="flex items-center justify-center w-full gap-3 cursor-pointer">
               <Avatar className="w-14 h-14 rounded-full">
                 <AvatarImage
                   src={authUser?.image || noImg}
@@ -59,6 +64,18 @@ export default function NavProfile({ authUser }: Props) {
                 </Badge>
               )}
             </div>
+            <div className="mb-7 flex items-center justify-center">
+              <DaysCalendarCTA
+                {...dayCalendarCTATexts}
+                className="w-fit text-[16px]"
+                size={20}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  router.push("/daysCalendar");
+                }}
+              />
+            </div>
             <div>
               <Button
                 size="lg"
@@ -70,7 +87,7 @@ export default function NavProfile({ authUser }: Props) {
                 }}
                 variant="destructive"
               >
-                SignOut
+                {"SignOut"}
               </Button>
             </div>
           </div>

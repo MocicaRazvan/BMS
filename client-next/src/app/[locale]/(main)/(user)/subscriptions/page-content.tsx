@@ -23,6 +23,9 @@ import {
   PlanExtraHeader,
   PlanImageOverlay,
 } from "@/components/plans/plan-list-extra";
+import DaysCalendarCTA, {
+  DaysCalendarCTATexts,
+} from "@/components/dayCalendar/days-calendar-cta";
 
 export interface SubscriptionsPageContentTexts {
   gridListTexts: GridListTexts;
@@ -31,6 +34,7 @@ export interface SubscriptionsPageContentTexts {
   objectiveDropDownTexts: UseFilterDropdownTexts;
   title: string;
   header: string;
+  dayCalendarCTATexts: DaysCalendarCTATexts;
 }
 interface Props extends WithUser, SubscriptionsPageContentTexts {
   options: SortingOption[];
@@ -45,6 +49,7 @@ export default function SubscriptionsPageContent({
   dietDropdownTexts,
   authUser,
   objectiveDropDownTexts,
+  dayCalendarCTATexts,
 }: Props) {
   const router = useRouter();
   const formatIntl = useFormatter();
@@ -92,6 +97,7 @@ export default function SubscriptionsPageContent({
   return (
     <section className="w-full min-h-[calc(100vh-4rem)] transition-all py-5 px-4 max-w-[1300px] mx-auto ">
       <Heading title={title} header={header} />
+      <DaysCalendarCTA {...dayCalendarCTATexts} />
       <GridList<PlanResponse>
         onItemClick={({
           model: {

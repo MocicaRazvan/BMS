@@ -16,7 +16,7 @@ interface Props<R> extends WithUser, ChildInputMultipleSelectorTexts {
   path: string;
   mapping: (i: R) => Option;
   onChange?: (options: Option[]) => void;
-  value: Option[];
+  value?: Option[];
   disabled: boolean;
   extraQueryParams?: Record<string, string>;
   sortingCriteria?: Record<string, SortDirection>;
@@ -97,6 +97,7 @@ export default function ChildInputMultipleSelector<R>({
         maxSelected={maxSelected}
         placeholder={placeholder}
         allowDuplicates={allowDuplicates}
+        hidePlaceholderWhenSelected={true}
         loadingIndicator={
           <p className="py-2 text-center text-lg leading-10 text-muted-foreground">
             {loading}

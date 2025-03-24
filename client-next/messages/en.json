@@ -8,6 +8,9 @@
     "description": "Sorry, the page you are looking for does not exist."
   },
   "zod": {
+    "AddDayToCalendarSchemaTexts": {
+      "dateRequired": "Please select a date"
+    },
     "RegisterSchemaTexts": {
       "minPassword": "Password must be at least 8 characters long",
       "mustLetters": "Password must contain at least one letter",
@@ -346,6 +349,23 @@
     }
   },
   "components": {
+    "dayCalendar": {
+      "DayCalendarHeaderTexts": {
+        "tracked": "Tracked"
+      },
+      "DayCalendarBodyMonthTexts": {
+        "addAnchor": "Add Day"
+      },
+      "DayCalendarEventTexts": {
+        "toastDescription": "Day was removed from the calendar"
+      },
+      "DayCalendarSingleDayTexts": {
+        "title": "Day"
+      },
+      "DaysCalendarCTATexts": {
+        "header": "Track your own progress using the days from the plan you bought!"
+      }
+    },
     "editor": {
       "FormatTypeTexts": {
         "paragraph": "Paragraph"
@@ -355,6 +375,21 @@
       }
     },
     "forms": {
+      "AddDayToCalendarTexts": {
+        "errorText": "The day could not be added",
+        "anchorText": "Add the day to the calendar",
+        "titleText": "Select a date and add the day to the calendar",
+        "formPlaceholder": "Select the date",
+        "formLabel": "Date in the calendar",
+        "formDescription": "The date cannot be one of the existing ones in the calendar",
+        "toastDescription": "The day was added to the calendar"
+      },
+      "CalendarDayFormTexts": {
+        "title": "Select and add a day",
+        "error": "The day could not be added",
+        "placeholder": "Select the day",
+        "toastDescription": "The day was added to the calendar"
+      },
       "AnswerFromBodyFormTexts": {
         "toxicError": "The question should not contain toxic language",
         "englishError": "The question must be in English",
@@ -659,7 +694,8 @@
         "orders": "Orders",
         "kanban": "Kanban",
         "trainerDashboard": "Your Dashboard",
-        "calculator": "Calculator"
+        "calculator": "Calculator",
+        "dayCalendarCTA": "Your Calendar"
       },
       "ChatMessageNotificationContentTexts": {
         "content": "{count, plural, one {You have {count} new message from {sender}} other {You have {count} new messages from {sender}}}"
@@ -2152,6 +2188,11 @@
       }
     },
     "user": {
+      "DaysCalendar": {
+        "title": "Day Calendar",
+        "description": "Track your days on Bro Meets Science",
+        "keywords": "days, calendar, track, progress, meals, ingredients, recipes, plans"
+      },
       "Cart": {
         "title": "Cart",
         "description": "Your cart on Bro Meets Science",

@@ -661,3 +661,19 @@ export interface OverallSummary {
   ordersCount: number;
   plansCount: number;
 }
+
+export interface DayCalendarResponse extends WithUserDto {
+  date: string;
+  dayResponse: DayResponse;
+  mealResponses: MealResponse[];
+  author: UserDto;
+}
+
+export interface DayCalendarBody {
+  dayId: number;
+  date: string;
+}
+export interface DayCalendarUserDates {
+  id: number;
+  customDate: string;
+}

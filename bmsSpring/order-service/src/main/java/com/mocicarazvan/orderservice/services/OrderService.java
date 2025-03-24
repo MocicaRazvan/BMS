@@ -6,6 +6,7 @@ import com.mocicarazvan.orderservice.dtos.clients.MealResponse;
 import com.mocicarazvan.orderservice.dtos.clients.PlanResponse;
 import com.mocicarazvan.orderservice.dtos.clients.RecipeResponse;
 import com.mocicarazvan.orderservice.dtos.clients.collect.FullDayResponse;
+import com.mocicarazvan.orderservice.enums.DayType;
 import com.mocicarazvan.orderservice.enums.DietType;
 import com.mocicarazvan.orderservice.enums.ObjectiveType;
 import com.mocicarazvan.templatemodule.dtos.PageableBody;
@@ -17,6 +18,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDate;
+import java.util.List;
 
 public interface OrderService extends CountInParentService {
 
@@ -48,4 +50,10 @@ public interface OrderService extends CountInParentService {
 
 
     Mono<String> seedPlanOrders(String userId);
+
+    Flux<PageableResponse<CustomEntityModel<DayResponse>>> getDaysFilteredByPlanIdsIn(
+            String title, DayType type, List<Long> excludeIds,
+            LocalDate createdAtLowerBound, LocalDate createdAtUpperBound,
+            LocalDate updatedAtLowerBound, LocalDate updatedAtUpperBound,
+            PageableBody pageableBody, String userId, Boolean admin);
 }

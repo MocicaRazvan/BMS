@@ -25,6 +25,7 @@ import com.mocicarazvan.templatemodule.exceptions.action.SubEntityUsed;
 import com.mocicarazvan.templatemodule.services.RabbitMqUpdateDeleteService;
 import com.mocicarazvan.templatemodule.services.impl.ManyToOneUserServiceImpl;
 import com.mocicarazvan.templatemodule.utils.EntitiesUtils;
+import com.mocicarazvan.templatemodule.utils.OrderEnsurer;
 import com.mocicarazvan.templatemodule.utils.PageableUtilsCustom;
 import lombok.Getter;
 import org.springframework.stereotype.Component;
@@ -267,7 +268,12 @@ public class IngredientServiceImpl extends
         @Override
         @RedisReactiveCache(key = CACHE_KEY_PATH, idPath = "id")
         public Flux<Ingredient> findAllById(List<Long> ids) {
-            return super.findAllById(ids);
+            return super.findAllById(ids)
+                    .transform(f -> OrderEnsurer.orderFlux(
+                            f,
+                            ids,
+                            Ingredient::getId
+                    ));
         }
 
         @Override

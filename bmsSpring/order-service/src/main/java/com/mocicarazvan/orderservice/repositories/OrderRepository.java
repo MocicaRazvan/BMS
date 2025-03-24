@@ -1,6 +1,7 @@
 package com.mocicarazvan.orderservice.repositories;
 
 import com.mocicarazvan.orderservice.models.Order;
+import com.mocicarazvan.templatemodule.dtos.IdsDto;
 import com.mocicarazvan.templatemodule.repositories.CountInParent;
 import com.mocicarazvan.templatemodule.repositories.ManyToOneUserRepository;
 import org.springframework.data.r2dbc.repository.Query;
@@ -43,6 +44,16 @@ public interface OrderRepository extends ManyToOneUserRepository<Order>, CountIn
             ORDER BY created_at DESC
             """)
     Flux<Order> findModelByMonth(int month, int year);
+
+
+    @Query(
+            """
+                    select o.id, o.plan_ids as reference_ids
+                    from custom_order o
+                    where o.user_id=:userId
+                    """
+    )
+    Flux<IdsDto> findPlansByUserId(Long userId);
 
 
 }
