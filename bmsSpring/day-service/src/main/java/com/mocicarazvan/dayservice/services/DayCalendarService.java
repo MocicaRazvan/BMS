@@ -11,18 +11,13 @@ import reactor.core.publisher.Mono;
 
 import java.time.LocalDate;
 
-public interface DayCalendarService
-//        extends ManyToOneUserService<DayCalendar, DayCalendarBody, DayCalendarResponse, DayCalendarRepository, DayCalendarMapper>
-{
-    //    @RedisReactiveChildCacheEvict(key = CACHE_KEY, id = "#id", masterId = "#userId")
+public interface DayCalendarService {
     Mono<DayCalendarResponse<MealResponse>> createDayCalendar(DayCalendarBody dayCalendarBody, String userId);
 
-    //    @RedisReactiveChildCacheEvict(key = CACHE_KEY, id = "#id", masterId = "#userId")
     Mono<Boolean> deleteDayCalendar(Long id, String userId);
 
     Mono<DayCalendarResponse<MealResponse>> getDayCalendarById(Long id, String userId);
 
-    //    @RedisReactiveChildCache(key = CACHE_KEY, idPath = "id", masterId = "#userId")
     Flux<DayCalendarResponse<MealResponse>> getDayCalendarsByUserIdAndDateBetween(
             String userId,
             LocalDate startDate,
