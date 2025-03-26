@@ -86,6 +86,7 @@ export default async function UsersPlansPage({
                 texts={userPlansPageTexts.topPlansTexts}
                 locale={locale}
                 path={`/orders/trainer/topPlans/${id}`}
+                authUser={authUser}
               />
             </div>
           </div>

@@ -58,13 +58,13 @@ public class RedisReactiveRoleCacheEvictAspect extends RedisReactiveCacheEvictAs
         }
 
         if (oldRolePath.isBlank()) {
-            return invalidateByRoles(joinPoint, key, idSpel, newRole, oldRole)
+            return Mono.defer(() -> invalidateByRoles(joinPoint, key, idSpel, newRole, oldRole))
                     .then(methodResponse(joinPoint));
         }
 
         aspectUtils.validateReturnTypeIsMonoPairClass(method, Role.class);
 
-        return methodMonoResponseToCacheInvalidateByRoles(joinPoint, key, idSpel, newRole, oldRolePath);
+        return Mono.defer(() -> methodMonoResponseToCacheInvalidateByRoles(joinPoint, key, idSpel, newRole, oldRolePath));
 
     }
 

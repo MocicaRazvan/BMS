@@ -14,6 +14,8 @@ import {
   getDayCalendarHeaderTexts,
 } from "@/texts/components/day-calendar";
 
+import TestPageContent from "./page-content";
+
 interface Props {
   params: {
     locale: Locale;
@@ -29,16 +31,5 @@ export default async function TestPage({ params }: Props) {
   const [dayCalendarHeaderTexts, dayCalendarBodyMonthTexts] = await Promise.all(
     [getDayCalendarHeaderTexts(), getDayCalendarBodyMonthTexts()],
   );
-  return (
-    // <TestPageContent
-    //   metadataValues={metadataValues}
-    //   texts={texts}
-    //   authUser={authUser}
-    //   editorTexts={editorTexts}
-    // />
-    <DayCalendarProvider authUser={authUser}>
-      <DayCalendarHeaderDate {...dayCalendarHeaderTexts} />
-      <DayCalendarBody dayCalendarBodyMonthTexts={dayCalendarBodyMonthTexts} />
-    </DayCalendarProvider>
-  );
+  return <TestPageContent authUser={authUser} />;
 }

@@ -3,6 +3,7 @@
 import { ApproveDto } from "@/types/dto";
 import { cn } from "@/lib/utils";
 import LikesDislikes from "@/components/common/likes-dislikes";
+import { ReactNode } from "react";
 
 export interface ElementHeaderTexts {
   notApproved: string;
@@ -15,6 +16,7 @@ interface Props<T extends ApproveDto> extends ElementHeaderTexts {
   isLiked?: boolean;
   isDisliked?: boolean;
   likesDisabled?: boolean;
+  extraContent?: ReactNode;
 }
 
 export default function ElementHeader<T extends ApproveDto>({
@@ -24,14 +26,15 @@ export default function ElementHeader<T extends ApproveDto>({
   isDisliked,
   notApproved,
   likesDisabled = false,
+  extraContent,
 }: Props<T>) {
   // const showLikes = react && isLiked !== undefined && isDisliked !== undefined;
   const showLikes = true;
   return (
-    <div className="w-3/4 mx-auto flex flex-col md:flex-row items-center justify-center gap-4 md:gap-20 mb-2">
+    <div className="w-3/4 mx-auto flex flex-col md:flex-row items-center md:items-start justify-center gap-4 md:gap-20 mb-2 relative">
       {elementState?.approved ? (
         showLikes ? (
-          <div className=" w-[250px] flex items-center justify-center gap-4 order-1 md:order-0">
+          <div className="w-[250px] flex items-center justify-center gap-4 order-1 md:order-0">
             <LikesDislikes
               react={react}
               likes={elementState?.userLikes || []}
@@ -47,16 +50,23 @@ export default function ElementHeader<T extends ApproveDto>({
           {notApproved}
         </h2>
       )}
+
       <div className="flex-1 flex items-center justify-center order-0 md:order-1">
         <h1
           className={cn(
             "text-2xl md:text-4xl text-balance tracking-tighter font-bold text-center",
-            showLikes && "md:translate-x-[-125px] ",
+            showLikes && "md:translate-x-[-125px]",
           )}
         >
           {elementState?.title}
         </h1>
       </div>
+
+      {extraContent && (
+        <div className="order-2 md:order-2 my-1 md:my-0 md:absolute md:right-0 md:top-1/2 md:-translate-y-1/2">
+          {extraContent}
+        </div>
+      )}
     </div>
   );
 }

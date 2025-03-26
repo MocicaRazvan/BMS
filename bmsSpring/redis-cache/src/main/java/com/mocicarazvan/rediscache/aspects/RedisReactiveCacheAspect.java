@@ -75,15 +75,15 @@ public class RedisReactiveCacheAspect {
             redisCacheUtils.checkValidId(idSpel);
             Long annId = aspectUtils.assertLong(aspectUtils.evaluateSpelExpression(idSpel, joinPoint));
             String savingKey = redisCacheUtils.getSingleKey(key, annId) + redisCacheUtils.getHashKey(argsHash);
-            return createBaseMono(savingKey, method)
-                    .switchIfEmpty(methodMonoResponseToCache(joinPoint, key, savingKey, annId, saveToCache));
+            return Mono.defer(() -> createBaseMono(savingKey, method))
+                    .switchIfEmpty(Mono.defer(() -> methodMonoResponseToCache(joinPoint, key, savingKey, annId, saveToCache)));
 
 
         } else if (returnType.isAssignableFrom(Flux.class)) {
             redisCacheUtils.checkValidId(idPath);
             String savingKey = redisCacheUtils.getListKey(key) + redisCacheUtils.getHashKey(argsHash);
-            return createBaseFlux(savingKey, method)
-                    .switchIfEmpty(methodFluxResponseToCache(joinPoint, key, savingKey, idPath, saveToCache));
+            return Flux.defer(() -> createBaseFlux(savingKey, method))
+                    .switchIfEmpty(Flux.defer(() -> methodFluxResponseToCache(joinPoint, key, savingKey, idPath, saveToCache)));
 
         }
         throw new RuntimeException("RedisReactiveCacheUpdate: Annotated method has unsupported return type, expected Mono<?> or Flux<?>");
@@ -95,7 +95,7 @@ public class RedisReactiveCacheAspect {
     protected Flux<Object> createBaseFlux(String savingKey, Method method) {
         return
                 localReactiveCache.getFluxOrEmpty(savingKey)
-                        .switchIfEmpty(
+                        .switchIfEmpty(Flux.defer(() ->
                                 reactiveRedisTemplate.opsForValue().get(savingKey)
                                         .map(collection -> (List<Object>) objectMapper.convertValue(collection, objectMapper.getTypeFactory()
                                                 .constructCollectionType(List.class,
@@ -105,7 +105,7 @@ public class RedisReactiveCacheAspect {
                                         .flatMapMany(Flux::fromIterable)
                                         .cast(Object.class)
 
-                        )
+                        ))
                         .onErrorResume(e -> Flux.empty());
     }
 
@@ -113,12 +113,12 @@ public class RedisReactiveCacheAspect {
         return
                 localReactiveCache.getMonoOrEmpty(savingKey)
                         .switchIfEmpty(
-                                reactiveRedisTemplate.opsForValue()
+                                Mono.defer(() -> reactiveRedisTemplate.opsForValue()
                                         .get(savingKey)
                                         .map(cr -> objectMapper.convertValue(cr, aspectUtils.getTypeReference(method)))
                                         .cast(Object.class)
                                         .doOnSuccess(ob -> localReactiveCache.put(savingKey, ob))
-                        )
+                                ))
                         .onErrorResume(e -> Mono.empty());
     }
 

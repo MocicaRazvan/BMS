@@ -33,6 +33,7 @@ import {
   RadialBar,
   RadialBarChart,
 } from "recharts";
+import { WithUser } from "@/lib/user";
 
 export interface TopPlansTexts {
   topChartWrapperTexts: TopChartWrapperTexts;
@@ -40,7 +41,7 @@ export interface TopPlansTexts {
   title: string;
 }
 
-interface Props {
+interface Props extends WithUser {
   texts: TopPlansTexts;
   locale: Locale;
   path: string;
@@ -50,6 +51,7 @@ export const TopPlans = memo(
     locale,
     path,
     texts: { topChartWrapperTexts, title, planCardTexts },
+    authUser,
   }: Props) => {
     return (
       <TopChartWrapper<TopPlansSummary>
@@ -58,7 +60,11 @@ export const TopPlans = memo(
         locale={locale}
         processMessage={(ts) => (
           <div key={ts.planId}>
-            <PlanCard topSummary={ts} texts={planCardTexts} />
+            <PlanCard
+              topSummary={ts}
+              texts={planCardTexts}
+              authUser={authUser}
+            />
           </div>
         )}
         title={title}
@@ -84,119 +90,112 @@ interface PlanCardTexts {
   ordersCount: string;
 }
 
-const PlanCard = memo(
-  ({
-    topSummary,
-    texts,
-  }: {
-    topSummary: TopPlansSummary;
-    texts: PlanCardTexts;
-  }) => {
-    const {
-      messages: plans,
-      error,
-      isFinished: isPlansFinished,
-    } = useFetchStream<ResponseWithUserDtoEntity<PlanResponse>, BaseError>({
-      path: `/plans/withUser/${topSummary.planId}`,
-      method: "GET",
-      authToken: true,
-    });
+interface PlanCardProps extends WithUser {
+  topSummary: TopPlansSummary;
+  texts: PlanCardTexts;
+}
 
-    if (!isPlansFinished || !plans.length) {
-      return <LoadingSpinner sectionClassName="min-h-[575px] w-full h-full" />;
-    }
+const PlanCard = memo(({ topSummary, texts, authUser }: PlanCardProps) => {
+  const {
+    messages: plans,
+    error,
+    isFinished: isPlansFinished,
+  } = useFetchStream<ResponseWithUserDtoEntity<PlanResponse>, BaseError>({
+    path: `/plans/withUser/${topSummary.planId}`,
+    method: "GET",
+    authToken: true,
+  });
 
-    const plan = plans[0].model.content;
-    const user = plans[0].user;
+  if (!isPlansFinished || !plans.length) {
+    return <LoadingSpinner sectionClassName="min-h-[575px] w-full h-full" />;
+  }
 
-    return (
-      <MotionCard
-        className="flex flex-col min-h-[575px] shadow"
-        initial={{ opacity: 0, scale: 0.8 }}
-        whileInView={{ opacity: 1, scale: 1 }}
-        viewport={{ once: true, amount: "some" }}
-        transition={{
-          duration: 0.5,
-          delay: 0.15,
-          type: "spring",
-          stiffness: 200,
-          damping: 15,
-        }}
-      >
-        <CardHeader>
-          <div className="flex justify-between items-center">
-            <CardTitle>
+  const plan = plans[0].model.content;
+  const user = plans[0].user;
+
+  return (
+    <MotionCard
+      className="flex flex-col min-h-[575px] shadow"
+      initial={{ opacity: 0, scale: 0.8 }}
+      whileInView={{ opacity: 1, scale: 1 }}
+      viewport={{ once: true, amount: "some" }}
+      transition={{
+        duration: 0.5,
+        delay: 0.15,
+        type: "spring",
+        stiffness: 200,
+        damping: 15,
+      }}
+    >
+      <CardHeader>
+        <div className="flex justify-between items-center">
+          <CardTitle>
+            <Link
+              href={`/${authUser.role === "ROLE_ADMIN" ? "admin" : "trainer"}/plans/single/${plan.id}`}
+              className="hover:underline flex items-center justify-center gap-2"
+            >
+              <p>{texts.planAntet}</p>
+              <p>{plan.title}</p>
+            </Link>
+          </CardTitle>
+          <TopRankBadge rank={topSummary.rank} rankLabel={texts.rankLabel} />
+        </div>
+        <CardDescription>
+          {texts.topPlan} {topSummary.rank}
+        </CardDescription>
+        <CardContent className="flex-1 grid gap-10 pt-1.5">
+          <div className="flex justify-between">
+            <div className="grid place-items-center">
+              <p className="text-sm font-medium">{texts.ordersCount}</p>
+              <p className="text-2xl font-bold">{topSummary.count}</p>
+            </div>
+            <div className="grid place-items-center">
+              <p className="text-sm font-medium">{texts.dietType}</p>
+              <DietBadge dietType={plan.type} pClassName="text-xs px-2 py-1" />
+            </div>
+            <div className="grid place-items-center">
+              <p className="text-sm font-medium">{texts.madeBy}</p>
               <Link
-                href={`/admin/plans/single/${plan.id}`}
-                className="hover:underline flex items-center justify-center gap-2"
+                href={`/admin/users/${user.id}`}
+                className="hover:underline"
               >
-                <p>{texts.planAntet}</p>
-                <p>{plan.title}</p>
+                {user.email}
               </Link>
-            </CardTitle>
-            <TopRankBadge rank={topSummary.rank} rankLabel={texts.rankLabel} />
+            </div>
           </div>
-          <CardDescription>
-            {texts.topPlan} {topSummary.rank}
-          </CardDescription>
-          <CardContent className="flex-1 grid gap-10 pt-1.5">
-            <div className="flex justify-between">
-              <div className="grid place-items-center">
-                <p className="text-sm font-medium">{texts.ordersCount}</p>
-                <p className="text-2xl font-bold">{topSummary.count}</p>
-              </div>
-              <div className="grid place-items-center">
-                <p className="text-sm font-medium">{texts.dietType}</p>
-                <DietBadge
-                  dietType={plan.type}
-                  pClassName="text-xs px-2 py-1"
-                />
-              </div>
-              <div className="grid place-items-center">
-                <p className="text-sm font-medium">{texts.madeBy}</p>
-                <Link
-                  href={`/admin/users/${user.id}`}
-                  className="hover:underline"
-                >
-                  {user.email}
-                </Link>
-              </div>
+          <div className="w-full h-full grid gap-4 grid-cols-1 md:grid-cols-2 place-items-center">
+            <div className="grid ">
+              <p className="text-sm font-medium mb-2">
+                {texts.numberOfPurchases}
+              </p>
+              <TopChartMeanRelative
+                chartKey="count"
+                chartLabel={texts.numberOfPurchases}
+                barData={topSummary.count}
+                maxBar={topSummary.maxGroupCount}
+                referenceValue={topSummary.avgGroupCount}
+                referenceLabel={texts.meanNumberOfPurchases}
+                chartColorNumber={2}
+                maxOffset={4}
+              />
             </div>
-            <div className="w-full h-full grid gap-4 grid-cols-1 md:grid-cols-2 place-items-center">
-              <div className="grid ">
-                <p className="text-sm font-medium mb-2">
-                  {texts.numberOfPurchases}
-                </p>
-                <TopChartMeanRelative
-                  chartKey="count"
-                  chartLabel={texts.numberOfPurchases}
-                  barData={topSummary.count}
-                  maxBar={topSummary.maxGroupCount}
-                  referenceValue={topSummary.avgGroupCount}
-                  referenceLabel={texts.meanNumberOfPurchases}
-                  chartColorNumber={2}
-                  maxOffset={4}
-                />
-              </div>
-              <div className="grid md:place-items-end">
-                <RatioPieChart
-                  innerLabel={texts.ratioLabel}
-                  chartData={[
-                    {
-                      ratio: topSummary.ratio,
-                      fill: "var(--color-plan)",
-                    },
-                  ]}
-                />
-              </div>
+            <div className="grid md:place-items-end">
+              <RatioPieChart
+                innerLabel={texts.ratioLabel}
+                chartData={[
+                  {
+                    ratio: topSummary.ratio,
+                    fill: "var(--color-plan)",
+                  },
+                ]}
+              />
             </div>
-          </CardContent>
-        </CardHeader>
-      </MotionCard>
-    );
-  },
-  isDeepEqual,
-);
+          </div>
+        </CardContent>
+      </CardHeader>
+    </MotionCard>
+  );
+}, isDeepEqual);
 PlanCard.displayName = "PlanCard";
 
 const chartConfig = {

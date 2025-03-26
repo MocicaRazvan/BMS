@@ -57,7 +57,7 @@ public class UserCartServiceImpl implements UserCartService {
                             return originalIds.size() != uc.getPlanIds().size() ? userCartRepository.save(uc) : Mono.just(uc);
 
                         })
-                        .switchIfEmpty(createCartForUser(userId))
+                        .switchIfEmpty(Mono.defer(() -> createCartForUser(userId)))
                         .flatMap(uc -> createResponse(userId, uc))
                         .as(transactionalOperator::transactional)
                 );
@@ -74,7 +74,7 @@ public class UserCartServiceImpl implements UserCartService {
                         )
                         .map(Tuple3::getT3)
                         .flatMap(subs -> userCartRepository.findByUserId(userId)
-                                .switchIfEmpty(createCartForUser(userId))
+                                .switchIfEmpty(Mono.defer(() -> createCartForUser(userId)))
                                 .flatMap(uc ->
                                         {
                                             userCartBody.getPlanIds().removeAll(subs);

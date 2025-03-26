@@ -82,6 +82,7 @@ export default function UserPlansAdminPageContent({
                     texts={topPlansTexts}
                     locale={locale}
                     path={`/orders/trainer/topPlans/${id}`}
+                    authUser={authUser}
                   />
                 </div>
               </div>

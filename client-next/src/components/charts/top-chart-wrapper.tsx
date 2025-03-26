@@ -104,10 +104,10 @@ const TopChartWrapper = <T extends RankSummary>({
       whileInView={{ opacity: 1 }}
       viewport={{ once: true, amount: "some" }}
     >
-      <h2 className="text-2xl lg:text-3xl font-bold tracking-tight capitalize inline">
+      <h2 className="text-2xl lg:text-3xl font-bold tracking-tight capitalize inline ">
         {title}
       </h2>
-      <div className="flex flex-col md:flex-row items-center justify-around w-full gap-5 md:gap-1  mb-12">
+      <div className="flex flex-col md:flex-row items-center justify-around w-full gap-5 md:gap-1 mt-2 mb-12">
         <div className="flex items-center gap-2">
           <Label className="text-lg font-semibold">{periodLabel}</Label>
           {dateRangePicker}

@@ -52,14 +52,14 @@ public class RedisReactiveCacheChildAspect extends RedisReactiveCacheAspect {
             Long annId = aspectUtils.assertLong(aspectUtils.evaluateSpelExpression(idSpel, joinPoint));
             // master first for efficient retrieval
             String savingKey = redisChildCacheUtils.getMasterKey(key, masterId) + redisChildCacheUtils.getSingleKey("child", annId) + redisChildCacheUtils.getHashKey(argsHash);
-            return createBaseMono(savingKey, method)
-                    .switchIfEmpty(methodMonoResponseToCache(joinPoint, key, savingKey, annId, saveToCache));
+            return Mono.defer(() -> createBaseMono(savingKey, method))
+                    .switchIfEmpty(Mono.defer(() -> methodMonoResponseToCache(joinPoint, key, savingKey, annId, saveToCache)));
 
         } else if (returnType.isAssignableFrom(Flux.class)) {
             redisChildCacheUtils.checkValidId(idPath);
             String savingKey = redisChildCacheUtils.getMasterKey(key, masterId) + redisChildCacheUtils.getListKey("child") + redisChildCacheUtils.getHashKey(argsHash);
-            return createBaseFlux(savingKey, method)
-                    .switchIfEmpty(methodFluxResponseToCache(joinPoint, key, savingKey, idPath, saveToCache));
+            return Flux.defer(() -> createBaseFlux(savingKey, method))
+                    .switchIfEmpty(Flux.defer(() -> methodFluxResponseToCache(joinPoint, key, savingKey, idPath, saveToCache)));
 
         }
         throw new RuntimeException("redisReactiveCacheChildAdd: Annotated method has invalid return type, expected return type to be Mono<?> or Flux<?>");

@@ -37,6 +37,7 @@ export default async function SinglePostPage({ params: { locale } }: Props) {
         authUser={user}
         {...singlePostPageTexts}
         showRecommendations={true}
+        trackViews={true}
       />
     </Suspense>
   );

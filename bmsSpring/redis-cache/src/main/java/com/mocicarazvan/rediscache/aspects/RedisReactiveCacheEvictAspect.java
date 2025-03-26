@@ -47,7 +47,7 @@ public class RedisReactiveCacheEvictAspect {
             redisCacheUtils.checkValidId(idSpel);
             Long annId = aspectUtils.assertLong(aspectUtils.evaluateSpelExpression(idSpel, joinPoint));
 
-            return invalidateForId(key, annId)
+            return Mono.defer(() -> invalidateForId(key, annId))
                     .then(methodResponse(joinPoint));
         }
 

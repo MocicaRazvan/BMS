@@ -114,7 +114,7 @@ public class MediaServiceImpl implements MediaService {
                                             });
                                 }
                         )
-                        .switchIfEmpty(fetchFileAndProcessFromGridFS(gridId, width, height, quality, exchange)) :
+                        .switchIfEmpty(Mono.defer(() -> fetchFileAndProcessFromGridFS(gridId, width, height, quality, exchange))) :
                 fetchFileAndProcessFromGridFS(gridId, width, height, quality, exchange);
     }
 

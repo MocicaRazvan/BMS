@@ -18,6 +18,9 @@ import ArchiveQueueCards, {
 } from "@/components/common/archive-queue-card";
 import { Separator } from "@/components/ui/separator";
 import { FindInSiteTexts } from "@/components/nav/find-in-site";
+import TopViewedPosts, {
+  TopViewedPostsTexts,
+} from "@/components/charts/top-viewed-posts";
 
 interface Props {
   params: { locale: Locale };
@@ -33,6 +36,7 @@ export interface AdminPostsPageTexts {
   archivePostsTexts: ArchiveQueueCardsTexts;
   archiveCommentsTexts: ArchiveQueueCardsTexts;
   findInSiteTexts: FindInSiteTexts;
+  topViewedPostsTexts: TopViewedPostsTexts;
 }
 export async function generateMetadata({
   params: { locale },
@@ -53,6 +57,7 @@ export default async function AdminPostsPage({ params: { locale } }: Props) {
       archivePostsTexts,
       archiveCommentsTexts,
       findInSiteTexts,
+      topViewedPostsTexts,
     },
     authUser,
   ] = await Promise.all([
@@ -92,6 +97,12 @@ export default async function AdminPostsPage({ params: { locale } }: Props) {
               extraQueryParams={{
                 admin: "true",
               }}
+            />
+            <Separator />
+            <TopViewedPosts
+              path="/posts/admin/viewStats"
+              texts={topViewedPostsTexts}
+              authUser={authUser}
             />
             <Separator />
             <div className="space-y-5">

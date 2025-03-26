@@ -50,14 +50,18 @@ public class RedisReactiveChildCacheEvictAspect extends RedisReactiveCacheEvictA
         String key = aspectUtils.extractKeyFromAnnotation(annotation.key(), joinPoint);
         String idSpel = annotation.id();
         String masterIdSpel = annotation.masterId();
-        Long masterId = null;
+        Long masterId;
         String masterPath = annotation.masterPath();
         if (masterIdSpel != null && !masterIdSpel.isBlank()) {
             masterId = aspectUtils.assertLong(aspectUtils.evaluateSpelExpression(masterIdSpel, joinPoint), -1L);
+        } else {
+            masterId = null;
         }
-        Long annId = null;
+        Long annId;
         if (idSpel != null && !idSpel.isBlank()) {
             annId = aspectUtils.assertLong(aspectUtils.evaluateSpelExpression(idSpel, joinPoint));
+        } else {
+            annId = null;
         }
 
         if (annId == null && masterId == null && (masterPath == null || masterPath.isBlank())) {
@@ -67,11 +71,11 @@ public class RedisReactiveChildCacheEvictAspect extends RedisReactiveCacheEvictA
         if (returnType.isAssignableFrom(Mono.class)) {
 
             if (masterPath != null && !(masterPath.isBlank())) {
-                return methodMonoResponseToCacheByMasterPath(joinPoint, key, annId, masterPath);
+                return Mono.defer(() -> methodMonoResponseToCacheByMasterPath(joinPoint, key, annId, masterPath));
             }
 
 
-            return invalidateForChild(key, annId, masterId)
+            return Mono.defer(() -> invalidateForChild(key, annId, masterId))
                     .then(methodResponse(joinPoint));
         }
 

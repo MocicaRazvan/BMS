@@ -22,8 +22,8 @@ public class SaveObjectToCacheImpl implements SaveObjectToCache {
         return reactiveRedisTemplate.opsForValue()
                 .get(key)
                 .map(result -> objectMapper.convertValue(result, typeReference))
-                .switchIfEmpty(cacheMissFunction.apply(item).flatMap(result -> reactiveRedisTemplate.opsForValue()
+                .switchIfEmpty(Mono.defer(() -> cacheMissFunction.apply(item).flatMap(result -> reactiveRedisTemplate.opsForValue()
                         .set(key, result, Duration.ofMinutes(expireMinutes))
-                        .thenReturn(result)));
+                        .thenReturn(result))));
     }
 }

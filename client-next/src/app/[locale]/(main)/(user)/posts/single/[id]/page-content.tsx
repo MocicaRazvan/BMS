@@ -5,7 +5,11 @@ import React, { Suspense, useCallback } from "react";
 import { fetchStream } from "@/lib/fetchers/fetchStream";
 import { CustomEntityModel, PostResponse } from "@/types/dto";
 import LoadingSpinner from "@/components/common/loading-spinner";
-import { checkApprovePrivilege, isSuccessCheckReturn } from "@/lib/utils";
+import {
+  checkApprovePrivilege,
+  isSuccessCheckReturn,
+  wrapItemToString,
+} from "@/lib/utils";
 import ElementHeader, {
   ElementHeaderTexts,
 } from "@/components/common/element-header";
@@ -24,6 +28,11 @@ import PostRecommendationList, {
 import { Separator } from "@/components/ui/separator";
 import { AnswerFromBodyFormTexts } from "@/components/forms/answer-from-body-form";
 import ItemBodyQa from "@/components/common/item-body-qa";
+import useTrackItemView from "@/hoooks/use-track-item-view";
+import useFetchStream from "@/hoooks/useFetchStream";
+import { readingTime } from "reading-time-estimator";
+import { useLocale } from "next-intl";
+import { Locale } from "@/navigation";
 
 export interface SinglePostPageTexts {
   elementHeaderTexts: ElementHeaderTexts;
@@ -31,10 +40,12 @@ export interface SinglePostPageTexts {
   postCommentsTexts: PostCommentsTexts;
   postRecommendationListTexts: PostRecommendationListTexts;
   answerFromBodyFormTexts: AnswerFromBodyFormTexts;
+  numberOfReads: string;
 }
 
 interface Props extends WithUser, SinglePostPageTexts {
   showRecommendations?: boolean;
+  trackViews?: boolean;
 }
 
 export default function SinglePostPageContent({
@@ -45,7 +56,10 @@ export default function SinglePostPageContent({
   showRecommendations = false,
   postRecommendationListTexts,
   answerFromBodyFormTexts,
+  trackViews = false,
+  numberOfReads,
 }: Props) {
+  const locale = useLocale() as Locale;
   const {
     itemState: postState,
     setItemState: setPostState,
@@ -64,6 +78,26 @@ export default function SinglePostPageContent({
     authUser,
     basePath: `/posts/withUser`,
   });
+
+  const {
+    messages: viewCount,
+    isFinished: isFinishedViewCount,
+    error: viewCountError,
+  } = useFetchStream<number>({
+    path: "/posts/viewCount/" + id,
+    authToken: true,
+  });
+
+  useTrackItemView(
+    `/posts/viewCount/${id}`,
+    3000,
+    Boolean(
+      trackViews &&
+        postState?.approved &&
+        postState?.userId &&
+        wrapItemToString(postState.userId) !== wrapItemToString(authUser.id),
+    ),
+  );
 
   const { navigateToNotFound } = useClientNotFound();
 
@@ -130,7 +164,19 @@ export default function SinglePostPageContent({
         isLiked={isLiked}
         isDisliked={isDisliked}
         {...elementHeaderTexts}
+        extraContent={
+          <p className="text-sm text-muted-foreground font-semibold">
+            {readingTime(postState?.body, 200, locale).text}
+          </p>
+        }
       />
+      <div className="w-3/4 mx-auto flex items-center justify-end">
+        {isFinishedViewCount && viewCount.length > 0 && !viewCountError && (
+          <p className="text-sm text-muted-foreground font-semibold">
+            {`${numberOfReads} ${viewCount[0]}`}
+          </p>
+        )}
+      </div>
       {item?.images.length > 0 && (
         <div className="mt-10">
           <CustomImageCarousel images={item?.images} />

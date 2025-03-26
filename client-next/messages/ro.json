@@ -1364,6 +1364,15 @@
           "orders": "comenzi",
           "plans": "planuri"
         }
+      },
+      "TopViewedPostsTexts": {
+        "rank": "Rank",
+        "title": "Cele mai vizualizate postări",
+        "topLabel": "Top",
+        "noResults": "Nu au fost găsite rezultate conform criteriilor de căutare!",
+        "viewCount": "Numărul de vizualizări",
+        "tags": "Taguri:",
+        "periodLabel": "Perioadă"
       }
     },
     "plans": {
@@ -1685,7 +1694,8 @@
     },
     "posts": {
       "SinglePageTexts": {
-        "updateButton": "Actualizează"
+        "updateButton": "Actualizează",
+        "numberOfReads": "Citiri"
       },
       "SortingOptions": {
         "createdAt": {

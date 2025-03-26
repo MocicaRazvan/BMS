@@ -22,6 +22,7 @@ import com.mocicarazvan.templatemodule.services.RabbitMqUpdateDeleteService;
 import com.mocicarazvan.templatemodule.utils.EntitiesUtils;
 import com.mocicarazvan.templatemodule.utils.PageableUtilsCustom;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.jooq.lambda.function.Function3;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.util.Pair;
@@ -34,6 +35,7 @@ import reactor.util.function.Tuples;
 import java.util.List;
 import java.util.function.Function;
 
+@Slf4j
 @Getter
 public abstract class ApprovedServiceImpl<MODEL extends Approve, BODY extends TitleBodyDto, RESPONSE extends ApproveDto,
         S extends ApprovedRepository<MODEL>, M extends DtoMapper<MODEL, BODY, RESPONSE>,

@@ -677,3 +677,8 @@ export interface DayCalendarUserDates {
   id: number;
   customDate: string;
 }
+
+export interface PostCountSummaryResponse extends PostResponse {
+  viewCount: number;
+  rank: number;
+}

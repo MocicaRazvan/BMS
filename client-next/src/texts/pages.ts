@@ -70,6 +70,7 @@ import {
   getTopPlansTexts,
   getTopTrainersTexts,
   getTopUsersTexts,
+  getTopViewedPostsTexts,
 } from "@/texts/components/charts";
 import { UserRecipesPageTexts } from "@/app/[locale]/trainer/user/[id]/recipes/page";
 import { AdminRecipesPageTexts } from "@/app/[locale]/admin/recipes/page";
@@ -185,6 +186,7 @@ export async function getSinglePostPageTexts(): Promise<SinglePostPageTexts> {
   return {
     elementHeaderTexts,
     updateButton: t("updateButton"),
+    numberOfReads: t("numberOfReads"),
     postCommentsTexts,
     postRecommendationListTexts,
     answerFromBodyFormTexts,
@@ -230,6 +232,7 @@ export async function getUserPostsPageTexts(): Promise<UserPostsPageTexts> {
     themeSwitchTexts,
     menuTexts,
     findInSiteTexts,
+    topViewedPostsTexts,
   ] = await Promise.all([
     getUserPostsPageContentTexts(),
     getThemeSwitchTexts(),
@@ -240,12 +243,14 @@ export async function getUserPostsPageTexts(): Promise<UserPostsPageTexts> {
       trainerSubLabels,
     ),
     getFindInSiteTexts(),
+    getTopViewedPostsTexts(),
   ]);
   return {
     userPostsPageContentTexts,
     themeSwitchTexts,
     menuTexts,
     findInSiteTexts,
+    topViewedPostsTexts,
   };
 }
 
@@ -539,6 +544,7 @@ export async function getAdminPostsPageTexts(): Promise<AdminPostsPageTexts> {
     archivePostsTexts,
     archiveCommentsTexts,
     findInSiteTexts,
+    topViewedPostsTexts,
   ] = await Promise.all([
     getTranslations("pages.admin.AdminPostsPageTexts"),
     getPostTableTexts(),
@@ -548,6 +554,7 @@ export async function getAdminPostsPageTexts(): Promise<AdminPostsPageTexts> {
     getArchiveQueueCardsTexts("post"),
     getArchiveQueueCardsTexts("comment"),
     getFindInSiteTexts(),
+    getTopViewedPostsTexts(),
   ]);
 
   return {
@@ -560,6 +567,7 @@ export async function getAdminPostsPageTexts(): Promise<AdminPostsPageTexts> {
     archivePostsTexts,
     archiveCommentsTexts,
     findInSiteTexts,
+    topViewedPostsTexts,
   };
 }
 
@@ -1576,6 +1584,7 @@ export async function getAdminDashboardPageTexts(): Promise<AdminDashboardPageTe
     topPlansTexts,
     topTrainersTexts,
     findInSiteTexts,
+    topViewedPostsTexts,
   ] = await Promise.all([
     getTranslations("pages.admin.AdminDashboardPageTexts"),
     getAllRelativeItemTexts(),
@@ -1587,6 +1596,7 @@ export async function getAdminDashboardPageTexts(): Promise<AdminDashboardPageTe
     getTopPlansTexts(),
     getTopTrainersTexts(),
     getFindInSiteTexts(),
+    getTopViewedPostsTexts(),
   ]);
 
   return {
@@ -1601,6 +1611,7 @@ export async function getAdminDashboardPageTexts(): Promise<AdminDashboardPageTe
     topPlansTexts,
     topTrainersTexts,
     findInSiteTexts,
+    topViewedPostsTexts,
     archiveTitle: t("archiveTitle"),
     selectItems: {
       comment: t("selectItems.comment"),

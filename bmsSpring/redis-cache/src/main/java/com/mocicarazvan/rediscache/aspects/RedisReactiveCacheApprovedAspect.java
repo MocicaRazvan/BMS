@@ -24,7 +24,7 @@ import java.lang.reflect.Method;
 @Slf4j
 @Aspect
 //@Component
-@ConditionalOnClass({ReactiveRedisTemplate.class, ObjectMapper.class, AspectUtils.class,LocalReactiveCache.class, ReverseKeysLocalCache.class})
+@ConditionalOnClass({ReactiveRedisTemplate.class, ObjectMapper.class, AspectUtils.class, LocalReactiveCache.class, ReverseKeysLocalCache.class})
 
 public class RedisReactiveCacheApprovedAspect extends RedisReactiveCacheAspect {
     private final RedisApprovedCacheUtils redisApprovedCacheUtils;
@@ -53,8 +53,8 @@ public class RedisReactiveCacheApprovedAspect extends RedisReactiveCacheAspect {
             redisApprovedCacheUtils.checkValidId(idSpel);
             Long annId = aspectUtils.assertLong(aspectUtils.evaluateSpelExpression(idSpel, joinPoint));
             String savingKey = redisApprovedCacheUtils.getSingleKey(key, annId) + redisApprovedCacheUtils.getHashKey(argsHash);
-            return createBaseMono(savingKey, method)
-                    .switchIfEmpty(methodMonoResponseToCache(joinPoint, key, savingKey, annId, saveToCache));
+            return Mono.defer(() -> createBaseMono(savingKey, method))
+                    .switchIfEmpty(Mono.defer(() -> methodMonoResponseToCache(joinPoint, key, savingKey, annId, saveToCache)));
 
         } else if (returnType.isAssignableFrom(Flux.class)) {
             BooleanEnum approved = redisApprovedCacheUtils.getApprovedArg(joinPoint, annotation);
@@ -63,8 +63,8 @@ public class RedisReactiveCacheApprovedAspect extends RedisReactiveCacheAspect {
             Long forWhomId = aspectUtils.assertLong(aspectUtils.evaluateSpelExpression(forWhom, joinPoint));
             String savingKey = redisApprovedCacheUtils.getListKey(key) + redisApprovedCacheUtils.getApprovedKey(approved) +
                     redisApprovedCacheUtils.getForWhomKey(forWhomId) + redisApprovedCacheUtils.getHashKey(argsHash);
-            return createBaseFlux(savingKey, method)
-                    .switchIfEmpty(methodFluxResponseToCache(joinPoint, key, savingKey, idPath, saveToCache));
+            return Flux.defer(() -> createBaseFlux(savingKey, method))
+                    .switchIfEmpty(Flux.defer(() -> methodFluxResponseToCache(joinPoint, key, savingKey, idPath, saveToCache)));
 
         }
         throw new RuntimeException("redisReactiveCacheApprovedAdd: Annotated method has invalid return type, expected return type to be Mono<?> or Flux<?>");

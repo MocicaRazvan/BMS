@@ -38,10 +38,10 @@ public class BasicUserProvider implements HandleUserProvider {
                     return Mono.just(u);
                 })
                 .flatMap(u -> generateResponse(u, u.getProvider()))
-                .switchIfEmpty(userRepository.save(user)
+                .switchIfEmpty(Mono.defer(() -> userRepository.save(user)
                         .flatMap(u -> generateResponse(u, provider))
                         .flatMap(u -> userEmbedService.saveEmbedding(u.getId(), u.getEmail()).thenReturn(u))
-                )
+                ))
                 .as(transactionalOperator::transactional);
 
     }

@@ -38,9 +38,9 @@ public class QueueServiceImpl implements QueueService {
 
         return simpleRedisCache.getCachedValue(queueName)
                 .cast(QueueInformationWithTimestamp.class)
-                .switchIfEmpty(fetchQueueInfoFromSource(queueName)
+                .switchIfEmpty(Mono.defer(() -> fetchQueueInfoFromSource(queueName)
                         .flatMap(queueInfo -> simpleRedisCache.putCachedValue(queueName, queueInfo)
-                                .thenReturn(queueInfo)));
+                                .thenReturn(queueInfo))));
     }
 
     @Override

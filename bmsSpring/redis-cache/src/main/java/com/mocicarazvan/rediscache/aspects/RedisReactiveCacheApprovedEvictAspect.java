@@ -49,7 +49,7 @@ public class RedisReactiveCacheApprovedEvictAspect extends RedisReactiveCacheEvi
         String forWhomPath = annotation.forWhomPath();
         aspectUtils.validateReturnTypeIsMonoPairClass(method, Boolean.class);
 
-        return methodMonoResponseToCacheInvalidateApproved(joinPoint, key, idSpel, forWhomPath);
+        return Mono.defer(() -> methodMonoResponseToCacheInvalidateApproved(joinPoint, key, idSpel, forWhomPath));
 
     }
 

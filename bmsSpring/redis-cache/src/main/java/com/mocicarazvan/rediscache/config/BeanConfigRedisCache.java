@@ -112,5 +112,6 @@ public class BeanConfigRedisCache {
                                                        @Qualifier("redisAsyncTaskExecutor") Executor executor, NotifyLocalRemove notifyLocalRemove) {
         return new ReverseKeysLocalCache(localCacheProperties, executor, notifyLocalRemove);
     }
+    
 }
 

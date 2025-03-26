@@ -83,7 +83,7 @@ public class PostController implements ApproveController
                                                                                              @RequestParam(name = "admin", required = false, defaultValue = "false") Boolean admin,
                                                                                              ServerWebExchange exchange) {
 
-        log.error("approved: " + approved);
+
         return postService.
                 getModelsWithUser(title, pageableBody, requestsUtils.extractAuthUser(exchange), approved)
                 .flatMapSequential(m -> postReactiveResponseBuilder.toModelWithUserPageable(m, PostController.class));
@@ -128,7 +128,6 @@ public class PostController implements ApproveController
                                                                                     @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate updatedAtUpperBound,
                                                                                     ServerWebExchange exchange) {
 
-        log.error("admin: " + admin);
         FilterKeyType.KeyRouteType keyRouteType = Boolean.TRUE.equals(admin) ? FilterKeyType.KeyRouteType.createForAdmin() : FilterKeyType.KeyRouteType.createForPublic();
 
         return
@@ -366,5 +365,9 @@ public class PostController implements ApproveController
                 ));
     }
 
+    @GetMapping("/invalidateCache/{id}")
+    public Mono<?> invalidateCache(@PathVariable Long id) {
+        return postService.invalidateCache(id);
+    }
 
 }

@@ -22,6 +22,7 @@ import {
 } from "@/components/charts/plan-charctersitic";
 import { TopTrainersTexts } from "@/components/charts/top-trainers";
 import { PredictionChartTexts } from "@/components/charts/prediction-chart";
+import { TopViewedPostsTexts } from "@/components/charts/top-viewed-posts";
 
 export async function getIngredientPieChartTexts(): Promise<IngredientPieChartTexts> {
   const t = await getTranslations("components.charts.IngredientPieChartTexts");
@@ -290,5 +291,22 @@ export async function getPredictionChartTexts(
     title: t("title"),
     totalAmountAreaLabel: t("totalAmountAreaLabel"),
     predictionLengthLabel: t("predictionLengthLabel"),
+  };
+}
+
+export async function getTopViewedPostsTexts(): Promise<TopViewedPostsTexts> {
+  const [dateRangePickerTexts, t] = await Promise.all([
+    getDateRangePickerTexts(),
+    getTranslations("components.charts.TopViewedPostsTexts"),
+  ]);
+  return {
+    dateRangePickerTexts,
+    rank: t("rank"),
+    title: t("title"),
+    topLabel: t("topLabel"),
+    viewCount: t("viewCount"),
+    noResults: t("noResults"),
+    tags: t("tags"),
+    periodLabel: t("periodLabel"),
   };
 }

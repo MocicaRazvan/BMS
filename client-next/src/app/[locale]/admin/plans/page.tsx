@@ -103,7 +103,8 @@ export default async function AdminPlansPage({ params: { locale } }: Props) {
               <TopPlans
                 texts={topPlansTexts}
                 locale={locale}
-                path={"/orders/admin/topPlans"}
+                path="/orders/admin/topPlans"
+                authUser={authUser}
               />
             </div>
             <Separator />

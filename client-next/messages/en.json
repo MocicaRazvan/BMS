@@ -1365,6 +1365,15 @@
           "orders": "orders",
           "plans": "plans"
         }
+      },
+      "TopViewedPostsTexts": {
+        "rank": "Rank",
+        "title": "Top Viewed Posts",
+        "topLabel": "Top",
+        "noResults": "No results were found by the search criteria!",
+        "viewCount": "View count:",
+        "tags": "Tags:",
+        "periodLabel": "Period"
       }
     },
     "plans": {
@@ -1686,7 +1695,8 @@
     },
     "posts": {
       "SinglePageTexts": {
-        "updateButton": "Update"
+        "updateButton": "Update",
+        "numberOfReads": "Reads"
       },
       "SortingOptions": {
         "createdAt": {

@@ -12,6 +12,7 @@ import com.mocicarazvan.templatemodule.dtos.response.PageableResponse;
 import com.mocicarazvan.templatemodule.dtos.response.ResponseWithChildList;
 import com.mocicarazvan.templatemodule.dtos.response.ResponseWithUserDto;
 import com.mocicarazvan.templatemodule.services.ApprovedService;
+import org.springframework.data.util.Pair;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -39,4 +40,6 @@ public interface PostService extends ApprovedService<Post, PostBody, PostRespons
 
     Flux<PageableResponse<PostResponse>> getModelsTrainer(String title, Long trainerId, PageableBody pageableBody, String userId, Boolean approved, List<String> tags, LocalDate createdAtLowerBound, LocalDate createdAtUpperBound,
                                                           LocalDate updatedAtLowerBound, LocalDate updatedAtUpperBound);
+
+    Mono<Pair<PostResponse, Boolean>> invalidateCache(Long id);
 }

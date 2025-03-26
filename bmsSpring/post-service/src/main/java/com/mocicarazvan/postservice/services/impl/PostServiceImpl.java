@@ -210,6 +210,13 @@ public class PostServiceImpl extends ApprovedServiceImpl<Post, PostBody, PostRes
         );
     }
 
+    @Override
+    public Mono<Pair<PostResponse, Boolean>> invalidateCache(Long id) {
+        return self.getModelInternal(id)
+                .map(modelMapper::fromModelToResponse)
+                .flatMap(r -> self.updateDeleteInvalidate(Pair.of(r, true)));
+    }
+
     @Getter
     @Component
     public static class PostServiceRedisCacheWrapper extends ApprovedServiceRedisCacheWrapper<Post, PostBody, PostResponse, PostRepository, PostMapper> {

@@ -50,14 +50,14 @@ public class RedisReactiveRoleCacheAspect extends RedisReactiveCacheAspect {
             redisCacheUtils.checkValidId(idSpel);
             Long annId = aspectUtils.assertLong(aspectUtils.evaluateSpelExpression(idSpel, joinPoint));
             String savingKey = redisCacheUtils.getSingleKey(key, annId) + redisCacheUtils.getHashKey(argsHash);
-            return createBaseMono(savingKey, method)
-                    .switchIfEmpty(methodMonoResponseToCache(joinPoint, key, savingKey, annId, saveToCache));
+            return Mono.defer(() -> createBaseMono(savingKey, method))
+                    .switchIfEmpty(Mono.defer(() -> methodMonoResponseToCache(joinPoint, key, savingKey, annId, saveToCache)));
 
         } else if (returnType.isAssignableFrom(Flux.class)) {
             redisCacheUtils.checkValidId(idPath);
             String savingKey = redisCacheUtils.getListKey(key) + redisRoleCacheUtils.getRoleKey(roleAnn) + redisCacheUtils.getHashKey(argsHash);
-            return createBaseFlux(savingKey, method)
-                    .switchIfEmpty(methodFluxResponseToCache(joinPoint, key, savingKey, idPath, saveToCache));
+            return Flux.defer(() -> createBaseFlux(savingKey, method))
+                    .switchIfEmpty(Flux.defer(() -> methodFluxResponseToCache(joinPoint, key, savingKey, idPath, saveToCache)));
 
         }
         throw new RuntimeException("redisReactiveCacheRoleAdd: Annotated method has invalid return type, expected return type to be Mono<?> or Flux<?>");

@@ -25,6 +25,9 @@ import TopTrainers, {
   TopTrainersTexts,
 } from "@/components/charts/top-trainers";
 import { FindInSiteTexts } from "@/components/nav/find-in-site";
+import TopViewedPosts, {
+  TopViewedPostsTexts,
+} from "@/components/charts/top-viewed-posts";
 
 export interface AdminDashboardPageTexts {
   title: string;
@@ -40,6 +43,7 @@ export interface AdminDashboardPageTexts {
   topPlansTexts: TopPlansTexts;
   topTrainersTexts: TopTrainersTexts;
   findInSiteTexts: FindInSiteTexts;
+  topViewedPostsTexts: TopViewedPostsTexts;
 }
 
 interface Props extends WithUser, AdminDashboardPageTexts {
@@ -57,6 +61,7 @@ export default function AdminDashboardPageContent({
   topUsersTexts,
   topPlansTexts,
   topTrainersTexts,
+  topViewedPostsTexts,
 }: Props) {
   const [relativeItemsCount, setRelativeItemsCount] = useState<
     Record<RelativeItems, number>
@@ -133,12 +138,21 @@ export default function AdminDashboardPageContent({
         <TopPlans
           texts={topPlansTexts}
           locale={locale}
-          path={"/orders/admin/topPlans"}
+          path="/orders/admin/topPlans"
+          authUser={authUser}
         />
       </div>
       <Separator className="mt-2" />
       <div className="my-5 h-full w-full">
         <TopTrainers texts={topTrainersTexts} locale={locale} />
+      </div>
+      <Separator className="mt-2" />
+      <div className="my-5 h-full w-full">
+        <TopViewedPosts
+          path="/posts/admin/viewStats"
+          texts={topViewedPostsTexts}
+          authUser={authUser}
+        />
       </div>
       <Separator />
       <div className="w-full h-full mt-5 md:mt-12">
