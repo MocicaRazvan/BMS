@@ -92,12 +92,6 @@ public class BeanConfigRedisCache {
                 .build();
     }
 
-//    @Bean
-//    @ConditionalOnMissingBean
-//    public NotifyLocalRemove notifyLocalRemovePlaceholder() {
-//        return (_)->{};
-//    }
-
     @Bean
     @ConditionalOnBean(NotifyLocalRemove.class)
     public LocalReactiveCache localReactiveCache(LocalCacheProperties localCacheProperties,
@@ -112,6 +106,6 @@ public class BeanConfigRedisCache {
                                                        @Qualifier("redisAsyncTaskExecutor") Executor executor, NotifyLocalRemove notifyLocalRemove) {
         return new ReverseKeysLocalCache(localCacheProperties, executor, notifyLocalRemove);
     }
-    
+
 }
 

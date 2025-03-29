@@ -98,11 +98,14 @@ public class MediaServiceImpl implements MediaService {
     public Mono<ServerHttpResponse> getResponseForFile(String gridId, Integer width, Integer height, Double quality, ServerWebExchange exchange, boolean shouldCheckCache) {
         return shouldCheckCache ?
                 imageRedisRepository.getImage(gridId, width, height, quality).flatMap(
-                                cachedImage -> {
+                                tuple -> {
+                                    byte[] cachedImage = tuple.getT1();
+                                    String attch = tuple.getT2();
 //                                    log.info("Image found in cache");
                                     ServerHttpResponse response = exchange.getResponse();
-                                    response.getHeaders().set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + gridId + "\"");
-                                    response.getHeaders().set(HttpHeaders.CONTENT_TYPE, "image/**");
+                                    String mediaType = MediaType.fromValue(attch).getValue();
+                                    response.getHeaders().set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + gridId + attch + "\"");
+                                    response.getHeaders().set(HttpHeaders.CONTENT_TYPE, "image/" + mediaType);
                                     response.getHeaders().setContentLength(cachedImage.length);
                                     return response.writeWith(Mono.just(response.bufferFactory().wrap(cachedImage)))
                                             .thenReturn(response)
@@ -130,12 +133,14 @@ public class MediaServiceImpl implements MediaService {
                             ServerHttpRequest request = exchange.getRequest();
                             ServerHttpResponse response = exchange.getResponse();
 
-                            response.getHeaders().set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getFilename() + "\"");
                             response.getHeaders().set(HttpHeaders.ACCEPT_RANGES, "bytes");
+                            String fileAttch = !mediaType.equals(MediaType.ALL) ? "." + mediaType.getValue() : "";
 
                             if (fileType.equals(FileType.VIDEO)) {
+                                response.getHeaders().set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + gridId + ".mp4" + "\"");
                                 response.getHeaders().set(HttpHeaders.CONTENT_TYPE, "video/mp4");
                             } else if (fileType.equals(FileType.IMAGE)) {
+                                response.getHeaders().set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + gridId + fileAttch + "\"");
                                 response.getHeaders().set(HttpHeaders.CONTENT_TYPE, "image/" + mediaType.getValue());
                             }
 
@@ -154,7 +159,7 @@ public class MediaServiceImpl implements MediaService {
                                                     response.getHeaders().setContentLength(dataBuffer.readableByteCount());
                                                     ByteBuffer byteBuffer = ByteBuffer.allocate(dataBuffer.readableByteCount());
                                                     dataBuffer.toByteBuffer(byteBuffer);
-                                                    return imageRedisRepository.saveImage(gridId, width, height, quality, byteBuffer.array())
+                                                    return imageRedisRepository.saveImage(gridId, width, height, quality, byteBuffer.array(), fileAttch)
                                                             .thenReturn(dataBuffer);
                                                 });
                             } else if (fileType.equals(FileType.VIDEO) && !httpRanges.isEmpty()) {

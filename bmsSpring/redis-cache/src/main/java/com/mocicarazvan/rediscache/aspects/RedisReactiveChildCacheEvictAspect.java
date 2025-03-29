@@ -88,8 +88,8 @@ public class RedisReactiveChildCacheEvictAspect extends RedisReactiveCacheEvictA
         try {
             return ((Mono<Object>) joinPoint.proceed(joinPoint.getArgs()))
                     .flatMap(methodResponse -> invalidateForChildMasterPath(joinPoint, key, annId, masterPath, methodResponse)
-                            .doOnNext(t -> log.info("METHOD RESPONSE: " + methodResponse))
-                            .thenReturn(methodResponse)
+//                            .doOnNext(t -> log.info("METHOD RESPONSE: " + methodResponse))
+                                    .thenReturn(methodResponse)
                     );
 
         } catch (Throwable e) {

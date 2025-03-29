@@ -65,6 +65,10 @@ public abstract class ClientBase {
                 .onErrorResume(ThrowFallback.class, fallback);
     }
 
+    public <T> Flux<T> getBaseFlux(String userId, Function<UriBuilder, URI> uriFunction, ParameterizedTypeReference<T> typeRef, Function<ThrowFallback, Flux<? extends T>> fallback) {
+        return getBaseFlux(getClient(), userId, uriFunction, typeRef, fallback);
+    }
+
     public <T> Mono<T> getBaseMono(WebClient webClient, String userId, Function<UriBuilder, URI> uriFunction, ParameterizedTypeReference<T> typeRef, Function<ThrowFallback, Mono<? extends T>> fallback) {
         if (serviceUrl == null) {
             return Mono.error(new IllegalArgumentException("Service url is null"));
@@ -80,6 +84,10 @@ public abstract class ClientBase {
                 .transform(this::applyResilience)
                 .onErrorResume(WebClientRequestException.class, ClientExceptionHandler::handleWebRequestException)
                 .onErrorResume(ThrowFallback.class, fallback);
+    }
+
+    public <T> Mono<T> getBaseMono(String userId, Function<UriBuilder, URI> uriFunction, ParameterizedTypeReference<T> typeRef, Function<ThrowFallback, Mono<? extends T>> fallback) {
+        return getBaseMono(getClient(), userId, uriFunction, typeRef, fallback);
     }
 
     public <T> Mono<T> getItemById(String id, String userId, Class<T> clazz, Function<ThrowFallback, Mono<? extends T>> fallback) {

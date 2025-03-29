@@ -8,9 +8,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.connection.DataType;
 import org.springframework.data.redis.core.ReactiveRedisTemplate;
 import org.springframework.data.redis.core.ScanOptions;
+import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.util.function.Tuple2;
 
 import java.time.Duration;
 import java.util.List;
@@ -21,6 +23,7 @@ import java.util.List;
 public class ImageRedisRepositoryImpl implements ImageRedisRepository {
 
     private final ReactiveRedisTemplate<String, byte[]> reactiveByteArrayRedisTemplate;
+    private final ReactiveRedisTemplate<String, String> reactiveStringRedisTemplate;
     private static final String IMAGE_CACHE_KEY_PATTERN = "image:%s:*";
     @Value("${spring.custom.scan.batch.size:25}")
     private int scanBatchSize;
@@ -30,26 +33,36 @@ public class ImageRedisRepositoryImpl implements ImageRedisRepository {
 
 
     @Override
-    public Mono<Void> saveImage(String gridId, Integer width, Integer height, Double quality, byte[] imageData) {
-        return reactiveByteArrayRedisTemplate.opsForValue()
-                .set(generateCacheKey(gridId, width, height, quality), imageData, Duration.ofMinutes(expireMinutes))
-                .filter(Boolean::booleanValue)
-                .switchIfEmpty(Mono.error(new RedisCommandExecutionException("Failed to save image")))
-                .then();
+    public Mono<Void> saveImage(String gridId, Integer width, Integer height, Double quality, byte[] imageData, String attch) {
+        Pair<String, String> keyPair = generateCacheKeyPair(gridId, width, height, quality);
+        return
+                reactiveByteArrayRedisTemplate.opsForValue()
+                        .set(keyPair.getFirst(), imageData, Duration.ofMinutes(expireMinutes))
+                        .filter(Boolean::booleanValue)
+                        .switchIfEmpty(Mono.error(new RedisCommandExecutionException("Failed to save image")))
+                        .zipWith(reactiveStringRedisTemplate.opsForValue().set(keyPair.getSecond(), attch, Duration.ofMinutes(expireMinutes))
+                                .filter(Boolean::booleanValue)
+                                .switchIfEmpty(Mono.error(new RedisCommandExecutionException("Failed to save attachment")))
+                        )
+                        .then();
     }
 
     @Override
-    public Mono<byte[]> getImage(String gridId, Integer width, Integer height, Double quality) {
+    public Mono<Tuple2<byte[], String>> getImage(String gridId, Integer width, Integer height, Double quality) {
 //        log.info("Generated cache key: {}", generateCacheKey(gridId, width, height, quality));
-
+        Pair<String, String> keyPair = generateCacheKeyPair(gridId, width, height, quality);
         return reactiveByteArrayRedisTemplate.opsForValue()
-                .get(generateCacheKey(gridId, width, height, quality));
+                .get(keyPair.getFirst())
+                .zipWith(reactiveStringRedisTemplate.opsForValue().get(keyPair.getSecond()));
+
     }
 
     @Override
     public Mono<Void> deleteImage(String gridId, Integer width, Integer height, Double quality) {
+        Pair<String, String> keyPair = generateCacheKeyPair(gridId, width, height, quality);
         return reactiveByteArrayRedisTemplate.opsForValue()
-                .delete(generateCacheKey(gridId, width, height, quality))
+                .delete(keyPair.getFirst())
+                .zipWith(reactiveStringRedisTemplate.opsForValue().delete(keyPair.getSecond()))
                 .then();
     }
 
@@ -77,12 +90,24 @@ public class ImageRedisRepositoryImpl implements ImageRedisRepository {
                 quality != null ? quality : -1.0);
     }
 
+    @Override
+    public Pair<String, String> generateCacheKeyPair(String gridId, Integer width, Integer height, Double quality) {
+        String key = generateCacheKey(gridId, width, height, quality);
+        return Pair.of(key, key + ":attch");
+    }
+
     private Flux<Long> scanAndDeleteKeys(String pattern) {
-        return reactiveByteArrayRedisTemplate.scan(ScanOptions.scanOptions()
-                        .type(DataType.STRING)
-                        .count(scanBatchSize)
-                        .match(pattern).build())
+        ScanOptions options = ScanOptions.scanOptions()
+                .type(DataType.STRING)
+                .count(scanBatchSize)
+                .match(pattern).build();
+        return reactiveByteArrayRedisTemplate.scan(options)
                 .buffer(scanBatchSize)
-                .flatMap(keys -> reactiveByteArrayRedisTemplate.delete(Flux.fromIterable(keys)));
+                .flatMap(keys -> reactiveByteArrayRedisTemplate.delete(Flux.fromIterable(keys)))
+                .zipWith(reactiveStringRedisTemplate.scan(options)
+                        .buffer(scanBatchSize)
+                        .flatMap(keys -> reactiveStringRedisTemplate.delete(Flux.fromIterable(keys)))
+                )
+                .map(t -> t.getT1() + t.getT2());
     }
 }

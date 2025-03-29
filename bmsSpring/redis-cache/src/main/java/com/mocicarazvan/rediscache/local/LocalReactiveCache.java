@@ -172,6 +172,10 @@ public class LocalReactiveCache implements RemoveFromCache {
         return (Flux<Object>) flux;
     }
 
+    public void clearAll() {
+        cacheMap.invalidateAll();
+    }
+
     private String removeStar(String key) {
         return key.replace("*", "");
     }

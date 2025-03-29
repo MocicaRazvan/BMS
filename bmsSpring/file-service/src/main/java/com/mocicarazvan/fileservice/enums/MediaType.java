@@ -31,7 +31,9 @@ public enum MediaType {
             return ALL;
         }
 
-        return switch (value.toLowerCase()) {
+        return switch (value
+                .replace(".", "")
+                .toLowerCase()) {
             case "png" -> PNG;
             case "jpg" -> JPG;
             case "jpeg" -> JPEG;

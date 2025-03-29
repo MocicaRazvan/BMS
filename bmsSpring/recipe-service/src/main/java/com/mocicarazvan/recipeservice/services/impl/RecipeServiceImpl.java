@@ -134,11 +134,11 @@ public class RecipeServiceImpl extends ApprovedServiceImpl<Recipe, RecipeBody, R
                 ingredientClient.verifyIds(recipeBody.getIngredients().stream().map(i -> i.getIngredientId().toString()).toList(), userId)
                         .then(
                                 ingredientClient.getByIds(recipeBody.getIngredients().stream().map(i -> i.getIngredientId().toString()).toList(),
-                                                userId).collectList().
-                                        flatMap(ings ->
+                                                userId)
+                                        .map(IngredientResponse::getType)
+                                        .collectList().
+                                        flatMap(ingTs ->
                                                 {
-                                                    List<DietType> ingTs = ings.stream().map(IngredientResponse::getType).toList();
-
                                                     if (!DietType.isDietTypeValid(recipeBody.getType(), ingTs)) {
                                                         return Mono.error(new InvalidTypeException(recipeBody.getType(), ingTs));
                                                     }
