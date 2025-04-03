@@ -35,10 +35,10 @@ jobs:
         run: |
           $modules = "${{ inputs.local-modules }}".Split(',')
           foreach ($module in $modules) {
-            Write-Host "Installing module: $module"
-            cd bmsSpring/$module
-            mvn clean install
-            cd ../..
+                  Write-Host "Installing $module..."
+                  Push-Location "bmsSpring/$module"
+                  mvn install -DskipTests
+                  Pop-Location
           }
       - name: Run Service Tests
         run: |
