@@ -20,13 +20,7 @@ jobs:
           java-version: '22'
 
       - name: Ensure Maven is installed
-        shell: powershell
-        run: |
-          if (-Not (Get-Command mvn -ErrorAction SilentlyContinue)) {
-            Write-Output "Maven not found. Installing Maven via Chocolatey..."
-            choco install maven -y
-          }
-          mvn -version
+        run: mvn --version
       - name: Check Docker version
         run: docker --version
 
