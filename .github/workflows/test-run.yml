@@ -25,7 +25,10 @@ jobs:
         run: mvn --version
       - name: Check Docker version
         run: docker --version
-
+      - name: Install Modules
+        run: |
+          cd bmsSpring/${{ inputs.app-path }}
+          mvn clean install -DskipTests
       - name: Run Service Tests
         run: |
           cd bmsSpring/${{ inputs.app-path }}

@@ -28,6 +28,7 @@ jobs:
     with:
       app-path: plan-service
   build-and-push-plan-service:
+    needs: [ test-template-module, test-redis-cache, test-ollama-search, test-plan-service ]
     uses: ./.github/workflows/build-and-push.yml
     with:
       image-name: plan-service-bms
