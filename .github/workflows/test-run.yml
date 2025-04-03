@@ -1,10 +1,12 @@
 name: Test Spring App
 
 on:
-  push:
-    paths:
-      - 'bmsSpring/redis-cache/**'
-  workflow_dispatch:
+  workflow_call:
+    inputs:
+      app-path:
+        description: 'Path to the Spring application'
+        required: true
+        type: string
 
 jobs:
   test:
@@ -26,5 +28,5 @@ jobs:
 
       - name: Run Service Tests
         run: |
-          cd bmsSpring/redis-cache
+          cd bmsSpring/${{ inputs.app-path }}
           mvn clean test 
