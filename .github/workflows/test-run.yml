@@ -7,6 +7,10 @@ on:
         description: 'Path to the Spring application'
         required: true
         type: string
+      local-modules:
+        description: 'Comma-separated list of local modules to install first'
+        required: false
+        type: string
 
 jobs:
   test:
@@ -26,9 +30,16 @@ jobs:
       - name: Check Docker version
         run: docker --version
       - name: Install Modules
+        if: ${{ inputs.local-modules != '' }}
+        shell: powershell
         run: |
-          cd bmsSpring/${{ inputs.app-path }}
-          mvn clean install -DskipTests
+          $modules = "${{ inputs.local-modules }}".Split(',')
+          foreach ($module in $modules) {
+            Write-Host "Installing module: $module"
+            cd bmsSpring/$module
+            mvn clean install
+            cd ../..
+          }
       - name: Run Service Tests
         run: |
           cd bmsSpring/${{ inputs.app-path }}
