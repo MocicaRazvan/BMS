@@ -27,4 +27,4 @@ jobs:
       - name: Run Service Tests
         run: |
           cd bmsSpring/redis-cache
-          mvn clean test --enable-preview
+          mvn clean test 
