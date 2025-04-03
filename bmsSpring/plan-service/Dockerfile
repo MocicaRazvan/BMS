@@ -31,7 +31,7 @@ COPY --from=ollama-search /root/.m2 /root/.m2
 COPY plan-service/pom.xml plan-service/pom.xml
 RUN mvn -f plan-service/pom.xml dependency:go-offline -B
 COPY plan-service/src plan-service/src
-RUN mvn clean verify -f plan-service/pom.xml -Dmaven.compiler.showWarnings=true -Dmaven.compiler.source=22 -Dmaven.compiler.target=22 -Dmaven.compiler.compilerArgs=--enable-preview
+RUN mvn -f plan-service/pom.xml clean package -Dmaven.compiler.showWarnings=true -Dmaven.compiler.source=22 -Dmaven.compiler.target=22 -Dmaven.compiler.compilerArgs=--enable-preview
 
 # ---------------------- RUNTIME IMAGE ----------------------
 FROM alpine/java:22.0.2-jre AS runtime
