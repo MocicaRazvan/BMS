@@ -48,6 +48,9 @@ public enum BooleanEnum {
         if (value == null) {
             return null;
         }
+        if (value.equals(NULL)) {
+            return null;
+        }
 
         return value == TRUE;
     }

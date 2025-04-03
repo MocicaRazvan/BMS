@@ -20,8 +20,9 @@ import reactor.core.publisher.Mono;
 import reactor.util.function.Tuple3;
 
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Aspect
@@ -75,7 +76,8 @@ public class RedisReactiveCacheApprovedEvictAspect extends RedisReactiveCacheEvi
         Tuple3<Flux<String>, Mono<Long>, Long> result = redisApprovedCacheUtils.getOptionalIdDelete(joinPoint, key, idSpel);
         return
                 Flux.concat(result.getT1(),
-                                keysToInvalidateByOriginalApproved(joinPoint, item, key, forWhomPath, originalApproved)).collectList()
+                                keysToInvalidateByOriginalApproved(joinPoint, item, key, forWhomPath, originalApproved))
+                        .collect(Collectors.toSet())
                         .flatMap(redisKeys ->
 //                                reactiveRedisTemplate.delete(redisKeys.toArray(String[]::new))
                                 redisCacheUtils.deleteListFromRedis(redisKeys)
@@ -87,7 +89,7 @@ public class RedisReactiveCacheApprovedEvictAspect extends RedisReactiveCacheEvi
 
 
     protected Flux<String> keysToInvalidateByOriginalApproved(ProceedingJoinPoint joinPoint, Object item, String key, String forWhomPath, BooleanEnum originalApproved) {
-        List<String> patterns = new ArrayList<>();
+        Set<String> patterns = new HashSet<>();
         Long forWhomId = aspectUtils.assertLong(aspectUtils.evaluateSpelExpressionForObject(forWhomPath, item, joinPoint));
         // invaliate for trainer
         patterns.add(createPattern(key, forWhomId, BooleanEnum.NULL));

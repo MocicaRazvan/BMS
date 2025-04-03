@@ -78,7 +78,7 @@ public class AspectUtils {
 
     public Long assertLong(Object id) {
         if (id == null) {
-            throw new RuntimeException("RedisReactiveCacheAdd: Annotated method has invalid item, expected item to return non null value " + null);
+            throw new RuntimeException("RedisReactiveCache: Annotated method has invalid item, expected item to return non null value " + null);
         }
         try {
             return switch (id) {
@@ -88,7 +88,7 @@ public class AspectUtils {
                 default -> Long.valueOf(String.valueOf(id));
             };
         } catch (NumberFormatException e) {
-            throw new RuntimeException("RedisReactiveCacheAdd: Annotated method has invalid item " + id);
+            throw new RuntimeException("RedisReactiveCache: Annotated method has invalid item " + id);
         }
 
     }
@@ -210,5 +210,6 @@ public class AspectUtils {
                 }
             }
         }
+        throw new RuntimeException("RedisReactiveCache: Annotated method has invalid return type, expected return type to be Mono<Pair<?, " + clazz.getSimpleName() + ">>");
     }
 }

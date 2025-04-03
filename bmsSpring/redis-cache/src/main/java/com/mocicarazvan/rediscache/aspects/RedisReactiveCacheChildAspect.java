@@ -62,6 +62,6 @@ public class RedisReactiveCacheChildAspect extends RedisReactiveCacheAspect {
                     .switchIfEmpty(Flux.defer(() -> methodFluxResponseToCache(joinPoint, key, savingKey, idPath, saveToCache)));
 
         }
-        throw new RuntimeException("redisReactiveCacheChildAdd: Annotated method has invalid return type, expected return type to be Mono<?> or Flux<?>");
+        throw new RuntimeException("RedisReactiveCacheUpdate: Annotated method has unsupported return type, expected Mono<?> or Flux<?>");
     }
 }

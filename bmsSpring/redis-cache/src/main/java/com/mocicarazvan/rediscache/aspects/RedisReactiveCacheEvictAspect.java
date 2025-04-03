@@ -17,8 +17,8 @@ import org.springframework.data.redis.core.ReactiveRedisTemplate;
 import reactor.core.publisher.Mono;
 
 import java.lang.reflect.Method;
+import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
 
@@ -51,7 +51,7 @@ public class RedisReactiveCacheEvictAspect {
                     .then(methodResponse(joinPoint));
         }
 
-        throw new RuntimeException("RedisReactiveCacheEvict: Annotated method has invalid return type, expected return type to be Mono<?>");
+        throw new RuntimeException("RedisReactiveCacheEvict: Annotated method has unsupported return type, expected Mono<?> or Flux<?>");
     }
 
     @SuppressWarnings("unchecked")
@@ -66,12 +66,13 @@ public class RedisReactiveCacheEvictAspect {
     }
 
     protected Mono<Long> invalidateForId(String key, Long id) {
-        return reactiveRedisTemplate.opsForSet().members(redisCacheUtils.createReverseIndexKey(key, id))
+        String reverseKey = redisCacheUtils.createReverseIndexKey(key, id);
+        return reactiveRedisTemplate.opsForSet().members(reverseKey)
                 .cast(String.class).collectList().flatMap(reverseKeys ->
 //                        reactiveRedisTemplate.delete(reverseKeys.toArray(String[]::new))
 //                                .defaultIfEmpty(0L)
                                 redisCacheUtils.deleteListFromRedis(reverseKeys)
-                                        .zipWith(reactiveRedisTemplate.delete(redisCacheUtils.createReverseIndexKey(key, id))
+                                        .zipWith(reactiveRedisTemplate.delete(reverseKey)
                                                 .defaultIfEmpty(0L))
 //                                        .doOnNext(success -> log.info("Invalidated key: " + key + " for id: " + id))
                                         .map(t -> t.getT1() + t.getT2())
@@ -79,15 +80,15 @@ public class RedisReactiveCacheEvictAspect {
                 );
     }
 
-    protected void invalidateForIdLocal(String key, Long id, List<String> redisKeys) {
+    protected void invalidateForIdLocal(String key, Long id, Collection<String> redisKeys) {
         invalidateForIdGeneric(key, id, redisKeys, localReactiveCache::removeNotify);
     }
 
-    protected void invalidateForIdLocalPrefix(String key, Long id, List<String> redisKeys) {
+    protected void invalidateForIdLocalPrefix(String key, Long id, Collection<String> redisKeys) {
         invalidateForIdGeneric(key, id, redisKeys, localReactiveCache::removeByPrefixNotify);
     }
 
-    protected void invalidateForIdGeneric(String key, Long id, List<String> redisKeys,
+    protected void invalidateForIdGeneric(String key, Long id, Collection<String> redisKeys,
                                           Consumer<Set<String>> consumer
     ) {
         asyncTaskExecutor.submit(() -> {

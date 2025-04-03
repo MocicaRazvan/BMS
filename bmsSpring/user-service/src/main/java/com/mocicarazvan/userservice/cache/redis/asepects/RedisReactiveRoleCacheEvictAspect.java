@@ -25,6 +25,7 @@ import reactor.util.function.Tuple3;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Aspect
@@ -99,7 +100,8 @@ public class RedisReactiveRoleCacheEvictAspect extends RedisReactiveCacheEvictAs
 
         return
                 Flux.concat(result.getT1(),
-                                keysToInvalidateRole(key, newRole, oldRole)).collectList()
+                                keysToInvalidateRole(key, newRole, oldRole))
+                        .collect(Collectors.toSet())
                         .flatMap(redisKeys ->
 //                                reactiveRedisTemplate.delete(redisKeys.toArray(String[]::new)
 //                                        ).defaultIfEmpty(0L)

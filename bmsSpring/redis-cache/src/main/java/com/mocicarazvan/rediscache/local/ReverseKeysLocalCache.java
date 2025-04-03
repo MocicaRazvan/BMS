@@ -10,10 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.checkerframework.checker.index.qual.NonNegative;
 import org.springframework.beans.factory.annotation.Qualifier;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -150,8 +147,27 @@ public class ReverseKeysLocalCache implements RemoveFromCache {
                 .collect(Collectors.toSet());
     }
 
+    public void clearAll() {
+        cacheMap.invalidateAll();
+    }
+
+    public List<Set<String>> getAll() {
+        return new ArrayList<>(cacheMap.asMap().values());
+    }
+
+    public Set<String> getKeys() {
+        return cacheMap.asMap().keySet();
+    }
+
+    public Map<String, Set<String>> getMap() {
+        return cacheMap.asMap();
+    }
+
 
     protected void notifyRemoveReverse(Collection<String> keys, CacheRemoveKeyRemoveType cacheRemoveKeyRemoveType) {
+        if (keys.isEmpty()) {
+            return;
+        }
         notifyLocalRemove.notifyRemove(new NotifyCacheRemoveDto(keys, CacheRemoveType.REVERSE, cacheRemoveKeyRemoveType));
     }
 

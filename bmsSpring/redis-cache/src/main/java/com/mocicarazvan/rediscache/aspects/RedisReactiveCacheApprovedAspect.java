@@ -67,7 +67,7 @@ public class RedisReactiveCacheApprovedAspect extends RedisReactiveCacheAspect {
                     .switchIfEmpty(Flux.defer(() -> methodFluxResponseToCache(joinPoint, key, savingKey, idPath, saveToCache)));
 
         }
-        throw new RuntimeException("redisReactiveCacheApprovedAdd: Annotated method has invalid return type, expected return type to be Mono<?> or Flux<?>");
+        throw new RuntimeException("RedisReactiveCacheApprovedAdd: Annotated method has invalid return type, expected return type to be Mono<?> or Flux<?>");
     }
 
 

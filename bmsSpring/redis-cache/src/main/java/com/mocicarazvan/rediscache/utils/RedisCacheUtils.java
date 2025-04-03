@@ -10,7 +10,7 @@ import reactor.core.publisher.Mono;
 import reactor.util.function.Tuple3;
 import reactor.util.function.Tuples;
 
-import java.util.List;
+import java.util.Collection;
 
 //@Component
 public class RedisCacheUtils {
@@ -26,9 +26,10 @@ public class RedisCacheUtils {
         return key + ":" + id;
     }
 
+
     public void checkValidId(String idSpel) {
         if (idSpel == null || idSpel.isBlank()) {
-            throw new RuntimeException("RedisReactiveCacheAdd: Annotated method has invalid idSpel, expected idSpel not null or empty");
+            throw new IllegalArgumentException("RedisReactiveCache: Annotated method has invalid idSpel, expected idSpel not null or empty");
         }
     }
 
@@ -44,7 +45,7 @@ public class RedisCacheUtils {
         return ":hash:" + argsHash;
     }
 
-    public Flux<String> getActualKeys(List<String> patterns, ReactiveRedisTemplate<String, Object> reactiveRedisTemplate) {
+    public Flux<String> getActualKeys(Collection<String> patterns, ReactiveRedisTemplate<String, Object> reactiveRedisTemplate) {
         return Flux.fromIterable(patterns)
                 .flatMap(p -> reactiveRedisTemplate
                         .scan(
@@ -68,7 +69,7 @@ public class RedisCacheUtils {
         return Tuples.of(members, zipWith, annId);
     }
 
-    public Mono<Long> deleteListFromRedis(List<String> keys) {
+    public Mono<Long> deleteListFromRedis(Collection<String> keys) {
         if (keys == null || keys.isEmpty()) {
             return Mono.just(0L);
         }

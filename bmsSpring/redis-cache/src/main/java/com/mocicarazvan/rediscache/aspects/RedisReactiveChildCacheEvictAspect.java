@@ -23,6 +23,7 @@ import reactor.core.publisher.Mono;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Aspect
@@ -65,7 +66,8 @@ public class RedisReactiveChildCacheEvictAspect extends RedisReactiveCacheEvictA
         }
 
         if (annId == null && masterId == null && (masterPath == null || masterPath.isBlank())) {
-            throw new RuntimeException("redisReactiveCacheChildEvict: Annotated method has invalid arguments, expected at least one of id, masterId, masterPath to be present");
+            //cant actually happen
+            throw new RuntimeException("RedisReactiveCacheChildEvict: Annotated method has invalid arguments, expected at least one of id, masterId, masterPath to be present");
         }
 
         if (returnType.isAssignableFrom(Mono.class)) {
@@ -79,7 +81,7 @@ public class RedisReactiveChildCacheEvictAspect extends RedisReactiveCacheEvictA
                     .then(methodResponse(joinPoint));
         }
 
-        throw new RuntimeException("redisReactiveCacheChildEvict: Annotated method has invalid return type, expected return type to be Mono<?>");
+        throw new RuntimeException("RedisReactiveCacheChildEvict: Annotated method has invalid return type, expected return type to be Mono<?>");
 
     }
 
@@ -105,23 +107,23 @@ public class RedisReactiveChildCacheEvictAspect extends RedisReactiveCacheEvictA
     protected Mono<Long> invalidateForChild(String key, Long id, Long masterId) {
         Flux<String> keysFromReverse = Flux.empty();
         Mono<Long> zipReverse;
+        String reverseKey = redisChildCacheUtils.createReverseIndexKey(key, id);
         if (id != null) {
-            keysFromReverse = reactiveRedisTemplate.opsForSet().members(redisChildCacheUtils.createReverseIndexKey(key, id)).cast(String.class);
-            zipReverse = reactiveRedisTemplate.delete(redisChildCacheUtils.createReverseIndexKey(key, id));
+            keysFromReverse = reactiveRedisTemplate.opsForSet().members(reverseKey).cast(String.class);
+            zipReverse = reactiveRedisTemplate.delete(reverseKey);
         } else {
             zipReverse = Mono.empty();
         }
 
 
         return Flux.concat(keysFromReverse,
-                        keysToInvalidateByMaster(key, masterId)).collectList()
+                        keysToInvalidateByMaster(key, masterId))
+                .collect(Collectors.toSet())
                 .flatMap(mainKeys ->
-//                        reactiveRedisTemplate.delete(mainKeys.toArray(String[]::new)
-//                                ).defaultIfEmpty(0L)
-                                redisChildCacheUtils.deleteListFromRedis(mainKeys)
-                                        .zipWith(zipReverse.defaultIfEmpty(0L))
-                                        .map(t -> t.getT1() + t.getT2())
-                                        .doOnSuccess(_ -> invalidateForIdLocalPrefix(key, id, mainKeys))
+                        redisChildCacheUtils.deleteListFromRedis(mainKeys)
+                                .zipWith(zipReverse.defaultIfEmpty(0L))
+                                .map(t -> t.getT1() + t.getT2())
+                                .doOnSuccess(_ -> invalidateForIdLocalPrefix(key, id, mainKeys))
                 );
 
 

@@ -176,11 +176,22 @@ public class LocalReactiveCache implements RemoveFromCache {
         cacheMap.invalidateAll();
     }
 
+    public Collection<Publisher<Object>> getAll() {
+        return cacheMap.asMap().values();
+    }
+
+    public Set<String> getKeys() {
+        return cacheMap.asMap().keySet();
+    }
+
     private String removeStar(String key) {
         return key.replace("*", "");
     }
 
     protected void notifyRemoveLocal(Collection<String> keys, CacheRemoveKeyRemoveType cacheRemoveKeyRemoveType) {
+        if (keys.isEmpty()) {
+            return;
+        }
         notifyLocalRemove.notifyRemove(new NotifyCacheRemoveDto(keys, CacheRemoveType.LOCAL, cacheRemoveKeyRemoveType));
     }
 

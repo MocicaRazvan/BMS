@@ -43,8 +43,6 @@ public class RedisReactiveCacheAspect {
     @Value("${spring.custom.cache.redis.expire.minutes:30}")
     protected Long expireMinutes;
 
-    @Value("${spring.custom.cache.redis.local.max.size:1000}")
-    protected Integer maxSize;
 
     public RedisReactiveCacheAspect(ReactiveRedisTemplate<String, Object> reactiveRedisTemplate,
                                     AspectUtils aspectUtils, ObjectMapper objectMapper,
@@ -99,9 +97,12 @@ public class RedisReactiveCacheAspect {
                                 reactiveRedisTemplate.opsForValue().get(savingKey)
                                         .map(collection -> (List<Object>) objectMapper.convertValue(collection, objectMapper.getTypeFactory()
                                                 .constructCollectionType(List.class,
-                                                        objectMapper.getTypeFactory().constructType(method.getGenericReturnType())
+                                                        objectMapper.getTypeFactory().constructType(aspectUtils.getTypeReference(method)
+                                                        )
                                                 )))
-                                        .doOnNext(list -> localReactiveCache.put(savingKey, list))
+                                        .doOnSuccess(list -> {
+                                            localReactiveCache.put(savingKey, list);
+                                        })
                                         .flatMapMany(Flux::fromIterable)
                                         .cast(Object.class)
 
@@ -117,7 +118,9 @@ public class RedisReactiveCacheAspect {
                                         .get(savingKey)
                                         .map(cr -> objectMapper.convertValue(cr, aspectUtils.getTypeReference(method)))
                                         .cast(Object.class)
-                                        .doOnSuccess(ob -> localReactiveCache.put(savingKey, ob))
+                                        .doOnSuccess(ob -> {
+                                            localReactiveCache.put(savingKey, ob);
+                                        })
                                 ))
                         .onErrorResume(e -> Mono.empty());
     }
@@ -139,10 +142,13 @@ public class RedisReactiveCacheAspect {
 
     protected void saveMonoResultToCache(ProceedingJoinPoint joinPoint, String key, String savingKey, Long annId, Object methodResponse) {
         saveMonoToCacheNoSubscribe(key, savingKey, annId, methodResponse)
+                .doOnSuccess(success -> {
+                    localReactiveCache.put(savingKey, methodResponse);
+                })
                 .subscribe(
                         success -> {
 //                            log.info("Key: " + savingKey + " set successfully");
-                            localReactiveCache.put(savingKey, methodResponse);
+//                            localReactiveCache.put(savingKey, methodResponse);
                         }, // Log success
                         error -> log.error("Failed to set key: " + savingKey, error) // Log errors
                 );
@@ -198,11 +204,11 @@ public class RedisReactiveCacheAspect {
         reactiveRedisTemplate.opsForValue().set(savingKey, sortedList, Duration.ofMinutes(expireMinutes))
                 .flatMapMany(s -> Flux.fromIterable(ids)
                         .flatMap(id -> addToReverseIndex(key, id, savingKey)))
+                .doOnComplete(() -> localReactiveCache.put(savingKey, sortedList))
                 .subscribe(
                         success ->
                         {
 //                            log.info("Key: " + savingKey + " set successfully");
-                            localReactiveCache.put(savingKey, sortedList);
                             return;
                         },// Log success
                         error -> log.error("Failed to set key: " + savingKey, error) // Log errors

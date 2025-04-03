@@ -19,6 +19,7 @@ import java.util.Objects;
 import java.util.concurrent.Executor;
 
 @Slf4j
+
 public abstract class CacheViewService {
     private final ReactiveStringRedisTemplate redisTemplate;
     private final String viewKeyPrefix;

@@ -16,7 +16,7 @@ import java.lang.annotation.*;
  *  <li><b>id</b> - the id of the object to be cached. Must be set on a <b>Mono</b> return.</li>
  *  <li><b>idPath</b> - the id of the object to be cached. Must be set on a <b>Flux</b> return.</li>
  *  <li><b>saveToCache</b> - if set to false, the cache will not be saved.</li>
- *  <li><b>masterId</b> - the id of the master object to be cached . If no masterId is specified -1 means the ones independent of a master</li>
+ *  <li><b>masterId</b> - the id of the master object to be cached . If no masterId is specified -1 means the ones for all masters</li>
  *  </ul>
  * <p>
  */
