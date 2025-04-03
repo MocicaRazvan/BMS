@@ -1,0 +1,25 @@
+name: Test Spring App
+
+on:
+  push:
+    paths:
+      - 'bmsSpring/redis-cache/**'
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: self-hosted
+    container:
+      image: maven:3.9.9-openjdk-22
+      options: --privileged --volume /var/run/docker.sock:/var/run/docker.sock
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Display Maven version
+        run: mvn -version
+
+      - name: Run Service Tests
+        run: |
+          cd bmsSpring/redis-cache
+          mvn clean test --enable-preview
