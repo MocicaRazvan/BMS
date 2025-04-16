@@ -7,6 +7,7 @@ import com.mocicarazvan.rediscache.config.TestContainersImages;
 import com.mocicarazvan.rediscache.configTests.TestServiceReactive;
 import com.mocicarazvan.rediscache.local.LocalReactiveCache;
 import com.mocicarazvan.rediscache.local.ReverseKeysLocalCache;
+import com.mocicarazvan.rediscache.testUtils.AssertionTestUtils;
 import com.mocicarazvan.rediscache.utils.AspectUtils;
 import lombok.SneakyThrows;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -146,7 +147,7 @@ class RedisReactiveCacheAspectTest {
         StepVerifier.create(testServiceReactive.getDummyById(1L))
                 .expectNext(res)
                 .verifyComplete();
-        await().atMost(Duration.ofSeconds(10))
+        await().atMost(AssertionTestUtils.AWAiTILITY_TIMEOUT_SECONDS)
                 .untilAsserted(
                         () -> {
 
@@ -167,7 +168,7 @@ class RedisReactiveCacheAspectTest {
 
                             var reverseIndexCaptor = ArgumentCaptor.forClass(String.class);
                             verify(reactiveSetOperations, atLeastOnce()).add(reverseIndexCaptor.capture(), eq(savingKeyCaptor.getValue()));
-                            await().atMost(Duration.ofSeconds(2))
+                            await().atMost(AssertionTestUtils.AWAiTILITY_TIMEOUT_SECONDS)
                                     .untilAsserted(
                                             () -> {
                                                 verify(reactiveRedisTemplate, atLeastOnce()).expire(reverseIndexCaptor.getValue(), Duration.ofMinutes(30 + 1));
@@ -211,7 +212,7 @@ class RedisReactiveCacheAspectTest {
         StepVerifier.create(testServiceReactive.getDummyById(1L))
                 .expectNext(res)
                 .verifyComplete();
-        await().atMost(Duration.ofSeconds(10))
+        await().atMost(AssertionTestUtils.AWAiTILITY_TIMEOUT_SECONDS)
                 .untilAsserted(
                         () -> {
                             verify(aspectUtils, times(1)).extractKeyFromAnnotation(eq(TestServiceReactive.CACHE_KEY), any());
@@ -247,7 +248,7 @@ class RedisReactiveCacheAspectTest {
         var savingKeyCaptor = ArgumentCaptor.forClass(String.class);
         var typeReference = new TypeReference<TestServiceReactive.Dummy>() {
         };
-        await().atMost(Duration.ofSeconds(10))
+        await().atMost(AssertionTestUtils.AWAiTILITY_TIMEOUT_SECONDS)
                 .untilAsserted(
                         () -> {
                             StepVerifier.create(testServiceReactive.getDummyById(1L))
@@ -290,7 +291,7 @@ class RedisReactiveCacheAspectTest {
                 .expectNext(res)
                 .verifyComplete();
         var savingKeyCaptor = ArgumentCaptor.forClass(String.class);
-        await().atMost(Duration.ofSeconds(10))
+        await().atMost(AssertionTestUtils.AWAiTILITY_TIMEOUT_SECONDS)
                 .untilAsserted(
                         () -> {
 
@@ -345,7 +346,7 @@ class RedisReactiveCacheAspectTest {
                 .verifyComplete();
         var savingKeyCaptor = ArgumentCaptor.forClass(String.class);
         var reverseIndexCaptor = ArgumentCaptor.forClass(String.class);
-        await().atMost(Duration.ofSeconds(10))
+        await().atMost(AssertionTestUtils.AWAiTILITY_TIMEOUT_SECONDS)
                 .untilAsserted(
                         () -> {
 
@@ -365,7 +366,7 @@ class RedisReactiveCacheAspectTest {
                             verify(redisReactiveCacheAspect, atLeastOnce()).methodFluxResponseToCache(any(ProceedingJoinPoint.class), eq(TestServiceReactive.CACHE_KEY), eq(savingKeyCaptor.getValue()), anyString(), eq(true));
 
                             verify(reactiveSetOperations, atLeast(res.size())).add(reverseIndexCaptor.capture(), eq(savingKeyCaptor.getValue()));
-                            await().atMost(Duration.ofSeconds(2))
+                            await().atMost(AssertionTestUtils.AWAiTILITY_TIMEOUT_SECONDS)
                                     .untilAsserted(
                                             () -> {
                                                 verify(reactiveRedisTemplate, atLeastOnce()).expire(reverseIndexCaptor.getValue(), Duration.ofMinutes(30 + 1));
@@ -422,7 +423,7 @@ class RedisReactiveCacheAspectTest {
                 )
                 .verifyComplete();
         var savingKeyCaptor = ArgumentCaptor.forClass(String.class);
-        await().atMost(Duration.ofSeconds(10))
+        await().atMost(AssertionTestUtils.AWAiTILITY_TIMEOUT_SECONDS)
                 .untilAsserted(
                         () -> {
                             verify(aspectUtils, times(1)).extractKeyFromAnnotation(eq(TestServiceReactive.CACHE_KEY), any());
@@ -478,7 +479,7 @@ class RedisReactiveCacheAspectTest {
                 )
                 .verifyComplete();
         var savingKeyCaptor = ArgumentCaptor.forClass(String.class);
-        await().atMost(Duration.ofSeconds(10))
+        await().atMost(AssertionTestUtils.AWAiTILITY_TIMEOUT_SECONDS)
                 .untilAsserted(
                         () -> {
                             verify(aspectUtils, times(1)).extractKeyFromAnnotation(eq(TestServiceReactive.CACHE_KEY), any());
@@ -526,7 +527,7 @@ class RedisReactiveCacheAspectTest {
                 )
                 .verifyComplete();
         var savingKeyCaptor = ArgumentCaptor.forClass(String.class);
-        await().atMost(Duration.ofSeconds(2))
+        await().atMost(AssertionTestUtils.AWAiTILITY_TIMEOUT_SECONDS)
                 .untilAsserted(
                         () -> {
 
@@ -582,7 +583,7 @@ class RedisReactiveCacheAspectTest {
     @ValueSource(longs = {1L, 2L, 3L})
     void cacheInvalidateMono_cacheShouldBeEmpty(long id) {
 
-        await().atMost(Duration.ofSeconds(2)).untilAsserted(() -> {
+        await().atMost(AssertionTestUtils.AWAiTILITY_TIMEOUT_SECONDS).untilAsserted(() -> {
             testServiceReactive.getDummyById(id).block();
             var members = reactiveRedisTemplate.opsForSet()
                     .members("dummies:" + id)
@@ -612,7 +613,7 @@ class RedisReactiveCacheAspectTest {
     @ParameterizedTest
     @ValueSource(longs = {1L, 2L})
     void cacheInvalidateMono_cacheShouldNotBeAffected(long id) {
-        await().atMost(Duration.ofSeconds(2)).untilAsserted(() -> {
+        await().atMost(AssertionTestUtils.AWAiTILITY_TIMEOUT_SECONDS).untilAsserted(() -> {
             var res = testServiceReactive.getDummyById(id).block();
             var lastTwoDummies = testServiceReactive.getDummies().subList(1, 3);
             assert res != null;
@@ -638,7 +639,7 @@ class RedisReactiveCacheAspectTest {
     @ValueSource(longs = {1L, 2L, 3L})
     void cacheInvalidateFlux_cacheEmpty(long id) {
         var res = testServiceReactive.getAllDummies().collectList().block();
-        await().atMost(Duration.ofSeconds(2)).until(() -> {
+        await().atMost(AssertionTestUtils.AWAiTILITY_TIMEOUT_SECONDS).until(() -> {
             var members = reactiveRedisTemplate.opsForSet()
                     .members("dummies:" + id)
                     .collectList()
@@ -649,7 +650,7 @@ class RedisReactiveCacheAspectTest {
         StepVerifier.create(testServiceReactive.evictDummyById(id))
                 .expectNextCount(1)
                 .verifyComplete();
-        await().atMost(Duration.ofSeconds(2)).untilAsserted(() -> {
+        await().atMost(AssertionTestUtils.AWAiTILITY_TIMEOUT_SECONDS).untilAsserted(() -> {
             StepVerifier.create(reactiveRedisTemplate.scan(ScanOptions.scanOptions()
                                     .match("*")
                                     .build())
@@ -657,7 +658,7 @@ class RedisReactiveCacheAspectTest {
                     )
                     .verifyComplete();
         });
-        await().atMost(Duration.ofSeconds(2)).untilAsserted(() -> {
+        await().atMost(AssertionTestUtils.AWAiTILITY_TIMEOUT_SECONDS).untilAsserted(() -> {
             var local = localReactiveCache.getAll();
             assertEquals(0, local.size());
             var reverse = reverseKeysLocalCache.getAll();
@@ -671,7 +672,7 @@ class RedisReactiveCacheAspectTest {
     void cacheInvalidateFlux_cacheNotTouched() {
         long id = 4L;
         var res = testServiceReactive.getAllDummies().collectList().block();
-        await().atMost(Duration.ofSeconds(2)).until(() -> {
+        await().atMost(AssertionTestUtils.AWAiTILITY_TIMEOUT_SECONDS).until(() -> {
             assert res != null;
             var members = res.stream().flatMap(k ->
                     Objects.requireNonNull(reactiveRedisTemplate.opsForSet()
@@ -686,7 +687,7 @@ class RedisReactiveCacheAspectTest {
         StepVerifier.create(testServiceReactive.evictDummyById(id))
                 .expectNextCount(0)
                 .verifyComplete();
-        await().atMost(Duration.ofSeconds(2)).untilAsserted(() -> {
+        await().atMost(AssertionTestUtils.AWAiTILITY_TIMEOUT_SECONDS).untilAsserted(() -> {
             StepVerifier.create(reactiveRedisTemplate.scan(ScanOptions.scanOptions()
                             .match("*")
                             .build())
@@ -694,7 +695,7 @@ class RedisReactiveCacheAspectTest {
                     .expectNextCount(4)
                     .verifyComplete();
         });
-        await().atMost(Duration.ofSeconds(2)).untilAsserted(() -> {
+        await().atMost(AssertionTestUtils.AWAiTILITY_TIMEOUT_SECONDS).untilAsserted(() -> {
             var local = localReactiveCache.getAll();
             assertEquals(1, local.size());
             var reverse = reverseKeysLocalCache.getAll();

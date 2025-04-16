@@ -7,6 +7,7 @@ import com.mocicarazvan.templatemodule.exceptions.action.PrivateRouteException;
 import com.mocicarazvan.templatemodule.exceptions.client.ThrowFallback;
 import com.mocicarazvan.templatemodule.exceptions.common.ServiceCallFailedException;
 import com.mocicarazvan.templatemodule.exceptions.notFound.NotFoundEntity;
+import com.mocicarazvan.templatemodule.testUtils.AssertionTestUtils;
 import nl.altindag.log.LogCaptor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,8 +18,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
-
-import java.time.Duration;
 
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -55,7 +54,7 @@ class ClientExceptionHandlerTest {
 
     private void assertLog() {
         await()
-                .atMost(Duration.ofSeconds(2))
+                .atMost(AssertionTestUtils.AWAiTILITY_TIMEOUT_SECONDS)
                 .untilAsserted(() -> {
                     assertTrue(logCaptor.getErrorLogs().stream().anyMatch(log -> log.contains("Status code")));
                 });
@@ -135,7 +134,7 @@ class ClientExceptionHandlerTest {
                 .expectError(ThrowFallback.class)
                 .verify();
 
-        await().atMost(Duration.ofSeconds(2))
+        await().atMost(AssertionTestUtils.AWAiTILITY_TIMEOUT_SECONDS)
                 .untilAsserted(() -> {
                     assertTrue(logCaptor.getErrorLogs().stream().anyMatch(log -> log.contains("Error:")));
                 });

@@ -7,6 +7,7 @@ import com.mocicarazvan.rediscache.configTests.TestServiceChildReactive;
 import com.mocicarazvan.rediscache.configTests.TestServiceReactive;
 import com.mocicarazvan.rediscache.local.LocalReactiveCache;
 import com.mocicarazvan.rediscache.local.ReverseKeysLocalCache;
+import com.mocicarazvan.rediscache.testUtils.AssertionTestUtils;
 import com.mocicarazvan.rediscache.utils.AspectUtils;
 import com.mocicarazvan.rediscache.utils.RedisChildCacheUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -148,7 +149,7 @@ public class RedisReactiveCacheChildAspectTest {
                 .expectNext(res)
                 .verifyComplete();
         ArgumentCaptor<String> savingKey = ArgumentCaptor.forClass(String.class);
-        await().atMost(Duration.ofSeconds(10)).untilAsserted(() -> {
+        await().atMost(AssertionTestUtils.AWAiTILITY_TIMEOUT_SECONDS).untilAsserted(() -> {
             verify(redisReactiveCacheChildAspect, times(1)).createBaseMono(savingKey.capture(), any(Method.class));
             verify(redisReactiveCacheChildAspect, times(1)).methodMonoResponseToCache(any(ProceedingJoinPoint.class),
                     eq(TestServiceReactive.CACHE_KEY), eq(savingKey.getValue()), eq(1L), eq(true));
@@ -165,7 +166,7 @@ public class RedisReactiveCacheChildAspectTest {
                 .expectNextSequence(res)
                 .verifyComplete();
         ArgumentCaptor<String> savingKey = ArgumentCaptor.forClass(String.class);
-        await().atMost(Duration.ofSeconds(10)).untilAsserted(() -> {
+        await().atMost(AssertionTestUtils.AWAiTILITY_TIMEOUT_SECONDS).untilAsserted(() -> {
             verify(redisReactiveCacheChildAspect, never()).createBaseMono(anyString(), any(Method.class));
             verify(redisReactiveCacheChildAspect, never()).methodMonoResponseToCache(any(ProceedingJoinPoint.class),
                     anyString(), anyString(), anyLong(), anyBoolean());
@@ -197,7 +198,7 @@ public class RedisReactiveCacheChildAspectTest {
     @Test
     void keysToInvalidateMaster_defaultMaster() {
         var res = testServiceChildReactive.getAllDummiesDefaultMaster().collectList().block();
-        await().atMost(Duration.ofSeconds(10)).until(() -> !Objects.requireNonNull(reactiveRedisTemplate.scan(
+        await().atMost(AssertionTestUtils.AWAiTILITY_TIMEOUT_SECONDS).until(() -> !Objects.requireNonNull(reactiveRedisTemplate.scan(
                 ScanOptions.scanOptions().match("dummies:*").build()
         ).collectList().block()).isEmpty());
         reset(redisChildCacheUtils);
@@ -226,7 +227,7 @@ public class RedisReactiveCacheChildAspectTest {
     @MethodSource("dummiesIds")
     void keysToInvalidateMaster_noDefaultMaster(long masterId) {
         var res = testServiceChildReactive.getAllDummiesMaster(String.valueOf(masterId)).collectList().block();
-        await().atMost(Duration.ofSeconds(10)).until(() -> !Objects.requireNonNull(reactiveRedisTemplate.scan(
+        await().atMost(AssertionTestUtils.AWAiTILITY_TIMEOUT_SECONDS).until(() -> !Objects.requireNonNull(reactiveRedisTemplate.scan(
                 ScanOptions.scanOptions().match("dummies:*").build()
         ).collectList().block()).isEmpty());
         reset(redisChildCacheUtils);
@@ -247,14 +248,14 @@ public class RedisReactiveCacheChildAspectTest {
     void invalidateForChild_idNotNull(long id) {
         var resF = testServiceChildReactive.getAllDummiesDefaultMaster().collectList().block();
         var resM = testServiceChildReactive.getDummyByIdDefaultMaster(id).block();
-        await().atMost(Duration.ofSeconds(10)).until(() -> Objects.requireNonNull(reactiveRedisTemplate.scan(
+        await().atMost(AssertionTestUtils.AWAiTILITY_TIMEOUT_SECONDS).until(() -> Objects.requireNonNull(reactiveRedisTemplate.scan(
                 ScanOptions.scanOptions().match("dummies:*").build()
         ).collectList().block()).size() >= 5);
         StepVerifier.create(redisReactiveChildCacheEvictAspect.invalidateForChild(TestServiceChildReactive.CACHE_KEY, id, -1L))
                 .expectNext(3L)
                 .verifyComplete();
         var reverseKey = redisChildCacheUtils.createReverseIndexKey(TestServiceChildReactive.CACHE_KEY, id);
-        await().atMost(Duration.ofSeconds(10)).untilAsserted(() -> {
+        await().atMost(AssertionTestUtils.AWAiTILITY_TIMEOUT_SECONDS).untilAsserted(() -> {
             verify(reactiveSetOperations, times(1)).members(reverseKey);
             verify(reactiveRedisTemplate, times(1)).delete(reverseKey);
         });
@@ -266,14 +267,14 @@ public class RedisReactiveCacheChildAspectTest {
     void invalidateForChild_idNull(long id) {
         var resF = testServiceChildReactive.getAllDummiesDefaultMaster().collectList().block();
         var resM = testServiceChildReactive.getDummyByIdDefaultMaster(id).block();
-        await().atMost(Duration.ofSeconds(10)).until(() -> Objects.requireNonNull(reactiveRedisTemplate.scan(
+        await().atMost(AssertionTestUtils.AWAiTILITY_TIMEOUT_SECONDS).until(() -> Objects.requireNonNull(reactiveRedisTemplate.scan(
                 ScanOptions.scanOptions().match("dummies:*").build()
         ).collectList().block()).size() >= 5);
         StepVerifier.create(redisReactiveChildCacheEvictAspect.invalidateForChild(TestServiceChildReactive.CACHE_KEY, null, -1L))
                 .expectNext(2L)
                 .verifyComplete();
         var reverseKey = redisChildCacheUtils.createReverseIndexKey(TestServiceChildReactive.CACHE_KEY, id);
-        await().atMost(Duration.ofSeconds(10)).untilAsserted(() -> {
+        await().atMost(AssertionTestUtils.AWAiTILITY_TIMEOUT_SECONDS).untilAsserted(() -> {
             verify(reactiveSetOperations, never()).members(reverseKey);
             verify(reactiveRedisTemplate, never()).delete(reverseKey);
         });
@@ -283,11 +284,11 @@ public class RedisReactiveCacheChildAspectTest {
     void invalidateForMaterId_cacheEmpty() {
         var resF = testServiceChildReactive.getAllDummiesMaster("1").collectList().block();
         var resM = testServiceChildReactive.getDummyByIdMaster(1L, "1").block();
-        await().atMost(Duration.ofSeconds(10)).until(() -> Objects.requireNonNull(reactiveRedisTemplate.scan(
+        await().atMost(AssertionTestUtils.AWAiTILITY_TIMEOUT_SECONDS).until(() -> Objects.requireNonNull(reactiveRedisTemplate.scan(
                 ScanOptions.scanOptions().match("dummies:*").build()
         ).collectList().block()).size() >= 5);
 
-        await().atMost(Duration.ofSeconds(10)).untilAsserted(() -> {
+        await().atMost(AssertionTestUtils.AWAiTILITY_TIMEOUT_SECONDS).untilAsserted(() -> {
             StepVerifier.create(reactiveRedisTemplate.keys("dummies:master:1:*"))
                     .expectNextCount(2)
                     .verifyComplete();
@@ -295,7 +296,7 @@ public class RedisReactiveCacheChildAspectTest {
         StepVerifier.create(testServiceChildReactive.evictAllDummiesMasterId("1"))
                 .expectNext(true)
                 .verifyComplete();
-        await().atMost(Duration.ofSeconds(10)).untilAsserted(() -> {
+        await().atMost(AssertionTestUtils.AWAiTILITY_TIMEOUT_SECONDS).untilAsserted(() -> {
             StepVerifier.create(reactiveRedisTemplate.keys("dummies:master:1:*"))
                     .expectNextCount(0)
                     .verifyComplete();
@@ -306,11 +307,11 @@ public class RedisReactiveCacheChildAspectTest {
     void invalidateForMaterId_cacheNotTouched() {
         var resF = testServiceChildReactive.getAllDummiesMaster("1").collectList().block();
         var resM = testServiceChildReactive.getDummyByIdMaster(1L, "1").block();
-        await().atMost(Duration.ofSeconds(10)).until(() -> Objects.requireNonNull(reactiveRedisTemplate.scan(
+        await().atMost(AssertionTestUtils.AWAiTILITY_TIMEOUT_SECONDS).until(() -> Objects.requireNonNull(reactiveRedisTemplate.scan(
                 ScanOptions.scanOptions().match("dummies:*").build()
         ).collectList().block()).size() >= 5);
 
-        await().atMost(Duration.ofSeconds(10)).untilAsserted(() -> {
+        await().atMost(AssertionTestUtils.AWAiTILITY_TIMEOUT_SECONDS).untilAsserted(() -> {
             StepVerifier.create(reactiveRedisTemplate.keys("dummies:master:1:*"))
                     .expectNextCount(2)
                     .verifyComplete();
@@ -318,7 +319,7 @@ public class RedisReactiveCacheChildAspectTest {
         StepVerifier.create(testServiceChildReactive.evictAllDummiesMasterId("2"))
                 .expectNext(true)
                 .verifyComplete();
-        await().atMost(Duration.ofSeconds(10)).untilAsserted(() -> {
+        await().atMost(AssertionTestUtils.AWAiTILITY_TIMEOUT_SECONDS).untilAsserted(() -> {
             StepVerifier.create(reactiveRedisTemplate.keys("dummies:master:1:*"))
                     .expectNextCount(2)
                     .verifyComplete();

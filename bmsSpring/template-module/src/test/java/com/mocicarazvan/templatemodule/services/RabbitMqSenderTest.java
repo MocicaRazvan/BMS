@@ -6,6 +6,7 @@ import com.mocicarazvan.templatemodule.config.TestContainerImages;
 import com.mocicarazvan.templatemodule.models.IdGenerated;
 import com.mocicarazvan.templatemodule.models.IdGeneratedImpl;
 import com.mocicarazvan.templatemodule.services.impl.RabbitMqSenderImpl;
+import com.mocicarazvan.templatemodule.testUtils.AssertionTestUtils;
 import com.mocicarazvan.templatemodule.testUtils.RabbitTestUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -167,14 +168,14 @@ class RabbitMqSenderTest {
         var scheduler = VirtualTimeScheduler.getOrSet();
 
         StepVerifier.withVirtualTime(() -> Mono.fromRunnable(() -> rabbitMqSender.sendBatchMessage(List.of(1))))
-                .thenAwait(Duration.ofSeconds((long) retryCount * retryDelaySeconds + 2))
+                .thenAwait(Duration.ofSeconds((long) retryCount * retryDelaySeconds + 10))
                 .verifyComplete();
 
         var messages = rabbitTestUtils.drainTestQueue(RabbitMqTestConfig.TEST_QUEUE,
                 new ParameterizedTypeReference<Integer>() {
                 }, 1000, 0);
         assertEquals(0, messages.size());
-        await().atMost(Duration.ofSeconds(2))
+        await().atMost(AssertionTestUtils.AWAiTILITY_TIMEOUT_SECONDS)
                 .untilAsserted(() -> {
 
                     verify(template, times(3)).convertAndSend(anyString(), anyString(), any(Object.class));
@@ -201,7 +202,7 @@ class RabbitMqSenderTest {
                 }, 1000, 1);
         assertEquals(1, messages.size());
         assertEquals(1, messages.get(0));
-        await().atMost(Duration.ofSeconds(2))
+        await().atMost(AssertionTestUtils.AWAiTILITY_TIMEOUT_SECONDS)
                 .untilAsserted(() -> {
                     verify(template, times(2)).convertAndSend(anyString(), anyString(), any(Object.class));
                 });

@@ -8,6 +8,7 @@ import com.mocicarazvan.rediscache.configTests.TestServiceReactive;
 import com.mocicarazvan.rediscache.enums.BooleanEnum;
 import com.mocicarazvan.rediscache.local.LocalReactiveCache;
 import com.mocicarazvan.rediscache.local.ReverseKeysLocalCache;
+import com.mocicarazvan.rediscache.testUtils.AssertionTestUtils;
 import com.mocicarazvan.rediscache.utils.AspectUtils;
 import com.mocicarazvan.rediscache.utils.RedisApprovedCacheUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -39,7 +40,6 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import java.lang.reflect.Method;
-import java.time.Duration;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -149,7 +149,7 @@ class RedisReactiveCacheApprovedAspectTest {
                 .expectNext(res)
                 .verifyComplete();
         ArgumentCaptor<String> savingKey = ArgumentCaptor.forClass(String.class);
-        await().atMost(Duration.ofSeconds(10)).untilAsserted(() -> {
+        await().atMost(AssertionTestUtils.AWAiTILITY_TIMEOUT_SECONDS).untilAsserted(() -> {
             verify(redisReactiveCacheApprovedAspect, times(1)).createBaseMono(savingKey.capture(), any(Method.class));
             verify(redisReactiveCacheApprovedAspect, times(1)).methodMonoResponseToCache(any(ProceedingJoinPoint.class),
                     eq(TestServiceReactive.CACHE_KEY), eq(savingKey.getValue()), eq(1L), eq(true));
@@ -166,7 +166,7 @@ class RedisReactiveCacheApprovedAspectTest {
                 .expectNextSequence(res)
                 .verifyComplete();
         ArgumentCaptor<String> savingKey = ArgumentCaptor.forClass(String.class);
-        await().atMost(Duration.ofSeconds(10)).untilAsserted(() -> {
+        await().atMost(AssertionTestUtils.AWAiTILITY_TIMEOUT_SECONDS).untilAsserted(() -> {
             verify(redisReactiveCacheApprovedAspect, never()).createBaseMono(anyString(), any(Method.class));
             verify(redisReactiveCacheApprovedAspect, never()).methodMonoResponseToCache(any(ProceedingJoinPoint.class),
                     anyString(), anyString(), anyLong(), anyBoolean());
@@ -196,7 +196,7 @@ class RedisReactiveCacheApprovedAspectTest {
                 .verifyComplete();
         ArgumentCaptor<Set<String>> keys = ArgumentCaptor.forClass(Set.class);
 
-        await().atMost(Duration.ofSeconds(2))
+        await().atMost(AssertionTestUtils.AWAiTILITY_TIMEOUT_SECONDS)
                 .untilAsserted(() -> {
                     verify(redisApprovedCacheUtils, times(1)).getActualKeys(keys.capture(), any());
                 });
@@ -212,7 +212,7 @@ class RedisReactiveCacheApprovedAspectTest {
                 .verifyComplete();
         ArgumentCaptor<Set<String>> keys = ArgumentCaptor.forClass(Set.class);
 
-        await().atMost(Duration.ofSeconds(2))
+        await().atMost(AssertionTestUtils.AWAiTILITY_TIMEOUT_SECONDS)
                 .untilAsserted(() -> {
                     verify(redisApprovedCacheUtils, times(1)).getActualKeys(keys.capture(), any());
                 });
@@ -228,7 +228,7 @@ class RedisReactiveCacheApprovedAspectTest {
                 .verifyComplete();
         ArgumentCaptor<Set<String>> keys = ArgumentCaptor.forClass(Set.class);
 
-        await().atMost(Duration.ofSeconds(2))
+        await().atMost(AssertionTestUtils.AWAiTILITY_TIMEOUT_SECONDS)
                 .untilAsserted(() -> {
                     verify(redisApprovedCacheUtils, times(1)).getActualKeys(keys.capture(), any());
                 });
@@ -244,7 +244,7 @@ class RedisReactiveCacheApprovedAspectTest {
                 .verifyComplete();
         ArgumentCaptor<Set<String>> keys = ArgumentCaptor.forClass(Set.class);
 
-        await().atMost(Duration.ofSeconds(2))
+        await().atMost(AssertionTestUtils.AWAiTILITY_TIMEOUT_SECONDS)
                 .untilAsserted(() -> {
                     verify(redisApprovedCacheUtils, times(1)).getActualKeys(keys.capture(), any());
                 });
@@ -260,7 +260,7 @@ class RedisReactiveCacheApprovedAspectTest {
                 .verifyComplete();
         ArgumentCaptor<Set<String>> keys = ArgumentCaptor.forClass(Set.class);
 
-        await().atMost(Duration.ofSeconds(2))
+        await().atMost(AssertionTestUtils.AWAiTILITY_TIMEOUT_SECONDS)
                 .untilAsserted(() -> {
                     verify(redisApprovedCacheUtils, times(1)).getActualKeys(keys.capture(), any());
                 });
@@ -276,7 +276,7 @@ class RedisReactiveCacheApprovedAspectTest {
                 .verifyComplete();
         ArgumentCaptor<Set<String>> keys = ArgumentCaptor.forClass(Set.class);
 
-        await().atMost(Duration.ofSeconds(2))
+        await().atMost(AssertionTestUtils.AWAiTILITY_TIMEOUT_SECONDS)
                 .untilAsserted(() -> {
                     verify(redisApprovedCacheUtils, times(1)).getActualKeys(keys.capture(), any());
                 });
@@ -302,7 +302,7 @@ class RedisReactiveCacheApprovedAspectTest {
                 ArgumentCaptor.forClass(TestServiceApprovedReactive.DummyWithApproved.class);
         ArgumentCaptor<BooleanEnum> bC = ArgumentCaptor.forClass(BooleanEnum.class);
 
-        await().atMost(Duration.ofSeconds(2))
+        await().atMost(AssertionTestUtils.AWAiTILITY_TIMEOUT_SECONDS)
                 .untilAsserted(() -> {
                     verify(redisReactiveCacheApprovedEvictAspect, times(1))
                             .invalidateForByIdAndOriginalApproved(any(), any(), any(), any(),

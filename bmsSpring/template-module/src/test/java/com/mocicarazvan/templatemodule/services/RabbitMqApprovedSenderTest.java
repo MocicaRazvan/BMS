@@ -11,6 +11,7 @@ import com.mocicarazvan.templatemodule.dtos.response.ResponseWithUserDto;
 import com.mocicarazvan.templatemodule.enums.ApprovedNotificationType;
 import com.mocicarazvan.templatemodule.services.impl.RabbitMqApprovedSenderImpl;
 import com.mocicarazvan.templatemodule.services.impl.RabbitMqSenderImpl;
+import com.mocicarazvan.templatemodule.testUtils.AssertionTestUtils;
 import com.mocicarazvan.templatemodule.testUtils.RabbitTestUtils;
 import lombok.SneakyThrows;
 import nl.altindag.log.LogCaptor;
@@ -32,7 +33,6 @@ import org.testcontainers.containers.RabbitMQContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import java.time.Duration;
 import java.time.LocalDateTime;
 
 import static org.awaitility.Awaitility.await;
@@ -121,7 +121,7 @@ class RabbitMqApprovedSenderTest {
         rabbitMqApprovedSender.sendMessage(true, re, authUser);
 
         await()
-                .atMost(Duration.ofSeconds(2))
+                .atMost(AssertionTestUtils.AWAiTILITY_TIMEOUT_SECONDS)
                 .untilAsserted(() -> {
                     verify(spyMapper, times(1)).writeValueAsString(any());
                     var logs = logCaptor.getErrorLogs();

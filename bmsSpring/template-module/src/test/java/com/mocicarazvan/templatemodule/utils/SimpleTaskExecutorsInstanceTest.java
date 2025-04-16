@@ -1,9 +1,8 @@
 package com.mocicarazvan.templatemodule.utils;
 
+import com.mocicarazvan.templatemodule.testUtils.AssertionTestUtils;
 import org.junit.jupiter.api.Test;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
-
-import java.time.Duration;
 
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.*;
@@ -25,7 +24,7 @@ class SimpleTaskExecutorsInstanceTest {
             threadHolder[0] = Thread.currentThread();
         });
 
-        await().atMost(Duration.ofSeconds(2))
+        await().atMost(AssertionTestUtils.AWAiTILITY_TIMEOUT_SECONDS)
                 .untilAsserted(() -> {
                     assertNotNull(threadHolder[0]);
                     assertTrue(threadHolder[0].isVirtual());
@@ -42,7 +41,7 @@ class SimpleTaskExecutorsInstanceTest {
         assertNotNull(scheduler);
         assertEquals("ThreadPoolTaskScheduler-", scheduler.getThreadNamePrefix());
         assertTrue(scheduler.getScheduledThreadPoolExecutor().getRemoveOnCancelPolicy());
-      
+
         scheduler.initialize();
         scheduler.getScheduledExecutor();
     }
@@ -61,7 +60,7 @@ class SimpleTaskExecutorsInstanceTest {
         });
 
 
-        await().atMost(Duration.ofSeconds(2))
+        await().atMost(AssertionTestUtils.AWAiTILITY_TIMEOUT_SECONDS)
                 .untilAsserted(() -> {
                     assertNotNull(threadHolder[0]);
                     assertTrue(threadHolder[0].isVirtual());

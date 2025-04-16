@@ -204,7 +204,13 @@ export function DataTable<TData extends Record<string, any>, TValue>({
     },
   });
 
-  const chartData = useMemo(
+  const chartData: {
+    data: TData[];
+    type: Extract<
+      keyof DataTableTexts["linkedChartTexts"],
+      "persisted" | "table"
+    >;
+  } = useMemo(
     () =>
       persistedRows.length > 0
         ? { data: persistedRows.map((r) => r.original), type: "persisted" }
@@ -461,10 +467,7 @@ export function DataTable<TData extends Record<string, any>, TValue>({
               chartType="bar"
               texts={{
                 ...linkedChartTexts,
-                title:
-                  linkedChartTexts[
-                    chartData.type as keyof DataTableTexts["linkedChartTexts"]
-                  ],
+                title: linkedChartTexts[chartData.type],
               }}
               {...chartProps}
             />

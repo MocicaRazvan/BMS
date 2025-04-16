@@ -3,7 +3,6 @@ package com.mocicarazvan.rediscache.configTests;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mocicarazvan.rediscache.config.BeanConfigRedisCache;
-import com.mocicarazvan.rediscache.containers.AbstractRedisContainer;
 import com.mocicarazvan.rediscache.utils.AspectUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,7 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = BeanConfigRedisCache.class)
 @Execution(ExecutionMode.SAME_THREAD)
-public class BeanConfigRedisCacheTest extends AbstractRedisContainer {
+public class BeanConfigRedisCacheTest {
     @Autowired
     ObjectMapper objectMapper;
     @Autowired
