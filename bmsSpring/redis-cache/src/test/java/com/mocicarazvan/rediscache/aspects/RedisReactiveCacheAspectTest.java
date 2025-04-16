@@ -271,15 +271,19 @@ class RedisReactiveCacheAspectTest {
                             verify(localReactiveCache, times(1)).put(savingKeyCaptor.getValue(), res);
 
                         });
-        StepVerifier.create(reactiveRedisTemplate.opsForValue().get(savingKeyCaptor.getValue())
-                        .map(v -> objectMapper.convertValue(v, typeReference))
-                )
-                .expectNext(res)
-                .verifyComplete();
+        await().atMost(AssertionTestUtils.AWAiTILITY_TIMEOUT_SECONDS)
+                .untilAsserted(
+                        () -> {
+                            StepVerifier.create(reactiveRedisTemplate.opsForValue().get(savingKeyCaptor.getValue())
+                                            .map(v -> objectMapper.convertValue(v, typeReference))
+                                    )
+                                    .expectNext(res)
+                                    .verifyComplete();
 
-        StepVerifier.create(localReactiveCache.getMonoOrEmpty(savingKeyCaptor.getValue()))
-                .expectNext(res)
-                .verifyComplete();
+                            StepVerifier.create(localReactiveCache.getMonoOrEmpty(savingKeyCaptor.getValue()))
+                                    .expectNext(res)
+                                    .verifyComplete();
+                        });
 
     }
 
@@ -313,12 +317,16 @@ class RedisReactiveCacheAspectTest {
 
 
                         });
-        StepVerifier.create(reactiveRedisTemplate.opsForValue().get(savingKeyCaptor.getValue())
-                )
-                .verifyComplete();
+        await().atMost(AssertionTestUtils.AWAiTILITY_TIMEOUT_SECONDS)
+                .untilAsserted(
+                        () -> {
+                            StepVerifier.create(reactiveRedisTemplate.opsForValue().get(savingKeyCaptor.getValue())
+                                    )
+                                    .verifyComplete();
 
-        StepVerifier.create(localReactiveCache.getMonoOrEmpty(savingKeyCaptor.getValue()))
-                .verifyComplete();
+                            StepVerifier.create(localReactiveCache.getMonoOrEmpty(savingKeyCaptor.getValue()))
+                                    .verifyComplete();
+                        });
 
     }
 
@@ -389,25 +397,29 @@ class RedisReactiveCacheAspectTest {
 
 
                         });
-        StepVerifier.create(localReactiveCache.getFluxOrEmpty(savingKeyCaptor.getValue()).collectList())
-                .expectNextMatches(res::equals)
-                .verifyComplete();
+        await().atMost(AssertionTestUtils.AWAiTILITY_TIMEOUT_SECONDS)
+                .untilAsserted(
+                        () -> {
+                            StepVerifier.create(localReactiveCache.getFluxOrEmpty(savingKeyCaptor.getValue()).collectList())
+                                    .expectNextMatches(res::equals)
+                                    .verifyComplete();
 
-        StepVerifier.create(
-                        reactiveRedisTemplate.opsForSet()
-                                .members(reverseIndexCaptor.getValue())
-                                .collectList()
-                )
-                .expectNextMatches(redisList -> new HashSet<>(redisList).equals(new HashSet<>(reverseKeysLocalCache.get(reverseIndexCaptor.getValue()))))
-                .verifyComplete();
-        StepVerifier.create(reactiveRedisTemplate.opsForValue().get(savingKeyCaptor.getValue())
-                        .map(v -> objectMapper.convertValue(v, objectMapper.getTypeFactory()
-                                .constructCollectionType(List.class,
-                                        objectMapper.getTypeFactory().constructType(TestServiceReactive.Dummy.class)
-                                )))
-                )
-                .expectNext(res)
-                .verifyComplete();
+                            StepVerifier.create(
+                                            reactiveRedisTemplate.opsForSet()
+                                                    .members(reverseIndexCaptor.getValue())
+                                                    .collectList()
+                                    )
+                                    .expectNextMatches(redisList -> new HashSet<>(redisList).equals(new HashSet<>(reverseKeysLocalCache.get(reverseIndexCaptor.getValue()))))
+                                    .verifyComplete();
+                            StepVerifier.create(reactiveRedisTemplate.opsForValue().get(savingKeyCaptor.getValue())
+                                            .map(v -> objectMapper.convertValue(v, objectMapper.getTypeFactory()
+                                                    .constructCollectionType(List.class,
+                                                            objectMapper.getTypeFactory().constructType(TestServiceReactive.Dummy.class)
+                                                    )))
+                                    )
+                                    .expectNext(res)
+                                    .verifyComplete();
+                        });
 
     }
 
@@ -452,18 +464,21 @@ class RedisReactiveCacheAspectTest {
                             verify(objectMapper, never()).convertValue(any(), eq(typeReference));
                             verify(localReactiveCache, never()).put(eq(savingKeyCaptor.getValue()), anyList());
                         });
+        await().atMost(AssertionTestUtils.AWAiTILITY_TIMEOUT_SECONDS)
+                .untilAsserted(
+                        () -> {
+                            StepVerifier.create(reactiveRedisTemplate.opsForValue().get(savingKeyCaptor.getValue())
+                                    )
+                                    .verifyComplete();
 
-        StepVerifier.create(reactiveRedisTemplate.opsForValue().get(savingKeyCaptor.getValue())
-                )
-                .verifyComplete();
 
+                            StepVerifier.create(localReactiveCache.getFluxOrEmpty(savingKeyCaptor.getValue()))
+                                    .expectNextSequence(res)
+                                    .verifyComplete();
 
-        StepVerifier.create(localReactiveCache.getFluxOrEmpty(savingKeyCaptor.getValue()))
-                .expectNextSequence(res)
-                .verifyComplete();
-
-        StepVerifier.create(reactiveRedisTemplate.opsForSet().members(savingKeyCaptor.getValue()))
-                .verifyComplete();
+                            StepVerifier.create(reactiveRedisTemplate.opsForSet().members(savingKeyCaptor.getValue()))
+                                    .verifyComplete();
+                        });
     }
 
     @Test
@@ -502,19 +517,22 @@ class RedisReactiveCacheAspectTest {
                             verify(objectMapper, never()).convertValue(any(), eq(typeReference));
                             verify(localReactiveCache, times(1)).put(eq(savingKeyCaptor.getValue()), anyList());
                         });
+        await().atMost(AssertionTestUtils.AWAiTILITY_TIMEOUT_SECONDS)
+                .untilAsserted(
+                        () -> {
+                            StepVerifier.create(reactiveRedisTemplate.opsForValue().get(savingKeyCaptor.getValue())
+                                            .map(v -> objectMapper.convertValue(v, objectMapper.getTypeFactory()
+                                                    .constructCollectionType(List.class,
+                                                            objectMapper.getTypeFactory().constructType(TestServiceReactive.Dummy.class)
+                                                    )))
+                                    )
+                                    .expectNextMatches(res::equals)
+                                    .verifyComplete();
 
-        StepVerifier.create(reactiveRedisTemplate.opsForValue().get(savingKeyCaptor.getValue())
-                        .map(v -> objectMapper.convertValue(v, objectMapper.getTypeFactory()
-                                .constructCollectionType(List.class,
-                                        objectMapper.getTypeFactory().constructType(TestServiceReactive.Dummy.class)
-                                )))
-                )
-                .expectNextMatches(res::equals)
-                .verifyComplete();
-
-        StepVerifier.create(localReactiveCache.getFluxOrEmpty(savingKeyCaptor.getValue()))
-                .expectNextSequence(res)
-                .verifyComplete();
+                            StepVerifier.create(localReactiveCache.getFluxOrEmpty(savingKeyCaptor.getValue()))
+                                    .expectNextSequence(res)
+                                    .verifyComplete();
+                        });
 
     }
 
@@ -557,13 +575,16 @@ class RedisReactiveCacheAspectTest {
                             verify(objectMapper, never()).convertValue(any(), eq(typeReference));
                             verify(localReactiveCache, never()).put(eq(savingKeyCaptor.getValue()), anyList());
                         });
+        await().atMost(AssertionTestUtils.AWAiTILITY_TIMEOUT_SECONDS)
+                .untilAsserted(
+                        () -> {
+                            StepVerifier.create(reactiveRedisTemplate.opsForValue().get(savingKeyCaptor.getValue())
+                                    )
+                                    .verifyComplete();
 
-        StepVerifier.create(reactiveRedisTemplate.opsForValue().get(savingKeyCaptor.getValue())
-                )
-                .verifyComplete();
-
-        StepVerifier.create(localReactiveCache.getFluxOrEmpty(savingKeyCaptor.getValue()))
-                .verifyComplete();
+                            StepVerifier.create(localReactiveCache.getFluxOrEmpty(savingKeyCaptor.getValue()))
+                                    .verifyComplete();
+                        });
     }
 
     @Test
@@ -593,20 +614,25 @@ class RedisReactiveCacheAspectTest {
             assert members != null && !members.isEmpty() && reverseLocal;
 
         });
-        StepVerifier.create(testServiceReactive.evictDummyById(id))
-                .expectNext(testServiceReactive.getDummies().stream().filter(
-                                d -> d.id().equals(id)
-                        ).findFirst().orElseThrow()
-                )
-                .verifyComplete();
-        StepVerifier.create(reactiveRedisTemplate.scan(ScanOptions.scanOptions()
-                        .match("dummies:*")
-                        .build()))
-                .verifyComplete();
-        var local = localReactiveCache.getAll();
-        assertEquals(0, local.size());
-        var reverse = reverseKeysLocalCache.getAll();
-        assertEquals(0, reverse.size());
+        await().atMost(AssertionTestUtils.AWAiTILITY_TIMEOUT_SECONDS)
+                .untilAsserted(
+                        () -> {
+                            StepVerifier.create(testServiceReactive.evictDummyById(id))
+                                    .expectNext(testServiceReactive.getDummies().stream().filter(
+                                                    d -> d.id().equals(id)
+                                            ).findFirst().orElseThrow()
+                                    )
+                                    .verifyComplete();
+                            StepVerifier.create(reactiveRedisTemplate.scan(ScanOptions.scanOptions()
+                                            .match("dummies:*")
+                                            .build()))
+                                    .verifyComplete();
+                            var local = localReactiveCache.getAll();
+                            assertEquals(0, local.size());
+                            var reverse = reverseKeysLocalCache.getAll();
+                            assertEquals(0, reverse.size());
+                        }
+                );
 
     }
 

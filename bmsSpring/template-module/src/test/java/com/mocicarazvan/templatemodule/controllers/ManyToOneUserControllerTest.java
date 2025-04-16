@@ -468,4 +468,31 @@ class ManyToOneUserControllerTest {
     }
 
 
+    @Test
+    void getModelsByIdIn_notFound() {
+        var ids = List.of(1L, 2L);
+        var ex = new NotFoundEntity(MODEL_NAME, 1L);
+        when(service.getModelsByIdInPageable(ids, pageableBody))
+                .thenReturn(Flux.error(ex));
+        webTestClient.patch()
+                .uri(uriBuilder ->
+                        uriBuilder.path("/manyToOneUser/byIds")
+                                .queryParam("ids", ids)
+                                .build()
+                )
+                .accept(MediaType.APPLICATION_NDJSON)
+                .header(RequestsUtils.AUTH_HEADER, "1")
+                .bodyValue(pageableBody)
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectBody(new ParameterizedTypeReference<BaseErrorResponse>() {
+                })
+                .consumeWith(result -> {
+                    var body = result.getResponseBody();
+                    assertNotNull(body);
+                    assertEquals(ex.getMessage(), body.getMessage());
+                    assertEquals(404, body.getStatus());
+                });
+    }
+
 }
