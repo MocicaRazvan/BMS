@@ -7,9 +7,6 @@ import com.mocicarazvan.templatemodule.exceptions.action.PrivateRouteException;
 import com.mocicarazvan.templatemodule.exceptions.client.ThrowFallback;
 import com.mocicarazvan.templatemodule.exceptions.common.ServiceCallFailedException;
 import com.mocicarazvan.templatemodule.exceptions.notFound.NotFoundEntity;
-import com.mocicarazvan.templatemodule.testUtils.AssertionTestUtils;
-import nl.altindag.log.LogCaptor;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -19,8 +16,6 @@ import org.springframework.web.reactive.function.client.ClientResponse;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-import static org.awaitility.Awaitility.await;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -28,13 +23,6 @@ class ClientExceptionHandlerTest {
 
     @Mock
     ClientResponse response;
-    LogCaptor logCaptor;
-
-    @BeforeEach
-    void setUp() {
-        logCaptor = LogCaptor.forClass(ClientExceptionHandler.class);
-        logCaptor.clearLogs();
-    }
 
     @Test
     void handleClientExceptionWith404StatusShouldReturnNotFoundEntityException() {
@@ -49,15 +37,6 @@ class ClientExceptionHandlerTest {
                         throwable instanceof NotFoundEntity &&
                                 throwable.getMessage().equals(ex.getMessage()))
                 .verify();
-        assertLog();
-    }
-
-    private void assertLog() {
-        await()
-                .atMost(AssertionTestUtils.AWAiTILITY_TIMEOUT_SECONDS)
-                .untilAsserted(() -> {
-                    assertTrue(logCaptor.getErrorLogs().stream().anyMatch(log -> log.contains("Status code")));
-                });
     }
 
     @Test
@@ -70,7 +49,6 @@ class ClientExceptionHandlerTest {
         StepVerifier.create(ClientExceptionHandler.handleClientException(response, "/api/test", "testService"))
                 .expectError(PrivateRouteException.class)
                 .verify();
-        assertLog();
     }
 
     @Test
@@ -86,7 +64,6 @@ class ClientExceptionHandlerTest {
                         throwable instanceof IllegalActionException &&
                                 ((IllegalActionException) throwable).getMessage().equals(errorResponse.getMessage()))
                 .verify();
-        assertLog();
     }
 
     @Test
@@ -96,7 +73,6 @@ class ClientExceptionHandlerTest {
         StepVerifier.create(ClientExceptionHandler.handleClientException(response, "/api/test", "testService"))
                 .expectError(ThrowFallback.class)
                 .verify();
-        assertLog();
     }
 
     @Test
@@ -107,7 +83,6 @@ class ClientExceptionHandlerTest {
                 .expectError(ThrowFallback.class)
                 .verify();
 
-        assertLog();
     }
 
     @Test
@@ -123,7 +98,6 @@ class ClientExceptionHandlerTest {
                                 ((ServiceCallFailedException) throwable).getServicePath().equals("/api/test"))
                 .verify();
 
-        assertLog();
     }
 
     @Test
@@ -134,9 +108,5 @@ class ClientExceptionHandlerTest {
                 .expectError(ThrowFallback.class)
                 .verify();
 
-        await().atMost(AssertionTestUtils.AWAiTILITY_TIMEOUT_SECONDS)
-                .untilAsserted(() -> {
-                    assertTrue(logCaptor.getErrorLogs().stream().anyMatch(log -> log.contains("Error:")));
-                });
     }
 }

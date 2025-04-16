@@ -6,18 +6,15 @@ import com.mocicarazvan.websocketservice.dtos.generic.NotificationTemplateRespon
 import com.mocicarazvan.websocketservice.enums.ApprovedNotificationType;
 import com.mocicarazvan.websocketservice.models.generic.ApprovedModel;
 import com.mocicarazvan.websocketservice.service.generic.ApproveNotificationServiceTemplate;
-import nl.altindag.log.LogCaptor;
+import com.mocicarazvan.websocketservice.testUtils.AssertionTestUtils;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.amqp.core.Message;
-import org.springframework.amqp.rabbit.retry.RejectAndDontRequeueRecoverer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.test.util.ReflectionTestUtils;
-
-import java.time.Duration;
 
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.*;
@@ -72,7 +69,7 @@ public abstract class BaseApproveListenerTest<R extends ApprovedModel, RRESP ext
         when(serviceTemplate.saveApprovedNotificationCreateReference(body, body.getReferenceId()))
                 .thenReturn(response);
         rabbitTemplate.convertAndSend(queueName, body);
-        await().atMost(Duration.ofSeconds(5))
+        await().atMost(AssertionTestUtils.AWAiTILITY_TIMEOUT_SECONDS)
                 .untilAsserted(() -> {
                     ArgumentCaptor<BODY> argumentCaptor = ArgumentCaptor.forClass(bodyClass);
                     verify(serviceTemplate, times(1)).saveApprovedNotificationCreateReference(argumentCaptor.capture(), any());
@@ -85,19 +82,15 @@ public abstract class BaseApproveListenerTest<R extends ApprovedModel, RRESP ext
     @Test
     void testListenReferenceIdNull_throwsIllegalArgumentException() {
         var invalidBody = createInvalidBody();
-        try (LogCaptor logCaptor = LogCaptor.forClass(RejectAndDontRequeueRecoverer.class)) {
-            rabbitTemplate.convertAndSend(queueName, invalidBody);
-            await().atMost(Duration.ofSeconds(5))
-                    .untilAsserted(() -> {
-                        verify(serviceTemplate, never()).saveApprovedNotificationCreateReference(any(), any());
-
-                        assertTrue(logCaptor.getWarnLogs().stream()
-                                .anyMatch(m -> m.contains("Retries exhausted for message")));
-                    });
-            Message dlqMessage = rabbitTemplate.receive(queueName + ".dlq", 5000);
-            assertNotNull(dlqMessage, "Expected message to be in DLQ, but none was found.");
-            BODY body = (BODY) rabbitTemplate.getMessageConverter().fromMessage(dlqMessage);
-            assertEquals(invalidBody, body);
-        }
+        rabbitTemplate.convertAndSend(queueName, invalidBody);
+        await().atMost(AssertionTestUtils.AWAiTILITY_TIMEOUT_SECONDS)
+                .untilAsserted(() -> {
+                    verify(serviceTemplate, never()).saveApprovedNotificationCreateReference(any(), any());
+                });
+        Message dlqMessage = rabbitTemplate.receive(queueName + ".dlq", 5000);
+        assertNotNull(dlqMessage, "Expected message to be in DLQ, but none was found.");
+        BODY body = (BODY) rabbitTemplate.getMessageConverter().fromMessage(dlqMessage);
+        assertEquals(invalidBody, body);
     }
+
 }

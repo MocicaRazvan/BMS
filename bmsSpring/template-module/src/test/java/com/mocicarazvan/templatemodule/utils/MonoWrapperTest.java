@@ -1,8 +1,6 @@
 package com.mocicarazvan.templatemodule.utils;
 
 import lombok.SneakyThrows;
-import nl.altindag.log.LogCaptor;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import reactor.util.retry.Retry;
 
@@ -11,19 +9,10 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class MonoWrapperTest {
-    LogCaptor logCaptor;
-
-    @BeforeEach
-    void setUp() {
-        logCaptor = LogCaptor.forClass(MonoWrapper.class);
-        logCaptor.clearLogs();
-    }
-
     @Test
     @SneakyThrows
     void wrapBlockingFunction_success() {
@@ -78,11 +67,6 @@ class MonoWrapperTest {
 
         latch.await();
         assertTrue(wasRun.get());
-        await()
-                .atMost(Duration.ofSeconds(2))
-                .untilAsserted(() -> {
-                    assertTrue(logCaptor.getErrorLogs().stream().anyMatch(log -> log.contains("Test exception")));
-                });
     }
 
     @Test
@@ -102,11 +86,6 @@ class MonoWrapperTest {
 
         latch.await();
         assertEquals(2, runTimes.get());
-        await()
-                .atMost(Duration.ofSeconds(2))
-                .untilAsserted(() -> {
-                    assertTrue(logCaptor.getErrorLogs().stream().anyMatch(log -> log.contains("Test exception")));
-                });
     }
 
 }

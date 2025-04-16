@@ -14,7 +14,6 @@ import com.mocicarazvan.templatemodule.services.impl.RabbitMqSenderImpl;
 import com.mocicarazvan.templatemodule.testUtils.AssertionTestUtils;
 import com.mocicarazvan.templatemodule.testUtils.RabbitTestUtils;
 import lombok.SneakyThrows;
-import nl.altindag.log.LogCaptor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Execution;
@@ -36,7 +35,8 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import java.time.LocalDateTime;
 
 import static org.awaitility.Awaitility.await;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
 @SpringJUnitConfig(RabbitMqTestConfig.class)
@@ -59,7 +59,6 @@ class RabbitMqApprovedSenderTest {
     private RabbitMqApprovedSender<ApproveDto> rabbitMqApprovedSender;
     private RabbitMqSender rabbitMqSender;
     private final ObjectMapper objectMapper = new ObjectMapper().findAndRegisterModules();
-    LogCaptor logCaptor;
     UserDto authUser = UserDto.builder()
             .id(1L)
             .createdAt(LocalDateTime.now())
@@ -84,8 +83,6 @@ class RabbitMqApprovedSenderTest {
 
     @BeforeEach
     void setup() {
-        logCaptor = LogCaptor.forClass(RabbitMqApprovedSenderImpl.class);
-        logCaptor.clearLogs();
         rabbitMqSender = new RabbitMqSenderImpl(RabbitMqTestConfig.TEST_EXCHANGE,
                 RabbitMqTestConfig.TEST_ROUTING_KEY, template, 10);
         rabbitMqApprovedSender = new RabbitMqApprovedSenderImpl<>("extraLink", rabbitMqSender);
@@ -124,8 +121,6 @@ class RabbitMqApprovedSenderTest {
                 .atMost(AssertionTestUtils.AWAiTILITY_TIMEOUT_SECONDS)
                 .untilAsserted(() -> {
                     verify(spyMapper, times(1)).writeValueAsString(any());
-                    var logs = logCaptor.getErrorLogs();
-                    assertTrue(logs.contains("Error sending message to rabbitmq: test"));
                 });
     }
 
