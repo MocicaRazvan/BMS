@@ -18,6 +18,7 @@ class CacheHeaderUtilsTest {
 
     long timestamp = 1672531200000L;
 
+
     @Test
     void buildETagGeneratesCorrectETagWithAllParameters() {
         String etag = CacheHeaderUtils.buildETag("grid123", 1920, 1080, 0.8, timestamp);
@@ -45,7 +46,7 @@ class CacheHeaderUtilsTest {
         HttpHeaders headers = response.getHeaders();
         assertEquals("\"grid123-1672531200000\"", headers.getETag());
         assertEquals(timestamp, headers.getLastModified());
-        assertEquals("public, max-age=86400, immutable", headers.getCacheControl());
+        assertEquals(CacheHeaderUtils.VIDEO_CACHE_CONTROL.getHeaderValue(), headers.getCacheControl());
     }
 
     @Test
@@ -62,7 +63,7 @@ class CacheHeaderUtilsTest {
         HttpHeaders headers = response.getHeaders();
         assertEquals("\"grid123-1672531200000\"", headers.getETag());
         assertEquals(timestamp, headers.getLastModified());
-        assertEquals("public, max-age=604800, immutable", headers.getCacheControl());
+        assertEquals(CacheHeaderUtils.IMAGE_CACHE_CONTROL.getHeaderValue(), headers.getCacheControl());
     }
 
     @Test
