@@ -1,16 +1,23 @@
 package com.mocicarazvan.ollamasearch.utils;
 
 import java.text.Normalizer;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
+import java.util.regex.Pattern;
 
 public class TextPreprocessor {
+    private static final Pattern DIACRITICS = Pattern.compile("\\p{M}");
+
 
     public static String preprocess(String text) {
         if (text == null || text.isBlank()) {
             return "";
         }
-        return Normalizer.normalize(text, Normalizer.Form.NFKC)
+        String normalized = Normalizer.normalize(text, Normalizer.Form.NFKD);
+        String noDiacritics = DIACRITICS.matcher(normalized).replaceAll("");
+
+        return Normalizer.normalize(noDiacritics, Normalizer.Form.NFKC)
                 .toLowerCase(Locale.ROOT)
                 .replaceAll("\\p{C}", "")
                 .replaceAll("\\s+", " ")
@@ -24,6 +31,6 @@ public class TextPreprocessor {
     }
 
     public static String[] preprocess(String[] texts) {
-        return preprocess(List.of(texts));
+        return preprocess(Arrays.asList(texts));
     }
 }

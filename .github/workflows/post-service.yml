@@ -11,7 +11,25 @@ on:
       - 'bmsSpring/redis-cache/**'
       - 'bmsSpring/ollama-search/**'
 jobs:
+  test-template-module:
+    uses: ./.github/workflows/test-run.yml
+    with:
+      app-path: template-module
+  test-redis-cache:
+    uses: ./.github/workflows/test-run.yml
+    with:
+      app-path: redis-cache
+  test-ollama-search:
+    uses: ./.github/workflows/test-run.yml
+    with:
+      app-path: ollama-search
+  test-post-service:
+    uses: ./.github/workflows/test-run.yml
+    with:
+      app-path: post-service
+      local-modules: ollama-search,redis-cache,template-module
   build-and-push-post-service:
+    needs: [ test-template-module, test-redis-cache, test-ollama-search, test-post-service ]
     uses: ./.github/workflows/build-and-push.yml
     with:
       image-name: post-service-bms

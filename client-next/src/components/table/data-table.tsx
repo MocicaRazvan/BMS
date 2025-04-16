@@ -60,6 +60,11 @@ import SelectedRows, {
   SelectedRowsTexts,
 } from "@/components/table/selected-rows";
 import PulsatingButton from "@/components/magicui/pulsating-button";
+import {
+  LinkedChart,
+  LinkedChartProps,
+  LinkedChartTexts,
+} from "@/components/charts/linked-chart";
 
 export interface TableFilter {
   key: string;
@@ -75,6 +80,10 @@ export interface DataTableTexts {
   noResults: string;
   exportLabel: string;
   downloadSelected: string;
+  linkedChartTexts: Omit<LinkedChartTexts, "title"> & {
+    persisted: string;
+    table: string;
+  };
 }
 
 interface DataTableProps<TData extends Record<string, any>, TValue>
@@ -92,6 +101,8 @@ interface DataTableProps<TData extends Record<string, any>, TValue>
   sizeOptions?: number[];
   getRowId: (row: TData) => string;
   useRadioSort?: boolean;
+  chartProps?: Omit<Partial<LinkedChartProps<TData>>, "data" | "texts">;
+  showChart?: boolean;
 }
 
 const MotionTableRow = motion(TableRow);
@@ -122,11 +133,16 @@ export function DataTable<TData extends Record<string, any>, TValue>({
   selectedRowsTexts,
   downloadSelected,
   useRadioSort = true,
+  chartProps,
+  linkedChartTexts,
+  showChart = false,
 }: DataTableProps<TData, TValue>) {
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
-  const persistedRowsRef = useRef<Row<TData>[]>([]);
+  // const persistedRowsRef = useRef<Row<TData>[]>([]);
+  const [persistedRows, setPersistedRows] = useState<Row<TData>[]>([]);
+
   const selectedLength = useMemo(
     () => Object.keys(rowSelection).length,
     [rowSelection],
@@ -188,19 +204,33 @@ export function DataTable<TData extends Record<string, any>, TValue>({
     },
   });
 
+  const chartData = useMemo(
+    () =>
+      persistedRows.length > 0
+        ? { data: persistedRows.map((r) => r.original), type: "persisted" }
+        : {
+            data: table.getFilteredRowModel().rows.map((row) => row.original),
+            type: "table",
+          },
+    [persistedRows, table, data.length],
+  );
   useEffect(() => {
     const ids = Object.keys(rowSelection);
-    const prev = persistedRowsRef.current;
+    // const prev = persistedRowsRef.current;
 
-    const prevMap = new Map(prev.map((row) => [getRowId(row.original), row]));
+    const prevMap = new Map(
+      persistedRows.map((row) => [getRowId(row.original), row]),
+    );
     const tableRows = table.getCoreRowModel().rows;
     const tableRowMap = new Map(
       tableRows.map((row) => [getRowId(row.original), row]),
     );
 
-    persistedRowsRef.current = ids
+    // persistedRowsRef.current
+    const updated = ids
       .map((id) => prevMap.get(id) || tableRowMap.get(id))
       .filter((row): row is Row<TData> => Boolean(row));
+    setPersistedRows(updated);
   }, [getRowId, rowSelection, table]);
 
   const { exportPdf, exportCsv } = useExportTable<TData, TValue>({
@@ -300,14 +330,14 @@ export function DataTable<TData extends Record<string, any>, TValue>({
                 <DropdownMenuContent align="end">
                   <DropdownMenuItem
                     className="cursor-pointer py-2 "
-                    onClick={() => exportCsv(persistedRowsRef.current)}
+                    onClick={() => exportCsv(persistedRows)}
                   >
                     {"CSV"}
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
                     className="cursor-pointer py-2 "
-                    onClick={() => exportPdf(persistedRowsRef.current)}
+                    onClick={() => exportPdf(persistedRows)}
                   >
                     {"PDF"}
                   </DropdownMenuItem>
@@ -361,7 +391,7 @@ export function DataTable<TData extends Record<string, any>, TValue>({
                 <TableRow key={`loading-${i}`}>
                   {finalColumns.map((_, j) => (
                     <TableCell key={`loading-cell-${j}-row-${i}`}>
-                      <Skeleton className="w-full h-[5vh]" />
+                      <Skeleton className="w-full h-[33px]" />
                     </TableCell>
                   ))}
                 </TableRow>
@@ -372,8 +402,8 @@ export function DataTable<TData extends Record<string, any>, TValue>({
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
                   className="lg:hover:relative z-20  hover:bg-muted "
-                  initial={{ opacity: 0, y: 20, scale: 0.8 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  // initial={{ opacity: 0, y: 20, scale: 0.8 }}
+                  // animate={{ opacity: 1, y: 0, scale: 1 }}
                   transition={{
                     duration: 0.1,
                     // delay: i * 0.11,
@@ -421,6 +451,28 @@ export function DataTable<TData extends Record<string, any>, TValue>({
           sizeOptions={sizeOptions}
         />
       </div>
+      {showChart && (
+        <div className="h-[500px] md:h-[625px] mt-12">
+          {chartData.data.length > 0 ? (
+            <LinkedChart
+              data={chartData.data}
+              columns={columns}
+              dateField="createdAt"
+              chartType="bar"
+              texts={{
+                ...linkedChartTexts,
+                title:
+                  linkedChartTexts[
+                    chartData.type as keyof DataTableTexts["linkedChartTexts"]
+                  ],
+              }}
+              {...chartProps}
+            />
+          ) : (
+            <Skeleton className="h-full w-full" />
+          )}
+        </div>
+      )}
     </div>
   );
 }

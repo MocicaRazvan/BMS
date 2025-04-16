@@ -1,7 +1,7 @@
 "use client";
 
 import * as TooltipPrimitive from "@radix-ui/react-tooltip";
-import { ComponentPropsWithoutRef, useState } from "react";
+import { ComponentPropsWithoutRef, PropsWithChildren, useState } from "react";
 import {
   Tooltip,
   TooltipContent,
@@ -61,6 +61,32 @@ export default function OverflowTextTooltip({
               )}
             </Button>
           </div>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
+}
+interface LengthProps
+  extends ComponentPropsWithoutRef<typeof TooltipPrimitive.Content> {
+  text: string;
+  maxLength: number;
+}
+
+export function OverflowLengthTextTooltip({
+  text,
+  maxLength,
+  children,
+  ...props
+}: LengthProps) {
+  if (text.length <= maxLength) {
+    return children;
+  }
+  return (
+    <TooltipProvider>
+      <Tooltip delayDuration={1000}>
+        <TooltipTrigger asChild>{children}</TooltipTrigger>
+        <TooltipContent {...props} className="max-w-xs z-10">
+          <p>{text}</p>
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>

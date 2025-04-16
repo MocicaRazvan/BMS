@@ -5,7 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.hateoas.server.reactive.WebFluxLinkBuilder;
+import org.springframework.hateoas.Link;
 
 import java.util.List;
 
@@ -17,5 +17,5 @@ import java.util.List;
 public class PageableResponse<T> {
     private T content;
     private PageInfo pageInfo;
-    private List<WebFluxLinkBuilder.WebFluxLink> links;
+    private List<Link> links;
 }

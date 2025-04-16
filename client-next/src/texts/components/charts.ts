@@ -23,6 +23,7 @@ import {
 import { TopTrainersTexts } from "@/components/charts/top-trainers";
 import { PredictionChartTexts } from "@/components/charts/prediction-chart";
 import { TopViewedPostsTexts } from "@/components/charts/top-viewed-posts";
+import { LinkedChartTexts } from "@/components/charts/linked-chart";
 
 export async function getIngredientPieChartTexts(): Promise<IngredientPieChartTexts> {
   const t = await getTranslations("components.charts.IngredientPieChartTexts");
@@ -308,5 +309,28 @@ export async function getTopViewedPostsTexts(): Promise<TopViewedPostsTexts> {
     noResults: t("noResults"),
     tags: t("tags"),
     periodLabel: t("periodLabel"),
+  };
+}
+
+export async function getLinkedChartTexts(): Promise<LinkedChartTexts> {
+  const t = await getTranslations("components.charts.LinkedChartTexts");
+  return {
+    title: t("title"),
+    nothingFound: t("nothingFound"),
+    chartType: t("chartType"),
+    aggregates: t("aggregates"),
+    dateFormat: t("dateFormat"),
+    reset: t("reset"),
+    aggregatesPlaceholder: t("aggregatesPlaceholder"),
+    selectAggregates: t("selectAggregates"),
+    dateFormatPlaceholder: t("dateFormatPlaceholder"),
+    dateFormatDropDown: {
+      "dd/MM/yyyy": t("dateFormatDropDown.dd/MM/yyyy"),
+      "MMM yyyy": t("dateFormatDropDown.MMM_yyyy"),
+      "QQQ yyyy": t("dateFormatDropDown.QQQ_yyyy"),
+      yyyy: t("dateFormatDropDown.yyyy"),
+      "MM/dd/yyyy": t("dateFormatDropDown.MM/dd/yyyy"),
+      "yyyy-MM-dd": t("dateFormatDropDown.yyyy-MM-dd"),
+    },
   };
 }

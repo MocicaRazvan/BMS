@@ -1,16 +1,16 @@
 "use server";
-import { DayCalendarHeaderTexts } from "@/components/dayCalendar/day-calendar-header";
+import { DayCalendarHeaderTexts } from "@/components/days-calendar/day-calendar-header";
 import { getTranslations } from "next-intl/server";
-import { DayCalendarBodyMonthTexts } from "@/components/dayCalendar/day-calendar-body-month";
+import { DayCalendarBodyMonthTexts } from "@/components/days-calendar/day-calendar-body-month";
 import { getCalendarDayFormTexts } from "@/texts/components/forms";
-import { DayCalendarEventTexts } from "@/components/dayCalendar/day-calendar-event";
-import { DayCalendarSingleDayTexts } from "@/components/dayCalendar/day-calendar-single-day";
+import { DayCalendarEventTexts } from "@/components/days-calendar/day-calendar-event";
+import { DayCalendarSingleDayTexts } from "@/components/days-calendar/day-calendar-single-day";
 import { getSingleDayTexts } from "@/texts/components/days";
-import { DaysCalendarCTATexts } from "@/components/dayCalendar/days-calendar-cta";
+import { DaysCalendarCTATexts } from "@/components/days-calendar/days-calendar-cta";
 
 export async function getDayCalendarHeaderTexts(): Promise<DayCalendarHeaderTexts> {
   const [t] = await Promise.all([
-    getTranslations("components.dayCalendar.DayCalendarHeaderTexts"),
+    getTranslations("components.daysCalendar.DayCalendarHeaderTexts"),
   ]);
   return {
     tracked: t("tracked"),
@@ -18,7 +18,7 @@ export async function getDayCalendarHeaderTexts(): Promise<DayCalendarHeaderText
 }
 export async function getDayCalendarEventTexts(): Promise<DayCalendarEventTexts> {
   const [t, dayCalendarSingleDayTexts] = await Promise.all([
-    getTranslations("components.dayCalendar.DayCalendarEventTexts"),
+    getTranslations("components.daysCalendar.DayCalendarEventTexts"),
     getDayCalendarSingleDayTexts(),
   ]);
   return {
@@ -29,7 +29,7 @@ export async function getDayCalendarEventTexts(): Promise<DayCalendarEventTexts>
 
 export async function getDayCalendarSingleDayTexts(): Promise<DayCalendarSingleDayTexts> {
   const [t, singleDayTexts] = await Promise.all([
-    getTranslations("components.dayCalendar.DayCalendarSingleDayTexts"),
+    getTranslations("components.daysCalendar.DayCalendarSingleDayTexts"),
     getSingleDayTexts(),
   ]);
   return {
@@ -40,7 +40,7 @@ export async function getDayCalendarSingleDayTexts(): Promise<DayCalendarSingleD
 
 export async function getDayCalendarBodyMonthTexts(): Promise<DayCalendarBodyMonthTexts> {
   const [t, calendarDayFormTexts, dayCalendarEventTexts] = await Promise.all([
-    getTranslations("components.dayCalendar.DayCalendarBodyMonthTexts"),
+    getTranslations("components.daysCalendar.DayCalendarBodyMonthTexts"),
     getCalendarDayFormTexts(),
     getDayCalendarEventTexts(),
   ]);
@@ -53,7 +53,7 @@ export async function getDayCalendarBodyMonthTexts(): Promise<DayCalendarBodyMon
 
 export async function getDaysCalendarCTATexts(): Promise<DaysCalendarCTATexts> {
   const t = await getTranslations(
-    "components.dayCalendar.DaysCalendarCTATexts",
+    "components.daysCalendar.DaysCalendarCTATexts",
   );
 
   return {

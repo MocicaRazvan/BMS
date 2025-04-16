@@ -135,9 +135,11 @@ export const useRadioSort = ({
 const useRadioSortButton = ({
   sortingProperty,
   radioArgs,
+  showNone,
 }: {
   sortingProperty: string;
   radioArgs: UseRadioSortArgs;
+  showNone: boolean;
 }) => {
   const sortParam = useSearchParams().get("sort");
   const splitParams = sortParam?.split(":") || [];
@@ -162,7 +164,11 @@ const useRadioSortButton = ({
       ) {
         return paramValue;
       }
-      return "none";
+      if (showNone) {
+        return "none";
+      } else {
+        return "desc";
+      }
     },
   );
 
@@ -188,7 +194,7 @@ const useRadioSortButton = ({
       handleValueChange(`${sortingProperty}-asc`);
       setToggleSort("asc");
     } else if (toggleSort === "asc") {
-      if (isDefaultActive) {
+      if (isDefaultActive || !showNone) {
         handleValueChange(`${sortingProperty}-desc`);
         setToggleSort("desc");
       } else {
@@ -200,8 +206,13 @@ const useRadioSortButton = ({
 
   const handleManualClick = (direction: SortingOption["direction"]) => {
     if (direction === "none" || direction === toggleSort) {
-      handleValueChange(undefined);
-      setToggleSort("none");
+      if (showNone) {
+        handleValueChange(undefined);
+        setToggleSort("none");
+      } else {
+        handleValueChange(`${sortingProperty}-desc`);
+        setToggleSort("desc");
+      }
     } else {
       handleValueChange(`${sortingProperty}-${direction}`);
       setToggleSort(direction);
@@ -212,6 +223,8 @@ const useRadioSortButton = ({
     toggleSort,
     handleButtonClick,
     handleManualClick,
+    canBeDefault,
+    isDefaultActive,
   };
 };
 
@@ -219,17 +232,20 @@ interface RadioSortButtonProps extends ButtonProps {
   sortingProperty: string;
   radioArgs: UseRadioSortArgs;
   children: ReactNode;
+  showNone?: boolean;
 }
 export const RadioSortButton = ({
   sortingProperty,
   radioArgs,
   children,
   className,
+  showNone = true,
   ...args
 }: RadioSortButtonProps) => {
   const radioSortButtonHook = useRadioSortButton({
     sortingProperty,
     radioArgs,
+    showNone,
   });
   if (!radioSortButtonHook) return children;
   const { toggleSort, handleButtonClick } = radioSortButtonHook;
@@ -278,6 +294,7 @@ export const RadioSortButtonGroup = ({
   const radioSortButtonHook = useRadioSortButton({
     sortingProperty,
     radioArgs,
+    showNone,
   });
   if (!radioSortButtonHook) return null;
   const { toggleSort, handleManualClick } = radioSortButtonHook;
@@ -328,9 +345,11 @@ export function RadioSortDropDownWithExtra({
   const radioSortButtonHook = useRadioSortButton({
     sortingProperty,
     radioArgs,
+    showNone,
   });
   if (!radioSortButtonHook) return null;
-  const { toggleSort, handleManualClick } = radioSortButtonHook;
+  const { toggleSort, handleManualClick, isDefaultActive } =
+    radioSortButtonHook;
   const directions = ["asc", "desc"];
   if (showNone) directions.push("none");
   return (
@@ -358,6 +377,7 @@ export function RadioSortDropDownWithExtra({
               onClick={() =>
                 handleManualClick(direction as SortingOption["direction"])
               }
+              disabled={direction === "desc" && isDefaultActive}
               // disabled={isDefaultActive}
               variant="ghost"
               className={cn(

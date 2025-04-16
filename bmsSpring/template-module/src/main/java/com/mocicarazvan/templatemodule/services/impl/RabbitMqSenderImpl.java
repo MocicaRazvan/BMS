@@ -13,6 +13,7 @@ import reactor.util.retry.RetryBackoffSpec;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.Map;
 
 @RequiredArgsConstructor
 @Builder
@@ -33,7 +34,10 @@ public class RabbitMqSenderImpl implements RabbitMqSender {
     private int retryDelaySeconds = 2;
 
     public <T> void sendMessage(T message) {
-        checkArgs(List.of(message));
+        if (message == null) {
+            throw new IllegalArgumentException("Message cannot be null");
+        }
+        checkArgsBase();
 //        log.info("Sending message: {} in exchange: {} with routing key: {}", message, exchangeName, routingKey);
         MonoWrapper.wrapBlockingFunction(() -> rabbitTemplate.convertAndSend(exchangeName, routingKey, message), getRetrySpec());
     }
@@ -42,6 +46,10 @@ public class RabbitMqSenderImpl implements RabbitMqSender {
         if (messages == null || messages.isEmpty()) {
             throw new IllegalArgumentException("Message cannot be null or empty");
         }
+        checkArgsBase();
+    }
+
+    private void checkArgsBase() {
         if (exchangeName == null || exchangeName.isEmpty()) {
             throw new IllegalArgumentException("Exchange name cannot be null or empty");
         }
@@ -67,6 +75,23 @@ public class RabbitMqSenderImpl implements RabbitMqSender {
         return Retry.backoff(retryCount, Duration.ofSeconds(retryDelaySeconds))
                 .doBeforeRetry(retrySignal ->
                         log.warn("Retrying message send attempt {} due to: {}", retrySignal.totalRetriesInARow(), retrySignal.failure().getMessage()));
+    }
+
+    @Override
+    public <T> void sendMessageWithHeaders(T message, Map<String, Object> headers) {
+        if (message == null) {
+            throw new IllegalArgumentException("Message cannot be null");
+        }
+        checkArgsBase();
+
+        MonoWrapper.wrapBlockingFunction(() -> {
+            rabbitTemplate.convertAndSend(exchangeName, routingKey, message, msg -> {
+                if (headers != null) {
+                    headers.forEach((key, value) -> msg.getMessageProperties().setHeader(key, value));
+                }
+                return msg;
+            });
+        }, getRetrySpec());
     }
 
     @Override

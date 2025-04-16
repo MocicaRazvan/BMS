@@ -2,10 +2,12 @@ package com.mocicarazvan.rediscache.services;
 
 import com.mocicarazvan.rediscache.config.FlushProperties;
 import com.mocicarazvan.rediscache.config.LocalCacheConfig;
-import com.mocicarazvan.rediscache.containers.AbstractRedisContainer;
+import com.mocicarazvan.rediscache.config.TestContainersImages;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
@@ -15,7 +17,13 @@ import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.redis.core.ReactiveStringRedisTemplate;
 import org.springframework.data.redis.core.ReactiveValueOperations;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.containers.wait.strategy.Wait;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -34,7 +42,23 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 @SpringBootTest
 @Import(LocalCacheConfig.class)
-class CacheViewServiceTest extends AbstractRedisContainer {
+@Execution(ExecutionMode.SAME_THREAD)
+@Testcontainers
+class CacheViewServiceTest {
+    @Container
+    @SuppressWarnings("resource")
+    public static final GenericContainer<?> redisContainer =
+            new GenericContainer<>(TestContainersImages.REDIS_IMAGE)
+                    .withExposedPorts(6379).waitingFor(Wait.forListeningPort());
+    ;
+
+    @DynamicPropertySource
+    static void redisProperties(DynamicPropertyRegistry registry) {
+        registry.add("spring.custom.cache.redis.host", redisContainer::getHost);
+        registry.add("spring.custom.cache.redis.port", redisContainer::getFirstMappedPort);
+        registry.add("spring.custom.cache.redis.database", () -> 0);
+        registry.add(":spring.custom.executor.redis.async.concurrency.limit", () -> 128);
+    }
 
     @SpyBean
     CacheViewService cacheViewService;

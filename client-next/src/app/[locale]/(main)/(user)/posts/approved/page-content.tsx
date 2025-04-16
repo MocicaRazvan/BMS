@@ -1,5 +1,5 @@
 "use client";
-import { useRouter } from "@/navigation";
+import { Locale, useRouter } from "@/navigation";
 import GridList, {
   GridListTexts,
   SortingOption,
@@ -12,8 +12,9 @@ import useTagsExtraCriteria, {
 import { SortingOptionsTexts } from "@/lib/constants";
 import Heading from "@/components/common/heading";
 import { useSearchParams } from "next/navigation";
-import { useState } from "react";
+import React, { useState } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
+import { readingTime } from "reading-time-estimator";
 
 export interface ApprovedPostsTexts {
   gridListTexts: GridListTexts;
@@ -26,6 +27,7 @@ export interface ApprovedPostsTexts {
 
 interface Props extends ApprovedPostsTexts {
   options: SortingOption[];
+  locale: Locale;
 }
 
 export default function PostApprovedPageContent({
@@ -36,6 +38,7 @@ export default function PostApprovedPageContent({
   options,
   tagsCriteriaTexts,
   likedLabel,
+  locale,
 }: Props) {
   const router = useRouter();
   const {
@@ -105,6 +108,11 @@ export default function PostApprovedPageContent({
               </label>
             </div>
           </div>
+        )}
+        passExtraHeader={(p) => (
+          <p className="text-sm text-muted-foreground font-semibold">
+            {readingTime(p.model.content.body, 200, locale).text}
+          </p>
         )}
       />
     </section>

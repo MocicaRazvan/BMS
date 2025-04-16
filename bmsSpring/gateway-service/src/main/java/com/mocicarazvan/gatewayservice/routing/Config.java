@@ -39,9 +39,10 @@ public class Config {
 
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH", "HEAD"));
         configuration.addAllowedHeader("*");
-        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Cache-Control", "Content-Type", "Accept", "X-Requested-With", "Origin", "Range",
+        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Cache-Control", "Content-Type", "Accept", "X-Requested-With", "Origin", "Range", "X-Bypass-Cache",
+                "X-Forwarded-For", "X-Forwarded-Host", "X-Forwarded-Port", "X-Forwarded-Prefix", "X-Forwarded-Proto", "X-Forwarded-Scheme", "X-Forwarded-Uri",
                 NextCsrfValidator.NEXT_CSRF_HEADER, NextCsrfValidator.NEXT_CSRF_HEADER_TOKEN));
-        configuration.setExposedHeaders(Arrays.asList("Access-Control-Allow-Origin", "Authorization", "Content-Type", "Content-Range", "Content-Length", "Content-Disposition", "Accept-Ranges"));
+        configuration.setExposedHeaders(Arrays.asList("Access-Control-Allow-Origin", "Authorization", "Content-Type", "Content-Range", "Content-Length", "Content-Disposition", "Accept-Ranges", "Cache-Control", "X-Bypass-Cache"));
         configuration.setAllowCredentials(true);
         configuration.setMaxAge(3600L);
 

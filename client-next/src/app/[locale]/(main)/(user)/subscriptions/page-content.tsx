@@ -25,7 +25,7 @@ import {
 } from "@/components/plans/plan-list-extra";
 import DaysCalendarCTA, {
   DaysCalendarCTATexts,
-} from "@/components/dayCalendar/days-calendar-cta";
+} from "@/components/days-calendar/days-calendar-cta";
 
 export interface SubscriptionsPageContentTexts {
   gridListTexts: GridListTexts;

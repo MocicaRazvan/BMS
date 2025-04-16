@@ -15,6 +15,7 @@ import reactor.core.publisher.Mono;
 
 import java.util.List;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public abstract class ValidIdsClient<R extends WithUserDto> extends ClientBase {
     public ValidIdsClient(String service, WebClient.Builder webClientBuilder, CircuitBreakerRegistry circuitBreakerRegistry, RetryRegistry retryRegistry, RateLimiterRegistry rateLimiterRegistry) {
@@ -28,17 +29,21 @@ public abstract class ValidIdsClient<R extends WithUserDto> extends ClientBase {
         if (ids.isEmpty()) {
             return Mono.empty();
         }
-        return getClient()
-                .get()
-                .uri(uriBuilder -> uriBuilder.path("/internal/validIds").queryParam("ids", ids.stream().distinct().toList()).build())
-                .accept(MediaType.APPLICATION_NDJSON)
-                .header(RequestsUtils.AUTH_HEADER, userId)
-                .retrieve()
-                .onStatus(HttpStatusCode::isError, response -> ClientExceptionHandler.handleClientException(response, serviceUrl, service))
-                .bodyToMono(Void.class)
-                .transform(this::applyResilience)
-                .onErrorResume(WebClientRequestException.class, ClientExceptionHandler::handleWebRequestException)
-                .onErrorResume(ThrowFallback.class, fallback);
+        return
+                Flux.fromIterable(ids)
+                        .collect(Collectors.toSet())
+                        .flatMap(uIds ->
+                                getClient()
+                                        .get()
+                                        .uri(uriBuilder -> uriBuilder.path("/internal/validIds").queryParam("ids", uIds).build())
+                                        .accept(MediaType.APPLICATION_NDJSON)
+                                        .header(RequestsUtils.AUTH_HEADER, userId)
+                                        .retrieve()
+                                        .onStatus(HttpStatusCode::isError, response -> ClientExceptionHandler.handleClientException(response, serviceUrl, service))
+                                        .bodyToMono(Void.class)
+                                        .transform(this::applyResilience)
+                                        .onErrorResume(WebClientRequestException.class, ClientExceptionHandler::handleWebRequestException)
+                                        .onErrorResume(ThrowFallback.class, fallback));
     }
 
     public abstract Mono<Void> verifyIds(List<String> ids, String userId);
@@ -47,17 +52,24 @@ public abstract class ValidIdsClient<R extends WithUserDto> extends ClientBase {
         if (serviceUrl == null) {
             return Flux.error(new IllegalArgumentException("Service url is null"));
         }
-        return getClient()
-                .get()
-                .uri(uriBuilder -> uriBuilder.path("/internal/getByIds").queryParam("ids", ids).build())
-                .accept(MediaType.APPLICATION_NDJSON)
-                .header(RequestsUtils.AUTH_HEADER, userId)
-                .retrieve()
-                .onStatus(HttpStatusCode::isError, response -> ClientExceptionHandler.handleClientException(response, serviceUrl, service))
-                .bodyToFlux(clazz)
-                .transform(this::applyResilience)
-                .onErrorResume(WebClientRequestException.class, ClientExceptionHandler::handleWebRequestException)
-                .onErrorResume(ThrowFallback.class, fallback);
+        if (ids.isEmpty()) {
+            return Flux.empty();
+        }
+        return
+                Flux.fromIterable(ids)
+                        .collect(Collectors.toSet())
+                        .flatMapMany(uIds ->
+                                getClient()
+                                        .get()
+                                        .uri(uriBuilder -> uriBuilder.path("/internal/getByIds").queryParam("ids", uIds).build())
+                                        .accept(MediaType.APPLICATION_NDJSON)
+                                        .header(RequestsUtils.AUTH_HEADER, userId)
+                                        .retrieve()
+                                        .onStatus(HttpStatusCode::isError, response -> ClientExceptionHandler.handleClientException(response, serviceUrl, service))
+                                        .bodyToFlux(clazz)
+                                        .transform(this::applyResilience)
+                                        .onErrorResume(WebClientRequestException.class, ClientExceptionHandler::handleWebRequestException)
+                                        .onErrorResume(ThrowFallback.class, fallback));
     }
 
     public abstract Flux<R> getByIds(List<String> ids, String userId);

@@ -15,6 +15,7 @@ import com.mocicarazvan.fileservice.repositories.MediaMetadataRepository;
 import com.mocicarazvan.fileservice.repositories.MediaRepository;
 import com.mocicarazvan.fileservice.service.BytesService;
 import com.mocicarazvan.fileservice.service.MediaService;
+import com.mocicarazvan.fileservice.utils.CacheHeaderUtils;
 import com.mocicarazvan.fileservice.websocket.ProgressWebSocketHandler;
 import com.mongodb.client.gridfs.model.GridFSFile;
 import lombok.RequiredArgsConstructor;
@@ -48,6 +49,7 @@ import java.nio.ByteBuffer;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicLong;
 
 @Service
 @RequiredArgsConstructor
@@ -97,12 +99,28 @@ public class MediaServiceImpl implements MediaService {
     @Override
     public Mono<ServerHttpResponse> getResponseForFile(String gridId, Integer width, Integer height, Double quality, ServerWebExchange exchange, boolean shouldCheckCache) {
         return shouldCheckCache ?
-                imageRedisRepository.getImage(gridId, width, height, quality).flatMap(
-                                tuple -> {
-                                    byte[] cachedImage = tuple.getT1();
-                                    String attch = tuple.getT2();
-//                                    log.info("Image found in cache");
+                Mono.defer(() -> imageRedisRepository.getImage(gridId, width, height, quality).flatMap(
+                                model -> {
+                                    byte[] cachedImage = model.getImageData();
+                                    String attch = model.getAttachment();
+                                    long timestamp = model.getTimestamp();
+
+
                                     ServerHttpResponse response = exchange.getResponse();
+
+
+                                    String etag = CacheHeaderUtils.buildETag(gridId, width, height, quality, timestamp);
+
+                                    String clientETag = exchange.getRequest().getHeaders().getFirst(HttpHeaders.IF_NONE_MATCH);
+                                    if (CacheHeaderUtils.etagEquals(etag, clientETag)) {
+                                        response.setStatusCode(HttpStatus.NOT_MODIFIED);
+                                        return Mono.just(response);
+                                    }
+                                    response.getHeaders().setCacheControl(CacheHeaderUtils.IMAGE_CACHE_CONTROL);
+                                    response.getHeaders().setETag(etag);
+                                    response.getHeaders().setLastModified(timestamp);
+
+
                                     String mediaType = MediaType.fromValue(attch).getValue();
                                     response.getHeaders().set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + gridId + attch + "\"");
                                     response.getHeaders().set(HttpHeaders.CONTENT_TYPE, "image/" + mediaType);
@@ -116,9 +134,9 @@ public class MediaServiceImpl implements MediaService {
                                                         .thenReturn(response);
                                             });
                                 }
-                        )
+                        ))
                         .switchIfEmpty(Mono.defer(() -> fetchFileAndProcessFromGridFS(gridId, width, height, quality, exchange))) :
-                fetchFileAndProcessFromGridFS(gridId, width, height, quality, exchange);
+                Mono.defer(() -> fetchFileAndProcessFromGridFS(gridId, width, height, quality, exchange));
     }
 
 
@@ -129,9 +147,28 @@ public class MediaServiceImpl implements MediaService {
                         .flatMap(gridFSFile -> {
                             FileType fileType = FileType.valueOf(file.getOptions().getMetadata().getString("fileType"));
                             MediaType mediaType = MediaType.fromValue(file.getOptions().getMetadata().getString("mediaType"));
+
+
 //                            log.info("File type: {}", fileType);
                             ServerHttpRequest request = exchange.getRequest();
                             ServerHttpResponse response = exchange.getResponse();
+
+
+                            List<HttpRange> httpRanges = request.getHeaders().getRange();
+                            String etag = CacheHeaderUtils.buildETag(gridId, width, height, quality, gridFSFile.getUploadDate().getTime());
+                            String clientETag = request.getHeaders().getFirst(HttpHeaders.IF_NONE_MATCH);
+                            if (httpRanges.isEmpty() && CacheHeaderUtils.etagEquals(etag, clientETag)) {
+                                response.setStatusCode(HttpStatus.NOT_MODIFIED);
+                                return Mono.just(response);
+                            }
+
+                            long ifModifiedSince = request.getHeaders().getIfModifiedSince();
+                            if (httpRanges.isEmpty() && ifModifiedSince > 0 && gridFSFile.getUploadDate().getTime() <= ifModifiedSince) {
+                                response.setStatusCode(HttpStatus.NOT_MODIFIED);
+                                return Mono.just(response);
+                            }
+                            CacheHeaderUtils.setCachingHeaders(response, request, gridFSFile, gridId, fileType);
+
 
                             response.getHeaders().set(HttpHeaders.ACCEPT_RANGES, "bytes");
                             String fileAttch = !mediaType.equals(MediaType.ALL) ? "." + mediaType.getValue() : "";
@@ -145,7 +182,6 @@ public class MediaServiceImpl implements MediaService {
                             }
 
 
-                            List<HttpRange> httpRanges = request.getHeaders().getRange();
                             Flux<DataBuffer> downloadStream = file.getDownloadStream();
                             long fileLength = gridFSFile.getLength();
 //                            log.info("Range: " + httpRanges);
@@ -170,8 +206,11 @@ public class MediaServiceImpl implements MediaService {
                                 response.getHeaders().setContentLength(end - start + 1);
 
 
-                                final long[] rangeStart = {start};
-                                final long[] rangeEnd = {end};
+//                                final long[] rangeStart = {start};
+//                                final long[] rangeEnd = {end};
+
+                                AtomicLong rangeStart = new AtomicLong(start);
+                                AtomicLong rangeEnd = new AtomicLong(end);
 
                                 downloadStream = bytesService.getVideoByRange(file, rangeStart, rangeEnd)
                                         .doOnNext(_ -> {
@@ -190,13 +229,23 @@ public class MediaServiceImpl implements MediaService {
                             return response.writeWith(finalDownloadStream)
                                     .thenReturn(response)
                                     .onErrorResume(e -> {
-                                        response.setStatusCode(HttpStatus.FOUND);
-                                        response.getHeaders().setLocation(URI.create("/files/download/" + gridId));
+                                        if (!response.isCommitted()) {
+                                            log.error("Error writing response", e);
+                                            CacheHeaderUtils.clearCacheHeaders(exchange.getResponse());
+                                            response.setStatusCode(HttpStatus.FOUND);
+                                            response.getHeaders().setLocation(URI.create("/files/download/" + gridId));
+                                        }
                                         return response.setComplete()
                                                 .thenReturn(response);
                                     });
-                        }));
+                        }))
+                .doOnError(e -> {
+                    log.error("Error getting file", e);
+                    CacheHeaderUtils.clearCacheHeaders(exchange.getResponse());
+                });
+
     }
+
 
     private Mono<Tuple2<Long, String>> saveFileWithIndex(Long index, FilePart filePart, MetadataDto metadataDto) {
         return saveFile(filePart, metadataDto)

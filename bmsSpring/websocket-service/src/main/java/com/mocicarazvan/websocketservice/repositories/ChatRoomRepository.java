@@ -7,6 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -38,7 +39,7 @@ public interface ChatRoomRepository extends IdGeneratedRepository<ChatRoom> {
     List<ChatRoom> findAllByUsersEmail(String email);
 
     @Query("SELECT cr FROM ChatRoom cr JOIN cr.users u WHERE u.email IN :emails GROUP BY cr HAVING COUNT(DISTINCT u.email) = :emailCount")
-    List<ChatRoom> findAllByUserEmails(List<String> emails, long emailCount);
+    List<ChatRoom> findAllByUserEmails(Collection<String> emails, long emailCount);
 
     //    @Query("""
 //            SELECT DISTINCT cr FROM ChatRoom cr JOIN cr.users u

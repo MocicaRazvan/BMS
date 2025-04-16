@@ -12,6 +12,8 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.stream.Collectors;
+
 @Mapper(componentModel = "spring")
 public abstract class ConversationUserMapper implements ModelResponseMapper<ConversationUser, ConversationUserResponse> {
 
@@ -46,7 +48,7 @@ public abstract class ConversationUserMapper implements ModelResponseMapper<Conv
                                         conversationUser.getConnectedChatRoom().getUsers()
                                                 .stream()
                                                 .map(this::_fromModelToResponse)
-                                                .collect(java.util.stream.Collectors.toSet())
+                                                .collect(Collectors.toSet())
                                 )
                                 .build()
         );

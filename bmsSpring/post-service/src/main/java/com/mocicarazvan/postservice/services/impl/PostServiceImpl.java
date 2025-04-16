@@ -272,13 +272,13 @@ public class PostServiceImpl extends ApprovedServiceImpl<Post, PostBody, PostRes
 
         @Override
         @RedisReactiveApprovedCacheEvict(key = CACHE_KEY_PATH, forWhomPath = "#r.userId")
-        protected Mono<Pair<PostResponse, Boolean>> createInvalidate(PostResponse r) {
+        public Mono<Pair<PostResponse, Boolean>> createInvalidate(PostResponse r) {
             return super.createInvalidate(r);
         }
 
         @Override
         @RedisReactiveApprovedCacheEvict(key = CACHE_KEY_PATH, id = "#p.getFirst().getId()", forWhomPath = "#p.getFirst().getUserId()")
-        protected Mono<Pair<PostResponse, Boolean>> updateDeleteInvalidate(Pair<PostResponse, Boolean> p) {
+        public Mono<Pair<PostResponse, Boolean>> updateDeleteInvalidate(Pair<PostResponse, Boolean> p) {
             return super.updateDeleteInvalidate(p);
         }
 

@@ -10,7 +10,7 @@ public class Randomizer {
             return items;
         }
 
-        int randomAmount = (int) (Math.random() * items.size());
+        int randomAmount = 1 + (int) (Math.random() * items.size());
         List<T> copy = new ArrayList<>(items);
         Collections.shuffle(copy);
         return copy.subList(0, randomAmount);

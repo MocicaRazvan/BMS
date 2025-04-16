@@ -37,14 +37,14 @@ public class EntitiesUtils {
         Set<Long> likes = new HashSet<>(model.getUserLikes());
         Set<Long> dislikes = new HashSet<>(model.getUserDislikes());
 
-        if (type.equals("like")) {
+        if (type.equalsIgnoreCase("like")) {
             if (likes.contains(user.getId())) {
                 likes.remove(user.getId());
             } else {
                 likes.add(user.getId());
                 dislikes.remove(user.getId());
             }
-        } else if (type.equals("dislike")) {
+        } else if (type.equalsIgnoreCase("dislike")) {
             if (dislikes.contains(user.getId())) {
                 dislikes.remove(user.getId());
             } else {

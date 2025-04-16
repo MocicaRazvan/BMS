@@ -2,6 +2,7 @@ package com.mocicarazvan.templatemodule.email.impl;
 
 
 import com.mocicarazvan.templatemodule.email.EmailUtils;
+import com.mocicarazvan.templatemodule.exceptions.email.EmailFailToSend;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +22,7 @@ public class EmailUtilsImpl implements EmailUtils {
 
     @Override
     public Mono<Void> sendEmail(String to, String subject, String content) {
+        // double context switch bc of virtual threads
         return
                 Mono.just(true)
                         .flatMap(_ ->
@@ -36,7 +38,7 @@ public class EmailUtilsImpl implements EmailUtils {
                                                 return Mono.empty();
                                             } catch (Exception ex) {
                                                 log.error("Error sending email to: " + to, ex);
-                                                return Mono.error(ex);
+                                                throw new EmailFailToSend(to, subject, content);
                                             }
                                         })
                                         .subscribeOn(Schedulers.boundedElastic())

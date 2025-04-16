@@ -8,7 +8,12 @@ on:
     paths:
       - 'bmsSpring/websocket-service/**'
 jobs:
+  test-websocket-service:
+    uses: ./.github/workflows/test-run.yml
+    with:
+      app-path: websocket-service
   build-and-push-websocket-service:
+    needs: [ test-websocket-service ]
     uses: ./.github/workflows/build-and-push.yml
     with:
       image-name: websocket-service-bms

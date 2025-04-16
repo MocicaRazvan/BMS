@@ -4,22 +4,28 @@ import com.mocicarazvan.templatemodule.services.RabbitMqSender;
 import com.mocicarazvan.templatemodule.services.RabbitMqUpdateDeleteService;
 import com.mocicarazvan.templatemodule.services.impl.RabbitMqSenderImpl;
 import com.mocicarazvan.templatemodule.services.impl.RabbitMqUpdateDeleteServiceImpl;
+import com.mocicarazvan.templatemodule.utils.RabbitMqQueueUtils;
 import com.mocicarazvan.templatemodule.utils.SimpleTaskExecutorsInstance;
 import com.mocicarazvan.userservice.models.UserCustom;
 import org.springframework.amqp.core.*;
+import org.springframework.amqp.rabbit.annotation.RabbitListenerConfigurer;
+import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.amqp.rabbit.listener.RabbitListenerEndpointRegistrar;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.amqp.SimpleRabbitListenerContainerFactoryConfigurer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.retry.support.RetryTemplate;
+import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
 @Configuration
-public class RabbitMqConfig {
+public class RabbitMqConfig implements RabbitListenerConfigurer {
     @Value("${user.delete.queue.name}")
     private String userDeleteQueueName;
 
@@ -44,15 +50,42 @@ public class RabbitMqConfig {
     @Value("${user.fanout.exchange.name}")
     private String userFanoutExchangeName;
 
+    private final LocalValidatorFactoryBean validator;
+
+    public RabbitMqConfig(LocalValidatorFactoryBean validator) {
+        this.validator = validator;
+    }
+
+//    @Bean
+//    public Queue userDeleteQueue() {
+//        return new Queue(userDeleteQueueName, true);
+//    }
+
     @Bean
     public Queue userDeleteQueue() {
-        return new Queue(userDeleteQueueName, true);
+        return RabbitMqQueueUtils.durableQueueWithDlq(userDeleteQueueName);
     }
 
     @Bean
-    public Queue userUpdateQueue() {
-        return new Queue(userUpdateQueueName, true);
+    public Queue userDeleteDlqQueue() {
+        return RabbitMqQueueUtils.deadLetterQueue(userDeleteQueueName);
     }
+
+//    @Bean
+//    public Queue userUpdateQueue() {
+//        return new Queue(userUpdateQueueName, true);
+//    }
+
+    @Bean
+    public Queue userUpdateQueue() {
+        return RabbitMqQueueUtils.durableQueueWithDlq(userUpdateQueueName);
+    }
+
+    @Bean
+    public Queue userUpdateDlqQueue() {
+        return RabbitMqQueueUtils.deadLetterQueue(userUpdateQueueName);
+    }
+
 
     @Bean
     public Queue userCacheInvalidateQueue() {
@@ -117,12 +150,12 @@ public class RabbitMqConfig {
 
     @Bean
     public Queue usersEmailsRpcQueue() {
-        return new Queue("users.rpc.queue", true, false, true);
+        return new Queue("users.rpc.queue", true, false, false);
     }
 
     @Bean
     public Queue usersEmailExistsQueue() {
-        return new Queue("users.email.exists", true, false, true);
+        return new Queue("users.email.exists", true, false, false);
     }
 
     @Bean
@@ -139,6 +172,12 @@ public class RabbitMqConfig {
     }
 
     @Bean
+    public Binding userCacheInvalidateBinding(@Qualifier("userCacheInvalidateQueue") Queue userCacheInvalidateQueue,
+                                              @Qualifier("userFanoutExchange") FanoutExchange userFanoutExchange) {
+        return BindingBuilder.bind(userCacheInvalidateQueue).to(userFanoutExchange);
+    }
+
+    @Bean
     public Binding userEmailExistsBinding(Queue usersEmailExistsQueue, DirectExchange usersRpcExchange) {
         return BindingBuilder
                 .bind(usersEmailExistsQueue)
@@ -146,4 +185,21 @@ public class RabbitMqConfig {
                 .with("users.rpc.existsUserByEmail");
     }
 
+    @Bean
+    public SimpleRabbitListenerContainerFactory rabbitListenerContainerFactory(
+            ConnectionFactory connectionFactory,
+            SimpleRabbitListenerContainerFactoryConfigurer configurer,
+            @Qualifier("rabbitMqAsyncTaskExecutor") SimpleAsyncTaskExecutor taskExecutor
+    ) {
+
+        SimpleRabbitListenerContainerFactory factory = new SimpleRabbitListenerContainerFactory();
+        configurer.configure(factory, connectionFactory);
+        factory.setTaskExecutor(taskExecutor);
+        return factory;
+    }
+
+    @Override
+    public void configureRabbitListeners(RabbitListenerEndpointRegistrar registrar) {
+        registrar.setValidator(validator);
+    }
 }

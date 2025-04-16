@@ -8,6 +8,7 @@ import com.mocicarazvan.websocketservice.enums.BoughtNotificationType;
 import com.mocicarazvan.websocketservice.models.Plan;
 import com.mocicarazvan.websocketservice.service.generic.NotificationTemplateService;
 
+
 public interface BoughtNotificationService extends NotificationTemplateService<Plan, PlanResponse, BoughtNotificationType, BoughtNotificationBody, BoughtNotificationResponse> {
     Void saveInternalNotifications(InternalBoughtBody internalBoughtBody);
 }

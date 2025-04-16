@@ -5,13 +5,19 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mocicarazvan.archiveservice.validators.QueueNameValidator;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.connection.ReactiveSubscription;
 import org.springframework.data.redis.core.ReactiveRedisTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.socket.WebSocketHandler;
+import org.springframework.web.reactive.socket.WebSocketMessage;
 import org.springframework.web.reactive.socket.WebSocketSession;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.Duration;
+
+@Slf4j
 @Component
 @RequiredArgsConstructor
 @Getter
@@ -25,10 +31,18 @@ public class BatchHandler implements WebSocketHandler {
     @Override
     public Mono<Void> handle(WebSocketSession session) {
 
-        return redisTemplate.listenToChannel(CHANNEL_PREFIX)
+        Mono<Void> sendPing = session.send(
+                Flux.interval(Duration.ofSeconds(5), Duration.ofSeconds(5))
+                        .map(_ -> session.pingMessage(_ -> session.bufferFactory().allocateBuffer(1))));
+
+        Flux<WebSocketMessage> outboundMessages = redisTemplate.listenToChannel(CHANNEL_PREFIX)
                 .map(ReactiveSubscription.Message::getMessage)
-                .flatMap(message -> session.send(Mono.just(session.textMessage(message))))
-                .takeUntilOther(session.receive()).then();
+                .map(session::textMessage);
+
+        Mono<Void> out = session.send(outboundMessages);
+
+        return Mono.when(out, sendPing);
+
     }
 
     public static String getChannelName() {

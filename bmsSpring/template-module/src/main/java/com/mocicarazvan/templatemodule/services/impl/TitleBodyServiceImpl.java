@@ -4,7 +4,6 @@ package com.mocicarazvan.templatemodule.services.impl;
 import com.mocicarazvan.templatemodule.clients.UserClient;
 import com.mocicarazvan.templatemodule.dtos.UserDto;
 import com.mocicarazvan.templatemodule.dtos.generic.WithUserDto;
-import com.mocicarazvan.templatemodule.dtos.response.ResponseWithUserDto;
 import com.mocicarazvan.templatemodule.dtos.response.ResponseWithUserLikesAndDislikes;
 import com.mocicarazvan.templatemodule.mappers.DtoMapper;
 import com.mocicarazvan.templatemodule.models.TitleBody;
@@ -16,6 +15,7 @@ import com.mocicarazvan.templatemodule.utils.PageableUtilsCustom;
 import lombok.Getter;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
@@ -30,7 +30,8 @@ public abstract class TitleBodyServiceImpl<MODEL extends TitleBody, BODY, RESPON
     protected final EntitiesUtils entitiesUtils;
 
 
-    public TitleBodyServiceImpl(S modelRepository, M modelMapper, PageableUtilsCustom pageableUtils, UserClient userClient, String modelName, List<String> allowedSortingFields, EntitiesUtils entitiesUtils, CR titleBodyServiceRedisCacheWrapper, RabbitMqUpdateDeleteService<MODEL> rabbitMqUpdateDeleteService) {
+    public TitleBodyServiceImpl(S modelRepository, M modelMapper, PageableUtilsCustom pageableUtils, UserClient userClient, String modelName, List<String> allowedSortingFields,
+                                EntitiesUtils entitiesUtils, CR titleBodyServiceRedisCacheWrapper, RabbitMqUpdateDeleteService<MODEL> rabbitMqUpdateDeleteService) {
         super(modelRepository, modelMapper, pageableUtils, userClient, modelName, allowedSortingFields, titleBodyServiceRedisCacheWrapper, rabbitMqUpdateDeleteService);
         this.entitiesUtils = entitiesUtils;
     }
@@ -60,6 +61,8 @@ public abstract class TitleBodyServiceImpl<MODEL extends TitleBody, BODY, RESPON
                         .flatMap(authUser -> {
                             MODEL model = modelMapper.fromBodyToModel(body);
                             model.setUserId(authUser.getId());
+                            model.setCreatedAt(LocalDateTime.now());
+                            model.setUpdatedAt(LocalDateTime.now());
                             if (model.getUserDislikes() == null)
                                 model.setUserDislikes(List.of());
                             if (model.getUserLikes() == null)
@@ -94,13 +97,9 @@ public abstract class TitleBodyServiceImpl<MODEL extends TitleBody, BODY, RESPON
         }
 
         public Mono<ResponseWithUserLikesAndDislikes<RESPONSE>> getModelByIdWithUserLikesAndDislikesBase(Long id, UserDto authUser) {
-
             return
                     getModel(id)
-                            .flatMap(model -> getModelGuardWithLikesAndDislikesBase(authUser, model, true)
-
-
-                            );
+                            .flatMap(model -> getModelGuardWithLikesAndDislikesBase(authUser, model, true));
         }
 
         public Mono<RESPONSE> reactToModelInvalidate(RESPONSE r) {
@@ -110,19 +109,18 @@ public abstract class TitleBodyServiceImpl<MODEL extends TitleBody, BODY, RESPON
 
         public Mono<ResponseWithUserLikesAndDislikes<RESPONSE>> getModelGuardWithLikesAndDislikesBase(UserDto authUser, MODEL model, boolean guard) {
             return getModelGuardWithUserBase(authUser, model, guard)
-                    .zipWith(userClient.getUsersByIdIn("/byIds", model.getUserLikes()).collectList())
-                    .zipWith(userClient.getUsersByIdIn("/byIds", model.getUserDislikes()).collectList())
-                    .map(tuple -> {
-                        ResponseWithUserDto<RESPONSE> responseWithUserDto = tuple.getT1().getT1();
-                        List<UserDto> userLikes = tuple.getT1().getT2();
-                        List<UserDto> userDislikes = tuple.getT2();
-                        return ResponseWithUserLikesAndDislikes.<RESPONSE>builder()
-                                .model(responseWithUserDto.getModel())
-                                .user(responseWithUserDto.getUser())
-                                .userLikes(userLikes)
-                                .userDislikes(userDislikes)
-                                .build();
-                    });
+                    .zipWhen(_ ->
+                            Mono.zip(
+                                    userClient.getUsersByIdIn("/byIds", model.getUserLikes()).collectList(),
+                                    userClient.getUsersByIdIn("/byIds", model.getUserDislikes()).collectList()
+                            )
+                    )
+                    .map(tuple -> ResponseWithUserLikesAndDislikes.<RESPONSE>builder()
+                            .model(tuple.getT1().getModel())
+                            .user(tuple.getT1().getUser())
+                            .userLikes(tuple.getT2().getT1())
+                            .userDislikes(tuple.getT2().getT2())
+                            .build());
         }
 
     }

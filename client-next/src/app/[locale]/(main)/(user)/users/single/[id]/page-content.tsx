@@ -27,7 +27,7 @@ import { useStompClient } from "react-stomp-hooks";
 import useClientNotFound from "@/hoooks/useClientNotFound";
 import DaysCalendarCTA, {
   DaysCalendarCTATexts,
-} from "@/components/dayCalendar/days-calendar-cta";
+} from "@/components/days-calendar/days-calendar-cta";
 
 export interface UserPageTexts {
   updateProfileTexts: UpdateProfileTexts;

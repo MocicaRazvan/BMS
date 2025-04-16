@@ -19,11 +19,10 @@ import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientRequestException;
+import org.springframework.web.util.UriBuilder;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.net.URI;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -58,14 +57,12 @@ public class UserClient extends ClientBase {
                 .onErrorResume(ThrowFallback.class, e -> Mono.error(new NotFoundEntity(
                         "user", Long.valueOf(uri.substring(uri.lastIndexOf("/") + 1))
                 )))
-                .map(CustomEntityModel::getContent)
-                ;
+                .map(CustomEntityModel::getContent);
 
 
     }
 
     private Mono<? extends Throwable> handleNotFoundException(ClientResponse response, String uri) {
-        log.info(response.toString());
         if (response.statusCode().equals(HttpStatus.NOT_FOUND)) {
             return response.bodyToMono(NotFoundEntity.class)
                     .flatMap(Mono::error);
@@ -76,7 +73,7 @@ public class UserClient extends ClientBase {
     }
 
     public Mono<Boolean> hasPermissionToModifyEntity(UserDto authUser, Long entityUserId) {
-        return Mono.just(authUser.getRole() == Role.ROLE_ADMIN || Objects.equals(authUser.getId(), entityUserId));
+        return Mono.just(Objects.equals(authUser.getRole(), Role.ROLE_ADMIN) || Objects.equals(authUser.getId(), entityUserId));
     }
 
     public Mono<Void> existsUser(String uri, String userId) {
@@ -93,12 +90,17 @@ public class UserClient extends ClientBase {
     }
 
     public Mono<Void> existsUser(String uri, List<Role> roles) {
-        List<Role> rolesList = roles == null ? new ArrayList<>() : roles;
         return getClient()
                 .get()
-                .uri(uriBuilder -> uriBuilder.path(uri).queryParam("roles", rolesList.stream()
-                        .map(Role::toString).toList()
-                ).build())
+                .uri(uriBuilder -> {
+                    UriBuilder builder = uriBuilder.path(uri);
+                    if (roles != null && !roles.isEmpty()) {
+                        builder.queryParam("roles", roles.stream()
+                                .map(Role::toString)
+                                .toArray());
+                    }
+                    return builder.build();
+                })
                 .accept(MediaType.APPLICATION_NDJSON)
                 .retrieve()
                 .onStatus(HttpStatusCode::isError, response -> handleNotFoundException(response, uri))
@@ -113,13 +115,12 @@ public class UserClient extends ClientBase {
 
     // byIds
     public Flux<UserDto> getUsersByIdIn(String uri, List<Long> ids) {
+        if (ids == null || ids.isEmpty()) {
+            return Flux.empty();
+        }
         return getClient()
                 .get()
-                .uri(uriBuilder -> {
-                    URI builtUri = uriBuilder.path(uri).queryParam("ids", ids).build();
-                    log.debug("Calling URI: {}", builtUri);
-                    return builtUri;
-                })
+                .uri(uriBuilder -> uriBuilder.path(uri).queryParam("ids", ids).build())
                 .accept(MediaType.APPLICATION_NDJSON)
                 .retrieve()
                 .onStatus(HttpStatusCode::isError, response -> handleNotFoundException(response, uri))

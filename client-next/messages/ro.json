@@ -348,7 +348,7 @@
     }
   },
   "components": {
-    "dayCalendar": {
+    "daysCalendar": {
       "DayCalendarHeaderTexts": {
         "tracked": "Urmărite"
       },
@@ -869,6 +869,7 @@
           "stopTooltip": "Niciun consumator activ",
           "toastSchedule": "Consumatorii sunt programați pentru ",
           "toastStop": "Consumatorii sunt opriți",
+          "toastCron": "Consumatorii sunt porniți",
           "scheduleTooltip": "Consumatorii sunt deja programați",
           "consumerStoppedDescription": "Consumatorii sunt opriți"
         }
@@ -981,6 +982,23 @@
       }
     },
     "table": {
+      "ArchiveQueuesTableTexts": {
+        "actionPlaceholder": "Filtreaza acțiunea...",
+        "queueNamePlaceholder": "Filtreaza numele cozii...",
+        "clearFilters": "Șterge filtrele",
+        "noResults": "Nu s-au găsit rezultate conform criteriilor de căutare!",
+        "columns": {
+          "action": "Acțiune",
+          "queueName": "Numele cozii",
+          "timestamp": "Data",
+          "id": "id"
+        },
+        "linkedChart": {
+          "default": "Grafic asociat datelor curente din tabel",
+          "selected": "Grafic asociat coloanelor selecționate"
+        },
+        "downloadSelected": "Descarcă selectate"
+      },
       "SelectedRowsTexts": {
         "of": " din ",
         "rowsSelected": "linii selectate"
@@ -998,7 +1016,11 @@
         "columnsLabel": "Coloane",
         "noResults": "Nu s-au găsit rezultate conform criteriilor de căutare!",
         "exportLabel": "Export",
-        "downloadSelected": "Descarcă selectate"
+        "downloadSelected": "Descarcă selectate",
+        "linkedChart": {
+          "table": "Grafic asociat datelor curente din tabel",
+          "persisted": "Grafic asociat coloanelor selecționate"
+        }
       },
       "PostTableTexts": {
         "search": "Caută în titlu..."
@@ -1373,6 +1395,25 @@
         "viewCount": "Numărul de vizualizări",
         "tags": "Taguri:",
         "periodLabel": "Perioadă"
+      },
+      "LinkedChartTexts": {
+        "title": "Grafic asociat datelor curente din tabel",
+        "dateFormat": "Formatul datei",
+        "dateFormatPlaceholder": "Caută formatul...",
+        "chartType": "Tipul graficului",
+        "aggregates": "Coloane agregate",
+        "aggregatesPlaceholder": "Caută coloanele...",
+        "selectAggregates": "Selectează coloanele",
+        "reset": "Resetează",
+        "nothingFound": "Nu s-au găsit rezultate",
+        "dateFormatDropDown": {
+          "MMM_yyyy": "Lună (Mai 2025)",
+          "QQQ_yyyy": "Trimestru (T1 2025)",
+          "yyyy": "An (2025)",
+          "MM/dd/yyyy": "Dată SUA (25.05.2025)",
+          "dd/MM/yyyy": "Dată UE (25.05.2025)",
+          "yyyy-MM-dd": "Dată ISO (2025-05-25)"
+        }
       }
     },
     "plans": {
@@ -1417,6 +1458,7 @@
             "ingredients": "Ingrediente",
             "users": "Utilizatori",
             "orders": "Comenzi",
+            "archive": "Cozile de arhivare",
             "monthlySales": "Vânzări lunare",
             "dailySales": "Vânzări zilnice",
             "countries": "Țări",
@@ -1574,6 +1616,10 @@
           "title": "Nu lăsa rezultatele să te încetinească",
           "text": "Nu deveni prea confortabil și nu crede că nu poți pierde ceea ce ai realizat. Aici se face diferența dintre sprint și maraton."
         }
+      },
+      "HomeMapTexts": {
+        "title": "Fără limite",
+        "subtitle": "Depășește granițele tradiționale. Fii cea mai bună versiune a ta oriunde, oricând. Lasă scuzele acasă, nu și dieta."
       }
     },
     "ui": {
@@ -2064,6 +2110,23 @@
         "title": "Toate comenzile",
         "header": "Aici poți vedea și gestiona toate comenzile de pe platformă."
       },
+      "AdminArchiveQueuesPageTexts": {
+        "title": "Cozile de arhivare",
+        "header": "Aici poți vedea și gestiona toate cozile de arhivare de pe platformă.",
+        "archiveTitle": "Statisticile curente ale arhivării",
+        "archiveTableTitle": "Istorciul arhivării pentru ultimele 60 de zile",
+        "selectItems": {
+          "comment": "Comentarii",
+          "day": "Zile",
+          "ingredient": "Ingrediente",
+          "meal": "Mese",
+          "plan": "Planuri",
+          "post": "Postări",
+          "recipe": "Rețete",
+          "user": "Utilizatori",
+          "all": "Toate"
+        }
+      },
       "AdminDashboardPageTexts": {
         "title": "Panou de administrare",
         "header": "Aici poți vedea un sumar al activității de pe platformă.",
@@ -2159,11 +2222,6 @@
     }
   },
   "metadata": {
-    "DaysCalendar": {
-      "title": "Calendarul Zilelor",
-      "description": "Urmărește progresul tău",
-      "keywords": "zile, calendar, progres"
-    },
     "LocaleLayout": {
       "title": "Bro Meets Science",
       "description": "Bro Meets Science este o platformă care oferă o gamă largă de planuri, rețete și postări pentru a te ajuta să îți îmbunătățești sănătatea și stilul de viață. Alătură-te nouă și începe călătoria către o viață mai sănătoasă!",
@@ -2202,6 +2260,11 @@
       }
     },
     "user": {
+      "DaysCalendar": {
+        "title": "Calendarul Zilelor",
+        "description": "Urmărește progresul tău",
+        "keywords": "zile, calendar, progres"
+      },
       "Cart": {
         "title": "Coșul Tău",
         "description": "Aici poți vedea și gestiona toate planurile pe care le-ai adăugat în coș.",
@@ -2406,6 +2469,11 @@
       }
     },
     "admin": {
+      "ArchiveQueues": {
+        "title": "Cozile de Arhivare",
+        "description": "Aici poți vizualiza cozile de arhivare pentru elementele de pe platformă.",
+        "keywords": "cozi, arhivare, elemente, platformă, vizualizare, gestionare"
+      },
       "Countries": {
         "title": "Comenzi pe țări",
         "description": "Statistici pe țări pentru comenzile de pe Bro Meets Science",

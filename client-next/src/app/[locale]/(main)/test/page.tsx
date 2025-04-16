@@ -6,8 +6,8 @@ import { getAdminDashboardPageTexts } from "@/texts/pages";
 import { getUser } from "@/lib/user";
 import { getEditorTexts } from "@/texts/components/editor";
 import DayCalendarProvider from "@/context/day-calendar-context";
-import DayCalendarHeaderDate from "@/components/dayCalendar/day-calendar-header";
-import DayCalendarBody from "@/components/dayCalendar/day-calendar-body";
+import DayCalendarHeaderDate from "@/components/days-calendar/day-calendar-header";
+import DayCalendarBody from "@/components/days-calendar/day-calendar-body";
 import React from "react";
 import {
   getDayCalendarBodyMonthTexts,
@@ -15,6 +15,8 @@ import {
 } from "@/texts/components/day-calendar";
 
 import TestPageContent from "./page-content";
+import { ArchiveQueuesTableTexts } from "@/components/table/archive-queues-table";
+import { getArchiveQueuesTableTexts } from "@/texts/components/table";
 
 interface Props {
   params: {
@@ -24,12 +26,8 @@ interface Props {
 
 export default async function TestPage({ params }: Props) {
   const session = await getServerSession(authOptions);
-  const metadataValues = await getMetadataValues(session?.user, params.locale);
-  const texts = await getAdminDashboardPageTexts();
+  const texts = await getArchiveQueuesTableTexts();
   const authUser = await getUser();
-  const editorTexts = await getEditorTexts();
-  const [dayCalendarHeaderTexts, dayCalendarBodyMonthTexts] = await Promise.all(
-    [getDayCalendarHeaderTexts(), getDayCalendarBodyMonthTexts()],
-  );
-  return <TestPageContent authUser={authUser} />;
+
+  return <TestPageContent authUser={authUser} texts={texts} />;
 }

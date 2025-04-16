@@ -7,6 +7,7 @@ import com.mocicarazvan.archiveservice.exceptions.QueueNameNotValid;
 import com.mocicarazvan.archiveservice.exceptions.QueuePrefixNotFound;
 import com.mocicarazvan.archiveservice.listeners.ChannelAwareBatchMessageListenerImpl;
 import com.mocicarazvan.archiveservice.services.SaveMessagesAggregator;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @Component
 public class SimpleMessageListenerContainerFactory {
     private final SimpleAsyncTaskScheduler executor;
@@ -66,7 +68,7 @@ public class SimpleMessageListenerContainerFactory {
     }
 
     public List<SimpleMessageListenerContainer> createAllContainers() {
-        System.out.println(queuesPropertiesConfig.getQueuesJobs());
+        log.info("Queues jobs: {}", queuesPropertiesConfig.getQueuesJobs());
         return queuesPropertiesConfig.getQueues().stream()
                 .map(this::createContainer)
                 .toList();

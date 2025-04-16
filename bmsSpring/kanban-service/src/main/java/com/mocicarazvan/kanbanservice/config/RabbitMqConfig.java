@@ -7,22 +7,25 @@ import com.mocicarazvan.templatemodule.services.RabbitMqUpdateDeleteService;
 import com.mocicarazvan.templatemodule.services.impl.RabbitMqSenderImpl;
 import com.mocicarazvan.templatemodule.services.impl.RabbitMqUpdateDeleteNoOpServiceImpl;
 import com.mocicarazvan.templatemodule.utils.SimpleTaskExecutorsInstance;
-import org.springframework.amqp.core.AnonymousQueue;
-import org.springframework.amqp.core.FanoutExchange;
-import org.springframework.amqp.core.Queue;
+import org.springframework.amqp.core.*;
+import org.springframework.amqp.rabbit.annotation.RabbitListenerConfigurer;
+import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.amqp.rabbit.listener.RabbitListenerEndpointRegistrar;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.amqp.SimpleRabbitListenerContainerFactoryConfigurer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.retry.support.RetryTemplate;
+import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
 @Configuration
-public class RabbitMqConfig {
+public class RabbitMqConfig implements RabbitListenerConfigurer {
 
     @Value("${spring.custom.rabbit.thread.pool.executorAsyncConcurrencyLimit:64}")
     private int executorAsyncConcurrencyLimit;
@@ -33,6 +36,13 @@ public class RabbitMqConfig {
     @Value("${kanban.fanout.exchange.name}")
     private String kanbanFanoutExchangeName;
 
+    private final LocalValidatorFactoryBean validator;
+
+    public RabbitMqConfig(LocalValidatorFactoryBean validator) {
+        this.validator = validator;
+    }
+
+
     @Bean
     public Queue kanbanCacheInvalidateQueue() {
         return new AnonymousQueue();
@@ -41,6 +51,12 @@ public class RabbitMqConfig {
     @Bean
     public FanoutExchange kanbanFanoutExchange() {
         return new FanoutExchange(kanbanFanoutExchangeName);
+    }
+
+    @Bean
+    public Binding kanbanCacheInvalidateBinding(@Qualifier("kanbanCacheInvalidateQueue") Queue kanbanCacheInvalidateQueue,
+                                                @Qualifier("kanbanFanoutExchange") FanoutExchange kanbanFanoutExchange) {
+        return BindingBuilder.bind(kanbanCacheInvalidateQueue).to(kanbanFanoutExchange);
     }
 
     @Bean
@@ -77,5 +93,23 @@ public class RabbitMqConfig {
     @Bean
     public RabbitMqUpdateDeleteService<KanbanTask> kanbanTaskRabbitMqUpdateDeleteService() {
         return new RabbitMqUpdateDeleteNoOpServiceImpl<>();
+    }
+
+    @Bean
+    public SimpleRabbitListenerContainerFactory rabbitListenerContainerFactory(
+            ConnectionFactory connectionFactory,
+            SimpleRabbitListenerContainerFactoryConfigurer configurer,
+            @Qualifier("rabbitMqAsyncTaskExecutor") SimpleAsyncTaskExecutor taskExecutor
+    ) {
+
+        SimpleRabbitListenerContainerFactory factory = new SimpleRabbitListenerContainerFactory();
+        configurer.configure(factory, connectionFactory);
+        factory.setTaskExecutor(taskExecutor);
+        return factory;
+    }
+
+    @Override
+    public void configureRabbitListeners(RabbitListenerEndpointRegistrar registrar) {
+        registrar.setValidator(validator);
     }
 }

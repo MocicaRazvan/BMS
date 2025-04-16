@@ -162,7 +162,7 @@ export default function UsersTable({
     extraQueryParams: {
       ...(extraQueryParams && extraQueryParams),
       ...(field !== null && { emailVerified: field.toString() }),
-      // backend accepts lists alos for providers and role
+      // backend accepts lists also for providers and role
       ...(provider && { providers: provider }),
       ...(role && { roles: role }),
     },
@@ -583,6 +583,20 @@ export default function UsersTable({
               </div>
             </div>
           }
+          chartProps={{
+            aggregatorConfig: {
+              "#": (_) => 1,
+              "#Trainer": (r) => (r.role === "ROLE_TRAINER" ? 1 : 0),
+              "#User": (r) => (r.role === "ROLE_USER" ? 1 : 0),
+              ["# " + userTableColumnsTexts.emailVerified.header]: (r) =>
+                Number(r.emailVerified),
+              "#Google": (r) => (r.provider === "GOOGLE" ? 1 : 0),
+              "#Github": (r) => (r.provider === "GITHUB" ? 1 : 0),
+              "#Local": (r) => (r.provider === "LOCAL" ? 1 : 0),
+            },
+            dateField: "createdAt",
+          }}
+          showChart={true}
           // rangeDateFilter={
           //   <CreationFilter
           //     {...creationFilterTexts}

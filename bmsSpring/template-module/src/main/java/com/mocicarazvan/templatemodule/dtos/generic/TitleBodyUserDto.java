@@ -2,10 +2,7 @@ package com.mocicarazvan.templatemodule.dtos.generic;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 import java.util.ArrayList;
@@ -26,8 +23,10 @@ public abstract class TitleBodyUserDto extends WithUserDto {
     private String title;
 
     @Schema(description = "The user ids that liked the entity")
+    @Builder.Default
     private List<Long> userDislikes = new ArrayList<>();
 
     @Schema(description = "The user ids that disliked the entity")
+    @Builder.Default
     private List<Long> userLikes = new ArrayList<>();
 }

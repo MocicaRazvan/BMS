@@ -19,7 +19,6 @@ import com.mocicarazvan.templatemodule.repositories.ManyToOneUserRepository;
 import com.mocicarazvan.templatemodule.services.ManyToOneUserService;
 import com.mocicarazvan.templatemodule.services.RabbitMqUpdateDeleteService;
 import com.mocicarazvan.templatemodule.utils.PageableUtilsCustom;
-import lombok.Data;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
@@ -85,6 +84,7 @@ public abstract class ManyToOneUserServiceImpl<MODEL extends ManyToOneUser, BODY
                 .map(ru -> PageableResponse.<ResponseWithUserDto<RESPONSE>>builder()
                         .content(ru)
                         .pageInfo(pr.getPageInfo())
+                        .links(pr.getLinks())
                         .build());
     }
 
@@ -100,13 +100,11 @@ public abstract class ManyToOneUserServiceImpl<MODEL extends ManyToOneUser, BODY
 
     @Override
     public Mono<RESPONSE> deleteModel(Long id, String userId) {
-
-
         return
                 userClient.getUser("", userId)
                         .flatMap(authUser -> getModel(id)
                                 .flatMap(model -> privateRoute(true, authUser, model.getUserId())
-                                        .then(modelRepository.delete(model))
+                                        .then(Mono.defer(() -> modelRepository.delete(model)))
                                         .doOnSuccess(_ -> rabbitMqUpdateDeleteService.sendDeleteMessage(model))
                                         .then(Mono.fromCallable(() -> modelMapper.fromModelToResponse(model)))
                                 )
@@ -117,10 +115,7 @@ public abstract class ManyToOneUserServiceImpl<MODEL extends ManyToOneUser, BODY
 
     @Override
     public Mono<RESPONSE> getModelById(Long id, String userId) {
-
-
         return
-
                 userClient.getUser("", userId)
                         .flatMap(authUser -> self.getModel(id)
                                 .flatMap(model -> getResponseGuard(authUser, model, true))
@@ -130,7 +125,7 @@ public abstract class ManyToOneUserServiceImpl<MODEL extends ManyToOneUser, BODY
 
     public Mono<RESPONSE> getResponseGuard(UserDto authUser, MODEL model, boolean guard) {
         return privateRoute(guard, authUser, model.getUserId())
-                .thenReturn(modelMapper.fromModelToResponse(model));
+                .then(Mono.fromCallable(() -> modelMapper.fromModelToResponse(model)));
     }
 
     @Override
@@ -165,6 +160,7 @@ public abstract class ManyToOneUserServiceImpl<MODEL extends ManyToOneUser, BODY
                 .map(modelMapper::fromModelToResponse));
     }
 
+    // not clonable, it can be a "custom like" clone
     public abstract MODEL cloneModel(MODEL model);
 
     protected <G> Mono<G> updateModelWithSuccessGeneral(Long id, String userId, Function<MODEL, Mono<G>> successCallback) {
@@ -173,14 +169,13 @@ public abstract class ManyToOneUserServiceImpl<MODEL extends ManyToOneUser, BODY
                         .flatMap(model -> isNotAuthor(model, authUser)
                                 .flatMap(isNotAuthor -> {
                                     if (isNotAuthor) {
+                                        log.error("User {} has no permission to access the entity with id {}", authUser.getId(), model.getId());
                                         return Mono.error(new PrivateRouteException());
                                     } else {
 
                                         return
                                                 successCallback.apply(model)
                                                         .doOnSuccess(_ -> rabbitMqUpdateDeleteService.sendUpdateMessage(cloneModel(model)));
-
-
                                     }
                                 })
                         )
@@ -227,9 +222,7 @@ public abstract class ManyToOneUserServiceImpl<MODEL extends ManyToOneUser, BODY
     }
 
     public Mono<Boolean> isNotAuthor(MODEL model, UserDto authUser) {
-        return Mono.just(
-                !model.getUserId().equals(authUser.getId())
-        );
+        return self.isNotAuthor(model, authUser);
     }
 
     public Mono<Void> privateRoute(boolean guard, UserDto authUser, Long ownerId) {
@@ -275,9 +268,7 @@ public abstract class ManyToOneUserServiceImpl<MODEL extends ManyToOneUser, BODY
     }
 
 
-    // todo NEVER PUT PRIVATE IN THIS FUCKING CLASS
-    // todo never la update delete fol cache
-    @Data
+    @Getter
     public static class ManyToOneUserServiceRedisCacheWrapper<MODEL extends ManyToOneUser, BODY, RESPONSE extends WithUserDto,
             S extends ManyToOneUserRepository<MODEL>, M extends DtoMapper<MODEL, BODY, RESPONSE>> {
         protected final S modelRepository;
@@ -346,21 +337,23 @@ public abstract class ManyToOneUserServiceImpl<MODEL extends ManyToOneUser, BODY
         /// not cache
         public Mono<ResponseWithUserDto<RESPONSE>> getModelGuardWithUserBase(UserDto authUser, MODEL model, boolean guard) {
             return privateRouteBase(guard, authUser, model.getUserId())
-                    .then(userClient.getUser("", model.getUserId().toString())
+                    .then(Mono.defer(() -> userClient.getUser("", model.getUserId().toString())
                             .map(user ->
                                     ResponseWithUserDto.<RESPONSE>builder()
                                             .model(modelMapper.fromModelToResponse(model))
                                             .user(user)
                                             .build()
-                            )
-
-                    );
+                            )));
         }
 
         public Mono<Void> privateRouteBase(boolean guard, UserDto authUser, Long ownerId) {
+            if (!guard) {
+                return Mono.empty();
+            }
             return userClient.hasPermissionToModifyEntity(authUser, ownerId)
                     .flatMap(perm -> {
-                        if (guard && !perm) {
+                        if (!perm) {
+                            log.error("User {} has no permission to access the entity with id {}", authUser.getId(), ownerId);
                             return Mono.error(new PrivateRouteException());
                         }
                         return Mono.empty();

@@ -30,6 +30,7 @@ import reactor.core.publisher.Mono;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
+import java.time.temporal.TemporalAdjusters;
 import java.util.Locale;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -94,13 +95,21 @@ public class SummaryServiceImpl implements SummaryService {
 
     private Flux<MonthlyOrderSummaryPrediction> getSummaryPrediction(BiFunction<LocalDateTime, LocalDateTime, Flux<MonthlyOrderSummary>> repositoryFunction,
                                                                      int predictionLength) {
-        LocalDateTime current = LocalDateTime.now();
-        LocalDateTime startPrediction = current.minusYears(predictionStartYears).withDayOfYear(1).withHour(0).withMinute(0).withSecond(0);
+        LocalDateTime lastMonth = LocalDateTime.now()
+                .minusMonths(1).with(TemporalAdjusters.lastDayOfMonth()).withHour(23)
+                .withMinute(59)
+                .withSecond(59)
+                .withNano(999_999_999);
+        LocalDateTime curMonth = LocalDateTime.now().withDayOfMonth(1).withHour(0)
+                .withMinute(0)
+                .withSecond(0)
+                .withNano(0);
+        LocalDateTime startPrediction = lastMonth.minusYears(predictionStartYears).withDayOfYear(1).withHour(0).withMinute(0).withSecond(0);
 
-        return timeSeriesClient.getCountAmountPredictions(repositoryFunction.apply(startPrediction, current), predictionLength)
+        return timeSeriesClient.getCountAmountPredictions(repositoryFunction.apply(startPrediction, curMonth), predictionLength)
                 .flatMapMany(r -> Flux.range(0, predictionLength)
                         .map(i -> {
-                                    LocalDateTime curIns = current.plusMonths(i + 1);
+                                    LocalDateTime curIns = lastMonth.plusMonths(i + 1);
                                     return MonthlyOrderSummaryPrediction.builder()
                                             .countQuantiles(r.getCount_quantiles().get(i))
                                             .totalAmountQuantiles(r.getTotal_amount_quantiles().get(i))

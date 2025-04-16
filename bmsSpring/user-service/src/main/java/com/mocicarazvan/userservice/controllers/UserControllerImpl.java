@@ -15,14 +15,12 @@ import com.mocicarazvan.templatemodule.utils.RequestsUtils;
 import com.mocicarazvan.userservice.services.UserService;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.codec.multipart.FilePart;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Flux;
@@ -41,17 +39,14 @@ public class UserControllerImpl implements UserController {
     private final PageableUserAssembler pageableUserAssembler;
     private final RequestsUtils requestsUtils;
     private final ObjectMapper objectMapper;
-    private final ThreadPoolTaskScheduler threadPoolTaskScheduler;
 
     public UserControllerImpl(UserService userService, PageableUserAssembler pageableUserAssembler,
-                              RequestsUtils requestsUtils, ObjectMapper objectMapper,
-                              @Qualifier("threadPoolTaskScheduler") ThreadPoolTaskScheduler threadPoolTaskScheduler
+                              RequestsUtils requestsUtils, ObjectMapper objectMapper
     ) {
         this.userService = userService;
         this.pageableUserAssembler = pageableUserAssembler;
         this.requestsUtils = requestsUtils;
         this.objectMapper = objectMapper;
-        this.threadPoolTaskScheduler = threadPoolTaskScheduler;
     }
 
 
@@ -102,7 +97,7 @@ public class UserControllerImpl implements UserController {
     public Mono<ResponseEntity<CustomEntityModel<UserDto>>> updateUser(@PathVariable Long id, @RequestPart(value = "files", required = false) Flux<FilePart> files,
                                                                        @RequestPart("body") String body,
                                                                        ServerWebExchange exchange) {
-        return requestsUtils.getBodyFromJson(body, UserBody.class, objectMapper, threadPoolTaskScheduler).flatMap(
+        return requestsUtils.getBodyFromJson(body, UserBody.class, objectMapper).flatMap(
                 userBody ->
                         userService.updateUser(id, userBody, requestsUtils.extractAuthUser(exchange), files)
                                 .flatMap(u -> pageableUserAssembler.getItemAssembler().toModel(u))

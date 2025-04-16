@@ -46,8 +46,13 @@ public abstract class ApprovedServiceImpl<MODEL extends Approve, BODY extends Ti
 
     protected final RabbitMqApprovedSender<RESPONSE> rabbitMqApprovedSender;
 
-    public ApprovedServiceImpl(S modelRepository, M modelMapper, PageableUtilsCustom pageableUtils, UserClient userClient, String modelName, List<String> allowedSortingFields, EntitiesUtils entitiesUtils, FileClient fileClient, RabbitMqApprovedSender<RESPONSE> rabbitMqApprovedSender, CR self, RabbitMqUpdateDeleteService<MODEL> rabbitMqUpdateDeleteService) {
-        super(modelRepository, modelMapper, pageableUtils, userClient, modelName, allowedSortingFields, entitiesUtils, fileClient, self, rabbitMqUpdateDeleteService);
+    public ApprovedServiceImpl(S modelRepository, M modelMapper, PageableUtilsCustom pageableUtils,
+                               UserClient userClient, String modelName, List<String> allowedSortingFields,
+                               EntitiesUtils entitiesUtils, FileClient fileClient,
+                               RabbitMqApprovedSender<RESPONSE> rabbitMqApprovedSender,
+                               CR self, RabbitMqUpdateDeleteService<MODEL> rabbitMqUpdateDeleteService) {
+        super(modelRepository, modelMapper, pageableUtils, userClient, modelName,
+                allowedSortingFields, entitiesUtils, fileClient, self, rabbitMqUpdateDeleteService);
         this.rabbitMqApprovedSender = rabbitMqApprovedSender;
     }
 
@@ -193,6 +198,14 @@ public abstract class ApprovedServiceImpl<MODEL extends Approve, BODY extends Ti
 
     }
 
+    @Override
+    public Mono<Pair<RESPONSE, Boolean>> updateModelWithImagesGetOriginalApproved(Flux<FilePart> images, Long id, BODY body, String userId, String clientId) {
+
+        return
+                updateModelWithImagesGetOriginalApproved(images, id, body, userId, clientId, (_, _, m) -> modelRepository.save(m));
+
+    }
+
     public Mono<Pair<RESPONSE, Boolean>> updateModelWithImagesGetOriginalApproved(Flux<FilePart> images, Long id, BODY body, String userId, String clientId,
                                                                                   Function3<BODY, String, MODEL, Mono<MODEL>> callback
     ) {
@@ -215,18 +228,10 @@ public abstract class ApprovedServiceImpl<MODEL extends Approve, BODY extends Ti
                             .map(modelMapper::fromModelToResponse)
 
                             .map(r -> Pair.of(r, originalApproved));
-                }).flatMap(self::updateDeleteInvalidate)
-                ;
+                }).flatMap(self::updateDeleteInvalidate);
 
     }
 
-    @Override
-    public Mono<Pair<RESPONSE, Boolean>> updateModelWithImagesGetOriginalApproved(Flux<FilePart> images, Long id, BODY body, String userId, String clientId) {
-
-        return
-                updateModelWithImagesGetOriginalApproved(images, id, body, userId, clientId, (b, model, m) -> modelRepository.save(m));
-
-    }
 
     @Override
     public Mono<RESPONSE> createModel(Flux<FilePart> images, BODY body, String userId, String clientId) {
@@ -248,9 +253,10 @@ public abstract class ApprovedServiceImpl<MODEL extends Approve, BODY extends Ti
                         .flatMap(model ->
                                 {
                                     Boolean originalApproved = model.isApproved();
-                                    return privateRoute(true, authUser, model.getUserId()).thenReturn(model)
+                                    return privateRoute(true, authUser, model.getUserId())
+                                            .thenReturn(model)
                                             .flatMap(m -> fileClient.deleteFiles(m.getImages()))
-                                            .then(modelRepository.delete(model))
+                                            .then(Mono.defer(() -> modelRepository.delete(model)))
                                             .then(Mono.fromCallable(() -> modelMapper.fromModelToResponse(model)))
                                             .doOnSuccess(_ -> rabbitMqUpdateDeleteService.sendDeleteMessage(model))
                                             .map(r -> Pair.of(r, originalApproved))
@@ -275,7 +281,8 @@ public abstract class ApprovedServiceImpl<MODEL extends Approve, BODY extends Ti
             extends TitleBodyImagesServiceImpl.TitleBodyImagesServiceRedisCacheWrapper<MODEL, BODY, RESPONSE, S, M> {
         protected final PageableUtilsCustom pageableUtils;
 
-        public ApprovedServiceRedisCacheWrapper(S modelRepository, M modelMapper, String modelName, PageableUtilsCustom pageableUtils, UserClient userClient) {
+        public ApprovedServiceRedisCacheWrapper(S modelRepository, M modelMapper, String modelName,
+                                                PageableUtilsCustom pageableUtils, UserClient userClient) {
             super(modelRepository, modelMapper, modelName, userClient);
             this.pageableUtils = pageableUtils;
         }
@@ -308,36 +315,38 @@ public abstract class ApprovedServiceImpl<MODEL extends Approve, BODY extends Ti
         }
 
         // no cache
-        protected Mono<PageRequest> protectRoute(boolean approved, PageableBody pageableBody, String userId, List<String> allowedSortingFields) {
-            return userClient.getUser("", userId).flatMap(
-                            u -> {
-                                if (!u.getRole().equals(Role.ROLE_ADMIN) && !approved) {
-                                    return Mono.error(new PrivateRouteException());
-                                }
-                                return Mono.just(u);
-                            }
-                    )
-                    .then(pageableUtils.isSortingCriteriaValid(pageableBody.getSortingCriteria(), allowedSortingFields))
-                    .then(pageableUtils.createPageRequest(pageableBody));
+        public Mono<PageRequest> protectRoute(boolean approved, PageableBody pageableBody, String userId, List<String> allowedSortingFields) {
+            return
+                    pageableUtils.isSortingCriteriaValid(pageableBody.getSortingCriteria(), allowedSortingFields)
+                            .then(Mono.defer(() -> userClient.getUser("", userId).flatMap(
+                                    u -> {
+                                        if (!u.getRole().equals(Role.ROLE_ADMIN) && !approved) {
+                                            return Mono.error(new PrivateRouteException());
+                                        }
+                                        return Mono.just(u);
+                                    }
+                            )))
+                            .flatMap(_ -> pageableUtils.createPageRequest(pageableBody));
         }
 
-        protected Flux<PageableResponse<RESPONSE>> getModelsAuthorBase(Long trainerId, PageableBody pageableBody, String userId,
-                                                                       Function<PageRequest, Flux<PageableResponse<RESPONSE>>> getResponse,
-                                                                       List<String> allowedSortingFields
+        public Flux<PageableResponse<RESPONSE>> getModelsAuthorBase(Long trainerId, PageableBody pageableBody, String userId,
+                                                                    Function<PageRequest, Flux<PageableResponse<RESPONSE>>> getResponse,
+                                                                    List<String> allowedSortingFields
         ) {
-            return userClient.existsTrainerOrAdmin("/exists", trainerId)
-                    .then(pageableUtils.isSortingCriteriaValid(pageableBody.getSortingCriteria(), allowedSortingFields))
-                    .then(pageableUtils.createPageRequest(pageableBody))
-                    .flatMapMany(pr -> userClient.getUser("", userId)
-                            .flatMapMany(authUser -> privateRouteBase(true, authUser, trainerId))
-                            .thenMany(getResponse.apply(pr)));
+            return
+                    pageableUtils.isSortingCriteriaValid(pageableBody.getSortingCriteria(), allowedSortingFields)
+                            .then(Mono.defer(() -> userClient.existsTrainerOrAdmin("/exists", trainerId)))
+                            .then(Mono.defer(() -> pageableUtils.createPageRequest(pageableBody)))
+                            .flatMapMany(pr -> userClient.getUser("", userId)
+                                    .flatMapMany(authUser -> privateRouteBase(true, authUser, trainerId))
+                                    .thenMany(Flux.defer(() -> getResponse.apply(pr))));
         }
 
-        protected Mono<Pair<RESPONSE, Boolean>> createInvalidate(RESPONSE r) {
+        public Mono<Pair<RESPONSE, Boolean>> createInvalidate(RESPONSE r) {
             return Mono.just(Pair.of(r, Boolean.FALSE));
         }
 
-        protected Mono<Pair<RESPONSE, Boolean>> updateDeleteInvalidate(Pair<RESPONSE, Boolean> p) {
+        public Mono<Pair<RESPONSE, Boolean>> updateDeleteInvalidate(Pair<RESPONSE, Boolean> p) {
             return Mono.just(p);
         }
     }

@@ -13,21 +13,15 @@ import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @Component
 
 public class PageableUtilsCustom {
 
     public Mono<Void> isSortingCriteriaValid(Map<String, String> sortingCriteria, List<String> allowedFields) {
-        assert allowedFields != null;
-
-        if (sortingCriteria == null) {
+        if (allowedFields == null || sortingCriteria == null) {
             return Mono.empty();
         }
 
@@ -46,21 +40,29 @@ public class PageableUtilsCustom {
         return Mono.empty();
     }
 
-    public Mono<Sort> createSortFromMap(Map<String, String> sortCriteria) {
-        return Mono.just(Sort.by(
-                sortCriteria.entrySet().stream().filter(
-                        entry -> entry.getValue().equals("asc") || entry.getValue().equals("desc")
-                ).map(
-                        entry -> new Sort.Order(
-                                entry.getValue().equals("asc") ? Sort.Direction.ASC : Sort.Direction.DESC,
-                                entry.getKey()
-                        )
-                ).collect(Collectors.toList())
-
-        ))
+    public Mono<Sort> createSortFromMap(LinkedHashMap<String, String> sortCriteria) {
+//        return Mono.just(Sort.by(
+//                sortCriteria.entrySet().stream().filter(
+//                        entry -> entry.getValue().equals("asc") || entry.getValue().equals("desc")
+//                ).map(
+//                        entry -> new Sort.Order(
+//                                entry.getValue().equals("asc") ? Sort.Direction.ASC : Sort.Direction.DESC,
+//                                entry.getKey()
+//                        )
+//                ).collect(Collectors.toList())
+//
+//        ))
 //                .log()
-                ;
+        ;
 
+        return Flux.fromIterable(sortCriteria.entrySet())
+                .filter(e -> e.getValue().equalsIgnoreCase("asc") || e.getValue().equalsIgnoreCase("desc"))
+                .map(e -> new Sort.Order(
+                        e.getValue().equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC,
+                        e.getKey()
+                ))
+                .collectList()
+                .map(Sort::by);
 
     }
 

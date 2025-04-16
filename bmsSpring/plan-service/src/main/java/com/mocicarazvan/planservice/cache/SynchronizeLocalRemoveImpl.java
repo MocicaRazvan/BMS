@@ -4,8 +4,12 @@ import com.mocicarazvan.rediscache.dtos.NotifyCacheRemoveDto;
 import com.mocicarazvan.rediscache.local.LocalReactiveCache;
 import com.mocicarazvan.rediscache.local.ReverseKeysLocalCache;
 import com.mocicarazvan.rediscache.local.SynchronizeLocalRemove;
+import com.mocicarazvan.templatemodule.utils.AppInstanceId;
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.messaging.handler.annotation.Header;
+import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
 
 @Slf4j
@@ -15,10 +19,10 @@ public class SynchronizeLocalRemoveImpl extends SynchronizeLocalRemove {
         super(localReactiveCache, reverseKeysLocalCache);
     }
 
-    @Override
-    @RabbitListener(queues = "#{planCacheInvalidateQueue.name}", executor = "rabbitMqAsyncTaskExecutor")
-    public void handleNotification(NotifyCacheRemoveDto notifyCacheRemoveDto) {
+    @RabbitListener(queues = "#{planCacheInvalidateQueue.name}")
+    public void handleNotification(@Valid @Payload NotifyCacheRemoveDto notifyCacheRemoveDto,
+                                   @Header(AppInstanceId.APP_INSTANCE_ID_HEADER) String appInstanceId) {
 //        log.info("Received notification for cache: {}", notifyCacheRemoveDto);
-        super.handleNotification(notifyCacheRemoveDto);
+        super.handleNotification(notifyCacheRemoveDto, AppInstanceId.isSameAppInstanceId(appInstanceId));
     }
 }

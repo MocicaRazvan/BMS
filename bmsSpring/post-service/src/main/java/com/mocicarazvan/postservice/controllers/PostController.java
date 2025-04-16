@@ -20,14 +20,12 @@ import com.mocicarazvan.templatemodule.utils.RequestsUtils;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.util.Pair;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.codec.multipart.FilePart;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Flux;
@@ -51,17 +49,15 @@ public class PostController implements ApproveController
     private final RequestsUtils requestsUtils;
     private final ObjectMapper objectMapper;
     private final RabbitTemplate rabbitTemplate;
-    private final ThreadPoolTaskScheduler taskScheduler;
 
     public PostController(PostService postService, PostReactiveResponseBuilder postReactiveResponseBuilder,
                           RequestsUtils requestsUtils, ObjectMapper objectMapper,
-                          RabbitTemplate rabbitTemplate, @Qualifier("threadPoolTaskScheduler") ThreadPoolTaskScheduler taskScheduler) {
+                          RabbitTemplate rabbitTemplate) {
         this.postService = postService;
         this.postReactiveResponseBuilder = postReactiveResponseBuilder;
         this.requestsUtils = requestsUtils;
         this.objectMapper = objectMapper;
         this.rabbitTemplate = rabbitTemplate;
-        this.taskScheduler = taskScheduler;
     }
 
     @Override
@@ -298,7 +294,7 @@ public class PostController implements ApproveController
             @RequestParam("clientId") String clientId,
             ServerWebExchange exchange) {
 
-        return requestsUtils.getBodyFromJson(body, PostBody.class, objectMapper, taskScheduler)
+        return requestsUtils.getBodyFromJson(body, PostBody.class, objectMapper)
                 .flatMap(postBody -> postService.createModel(files, postBody, requestsUtils.extractAuthUser(exchange), clientId)
                         .flatMap(m -> postReactiveResponseBuilder.toModel(m, PostController.class)))
 
@@ -316,7 +312,7 @@ public class PostController implements ApproveController
             ServerWebExchange exchange) {
         // getting original approved status of the post
         return
-                requestsUtils.getBodyFromJson(body, PostBody.class, objectMapper, taskScheduler)
+                requestsUtils.getBodyFromJson(body, PostBody.class, objectMapper)
                         .flatMap(postBody -> postService.updateModelWithImagesGetOriginalApproved(files, id, postBody, requestsUtils.extractAuthUser(exchange), clientId)
                                 .flatMap(m -> postReactiveResponseBuilder.toModelWithPair(m, PostController.class))
                                 .map(Pair::getFirst)

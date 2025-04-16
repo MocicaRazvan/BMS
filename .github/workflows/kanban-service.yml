@@ -10,7 +10,21 @@ on:
       - 'bmsSpring/template-module/**'
       - 'bmsSpring/redis-cache/**'
 jobs:
+  test-template-module:
+    uses: ./.github/workflows/test-run.yml
+    with:
+      app-path: template-module
+  test-redis-cache:
+    uses: ./.github/workflows/test-run.yml
+    with:
+      app-path: redis-cache
+  test-kanban-service:
+    uses: ./.github/workflows/test-run.yml
+    with:
+      app-path: kanban-service
+      local-modules: redis-cache,template-module
   build-and-push-kanban-service:
+    needs: [ test-template-module, test-redis-cache, test-kanban-service ]
     uses: ./.github/workflows/build-and-push.yml
     with:
       image-name: kanban-service-bms

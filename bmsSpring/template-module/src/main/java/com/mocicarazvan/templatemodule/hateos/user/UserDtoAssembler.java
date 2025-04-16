@@ -7,12 +7,13 @@ import com.mocicarazvan.templatemodule.dtos.UserDto;
 import com.mocicarazvan.templatemodule.enums.AuthProvider;
 import com.mocicarazvan.templatemodule.enums.Role;
 import com.mocicarazvan.templatemodule.hateos.CustomEntityModel;
+import com.mocicarazvan.templatemodule.hateos.ReactiveRepresentationModelAssembler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.hateoas.server.reactive.WebFluxLinkBuilder;
 import reactor.core.publisher.Mono;
 
-import java.util.Map;
+import java.util.LinkedHashMap;
 import java.util.Set;
 
 
@@ -24,6 +25,8 @@ public class UserDtoAssembler implements ReactiveRepresentationModelAssembler<Us
 
     @Override
     public Mono<CustomEntityModel<UserDto>> toModel(UserDto entity) {
+        LinkedHashMap<String, String> sortingCriteria = new LinkedHashMap<>();
+        sortingCriteria.put("email", "asc");
         return Mono.just(CustomEntityModel.<UserDto>builder()
                         .content(entity)
                         .build())
@@ -42,7 +45,7 @@ public class UserDtoAssembler implements ReactiveRepresentationModelAssembler<Us
                                         PageableBody.builder()
                                                 .page(0)
                                                 .size(10)
-                                                .sortingCriteria(Map.of("email", "asc"))
+                                                .sortingCriteria(sortingCriteria)
                                                 .build(), "raz", Set.of(Role.ROLE_USER, Role.ROLE_TRAINER), Set.of(AuthProvider.GOOGLE), true, false,
                                         null, null, null, null))
                                 .withRel(IanaLinkRelations.COLLECTION)

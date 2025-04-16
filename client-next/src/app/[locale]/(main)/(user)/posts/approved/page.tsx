@@ -26,5 +26,7 @@ export default async function PostApprovedPage({ params: { locale } }: Props) {
     texts.sortingPostsSortingOptions,
   );
 
-  return <PostApprovedPageContent options={postOptions} {...texts} />;
+  return (
+    <PostApprovedPageContent options={postOptions} locale={locale} {...texts} />
+  );
 }

@@ -11,9 +11,16 @@ public abstract class SynchronizeLocalRemove {
     private final LocalReactiveCache localReactiveCache;
     private final ReverseKeysLocalCache reverseKeysLocalCache;
 
-    public void handleNotification(NotifyCacheRemoveDto notifyCacheRemoveDto) {
+    public void handleNotification(NotifyCacheRemoveDto notifyCacheRemoveDto, boolean notRemove) {
+        if (notRemove) {
+            return;
+        }
         RemoveFromCache removeFromCache = getCacheFromNotification(notifyCacheRemoveDto);
         getFunctionToCall(notifyCacheRemoveDto, removeFromCache);
+    }
+
+    public void handleNotification(NotifyCacheRemoveDto notifyCacheRemoveDto) {
+        handleNotification(notifyCacheRemoveDto, false);
     }
 
     public RemoveFromCache getCacheFromNotification(NotifyCacheRemoveDto notifyCacheRemoveDto) {

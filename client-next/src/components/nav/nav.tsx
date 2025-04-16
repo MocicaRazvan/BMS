@@ -26,7 +26,7 @@ import FindInSite, {
   FindInSiteTexts,
   MetadataValue,
 } from "@/components/nav/find-in-site";
-import { DaysCalendarCTATexts } from "@/components/dayCalendar/days-calendar-cta";
+import { DaysCalendarCTATexts } from "@/components/days-calendar/days-calendar-cta";
 
 export interface NavTexts {
   themeSwitchTexts: ThemeSwitchTexts;

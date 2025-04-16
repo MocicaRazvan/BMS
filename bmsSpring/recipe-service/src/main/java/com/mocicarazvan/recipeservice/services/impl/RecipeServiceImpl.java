@@ -177,7 +177,8 @@ public class RecipeServiceImpl extends ApprovedServiceImpl<Recipe, RecipeBody, R
     }
 
     @Override
-    public Mono<Pair<RecipeResponse, Boolean>> updateModelWithVideosGetOriginalApproved(Flux<FilePart> images, Flux<FilePart> videos, RecipeBody recipeBody, Long id, String userId, String clientId) {
+    public Mono<Pair<RecipeResponse, Boolean>> updateModelWithVideosGetOriginalApproved(Flux<FilePart> images, Flux<FilePart> videos,
+                                                                                        RecipeBody recipeBody, Long id, String userId, String clientId) {
         return
                 verifyRecipeIds(recipeBody, id, userId)
                         .then(updateModelWithSuccessGeneral(id, userId, model ->
@@ -190,9 +191,9 @@ public class RecipeServiceImpl extends ApprovedServiceImpl<Recipe, RecipeBody, R
                                             .then(uploadFiles(images, FileType.IMAGE, clientId)
                                                     .zipWith(uploadFiles(videos, FileType.VIDEO, clientId))
                                                     .flatMap(t ->
-
-                                                            recipeEmbedServiceImpl.updateEmbeddingWithZip(recipeBody.getTitle(), origTitle, model.getId(), modelMapper.updateModelFromBody(recipeBody, model))
-
+                                                            recipeEmbedServiceImpl.updateEmbeddingWithZip(recipeBody.getTitle(),
+                                                                            origTitle, model.getId(),
+                                                                            modelMapper.updateModelFromBody(recipeBody, model))
                                                                     .flatMap(handleVideos(recipeBody, id, t)))).flatMap(modelRepository::save)
                                             .map(modelMapper::fromModelToResponse).map(r -> Pair.of(r, originalApproved));
 
@@ -413,13 +414,13 @@ public class RecipeServiceImpl extends ApprovedServiceImpl<Recipe, RecipeBody, R
 
         @Override
         @RedisReactiveApprovedCacheEvict(key = CACHE_KEY_PATH, forWhomPath = "#r.userId")
-        protected Mono<Pair<RecipeResponse, Boolean>> createInvalidate(RecipeResponse r) {
+        public Mono<Pair<RecipeResponse, Boolean>> createInvalidate(RecipeResponse r) {
             return super.createInvalidate(r);
         }
 
         @Override
         @RedisReactiveApprovedCacheEvict(key = CACHE_KEY_PATH, id = "#p.getFirst().getId()", forWhomPath = "#p.getFirst().getUserId()")
-        protected Mono<Pair<RecipeResponse, Boolean>> updateDeleteInvalidate(Pair<RecipeResponse, Boolean> p) {
+        public Mono<Pair<RecipeResponse, Boolean>> updateDeleteInvalidate(Pair<RecipeResponse, Boolean> p) {
             return super.updateDeleteInvalidate(p);
         }
 

@@ -3,6 +3,7 @@ package com.mocicarazvan.archiveservice.services.impl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mocicarazvan.archiveservice.dtos.enums.ContainerAction;
 import com.mocicarazvan.archiveservice.dtos.websocket.NotifyContainerAction;
+import com.mocicarazvan.archiveservice.repositories.ContainerNotifyRepository;
 import com.mocicarazvan.archiveservice.services.ContainerNotify;
 import com.mocicarazvan.archiveservice.services.SimpleRedisCache;
 import com.mocicarazvan.archiveservice.websocket.BatchHandler;
@@ -13,6 +14,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
+import reactor.util.function.Tuple2;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -24,14 +26,16 @@ public class ContainerNotifyImpl implements ContainerNotify {
     private final ReactiveRedisTemplate<String, String> redisTemplate;
     private final SimpleRedisCache simpleRedisCache;
     private final ThreadPoolTaskScheduler threadPoolTaskScheduler;
+    private final ContainerNotifyRepository containerNotifyRepository;
 
     public ContainerNotifyImpl(
             ObjectMapper objectMapper, ReactiveRedisTemplate<String, String> redisTemplate, SimpleRedisCache simpleRedisCache,
-            @Qualifier("threadPoolTaskScheduler") ThreadPoolTaskScheduler threadPoolTaskScheduler) {
+            @Qualifier("threadPoolTaskScheduler") ThreadPoolTaskScheduler threadPoolTaskScheduler, ContainerNotifyRepository containerNotifyRepository) {
         this.objectMapper = objectMapper;
         this.redisTemplate = redisTemplate;
         this.simpleRedisCache = simpleRedisCache;
         this.threadPoolTaskScheduler = threadPoolTaskScheduler;
+        this.containerNotifyRepository = containerNotifyRepository;
     }
 
     @Override
@@ -59,14 +63,17 @@ public class ContainerNotifyImpl implements ContainerNotify {
 
 
     private Mono<Void> sendContainerActionToRedis(String queueName, ContainerAction containerAction) {
-        return Mono.just(containerAction)
-                .flatMap(ca -> Mono.fromCallable(() -> objectMapper.writeValueAsString(NotifyContainerAction.builder()
-                                .action(ca)
-                                .queueName(queueName)
-                                .id(UUID.randomUUID().toString())
-                                .timestamp(LocalDateTime.now())
-                                .build()))
-                        .subscribeOn(Schedulers.fromExecutor(threadPoolTaskScheduler.getScheduledThreadPoolExecutor()))
+        return Mono.just(NotifyContainerAction.builder()
+                        .action(containerAction)
+                        .queueName(queueName)
+                        .id(UUID.randomUUID().toString())
+                        .timestamp(LocalDateTime.now())
+                        .build())
+                .flatMap(ca -> Mono.zip(Mono.fromCallable(() ->
+                                                objectMapper.writeValueAsString(ca))
+                                        .subscribeOn(Schedulers.fromExecutor(threadPoolTaskScheduler.getScheduledThreadPoolExecutor())),
+                                containerNotifyRepository.addNotification(ca)
+                        ).map(Tuple2::getT1)
                 )
                 .flatMap(json -> redisTemplate.convertAndSend(BatchHandler.getChannelName(), json))
                 .then();

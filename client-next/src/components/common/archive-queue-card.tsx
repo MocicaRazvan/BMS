@@ -44,9 +44,10 @@ import {
 import ButtonSubmit from "@/components/forms/button-submit";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "@/components/ui/use-toast";
-import useGetArchiveUpdates from "@/hoooks/useGetArchiveUpdates";
 import { WithUser } from "@/lib/user";
 import FadeTextChange from "@/components/ui/fade-text-change";
+import { useArchiveQueueUpdateContext } from "@/context/archive-queue-update-context";
+import { convert } from "crontzconvert";
 
 export interface ArchiveQueueCardsTexts {
   title: Record<"delete" | "update", string>;
@@ -67,6 +68,13 @@ interface Props extends ArchiveQueueCardsTexts, WithUser {
   showHeader?: boolean;
 }
 type ToggleRefresh = (queueName: ArchiveQueue) => Promise<unknown>;
+const aliveOptions = {
+  "60000": "60s",
+  "600000": "10m",
+  "1200000": "20m",
+};
+type AliveOptionKey = keyof typeof aliveOptions;
+
 const ArchiveQueueCards = memo(
   ({ prefix, locale, header, showHeader, ...rest }: Props) => {
     const queueNames = getArchiveQueuesNameByPrefix(prefix);
@@ -291,10 +299,8 @@ const DashboardSuccessCard = memo(
       refetch: () => void;
     }) => {
     const formatIntl = useFormatter();
-    const { getAction, getBatchUpdates } = useGetArchiveUpdates({
-      authToken: authUser.token,
-    });
-    const [alive, setAlive] = useState<string>("60000");
+    const { getAction, getBatchUpdates } = useArchiveQueueUpdateContext();
+    const [alive, setAlive] = useState<AliveOptionKey>("60000");
     const [triggerLoading, setTriggerLoading] = useState<boolean>(false);
     const [stopLoading, setStopLoading] = useState<boolean>(false);
     const [popOpen, setPopOpen] = useState<boolean>(false);
@@ -342,10 +348,10 @@ const DashboardSuccessCard = memo(
         }));
         toggleBooleanState(popOpen, setPopOpen, false);
         toggleBooleanState(stopLoading, setStopLoading, false);
-        toast({
-          title: queueName,
-          description: managePopTexts.consumerStoppedDescription,
-        });
+        // toast({
+        //   title,
+        //   description: managePopTexts.consumerStoppedDescription,
+        // });
       } else if (
         action === ContainerAction.START_MANUAL &&
         consumerCount === 0
@@ -358,8 +364,8 @@ const DashboardSuccessCard = memo(
         toggleBooleanState(popOpen, setPopOpen, false);
         toggleBooleanState(triggerLoading, setTriggerLoading, false);
         toast({
-          title: queueName,
-          description: managePopTexts.toastSchedule + alive,
+          title,
+          description: managePopTexts.toastSchedule + aliveOptions[alive],
         });
       }
     }, [
@@ -369,10 +375,10 @@ const DashboardSuccessCard = memo(
       toggleBooleanState,
       popOpen,
       stopLoading,
-      queueName,
       managePopTexts.consumerStoppedDescription,
       managePopTexts.toastSchedule,
       triggerLoading,
+      title,
     ]);
 
     useEffect(() => {
@@ -386,17 +392,6 @@ const DashboardSuccessCard = memo(
         }));
       }
     }, [batchUpdateMessagesCount, batchUpdateMessagesFinished]);
-
-    // const scheduleCallbackAfter = useCallback((q: QueueInformation) => {
-    //   setQueueInfo((prev) => ({
-    //     ...q,
-    //     messageCount: prev.messageCount,
-    //   }));
-    // }, []);
-    //
-    // const scheduleCallbackBefore = useCallback((q: QueueInformation) => {
-    //   setQueueInfo(q);
-    // }, []);
 
     return (
       <div className="h-full w-full min-h-[250px]">
@@ -466,7 +461,11 @@ const DashboardSuccessCard = memo(
               <div>
                 <p>
                   {parseHumanReadable(
-                    cronExpression,
+                    convert(
+                      cronExpression,
+                      "UTC",
+                      Intl.DateTimeFormat().resolvedOptions().timeZone,
+                    ),
                     {
                       // placeholder bug in the library
                       runOnWeekDay: {
@@ -565,13 +564,14 @@ interface ManagePopTexts {
   stopTooltip: string;
   toastSchedule: string;
   toastStop: string;
+  toastCron: string;
   scheduleTooltip: string;
   consumerStoppedDescription: string;
 }
 interface ManagePopProps extends ManagePopTexts, WithUser {
   queueInformation: QueueInformation;
   alive: string;
-  setAlive: (value: string) => void;
+  setAlive: (value: AliveOptionKey) => void;
   refetch: () => void;
   errorMessage: string;
   triggerLoading: boolean;
@@ -581,6 +581,7 @@ interface ManagePopProps extends ManagePopTexts, WithUser {
   setTriggerLoading: (value: boolean) => void;
   setStopLoading: (value: boolean) => void;
 }
+
 const ManagePop = ({
   queueInformation: { name: queueName, consumerCount },
   alive,
@@ -660,15 +661,20 @@ const ManagePop = ({
       </PopoverTrigger>
       <PopoverContent className="space-y-5">
         <Select value={alive} onValueChange={setAlive}>
-          <SelectTrigger defaultValue={"60000"}>
+          <SelectTrigger defaultValue="60000">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
             <SelectGroup>
               <SelectLabel>{selectLabel}</SelectLabel>
-              <SelectItem value="60000">{"60s"}</SelectItem>
-              <SelectItem value="600000">{"10m"}</SelectItem>
-              <SelectItem value="1200000">{"20m"}</SelectItem>
+              {/*<SelectItem value="60000">{"60s"}</SelectItem>*/}
+              {/*<SelectItem value="600000">{"10m"}</SelectItem>*/}
+              {/*<SelectItem value="1200000">{"20m"}</SelectItem>*/}
+              {Object.entries(aliveOptions).map(([key, value]) => (
+                <SelectItem key={key + "_" + queueName} value={key}>
+                  {value}
+                </SelectItem>
+              ))}
             </SelectGroup>
           </SelectContent>
         </Select>

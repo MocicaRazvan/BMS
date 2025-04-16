@@ -274,6 +274,12 @@ export default function useList<T>({
         totalPages: messages[0].pageInfo.totalPages,
         totalElements: messages[0].pageInfo.totalElements,
       }));
+    } else {
+      setPageInfo((prev) => ({
+        ...prev,
+        totalPages: 0,
+        totalElements: 0,
+      }));
     }
   }, [JSON.stringify(messages)]);
 

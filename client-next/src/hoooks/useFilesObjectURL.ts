@@ -23,9 +23,21 @@ const fetchFilesObjectURL = async (urls: string[]) => {
     const res = await fetch(url, {
       priority: "high",
       method: "GET",
+      headers: {
+        "X-Bypass-Cache": "1",
+      },
     });
     const mimeType =
       res.headers.get("content-type") || "application/octet-stream";
+
+    const contentDisposition = res.headers.get("content-disposition");
+    let filename = undefined;
+    if (contentDisposition) {
+      const match = contentDisposition.match(/filename="?([^"]+)"?/);
+      if (match && match[1]?.trim()) {
+        filename = match[1];
+      }
+    }
 
     let blob: Blob;
     if (res.body) {
@@ -51,6 +63,7 @@ const fetchFilesObjectURL = async (urls: string[]) => {
       blob,
       mimeType,
       url,
+      filename,
     };
   }
 
@@ -144,13 +157,13 @@ export default function useFilesObjectURL<T extends FieldValues>({
         )
         .then((reps) =>
           reps.map((fs) => {
-            const file = new File(
-              [fs.blob],
-              fs.url.split("/").pop() || "file",
-              {
-                type: fs.mimeType,
-              },
-            );
+            const urlPart = fs.url.split("/").pop();
+            const ext = fs.mimeType?.split("/").pop();
+            const fallbackName = urlPart && ext ? `${urlPart}.${ext}` : "file";
+
+            const file = new File([fs.blob], fs.filename || fallbackName, {
+              type: fs.mimeType,
+            });
             const objectURL = URL.createObjectURL(fs.blob);
             setChunkProgressValue((prev) => ((prev + 1) / files.length) * 100);
             return {

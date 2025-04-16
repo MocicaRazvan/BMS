@@ -10,6 +10,7 @@ import org.springframework.data.r2dbc.repository.Query;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.Collection;
 import java.util.List;
 
 public interface DayRepository extends TitleBodyRepository<Day>, CountInParent, CountIds {
@@ -22,11 +23,12 @@ public interface DayRepository extends TitleBodyRepository<Day>, CountInParent, 
             """)
     Flux<Long> countInParent(Long childId);
 
+    @Override
     @Query("""
                 select distinct d.id from day d
                 where d.id in (:ids)
             """)
-    Flux<Long> countByIds(List<Long> ids);
+    Flux<Long> countByIds(Collection<Long> ids);
 
     @Query("""
             SELECT * FROM day

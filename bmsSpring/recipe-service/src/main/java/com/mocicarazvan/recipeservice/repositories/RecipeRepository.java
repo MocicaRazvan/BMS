@@ -10,6 +10,7 @@ import org.springframework.data.r2dbc.repository.Query;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.Collection;
 import java.util.List;
 
 public interface RecipeRepository extends ApprovedRepository<Recipe>, CountInParent, CountIds {
@@ -25,11 +26,12 @@ public interface RecipeRepository extends ApprovedRepository<Recipe>, CountInPar
             """)
     Flux<Long> countInParent(Long childId);
 
+    @Override
     @Query(""" 
                             select distinct  r.id from recipe r 
                             where r.id in (:ids) and r.approved = true
             """)
-    Flux<Long> countByIds(List<Long> ids);
+    Flux<Long> countByIds(Collection<Long> ids);
 
 
     @Query("""

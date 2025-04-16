@@ -26,14 +26,12 @@ import com.mocicarazvan.templatemodule.hateos.CustomEntityModel;
 import com.mocicarazvan.templatemodule.utils.RequestsUtils;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.util.Pair;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.codec.multipart.FilePart;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Flux;
@@ -51,16 +49,13 @@ public class PlanController implements ApproveController<Plan, PlanBody, PlanRes
     private final RequestsUtils requestsUtils;
     private final PlansReactiveResponseBuilder plansReactiveResponseBuilder;
     private final ObjectMapper objectMapper;
-    private final ThreadPoolTaskScheduler taskScheduler;
 
     public PlanController(PlanService planService, RequestsUtils requestsUtils,
-                          PlansReactiveResponseBuilder plansReactiveResponseBuilder, ObjectMapper objectMapper,
-                          @Qualifier("threadPoolTaskScheduler") ThreadPoolTaskScheduler taskScheduler) {
+                          PlansReactiveResponseBuilder plansReactiveResponseBuilder, ObjectMapper objectMapper) {
         this.planService = planService;
         this.requestsUtils = requestsUtils;
         this.plansReactiveResponseBuilder = plansReactiveResponseBuilder;
         this.objectMapper = objectMapper;
-        this.taskScheduler = taskScheduler;
     }
 
     @Override
@@ -142,10 +137,6 @@ public class PlanController implements ApproveController<Plan, PlanBody, PlanRes
                 .map(ResponseEntity::ok);
     }
 
-    //todo in subscription tine minte si planurile cumparate dar si retetele din ele si fa overwrite la get with user la
-    // protected to true daca e in ele
-    // daca tii minte doar planurile in subscription
-    // subscription iti da planul dupa id, dupa tot subscription iti da retele din plan daca l-ai cumparat si sunt valide
     @Override
     @GetMapping(value = "/withUser/{id}", produces = {MediaType.APPLICATION_NDJSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
     public Mono<ResponseEntity<ResponseWithUserDtoEntity<PlanResponse>>> getModelByIdWithUser(@PathVariable Long id, ServerWebExchange exchange) {
@@ -218,7 +209,7 @@ public class PlanController implements ApproveController<Plan, PlanBody, PlanRes
                                                                                        @RequestPart("body") String body,
                                                                                        @RequestParam("clientId") String clientId,
                                                                                        ServerWebExchange exchange) {
-        return requestsUtils.getBodyFromJson(body, PlanBody.class, objectMapper, taskScheduler)
+        return requestsUtils.getBodyFromJson(body, PlanBody.class, objectMapper)
                 .flatMap(planBody -> planService.createModel(files, planBody, requestsUtils.extractAuthUser(exchange), clientId)
                         .flatMap(m -> plansReactiveResponseBuilder.toModel(m, PlanController.class)))
                 .map(ResponseEntity::ok);
@@ -231,7 +222,7 @@ public class PlanController implements ApproveController<Plan, PlanBody, PlanRes
                                                                                        @RequestParam("clientId") String clientId,
                                                                                        @PathVariable Long id,
                                                                                        ServerWebExchange exchange) {
-        return requestsUtils.getBodyFromJson(body, PlanBody.class, objectMapper, taskScheduler)
+        return requestsUtils.getBodyFromJson(body, PlanBody.class, objectMapper)
                 .flatMap(planBody -> planService.updateModelWithImagesGetOriginalApproved(files, id, planBody, requestsUtils.extractAuthUser(exchange), clientId)
                         .flatMap(m -> plansReactiveResponseBuilder.toModelWithPair(m, PlanController.class))
                         .map(Pair::getFirst)

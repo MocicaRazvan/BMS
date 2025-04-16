@@ -252,6 +252,11 @@ const metadataValues = (id: string): MetadataValues[] => [
     path: "/trainer/user/" + id + "/recipes",
     role: "ROLE_TRAINER",
   },
+  {
+    key: "admin.ArchiveQueues",
+    path: "/admin/archiveQueues",
+    role: "ROLE_ADMIN",
+  },
 ];
 
 export async function getMetadataValues(

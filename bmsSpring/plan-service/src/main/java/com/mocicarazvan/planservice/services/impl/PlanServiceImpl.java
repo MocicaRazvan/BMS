@@ -586,13 +586,13 @@ public class PlanServiceImpl
 
         @Override
         @RedisReactiveApprovedCacheEvict(key = CACHE_KEY_PATH, forWhomPath = "#r.userId")
-        protected Mono<Pair<PlanResponse, Boolean>> createInvalidate(PlanResponse r) {
+        public Mono<Pair<PlanResponse, Boolean>> createInvalidate(PlanResponse r) {
             return super.createInvalidate(r);
         }
 
         @Override
         @RedisReactiveApprovedCacheEvict(key = CACHE_KEY_PATH, id = "#p.getFirst().getId()", forWhomPath = "#p.getFirst().getUserId()")
-        protected Mono<Pair<PlanResponse, Boolean>> updateDeleteInvalidate(Pair<PlanResponse, Boolean> p) {
+        public Mono<Pair<PlanResponse, Boolean>> updateDeleteInvalidate(Pair<PlanResponse, Boolean> p) {
             return super.updateDeleteInvalidate(p);
         }
 

@@ -8,6 +8,7 @@ import com.mocicarazvan.templatemodule.repositories.CountInParent;
 import org.springframework.data.r2dbc.repository.Query;
 import reactor.core.publisher.Flux;
 
+import java.util.Collection;
 import java.util.List;
 
 public interface PlanRepository extends ApprovedRepository<Plan>, CountInParent, CountIds {
@@ -18,12 +19,12 @@ public interface PlanRepository extends ApprovedRepository<Plan>, CountInParent,
             """)
     Flux<Long> countInParent(Long childId);
 
-
+    @Override
     @Query("""
                 select distinct p.id  from plan p
                 where p.id in (:ids) and p.approved = true
             """)
-    Flux<Long> countByIds(List<Long> ids);
+    Flux<Long> countByIds(Collection<Long> ids);
 
     Flux<Plan> findAllByIdInAndApprovedTrue(List<Long> ids);
 

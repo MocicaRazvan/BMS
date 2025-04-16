@@ -7,9 +7,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { SmilePlus } from "lucide-react";
 import { useState } from "react";
-import EmojiPicker, { EmojiStyle, Theme } from "emoji-picker-react";
-import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
+import CustomEmojiPicker from "@/components/common/custom-emoji-picker";
 
 export interface EditorEmojiPickerTexts {
   searchPlaceholder: string;
@@ -25,7 +24,6 @@ export default function EditorEmojiPicker({
   texts: { searchPlaceholder },
 }: Props) {
   const [open, setOpen] = useState(false);
-  const theme = useTheme();
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger asChild>
@@ -39,14 +37,7 @@ export default function EditorEmojiPicker({
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-full md:w-fit">
-        <EmojiPicker
-          className="!bg-background  [&_input]:!bg-background
-          [&_h2]:!bg-background/35 [&_h2]:!backdrop-blur
-            [&_h2]:!supports-[backdrop-filter]:bg-background/60
-            [&_button]:!text-primary
-          "
-          theme={theme.theme === "dark" ? Theme.DARK : Theme.LIGHT}
-          emojiStyle={EmojiStyle.GOOGLE}
+        <CustomEmojiPicker
           onEmojiClick={(e) => {
             onEmojiSelect(e.emoji);
           }}

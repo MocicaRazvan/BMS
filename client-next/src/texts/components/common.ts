@@ -4,12 +4,17 @@ import { RadioSortTexts } from "@/components/common/radio-sort";
 import { NutritionalTableTexts } from "@/components/common/nutritional-table";
 import { getIngredientTableColumnTexts } from "@/texts/components/table";
 import { ArchiveQueueCardsTexts } from "@/components/common/archive-queue-card";
-import { ArchiveQueuePrefix, archiveQueuePrefixes } from "@/types/dto";
+import {
+  ArchiveQueuePrefix,
+  archiveQueuePrefixes,
+  ContainerAction,
+} from "@/types/dto";
 import {
   MonthPicker,
   MonthPickerTexts,
 } from "@/components/common/month-picker";
 import { ImageCropTexts } from "@/components/common/image-cropper";
+import { ArchiveQueueUpdateTexts } from "@/context/archive-queue-update-context";
 
 export async function getElementHeaderTexts(): Promise<ElementHeaderTexts> {
   const t = await getTranslations("components.common.ElementHeaderTexts");
@@ -35,6 +40,36 @@ export async function getNutritionalTableTexts(): Promise<NutritionalTableTexts>
   return {
     tableCaption: t("tableCaption"),
     ingredientColumnTexts,
+  };
+}
+
+export async function getArchiveQueueTitleForPrefixes(): Promise<ArchiveQueueUpdateTexts> {
+  const t = await getTranslations("components.common.ArchiveQueueCardsTexts");
+  return {
+    titles: [
+      "comment",
+      "day",
+      "ingredient",
+      "meal",
+      "plan",
+      "post",
+      "recipe",
+      "user",
+    ].reduce(
+      (acc, type) => {
+        acc[type as ArchiveQueuePrefix] = {
+          delete: t("title.delete", { type }),
+          update: t("title.update", { type }),
+        };
+        return acc;
+      },
+      {} as ArchiveQueueUpdateTexts["titles"],
+    ),
+    toastActions: {
+      [ContainerAction.START_MANUAL]: t("managePopTexts.toastCron"),
+      [ContainerAction.STOP]: t("managePopTexts.toastStop"),
+      [ContainerAction.START_CRON]: t("managePopTexts.toastCron"),
+    },
   };
 }
 export async function getArchiveQueueCardsTexts(
@@ -73,6 +108,7 @@ export async function getArchiveQueueCardsTexts(
       consumerStoppedDescription: t(
         "managePopTexts.consumerStoppedDescription",
       ),
+      toastCron: t("managePopTexts.toastCron"),
     },
   };
 }

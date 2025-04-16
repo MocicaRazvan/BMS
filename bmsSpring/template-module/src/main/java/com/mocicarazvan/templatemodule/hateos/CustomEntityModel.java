@@ -6,8 +6,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.hateoas.Link;
 
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @Data
@@ -36,7 +36,7 @@ public class CustomEntityModel<T> {
 
     }
 
-    public void add(List<Link> links) {
+    public void add(Collection<Link> links) {
         if (_links == null)
             _links = new HashMap<>();
         links.forEach(link -> _links.put(link.getRel().value(), link));

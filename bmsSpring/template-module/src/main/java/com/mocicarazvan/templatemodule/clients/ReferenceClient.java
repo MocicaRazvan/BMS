@@ -18,7 +18,6 @@ import reactor.core.publisher.Mono;
 @Setter
 public abstract class ReferenceClient extends ClientBase {
     private final String referenceName;
-//    private String serviceUrl;
 
     public ReferenceClient(String service, WebClient.Builder webClientBuilder, CircuitBreakerRegistry circuitBreakerRegistry, RetryRegistry retryRegistry, RateLimiterRegistry rateLimiterRegistry, String referenceName) {
         super(service, webClientBuilder, circuitBreakerRegistry, retryRegistry, rateLimiterRegistry);
@@ -45,25 +44,6 @@ public abstract class ReferenceClient extends ClientBase {
                 .onErrorResume(WebClientRequestException.class, ClientExceptionHandler::handleWebRequestException)
                 .onErrorResume(ThrowFallback.class, e -> Mono.error(new NotFoundEntity(referenceName, Long.valueOf(referenceId))));
     }
-
-//    public <T extends ApproveDto> Mono<T> getReferenceById(String referenceId, String userId, Class<T> clazz) {
-//        if (serviceUrl == null) {
-//            return Mono.error(new NotFoundEntity(referenceName, Long.valueOf(referenceId)));
-//        }
-//        return getClient()
-//                .get()
-//                .uri(uriBuilder -> uriBuilder.path("/{referenceId}").build(referenceId))
-//                .accept(MediaType.APPLICATION_NDJSON)
-//                .header(RequestsUtils.AUTH_HEADER, userId)
-//                .retrieve()
-//                .onStatus(HttpStatusCode::isError, response -> handleClientException(response, serviceUrl))
-//                .bodyToMono(clazz)
-//                .transformDeferred(RetryOperator.of(retry))
-//                .transformDeferred(CircuitBreakerOperator.of(circuitBreaker))
-//                .transformDeferred(RateLimiterOperator.of(rateLimiter))
-//                .onErrorResume(WebClientRequestException.class, this::handleWebRequestException)
-//                .onErrorResume(ThrowFallback.class, e -> Mono.error(new NotFoundEntity(referenceName, Long.valueOf(referenceId))));
-//    }
 
     public <T extends ApproveDto> Mono<T> getReferenceById(String referenceId, String userId, Class<T> clazz) {
         if (serviceUrl == null) {

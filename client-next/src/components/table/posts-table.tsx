@@ -463,6 +463,18 @@ export default function PostsTable({
             callback: resetCurrentPage,
             filterKey: "title",
           }}
+          chartProps={{
+            aggregatorConfig: {
+              "#": (_) => 1,
+              [postTableColumnsTexts.userLikes]: (p) => p.userLikes.length,
+              [postTableColumnsTexts.userDislikes]: (p) =>
+                p.userDislikes.length,
+              ["# " + postTableColumnsTexts.approved.header]: (p) =>
+                Number(p.approved),
+            },
+            dateField: "createdAt",
+          }}
+          showChart={true}
           extraCriteria={
             <div className="flex items-start justify-center gap-8 flex-1 flex-wrap">
               <div className="flex-1 flex-wrap">

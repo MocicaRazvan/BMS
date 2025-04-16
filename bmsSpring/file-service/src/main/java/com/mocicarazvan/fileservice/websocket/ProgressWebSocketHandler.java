@@ -9,9 +9,13 @@ import org.springframework.data.redis.connection.ReactiveSubscription;
 import org.springframework.data.redis.core.ReactiveRedisTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.socket.WebSocketHandler;
+import org.springframework.web.reactive.socket.WebSocketMessage;
 import org.springframework.web.reactive.socket.WebSocketSession;
 import org.springframework.web.util.UriComponentsBuilder;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.time.Duration;
 
 @Component
 @Slf4j
@@ -43,10 +47,22 @@ public class ProgressWebSocketHandler implements WebSocketHandler {
         FileType fileType = FileType.valueOf(stringFileType);
         String key = clientId + "-" + fileType;
 
-        return redisTemplate.listenToChannel(key)
+        Mono<Void> sendPing = session.send(
+                Flux.interval(Duration.ofSeconds(5), Duration.ofSeconds(5))
+                        .map(_ -> session.pingMessage(_ -> session.bufferFactory().allocateBuffer(1))));
+
+//        return redisTemplate.listenToChannel(key)
+//                .map(ReactiveSubscription.Message::getMessage)
+//                .flatMap(message -> session.send(Mono.just(session.textMessage(message))))
+//                .takeUntilOther(session.receive()).then();
+
+        Flux<WebSocketMessage> outboundMessages = redisTemplate.listenToChannel(key)
                 .map(ReactiveSubscription.Message::getMessage)
-                .flatMap(message -> session.send(Mono.just(session.textMessage(message))))
-                .takeUntilOther(session.receive()).then();
+                .map(session::textMessage);
+
+        Mono<Void> out = session.send(outboundMessages);
+
+        return Mono.when(out, sendPing);
     }
 
     public void sendProgressUpdate(String clientId, FileType fileType, Long index) {

@@ -6,6 +6,7 @@ import com.mocicarazvan.websocketservice.exceptions.MoreThenOneChatRoom;
 import com.mocicarazvan.websocketservice.exceptions.SameUserChatRoom;
 import com.mocicarazvan.websocketservice.exceptions.UserIsConnectedToTheRoom;
 import com.mocicarazvan.websocketservice.exceptions.notFound.NotFoundBase;
+import com.mocicarazvan.websocketservice.exceptions.reactive.CannotGetUsersByEmail;
 import com.mocicarazvan.websocketservice.messaging.CustomConvertAndSendToUser;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +19,8 @@ import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+import java.util.concurrent.CompletionException;
+
 @ControllerAdvice
 @RequiredArgsConstructor
 public class Advice extends BaseAdvice {
@@ -25,35 +28,31 @@ public class Advice extends BaseAdvice {
     private final SimpMessagingTemplate simpMessagingTemplate;
     private final CustomConvertAndSendToUser customConvertAndSendToUser;
 
-    @ExceptionHandler({NotFoundBase.class, MoreThenOneChatRoom.class, SameUserChatRoom.class, UserIsConnectedToTheRoom.class})
+    @ExceptionHandler({NotFoundBase.class, MoreThenOneChatRoom.class, SameUserChatRoom.class, UserIsConnectedToTheRoom.class, CannotGetUsersByEmail.class})
     public ResponseEntity<BaseErrorResponse> handleBadRequest(RuntimeException e, HttpServletRequest request) {
 
         return handleWithMessage(HttpStatus.BAD_REQUEST, e, request);
     }
 
+    @ExceptionHandler(CompletionException.class)
+    public ResponseEntity<BaseErrorResponse> handleCompletionException(CompletionException e, HttpServletRequest request) {
+        Throwable cause = e.getCause();
+
+        if (cause instanceof NotFoundBase ||
+                cause instanceof MoreThenOneChatRoom ||
+                cause instanceof SameUserChatRoom ||
+                cause instanceof UserIsConnectedToTheRoom
+                || cause instanceof CannotGetUsersByEmail
+        ) {
+            return handleWithMessage(HttpStatus.BAD_REQUEST, (RuntimeException) cause, request);
+        }
+        return handleWithMessage(HttpStatus.INTERNAL_SERVER_ERROR, new RuntimeException("Unexpected async error"), request);
+    }
+
+
     @MessageExceptionHandler({NotFoundBase.class, MoreThenOneChatRoom.class, SameUserChatRoom.class})
     public void handleBadRequest(RuntimeException e, Message<?> message,
                                  StompHeaderAccessor accessor) {
-
-//        String username = Objects.requireNonNull(accessor.getUser()).getName();
-//
-//
-//        WebSocketErrorResponse resp = WebSocketErrorResponse.builder()
-//                .message(e.getMessage())
-//                .timestamp(Instant.now().toString())
-//                .error(e.getClass().getSimpleName())
-//                .sessionId(accessor.getSessionId())
-//                .destination(accessor.getDestination())
-//                .status(HttpStatus.BAD_REQUEST.value())
-//                .payloadType(message.getPayload().getClass().getSimpleName())
-//                .build();
-//
-//
-//        if (username != null) {
-//            simpMessagingTemplate.convertAndSendToUser(username, "/queue/errors", resp);
-//        } else {
-//            simpMessagingTemplate.convertAndSend("/queue/errors", resp);
-//        }
         handleWithMessageWs(e, message, accessor, HttpStatus.BAD_REQUEST, simpMessagingTemplate, customConvertAndSendToUser);
 
     }

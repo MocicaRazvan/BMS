@@ -90,6 +90,7 @@ public class ChannelAwareBatchMessageListenerImpl<T> implements ChannelAwareBatc
                         .then();
     }
 
+    //this can actually be a huge message like over 10k, that's why i use a normal thread not a virtual one
     private T deserializeMessage(Message message) {
         try {
             return objectMapper.readValue(message.getBody(), clazz);

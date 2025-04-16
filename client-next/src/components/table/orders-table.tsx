@@ -400,6 +400,18 @@ export default function OrdersTable({
               {searchKeyCriteria(resetCurrentPage)}
             </div>
           }
+          chartProps={{
+            aggregatorConfig: {
+              [orderTableColumnsTexts.plans + " / 10"]: (p) =>
+                p.order.planIds.length / 10,
+              [orderTableColumnsTexts.plans +
+              " * " +
+              orderTableColumnsTexts.total +
+              " / 10"]: (p) => (p.order.planIds.length * p.order.total) / 100,
+            },
+            dateField: "order.createdAt",
+          }}
+          showChart={true}
           // rangeDateFilter={
           // <CreationFilter
           //   {...creationFilterTexts}

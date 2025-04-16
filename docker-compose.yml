@@ -725,6 +725,21 @@ services:
     depends_on:
       - gateway-service
 
+  
+  
+  nginx-files:
+    image: nginx:latest
+    container_name: nginx-files-container-bms
+    ports:
+      - "8180:80"
+      - "8943:443"
+    volumes:
+      - ./nginx/files.conf:/etc/nginx/nginx.conf
+    networks:
+      - bms
+    restart: unless-stopped
+
+
   nginx-nextjs:
     image: nginx:latest
     container_name: nginx-nextjs-container-bms

@@ -5,12 +5,12 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.LinkedHashMap;
 
 @Data
 @AllArgsConstructor
@@ -22,12 +22,14 @@ public class PageableBody {
     @NotNull(message = "The page number should be present")
     @Min(value = 0, message = "Page is a non negative value.")
     @Schema(description = "The page value, 0 index based", minimum = "0")
+    @Builder.Default
     private int page = 0;
 
     @NotNull(message = "The page size should be present")
     @Min(value = 1, message = "The size should be at least 1.")
     @Max(value = 100, message = "The size should be at most 100.")
     @Schema(description = "The page size value", minimum = "1")
+    @Builder.Default
     private int size = 10;
 
     @Schema(description = """
@@ -37,6 +39,6 @@ public class PageableBody {
             For any other entities will be added the criteria title and body.
             Null values are considered value.
             """)
-    private Map<String, String> sortingCriteria = new HashMap<>();
+    private LinkedHashMap<String, String> sortingCriteria = new LinkedHashMap<>();
 
 }

@@ -8,21 +8,27 @@ import com.mocicarazvan.templatemodule.services.RabbitMqUpdateDeleteService;
 import com.mocicarazvan.templatemodule.services.impl.RabbitMqApprovedSenderImpl;
 import com.mocicarazvan.templatemodule.services.impl.RabbitMqSenderImpl;
 import com.mocicarazvan.templatemodule.services.impl.RabbitMqUpdateDeleteServiceImpl;
+import com.mocicarazvan.templatemodule.utils.RabbitMqQueueUtils;
 import com.mocicarazvan.templatemodule.utils.SimpleTaskExecutorsInstance;
 import org.springframework.amqp.core.*;
+import org.springframework.amqp.rabbit.annotation.RabbitListenerConfigurer;
+import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.amqp.rabbit.listener.RabbitListenerEndpointRegistrar;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.amqp.SimpleRabbitListenerContainerFactoryConfigurer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.retry.support.RetryTemplate;
+import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
 @Configuration
-public class RabbitMqConfig {
+public class RabbitMqConfig implements RabbitListenerConfigurer {
     @Value("${plan.queue.name}")
     private String planQueueName;
 
@@ -56,9 +62,25 @@ public class RabbitMqConfig {
     @Value("${plan.fanout.exchange.name}")
     private String planFanoutExchangeName;
 
+    private final LocalValidatorFactoryBean validator;
+
+    public RabbitMqConfig(LocalValidatorFactoryBean validator) {
+        this.validator = validator;
+    }
+
+//    @Bean
+//    public Queue planQueue() {
+//        return new Queue(planQueueName, true);
+//    }
+
     @Bean
     public Queue planQueue() {
-        return new Queue(planQueueName, true);
+        return RabbitMqQueueUtils.durableQueueWithDlq(planQueueName);
+    }
+
+    @Bean
+    public Queue planDlqQueue() {
+        return RabbitMqQueueUtils.deadLetterQueue(planQueueName);
     }
 
     @Bean
@@ -84,6 +106,12 @@ public class RabbitMqConfig {
     @Bean
     public MessageConverter jsonMessageConverter() {
         return new Jackson2JsonMessageConverter();
+    }
+
+    @Bean
+    public Binding planCacheInvalidateBinding(@Qualifier("planCacheInvalidateQueue") Queue planCacheInvalidateQueue,
+                                              @Qualifier("planFanoutExchange") FanoutExchange planFanoutExchange) {
+        return BindingBuilder.bind(planCacheInvalidateQueue).to(planFanoutExchange);
     }
 
     @Bean
@@ -116,14 +144,34 @@ public class RabbitMqConfig {
         return new RabbitMqSenderImpl(planFanoutExchangeName, "", rabbitTemplate, concurrency);
     }
 
+//    @Bean
+//    public Queue planDeleteQueue() {
+//        return new Queue(planDeleteQueueName, true);
+//    }
+
     @Bean
     public Queue planDeleteQueue() {
-        return new Queue(planDeleteQueueName, true);
+        return RabbitMqQueueUtils.durableQueueWithDlq(planDeleteQueueName);
     }
 
     @Bean
+    public Queue planDeleteDlqQueue() {
+        return RabbitMqQueueUtils.deadLetterQueue(planDeleteQueueName);
+    }
+
+//    @Bean
+//    public Queue planUpdateQueue() {
+//        return new Queue(planUpdateQueueName, true);
+//    }
+
+    @Bean
     public Queue planUpdateQueue() {
-        return new Queue(planUpdateQueueName, true);
+        return RabbitMqQueueUtils.durableQueueWithDlq(planUpdateQueueName);
+    }
+
+    @Bean
+    public Queue planUpdateDlqQueue() {
+        return RabbitMqQueueUtils.deadLetterQueue(planUpdateQueueName);
     }
 
     @Bean
@@ -144,5 +192,23 @@ public class RabbitMqConfig {
                 .deleteSender(new RabbitMqSenderImpl(planExchangeName, planDeleteRoutingKey, rabbitTemplate, concurrency))
                 .updateSender(new RabbitMqSenderImpl(planExchangeName, planUpdateRoutingKey, rabbitTemplate, concurrency))
                 .build();
+    }
+
+    @Bean
+    public SimpleRabbitListenerContainerFactory rabbitListenerContainerFactory(
+            ConnectionFactory connectionFactory,
+            SimpleRabbitListenerContainerFactoryConfigurer configurer,
+            @Qualifier("rabbitMqAsyncTaskExecutor") SimpleAsyncTaskExecutor taskExecutor
+    ) {
+
+        SimpleRabbitListenerContainerFactory factory = new SimpleRabbitListenerContainerFactory();
+        configurer.configure(factory, connectionFactory);
+        factory.setTaskExecutor(taskExecutor);
+        return factory;
+    }
+
+    @Override
+    public void configureRabbitListeners(RabbitListenerEndpointRegistrar registrar) {
+        registrar.setValidator(validator);
     }
 }

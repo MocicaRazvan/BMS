@@ -20,6 +20,8 @@ import person4 from "@/../public/images/people/person4.jpg";
 import Logo from "@/components/logo/logo";
 import LogoWall from "@/components/reactbits/logo-wall";
 import HomeAboutWrapper from "@/components/home/home-about-wrapper";
+import HomeMap, { HomeMapTexts } from "@/components/home/home-map";
+import WorldWrapper from "@/components/aceternityui/world-wrapper";
 
 interface Props {
   params: { locale: Locale };
@@ -32,6 +34,7 @@ export interface HomeTexts {
   homeTimelineTexts: HomeTimelineTexts;
   homeHeroTexts: HomeHeroTexts;
   homeTestimonialsTexts: HomeTestimonialsTexts;
+  homeMapTexts: HomeMapTexts;
 }
 
 const logoWallArr = Array.from({ length: 8 }, (_, i) => (
@@ -42,6 +45,7 @@ const logoWallArr = Array.from({ length: 8 }, (_, i) => (
     <Logo width={70} height={70} />
   </div>
 ));
+const personImages = [person1, person2, person3, person4];
 export default async function Home({ params: { locale } }: Props) {
   unstable_setRequestLocale(locale);
 
@@ -52,9 +56,9 @@ export default async function Home({ params: { locale } }: Props) {
     homeTimelineTexts,
     homeHeroTexts,
     homeTestimonialsTexts,
+    homeMapTexts,
   } = await getHomeTexts();
 
-  const personImages = [person1, person2, person3, person4];
   const testimonials = Array.from({ length: 4 }).map((_, i) => {
     const key = `testimonial${i + 1}` as TypeTestimonials;
     return {
@@ -73,12 +77,15 @@ export default async function Home({ params: { locale } }: Props) {
       <div className="h-8 lg:h-14" />
       <HomeAboutWrapper texts={homeAboutTexts} />
       <HomeTimeline {...homeTimelineTexts} />
-      <div className="h-10 md:h-16" />
+      {/*<div className="h-10" />*/}
+      <WorldWrapper>
+        <HomeMap {...homeMapTexts} />
+      </WorldWrapper>
       <HomeTestimonials
         testimonials={testimonials}
         title={homeTestimonialsTexts.title}
       />
-      <div className="mb-3 mt-5 md:mt-8">
+      <div className="mb-3 mt-5 md:mt-12 pt-0 md:pt-5">
         <LogoWall
           items={logoWallArr}
           size={"clamp(4rem, 1rem + 15vmin, 13rem)"}

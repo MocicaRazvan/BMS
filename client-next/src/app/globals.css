@@ -166,6 +166,11 @@
     width: 14px;
 }
 
+.epr_-6fvvle:hover::after {
+    color: var(--primary) !important;
+    background-color: var(--primary) !important;
+}
+
 /* Track */
 ::-webkit-scrollbar-track {
     background-color: hsl(var(--scrollbar-bg));

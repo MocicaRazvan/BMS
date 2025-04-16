@@ -4,8 +4,8 @@ import {
   getDayCalendarBodyMonthTexts,
   getDayCalendarHeaderTexts,
 } from "@/texts/components/day-calendar";
-import DayCalendarHeaderDate from "@/components/dayCalendar/day-calendar-header";
-import DayCalendarBody from "@/components/dayCalendar/day-calendar-body";
+import DayCalendarHeaderDate from "@/components/days-calendar/day-calendar-header";
+import DayCalendarBody from "@/components/days-calendar/day-calendar-body";
 import React, { Suspense } from "react";
 import { Separator } from "@/components/ui/separator";
 import { Metadata } from "next";

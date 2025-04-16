@@ -8,7 +8,12 @@ on:
     paths:
       - 'bmsSpring/archive-service/**'
 jobs:
+  test-archive-service:
+    uses: ./.github/workflows/test-run.yml
+    with:
+      app-path: archive-service
   build-and-push-archive-service:
+    needs: [ test-archive-service ]
     uses: ./.github/workflows/build-and-push.yml
     with:
       image-name: archive-service-bms

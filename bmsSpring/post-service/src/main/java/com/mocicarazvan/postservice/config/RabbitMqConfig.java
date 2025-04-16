@@ -8,21 +8,27 @@ import com.mocicarazvan.templatemodule.services.RabbitMqUpdateDeleteService;
 import com.mocicarazvan.templatemodule.services.impl.RabbitMqApprovedSenderImpl;
 import com.mocicarazvan.templatemodule.services.impl.RabbitMqSenderImpl;
 import com.mocicarazvan.templatemodule.services.impl.RabbitMqUpdateDeleteServiceImpl;
+import com.mocicarazvan.templatemodule.utils.RabbitMqQueueUtils;
 import com.mocicarazvan.templatemodule.utils.SimpleTaskExecutorsInstance;
 import org.springframework.amqp.core.*;
+import org.springframework.amqp.rabbit.annotation.RabbitListenerConfigurer;
+import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.amqp.rabbit.listener.RabbitListenerEndpointRegistrar;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.amqp.SimpleRabbitListenerContainerFactoryConfigurer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.retry.support.RetryTemplate;
+import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
 @Configuration
-public class RabbitMqConfig {
+public class RabbitMqConfig implements RabbitListenerConfigurer {
     @Value("${post.queue.name}")
     private String postQueueName;
 
@@ -57,9 +63,24 @@ public class RabbitMqConfig {
     @Value("${post.fanout.exchange.name}")
     private String postFanoutExchangeName;
 
+    private final LocalValidatorFactoryBean validator;
+
+    public RabbitMqConfig(LocalValidatorFactoryBean validator) {
+        this.validator = validator;
+    }
+
+    //    @Bean
+//    public Queue postQueue() {
+//        return new Queue(postQueueName, true);
+//    }
     @Bean
     public Queue postQueue() {
-        return new Queue(postQueueName, true);
+        return RabbitMqQueueUtils.durableQueueWithDlq(postQueueName);
+    }
+
+    @Bean
+    public Queue postDlqQueue() {
+        return RabbitMqQueueUtils.deadLetterQueue(postQueueName);
     }
 
     @Bean
@@ -118,14 +139,34 @@ public class RabbitMqConfig {
         return new RabbitMqSenderImpl(postFanoutExchangeName, "", rabbitTemplate, concurrency);
     }
 
+//    @Bean
+//    public Queue postDeleteQueue() {
+//        return new Queue(postDeleteQueueName, true);
+//    }
+
     @Bean
     public Queue postDeleteQueue() {
-        return new Queue(postDeleteQueueName, true);
+        return RabbitMqQueueUtils.durableQueueWithDlq(postDeleteQueueName);
     }
 
     @Bean
+    public Queue postDeleteDlqQueue() {
+        return RabbitMqQueueUtils.deadLetterQueue(postDeleteQueueName);
+    }
+
+//    @Bean
+//    public Queue postUpdateQueue() {
+//        return new Queue(postUpdateQueueName, true);
+//    }
+
+    @Bean
     public Queue postUpdateQueue() {
-        return new Queue(postUpdateQueueName, true);
+        return RabbitMqQueueUtils.durableQueueWithDlq(postUpdateQueueName);
+    }
+
+    @Bean
+    public Queue postUpdateDlqQueue() {
+        return RabbitMqQueueUtils.deadLetterQueue(postUpdateQueueName);
     }
 
     @Bean
@@ -141,10 +182,34 @@ public class RabbitMqConfig {
     }
 
     @Bean
+    public Binding postCacheInvalidateBinding(@Qualifier("postCacheInvalidateQueue") Queue postCacheInvalidateQueue,
+                                              @Qualifier("postFanoutExchange") FanoutExchange postFanoutExchange) {
+        return BindingBuilder.bind(postCacheInvalidateQueue).to(postFanoutExchange);
+    }
+
+    @Bean
     public RabbitMqUpdateDeleteService<Post> postRabbitMqUpdateDeleteService(RabbitTemplate rabbitTemplate) {
         return RabbitMqUpdateDeleteServiceImpl.<Post>builder()
                 .deleteSender(new RabbitMqSenderImpl(postExchangeName, postDeleteRoutingKey, rabbitTemplate, concurrency))
                 .updateSender(new RabbitMqSenderImpl(postExchangeName, postUpdateRoutingKey, rabbitTemplate, concurrency))
                 .build();
+    }
+
+    @Bean
+    public SimpleRabbitListenerContainerFactory rabbitListenerContainerFactory(
+            ConnectionFactory connectionFactory,
+            SimpleRabbitListenerContainerFactoryConfigurer configurer,
+            @Qualifier("rabbitMqAsyncTaskExecutor") SimpleAsyncTaskExecutor taskExecutor
+    ) {
+
+        SimpleRabbitListenerContainerFactory factory = new SimpleRabbitListenerContainerFactory();
+        configurer.configure(factory, connectionFactory);
+        factory.setTaskExecutor(taskExecutor);
+        return factory;
+    }
+
+    @Override
+    public void configureRabbitListeners(RabbitListenerEndpointRegistrar registrar) {
+        registrar.setValidator(validator);
     }
 }

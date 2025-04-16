@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.scheduling.concurrent.SimpleAsyncTaskScheduler;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
 import java.time.Duration;
 
@@ -31,7 +32,7 @@ public class AsyncConfig {
                 .build();
     }
 
-//    @Bean
+    //    @Bean
 //    public ThreadPoolTaskScheduler threadPoolTaskScheduler() {
 //        ThreadPoolTaskScheduler threadPoolTaskScheduler = new ThreadPoolTaskScheduler();
 //        threadPoolTaskScheduler.setPoolSize(threadPoolSize);
@@ -43,18 +44,18 @@ public class AsyncConfig {
 //
 //    }
 //
-//    @Bean
-//    public ThreadPoolTaskScheduler threadPoolTaskSchedulerVirtual() {
-//        ThreadPoolTaskScheduler threadPoolTaskScheduler = new ThreadPoolTaskScheduler();
-//        threadPoolTaskScheduler.setPoolSize(executorAsyncConcurrencyLimit);
-//        threadPoolTaskScheduler.setThreadNamePrefix("WSSchedulerVirtual-");
-//        threadPoolTaskScheduler.setRemoveOnCancelPolicy(true);
-//        threadPoolTaskScheduler.setWaitForTasksToCompleteOnShutdown(true);
-//        threadPoolTaskScheduler.setAwaitTerminationSeconds(60);
-//        threadPoolTaskScheduler.setThreadFactory(Thread.ofVirtual().factory());
-//        return threadPoolTaskScheduler;
-//
-//    }
+    @Bean
+    public ThreadPoolTaskScheduler threadPoolTaskSchedulerVirtual() {
+        ThreadPoolTaskScheduler threadPoolTaskScheduler = new ThreadPoolTaskScheduler();
+        threadPoolTaskScheduler.setPoolSize(executorAsyncConcurrencyLimit);
+        threadPoolTaskScheduler.setThreadNamePrefix("WSSchedulerVirtual-");
+        threadPoolTaskScheduler.setRemoveOnCancelPolicy(true);
+        threadPoolTaskScheduler.setWaitForTasksToCompleteOnShutdown(true);
+        threadPoolTaskScheduler.setAwaitTerminationSeconds(60);
+        threadPoolTaskScheduler.setThreadFactory(Thread.ofVirtual().factory());
+        return threadPoolTaskScheduler;
+
+    }
 
     @Bean
     public SimpleAsyncTaskScheduler simpleAsyncTaskScheduler() {

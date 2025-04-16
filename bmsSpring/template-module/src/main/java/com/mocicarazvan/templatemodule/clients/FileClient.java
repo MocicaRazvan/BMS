@@ -65,27 +65,34 @@ public class FileClient extends ClientBase {
     }
 
     public Mono<Void> deleteFiles(List<String> urls) {
-        GridIdsDto ids = new GridIdsDto(urls.stream()
-                .map(i -> i.substring(i.lastIndexOf('/') + 1))
-                .toList());
+//        GridIdsDto ids = new GridIdsDto(urls.stream()
+//                .map(i -> i.substring(i.lastIndexOf('/') + 1))
+//                .toList());
 
-        return getClient().method(HttpMethod.DELETE)
-                .uri("/delete")
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(ids)
-                .retrieve()
-                .onStatus(HttpStatusCode::isError, response -> ClientExceptionHandler.handleClientException(response, serviceUrl, service))
-                .bodyToMono(Void.class)
-                .transformDeferred(RetryOperator.of(retry))
-                .transformDeferred(CircuitBreakerOperator.of(circuitBreaker))
-                .transformDeferred(RateLimiterOperator.of(rateLimiter))
-                .onErrorResume(WebClientRequestException.class, ClientExceptionHandler::handleWebRequestException)
-                .onErrorResume(ThrowFallback.class, e ->
-                {
-                    log.error("Error deleting files", e);
-                    return Mono.error(new ServiceCallFailedException(
-                            "Error deleting files from file-service", "file-service", "/delete"));
-                });
+        return
+                Flux.fromIterable(urls)
+                        .map(i -> i.substring(i.lastIndexOf('/') + 1))
+                        .collectList()
+                        .map(GridIdsDto::new)
+                        .flatMap(ids ->
+                                getClient().method(HttpMethod.DELETE)
+                                        .uri("/delete")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .bodyValue(ids)
+                                        .retrieve()
+                                        .onStatus(HttpStatusCode::isError, response -> ClientExceptionHandler.handleClientException(response, serviceUrl, service))
+                                        .bodyToMono(Void.class)
+                                        .transformDeferred(RetryOperator.of(retry))
+                                        .transformDeferred(CircuitBreakerOperator.of(circuitBreaker))
+                                        .transformDeferred(RateLimiterOperator.of(rateLimiter))
+                                        .onErrorResume(WebClientRequestException.class, ClientExceptionHandler::handleWebRequestException)
+                                        .onErrorResume(ThrowFallback.class, e ->
+                                        {
+                                            log.error("Error deleting files", e);
+                                            return Mono.error(new ServiceCallFailedException(
+                                                    "Error deleting files from file-service", "file-service", "/delete"));
+                                        })
+                        );
 
 
     }

@@ -63,7 +63,8 @@ public class OllamaAPIServiceImpl implements OllamaAPIService {
 
     @Override
     public Mono<Float[]> generateEmbeddingFloatMono(String text) {
-        return generateEmbedding(text).map(ollamaEmbedResponseModel -> convertToFloat(ollamaEmbedResponseModel.getEmbeddings().getFirst()));
+        return generateEmbedding(text)
+                .map(ollamaEmbedResponseModel -> convertToFloat(ollamaEmbedResponseModel.getEmbeddings().getFirst()));
     }
 
     private Float[] convertToFloat(List<Double> doubleList) {
@@ -78,14 +79,6 @@ public class OllamaAPIServiceImpl implements OllamaAPIService {
     private Mono<OllamaEmbedResponseModel> embed(List<String> inputs) {
 //        String[] texts = inputs.stream().map(t -> t.toLowerCase().replaceAll("\\s+", " ").trim()).toArray(String[]::new);
         String[] texts = TextPreprocessor.preprocess(inputs);
-        OllamaEmbedRequestModel.builder()
-                .fromConfig(ollamaPropertiesConfig)
-                .input(texts)
-                .options(OllamaOptions.builder()
-                        .fromConfig(ollamaPropertiesConfig)
-                        .build())
-                .build();
-
         return ollamaAPI.embed(OllamaEmbedRequestModel.builder()
                 .fromConfig(ollamaPropertiesConfig)
                 .input(texts)
@@ -114,6 +107,6 @@ public class OllamaAPIServiceImpl implements OllamaAPIService {
 
     @Override
     public boolean isNotNullOrEmpty(String text) {
-        return text != null && !text.isEmpty();
+        return text != null && !text.isBlank();
     }
 }

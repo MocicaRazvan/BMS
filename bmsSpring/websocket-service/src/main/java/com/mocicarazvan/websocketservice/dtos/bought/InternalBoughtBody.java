@@ -1,5 +1,7 @@
 package com.mocicarazvan.websocketservice.dtos.bought;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -12,7 +14,9 @@ import java.util.List;
 @AllArgsConstructor
 @SuperBuilder
 public class InternalBoughtBody {
+    @NotBlank
     private String senderEmail;
+    @NotEmpty
     private List<InnerPlanResponse> plans;
 
     @Data

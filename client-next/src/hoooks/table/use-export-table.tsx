@@ -176,7 +176,9 @@ export default function useExportTable<T extends Record<string, any>, V>({
         ...csvConfig,
         columnHeaders: tableColumnHeaders.map((h) => h.id),
       };
-      download(finalConfig)(generateCsv(finalConfig)(formattedRows));
+      if (formattedRows.length > 0) {
+        download(finalConfig)(generateCsv(finalConfig)(formattedRows));
+      }
     },
     [csvConfig, getExport],
   );

@@ -31,7 +31,9 @@ public class OllamaQueryUtils {
     }
 
     public String addDistance(String vector) {
-
+        if (isNullOrEmpty(vector)) {
+            return "";
+        }
         return String.format("(e.embedding <#> '%s') * -1 AS distance", vector);
     }
 

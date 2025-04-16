@@ -719,6 +719,23 @@ export default function PlansTable({
               </div>
             </div>
           }
+          chartProps={{
+            aggregatorConfig: {
+              "#": (_) => 1,
+              "#omnivore": (r) => (r.model.type === "OMNIVORE" ? 1 : 0),
+              "#vegan": (r) => (r.model.type === "VEGAN" ? 1 : 0),
+              "#vegetarian": (r) => (r.model.type === "VEGETARIAN" ? 1 : 0),
+              ["# " + planTableColumnsTexts.approved.header]: (p) =>
+                Number(p.model.approved),
+              [planTableColumnsTexts.count + " / 10"]: (p) => p.count / 10,
+              [planTableColumnsTexts.count +
+              " * " +
+              planTableColumnsTexts.price +
+              " / 100"]: (p) => (p.count * p.model.price) / 100,
+            },
+            dateField: "model.createdAt",
+          }}
+          showChart={true}
           // rangeDateFilter={
           //   <CreationFilter
           //     {...creationFilterTexts}

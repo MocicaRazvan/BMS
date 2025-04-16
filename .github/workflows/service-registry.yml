@@ -8,7 +8,12 @@ on:
     paths:
       - 'bmsSpring/service-registry/**'
 jobs:
+  test-service-registry:
+    uses: ./.github/workflows/test-run.yml
+    with:
+      app-path: service-registry
   build-and-push-service-registry:
+    needs: [ test-service-registry ]
     uses: ./.github/workflows/build-and-push.yml
     with:
       image-name: service-registry-bms

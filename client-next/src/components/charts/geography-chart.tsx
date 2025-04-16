@@ -277,10 +277,11 @@ export default function GeographyChart({
                         borderColor="black"
                         colors={"blues"}
                         tooltip={({ feature }) =>
-                          feature.value > 0 &&
-                          scale < 3.5 && (
+                          feature.value > 0 && (
                             <div
-                              style={{ transform: `scale(${1 / scale})` }}
+                              style={{
+                                transform: `scale(${1 / (0.9 * scale)}) translateY(${(scale - 1) * 65}%)`,
+                              }}
                               className={cn(
                                 ` flex items-center justify-center p-2 
                               origin-center bg-background

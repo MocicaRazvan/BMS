@@ -10,8 +10,10 @@ import org.springframework.hateoas.server.reactive.WebFluxLinkBuilder;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.List;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 
 
 @RequiredArgsConstructor
@@ -21,10 +23,9 @@ public class ReactiveResponseBuilder<RESPONSE, C> {
 
     public Mono<CustomEntityModel<RESPONSE>> toModel(RESPONSE response, Class<C> clazz) {
         CustomEntityModel<RESPONSE> model = CustomEntityModel.of(response);
-        List<Mono<Link>> links = linkBuilder.createModelLinks(response, clazz)
-                .stream().map(WebFluxLinkBuilder.WebFluxLink::toMono).toList();
 
-        return Flux.merge(links)
+        return Flux.fromIterable(linkBuilder.createModelLinks(response, clazz))
+                .flatMap(WebFluxLinkBuilder.WebFluxLink::toMono)
                 .collectList()
                 .doOnNext(model::add)
                 .thenReturn(model);
@@ -93,23 +94,48 @@ public class ReactiveResponseBuilder<RESPONSE, C> {
     }
 
     public Mono<PageableResponse<CustomEntityModel<RESPONSE>>> toModelPageable(PageableResponse<RESPONSE> pageableResponse, Class<C> clazz) {
-        return toModelGeneric(pageableResponse, clazz, this::toModel);
+        return toModelGeneric(pageableResponse, clazz, this::toModel)
+                .transform(m -> addLinksToPage(m,
+                        pr -> pr.getContent().get_links().values()
+                ));
+    }
+
+    private <T> Mono<PageableResponse<T>> addLinksToPage(Mono<PageableResponse<T>> pageableResponse,
+                                                         Function<PageableResponse<T>, Collection<Link>> linksFunction
+    ) {
+        return
+                pageableResponse.map(pr -> {
+                    pr.setLinks(new ArrayList<>(linksFunction.apply(pr)));
+                    return pr;
+                });
     }
 
     public Mono<PageableResponse<ResponseWithUserDtoEntity<RESPONSE>>> toModelWithUserPageable(PageableResponse<ResponseWithUserDto<RESPONSE>> response, Class<C> clazz) {
-        return toModelGeneric(response, clazz, this::toModelWithUser);
+        return toModelGeneric(response, clazz, this::toModelWithUser)
+                .transform(m -> addLinksToPage(m,
+                        pr -> pr.getContent().getModel().get_links().values()
+                ));
     }
 
     public Mono<PageableResponse<ResponseWithUserLikesAndDislikesEntity<RESPONSE>>> toModelWithUserLikesAndDislikesPageable(PageableResponse<ResponseWithUserLikesAndDislikes<RESPONSE>> response, Class<C> clazz) {
-        return toModelGeneric(response, clazz, this::toModelWithUserLikesAndDislikes);
+        return toModelGeneric(response, clazz, this::toModelWithUserLikesAndDislikes)
+                .transform(m -> addLinksToPage(m,
+                        pr -> pr.getContent().getModel().get_links().values()
+                ));
     }
 
     public <CHILD> Mono<PageableResponse<ResponseWithChildListUser<RESPONSE, CHILD>>> toModelWithChildListUserPageable(PageableResponse<ResponseWithChildList<ResponseWithUserDto<RESPONSE>, CHILD>> response, Class<C> clazz) {
-        return toModelGeneric(response, clazz, this::toModelWithChildListUser);
+        return toModelGeneric(response, clazz, this::toModelWithChildListUser)
+                .transform(m -> addLinksToPage(m,
+                        pr -> pr.getContent().getEntity().getModel().get_links().values()
+                ));
     }
 
     public Mono<PageableResponse<ResponseWithEntityCount<CustomEntityModel<RESPONSE>>>> toModelWithEntityCountPageable(PageableResponse<ResponseWithEntityCount<RESPONSE>> response, Class<C> clazz) {
-        return toModelGeneric(response, clazz, this::toModelWithEntityCount);
+        return toModelGeneric(response, clazz, this::toModelWithEntityCount)
+                .transform(m -> addLinksToPage(m,
+                        pr -> pr.getContent().getModel().get_links().values()
+                ));
     }
 
 
@@ -136,8 +162,7 @@ public class ReactiveResponseBuilder<RESPONSE, C> {
 
     public <T> Mono<CustomEntityModel<T>> toModelConvertSetContent(RESPONSE response, Class<C> clazz, T content) {
         return toModel(response, clazz)
-                .map(model -> model.convertContent(content))
-                ;
+                .map(model -> model.convertContent(content));
     }
 
 

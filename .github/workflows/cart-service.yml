@@ -9,7 +9,17 @@ on:
       - 'bmsSpring/cart-service/**'
       - 'bmsSpring/template-module/**'
 jobs:
+  test-template-module:
+    uses: ./.github/workflows/test-run.yml
+    with:
+      app-path: template-module
+  test-cart-service:
+    uses: ./.github/workflows/test-run.yml
+    with:
+      app-path: cart-service
+      local-modules: template-module
   build-and-push-cart-service:
+    needs: [ test-template-module, test-cart-service ]
     uses: ./.github/workflows/build-and-push.yml
     with:
       image-name: cart-service-bms

@@ -61,8 +61,9 @@ import {
 } from "@/components/table/day-table";
 import { dayTypes, planObjectives } from "@/types/dto";
 import { getDayTypeBadgeTexts } from "@/texts/components/days";
-import { CreationFilterTexts } from "@/components/list/creation-filter";
 import { SelectedRowsTexts } from "@/components/table/selected-rows";
+import { getLinkedChartTexts } from "@/texts/components/charts";
+import { ArchiveQueuesTableTexts } from "@/components/table/archive-queues-table";
 
 export async function getDataTablePaginationTexts(): Promise<DataTablePaginationTexts> {
   const t = await getTranslations("components.table.DataTablePaginationTexts");
@@ -78,13 +79,19 @@ export async function getDataTablePaginationTexts(): Promise<DataTablePagination
 }
 
 export async function getDataTableTexts(): Promise<DataTableTexts> {
-  const [dataTablePaginationTexts, radioSortTexts, selectedRowsTexts, t] =
-    await Promise.all([
-      getDataTablePaginationTexts(),
-      getRadioSortTexts(),
-      getSelectedRowsTexts(),
-      getTranslations("components.table.DataTableTexts"),
-    ]);
+  const [
+    dataTablePaginationTexts,
+    radioSortTexts,
+    selectedRowsTexts,
+    linkedChartTexts,
+    t,
+  ] = await Promise.all([
+    getDataTablePaginationTexts(),
+    getRadioSortTexts(),
+    getSelectedRowsTexts(),
+    getLinkedChartTexts(),
+    getTranslations("components.table.DataTableTexts"),
+  ]);
   return {
     dataTablePaginationTexts,
     columnsLabel: t("columnsLabel"),
@@ -93,6 +100,11 @@ export async function getDataTableTexts(): Promise<DataTableTexts> {
     exportLabel: t("exportLabel"),
     selectedRowsTexts,
     downloadSelected: t("downloadSelected"),
+    linkedChartTexts: {
+      ...linkedChartTexts,
+      persisted: t("linkedChart.persisted"),
+      table: t("linkedChart.table"),
+    },
   };
 }
 
@@ -481,5 +493,35 @@ export async function getSelectedRowsTexts(): Promise<SelectedRowsTexts> {
   return {
     of: t("of"),
     rowsSelected: t("rowsSelected"),
+  };
+}
+
+export async function getArchiveQueuesTableTexts(): Promise<ArchiveQueuesTableTexts> {
+  const [t, dataTablePaginationTexts, selectedRowsTexts, linkedChartTexts] =
+    await Promise.all([
+      getTranslations("components.table.ArchiveQueuesTableTexts"),
+      getDataTablePaginationTexts(),
+      getSelectedRowsTexts(),
+      getLinkedChartTexts(),
+    ]);
+  return {
+    dataTablePaginationTexts,
+    selectedRowsTexts,
+    linkedChartTexts: {
+      ...linkedChartTexts,
+      default: t("linkedChart.default"),
+      selected: t("linkedChart.selected"),
+    },
+    actionPlaceholder: t("actionPlaceholder"),
+    clearFilters: t("clearFilters"),
+    queueNamePlaceholder: t("queueNamePlaceholder"),
+    noResults: t("noResults"),
+    columns: {
+      action: t("columns.action"),
+      queueName: t("columns.queueName"),
+      timestamp: t("columns.timestamp"),
+      id: t("columns.id"),
+    },
+    downloadSelected: t("downloadSelected"),
   };
 }

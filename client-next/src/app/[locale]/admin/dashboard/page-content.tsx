@@ -17,7 +17,7 @@ import { ArchiveQueuePrefix } from "@/types/dto";
 import { Locale } from "@/navigation";
 import ArchiveContent, {
   AugmentedArchiveQueuePrefix,
-} from "@/app/[locale]/admin/dashboard/archive-content";
+} from "@/components/archive/archive-content";
 import TopUsers, { TopUsersTexts } from "@/components/charts/top-users";
 import { Separator } from "@/components/ui/separator";
 import { TopPlans, TopPlansTexts } from "@/components/charts/top-plans";

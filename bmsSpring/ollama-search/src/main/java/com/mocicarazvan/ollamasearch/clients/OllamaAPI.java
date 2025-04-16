@@ -20,7 +20,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Schedulers;
 
 
 @Component
@@ -46,13 +45,12 @@ public class OllamaAPI {
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(embedRequestModel)
                 .retrieve()
+                // ollama sends just 200 on embed success, rest is an error
                 .onRawStatus(status -> status != 200, this::createErrorResponse)
                 .bodyToMono(OllamaEmbedResponseModel.class)
                 .transformDeferred(RetryOperator.of(retry))
                 .transformDeferred(CircuitBreakerOperator.of(circuitBreaker))
-                .transformDeferred(RateLimiterOperator.of(rateLimiter))
-                // bc it can be a long operation
-                .subscribeOn(Schedulers.boundedElastic());
+                .transformDeferred(RateLimiterOperator.of(rateLimiter));
     }
 
     private Mono<? extends Throwable> createErrorResponse(ClientResponse response) {

@@ -79,9 +79,8 @@ export default function LogoWall({
         >
           {items.map((item, idx) => (
             <div
-              key={idx + "-logo-first-row"}
+              key={`logo-${idx}`}
               className={[
-                // "bg-[var(--color-bg-accent)]",
                 "rounded-md",
                 "object-contain",
                 "aspect-video",
@@ -96,6 +95,7 @@ export default function LogoWall({
             </div>
           ))}
         </div>
+
         <div
           aria-hidden="true"
           className={[
@@ -113,85 +113,8 @@ export default function LogoWall({
         >
           {items.map((item, idx) => (
             <div
-              key={idx + "-logo-second-row"}
+              key={`logo-duplicate-${idx}`}
               className={[
-                // "bg-[var(--color-bg-accent)]",
-                "rounded-md",
-                "object-contain",
-                "aspect-video",
-                `w-[var(--size)] p-[calc(var(--size)/10)]`,
-                direction === "vertical" &&
-                  "aspect-square w-[calc(var(--size)/1.5)] p-[calc(var(--size)/6)]",
-              ]
-                .filter(Boolean)
-                .join(" ")}
-            >
-              {item}
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div
-        className={marqueeClass + " marquee--reverse"}
-        onMouseEnter={() => pauseOnHover && setIsPaused(true)}
-        onMouseLeave={() => pauseOnHover && setIsPaused(false)}
-      >
-        <div
-          className={[
-            "flex-shrink-0",
-            "flex",
-            "items-center",
-            "justify-around",
-            "gap-[calc(var(--size)/14)]",
-            "min-w-full",
-            "animate-scrollX reverse-x",
-            direction === "vertical" &&
-              "flex-col min-h-full animate-scrollY reverse-x",
-          ]
-            .filter(Boolean)
-            .join(" ")}
-        >
-          {items.map((item, idx) => (
-            <div
-              key={`rev-${idx}-logo-first-row`}
-              className={[
-                // "bg-[var(--color-bg-accent)]",
-                "rounded-md",
-                "object-contain",
-                "aspect-video",
-                `w-[var(--size)] p-[calc(var(--size)/10)]`,
-                direction === "vertical" &&
-                  "aspect-square w-[calc(var(--size)/1.5)] p-[calc(var(--size)/6)]",
-              ]
-                .filter(Boolean)
-                .join(" ")}
-            >
-              {item}
-            </div>
-          ))}
-        </div>
-        <div
-          aria-hidden="true"
-          className={[
-            "flex-shrink-0",
-            "flex",
-            "items-center",
-            "justify-around",
-            "gap-[calc(var(--size)/14)]",
-            "min-w-full",
-            "animate-scrollX reverse-x",
-            direction === "vertical" &&
-              "flex-col min-h-full animate-scrollY reverse-x",
-          ]
-            .filter(Boolean)
-            .join(" ")}
-        >
-          {items.map((item, idx) => (
-            <div
-              key={`dup2-${idx}-logo-second-row`}
-              className={[
-                // "bg-[var(--color-bg-accent)]",
                 "rounded-md",
                 "object-contain",
                 "aspect-video",

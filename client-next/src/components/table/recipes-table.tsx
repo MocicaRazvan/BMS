@@ -582,6 +582,19 @@ export default function RecipeTable({
               </div>
             </div>
           }
+          chartProps={{
+            aggregatorConfig: {
+              "#": (_) => 1,
+              "#omnivore": (r) => (r.model.type === "OMNIVORE" ? 1 : 0),
+              "#vegan": (r) => (r.model.type === "VEGAN" ? 1 : 0),
+              "#vegetarian": (r) => (r.model.type === "VEGETARIAN" ? 1 : 0),
+              ["# " + recipeTableColumnsTexts.approved.header]: (r) =>
+                Number(r.model.approved),
+              [recipeTableColumnsTexts.count + " / 10"]: (r) => r.count / 10,
+            },
+            dateField: "model.createdAt",
+          }}
+          showChart={true}
           // rangeDateFilter={
           //   <CreationFilter
           //     {...creationFilterTexts}

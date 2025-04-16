@@ -9,6 +9,7 @@ import org.springframework.data.r2dbc.repository.Query;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.Collection;
 import java.util.List;
 
 public interface IngredientRepository extends ManyToOneUserRepository<Ingredient>, CountIds {
@@ -39,7 +40,7 @@ public interface IngredientRepository extends ManyToOneUserRepository<Ingredient
                 select distinct i.id from  ingredient i
                 where i.id in (:ids) and i.display = true
             """)
-    Flux<Long> countByIds(List<Long> ids);
+    Flux<Long> countByIds(Collection<Long> ids);
 
     Flux<Ingredient> findAllByIdInAndDisplayTrue(List<Long> ids);
 

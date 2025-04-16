@@ -31,7 +31,9 @@ public abstract class TitleBodyImagesServiceImpl<MODEL extends TitleBodyImages, 
 
     protected final FileClient fileClient;
 
-    public TitleBodyImagesServiceImpl(S modelRepository, M modelMapper, PageableUtilsCustom pageableUtils, UserClient userClient, String modelName, List<String> allowedSortingFields, EntitiesUtils entitiesUtils, FileClient fileClient, CR self, RabbitMqUpdateDeleteService<MODEL> rabbitMqUpdateDeleteService) {
+    public TitleBodyImagesServiceImpl(S modelRepository, M modelMapper, PageableUtilsCustom pageableUtils, UserClient userClient, String modelName,
+                                      List<String> allowedSortingFields, EntitiesUtils entitiesUtils,
+                                      FileClient fileClient, CR self, RabbitMqUpdateDeleteService<MODEL> rabbitMqUpdateDeleteService) {
         super(modelRepository, modelMapper, pageableUtils, userClient, modelName, allowedSortingFields, entitiesUtils, self, rabbitMqUpdateDeleteService);
         this.fileClient = fileClient;
     }
@@ -52,14 +54,13 @@ public abstract class TitleBodyImagesServiceImpl<MODEL extends TitleBodyImages, 
 
         return
                 updateModelWithSuccess(id, userId, model -> fileClient.deleteFiles(model.getImages())
-                        .then(uploadFiles(images, FileType.IMAGE, clientId)
+                        .then(Mono.defer(() -> uploadFiles(images, FileType.IMAGE, clientId)
                                 .flatMap(fileUploadResponse -> modelMapper.updateModelFromBody(body, model)
                                         .map(m -> {
                                             m.setImages(fileUploadResponse.getFiles());
                                             return m;
                                         })
-                                )
-                        ));
+                                ))));
 
     }
 
@@ -94,9 +95,12 @@ public abstract class TitleBodyImagesServiceImpl<MODEL extends TitleBodyImages, 
                         .map(fileUploadResponse -> {
                             MODEL model = modelMapper.fromBodyToModel(body);
                             model.setImages(fileUploadResponse.getFiles());
-                            model.setUserId(authUser.getId());
+
                             model.setCreatedAt(LocalDateTime.now());
                             model.setUpdatedAt(LocalDateTime.now());
+
+                            model.setUserId(authUser.getId());
+
                             if (model.getUserDislikes() == null)
                                 model.setUserDislikes(List.of());
                             if (model.getUserLikes() == null)

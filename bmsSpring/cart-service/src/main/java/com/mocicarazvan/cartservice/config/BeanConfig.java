@@ -16,6 +16,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.transaction.ReactiveTransactionManager;
 import org.springframework.transaction.reactive.TransactionalOperator;
+import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.reactive.function.client.WebClient;
 
 @Configuration
@@ -87,5 +88,10 @@ public class BeanConfig {
     @Bean
     public TransactionalOperator transactionalOperator(ReactiveTransactionManager txManager) {
         return TransactionalOperator.create(txManager);
+    }
+
+    @Bean
+    public LocalValidatorFactoryBean localValidatorFactoryBean() {
+        return new LocalValidatorFactoryBean();
     }
 }

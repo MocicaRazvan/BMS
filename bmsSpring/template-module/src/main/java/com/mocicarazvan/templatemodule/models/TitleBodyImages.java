@@ -6,7 +6,9 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
@@ -19,7 +21,7 @@ public abstract class TitleBodyImages extends TitleBody implements Cloneable {
     @Override
     public TitleBodyImages clone() {
         TitleBodyImages clone = (TitleBodyImages) super.clone();
-        clone.setImages(List.copyOf(images));
+        clone.setImages(new ArrayList<>(Optional.ofNullable(images).orElseGet(ArrayList::new)));
         return clone;
     }
 }

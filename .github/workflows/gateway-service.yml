@@ -8,7 +8,12 @@ on:
     paths:
       - 'bmsSpring/gateway-service/**'
 jobs:
+  test-gateway-service:
+    uses: ./.github/workflows/test-run.yml
+    with:
+      app-path: gateway-service
   build-and-push-gateway-service:
+    needs: [ test-gateway-service ]
     uses: ./.github/workflows/build-and-push.yml
     with:
       image-name: gateway-service-bms

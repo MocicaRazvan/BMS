@@ -3,8 +3,8 @@ package com.mocicarazvan.rediscache.aspects;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mocicarazvan.rediscache.config.LocalCacheConfig;
+import com.mocicarazvan.rediscache.config.TestContainersImages;
 import com.mocicarazvan.rediscache.configTests.TestServiceReactive;
-import com.mocicarazvan.rediscache.containers.AbstractRedisContainer;
 import com.mocicarazvan.rediscache.local.LocalReactiveCache;
 import com.mocicarazvan.rediscache.local.ReverseKeysLocalCache;
 import com.mocicarazvan.rediscache.utils.AspectUtils;
@@ -13,6 +13,8 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
@@ -24,6 +26,13 @@ import org.springframework.data.redis.core.ReactiveRedisTemplate;
 import org.springframework.data.redis.core.ReactiveSetOperations;
 import org.springframework.data.redis.core.ReactiveValueOperations;
 import org.springframework.data.redis.core.ScanOptions;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
+import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.containers.wait.strategy.Wait;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -45,8 +54,24 @@ import static org.mockito.Mockito.*;
 @SpringBootTest(classes = LocalCacheConfig.class, properties = {
         "spring.custom.cache.redis.expire.minutes=30"
 })
-class RedisReactiveCacheAspectTest extends AbstractRedisContainer {
+@Execution(ExecutionMode.SAME_THREAD)
+@Testcontainers
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
+class RedisReactiveCacheAspectTest {
+    @Container
+    @SuppressWarnings("resource")
+    public static final GenericContainer<?> redisContainer =
+            new GenericContainer<>(TestContainersImages.REDIS_IMAGE)
+                    .withExposedPorts(6379).waitingFor(Wait.forListeningPort());
+    ;
 
+    @DynamicPropertySource
+    static void redisProperties(DynamicPropertyRegistry registry) {
+        registry.add("spring.custom.cache.redis.host", redisContainer::getHost);
+        registry.add("spring.custom.cache.redis.port", redisContainer::getFirstMappedPort);
+        registry.add("spring.custom.cache.redis.database", () -> 0);
+        registry.add(":spring.custom.executor.redis.async.concurrency.limit", () -> 128);
+    }
 
     @Autowired
     TestServiceReactive testServiceReactive;

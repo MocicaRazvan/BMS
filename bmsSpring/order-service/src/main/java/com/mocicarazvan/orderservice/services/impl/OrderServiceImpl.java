@@ -273,7 +273,7 @@ public class OrderServiceImpl implements OrderService {
                                         PageableBody.builder()
                                                 .page(0)
                                                 .size(order.getPlanIds().size())
-                                                .sortingCriteria(Map.of())
+                                                .sortingCriteria(new LinkedHashMap<>(0))
                                                 .build(), userId)
                                 )))
                 ;

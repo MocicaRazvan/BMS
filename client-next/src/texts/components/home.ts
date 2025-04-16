@@ -9,6 +9,7 @@ import {
   TypeTestimonials,
 } from "@/components/home/home-testimonials";
 import { Testimonial } from "@/components/aceternityui/animated-testimonials";
+import { HomeMapTexts } from "@/components/home/home-map";
 
 export async function getHomeHeaderTexts(): Promise<HomeHeaderTexts> {
   const t = await getTranslations("components.home.HomeHeaderTexts");
@@ -100,5 +101,13 @@ export async function getHomeTimelineTexts(): Promise<HomeTimelineTexts> {
       }),
       {} as HomeTimelineTexts,
     ),
+  };
+}
+
+export async function getHomeMapTexts(): Promise<HomeMapTexts> {
+  const t = await getTranslations("components.home.HomeMapTexts");
+  return {
+    title: t("title"),
+    subtitle: t("subtitle"),
   };
 }

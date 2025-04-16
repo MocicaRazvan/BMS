@@ -20,14 +20,12 @@ import com.mocicarazvan.templatemodule.hateos.CustomEntityModel;
 import com.mocicarazvan.templatemodule.utils.RequestsUtils;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.util.Pair;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.codec.multipart.FilePart;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Flux;
@@ -50,19 +48,16 @@ public class RecipeController implements ApproveController<Recipe, RecipeBody, R
     private final IngredientQuantityService ingredientQuantityService;
     private final RecipeReactiveResponseBuilder recipeReactiveResponseBuilder;
     private final ObjectMapper objectMapper;
-    private final ThreadPoolTaskScheduler threadPoolTaskScheduler;
 
     public RecipeController(RecipeService recipeService, RequestsUtils requestsUtils,
                             IngredientQuantityService ingredientQuantityService,
                             RecipeReactiveResponseBuilder recipeReactiveResponseBuilder,
-                            ObjectMapper objectMapper,
-                            @Qualifier("threadPoolTaskScheduler") ThreadPoolTaskScheduler threadPoolTaskScheduler) {
+                            ObjectMapper objectMapper) {
         this.recipeService = recipeService;
         this.requestsUtils = requestsUtils;
         this.ingredientQuantityService = ingredientQuantityService;
         this.recipeReactiveResponseBuilder = recipeReactiveResponseBuilder;
         this.objectMapper = objectMapper;
-        this.threadPoolTaskScheduler = threadPoolTaskScheduler;
     }
 
     @Override
@@ -213,7 +208,7 @@ public class RecipeController implements ApproveController<Recipe, RecipeBody, R
                                                                                          @RequestPart("body") String body,
                                                                                          @RequestParam("clientId") String clientId,
                                                                                          ServerWebExchange exchange) {
-        return requestsUtils.getBodyFromJson(body, RecipeBody.class, objectMapper, threadPoolTaskScheduler)
+        return requestsUtils.getBodyFromJson(body, RecipeBody.class, objectMapper)
                 .flatMap(recipeBody -> recipeService.createModel(files, recipeBody, requestsUtils.extractAuthUser(exchange), clientId)
                         .flatMap(m -> recipeReactiveResponseBuilder.toModel(m, RecipeController.class))
                         .map(ResponseEntity::ok));
@@ -226,7 +221,7 @@ public class RecipeController implements ApproveController<Recipe, RecipeBody, R
                                                                                          @RequestParam("clientId") String clientId,
                                                                                          @PathVariable Long id,
                                                                                          ServerWebExchange exchange) {
-        return requestsUtils.getBodyFromJson(body, RecipeBody.class, objectMapper, threadPoolTaskScheduler)
+        return requestsUtils.getBodyFromJson(body, RecipeBody.class, objectMapper)
                 .flatMap(recipeBody -> recipeService.updateModelWithImages(files, id, recipeBody, requestsUtils.extractAuthUser(exchange), clientId)
                         .flatMap(m -> recipeReactiveResponseBuilder.toModel(m, RecipeController.class)))
                 .map(ResponseEntity::ok);
@@ -301,7 +296,7 @@ public class RecipeController implements ApproveController<Recipe, RecipeBody, R
             @RequestPart("body") String body,
             @RequestParam("clientId") String clientId,
             ServerWebExchange exchange) {
-        return requestsUtils.getBodyFromJson(body, RecipeBody.class, objectMapper, threadPoolTaskScheduler)
+        return requestsUtils.getBodyFromJson(body, RecipeBody.class, objectMapper)
                 .flatMap(recipeBody -> recipeService.createModelWithVideos(images, videos, recipeBody, requestsUtils.extractAuthUser(exchange), clientId))
                 .flatMap(m -> recipeReactiveResponseBuilder.toModel(m, RecipeController.class))
                 .map(ResponseEntity::ok);
@@ -315,7 +310,7 @@ public class RecipeController implements ApproveController<Recipe, RecipeBody, R
             @RequestParam("clientId") String clientId,
             @PathVariable Long id,
             ServerWebExchange exchange) {
-        return requestsUtils.getBodyFromJson(body, RecipeBody.class, objectMapper, threadPoolTaskScheduler)
+        return requestsUtils.getBodyFromJson(body, RecipeBody.class, objectMapper)
                 .flatMap(recipeBody -> recipeService.updateModelWithVideosGetOriginalApproved(images, videos, recipeBody, id, requestsUtils.extractAuthUser(exchange), clientId))
                 .flatMap(m -> recipeReactiveResponseBuilder.toModelWithPair(m, RecipeController.class)
                         .map(Pair::getFirst)

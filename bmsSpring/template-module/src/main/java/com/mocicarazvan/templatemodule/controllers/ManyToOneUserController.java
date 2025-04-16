@@ -22,15 +22,11 @@ import reactor.core.publisher.Mono;
 import java.util.List;
 
 
-//@RequiredArgsConstructor
 public interface ManyToOneUserController<MODEL extends ManyToOneUser, BODY, RESPONSE extends WithUserDto,
         S extends ManyToOneUserRepository<MODEL>, M extends DtoMapper<MODEL, BODY, RESPONSE>,
         G extends ManyToOneUserService<MODEL, BODY, RESPONSE, S, M>> {
 
-    //    protected final G modelService;
-//    protected final String modelName;
-//    @Value("${wellness.openapi.dev-url}")
-//    protected String devUrl;
+
     @DeleteMapping("/delete/{id}")
     Mono<ResponseEntity<CustomEntityModel<RESPONSE>>> deleteModel(@PathVariable Long id, ServerWebExchange exchange);
 
@@ -44,7 +40,7 @@ public interface ManyToOneUserController<MODEL extends ManyToOneUser, BODY, RESP
     Mono<ResponseEntity<CustomEntityModel<RESPONSE>>> updateModel(@Valid @RequestBody BODY body,
                                                                   @PathVariable Long id, ServerWebExchange exchange);
 
-    @GetMapping("/byIds")
+    @PatchMapping("/byIds")
     @ResponseStatus(HttpStatus.OK)
     Flux<PageableResponse<CustomEntityModel<RESPONSE>>> getModelsByIdIn(@Valid @RequestBody PageableBody pageableBody,
                                                                         @RequestParam List<Long> ids);

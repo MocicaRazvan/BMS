@@ -18,8 +18,9 @@ public abstract class ApproveQueListener<R extends ApprovedModel, RRESP extends 
     private final ApproveNotificationServiceTemplate<R, RRESP, BODY, RESPONSE> approvePostNotificationService;
 
     public void listen(BODY message) {
+        //todo if is null notify for all
         if (message.getReferenceId() == null) {
-            throw new IllegalArgumentException("ReferenceId is required");
+            throw new IllegalArgumentException("ReferenceId is required for rabbitmq message");
         }
 
         approvePostNotificationService.saveApprovedNotificationCreateReference(

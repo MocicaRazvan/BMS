@@ -7,6 +7,8 @@ import com.mocicarazvan.rediscache.containers.AbstractRedisContainer;
 import com.mocicarazvan.rediscache.utils.AspectUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
@@ -19,6 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = BeanConfigRedisCache.class)
+@Execution(ExecutionMode.SAME_THREAD)
 public class BeanConfigRedisCacheTest extends AbstractRedisContainer {
     @Autowired
     ObjectMapper objectMapper;

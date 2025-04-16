@@ -6,6 +6,7 @@ import reactor.core.publisher.Mono;
 
 import java.util.function.Function;
 
+@FunctionalInterface
 public interface EmbedCache {
 
     default String getEmbeddingKey(String key, String text) {

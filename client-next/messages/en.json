@@ -349,7 +349,7 @@
     }
   },
   "components": {
-    "dayCalendar": {
+    "daysCalendar": {
       "DayCalendarHeaderTexts": {
         "tracked": "Tracked"
       },
@@ -869,6 +869,7 @@
           "stopTooltip": "No consumers to stop",
           "toastSchedule": "Consumers are scheduled for ",
           "toastStop": "Consumers are stopped",
+          "toastCron": "Consumers are started",
           "scheduleTooltip": "Consumers are already scheduled",
           "consumerStoppedDescription": "The consumers are stopped"
         }
@@ -982,6 +983,23 @@
       }
     },
     "table": {
+      "ArchiveQueuesTableTexts": {
+        "actionPlaceholder": "Filter actions...",
+        "queueNamePlaceholder": "Filter queue name...",
+        "clearFilters": "Clear filters",
+        "noResults": "No results were found by the search criteria!",
+        "columns": {
+          "action": "Action",
+          "queueName": "Queue Name",
+          "timestamp": "Timestamp",
+          "id": "id"
+        },
+        "linkedChart": {
+          "selected": "Linked Chart with the current selected rows",
+          "default": "Linked Chart with the current table data"
+        },
+        "downloadSelected": "Download selected"
+      },
       "SelectedRowsTexts": {
         "of": " of ",
         "rowsSelected": "rows(s) selected"
@@ -999,7 +1017,11 @@
         "columnsLabel": "Columns",
         "noResults": "No results were found by the search criteria!",
         "exportLabel": "Export",
-        "downloadSelected": "Download selected"
+        "downloadSelected": "Download selected",
+        "linkedChart": {
+          "persisted": "Linked Chart with the current selected rows",
+          "table": "Linked Chart with the current table data"
+        }
       },
       "PostTableTexts": {
         "search": "Search in title..."
@@ -1374,6 +1396,25 @@
         "viewCount": "View count:",
         "tags": "Tags:",
         "periodLabel": "Period"
+      },
+      "LinkedChartTexts": {
+        "title": "Linked Chart with the current table data",
+        "dateFormat": "Date format",
+        "dateFormatPlaceholder": "Search format...",
+        "chartType": "Chart Type",
+        "aggregates": "Aggregated columns",
+        "aggregatesPlaceholder": "Search columns...",
+        "selectAggregates": "Select columns",
+        "reset": "Reset",
+        "nothingFound": "No results where found",
+        "dateFormatDropDown": {
+          "MMM_yyyy": "Month (May 2025)",
+          "QQQ_yyyy": "Quarter (Q1 2025)",
+          "yyyy": "Year (2025)",
+          "MM/dd/yyyy": "US Date (05/25/2025)",
+          "dd/MM/yyyy": "EU Date (25/05/2025)",
+          "yyyy-MM-dd": "ISO Date (2025-05-25)"
+        }
       }
     },
     "plans": {
@@ -1418,6 +1459,7 @@
             "ingredients": "Ingredients",
             "users": "Users",
             "orders": "Orders",
+            "archive": "Archive Queues",
             "monthlySales": "Monthly Sales",
             "dailySales": "Daily Sales",
             "countries": "Countries",
@@ -1517,7 +1559,7 @@
         }
       },
       "HomeTestimonialsTexts": {
-        "title": " See What Our Customers Are Saying",
+        "title": "See What Our Customers Are Saying",
         "testimonials": {
           "testimonial1": {
             "quote": "The nutritional insights and meal plans have completely transformed my diet. I feel more energetic and healthier than ever before.",
@@ -1599,6 +1641,10 @@
           "title": "Don't let the results slow you down",
           "text": "Don't get too comfortable and think you can't lose what you've achieved. This is where the difference between the sprint and the marathon is made."
         }
+      },
+      "HomeMapTexts": {
+        "title": "No Boundaries",
+        "subtitle": "Break free from traditional boundaries. Be the best version of yourself anywhere anytime. Leave the excuses at home not the diet."
       }
     },
     "footer": {
@@ -2065,6 +2111,23 @@
         "title": "All The Orders",
         "header": "Here you can see and manage all the orders."
       },
+      "AdminArchiveQueuesPageTexts": {
+        "title": "Archive Queues",
+        "header": "Here you can see and manage all the archive queues.",
+        "archiveTitle": "Archive Current Statistics",
+        "archiveTableTitle": "Archive history for the last 60 days",
+        "selectItems": {
+          "comment": "Comments",
+          "day": "Days",
+          "ingredient": "Ingredients",
+          "meal": "Meals",
+          "plan": "Plans",
+          "post": "Posts",
+          "recipe": "Recipes",
+          "user": "Users",
+          "all": "All"
+        }
+      },
       "AdminDashboardPageTexts": {
         "title": "Dashboard",
         "header": "Here you can see a summary of the platform.",
@@ -2407,6 +2470,11 @@
       }
     },
     "admin": {
+      "ArchiveQueues": {
+        "title": "Archive Queues",
+        "description": "Archive queues for the elements",
+        "keywords": "queues, archive, elements, admin"
+      },
       "Countries": {
         "title": "Orders by countries",
         "description": "Stats by countries for the orders on Bro Meets Science",

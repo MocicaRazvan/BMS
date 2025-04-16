@@ -6,11 +6,12 @@ import com.mocicarazvan.websocketservice.dtos.recipe.ApproveRecipeNotificationRe
 import com.mocicarazvan.websocketservice.dtos.recipe.RecipeResponse;
 import com.mocicarazvan.websocketservice.models.Recipe;
 import com.mocicarazvan.websocketservice.service.ApproveRecipeNotificationService;
+import jakarta.validation.Valid;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
 
 @Component
-
 public class RecipeApproveQueListener
         extends ApproveQueListener<Recipe, RecipeResponse, ApproveRecipeNotificationBody, ApproveRecipeNotificationResponse> {
 
@@ -19,8 +20,8 @@ public class RecipeApproveQueListener
         super(approveRecipeNotificationService);
     }
 
-    @RabbitListener(queues = "#{@environment['recipe.queue.name']}", executor = "scheduledExecutorService")
-    public void listen(ApproveRecipeNotificationBody message) {
+    @RabbitListener(queues = "#{@environment['recipe.queue.name']}")
+    public void listen(@Valid @Payload ApproveRecipeNotificationBody message) {
         super.listen(message);
     }
 

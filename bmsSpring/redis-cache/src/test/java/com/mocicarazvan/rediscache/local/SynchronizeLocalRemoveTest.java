@@ -6,6 +6,8 @@ import com.mocicarazvan.rediscache.dtos.CacheRemoveType;
 import com.mocicarazvan.rediscache.dtos.NotifyCacheRemoveDto;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -17,6 +19,7 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 @SpringBootTest(classes = LocalCacheConfig.class)
+@Execution(ExecutionMode.SAME_THREAD)
 public class SynchronizeLocalRemoveTest {
 
     @MockBean
@@ -61,5 +64,20 @@ public class SynchronizeLocalRemoveTest {
         verifyNoInteractions(localReactiveCache);
     }
 
+    @Test
+    void handleNotification_localRemove_NotRemove_callsRemoveOnLocalCache() {
+        var dto = new NotifyCacheRemoveDto(List.of("a", "b"), CacheRemoveType.LOCAL, CacheRemoveKeyRemoveType.NORMAL);
+        synchronizeLocalRemove.handleNotification(dto, true);
+        verifyNoInteractions(localReactiveCache);
+        verifyNoInteractions(reverseKeysLocalCache);
+    }
 
+    @Test
+    void handleNotification_reverseRemove_NotRemove_callsRemoveOnReverseCache() {
+        var dto = new NotifyCacheRemoveDto(List.of("x", "y"), CacheRemoveType.REVERSE, CacheRemoveKeyRemoveType.NORMAL);
+        synchronizeLocalRemove.handleNotification(dto, true);
+        verifyNoInteractions(reverseKeysLocalCache);
+        verifyNoInteractions(localReactiveCache);
+
+    }
 }

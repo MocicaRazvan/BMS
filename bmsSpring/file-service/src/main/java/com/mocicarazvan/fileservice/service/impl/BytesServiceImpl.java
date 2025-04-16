@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.coobird.thumbnailator.Thumbnails;
 import net.coobird.thumbnailator.geometry.Positions;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.data.mongodb.gridfs.ReactiveGridFsResource;
@@ -26,6 +27,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.util.Iterator;
+import java.util.concurrent.atomic.AtomicLong;
 
 @Service
 @Slf4j
@@ -33,53 +35,66 @@ public class BytesServiceImpl implements BytesService {
 
     private final Scheduler thumbnailScheduler;
 
+    @Value("${spring.custom.video.limit-rate:16}")
+    private int videoLimitRate;
+
     public BytesServiceImpl(@Qualifier("threadPoolTaskScheduler") ThreadPoolTaskScheduler threadPoolTaskScheduler) {
         this.thumbnailScheduler = Schedulers.fromExecutor(threadPoolTaskScheduler.getScheduledExecutor());
 
     }
 
 
-    public Flux<DataBuffer> getVideoByRange(ReactiveGridFsResource file, long[] rangeStart, long[] rangeEnd) {
+    public Flux<DataBuffer> getVideoByRange(ReactiveGridFsResource file, AtomicLong rangeStart, AtomicLong rangeEnd) {
         Flux<DataBuffer> downloadStream;
         int chunkSize = file.getOptions().getChunkSize();
         Flux<DataBuffer> dataBufferFlux = chunkSize > 0 ? file.getDownloadStream(chunkSize) : file.getDownloadStream();
         downloadStream = dataBufferFlux
                 .subscribeOn(Schedulers.boundedElastic())
-                .flatMap(dataBuffer -> {
+                .limitRate(videoLimitRate / 2, videoLimitRate)
+                .handle((dataBuffer, sink) -> {
                     try {
+                        if (rangeStart.get() < 0 || rangeEnd.get() < 0) {
+                            DataBufferUtils.release(dataBuffer);
+                            return;
+                        }
                         int dataBufferSize = dataBuffer.readableByteCount();
                         // skip data until the start of the range
-                        if (rangeStart[0] >= dataBufferSize) {
-                            rangeStart[0] -= dataBufferSize;
-                            rangeEnd[0] -= dataBufferSize;
+                        if (rangeStart.get() >= dataBufferSize) {
+                            rangeStart.addAndGet(-dataBufferSize);
+                            rangeEnd.addAndGet(-dataBufferSize);
                             DataBufferUtils.release(dataBuffer);
-                            return Mono.empty();
+                            return;
                         }
 
                         // slice data buffer to fit the start of the range
-                        if (rangeStart[0] > 0) {
-                            int sliceStart = (int) rangeStart[0];
+                        if (rangeStart.get() > 0) {
+                            int sliceStart = (int) rangeStart.get();
                             int sliceLength = dataBufferSize - sliceStart;
                             dataBuffer = dataBuffer.slice(sliceStart, sliceLength);
-                            rangeStart[0] = 0;
+                            rangeStart.set(0);
                         }
 
                         // slice data buffer to fit the end of the range
-                        if (rangeEnd[0] < dataBufferSize) {
-                            int sliceEnd = (int) (rangeEnd[0] - rangeStart[0] + 1);
-                            if (sliceEnd < dataBuffer.readableByteCount()) {
+                        if (rangeEnd.get() < dataBufferSize) {
+                            //range start its 0 anyway
+                            int sliceEnd = (int) (rangeEnd.get() - rangeStart.get() + 1);
+                            if (sliceEnd < dataBufferSize) {
                                 dataBuffer = dataBuffer.slice(0, sliceEnd);
                             }
-                            rangeEnd[0] = 0;
+                            rangeEnd.set(-1);
                         } else {
-                            rangeEnd[0] -= dataBufferSize;
+                            rangeEnd.addAndGet(-dataBufferSize);
                         }
 
-                        return Mono.just(dataBuffer);
+                        sink.next(dataBuffer);
+
+                        if (rangeEnd.get() < 0) {
+                            sink.complete();
+                        }
                     } catch (Exception e) {
                         log.error("Error processing video: {}", e.getMessage(), e);
                         DataBufferUtils.release(dataBuffer);
-                        return Mono.error(e);
+                        sink.error(e);
                     }
                 });
         return downloadStream;

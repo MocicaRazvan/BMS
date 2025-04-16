@@ -38,6 +38,7 @@ import {
 } from "@/texts/components/forms";
 import { UserPostsPageContentTexts } from "@/app/[locale]/trainer/user/[id]/posts/page-content";
 import {
+  getArchiveQueuesTableTexts,
   getDayTableTexts,
   getIngredientTableColumnTexts,
   getIngredientTableTexts,
@@ -112,6 +113,7 @@ import {
   getHomeCardsText,
   getHomeHeaderTexts,
   getHomeHeroTexts,
+  getHomeMapTexts,
   getHomeTestimonialsTexts,
   getHomeTimelineTexts,
 } from "@/texts/components/home";
@@ -168,6 +170,7 @@ import {
 import { ChatPageTexts } from "@/app/[locale]/(main)/(user)/chat/page-content";
 import { getChatRoomsTexts } from "@/texts/components/chat";
 import { getDaysCalendarCTATexts } from "@/texts/components/day-calendar";
+import { AdminArchiveQueuesPageTexts } from "@/app/[locale]/admin/archiveQueues/page";
 
 export async function getSinglePostPageTexts(): Promise<SinglePostPageTexts> {
   const [
@@ -1572,6 +1575,46 @@ export async function getSingleOrderPageContentTexts(): Promise<SingleOrderPageC
   };
 }
 
+export async function getAdminArchiveQueuesPageTexts(): Promise<AdminArchiveQueuesPageTexts> {
+  const [
+    t,
+    themeSwitchTexts,
+    menuTexts,
+    archiveTexts,
+    archiveQueueTableTexts,
+    findInSiteTexts,
+  ] = await Promise.all([
+    getTranslations("pages.admin.AdminArchiveQueuesPageTexts"),
+    getThemeSwitchTexts(),
+    getSidebarMenuTexts("admin", adminGroupLabels, adminLabels, adminSubLabels),
+    getAllArchiveQueueCardsTexts(),
+    getArchiveQueuesTableTexts(),
+    getFindInSiteTexts(),
+  ]);
+  return {
+    themeSwitchTexts,
+    menuTexts,
+    archiveTexts,
+    archiveQueueTableTexts,
+    findInSiteTexts,
+    title: t("title"),
+    header: t("header"),
+    archiveTitle: t("archiveTitle"),
+    archiveTableTitle: t("archiveTableTitle"),
+    selectItems: {
+      comment: t("selectItems.comment"),
+      day: t("selectItems.day"),
+      ingredient: t("selectItems.ingredient"),
+      meal: t("selectItems.meal"),
+      plan: t("selectItems.plan"),
+      post: t("selectItems.post"),
+      recipe: t("selectItems.recipe"),
+      user: t("selectItems.user"),
+      all: t("selectItems.all"),
+    },
+  };
+}
+
 export async function getAdminDashboardPageTexts(): Promise<AdminDashboardPageTexts> {
   const [
     t,
@@ -1821,6 +1864,7 @@ export async function getHomeTexts(): Promise<HomeTexts> {
     homeTimelineTexts,
     homeHeroTexts,
     homeTestimonialsTexts,
+    homeMpaTexts,
   ] = await Promise.all([
     getHomeHeaderTexts(),
     getHomeCardsText(),
@@ -1828,6 +1872,7 @@ export async function getHomeTexts(): Promise<HomeTexts> {
     getHomeTimelineTexts(),
     getHomeHeroTexts(),
     getHomeTestimonialsTexts(),
+    getHomeMapTexts(),
   ]);
   return {
     homeHeaderTexts,
@@ -1836,6 +1881,7 @@ export async function getHomeTexts(): Promise<HomeTexts> {
     homeTimelineTexts,
     homeHeroTexts,
     homeTestimonialsTexts,
+    homeMapTexts: homeMpaTexts,
   };
 }
 

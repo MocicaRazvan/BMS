@@ -11,6 +11,8 @@ import {
   adminLabels,
   adminSubLabels,
 } from "@/components/sidebar/menu-list";
+import ArchiveQueueUpdateProvider from "@/context/archive-queue-update-context";
+import { getArchiveQueueTitleForPrefixes } from "@/texts/components/common";
 
 interface Props {
   params: { locale: Locale };
@@ -22,7 +24,7 @@ export default async function AdminLayout({
   children,
 }: Props) {
   unstable_setRequestLocale(locale);
-  const [user, texts] = await Promise.all([
+  const [user, texts, queueTexts] = await Promise.all([
     getUserWithMinRole("ROLE_ADMIN"),
     getSidebarLayoutTexts(
       "admin",
@@ -30,11 +32,14 @@ export default async function AdminLayout({
       adminLabels,
       adminSubLabels,
     ),
+    getArchiveQueueTitleForPrefixes(),
   ]);
   return (
     <SidebarToggleProvider>
       <SidebarPanelLayout {...texts} mappingKey={"admin"} authUser={user}>
-        {children}
+        <ArchiveQueueUpdateProvider authUser={user} texts={queueTexts}>
+          {children}
+        </ArchiveQueueUpdateProvider>
       </SidebarPanelLayout>
     </SidebarToggleProvider>
   );

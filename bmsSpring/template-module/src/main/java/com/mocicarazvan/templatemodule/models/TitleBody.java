@@ -7,7 +7,9 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 import org.springframework.data.relational.core.mapping.Column;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
@@ -26,8 +28,8 @@ public abstract class TitleBody extends ManyToOneUser implements Cloneable {
     @Override
     public TitleBody clone() {
         TitleBody clone = (TitleBody) super.clone();
-        clone.setUserLikes(List.copyOf(userLikes));
-        clone.setUserDislikes(List.copyOf(userDislikes));
+        clone.setUserLikes(new ArrayList<>(Optional.ofNullable(userLikes).orElseGet(ArrayList::new)));
+        clone.setUserDislikes(new ArrayList<>(Optional.ofNullable(userDislikes).orElseGet(ArrayList::new)));
         return clone;
     }
 }

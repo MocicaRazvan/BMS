@@ -74,7 +74,7 @@ export default function SideBar({
               </Button>
             </TooltipTrigger>
             {!isOpen && (
-              <TooltipContent side="bottom" className={"capitalize"}>
+              <TooltipContent side="bottom" className="capitalize">
                 {mainSite}
               </TooltipContent>
             )}

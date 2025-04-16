@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import noImg from "../../../public/noImage.jpg";
 import DaysCalendarCTA, {
   DaysCalendarCTATexts,
-} from "@/components/dayCalendar/days-calendar-cta";
+} from "@/components/days-calendar/days-calendar-cta";
 
 interface Props extends WithUser {
   dayCalendarCTATexts: DaysCalendarCTATexts;

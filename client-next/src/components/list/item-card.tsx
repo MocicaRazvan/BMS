@@ -1,5 +1,5 @@
 "use client";
-import { cn } from "@/lib/utils";
+import { cn, truncate } from "@/lib/utils";
 import noImg from "../../../public/noImage.jpg";
 import { ReactNode, useMemo } from "react";
 import { ResponseWithUserDtoEntity, TitleBodyImagesUserDto } from "@/types/dto";
@@ -7,6 +7,7 @@ import { format, parseISO } from "date-fns";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { Link } from "@/navigation";
 import CustomImage from "@/components/common/custom-image";
+import { OverflowLengthTextTooltip } from "@/components/common/overflow-text-tooltip";
 
 export interface ItemCardTexts {
   author: string;
@@ -20,6 +21,7 @@ interface Props<T extends TitleBodyImagesUserDto> {
   generateImageOverlay?: (item: ResponseWithUserDtoEntity<T>) => ReactNode;
   texts: ItemCardTexts;
   eagerImage?: boolean;
+  maxTitleLength?: number;
 }
 
 export default function ItemCard<T extends TitleBodyImagesUserDto>({
@@ -30,6 +32,7 @@ export default function ItemCard<T extends TitleBodyImagesUserDto>({
   generateImageOverlay,
   eagerImage = true,
   texts: { author },
+  maxTitleLength = 75,
 }: Props<T>) {
   const body = useMemo(
     () =>
@@ -68,9 +71,14 @@ export default function ItemCard<T extends TitleBodyImagesUserDto>({
       <div className="flex flex-col gap-3 mt-1 w-full">
         <div className="flex flex-col gap-1 w-full h-[285px] overflow-hidden py-2.5">
           <div className="flex items-center w-full justify-between">
-            <h2 className="text-lg font-semibold tracking-tight text-center">
-              {item.model.content.title}
-            </h2>
+            <OverflowLengthTextTooltip
+              maxLength={maxTitleLength}
+              text={item.model.content.title}
+            >
+              <h2 className="text-lg font-semibold tracking-tight text-center">
+                {truncate(item.model.content.title, maxTitleLength)}
+              </h2>
+            </OverflowLengthTextTooltip>
           </div>
           <div className="w-full h-full flex items-center justify-between gap-2">
             {generateExtraHeader && generateExtraHeader(item)}

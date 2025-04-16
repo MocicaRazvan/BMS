@@ -6,7 +6,7 @@ import { ApproveDto, DietType, WithUserDto } from "@/types/dto";
 import { SortingOption } from "@/components/list/grid-list";
 import { Dispatch, ReactNode, SetStateAction } from "react";
 import { getTimezoneOffset, toZonedTime } from "date-fns-tz";
-import { formatDistanceToNow } from "date-fns";
+import { formatDistanceToNow, isValid, parse } from "date-fns";
 import { enUS, ro, Locale as DateFnsLocale } from "date-fns/locale";
 import { Locale } from "@/navigation";
 import isEqual from "lodash.isequal";
@@ -271,7 +271,7 @@ export function fromDistanceToNowUtc(
   });
 }
 
-export const fromStringOfDotToObjectValue = <T extends object>(
+export const fromStringOfDotToObjectValue = <T>(
   str: string,
   obj: T,
   lastIsLength = false,
@@ -358,4 +358,16 @@ export function removeHTML(html: string) {
 export const dateFnsLocaleMapper: Record<Locale, DateFnsLocale> = {
   en: enUS,
   ro: ro,
+};
+
+export const parseToUnix = (value: any): number => {
+  if (!value) return NaN;
+
+  if (typeof value === "number") return value;
+  if (value instanceof Date) return value.getTime();
+
+  let parsed = parse(value, "dd/MM/yyyy HH:mm:ss", new Date());
+  if (!isValid(parsed)) parsed = new Date(value);
+
+  return isValid(parsed) ? parsed.getTime() : NaN;
 };

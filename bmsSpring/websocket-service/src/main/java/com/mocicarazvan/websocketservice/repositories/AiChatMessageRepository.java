@@ -34,4 +34,6 @@ public interface AiChatMessageRepository extends IdGeneratedRepository<AiChatMes
     void deleteAllByVercelIdAndChatRoom_UserEmail(String vercelId, String email);
 
     List<AiChatMessage> findAllByVercelId(String vercelId);
+
+    List<AiChatMessage> findAllByChatRoom_Id(long roomId);
 }
