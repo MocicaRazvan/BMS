@@ -56,7 +56,7 @@ public class BytesServiceImpl implements BytesService {
         Flux<DataBuffer> dataBufferFlux = chunkSize > 0 ? file.getDownloadStream(chunkSize) : file.getDownloadStream();
         downloadStream = dataBufferFlux
                 .subscribeOn(Schedulers.boundedElastic())
-                .limitRate(videoLimitRate / 2, videoLimitRate)
+                .limitRate(videoLimitRate, videoLimitRate / 2)
                 .handle((dataBuffer, sink) -> {
                     try {
                         if (rangeStart.get() < 0 || rangeEnd.get() < 0) {
@@ -175,7 +175,7 @@ public class BytesServiceImpl implements BytesService {
                         return Flux.error(new IOException("Failed to process the image"));
                     }
                 })
-                .limitRate(thumblinatorLimitRate / 2, thumblinatorLimitRate);
+                .limitRate(thumblinatorLimitRate, thumblinatorLimitRate / 2);
     }
 
     private DataBuffer processWithThumblinator(Integer width, Integer height, Double quality, ServerHttpResponse response, BufferedImage image, String formatName) throws IOException {
