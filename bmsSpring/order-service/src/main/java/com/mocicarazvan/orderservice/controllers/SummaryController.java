@@ -11,6 +11,7 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.CacheControl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,6 +19,7 @@ import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.Duration;
 import java.time.LocalDate;
 
 @RestController
@@ -210,7 +212,14 @@ public class SummaryController {
 
     @GetMapping("/overall")
     public Mono<ResponseEntity<OverallSummary>> getOverallSummary() {
-        return summaryService.getOverallSummary().map(ResponseEntity::ok);
+        return summaryService.getOverallSummary().map(s -> ResponseEntity.ok()
+                .cacheControl(CacheControl.maxAge(Duration.ofMinutes(5))
+                        .cachePublic()
+                        .staleIfError(Duration.ofMinutes(5))
+                        .staleWhileRevalidate(Duration.ofMinutes(1)))
+                .body(s)
+
+        );
     }
 
 }

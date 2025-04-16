@@ -2,13 +2,30 @@ package com.mocicarazvan.fileservice.utils;
 
 import com.mocicarazvan.fileservice.enums.FileType;
 import com.mongodb.client.gridfs.model.GridFSFile;
+import org.springframework.http.CacheControl;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 
+import java.time.Duration;
+
 public class CacheHeaderUtils {
 
-    public static final String IMAGE_CACHE_CONTROL = "public, max-age=604800, immutable";
-    public static final String VIDEO_CACHE_CONTROL = "public, max-age=86400, immutable";
+    public static final CacheControl IMAGE_CACHE_CONTROL = CacheControl
+            .maxAge(Duration.ofDays(7))
+            .staleWhileRevalidate(Duration.ofHours(12))
+            .staleIfError(Duration.ofDays(1))
+            .cachePublic()
+            .immutable()
+            .noTransform();
+
+    public static final CacheControl VIDEO_CACHE_CONTROL = CacheControl
+            .maxAge(Duration.ofDays(3))
+            .staleWhileRevalidate(Duration.ofHours(12))
+            .staleIfError(Duration.ofDays(1))
+            .cachePublic()
+            .immutable()
+            .noTransform();
+
 
     public static String buildETag(String gridId, Integer width, Integer height, Double quality, long timestamp) {
         StringBuilder builder = new StringBuilder("\"" + gridId);

@@ -1,5 +1,6 @@
 package com.mocicarazvan.fileservice.service.impl;
 
+import com.mocicarazvan.fileservice.enums.MediaType;
 import com.mocicarazvan.fileservice.service.BytesService;
 import lombok.extern.slf4j.Slf4j;
 import net.coobird.thumbnailator.Thumbnails;
@@ -9,6 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.data.mongodb.gridfs.ReactiveGridFsResource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Service;
@@ -38,12 +40,16 @@ public class BytesServiceImpl implements BytesService {
     @Value("${spring.custom.video.limit-rate:16}")
     private int videoLimitRate;
 
+    @Value("${spring.custom.thumblinator.limit-rate:16}")
+    private int thumblinatorLimitRate;
+
     public BytesServiceImpl(@Qualifier("threadPoolTaskScheduler") ThreadPoolTaskScheduler threadPoolTaskScheduler) {
         this.thumbnailScheduler = Schedulers.fromExecutor(threadPoolTaskScheduler.getScheduledExecutor());
 
     }
 
 
+    @Override
     public Flux<DataBuffer> getVideoByRange(ReactiveGridFsResource file, AtomicLong rangeStart, AtomicLong rangeEnd) {
         Flux<DataBuffer> downloadStream;
         int chunkSize = file.getOptions().getChunkSize();
@@ -101,23 +107,41 @@ public class BytesServiceImpl implements BytesService {
     }
 
 
-    public Flux<DataBuffer> convertWithThumblinator(Integer width, Integer height, Double quality, Flux<DataBuffer> downloadStream, ServerHttpResponse response) {
+    @Override
+    public Flux<DataBuffer> convertWithThumblinator(Integer width, Integer height, Double quality, Flux<DataBuffer> downloadStream, MediaType mediaType, ServerHttpResponse response) {
         return DataBufferUtils.join(downloadStream)
                 .publishOn(Schedulers.boundedElastic())
                 .flatMapMany(dataBuffer -> {
                     try (InputStream inputStream = dataBuffer.asInputStream(true)) {
                         DataBufferUtils.release(dataBuffer);
 
-                        ImageInputStream imageInputStream = ImageIO.createImageInputStream(inputStream);
-                        Iterator<ImageReader> imageReaders = ImageIO.getImageReaders(imageInputStream);
+                        boolean isKnownFormat = mediaType == MediaType.PNG || mediaType == MediaType.JPEG || mediaType == MediaType.JPG;
 
-                        if (!imageReaders.hasNext()) {
-                            return getImageFallback(response, inputStream);
-                        }
 
-                        ImageReader reader = imageReaders.next();
-
+                        ImageReader reader = null;
+                        ImageInputStream imageInputStream = null;
+                        String mediaFormatName = null;
                         try {
+                            if (isKnownFormat) {
+                                mediaFormatName = mediaType.getValue().toLowerCase();
+                                Iterator<ImageReader> imageReaders = ImageIO.getImageReadersByFormatName(mediaFormatName);
+                                if (!imageReaders.hasNext()) {
+                                    return getImageFallback(response, inputStream);
+                                }
+                                reader = imageReaders.next();
+                                imageInputStream = ImageIO.createImageInputStream(inputStream);
+                            } else {
+
+                                imageInputStream = ImageIO.createImageInputStream(inputStream);
+                                Iterator<ImageReader> imageReaders = ImageIO.getImageReaders(imageInputStream);
+
+                                if (!imageReaders.hasNext()) {
+                                    return getImageFallback(response, inputStream);
+                                }
+
+                                reader = imageReaders.next();
+                            }
+
                             reader.setInput(imageInputStream);
                             BufferedImage image = reader.read(0);
 
@@ -126,14 +150,22 @@ public class BytesServiceImpl implements BytesService {
                                 return getImageFallback(response, inputStream);
                             }
 
-
-                            return Mono.fromCallable(() -> processWithThumblinator(width, height, quality, response, image, reader))
+                            String formatName = mediaFormatName != null ? mediaFormatName : reader.getFormatName();
+                            if (mediaType == MediaType.ALL) {
+                                response.getHeaders().set(HttpHeaders.CONTENT_TYPE, "image/" + formatName.toLowerCase());
+                            }
+                            return Mono.fromCallable(() -> processWithThumblinator(width, height, quality, response, image, formatName))
                                     .subscribeOn(thumbnailScheduler);
                         } catch (IOException e) {
                             log.error("Error processing image: {}", e.getMessage(), e);
                             return Flux.error(new IOException("Failed to process the image"));
                         } finally {
-                            reader.dispose();
+                            if (reader != null) {
+                                reader.dispose();
+                            }
+                            if (imageInputStream != null) {
+                                imageInputStream.close();
+                            }
                         }
 
 
@@ -142,13 +174,14 @@ public class BytesServiceImpl implements BytesService {
                         DataBufferUtils.release(dataBuffer);
                         return Flux.error(new IOException("Failed to process the image"));
                     }
-                });
+                })
+                .limitRate(thumblinatorLimitRate / 2, thumblinatorLimitRate);
     }
 
-    private DataBuffer processWithThumblinator(Integer width, Integer height, Double quality, ServerHttpResponse response, BufferedImage image, ImageReader reader) throws IOException {
+    private DataBuffer processWithThumblinator(Integer width, Integer height, Double quality, ServerHttpResponse response, BufferedImage image, String formatName) throws IOException {
         DataBuffer dataBuffer = response.bufferFactory().allocateBuffer(getInitialThumblinatorBufferSize(width, height, image));
         try (OutputStream outputStream = dataBuffer.asOutputStream()) {
-            configureThumblinator(width, height, quality, image, reader, outputStream);
+            configureThumblinator(width, height, quality, image, formatName, outputStream);
             return dataBuffer;
         } catch (Exception e) {
             DataBufferUtils.release(dataBuffer);
@@ -163,9 +196,8 @@ public class BytesServiceImpl implements BytesService {
     }
 
 
-    private void configureThumblinator(Integer width, Integer height, Double quality, BufferedImage image, ImageReader reader, OutputStream outputStream) throws IOException {
+    private void configureThumblinator(Integer width, Integer height, Double quality, BufferedImage image, String formatName, OutputStream outputStream) throws IOException {
         Thumbnails.Builder<BufferedImage> thumbnailBuilder = Thumbnails.of(image);
-        String formatName = reader.getFormatName();
 //        log.info("Image format: {}", formatName);
 
         if (formatName != null) {
@@ -200,31 +232,7 @@ public class BytesServiceImpl implements BytesService {
     }
 
 
-    private Thumbnails.Builder<BufferedImage> configureThumbnailBuilder(BufferedImage image, String formatName, Integer width, Integer height, Double quality) {
-        Thumbnails.Builder<BufferedImage> thumbnailBuilder = Thumbnails.of(image);
-
-        if (formatName != null) {
-            thumbnailBuilder.outputFormat(formatName);
-        }
-
-        if (width != null && height != null) {
-            thumbnailBuilder.size(width, height);
-        } else if (width != null && width > 0) {
-            thumbnailBuilder.width(width);
-        } else if (height != null && height > 0) {
-            thumbnailBuilder.height(height);
-        } else {
-            thumbnailBuilder.scale(1.0);
-        }
-
-        if (quality != null && quality > 0) {
-            double finalQuality = Math.min(quality, 100.0);
-            thumbnailBuilder.outputQuality(finalQuality / 100.0f);
-        }
-
-        return thumbnailBuilder;
-    }
-
+    @Override
     public Mono<DataBuffer> getImageFallback(ServerHttpResponse response, InputStream imageInputStream) {
         log.error("Falling back to default image processing");
         try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {

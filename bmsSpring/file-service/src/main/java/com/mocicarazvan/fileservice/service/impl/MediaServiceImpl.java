@@ -29,6 +29,7 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.gridfs.ReactiveGridFsResource;
 import org.springframework.data.mongodb.gridfs.ReactiveGridFsTemplate;
+import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpRange;
 import org.springframework.http.HttpStatus;
@@ -122,7 +123,13 @@ public class MediaServiceImpl implements MediaService {
 
 
                                     String mediaType = MediaType.fromValue(attch).getValue();
-                                    response.getHeaders().set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + gridId + attch + "\"");
+
+                                    response.getHeaders().setContentDisposition(
+                                            ContentDisposition.attachment()
+                                                    .filename(gridId + attch)
+                                                    .build()
+                                    );
+
                                     response.getHeaders().set(HttpHeaders.CONTENT_TYPE, "image/" + mediaType);
                                     response.getHeaders().setContentLength(cachedImage.length);
                                     return response.writeWith(Mono.just(response.bufferFactory().wrap(cachedImage)))
@@ -174,10 +181,18 @@ public class MediaServiceImpl implements MediaService {
                             String fileAttch = !mediaType.equals(MediaType.ALL) ? "." + mediaType.getValue() : "";
 
                             if (fileType.equals(FileType.VIDEO)) {
-                                response.getHeaders().set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + gridId + ".mp4" + "\"");
+                                response.getHeaders().setContentDisposition(
+                                        ContentDisposition.attachment()
+                                                .filename(gridId + ".mp4")
+                                                .build()
+                                );
                                 response.getHeaders().set(HttpHeaders.CONTENT_TYPE, "video/mp4");
                             } else if (fileType.equals(FileType.IMAGE)) {
-                                response.getHeaders().set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + gridId + fileAttch + "\"");
+                                response.getHeaders().setContentDisposition(
+                                        ContentDisposition.attachment()
+                                                .filename(gridId + fileAttch)
+                                                .build()
+                                );
                                 response.getHeaders().set(HttpHeaders.CONTENT_TYPE, "image/" + mediaType.getValue());
                             }
 
@@ -189,7 +204,7 @@ public class MediaServiceImpl implements MediaService {
                             if (fileType.equals(FileType.IMAGE) && (width != null || height != null || quality != null)) {
 //                                log.info("file name: {}", file.getFilename());
                                 downloadStream =
-                                        bytesService.convertWithThumblinator(width, height, quality, downloadStream, response
+                                        bytesService.convertWithThumblinator(width, height, quality, downloadStream, mediaType, response
                                                 )
                                                 .flatMap(dataBuffer -> {
                                                     response.getHeaders().setContentLength(dataBuffer.readableByteCount());
@@ -202,12 +217,9 @@ public class MediaServiceImpl implements MediaService {
                                 HttpRange range = httpRanges.getFirst();
                                 long start = range.getRangeStart(fileLength);
                                 long end = range.getRangeEnd(fileLength);
-                                response.getHeaders().add(HttpHeaders.CONTENT_RANGE, "bytes " + start + "-" + end + "/" + fileLength);
+                                response.getHeaders().add(HttpHeaders.CONTENT_RANGE, String.format("bytes %d-%d/%d", start, end, fileLength));
                                 response.getHeaders().setContentLength(end - start + 1);
 
-
-//                                final long[] rangeStart = {start};
-//                                final long[] rangeEnd = {end};
 
                                 AtomicLong rangeStart = new AtomicLong(start);
                                 AtomicLong rangeEnd = new AtomicLong(end);
