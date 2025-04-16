@@ -37,7 +37,7 @@ jobs:
           foreach ($module in $modules) {
                   Write-Host "Installing $module..."
                   Push-Location "bmsSpring/$module"
-                  mvn clean install -DskipTests -U
+                  mvn clean install -DskipTests 
                   Pop-Location
           }
       - name: Run Service Tests

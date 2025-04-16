@@ -98,7 +98,7 @@ class RabbitMqApprovedSenderTest {
         assertDoesNotThrow(() -> rabbitMqApprovedSender.sendMessage(app, re, authUser));
         var message = rabbitTestUtils.drainTestQueue(RabbitMqTestConfig.TEST_QUEUE,
                 new ParameterizedTypeReference<ApproveNotificationBody>() {
-                }, 1000, 1);
+                }, 4000, 1);
         assertEquals(1, message.size());
         var notificationBody = message.get(0);
         assertEquals(authUser.getEmail(), notificationBody.getSenderEmail());

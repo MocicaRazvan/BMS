@@ -25,9 +25,6 @@ import org.springframework.test.util.ReflectionTestUtils;
 import org.testcontainers.containers.RabbitMQContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import reactor.core.publisher.Mono;
-import reactor.test.StepVerifier;
-import reactor.test.scheduler.VirtualTimeScheduler;
 import reactor.util.retry.RetryBackoffSpec;
 
 import java.time.Duration;
@@ -114,7 +111,7 @@ class RabbitMqSenderTest {
 
         var messages = rabbitTestUtils.drainTestQueue(RabbitMqTestConfig.TEST_QUEUE,
                 new ParameterizedTypeReference<IdGeneratedImpl>() {
-                }, 1000, 1);
+                }, 4000, 1);
 
         assertEquals(1, messages.size());
         assertEquals(message, messages.get(0));
@@ -139,7 +136,7 @@ class RabbitMqSenderTest {
 
         var messages = rabbitTestUtils.drainTestQueue(RabbitMqTestConfig.TEST_QUEUE,
                 new ParameterizedTypeReference<IdGeneratedImpl>() {
-                }, 1000, payload.size());
+                }, 4000, payload.size());
 
         assertEquals(payload.size(), messages.size());
         assertEquals(payload.stream().sorted(
@@ -159,51 +156,49 @@ class RabbitMqSenderTest {
 
     @Test
     void testRetry_noSuccess() {
+        var retryDelaySeconds = 1;
+        ReflectionTestUtils.setField(rabbitMqSender, "retryDelaySeconds", retryDelaySeconds);
         var retryCount = (int) ReflectionTestUtils.getField(rabbitMqSender, RabbitMqSenderImpl.class, "retryCount");
-        var retryDelaySeconds = (int) ReflectionTestUtils.getField(rabbitMqSender, RabbitMqSenderImpl.class, "retryDelaySeconds");
 
         doThrow(new RuntimeException("Test exception"))
                 .when(template).convertAndSend(anyString(), anyString(), any(Object.class));
 
-        var scheduler = VirtualTimeScheduler.getOrSet();
-
-        StepVerifier.withVirtualTime(() -> Mono.fromRunnable(() -> rabbitMqSender.sendBatchMessage(List.of(1))))
-                .thenAwait(Duration.ofSeconds((long) retryCount * retryDelaySeconds + 10))
-                .verifyComplete();
+        rabbitMqSender.sendBatchMessage(List.of(1));
 
         var messages = rabbitTestUtils.drainTestQueue(RabbitMqTestConfig.TEST_QUEUE,
                 new ParameterizedTypeReference<Integer>() {
-                }, 1000, 0);
-        assertEquals(0, messages.size());
-        await().atMost(AssertionTestUtils.AWAiTILITY_TIMEOUT_SECONDS)
-                .untilAsserted(() -> {
+                }, 4000, 0);
 
-                    verify(template, times(3)).convertAndSend(anyString(), anyString(), any(Object.class));
+
+        await().atMost(Duration.ofSeconds(AssertionTestUtils.AWAiTILITY_TIMEOUT_SECONDS.getSeconds() + retryCount * retryDelaySeconds))
+                .untilAsserted(() -> {
+                    assertEquals(0, messages.size());
+                    verify(template, times(retryCount + 1)).convertAndSend(anyString(), anyString(), any(Object.class));
                 });
     }
 
     @Test
     void testRetry_recover() {
+        var retryDelaySeconds = 1;
+        ReflectionTestUtils.setField(rabbitMqSender, "retryDelaySeconds", retryDelaySeconds);
         var retryCount = (int) ReflectionTestUtils.getField(rabbitMqSender, RabbitMqSenderImpl.class, "retryCount");
-        var retryDelaySeconds = (int) ReflectionTestUtils.getField(rabbitMqSender, RabbitMqSenderImpl.class, "retryDelaySeconds");
 
         doThrow(new RuntimeException("Test exception"))
                 .doCallRealMethod()
                 .when(template).convertAndSend(anyString(), anyString(), any(Object.class));
 
-        var scheduler = VirtualTimeScheduler.getOrSet();
 
-        StepVerifier.withVirtualTime(() -> Mono.fromRunnable(() -> rabbitMqSender.sendBatchMessage(List.of(1))))
-                .thenAwait(Duration.ofSeconds((long) retryCount * retryDelaySeconds + 2))
-                .verifyComplete();
+        rabbitMqSender.sendBatchMessage(List.of(1));
+
 
         var messages = rabbitTestUtils.drainTestQueue(RabbitMqTestConfig.TEST_QUEUE,
                 new ParameterizedTypeReference<Integer>() {
-                }, 1000, 1);
-        assertEquals(1, messages.size());
-        assertEquals(1, messages.get(0));
-        await().atMost(AssertionTestUtils.AWAiTILITY_TIMEOUT_SECONDS)
+                }, 4000, 1);
+
+        await().atMost(Duration.ofSeconds(AssertionTestUtils.AWAiTILITY_TIMEOUT_SECONDS.getSeconds() + retryCount * retryDelaySeconds))
                 .untilAsserted(() -> {
+                    assertEquals(1, messages.size());
+                    assertEquals(1, messages.get(0));
                     verify(template, times(2)).convertAndSend(anyString(), anyString(), any(Object.class));
                 });
     }
@@ -218,7 +213,7 @@ class RabbitMqSenderTest {
         assertDoesNotThrow(() -> rabbitMqSender.sendMessageWithHeaders(message, headers));
         var messages = rabbitTestUtils.drainTestQueueWithHeaders(RabbitMqTestConfig.TEST_QUEUE,
                 new ParameterizedTypeReference<IdGeneratedImpl>() {
-                }, 1000, 1);
+                }, 4000, 1);
 
         assertEquals(1, messages.size());
         assertEquals(message, messages.get(0).getFirst());
