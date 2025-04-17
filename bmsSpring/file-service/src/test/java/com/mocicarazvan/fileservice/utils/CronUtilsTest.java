@@ -10,7 +10,7 @@ import org.springframework.scheduling.support.CronExpression;
 import java.time.Duration;
 import java.time.LocalDateTime;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class CronUtilsTest {
 

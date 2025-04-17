@@ -7,7 +7,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.AntPathMatcher;
 import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Schedulers;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -20,6 +19,14 @@ import java.util.HexFormat;
 public class NextCsrfValidator {
     private final NextAuthProperties nextAuthProperties;
     private final AntPathMatcher antPathMatcher;
+    private final ThreadLocal<MessageDigest> sha256ThreadLocal = ThreadLocal.withInitial(() -> {
+        try {
+            return MessageDigest.getInstance("SHA-256");
+        } catch (NoSuchAlgorithmException e) {
+            log.error("Error initializing SHA-256 MessageDigest", e);
+            throw new RuntimeException(e);
+        }
+    });
     public static final String[] NEXT_CSRF_COOKIES = {
             "__Host-next-auth.csrf-token"
             , "next-auth.csrf-token"
@@ -62,7 +69,6 @@ public class NextCsrfValidator {
 
                     return requestHash.equals(validHash);
                 })
-                .subscribeOn(Schedulers.boundedElastic())
                 .onErrorResume(_ -> Mono.just(false)
                 );
     }
@@ -81,10 +87,8 @@ public class NextCsrfValidator {
         return parts;
     }
 
-    private String computeSha256Hash(String data) throws NoSuchAlgorithmException {
-        // useless to make thread local bc its gonna run on virtual thread bc its super fast anyway
-        MessageDigest digest = MessageDigest.getInstance("SHA-256");
-        byte[] hashBytes = digest.digest(data.getBytes(StandardCharsets.UTF_8));
+    private String computeSha256Hash(String data) {
+        byte[] hashBytes = sha256ThreadLocal.get().digest(data.getBytes(StandardCharsets.UTF_8));
         return HexFormat.of().formatHex(hashBytes);
     }
 
