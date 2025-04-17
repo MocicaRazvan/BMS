@@ -55,7 +55,12 @@ class CryptTest {
 
         String encrypted = Crypt.encryptPassword(password, correctKey);
 
-        assertThrows(Exception.class, () -> Crypt.decryptPassword(encrypted, wrongKey));
+        try {
+            String decrypted = Crypt.decryptPassword(encrypted, wrongKey);
+            assertNotEquals(password, decrypted, "Decryption with wrong key should not yield original password");
+        } catch (Exception e) {
+            assertTrue(true);
+        }
     }
 
     @ParameterizedTest

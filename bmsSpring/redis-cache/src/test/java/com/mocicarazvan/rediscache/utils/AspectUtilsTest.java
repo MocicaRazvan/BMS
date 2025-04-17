@@ -225,6 +225,12 @@ class AspectUtilsTest {
         assertThrows(NullPointerException.class, () -> aspectUtils.getMethod(joinPoint));
     }
 
+    @ParameterizedTest
+    @NullAndEmptySource
+    void evaluateSpelExpression_nullEmptySpel(String spel) {
+        assertThrows(IllegalArgumentException.class, () -> aspectUtils.evaluateSpelExpression(spel, joinPoint));
+    }
+
     static class TestClass {
         public Mono<Pair<String, String>> validMethod() {
             return Mono.just(Pair.of("key", "value"));
