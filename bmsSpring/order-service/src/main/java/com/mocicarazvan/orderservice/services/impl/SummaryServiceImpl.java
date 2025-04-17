@@ -305,12 +305,12 @@ public class SummaryServiceImpl implements SummaryService {
             return summaryRepository.getTopUsersSummary(from, to, top);
         }
 
-        @RedisReactiveChildCache(key = OrderCacheKeys.CACHE_KEY_PATH, idPath = "userId+rank*5+8502")
+        @RedisReactiveChildCache(key = OrderCacheKeys.CACHE_KEY_PATH, idPath = "planId+rank*5+8502")
         public Flux<TopPlansSummary> getTopPlansSummaryBase(LocalDateTime from, LocalDateTime to, int top) {
             return summaryRepository.getTopPlansSummary(from, to, top);
         }
 
-        @RedisReactiveChildCache(key = OrderCacheKeys.CACHE_KEY_PATH, idPath = "userId+rank*7+12003", masterId = "#trainerId")
+        @RedisReactiveChildCache(key = OrderCacheKeys.CACHE_KEY_PATH, idPath = "planId+rank*7+12003", masterId = "#trainerId")
         public Flux<TopPlansSummary> getTopPlansSummaryTrainerBase(LocalDateTime from, LocalDateTime to, int top, Flux<PlanResponse> plans, Long trainerId) {
             return getPlanIds(plans).flatMapMany(ids -> summaryRepository.getTopPlansSummaryTrainer(from, to, top, ids));
         }

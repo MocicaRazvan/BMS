@@ -61,11 +61,11 @@ public class RedisDistributedLockImpl implements RedisDistributedLock {
                         return Mono.just(false);
                     })
                     .doOnNext(removed -> {
-                        if (removed) {
-                            log.info("Lock {} released by value {}", lockKey, lockValue);
-                        } else {
-                            log.warn("Lock {} NOT released — value mismatch ", lockKey);
-                        }
+//                        if (removed) {
+//                            log.info("Lock {} released by value {}", lockKey, lockValue);
+//                        } else {
+//                            log.warn("Lock {} NOT released — value mismatch ", lockKey);
+//                        }
                     })
                     .doFinally(_ -> {
                         lockValue.set(null);

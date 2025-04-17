@@ -17,7 +17,9 @@ import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.data.redis.core.ReactiveRedisTemplate;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 import reactor.util.function.Tuple2;
+import reactor.util.function.Tuples;
 
 import java.lang.reflect.Method;
 import java.time.Duration;
@@ -107,7 +109,10 @@ public class RedisReactiveCacheAspect {
                                         .cast(Object.class)
 
                         ))
-                        .onErrorResume(e -> Flux.empty());
+                        .onErrorResume(e -> {
+                            log.error("Error while creating base flux for key: {}", savingKey, e);
+                            return Flux.empty();
+                        });
     }
 
     protected Mono<Object> createBaseMono(String savingKey, Method method) {
@@ -122,7 +127,10 @@ public class RedisReactiveCacheAspect {
                                             localReactiveCache.put(savingKey, ob);
                                         })
                                 ))
-                        .onErrorResume(e -> Mono.empty());
+                        .onErrorResume(e -> {
+                            log.error("Error while creating base mono for key: {}", savingKey, e);
+                            return Mono.empty();
+                        });
     }
 
 
@@ -150,14 +158,15 @@ public class RedisReactiveCacheAspect {
 //                            log.info("Key: " + savingKey + " set successfully");
 //                            localReactiveCache.put(savingKey, methodResponse);
                         }, // Log success
-                        error -> log.error("Failed to set key: " + savingKey, error) // Log errors
+                        error -> log.error("Failed to set key: {}", savingKey, error) // Log errors
                 );
     }
 
     protected Mono<Long> saveMonoToCacheNoSubscribe(String key, String savingKey, Long annId, Object methodResponse) {
         return reactiveRedisTemplate.opsForValue()
                 .set(savingKey, methodResponse, Duration.ofMinutes(expireMinutes))
-                .then(addToReverseIndex(key, annId, savingKey));
+                .filter(Boolean::booleanValue)
+                .flatMap(_ -> addToReverseIndex(key, annId, savingKey));
     }
 
     @SuppressWarnings("unchecked")
@@ -184,34 +193,43 @@ public class RedisReactiveCacheAspect {
     }
 
     protected void saveFluxResultToCache(ProceedingJoinPoint joinPoint, String key, String savingKey, String idPath, ConcurrentMap<Long, Object> indexMap) {
-        List<Long> ids = new ArrayList<>();
-        List<Object> sortedList = indexMap.entrySet()
-                .stream()
-                .sorted(ConcurrentMap.Entry.comparingByKey())
-                .map(ConcurrentMap.Entry::getValue)
-                .peek(object -> {
-                    Long id = aspectUtils.assertLong(aspectUtils.evaluateSpelExpressionForObject(idPath, object, joinPoint));
-                    ids.add(id);
-                })
-                .toList();
-//        log.info("Setting key: " + key + " with value: " + sortedList);
+        Mono.defer(() -> Flux.fromIterable(indexMap.entrySet())
+                        .sort(ConcurrentMap.Entry.comparingByKey())
+                        .map(ConcurrentMap.Entry::getValue)
+                        .reduce(Tuples.of(new ArrayList<Long>(), new ArrayList<>()),
+                                (acc, value) -> {
+                                    Long id = aspectUtils.assertLong(
+                                            aspectUtils.evaluateSpelExpressionForObject(idPath, value, joinPoint)
+                                    );
+                                    acc.getT1().add(id);
+                                    acc.getT2().add(value);
+                                    return acc;
+                                }
+                        ))
+                // offloading from virtual bc the map can be big
+                .subscribeOn(Schedulers.parallel())
+                .filter(acc -> !acc.getT1().isEmpty() && !acc.getT2().isEmpty())
+                .flatMapMany(tuple ->
+                        {
+                            List<Long> ids = tuple.getT1();
+                            List<Object> sortedList = tuple.getT2();
 
-        if (sortedList.isEmpty()) {
-            return;
-        }
-
-
-        reactiveRedisTemplate.opsForValue().set(savingKey, sortedList, Duration.ofMinutes(expireMinutes))
-                .flatMapMany(s -> Flux.fromIterable(ids)
-                        .flatMap(id -> addToReverseIndex(key, id, savingKey)))
-                .doOnComplete(() -> localReactiveCache.put(savingKey, sortedList))
+                            return reactiveRedisTemplate.opsForValue().set(savingKey, sortedList, Duration.ofMinutes(expireMinutes))
+                                    .filter(Boolean::booleanValue)
+                                    .flatMapMany(_ -> Flux.fromIterable(ids)
+                                            .flatMap(id ->
+                                                    addToReverseIndex(key, id, savingKey)
+                                            ))
+                                    .doOnComplete(() -> localReactiveCache.put(savingKey, sortedList));
+                        }
+                )
                 .subscribe(
                         success ->
                         {
 //                            log.info("Key: " + savingKey + " set successfully");
                             return;
                         },// Log success
-                        error -> log.error("Failed to set key: " + savingKey, error) // Log errors
+                        error -> log.error("Failed to set key: {}", savingKey, error) // Log errors
                 );
     }
 
@@ -233,7 +251,7 @@ public class RedisReactiveCacheAspect {
                             return;
                         })
                         .doOnSuccess(_ -> reverseKeysLocalCache.add(reverseIndexKey, indexKey))
-                        .doOnError(error -> log.error("Failed to add to reverse index: " + key + ":" + id + " value: " + indexKey, error));
+                        .doOnError(error -> log.error("Failed to add to reverse index: {}:{} value: {}", key, id, indexKey, error));
     }
 
 
