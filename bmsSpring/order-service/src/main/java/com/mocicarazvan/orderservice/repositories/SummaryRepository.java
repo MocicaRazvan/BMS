@@ -325,23 +325,28 @@ public interface SummaryRepository extends Repository<Order, Long> {
 
     @Query("""
                 WITH elem_counts AS (
-                    SELECT elem, COUNT(*) AS cnt,
-                           count(c.id) as cnt_ord
+                    SELECT elem, COUNT(*) AS cnt
                     FROM custom_order c,
                          unnest(plan_ids) AS elem
                     WHERE created_at >= :startDate AND created_at < :endDate
                     GROUP BY elem
+                ),
+                ranked_counts AS (
+                    SELECT elem AS plan_id,
+                           cnt AS count,
+                           1.0 * cnt / NULLIF(SUM(cnt) OVER(), 0) AS ratio,
+                           DENSE_RANK() OVER (ORDER BY cnt DESC) AS rank
+                    FROM elem_counts
+                ),
+                top_counts AS (
+                    SELECT * FROM ranked_counts
+                    WHERE rank <= :top
                 )
-                select * from (
-                SELECT elem as plan_id,
-                       cnt as count,
-                       1.0 * cnt / NULLIF(SUM(cnt) OVER(),0) AS ratio,
-                       MAX(cnt) OVER () AS max_group_count,
-                       AVG(cnt) OVER () AS avg_group_count,
-                       MIN(cnt) OVER () AS min_group_count,
-                       DENSE_RANK() OVER (ORDER BY cnt DESC) AS rank
-                FROM elem_counts) s
-                where rank <= :top;
+                SELECT *,
+                       MAX(count) OVER () AS max_group_count,
+                       AVG(count) OVER () AS avg_group_count,
+                       MIN(count) OVER () AS min_group_count
+                FROM top_counts
             """)
     Flux<TopPlansSummary> getTopPlansSummary(LocalDateTime startDate,
                                              LocalDateTime endDate,
@@ -349,24 +354,29 @@ public interface SummaryRepository extends Repository<Order, Long> {
 
     @Query("""
                 WITH elem_counts AS (
-                    SELECT elem, COUNT(*) AS cnt,
-                           count(c.id) as cnt_ord
+                    SELECT elem, COUNT(*) AS cnt
                     FROM custom_order c,
                          unnest(plan_ids) AS elem
                     WHERE created_at >= :startDate AND created_at < :endDate
-                    and elem = any(:trainerPlanIds)
+                      AND elem = ANY(:trainerPlanIds)
                     GROUP BY elem
+                ),
+                ranked_counts AS (
+                    SELECT elem AS plan_id,
+                           cnt AS count,
+                           1.0 * cnt / NULLIF(SUM(cnt) OVER (), 0) AS ratio,
+                           DENSE_RANK() OVER (ORDER BY cnt DESC) AS rank
+                    FROM elem_counts
+                ),
+                top_counts AS (
+                    SELECT * FROM ranked_counts
+                    WHERE rank <= :top
                 )
-                select * from (
-                SELECT elem as plan_id,
-                       cnt as count,
-                       1.0 * cnt / NULLIF(SUM(cnt) OVER(),0) AS ratio,
-                       MAX(cnt) OVER () AS max_group_count,
-                       AVG(cnt) OVER () AS avg_group_count,
-                       MIN(cnt) OVER () AS min_group_count,
-                       DENSE_RANK() OVER (ORDER BY cnt DESC) AS rank
-                FROM elem_counts) s
-                where rank <= :top;
+                SELECT *,
+                       MAX(count) OVER () AS max_group_count,
+                       AVG(count) OVER () AS avg_group_count,
+                       MIN(count) OVER () AS min_group_count
+                FROM top_counts
             """)
     Flux<TopPlansSummary> getTopPlansSummaryTrainer(LocalDateTime startDate,
                                                     LocalDateTime endDate,
