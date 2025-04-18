@@ -7,26 +7,27 @@ import com.mocicarazvan.rediscache.local.LocalReactiveCache;
 import com.mocicarazvan.rediscache.local.ReverseKeysLocalCache;
 import com.mocicarazvan.rediscache.utils.AspectUtils;
 import com.mocicarazvan.rediscache.utils.RedisCacheUtils;
+import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.task.SimpleAsyncTaskExecutorBuilder;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.data.redis.core.ReactiveRedisTemplate;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.publisher.Sinks;
+import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
-import reactor.util.function.Tuple2;
 import reactor.util.function.Tuples;
 
 import java.lang.reflect.Method;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 @Slf4j
 @Aspect
@@ -41,10 +42,17 @@ public class RedisReactiveCacheAspect {
     protected final RedisCacheUtils redisCacheUtils;
     protected final ReverseKeysLocalCache reverseKeysLocalCache;
     protected final LocalReactiveCache localReactiveCache;
+    //to prevent infinite cache
+    @Value("${spring.custom.max.cache.flux.seconds:3600}")
+    protected Long maxCacheFluxSeconds;
 
     @Value("${spring.custom.cache.redis.expire.minutes:30}")
     protected Long expireMinutes;
 
+    @Value("${spring.custom.cache.redis.flux,cache,parallelism:4}")
+    protected int parallelism;
+
+    private Scheduler scheduler;
 
     public RedisReactiveCacheAspect(ReactiveRedisTemplate<String, Object> reactiveRedisTemplate,
                                     AspectUtils aspectUtils, ObjectMapper objectMapper,
@@ -59,6 +67,30 @@ public class RedisReactiveCacheAspect {
         this.redisCacheUtils = redisCacheUtils;
         this.reverseKeysLocalCache = reverseKeysLocalCache;
         this.localReactiveCache = localReactiveCache;
+    }
+
+    public RedisReactiveCacheAspect(ReactiveRedisTemplate<String, Object> reactiveRedisTemplate,
+                                    AspectUtils aspectUtils, ObjectMapper objectMapper,
+                                    RedisCacheUtils redisCacheUtils,
+                                    ReverseKeysLocalCache reverseKeysLocalCache, LocalReactiveCache localReactiveCache
+    ) {
+        this.reactiveRedisTemplate = reactiveRedisTemplate;
+        this.aspectUtils = aspectUtils;
+        this.objectMapper = objectMapper;
+        this.asyncTaskExecutor = new SimpleAsyncTaskExecutorBuilder()
+                .concurrencyLimit(4)
+                .build();
+        this.redisCacheUtils = redisCacheUtils;
+        this.reverseKeysLocalCache = reverseKeysLocalCache;
+        this.localReactiveCache = localReactiveCache;
+    }
+
+    @PostConstruct
+    public void init() {
+        if (this.scheduler == null) {
+            this.scheduler = Schedulers.newParallel("redis-cache-flux", parallelism);
+        }
+
     }
 
     @Around("execution(* *(..)) && @annotation(com.mocicarazvan.rediscache.annotation.RedisReactiveCache)")
@@ -150,15 +182,15 @@ public class RedisReactiveCacheAspect {
 
     protected void saveMonoResultToCache(ProceedingJoinPoint joinPoint, String key, String savingKey, Long annId, Object methodResponse) {
         saveMonoToCacheNoSubscribe(key, savingKey, annId, methodResponse)
-                .doOnSuccess(success -> {
+                .doOnSuccess(_ -> {
                     localReactiveCache.put(savingKey, methodResponse);
                 })
                 .subscribe(
                         success -> {
 //                            log.info("Key: " + savingKey + " set successfully");
 //                            localReactiveCache.put(savingKey, methodResponse);
-                        }, // Log success
-                        error -> log.error("Failed to set key: {}", savingKey, error) // Log errors
+                        },
+                        error -> log.error("Failed to set key: {}", savingKey, error)
                 );
     }
 
@@ -172,19 +204,12 @@ public class RedisReactiveCacheAspect {
     @SuppressWarnings("unchecked")
     protected Flux<Object> methodFluxResponseToCache(ProceedingJoinPoint joinPoint, String key, String savingKey, String idPath, boolean saveToCache) {
         try {
-            ConcurrentMap<Long, Object> indexMap = new ConcurrentHashMap<>();
-            return ((Flux<Object>) joinPoint.proceed(joinPoint.getArgs()))
-                    .index()
-                    .doOnNext(indexedValue -> {
-//                        log.info("Processing value: index={}, value={}", indexedValue.getT1(), indexedValue.getT2());
-                        indexMap.put(indexedValue.getT1(), indexedValue.getT2());
-//                        log.info("Current state of indexMap: {}", indexMap);
-
-                    })
-                    .map(Tuple2::getT2)
+            Flux<Object> original = (Flux<Object>) joinPoint.proceed(joinPoint.getArgs());
+            Flux<Object> cached = original.cache(Duration.ofSeconds(maxCacheFluxSeconds));
+            return cached
                     .doOnComplete(() -> {
                         if (saveToCache) {
-                            asyncTaskExecutor.submit(() -> saveFluxResultToCache(joinPoint, key, savingKey, idPath, indexMap));
+                            asyncTaskExecutor.submit(() -> saveFluxResultToCache(joinPoint, key, savingKey, idPath, cached));
                         }
                     });
         } catch (Throwable e) {
@@ -192,47 +217,46 @@ public class RedisReactiveCacheAspect {
         }
     }
 
-    protected void saveFluxResultToCache(ProceedingJoinPoint joinPoint, String key, String savingKey, String idPath, ConcurrentMap<Long, Object> indexMap) {
-        Mono.defer(() -> Flux.fromIterable(indexMap.entrySet())
-                        .sort(ConcurrentMap.Entry.comparingByKey())
-                        .map(ConcurrentMap.Entry::getValue)
-                        .reduce(Tuples.of(new ArrayList<Long>(), new ArrayList<>()),
-                                (acc, value) -> {
-                                    Long id = aspectUtils.assertLong(
-                                            aspectUtils.evaluateSpelExpressionForObject(idPath, value, joinPoint)
-                                    );
-                                    acc.getT1().add(id);
-                                    acc.getT2().add(value);
-                                    return acc;
-                                }
-                        ))
-                // offloading from virtual bc the map can be big
-                .subscribeOn(Schedulers.parallel())
-                .filter(acc -> !acc.getT1().isEmpty() && !acc.getT2().isEmpty())
-                .flatMapMany(tuple ->
-                        {
-                            List<Long> ids = tuple.getT1();
-                            List<Object> sortedList = tuple.getT2();
-
-                            return reactiveRedisTemplate.opsForValue().set(savingKey, sortedList, Duration.ofMinutes(expireMinutes))
+    protected void saveFluxResultToCache(ProceedingJoinPoint joinPoint, String key, String savingKey, String idPath, Flux<Object> original) {
+        // just in case
+        Scheduler fallbackScheduler = scheduler != null ? scheduler : Schedulers.immediate();
+        original
+                .publishOn(fallbackScheduler)
+                .reduce(Tuples.of(Sinks.many().unicast().<Long>onBackpressureBuffer(), new ArrayList<>()), (acc, cur) -> {
+                    long id = aspectUtils.assertLong(
+                            aspectUtils.evaluateSpelExpressionForObject(idPath, cur, joinPoint)
+                    );
+                    acc.getT1().tryEmitNext(id);
+                    acc.getT2().add(cur);
+                    return acc;
+                })
+                .doOnSuccess(t -> {
+                    t.getT1().tryEmitComplete();
+                })
+                .flatMapMany(tuple -> {
+                            Flux<Long> ids = tuple.getT1().asFlux().timeout(Duration.ofSeconds(maxCacheFluxSeconds));
+                            List<Object> values = tuple.getT2();
+                            
+                            return reactiveRedisTemplate.opsForValue().set(savingKey, values, Duration.ofMinutes(expireMinutes))
                                     .filter(Boolean::booleanValue)
-                                    .flatMapMany(_ -> Flux.fromIterable(ids)
+                                    // https://github.com/spring-projects/spring-data-redis/issues/2715
+                                    // no need to pipeline here
+                                    .flatMapMany(_ -> ids
                                             .flatMap(id ->
                                                     addToReverseIndex(key, id, savingKey)
                                             ))
-                                    .doOnComplete(() -> localReactiveCache.put(savingKey, sortedList));
+                                    .doOnComplete(() -> localReactiveCache.put(savingKey, values));
                         }
-                )
-                .subscribe(
+                ).subscribe(
                         success ->
                         {
 //                            log.info("Key: " + savingKey + " set successfully");
                             return;
-                        },// Log success
-                        error -> log.error("Failed to set key: {}", savingKey, error) // Log errors
+                        },
+                        error -> log.error("Failed to set key: {}", savingKey, error)
                 );
-    }
 
+    }
 
     protected Mono<Long> addToReverseIndex(String key, Long id, String indexKey) {
         if (id == null) {

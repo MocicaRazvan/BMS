@@ -37,6 +37,14 @@ public class RedisReactiveCacheApprovedAspect extends RedisReactiveCacheAspect {
         this.redisApprovedCacheUtils = redisApprovedCacheUtils;
     }
 
+    public RedisReactiveCacheApprovedAspect(ReactiveRedisTemplate<String, Object> reactiveRedisTemplate, AspectUtils aspectUtils, ObjectMapper objectMapper,
+                                            RedisApprovedCacheUtils redisApprovedCacheUtils,
+                                            ReverseKeysLocalCache reverseKeysLocalCache, LocalReactiveCache localReactiveCache
+    ) {
+        super(reactiveRedisTemplate, aspectUtils, objectMapper, redisApprovedCacheUtils, reverseKeysLocalCache, localReactiveCache);
+        this.redisApprovedCacheUtils = redisApprovedCacheUtils;
+    }
+
     @Around("execution(* *(..)) && @annotation(com.mocicarazvan.rediscache.annotation.RedisReactiveApprovedCache)")
     public Object redisReactiveCacheApprovedAdd(ProceedingJoinPoint joinPoint) {
         Method method = aspectUtils.getMethod(joinPoint);

@@ -10,6 +10,7 @@ import com.mocicarazvan.rediscache.local.ReverseKeysLocalCache;
 import com.mocicarazvan.rediscache.testUtils.AssertionTestUtils;
 import com.mocicarazvan.rediscache.utils.AspectUtils;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -51,6 +52,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
+@Slf4j
 @ExtendWith(MockitoExtension.class)
 @SpringBootTest(classes = LocalCacheConfig.class, properties = {
         "spring.custom.cache.redis.expire.minutes=30"
@@ -71,7 +73,7 @@ class RedisReactiveCacheAspectTest {
         registry.add("spring.custom.cache.redis.host", redisContainer::getHost);
         registry.add("spring.custom.cache.redis.port", redisContainer::getFirstMappedPort);
         registry.add("spring.custom.cache.redis.database", () -> 0);
-        registry.add(":spring.custom.executor.redis.async.concurrency.limit", () -> 128);
+        registry.add("spring.custom.executor.redis.async.concurrency.limit", () -> 128);
     }
 
     @Autowired
@@ -349,7 +351,7 @@ class RedisReactiveCacheAspectTest {
         var res = testServiceReactive.getDummies();
         StepVerifier.create(testServiceReactive.getAllDummies().collectList())
                 .expectNextMatches(
-                        r -> new HashSet<>(r).equals(new HashSet<>(res))
+                        r -> r.equals(res)
                 )
                 .verifyComplete();
         var savingKeyCaptor = ArgumentCaptor.forClass(String.class);
@@ -424,6 +426,170 @@ class RedisReactiveCacheAspectTest {
     }
 
     @Test
+    @SneakyThrows
+    public void addFluxToCacheAllCachesMiss_hugeList() {
+        var res = testServiceReactive.getDummiesHuge();
+        StepVerifier.create(testServiceReactive.getAllDummiesHuge().collectList())
+                .expectNextMatches(
+                        r -> r.equals(res)
+                )
+                .verifyComplete();
+        log.info("Step verifier completed");
+        var savingKeyCaptor = ArgumentCaptor.forClass(String.class);
+        var reverseIndexCaptor = ArgumentCaptor.forClass(String.class);
+        await().atMost(AssertionTestUtils.AWAiTILITY_TIMEOUT_SECONDS)
+                .untilAsserted(
+                        () -> {
+
+                            verify(aspectUtils, atLeastOnce()).extractKeyFromAnnotation(eq(TestServiceReactive.CACHE_KEY), any());
+                            verify(aspectUtils, atLeastOnce()).getHashString(any(), eq(TestServiceReactive.CACHE_KEY), eq("getAllDummiesHuge"));
+                            verify(redisReactiveCacheAspect, atLeastOnce()).createBaseFlux(savingKeyCaptor.capture(), any(Method.class));
+                            verify(localReactiveCache, atLeastOnce()).getFluxOrEmpty(savingKeyCaptor.getValue());
+                            verify(reactiveValueOperations, atLeastOnce()).get(savingKeyCaptor.getValue());
+                            var typeReference = new TypeReference<TestServiceReactive.Dummy>() {
+                            };
+
+
+                            verify(reactiveValueOperations, atLeastOnce()).set(eq(savingKeyCaptor.getValue()), eq(res), eq(Duration.ofMinutes(30)));
+                            verify(redisReactiveCacheAspect, atLeastOnce()).addToReverseIndex(TestServiceReactive.CACHE_KEY, 1L, savingKeyCaptor.getValue());
+                            verify(redisReactiveCacheAspect, atLeastOnce()).addToReverseIndex(TestServiceReactive.CACHE_KEY, 2L, savingKeyCaptor.getValue());
+                            verify(redisReactiveCacheAspect, atLeastOnce()).addToReverseIndex(TestServiceReactive.CACHE_KEY, 3L, savingKeyCaptor.getValue());
+                            verify(redisReactiveCacheAspect, atLeastOnce()).methodFluxResponseToCache(any(ProceedingJoinPoint.class), eq(TestServiceReactive.CACHE_KEY), eq(savingKeyCaptor.getValue()), anyString(), eq(true));
+
+                            verify(reactiveSetOperations, atLeast(res.size())).add(reverseIndexCaptor.capture(), eq(savingKeyCaptor.getValue()));
+                            await().atMost(AssertionTestUtils.AWAiTILITY_TIMEOUT_SECONDS)
+                                    .untilAsserted(
+                                            () -> {
+                                                verify(reactiveRedisTemplate, atLeastOnce()).expire(reverseIndexCaptor.getValue(), Duration.ofMinutes(30 + 1));
+                                            });
+                            verify(reverseKeysLocalCache, atLeastOnce()).add(reverseIndexCaptor.getValue(), savingKeyCaptor.getValue());
+                            verify(reactiveValueOperations, atLeastOnce())
+                                    .set(eq(savingKeyCaptor.getValue()), eq(res), eq(Duration.ofMinutes(30)));
+
+                            verify(reactiveRedisTemplate, atLeastOnce())
+                                    .expire(reverseIndexCaptor.getValue(), Duration.ofMinutes(30 + 1));
+
+
+                            verify(aspectUtils, never()).evaluateSpelExpression(anyString(), any());
+                            verify(redisReactiveCacheAspect, never()).methodMonoResponseToCache(any(ProceedingJoinPoint.class), anyString(), anyString(), anyLong(), anyBoolean());
+                            verify(redisReactiveCacheAspect, never()).saveMonoResultToCache(any(ProceedingJoinPoint.class), anyString(), anyString(), anyLong(), anyBoolean());
+                            verify(redisReactiveCacheAspect, never()).saveMonoToCacheNoSubscribe(eq(TestServiceReactive.CACHE_KEY), eq(savingKeyCaptor.getValue()), eq(1L), eq(res));
+
+                            verify(objectMapper, never()).convertValue(any(), eq(typeReference));
+                            verify(localReactiveCache, atLeastOnce()).put(eq(savingKeyCaptor.getValue()), anyList());
+
+
+                        });
+        await().atMost(AssertionTestUtils.AWAiTILITY_TIMEOUT_SECONDS)
+                .untilAsserted(
+                        () -> {
+                            StepVerifier.create(localReactiveCache.getFluxOrEmpty(savingKeyCaptor.getValue()).collectList())
+                                    .expectNextMatches(res::equals)
+                                    .verifyComplete();
+
+                            StepVerifier.create(
+                                            reactiveRedisTemplate.opsForSet()
+                                                    .members(reverseIndexCaptor.getValue())
+                                                    .collectList()
+                                    )
+                                    .expectNextMatches(redisList -> new HashSet<>(redisList).equals(new HashSet<>(reverseKeysLocalCache.get(reverseIndexCaptor.getValue()))))
+                                    .verifyComplete();
+                            StepVerifier.create(reactiveRedisTemplate.opsForValue().get(savingKeyCaptor.getValue())
+                                            .map(v -> objectMapper.convertValue(v, objectMapper.getTypeFactory()
+                                                    .constructCollectionType(List.class,
+                                                            objectMapper.getTypeFactory().constructType(TestServiceReactive.Dummy.class)
+                                                    )))
+                                    )
+                                    .expectNext(res)
+                                    .verifyComplete();
+                        });
+
+    }
+
+    @Test
+    @SneakyThrows
+    public void addFluxToCacheAllCachesMiss_withDelay() {
+        var res = testServiceReactive.getDummies();
+        StepVerifier.create(testServiceReactive.getAllDummiesWithDelay().collectList())
+                .expectNextMatches(
+                        r -> r.equals(res)
+                )
+                .verifyComplete();
+
+        log.info("Step verifier completed");
+
+        var savingKeyCaptor = ArgumentCaptor.forClass(String.class);
+        var reverseIndexCaptor = ArgumentCaptor.forClass(String.class);
+        await().atMost(AssertionTestUtils.AWAiTILITY_TIMEOUT_SECONDS)
+                .untilAsserted(
+                        () -> {
+
+                            verify(aspectUtils, atLeastOnce()).extractKeyFromAnnotation(eq(TestServiceReactive.CACHE_KEY), any());
+                            verify(aspectUtils, atLeastOnce()).getHashString(any(), eq(TestServiceReactive.CACHE_KEY), eq("getAllDummiesWithDelay"));
+                            verify(redisReactiveCacheAspect, atLeastOnce()).createBaseFlux(savingKeyCaptor.capture(), any(Method.class));
+                            verify(localReactiveCache, atLeastOnce()).getFluxOrEmpty(savingKeyCaptor.getValue());
+                            verify(reactiveValueOperations, atLeastOnce()).get(savingKeyCaptor.getValue());
+                            var typeReference = new TypeReference<TestServiceReactive.Dummy>() {
+                            };
+
+
+                            verify(reactiveValueOperations, atLeastOnce()).set(eq(savingKeyCaptor.getValue()), eq(res), eq(Duration.ofMinutes(30)));
+                            verify(redisReactiveCacheAspect, atLeastOnce()).addToReverseIndex(TestServiceReactive.CACHE_KEY, 1L, savingKeyCaptor.getValue());
+                            verify(redisReactiveCacheAspect, atLeastOnce()).addToReverseIndex(TestServiceReactive.CACHE_KEY, 2L, savingKeyCaptor.getValue());
+                            verify(redisReactiveCacheAspect, atLeastOnce()).addToReverseIndex(TestServiceReactive.CACHE_KEY, 3L, savingKeyCaptor.getValue());
+                            verify(redisReactiveCacheAspect, atLeastOnce()).methodFluxResponseToCache(any(ProceedingJoinPoint.class), eq(TestServiceReactive.CACHE_KEY), eq(savingKeyCaptor.getValue()), anyString(), eq(true));
+
+                            verify(reactiveSetOperations, atLeast(res.size())).add(reverseIndexCaptor.capture(), eq(savingKeyCaptor.getValue()));
+                            await().atMost(AssertionTestUtils.AWAiTILITY_TIMEOUT_SECONDS)
+                                    .untilAsserted(
+                                            () -> {
+                                                verify(reactiveRedisTemplate, atLeastOnce()).expire(reverseIndexCaptor.getValue(), Duration.ofMinutes(30 + 1));
+                                            });
+                            verify(reverseKeysLocalCache, atLeastOnce()).add(reverseIndexCaptor.getValue(), savingKeyCaptor.getValue());
+                            verify(reactiveValueOperations, atLeastOnce())
+                                    .set(eq(savingKeyCaptor.getValue()), eq(res), eq(Duration.ofMinutes(30)));
+
+                            verify(reactiveRedisTemplate, atLeastOnce())
+                                    .expire(reverseIndexCaptor.getValue(), Duration.ofMinutes(30 + 1));
+
+
+                            verify(aspectUtils, never()).evaluateSpelExpression(anyString(), any());
+                            verify(redisReactiveCacheAspect, never()).methodMonoResponseToCache(any(ProceedingJoinPoint.class), anyString(), anyString(), anyLong(), anyBoolean());
+                            verify(redisReactiveCacheAspect, never()).saveMonoResultToCache(any(ProceedingJoinPoint.class), anyString(), anyString(), anyLong(), anyBoolean());
+                            verify(redisReactiveCacheAspect, never()).saveMonoToCacheNoSubscribe(eq(TestServiceReactive.CACHE_KEY), eq(savingKeyCaptor.getValue()), eq(1L), eq(res));
+
+                            verify(objectMapper, never()).convertValue(any(), eq(typeReference));
+                            verify(localReactiveCache, atLeastOnce()).put(eq(savingKeyCaptor.getValue()), anyList());
+
+
+                        });
+        await().atMost(AssertionTestUtils.AWAiTILITY_TIMEOUT_SECONDS)
+                .untilAsserted(
+                        () -> {
+                            StepVerifier.create(localReactiveCache.getFluxOrEmpty(savingKeyCaptor.getValue()).collectList())
+                                    .expectNextMatches(res::equals)
+                                    .verifyComplete();
+
+                            StepVerifier.create(
+                                            reactiveRedisTemplate.opsForSet()
+                                                    .members(reverseIndexCaptor.getValue())
+                                                    .collectList()
+                                    )
+                                    .expectNextMatches(redisList -> new HashSet<>(redisList).equals(new HashSet<>(reverseKeysLocalCache.get(reverseIndexCaptor.getValue()))))
+                                    .verifyComplete();
+                            StepVerifier.create(reactiveRedisTemplate.opsForValue().get(savingKeyCaptor.getValue())
+                                            .map(v -> objectMapper.convertValue(v, objectMapper.getTypeFactory()
+                                                    .constructCollectionType(List.class,
+                                                            objectMapper.getTypeFactory().constructType(TestServiceReactive.Dummy.class)
+                                                    )))
+                                    )
+                                    .expectNext(res)
+                                    .verifyComplete();
+                        });
+
+    }
+
+    @Test
     void addFluxLocalCacheHit() {
         var res = testServiceReactive.getDummies();
 
@@ -431,7 +597,7 @@ class RedisReactiveCacheAspectTest {
 
         StepVerifier.create(testServiceReactive.getAllDummies().collectList())
                 .expectNextMatches(
-                        r -> new HashSet<>(r).equals(new HashSet<>(res))
+                        r -> r.equals(res)
                 )
                 .verifyComplete();
         var savingKeyCaptor = ArgumentCaptor.forClass(String.class);
@@ -490,7 +656,7 @@ class RedisReactiveCacheAspectTest {
 
         StepVerifier.create(testServiceReactive.getAllDummies().collectList())
                 .expectNextMatches(
-                        r -> new HashSet<>(r).equals(new HashSet<>(res))
+                        r -> r.equals(res)
                 )
                 .verifyComplete();
         var savingKeyCaptor = ArgumentCaptor.forClass(String.class);

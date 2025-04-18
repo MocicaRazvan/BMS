@@ -35,6 +35,14 @@ public class RedisReactiveCacheChildAspect extends RedisReactiveCacheAspect {
         this.redisChildCacheUtils = redisChildCacheUtil;
     }
 
+    public RedisReactiveCacheChildAspect(ReactiveRedisTemplate<String, Object> reactiveRedisTemplate, AspectUtils aspectUtils, ObjectMapper objectMapper,
+                                         RedisChildCacheUtils redisChildCacheUtil,
+                                         ReverseKeysLocalCache reverseKeysLocalCache, LocalReactiveCache localReactiveCache
+    ) {
+        super(reactiveRedisTemplate, aspectUtils, objectMapper, redisChildCacheUtil, reverseKeysLocalCache, localReactiveCache);
+        this.redisChildCacheUtils = redisChildCacheUtil;
+    }
+
     @Around("execution(* *(..)) && @annotation(com.mocicarazvan.rediscache.annotation.RedisReactiveChildCache)")
     public Object redisReactiveCacheChildAdd(ProceedingJoinPoint joinPoint) {
         Method method = aspectUtils.getMethod(joinPoint);

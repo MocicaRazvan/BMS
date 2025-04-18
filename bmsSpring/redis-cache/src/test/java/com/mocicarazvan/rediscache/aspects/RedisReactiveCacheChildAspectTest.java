@@ -68,7 +68,7 @@ public class RedisReactiveCacheChildAspectTest {
         registry.add("spring.custom.cache.redis.host", redisContainer::getHost);
         registry.add("spring.custom.cache.redis.port", redisContainer::getFirstMappedPort);
         registry.add("spring.custom.cache.redis.database", () -> 0);
-        registry.add(":spring.custom.executor.redis.async.concurrency.limit", () -> 128);
+        registry.add("spring.custom.executor.redis.async.concurrency.limit", () -> 128);
     }
 
     @Autowired
