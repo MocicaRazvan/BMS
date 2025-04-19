@@ -8,10 +8,9 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.io.InputStream;
-import java.util.concurrent.atomic.AtomicLong;
 
 public interface BytesService {
-    Flux<DataBuffer> getVideoByRange(ReactiveGridFsResource file, AtomicLong rangeStart, AtomicLong rangeEnd);
+    Flux<DataBuffer> getVideoByRange(ReactiveGridFsResource file, long start, long end);
 
     Flux<DataBuffer> convertWithThumblinator(Integer width, Integer height, Double quality, Flux<DataBuffer> downloadStream, MediaType mediaType, ServerHttpResponse response);
 

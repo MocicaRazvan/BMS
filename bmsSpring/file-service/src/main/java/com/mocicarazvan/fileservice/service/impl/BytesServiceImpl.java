@@ -5,10 +5,17 @@ import com.mocicarazvan.fileservice.service.BytesService;
 import lombok.extern.slf4j.Slf4j;
 import net.coobird.thumbnailator.Thumbnails;
 import net.coobird.thumbnailator.geometry.Positions;
+import org.bson.Document;
+import org.bson.types.Binary;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DataBufferUtils;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.mongodb.core.ReactiveMongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.gridfs.ReactiveGridFsResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.reactive.ServerHttpResponse;
@@ -18,6 +25,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
+import reactor.util.function.Tuples;
 
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
@@ -29,81 +37,78 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.util.Iterator;
-import java.util.concurrent.atomic.AtomicLong;
 
 @Service
 @Slf4j
 public class BytesServiceImpl implements BytesService {
 
     private final Scheduler thumbnailScheduler;
-
+    private final ReactiveMongoTemplate reactiveMongoTemplate;
+    private final DataBufferFactory dataBufferFactory;
     @Value("${spring.custom.video.limit-rate:16}")
     private int videoLimitRate;
 
     @Value("${spring.custom.thumblinator.limit-rate:16}")
     private int thumblinatorLimitRate;
 
-    public BytesServiceImpl(@Qualifier("threadPoolTaskScheduler") ThreadPoolTaskScheduler threadPoolTaskScheduler) {
+    public BytesServiceImpl(@Qualifier("threadPoolTaskScheduler") ThreadPoolTaskScheduler threadPoolTaskScheduler, ReactiveMongoTemplate reactiveMongoTemplate,
+                            @Qualifier("dataBufferFactory") DataBufferFactory dataBufferFactory) {
         this.thumbnailScheduler = Schedulers.fromExecutor(threadPoolTaskScheduler.getScheduledExecutor());
 
+
+        this.reactiveMongoTemplate = reactiveMongoTemplate;
+        this.dataBufferFactory = dataBufferFactory;
     }
 
-
     @Override
-    public Flux<DataBuffer> getVideoByRange(ReactiveGridFsResource file, AtomicLong rangeStart, AtomicLong rangeEnd) {
-        Flux<DataBuffer> downloadStream;
+    public Flux<DataBuffer> getVideoByRange(ReactiveGridFsResource file,
+                                            long start,
+                                            long end) {
+        if (start > end || start < 0) {
+            return Flux.empty();
+        }
         int chunkSize = file.getOptions().getChunkSize();
-        Flux<DataBuffer> dataBufferFlux = chunkSize > 0 ? file.getDownloadStream(chunkSize) : file.getDownloadStream();
-        downloadStream = dataBufferFlux
-                .subscribeOn(Schedulers.boundedElastic())
+        int startChunk = (int) (start / chunkSize);
+        int endChunk = (int) (end / chunkSize);
+        int headOffset = (int) (start % chunkSize);
+        int tailOffset = (int) (end % chunkSize);
+        // only the chunks that are in the range
+        Query q = Query.query(Criteria
+                        .where("files_id").is(file.getFileId())
+                        .and("n").gte(startChunk).lte(endChunk))
+                .with(Sort.by("n"));
+
+        return reactiveMongoTemplate
+                .find(q, Document.class, "fs.chunks")
                 .limitRate(videoLimitRate, videoLimitRate / 2)
-                .handle((dataBuffer, sink) -> {
-                    try {
-                        if (rangeStart.get() < 0 || rangeEnd.get() < 0) {
-                            DataBufferUtils.release(dataBuffer);
-                            return;
-                        }
-                        int dataBufferSize = dataBuffer.readableByteCount();
-                        // skip data until the start of the range
-                        if (rangeStart.get() >= dataBufferSize) {
-                            rangeStart.addAndGet(-dataBufferSize);
-                            rangeEnd.addAndGet(-dataBufferSize);
-                            DataBufferUtils.release(dataBuffer);
-                            return;
-                        }
+                .map(doc -> {
+                    int chunkIdx = doc.getInteger("n");
+                    Binary bin = doc.get("data", Binary.class);
+                    DataBuffer buf = dataBufferFactory.wrap(bin.getData());
+                    return Tuples.of(chunkIdx, buf);
+                })
+                .map(tuple -> {
+                    int n = tuple.getT1();
+                    DataBuffer buf = tuple.getT2();
 
-                        // slice data buffer to fit the start of the range
-                        if (rangeStart.get() > 0) {
-                            int sliceStart = (int) rangeStart.get();
-                            int sliceLength = dataBufferSize - sliceStart;
-                            dataBuffer = dataBuffer.slice(sliceStart, sliceLength);
-                            rangeStart.set(0);
-                        }
-
-                        // slice data buffer to fit the end of the range
-                        if (rangeEnd.get() < dataBufferSize) {
-                            //range start its 0 anyway
-                            int sliceEnd = (int) (rangeEnd.get() - rangeStart.get() + 1);
-                            if (sliceEnd < dataBufferSize) {
-                                dataBuffer = dataBuffer.slice(0, sliceEnd);
-                            }
-                            rangeEnd.set(-1);
-                        } else {
-                            rangeEnd.addAndGet(-dataBufferSize);
-                        }
-
-                        sink.next(dataBuffer);
-
-                        if (rangeEnd.get() < 0) {
-                            sink.complete();
-                        }
-                    } catch (Exception e) {
-                        log.error("Error processing video: {}", e.getMessage(), e);
-                        DataBufferUtils.release(dataBuffer);
-                        sink.error(e);
+                    // single chunk
+                    if (startChunk == endChunk) {
+                        int length = tailOffset - headOffset + 1;
+                        buf.split(headOffset);                         // drop [0..headOffset)
+                        return buf.split(length);                       // buf now starts at headOffset
                     }
+                    // 1st chunk
+                    if (n == startChunk) {
+                        buf.split(headOffset);                         // drop [0..headOffset)
+                        return buf;                                    // buf now starts at headOffset
+                    }
+                    // last chunk
+                    if (n == endChunk) {
+                        return buf.split(tailOffset + 1);
+                    }
+                    // middle chunk
+                    return buf;
                 });
-        return downloadStream;
     }
 
 
@@ -113,7 +118,6 @@ public class BytesServiceImpl implements BytesService {
                 .publishOn(Schedulers.boundedElastic())
                 .flatMapMany(dataBuffer -> {
                     try (InputStream inputStream = dataBuffer.asInputStream(true)) {
-                        DataBufferUtils.release(dataBuffer);
 
                         boolean isKnownFormat = mediaType == MediaType.PNG || mediaType == MediaType.JPEG || mediaType == MediaType.JPG;
 

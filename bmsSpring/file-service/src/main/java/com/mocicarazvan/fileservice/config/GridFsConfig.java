@@ -8,14 +8,19 @@ import com.mongodb.reactivestreams.client.MongoClients;
 import com.mongodb.reactivestreams.client.MongoDatabase;
 import com.mongodb.reactivestreams.client.gridfs.GridFSBucket;
 import com.mongodb.reactivestreams.client.gridfs.GridFSBuckets;
+import io.netty.buffer.PooledByteBufAllocator;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.io.buffer.DataBufferFactory;
+import org.springframework.core.io.buffer.NettyDataBufferFactory;
 import org.springframework.data.mongodb.ReactiveMongoDatabaseFactory;
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate;
 import org.springframework.data.mongodb.core.SimpleReactiveMongoDatabaseFactory;
 import org.springframework.data.mongodb.core.convert.MappingMongoConverter;
 import org.springframework.data.mongodb.gridfs.ReactiveGridFsTemplate;
+import reactor.core.publisher.Mono;
 
 import java.util.concurrent.TimeUnit;
 
@@ -70,7 +75,16 @@ public class GridFsConfig {
     }
 
     @Bean
-    public ReactiveGridFsTemplate reactiveGridFsTemplate(ReactiveMongoDatabaseFactory reactiveMongoDatabaseFactory, MappingMongoConverter mappingMongoConverter) {
-        return new ReactiveGridFsTemplate(reactiveMongoDatabaseFactory, mappingMongoConverter);
+    public DataBufferFactory dataBufferFactory() {
+        return new NettyDataBufferFactory(PooledByteBufAllocator.DEFAULT);
+    }
+
+    @Bean
+    public ReactiveGridFsTemplate reactiveGridFsTemplate(MappingMongoConverter mappingMongoConverter,
+                                                         GridFSBucket gridFSBucket, @Qualifier("dataBufferFactory") DataBufferFactory dataBufferFactory) {
+        {
+            Mono<GridFSBucket> gridFSBucketMono = Mono.just(gridFSBucket);
+            return new ReactiveGridFsTemplate(mappingMongoConverter, gridFSBucketMono, dataBufferFactory);
+        }
     }
 }

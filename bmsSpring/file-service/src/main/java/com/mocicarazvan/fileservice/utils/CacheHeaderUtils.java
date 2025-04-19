@@ -3,10 +3,11 @@ package com.mocicarazvan.fileservice.utils;
 import com.mocicarazvan.fileservice.enums.FileType;
 import com.mongodb.client.gridfs.model.GridFSFile;
 import org.springframework.http.CacheControl;
-import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.http.HttpRange;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 
 import java.time.Duration;
+import java.util.List;
 
 public class CacheHeaderUtils {
 
@@ -25,6 +26,9 @@ public class CacheHeaderUtils {
             .cachePublic()
             .immutable()
             .noTransform();
+
+    public static final CacheControl VIDEO_CACHE_RANGE_CONTROL = CacheControl
+            .noStore();
 
 
     public static String buildETag(String gridId, Integer width, Integer height, Double quality, long timestamp) {
@@ -45,13 +49,16 @@ public class CacheHeaderUtils {
         return builder.toString();
     }
 
-    public static void setCachingHeaders(ServerHttpResponse response, ServerHttpRequest request, GridFSFile gridFSFile, String gridId, FileType fileType) {
+    public static void setCachingHeaders(ServerHttpResponse response, GridFSFile gridFSFile, String gridId, FileType fileType, List<HttpRange> rangeList) {
 
-//        String bypass = request.getHeaders().getFirst("X-Bypass-Cache");
-//        if (bypass != null && (bypass.equals("true") || bypass.equals("1"))) {
-//            response.getHeaders().setCacheControl("no-store");
-//            return;
-//        }
+        if (response.isCommitted()) {
+            return;
+        }
+        if (rangeList != null && !rangeList.isEmpty()) {
+            response.getHeaders().setCacheControl(VIDEO_CACHE_RANGE_CONTROL);
+            return;
+        }
+
         String etag = "\"" + gridId + "-" + gridFSFile.getUploadDate().getTime() + "\"";
         response.getHeaders().setETag(etag);
         response.getHeaders().setLastModified(gridFSFile.getUploadDate().getTime());
@@ -61,6 +68,10 @@ public class CacheHeaderUtils {
         } else {
             response.getHeaders().setCacheControl(IMAGE_CACHE_CONTROL);
         }
+    }
+
+    public static void setCachingHeaders(ServerHttpResponse response, GridFSFile gridFSFile, String gridId, FileType fileType) {
+        setCachingHeaders(response, gridFSFile, gridId, fileType, null);
     }
 
     public static void clearCacheHeaders(ServerHttpResponse response) {

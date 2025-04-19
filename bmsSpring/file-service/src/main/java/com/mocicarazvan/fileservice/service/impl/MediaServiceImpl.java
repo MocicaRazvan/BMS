@@ -50,7 +50,6 @@ import java.nio.ByteBuffer;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicLong;
 
 @Service
 @RequiredArgsConstructor
@@ -174,7 +173,7 @@ public class MediaServiceImpl implements MediaService {
                                 response.setStatusCode(HttpStatus.NOT_MODIFIED);
                                 return Mono.just(response);
                             }
-                            CacheHeaderUtils.setCachingHeaders(response, request, gridFSFile, gridId, fileType);
+                            CacheHeaderUtils.setCachingHeaders(response, gridFSFile, gridId, fileType, httpRanges);
 
 
                             response.getHeaders().set(HttpHeaders.ACCEPT_RANGES, "bytes");
@@ -220,11 +219,7 @@ public class MediaServiceImpl implements MediaService {
                                 response.getHeaders().add(HttpHeaders.CONTENT_RANGE, String.format("bytes %d-%d/%d", start, end, fileLength));
                                 response.getHeaders().setContentLength(end - start + 1);
 
-
-                                AtomicLong rangeStart = new AtomicLong(start);
-                                AtomicLong rangeEnd = new AtomicLong(end);
-
-                                downloadStream = bytesService.getVideoByRange(file, rangeStart, rangeEnd)
+                                downloadStream = bytesService.getVideoByRange(file, start, end)
                                         .doOnNext(_ -> {
                                             response.setStatusCode(HttpStatus.PARTIAL_CONTENT);
                                         });
