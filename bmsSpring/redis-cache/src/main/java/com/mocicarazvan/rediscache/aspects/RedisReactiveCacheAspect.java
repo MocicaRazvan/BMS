@@ -22,6 +22,7 @@ import reactor.core.publisher.Mono;
 import reactor.core.publisher.Sinks;
 import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
+import reactor.scheduler.forkjoin.ForkJoinPoolScheduler;
 import reactor.util.function.Tuples;
 
 import java.lang.reflect.Method;
@@ -88,7 +89,7 @@ public class RedisReactiveCacheAspect {
     @PostConstruct
     public void init() {
         if (this.scheduler == null) {
-            this.scheduler = Schedulers.newParallel("redis-cache-flux", parallelism);
+            this.scheduler = ForkJoinPoolScheduler.create("redis-cache-flux", parallelism);
         }
 
     }
@@ -236,7 +237,7 @@ public class RedisReactiveCacheAspect {
                 .flatMapMany(tuple -> {
                             Flux<Long> ids = tuple.getT1().asFlux().timeout(Duration.ofSeconds(maxCacheFluxSeconds));
                             List<Object> values = tuple.getT2();
-                            
+
                             return reactiveRedisTemplate.opsForValue().set(savingKey, values, Duration.ofMinutes(expireMinutes))
                                     .filter(Boolean::booleanValue)
                                     // https://github.com/spring-projects/spring-data-redis/issues/2715
