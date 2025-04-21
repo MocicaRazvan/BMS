@@ -1,6 +1,7 @@
 package com.mocicarazvan.archiveservice.listeners;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectReader;
 import com.mocicarazvan.archiveservice.config.QueuesPropertiesConfig;
 import com.mocicarazvan.archiveservice.services.SaveMessagesAggregator;
 import com.mocicarazvan.archiveservice.utils.MonoWrapper;
@@ -8,7 +9,6 @@ import com.rabbitmq.client.Channel;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.listener.api.ChannelAwareBatchMessageListener;
-import org.springframework.beans.factory.annotation.Qualifier;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Scheduler;
@@ -20,8 +20,7 @@ import java.util.List;
 @Slf4j
 public class ChannelAwareBatchMessageListenerImpl<T> implements ChannelAwareBatchMessageListener {
 
-    private final ObjectMapper objectMapper;
-    private final Class<T> clazz;
+    private final ObjectReader reader;
     private final String queueName;
     private final SaveMessagesAggregator saveMessagesAggregator;
     private final QueuesPropertiesConfig queuesPropertiesConfig;
@@ -30,9 +29,8 @@ public class ChannelAwareBatchMessageListenerImpl<T> implements ChannelAwareBatc
     public ChannelAwareBatchMessageListenerImpl(ObjectMapper objectMapper,
                                                 Class<T> clazz, String queueName, SaveMessagesAggregator saveMessagesAggregator,
                                                 QueuesPropertiesConfig queuesPropertiesConfig,
-                                                @Qualifier("parallelScheduler") Scheduler deSerScheduler) {
-        this.objectMapper = objectMapper;
-        this.clazz = clazz;
+                                                Scheduler deSerScheduler) {
+        this.reader = objectMapper.readerFor(clazz);
         this.queueName = queueName;
         this.saveMessagesAggregator = saveMessagesAggregator;
         this.queuesPropertiesConfig = queuesPropertiesConfig;
@@ -92,7 +90,7 @@ public class ChannelAwareBatchMessageListenerImpl<T> implements ChannelAwareBatc
     //this can actually be a huge message like over 10k, that's why i use a normal thread not a virtual one
     private T deserializeMessage(Message message) {
         try {
-            return objectMapper.readValue(message.getBody(), clazz);
+            return reader.readValue(message.getBody());
         } catch (IOException e) {
             throw new RuntimeException("Error deserializing message: " + e.getMessage(), e);
         }
