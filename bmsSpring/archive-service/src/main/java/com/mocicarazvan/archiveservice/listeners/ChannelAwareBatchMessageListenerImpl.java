@@ -8,11 +8,10 @@ import com.rabbitmq.client.Channel;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.listener.api.ChannelAwareBatchMessageListener;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
+import org.springframework.beans.factory.annotation.Qualifier;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Scheduler;
-import reactor.core.scheduler.Schedulers;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -26,18 +25,18 @@ public class ChannelAwareBatchMessageListenerImpl<T> implements ChannelAwareBatc
     private final String queueName;
     private final SaveMessagesAggregator saveMessagesAggregator;
     private final QueuesPropertiesConfig queuesPropertiesConfig;
-    private final Scheduler scheduler;
+    private final Scheduler deSerScheduler;
 
     public ChannelAwareBatchMessageListenerImpl(ObjectMapper objectMapper,
                                                 Class<T> clazz, String queueName, SaveMessagesAggregator saveMessagesAggregator,
                                                 QueuesPropertiesConfig queuesPropertiesConfig,
-                                                ThreadPoolTaskScheduler threadPoolTaskScheduler) {
+                                                @Qualifier("parallelScheduler") Scheduler deSerScheduler) {
         this.objectMapper = objectMapper;
         this.clazz = clazz;
         this.queueName = queueName;
         this.saveMessagesAggregator = saveMessagesAggregator;
         this.queuesPropertiesConfig = queuesPropertiesConfig;
-        this.scheduler = Schedulers.fromExecutor(threadPoolTaskScheduler);
+        this.deSerScheduler = deSerScheduler;
     }
 
 
@@ -49,7 +48,7 @@ public class ChannelAwareBatchMessageListenerImpl<T> implements ChannelAwareBatc
         try {
             Flux.fromIterable(messages)
                     .flatMap(m -> Mono.fromCallable(() -> deserializeMessage(m)
-                            ).subscribeOn(scheduler)
+                            ).subscribeOn(deSerScheduler)
                     )
                     .bufferTimeout(queuesPropertiesConfig.getBatchSize(), Duration.ofSeconds(queuesPropertiesConfig.getSavingBufferSeconds()))
                     .flatMap(this::sendBatchToBeSaved)

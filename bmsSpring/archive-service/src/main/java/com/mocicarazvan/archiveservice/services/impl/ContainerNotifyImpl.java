@@ -8,12 +8,9 @@ import com.mocicarazvan.archiveservice.services.ContainerNotify;
 import com.mocicarazvan.archiveservice.services.SimpleRedisCache;
 import com.mocicarazvan.archiveservice.websocket.BatchHandler;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.ReactiveRedisTemplate;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Schedulers;
 import reactor.util.function.Tuple2;
 
 import java.time.LocalDateTime;
@@ -25,16 +22,14 @@ public class ContainerNotifyImpl implements ContainerNotify {
     private final ObjectMapper objectMapper;
     private final ReactiveRedisTemplate<String, String> redisTemplate;
     private final SimpleRedisCache simpleRedisCache;
-    private final ThreadPoolTaskScheduler threadPoolTaskScheduler;
     private final ContainerNotifyRepository containerNotifyRepository;
 
     public ContainerNotifyImpl(
             ObjectMapper objectMapper, ReactiveRedisTemplate<String, String> redisTemplate, SimpleRedisCache simpleRedisCache,
-            @Qualifier("threadPoolTaskScheduler") ThreadPoolTaskScheduler threadPoolTaskScheduler, ContainerNotifyRepository containerNotifyRepository) {
+            ContainerNotifyRepository containerNotifyRepository) {
         this.objectMapper = objectMapper;
         this.redisTemplate = redisTemplate;
         this.simpleRedisCache = simpleRedisCache;
-        this.threadPoolTaskScheduler = threadPoolTaskScheduler;
         this.containerNotifyRepository = containerNotifyRepository;
     }
 
@@ -70,8 +65,7 @@ public class ContainerNotifyImpl implements ContainerNotify {
                         .timestamp(LocalDateTime.now())
                         .build())
                 .flatMap(ca -> Mono.zip(Mono.fromCallable(() ->
-                                                objectMapper.writeValueAsString(ca))
-                                        .subscribeOn(Schedulers.fromExecutor(threadPoolTaskScheduler.getScheduledThreadPoolExecutor())),
+                                        objectMapper.writeValueAsString(ca)),
                                 containerNotifyRepository.addNotification(ca)
                         ).map(Tuple2::getT1)
                 )

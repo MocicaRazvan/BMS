@@ -19,7 +19,6 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.gridfs.ReactiveGridFsResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.reactive.ServerHttpResponse;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -51,9 +50,9 @@ public class BytesServiceImpl implements BytesService {
     @Value("${spring.custom.thumblinator.limit-rate:16}")
     private int thumblinatorLimitRate;
 
-    public BytesServiceImpl(@Qualifier("threadPoolTaskScheduler") ThreadPoolTaskScheduler threadPoolTaskScheduler, ReactiveMongoTemplate reactiveMongoTemplate,
+    public BytesServiceImpl(@Qualifier("parallelScheduler") Scheduler thumbnailScheduler, ReactiveMongoTemplate reactiveMongoTemplate,
                             @Qualifier("dataBufferFactory") DataBufferFactory dataBufferFactory) {
-        this.thumbnailScheduler = Schedulers.fromExecutor(threadPoolTaskScheduler.getScheduledExecutor());
+        this.thumbnailScheduler = thumbnailScheduler;
 
 
         this.reactiveMongoTemplate = reactiveMongoTemplate;

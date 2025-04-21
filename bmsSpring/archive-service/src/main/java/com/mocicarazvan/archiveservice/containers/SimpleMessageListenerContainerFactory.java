@@ -12,8 +12,8 @@ import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.concurrent.SimpleAsyncTaskScheduler;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Component;
+import reactor.core.scheduler.Scheduler;
 
 import java.util.List;
 import java.util.Map;
@@ -26,7 +26,7 @@ public class SimpleMessageListenerContainerFactory {
     private final QueuesPropertiesConfig queuesPropertiesConfig;
     private final ObjectMapper objectMapper;
     private final SaveMessagesAggregator saveMessagesAggregator;
-    private final ThreadPoolTaskScheduler threadPoolTaskScheduler;
+    private final Scheduler scheduler;
 
     private static final List<String> queuePrefixes = List.of("user", "comment", "day", "ingredient", "meal", "plan", "post", "recipe", "nutritionalFact");
     private static final Map<String, Class<?>> queueToClassMap = Map.of(
@@ -42,14 +42,14 @@ public class SimpleMessageListenerContainerFactory {
     );
 
     public SimpleMessageListenerContainerFactory(
-            @Qualifier("threadPoolTaskScheduler") ThreadPoolTaskScheduler threadPoolTaskScheduler,
+            @Qualifier("parallelScheduler") Scheduler scheduler,
             @Qualifier("containerLifecycleSimpleAsyncTaskScheduler") SimpleAsyncTaskScheduler executor, ConnectionFactory connectionFactory, QueuesPropertiesConfig queuesPropertiesConfig, ObjectMapper objectMapper, SaveMessagesAggregator saveMessagesAggregator) {
         this.executor = executor;
         this.connectionFactory = connectionFactory;
         this.queuesPropertiesConfig = queuesPropertiesConfig;
         this.objectMapper = objectMapper;
         this.saveMessagesAggregator = saveMessagesAggregator;
-        this.threadPoolTaskScheduler = threadPoolTaskScheduler;
+        this.scheduler = scheduler;
     }
 
     public SimpleMessageListenerContainer createContainer(String queueName) {
@@ -62,7 +62,7 @@ public class SimpleMessageListenerContainerFactory {
                 .queueName(queueName)
                 .executor(executor)
                 .queuesPropertiesConfig(queuesPropertiesConfig)
-                .channelAwareBatchMessageListener(new ChannelAwareBatchMessageListenerImpl<>(objectMapper, clazz, queueName, saveMessagesAggregator, queuesPropertiesConfig, threadPoolTaskScheduler))
+                .channelAwareBatchMessageListener(new ChannelAwareBatchMessageListenerImpl<>(objectMapper, clazz, queueName, saveMessagesAggregator, queuesPropertiesConfig, scheduler))
                 .build()
                 .initContainer();
     }

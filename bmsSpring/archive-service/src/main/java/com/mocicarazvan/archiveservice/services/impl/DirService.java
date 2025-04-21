@@ -2,10 +2,10 @@ package com.mocicarazvan.archiveservice.services.impl;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SequenceWriter;
 import com.mocicarazvan.archiveservice.services.SaveBatchMessages;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Scheduler;
@@ -23,14 +23,14 @@ import java.util.UUID;
 // todo implement this well its just a placeholder
 public class DirService implements SaveBatchMessages {
 
-    private final Scheduler scheduler;
+    private final Scheduler derSerScheduler;
 
     public static final String ROOT_DIR_PATH = "archive/data".replace("/", File.separator);
     private final ObjectMapper objectMapper;
 
-    public DirService(ObjectMapper objectMapper, @Qualifier("threadPoolTaskScheduler") ThreadPoolTaskScheduler threadPoolTaskScheduler) {
+    public DirService(ObjectMapper objectMapper, @Qualifier("parallelScheduler") Scheduler derSerScheduler) {
         this.objectMapper = objectMapper;
-        this.scheduler = Schedulers.fromExecutor(threadPoolTaskScheduler.getScheduledThreadPoolExecutor());
+        this.derSerScheduler = derSerScheduler;
     }
 
     public File createRootDirIfNotExists() {
@@ -55,7 +55,15 @@ public class DirService implements SaveBatchMessages {
                     File dir = createDirIfNotExists(createRootDirIfNotExists(), queueName);
                     File batchFile = new File(dir, getCurrentTime() + "_" + UUID.randomUUID() + ".json");
 
-                    objectMapper.writerWithDefaultPrettyPrinter().writeValue(batchFile, items);
+                    // the list can be very big
+//                    objectMapper.writerWithDefaultPrettyPrinter().writeValue(batchFile, items);
+                    //streaming
+                    try (SequenceWriter writer = objectMapper.writerWithDefaultPrettyPrinter()
+                            .writeValuesAsArray(batchFile)) {
+                        for (T item : items) {
+                            writer.write(item);
+                        }
+                    }
 
                     return true;
                 })
@@ -63,7 +71,9 @@ public class DirService implements SaveBatchMessages {
                     log.error("Error saving batch: {}", e.getMessage());
                     return Mono.just(false);
                 })
-                .subscribeOn(scheduler).subscribe();
+//                .subscribeOn(derSerScheduler)
+                .subscribeOn(Schedulers.boundedElastic())
+                .subscribe();
     }
 
     public String getCurrentTime() {

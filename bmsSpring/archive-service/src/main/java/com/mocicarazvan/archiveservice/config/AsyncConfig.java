@@ -8,7 +8,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.scheduling.concurrent.SimpleAsyncTaskScheduler;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
+import reactor.core.scheduler.Scheduler;
+import reactor.core.scheduler.Schedulers;
 
 import java.time.Duration;
 
@@ -21,20 +22,23 @@ public class AsyncConfig {
     @Value("${spring.custom.executor.async.concurrency.limit:64}")
     private int executorAsyncConcurrencyLimit;
 
-    @Value("${spring.custom.thread.pool.size:4}")
-    private int threadPoolSize;
+//    @Value("${spring.custom.thread.pool.size:4}")
+//    private int threadPoolSize;
 
-    @Bean
-    public ThreadPoolTaskScheduler threadPoolTaskScheduler() {
-        ThreadPoolTaskScheduler threadPoolTaskScheduler = new ThreadPoolTaskScheduler();
-        threadPoolTaskScheduler.setPoolSize(threadPoolSize);
-        threadPoolTaskScheduler.setThreadNamePrefix("ThreadPoolScheduler-");
-        threadPoolTaskScheduler.setRemoveOnCancelPolicy(true);
-        threadPoolTaskScheduler.setWaitForTasksToCompleteOnShutdown(true);
-        threadPoolTaskScheduler.setAwaitTerminationSeconds(20);
-        return threadPoolTaskScheduler;
+    @Value("${spring.custom.parallel.size:4}")
+    private int parallelSize;
 
-    }
+//    @Bean
+//    public ThreadPoolTaskScheduler threadPoolTaskScheduler() {
+//        ThreadPoolTaskScheduler threadPoolTaskScheduler = new ThreadPoolTaskScheduler();
+//        threadPoolTaskScheduler.setPoolSize(threadPoolSize);
+//        threadPoolTaskScheduler.setThreadNamePrefix("ThreadPoolScheduler-");
+//        threadPoolTaskScheduler.setRemoveOnCancelPolicy(true);
+//        threadPoolTaskScheduler.setWaitForTasksToCompleteOnShutdown(true);
+//        threadPoolTaskScheduler.setAwaitTerminationSeconds(20);
+//        return threadPoolTaskScheduler;
+//
+//    }
 
     @Bean
     public SimpleAsyncTaskScheduler containerSimpleAsyncTaskScheduler() {
@@ -49,6 +53,11 @@ public class AsyncConfig {
     @Bean
     public SimpleAsyncTaskScheduler redisSimpleAsyncTaskScheduler() {
         return getSimpleAsyncTaskScheduler("RedisSimpleAsyncTaskScheduler");
+    }
+
+    @Bean
+    public Scheduler parallelScheduler() {
+        return Schedulers.newParallel("parallel-scheduler", parallelSize);
     }
 
     public SimpleAsyncTaskScheduler getSimpleAsyncTaskScheduler(String prefix) {
