@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getUserWithMinRole } from "@/lib/user";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/auth-options";
 import { getCsrfNextAuthHeader } from "@/actions/get-csr-next-auth";
 import fetchFactory from "@/lib/fetchers/fetchWithRetry";
 
@@ -9,15 +7,13 @@ const springUrl = process.env.NEXT_PUBLIC_SPRING!;
 
 export async function POST(req: NextRequest) {
   try {
-    await getUserWithMinRole("ROLE_TRAINER");
-
-    const [session, body, csrfHeader] = await Promise.all([
-      getServerSession(authOptions),
-      await req.json(),
-      await getCsrfNextAuthHeader(),
+    const [user, body, csrfHeader] = await Promise.all([
+      getUserWithMinRole("ROLE_TRAINER"),
+      req.json(),
+      getCsrfNextAuthHeader(),
     ]);
 
-    if (!session || !session?.user?.token) {
+    if (!user || !user?.token) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
@@ -27,7 +23,7 @@ export async function POST(req: NextRequest) {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${session.user.token}`,
+          Authorization: `Bearer ${user.token}`,
           ...csrfHeader,
         },
         body: JSON.stringify(body),
