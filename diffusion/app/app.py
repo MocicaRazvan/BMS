@@ -63,7 +63,7 @@ def generate_images():
 
         prompt = data.get("prompt", "a beautiful landscape")
         negative_prompt = data.get("negative_prompt", None)
-        num_inference_steps = data.get("num_inference_steps", 50)
+        num_inference_steps = data.get("num_inference_steps", 35)
         guidance_scale = data.get("guidance_scale", 7.5)
         num_images = data.get("num_images", 1)
         if num_images < 1:
