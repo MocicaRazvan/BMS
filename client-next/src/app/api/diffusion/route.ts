@@ -3,6 +3,7 @@ import { getUserWithMinRole } from "@/lib/user";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/auth-options";
 import { getCsrfNextAuthHeader } from "@/actions/get-csr-next-auth";
+import fetchFactory from "@/lib/fetchers/fetchWithRetry";
 
 const springUrl = process.env.NEXT_PUBLIC_SPRING!;
 
@@ -20,16 +21,19 @@ export async function POST(req: NextRequest) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
-    const response = await fetch(springUrl + "/diffusion/generate-images", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${session.user.token}`,
-        ...csrfHeader,
+    const response = await fetchFactory(fetch)(
+      springUrl + "/diffusion/generate-images",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.user.token}`,
+          ...csrfHeader,
+        },
+        body: JSON.stringify(body),
+        credentials: "include",
       },
-      body: JSON.stringify(body),
-      credentials: "include",
-    });
+    );
 
     if (!response.ok) {
       return new NextResponse("Failed to generate images", {
