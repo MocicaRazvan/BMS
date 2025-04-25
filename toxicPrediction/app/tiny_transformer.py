@@ -2,6 +2,8 @@ import torch
 import torch.nn as nn
 from transformers import PreTrainedModel, PretrainedConfig, AutoTokenizer
 
+from utils import sliding_chunks
+
 
 class TinyTransformer(nn.Module):
     def __init__(self, vocab_size, embed_dim, num_heads, ff_dim, num_layers):
@@ -73,14 +75,26 @@ def predict_toxicity(text, model, tokenizer, device):
     prediction = "Toxic" if logits > 0.5 else "Not Toxic"
     return prediction
 
+def predict_toxicity_batch(chunks, model, tokenizer, device):
+    inputs = tokenizer(chunks, return_tensors="pt", padding=True, truncation=True).to(device)
+    if "token_type_ids" in inputs:
+        del inputs["token_type_ids"]
+
+    with torch.no_grad():
+        outputs = model(**inputs)
+    logits = outputs["logits"].squeeze()
+
+    if logits.dim() == 0:
+        logits = logits.unsqueeze(0)
+
+    predictions = (logits > 0.5).tolist()
+    results = ["Toxic" if p else "Not Toxic" for p in predictions]
+
+    return results
+
 def predict_long_text(text, model, tokenizer, device):
-    chunks = [text[i:i+500] for i in range(0, len(text), 500)]
-    toxic_found = False
+    chunks = sliding_chunks(text, tokenizer.model_max_length)
 
-    for chunk in chunks:
-        result = predict_toxicity(chunk, model, tokenizer, device)
-        if result == "Toxic":
-            toxic_found = True
-            break
+    results = predict_toxicity_batch(chunks, model, tokenizer, device)
 
-    return toxic_found
+    return "Toxic" in results

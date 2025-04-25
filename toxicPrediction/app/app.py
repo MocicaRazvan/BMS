@@ -11,7 +11,7 @@ from opentelemetry.sdk.trace.export import BatchSpanProcessor
 from opentelemetry.sdk.trace.sampling import ParentBased, TraceIdRatioBased
 from prometheus_flask_exporter.multiprocess import GunicornInternalPrometheusMetrics
 
-from app_config import APP_NAME, APP_VERSION, FLASK_DEBUG, ZIPKIN_SAMPLE_RATE, ZIPKIN_URL
+from app_config import APP_NAME, APP_VERSION, FLASK_DEBUG, ZIPKIN_SAMPLE_RATE, ZIPKIN_URL, MAX_BODY_SIZE
 from app_config import CACHE_REDIS_DB, CACHE_REDIS_HOST, CACHE_REDIS_PASSWORD, CACHE_REDIS_PORT, CACHE_REDIS_EXPIRATION
 from logger import logger
 from models import predict_english, predict_toxicity
@@ -22,6 +22,7 @@ metrics = GunicornInternalPrometheusMetrics(
     app,
     default_labels={"application": APP_NAME}
 )
+app.config['MAX_CONTENT_LENGTH'] = MAX_BODY_SIZE
 
 metrics.info(APP_NAME.replace("-","_"), "Application info prometheus", version=APP_VERSION)
 
