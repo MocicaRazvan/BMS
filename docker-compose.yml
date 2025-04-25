@@ -862,6 +862,25 @@ services:
       - redis
     runtime: nvidia
 
+  toxic-prediction:
+    build:
+      context: ./toxicPrediction
+      dockerfile: Dockerfile
+    container_name: toxic-prediction-container-bms
+    environment:
+      - PYTHON_PROFILES_ACTIVE=docker
+      #      - ZIPKIN_SAMPLE_RATE=1
+      #      - LOKI_URL=http://host.docker.internal:3100/loki/api/v1/push
+      #      - HUGGING_FACE_HUB_TOKEN=${HUGGING_FACE_HUB_TOKEN}
+    ports:
+      - "5002:5002"
+    volumes:
+      - toxic_fs:/root/.cache/huggingface
+    networks:
+      - bms
+    depends_on:
+      - redis
+
   archive-service:
     container_name: archive-service-container-bms
     build:
@@ -892,6 +911,7 @@ volumes:
   diffusion_fs:
   zipkin_mysql_data:
   timeseries_fs:
+  toxic_fs:
 networks:
   bms:
     driver: bridge

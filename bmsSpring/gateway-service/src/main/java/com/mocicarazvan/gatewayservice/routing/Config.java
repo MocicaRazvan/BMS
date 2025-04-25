@@ -153,6 +153,13 @@ public class Config {
                                 .stripPrefix(1)
                                 .dedupeResponseHeader("Access-Control-Allow-Origin", "RETAIN_UNIQUE"))
                         .uri(externalServicesConfig.getDiffusion()))
+                .route("toxic-prediction-service", r -> r.path("/toxicity/**")
+                        .filters(f -> f
+                                .filter(csrfFilter)
+                                .filter(authFilter)
+                                .stripPrefix(1)
+                                .dedupeResponseHeader("Access-Control-Allow-Origin", "RETAIN_UNIQUE"))
+                        .uri(externalServicesConfig.getToxicity()))
 
                 .route("user-openapi", r -> r.path("/user-service/v3/api-docs")
                         .uri("lb://user-service"))
@@ -281,6 +288,13 @@ public class Config {
                                 .stripPrefix(1)
                                 .dedupeResponseHeader("Access-Control-Allow-Origin", "RETAIN_UNIQUE"))
                         .uri(externalServicesConfig.getDiffusion()))
+                .route("toxic-prediction-service", r -> r.path("/toxicity/**")
+                        .filters(f -> f
+                                .filter(csrfFilter)
+                                .filter(authFilter)
+                                .stripPrefix(1)
+                                .dedupeResponseHeader("Access-Control-Allow-Origin", "RETAIN_UNIQUE"))
+                        .uri(externalServicesConfig.getToxicity()))
 
 
                 .route("user-openapi", r -> r.path("/user-service/v3/api-docs")

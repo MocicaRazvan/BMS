@@ -1,0 +1,19 @@
+name: Toxic Prediction Service Docker Image
+
+on:
+  workflow_dispatch: { }
+  push:
+    branches:
+      - main
+    paths:
+      - 'toxicPrediction/**'
+jobs:
+  build-and-push-diffusion-service:
+    uses: ./.github/workflows/build-and-push.yml
+    with:
+      image-name: toxic-prediction-service-bms
+      context: ./toxicPrediction
+      dockerfile: ./toxicPrediction/Dockerfile
+    secrets:
+      DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}

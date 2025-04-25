@@ -1,69 +1,44 @@
 "use server";
-import * as toxicity from "@tensorflow-models/toxicity";
-import { detect } from "tinyld";
-import { emitInfo } from "@/logger";
-import lande from "lande";
-import LanguageDetect from "languagedetect";
-
-const threshold = process.env.TOXICITY_THRESHOLD
-  ? parseFloat(process.env.TOXICITY_THRESHOLD)
-  : 0.35;
-let globalModel: toxicity.ToxicityClassifier | null = null;
+import { getUser } from "@/lib/user";
+import { getCsrfNextAuthHeader } from "@/actions/get-csr-next-auth";
+import fetchFactory from "@/lib/fetchers/fetchWithRetry";
 
 enum TOXIC_REASON {
   LANGUAGE = "language",
   TOXICITY = "toxicity",
   NONE = "none",
 }
-export async function loadGlobalModel(): Promise<toxicity.ToxicityClassifier> {
-  if (!globalModel) {
-    const labels = [
-      "identity_attack",
-      "insult",
-      "obscene",
-      "severe_toxicity",
-      "sexual_explicit",
-      "threat",
-      "toxicity",
-    ];
-    globalModel = await toxicity.load(threshold, labels);
-    emitInfo({
-      message: "Toxicity Model Loaded",
-      threshold,
-      labels,
-    });
-  }
-  return globalModel;
-}
-export async function getToxicity(text: string) {
-  const tinyDet = detect(text) === "en";
-  const ladneDet = lande(text).some((e) => e[0] === "eng" && e[1] > 0.22);
-  const ld = new LanguageDetect()
-    .detect(text, 10)
-    .some((e) => e[0] === "english" && e[1] > 0.22);
 
-  const isOneEnglish = [tinyDet, ladneDet, ld].filter(Boolean).length >= 1;
-  if (!isOneEnglish && text.length > 10) {
+interface ToxicResponse {
+  failure: boolean;
+  reason: TOXIC_REASON;
+  message: string;
+}
+
+const springUrl = process.env.NEXT_PUBLIC_SPRING!;
+
+export async function getToxicity(text: string): Promise<ToxicResponse> {
+  const [user, csrfHeader] = await Promise.all([
+    getUser(),
+    getCsrfNextAuthHeader(),
+  ]);
+
+  const response = await fetchFactory(fetch)(springUrl + "/toxicity/isToxic", {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${user.token}`,
+      ...csrfHeader,
+    },
+    body: JSON.stringify({ text }),
+    credentials: "include",
+  });
+  if (!response.ok) {
     return {
       failure: true,
       reason: TOXIC_REASON.LANGUAGE,
-      message: "ENGLISH ONLY",
+      message: "Failed to detect toxicity",
     };
   }
-  const model = await loadGlobalModel();
-  const predictions = await model.classify(text);
-
-  const isToxic = predictions.some((p) => p.results[0].match);
-  if (isToxic) {
-    return {
-      failure: true,
-      reason: TOXIC_REASON.TOXICITY,
-      message: "TOXIC",
-    };
-  }
-  return {
-    failure: false,
-    reason: TOXIC_REASON.NONE,
-    message: "CLEAN",
-  };
+  return (await response.json()) as ToxicResponse;
 }

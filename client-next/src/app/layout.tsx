@@ -16,7 +16,6 @@ import { CartProvider } from "@/context/cart-context";
 import { SubscriptionProvider } from "@/context/subscriptions-context";
 import { BoughtNotificationProvider } from "@/context/bought-notification-context";
 import ScrollTopProvider from "@/providers/scroll-top";
-import { loadGlobalModel } from "@/actions/toxcity";
 import { vectorStoreInstance } from "@/lib/langchain/langchain";
 import { getAiChatBoxTexts } from "@/texts/components/ai-chat";
 import ValidUserSessionContext from "@/context/valid-user-session";
@@ -69,9 +68,8 @@ export default async function BaseLayout({
   let aiTexts;
 
   if (process.env.NODE_ENV === "production") {
-    const [sessionP, tf, lg, aiTextsP] = await Promise.all([
+    const [sessionP, lg, aiTextsP] = await Promise.all([
       getServerSession(authOptions),
-      loadGlobalModel(),
       vectorStoreInstance.initialize(false, false),
       getAiChatBoxTexts(),
     ]);

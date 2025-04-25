@@ -12,4 +12,5 @@ import org.springframework.stereotype.Component;
 @NoArgsConstructor
 public class ExternalServicesConfig {
     private String diffusion;
+    private String toxicity;
 }
