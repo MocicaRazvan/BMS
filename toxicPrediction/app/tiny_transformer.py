@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 from transformers import PreTrainedModel, PretrainedConfig, AutoTokenizer
 
+from app_config import TINY_MIN_SCORE
 from utils import sliding_chunks
 
 
@@ -72,7 +73,7 @@ def predict_toxicity(text, model, tokenizer, device):
     with torch.no_grad():
         outputs = model(**inputs)
     logits = outputs["logits"].squeeze()
-    prediction = "Toxic" if logits > 0.5 else "Not Toxic"
+    prediction = "Toxic" if logits > TINY_MIN_SCORE else "Not Toxic"
     return prediction
 
 def predict_toxicity_batch(chunks, model, tokenizer, device):
@@ -87,7 +88,7 @@ def predict_toxicity_batch(chunks, model, tokenizer, device):
     if logits.dim() == 0:
         logits = logits.unsqueeze(0)
 
-    predictions = (logits > 0.5).tolist()
+    predictions = (logits > TINY_MIN_SCORE).tolist()
     results = ["Toxic" if p else "Not Toxic" for p in predictions]
 
     return results
