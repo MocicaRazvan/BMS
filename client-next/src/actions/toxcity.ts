@@ -30,7 +30,7 @@ export async function getToxicity(text: string): Promise<ToxicResponse> {
       Authorization: `Bearer ${user.token}`,
       ...csrfHeader,
     },
-    body: JSON.stringify({ text }),
+    body: JSON.stringify({ text: text.trim().toLowerCase() }),
     credentials: "include",
   });
   if (!response.ok) {
