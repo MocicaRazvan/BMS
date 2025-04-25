@@ -30,6 +30,7 @@ TOXIC_MIN_SCORE = float(cc.get("toxic.min.score", "0.4"))
 NEUTRAL_LABELS_LIST= cc.get("neutral.labels.list", "").split(",") if cc.get("neutral.labels.list") else []
 STRIDE_FACTOR= int(cc.get("stride.factor", 4))
 MAX_BODY_SIZE = int(cc.get("max.body.size", 1024 * 1024 * 10))  # 10 MB
+ENGLISH_LABEL = cc.get("english.label", "en")
 
 
 # zipkin settings

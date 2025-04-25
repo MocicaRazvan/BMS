@@ -1,10 +1,10 @@
 import os
-from itertools import chain
 
 import torch
 from transformers import pipeline
 
-from app_config import LANGUAGE_MODEL_ID, TOXIC_MODEL_ID, LANGUAGE_MIN_SCORE, TOXIC_MIN_SCORE, NEUTRAL_LABELS_LIST
+from app_config import LANGUAGE_MODEL_ID, TOXIC_MODEL_ID, LANGUAGE_MIN_SCORE, TOXIC_MIN_SCORE, NEUTRAL_LABELS_LIST, \
+    ENGLISH_LABEL
 from lang_detect import is_langdetect_english
 from tiny_transformer import load_model_and_tokenizer, predict_long_text
 from utils import sliding_chunks
@@ -22,21 +22,27 @@ def is_tiny_toxic(text:str)->bool:
 def predict_english(text:str)->bool:
     if is_langdetect_english(text):
         return True
+
     chunks = sliding_chunks(text, pipe_lang_det.tokenizer.model_max_length)
 
     predictions = pipe_lang_det(chunks)
-    all_preds = chain.from_iterable(predictions)
-
-    return any(p['label'] == 'en' and p['score'] >= LANGUAGE_MIN_SCORE for p in all_preds)
+    for chunk_preds in predictions:
+        for p in chunk_preds:
+            if p['label'] == ENGLISH_LABEL and p['score'] >= LANGUAGE_MIN_SCORE:
+                return True
+    return False
 
 
 def predict_toxicity(text:str)->bool:
     # fast guard model
     if is_tiny_toxic(text):
         return True
+
     chunks = sliding_chunks(text,  pipe_toxic_det.tokenizer.model_max_length)
 
     predictions = pipe_toxic_det(chunks)
-    all_preds = chain.from_iterable(predictions)
-
-    return any(p['label'] not in NEUTRAL_LABELS_LIST and p['score'] >= TOXIC_MIN_SCORE for p in all_preds)
+    for chunk_preds in predictions:
+        for p in chunk_preds:
+            if p['label'] not in NEUTRAL_LABELS_LIST and p['score'] >= TOXIC_MIN_SCORE:
+                return True
+    return False
