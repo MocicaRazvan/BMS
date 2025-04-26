@@ -4,7 +4,7 @@ from enum import Enum
 
 from flask import request, jsonify
 
-from app_config import STRIDE_FACTOR
+from app_config import STRIDE_FACTOR, CHUNK_FACTOR
 from logger import logger
 
 
@@ -25,11 +25,12 @@ def error_response(message, status=400, error=None):
     return jsonify({"error": error, "message": message, "path": request.path, "status": status}), status
 
 def sliding_chunks(text, max_length):
-    stride = max_length // STRIDE_FACTOR
+    final_max_length = CHUNK_FACTOR * max_length
+    stride = final_max_length // STRIDE_FACTOR
     chunks = []
 
-    for i in range(0, len(text), max_length - stride):
-        chunk = text[i:i + max_length]
+    for i in range(0, len(text), final_max_length - stride):
+        chunk = text[i:i + final_max_length]
         chunks.append(chunk)
 
     return chunks

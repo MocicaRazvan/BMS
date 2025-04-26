@@ -33,6 +33,7 @@ MAX_BODY_SIZE = int(cc.get("max.body.size", 1024 * 1024 * 10))  # 10 MB
 ENGLISH_LABEL = cc.get("english.label", "en")
 TINY_MIN_SCORE = float(cc.get("tiny.min.score", "0.75"))
 LANGDECT_ENGLISH_MIN_SCORE = float(cc.get("langdetect.english.min.score", "0.75"))
+CHUNK_FACTOR= int(cc.get("chunk.factor", 2))
 
 # zipkin settings
 ZIPKIN_SAMPLE_RATE = float(cc.get("zipkin.sample.rate", "0.1"))
