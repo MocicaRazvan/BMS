@@ -2,7 +2,10 @@
 
 import { WithUser } from "@/lib/user";
 import React, { useCallback } from "react";
-import MultipleSelector, { Option } from "@/components/ui/multiple-selector";
+import MultipleSelector, {
+  MultipleSelectorProps,
+  Option,
+} from "@/components/ui/multiple-selector";
 import { fetchStream } from "@/lib/fetchers/fetchStream";
 import { SortDirection } from "@/types/fetch-utils";
 
@@ -12,7 +15,13 @@ export interface ChildInputMultipleSelectorTexts {
   noResults: string;
 }
 
-interface Props<R> extends WithUser, ChildInputMultipleSelectorTexts {
+interface Props<R>
+  extends WithUser,
+    ChildInputMultipleSelectorTexts,
+    Pick<
+      MultipleSelectorProps,
+      "giveUnselected" | "maxSelected" | "allowDuplicates" | "closeOnSelect"
+    > {
   path: string;
   mapping: (i: R) => Option;
   onChange?: (options: Option[]) => void;
@@ -21,9 +30,7 @@ interface Props<R> extends WithUser, ChildInputMultipleSelectorTexts {
   extraQueryParams?: Record<string, string>;
   sortingCriteria?: Record<string, SortDirection>;
   valueKey: string;
-  maxSelected?: number;
   giveUnselectedValue?: boolean;
-  allowDuplicates?: boolean;
   pageSize?: number;
   addNameSortWhenSearchingInputEmpty?: boolean;
 }
@@ -46,6 +53,7 @@ export default function ChildInputMultipleSelector<R>({
   allowDuplicates = false,
   pageSize = 10,
   addNameSortWhenSearchingInputEmpty = true,
+  closeOnSelect = false,
 }: Props<R>) {
   const fetchData = useCallback(
     async (value: string): Promise<Option[]> => {
@@ -98,6 +106,7 @@ export default function ChildInputMultipleSelector<R>({
         placeholder={placeholder}
         allowDuplicates={allowDuplicates}
         hidePlaceholderWhenSelected={true}
+        closeOnSelect={closeOnSelect}
         loadingIndicator={
           <p className="py-2 text-center text-lg leading-10 text-muted-foreground">
             {loading}

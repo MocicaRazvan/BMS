@@ -27,7 +27,7 @@ interface GroupOption {
   [key: string]: Option[];
 }
 
-interface MultipleSelectorProps {
+export interface MultipleSelectorProps {
   value?: Option[];
   defaultOptions?: Option[];
   /** manually controlled options */
@@ -76,6 +76,7 @@ interface MultipleSelectorProps {
   >;
   giveUnselected?: boolean;
   allowDuplicates?: boolean;
+  closeOnSelect?: boolean;
 }
 
 export interface MultipleSelectorRef {
@@ -185,6 +186,7 @@ const MultipleSelector = React.forwardRef<
       inputProps,
       giveUnselected = false,
       allowDuplicates = false,
+      closeOnSelect = false,
     }: MultipleSelectorProps,
     ref: React.Ref<MultipleSelectorRef>,
   ) => {
@@ -491,6 +493,10 @@ const MultipleSelector = React.forwardRef<
                                 const newOptions = [...selected, option];
                                 setSelected(newOptions);
                                 onChange?.(newOptions);
+                                if (closeOnSelect) {
+                                  setOpen(false);
+                                  inputRef.current?.blur();
+                                }
                               }}
                               className={cn(
                                 "cursor-pointer",

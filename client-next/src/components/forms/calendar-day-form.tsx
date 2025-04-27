@@ -108,6 +108,7 @@ export default function CalendarDayForm({ date, anchor, texts }: Props) {
         >
           disabled={false}
           allowDuplicates={true}
+          closeOnSelect={true}
           path={`/orders/subscriptions/plans/days`}
           // sortingCriteria={{ title: "asc" }}
           // extraQueryParams={{ approved: "true" }}
