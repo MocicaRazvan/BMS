@@ -262,6 +262,7 @@ export const SingleComment = memo<Props>(
                                 onChange={field.onChange}
                                 placeholder={titleBodyTexts.bodyPlaceholder}
                                 texts={editorTexts}
+                                separatorClassname="h-6"
                               />
                             </FormControl>
                             <FormMessage />

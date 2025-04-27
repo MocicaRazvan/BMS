@@ -230,6 +230,7 @@ export default function CommentAccordion({
                           onChange={field.onChange}
                           placeholder={titleBodyTexts.bodyPlaceholder}
                           texts={editorTexts}
+                          separatorClassname="h-2"
                         />
                       </FormControl>
                       <FormMessage />

@@ -17,6 +17,7 @@ interface Props {
   texts: EditorTexts;
   editorContentWrapperClassname?: ClassValue;
   useEmojis?: boolean;
+  separatorClassname?: ClassValue;
 }
 
 export default function Editor({
@@ -27,6 +28,7 @@ export default function Editor({
   texts,
   editorContentWrapperClassname,
   useEmojis = true,
+  separatorClassname = "",
 }: Props) {
   const editor = useEditor({
     extensions: [StarterKit, CustomSpan],
@@ -52,7 +54,7 @@ export default function Editor({
         useEmojis={useEmojis}
         {...texts.editorToolbarTexts}
       />
-      <div className="h-1" />
+      <div className={cn("h-1", separatorClassname)} />
       <div className={cn(editorContentWrapperClassname)}>
         <EditorContent editor={editor} placeholder={placeholder} />
       </div>
