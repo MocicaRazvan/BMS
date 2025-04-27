@@ -3,6 +3,7 @@ package com.mocicarazvan.commentservice.cache;
 import com.mocicarazvan.rediscache.dtos.NotifyCacheRemoveDto;
 import com.mocicarazvan.rediscache.local.NotifyLocalRemove;
 import com.mocicarazvan.templatemodule.services.RabbitMqSender;
+import com.mocicarazvan.templatemodule.utils.AppInstanceId;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
@@ -19,6 +20,6 @@ public class NotifyLocalRemoveImpl implements NotifyLocalRemove {
 
     @Override
     public void notifyRemove(NotifyCacheRemoveDto cacheRemove) {
-        rabbitMqSender.sendMessage(cacheRemove);
+        rabbitMqSender.sendMessageWithHeaders(cacheRemove, AppInstanceId.getAppInstanceIdHeader());
     }
 }
