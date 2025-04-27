@@ -201,7 +201,7 @@ export const TitleBodyForm = <TFieldValues extends TitleBodyDto>({
                   {...aiResponseTexts}
                   presentationCallback={(r) => (
                     <div className="w-full h-full space-y-2 mb-16">
-                      <p className="text-sm dark:text-amber-500 text-amber-400">
+                      <p className="text-sm text-amber">
                         {aiResponseTexts.warningText}
                       </p>
                       <div

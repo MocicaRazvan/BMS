@@ -67,7 +67,7 @@ export default function AIGeneratePop({
   loadingCallback,
 }: AIPopProps) {
   const [input, setInput] = useState<string | undefined>();
-  // const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [toxicLoading, setToxicLoading] = useState<boolean>(false);
   const [popOpen, setPopOpen] = useState<boolean>(false);
   const [showFunBtn, setShowFunBtn] = useState<boolean>(false);
   const [inputErr, setInputErr] = useState<string | undefined>();
@@ -147,7 +147,6 @@ export default function AIGeneratePop({
 
   const handleSubmit = useCallback(async () => {
     setShowFunBtn(false);
-    // setIsLoading(true);
     setInputErr(undefined);
     setMessages([]);
     lastUpdateTime.current = new Date().getTime();
@@ -155,12 +154,14 @@ export default function AIGeneratePop({
       ? input.trim().replace(/\s+/g, " ") || undefined
       : undefined;
     if (trimmedInput) {
+      setToxicLoading(true);
       const toxicResp = await getToxicity(
         DOMPurify.sanitize(trimmedInput, {
           ALLOWED_TAGS: [],
           ALLOWED_ATTR: [],
         }),
       );
+      setToxicLoading(false);
       if (toxicResp.failure) {
         if (toxicResp.reason.toLowerCase() === "toxicity") {
           setInputErr(toxicError);
@@ -272,9 +273,9 @@ export default function AIGeneratePop({
                   }
                   await handleSubmit();
                 }}
-                isLoading={isLoading}
-                disable={isLoading}
-                size={"default"}
+                isLoading={isLoading || toxicLoading}
+                disable={isLoading || toxicLoading}
+                size="default"
                 buttonSubmitTexts={buttonSubmitTexts}
               />
               <Button
