@@ -469,7 +469,7 @@ export default function PostsTable({
               [postTableColumnsTexts.userLikes]: (p) => p.userLikes.length,
               [postTableColumnsTexts.userDislikes]: (p) =>
                 p.userDislikes.length,
-              ["# " + postTableColumnsTexts.approved.header]: (p) =>
+              ["#" + postTableColumnsTexts.approved.header]: (p) =>
                 Number(p.approved),
             },
             dateField: "createdAt",

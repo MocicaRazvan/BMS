@@ -725,7 +725,7 @@ export default function PlansTable({
               "#omnivore": (r) => (r.model.type === "OMNIVORE" ? 1 : 0),
               "#vegan": (r) => (r.model.type === "VEGAN" ? 1 : 0),
               "#vegetarian": (r) => (r.model.type === "VEGETARIAN" ? 1 : 0),
-              ["# " + planTableColumnsTexts.approved.header]: (p) =>
+              ["#" + planTableColumnsTexts.approved.header]: (p) =>
                 Number(p.model.approved),
               [planTableColumnsTexts.count + " / 10"]: (p) => p.count / 10,
               [planTableColumnsTexts.count +
