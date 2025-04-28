@@ -26,6 +26,7 @@ import { NavigationGuardProvider } from "next-navigation-guard";
 import { CacheProvider } from "@/providers/cache-provider";
 import { Metadata } from "next";
 import ChatConnectContext from "@/context/chat-connect-context";
+import { UmamiAnalytics } from "@/lib/umami-analytics";
 
 const fontSans = FontSans({
   subsets: ["latin"],
@@ -87,6 +88,9 @@ export default async function BaseLayout({
 
   return (
     <html lang={locale} suppressHydrationWarning>
+      <head>
+        <UmamiAnalytics />
+      </head>
       <body
         className={cn(
           " bg-background font-sans antialiased ",
