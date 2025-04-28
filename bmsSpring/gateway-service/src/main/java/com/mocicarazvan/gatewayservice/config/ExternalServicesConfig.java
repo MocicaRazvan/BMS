@@ -13,5 +13,4 @@ import org.springframework.stereotype.Component;
 public class ExternalServicesConfig {
     private String diffusion;
     private String toxicity;
-    private String umami;
 }
