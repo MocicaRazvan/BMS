@@ -296,7 +296,11 @@ public class Config {
                                 .dedupeResponseHeader("Access-Control-Allow-Origin", "RETAIN_UNIQUE"))
                         .uri(externalServicesConfig.getToxicity()))
 
-
+                // hacky but digi doesnt have subdomain
+                .route("umami", r -> r.path("/umami/**")
+                        .filters(f -> f.stripPrefix(1))
+                        .uri(externalServicesConfig.getUmami())
+                )
                 .route("user-openapi", r -> r.path("/user-service/v3/api-docs")
                         .uri("http://user-service:8081"))
                 .route("file-openapi", r -> r.path("/file-service/v3/api-docs")
