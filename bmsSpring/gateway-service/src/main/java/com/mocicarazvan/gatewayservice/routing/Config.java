@@ -5,6 +5,7 @@ import com.mocicarazvan.gatewayservice.filters.AuthFilter;
 import com.mocicarazvan.gatewayservice.filters.CsrfFilter;
 import com.mocicarazvan.gatewayservice.services.NextCsrfValidator;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.gateway.route.Route;
 import org.springframework.cloud.gateway.route.RouteLocator;
@@ -23,6 +24,7 @@ import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
 import java.util.Arrays;
 import java.util.function.Function;
 
+@Slf4j
 @Configuration
 @RequiredArgsConstructor
 public class Config {
@@ -298,7 +300,16 @@ public class Config {
 
                 // hacky but digi doesnt have subdomain
                 .route("umami", r -> r.path("/umami/**")
-                        .filters(f -> f.stripPrefix(1))
+                        .filters(f -> f
+                                .stripPrefix(1)
+                                .filter((exchange, chain) -> {
+                                    // Log request headers
+                                    exchange.getRequest().getHeaders().forEach((key, value) -> {
+                                        log.info("Header: {} = {}", key, value);
+                                    });
+                                    return chain.filter(exchange);
+                                })
+                        )
                         .uri(externalServicesConfig.getUmami())
                 )
                 .route("user-openapi", r -> r.path("/user-service/v3/api-docs")
