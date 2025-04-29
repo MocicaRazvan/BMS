@@ -34,6 +34,7 @@ const titlePrompt = ChatPromptTemplate.fromMessages([
     - No explanations, commentary, or additional information, keep it concise, short and to the point.
     - Make sure the title is engaging, relevant, and captures the essence of the content.
     - Keep in mind the kind of item you are generating the title for item type: {item}.
+    - Do not add any notes or disclaimers.
     `,
   ],
   [
