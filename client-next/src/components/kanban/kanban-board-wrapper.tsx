@@ -27,7 +27,7 @@ export default function KanbanBoardWrapper({ authUser, ...props }: Props) {
     Record<number, boolean>
   >({});
 
-  const { messages, error, isFinished } = useFetchStream<
+  const { messages, error, isFinished, isAbsoluteFinished } = useFetchStream<
     CustomEntityModel<KanbanColumnResponse>,
     BaseError
   >({
@@ -77,12 +77,14 @@ export default function KanbanBoardWrapper({ authUser, ...props }: Props) {
 
   return (
     <>
-      <KanbanBoard
-        initialColumns={columns}
-        initialGroupedTasks={groupedTasks}
-        authUser={authUser}
-        {...props}
-      />
+      {isAbsoluteFinished && (
+        <KanbanBoard
+          initialColumns={columns}
+          initialGroupedTasks={groupedTasks}
+          authUser={authUser}
+          {...props}
+        />
+      )}
     </>
   );
 }
