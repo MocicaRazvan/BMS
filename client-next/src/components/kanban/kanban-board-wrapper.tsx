@@ -15,6 +15,7 @@ import KanbanBoard, {
   KanbanColumn,
 } from "@/components/kanban/kanban-board";
 import { fetchStream } from "@/lib/fetchers/fetchStream";
+import Loader from "@/components/ui/spinner";
 
 interface Props extends WithUser, KanbanBoardTexts {}
 export const createDndIdColumn = (id: number) => `column-${id}`;
@@ -77,13 +78,17 @@ export default function KanbanBoardWrapper({ authUser, ...props }: Props) {
 
   return (
     <>
-      {isAbsoluteFinished && (
+      {isAbsoluteFinished ? (
         <KanbanBoard
           initialColumns={columns}
           initialGroupedTasks={groupedTasks}
           authUser={authUser}
           {...props}
         />
+      ) : (
+        <div className="flex items-center justify-center size-full p-2">
+          <Loader />
+        </div>
       )}
     </>
   );
