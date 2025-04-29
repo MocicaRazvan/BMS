@@ -26,6 +26,7 @@ def predict_english(text: str) -> bool:
         for p in chunk_preds:
             if p['label'] == ENGLISH_LABEL and p['score'] >= LANGUAGE_MIN_SCORE:
                 return True
+
     return False
 
 
@@ -37,4 +38,5 @@ def predict_toxicity(text: str) -> bool:
         for p in chunk_preds:
             if p['label'] not in NEUTRAL_LABELS_LIST and p['score'] >= TOXIC_MIN_SCORE:
                 return True
+
     return False
