@@ -161,57 +161,59 @@ export default function AnswerFromBodyForm({
             <Form {...form}>
               <form
                 onSubmit={form.handleSubmit(onSubmit)}
-                className="space-y-8 lg:space-y-12"
+                className="space-y-8 lg:space-y-12 w-full mt-6"
                 noValidate
               >
-                <FormField
-                  control={form.control}
-                  name="question"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{questionLabel}</FormLabel>
-                      <FormControl>
-                        <Textarea
-                          placeholder={questionPlaceholder}
-                          className="resize-none"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="k"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{kLabel}</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={wrapItemToString(field.value)}
-                      >
+                <div className="flex flex-col md:flex-row w-full items-start justify-between gap-8 lg:gap-10">
+                  <FormField
+                    control={form.control}
+                    name="question"
+                    render={({ field }) => (
+                      <FormItem className="flex-1 w-full">
+                        <FormLabel>{questionLabel}</FormLabel>
                         <FormControl>
-                          <SelectTrigger className="w-full max-w-60">
-                            <SelectValue placeholder={kPlaceholder} />
-                          </SelectTrigger>
+                          <Textarea
+                            placeholder={questionPlaceholder}
+                            className="resize-none"
+                            {...field}
+                          />
                         </FormControl>
-                        <SelectContent>
-                          {kOptions.map((k) => (
-                            <SelectItem
-                              value={wrapItemToString(k)}
-                              key={uniqueItemKey + k}
-                            >
-                              {k}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="k"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{kLabel}</FormLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={wrapItemToString(field.value)}
+                        >
+                          <FormControl>
+                            <SelectTrigger className="w-full max-w-60">
+                              <SelectValue placeholder={kPlaceholder} />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {kOptions.map((k) => (
+                              <SelectItem
+                                value={wrapItemToString(k)}
+                                key={uniqueItemKey + k}
+                              >
+                                {k}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
 
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
                 <ErrorMessage message={answerError} show={!!errorMsg} />
                 <ButtonSubmit
                   isLoading={isLoading}
