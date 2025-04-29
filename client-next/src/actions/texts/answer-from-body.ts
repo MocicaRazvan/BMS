@@ -1,12 +1,12 @@
 "use server";
 import { Document as LangDocument } from "langchain/document";
 import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
-import { MemoryVectorStore } from "langchain/vectorstores/memory";
 import { vectorStoreInstance } from "@/lib/langchain/langchain";
 import { generateHashKey, getRedisInstance } from "@/lib/langchain/redis-cache";
 import { split } from "sentence-splitter";
 import { removeHTML } from "@/lib/utils";
 import { OllamaEmbeddings } from "@langchain/ollama";
+import { getMemoryVectorStoreCache } from "@/lib/langchain/memory-vector-store-cache";
 
 function generateAnsCacheKey(text: string, query: string, k: number) {
   text = text.toLowerCase();
@@ -15,6 +15,7 @@ function generateAnsCacheKey(text: string, query: string, k: number) {
 }
 
 const parseString = (str: string) => str.replace(/\s/g, " ").trim();
+const memoryVectorStoreCache = getMemoryVectorStoreCache();
 
 interface AnsReturnType {
   content: string;
@@ -41,7 +42,10 @@ async function getHTMLAggregate(
       }),
   );
 
-  const vectorDb = await MemoryVectorStore.fromDocuments(docs, embeddings);
+  const vectorDb = await memoryVectorStoreCache.getStoreOrCreate(
+    docs,
+    embeddings,
+  );
 
   return (
     await vectorDb.maxMarginalRelevanceSearch(query, {
@@ -82,7 +86,7 @@ async function getSentenceResults(
     )
     .flat();
 
-  const sentenceVectorDb = await MemoryVectorStore.fromDocuments(
+  const sentenceVectorDb = await memoryVectorStoreCache.getStoreOrCreate(
     sentenceDocs,
     embeddings,
   );

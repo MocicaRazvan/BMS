@@ -4,7 +4,7 @@ import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
 import { Document as LangDocument } from "langchain/document";
 import removeMd from "remove-markdown";
 import { ChatOllama, OllamaEmbeddings } from "@langchain/ollama";
-import { MemoryVectorStore } from "langchain/vectorstores/memory";
+import { getMemoryVectorStoreCache } from "@/lib/langchain/memory-vector-store-cache";
 import { createStuffDocumentsChain } from "langchain/chains/combine_documents";
 import { getMultiQueryRetriever } from "@/lib/langchain/langhcain-multi-query-retriver";
 import { ContextualCompressionRetriever } from "langchain/retrievers/contextual_compression";
@@ -39,7 +39,7 @@ const titlePrompt = ChatPromptTemplate.fromMessages([
   [
     "user",
     "Here is the __context__: {context}.\n" +
-      "Additionally, the user has provided this input: {input}. Based on this, output a single title as a text with NO explanations, the item type: {item}.",
+      "Additionally, the user has provided this input: {input}. Based on this, output a single short title as a text with NO explanations, the item type: {item}.",
   ],
 ]);
 const descriptionPrompt = ChatPromptTemplate.fromMessages([
@@ -86,6 +86,7 @@ export const prompts: Record<TargetedFields, ChatPromptTemplate> = {
   title: titlePrompt,
   description: descriptionPrompt,
 };
+const memoryVectorStoreCache = getMemoryVectorStoreCache();
 
 export async function getHtmlDocs(field: AiIdeasField) {
   return (
@@ -156,7 +157,11 @@ export async function getBaseIdea(
     ),
   ]);
 
-  const vectorDb = await MemoryVectorStore.fromDocuments(htmlDocs, embeddings);
+  const vectorDb = await memoryVectorStoreCache.getStoreOrCreate(
+    htmlDocs,
+    embeddings,
+  );
+
   const combineDocsChain = await createStuffDocumentsChain({
     llm,
     prompt,
