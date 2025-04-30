@@ -105,7 +105,7 @@ public class KanbanColumnServiceImpl
                         .switchIfEmpty(Mono.error(new RuntimeException("Columns not found")))
                         .flatMap(c -> entitiesUtils.checkOwner(c, userId)
                                 .then(Mono.fromCallable(() -> {
-                                    log.error("Reindexing column {}", c.getId());
+//                                    log.error("Reindexing column {}", c.getId());
                                     int orderIndex = pair.getSecond().get(pair.getFirst().indexOf(c.getId()));
                                     c.setOrderIndex(orderIndex);
                                     c.setUpdatedAt(LocalDateTime.now());
