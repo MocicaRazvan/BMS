@@ -101,7 +101,9 @@ public class RouteValidator {
             "/orders/create",
             "/orders/trainer/**",
 
-            "/diffusion/**"
+            "/diffusion/**",
+
+            "/timeSeries/**"
     );
 
     private static final List<String> ADMIN_LIST = List.of("/test/admin",
