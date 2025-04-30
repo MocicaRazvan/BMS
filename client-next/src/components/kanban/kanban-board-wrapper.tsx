@@ -15,7 +15,8 @@ import KanbanBoard, {
   KanbanColumn,
 } from "@/components/kanban/kanban-board";
 import { fetchStream } from "@/lib/fetchers/fetchStream";
-import Loader from "@/components/ui/spinner";
+import LoadingSpinner from "@/components/common/loading-spinner";
+import { motion } from "framer-motion";
 
 interface Props extends WithUser, KanbanBoardTexts {}
 export const createDndIdColumn = (id: number) => `column-${id}`;
@@ -76,20 +77,21 @@ export default function KanbanBoardWrapper({ authUser, ...props }: Props) {
     });
   }, [JSON.stringify(columnsIds)]);
 
-  return (
-    <>
-      {isAbsoluteFinished ? (
-        <KanbanBoard
-          initialColumns={columns}
-          initialGroupedTasks={groupedTasks}
-          authUser={authUser}
-          {...props}
-        />
-      ) : (
-        <div className="flex items-center justify-center size-full p-2">
-          <Loader />
-        </div>
-      )}
-    </>
+  return isAbsoluteFinished ? (
+    <KanbanBoard
+      initialColumns={columns}
+      initialGroupedTasks={groupedTasks}
+      authUser={authUser}
+      {...props}
+    />
+  ) : (
+    <motion.div
+      className="flex items-center justify-center size-full p-2"
+      initial={{ opacity: 0, scale: 0.8 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.2, delay: 2 }}
+    >
+      <LoadingSpinner sectionClassName="min-h-[calc(100vh-24rem)]" />
+    </motion.div>
   );
 }
