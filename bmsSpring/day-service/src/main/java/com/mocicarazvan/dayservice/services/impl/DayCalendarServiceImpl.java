@@ -64,7 +64,7 @@ public class DayCalendarServiceImpl implements DayCalendarService {
                 }));
     }
 
-    @RedisReactiveChildCacheEvict(key = CACHE_KEY, masterId = "#userId")
+    @RedisReactiveChildCacheEvict(key = CACHE_KEY, masterId = "#userId", id = "#id")
     @Override
     public Mono<Boolean> deleteDayCalendar(Long id, String userId) {
         Long userIdLong = Long.parseLong(userId);
@@ -91,7 +91,7 @@ public class DayCalendarServiceImpl implements DayCalendarService {
                 ));
     }
 
-    @RedisReactiveChildCache(key = CACHE_KEY, masterId = CACHE_KEY, idPath = "userId * 10000 + month + year")
+    @RedisReactiveChildCache(key = CACHE_KEY, masterId = CACHE_KEY, idPath = "userId * 10000 + month + year * 100")
     @Override
     public Flux<DayCalendarTrackingStats> getDayCalendarTrackingStats(String userId, LocalDate from, LocalDate to) {
         LocalDateTime dateAfter = from == null ? null : from.atStartOfDay();
