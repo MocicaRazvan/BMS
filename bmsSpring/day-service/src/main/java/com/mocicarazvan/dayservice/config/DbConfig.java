@@ -1,7 +1,9 @@
 package com.mocicarazvan.dayservice.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mocicarazvan.dayservice.convertors.DayTypeReadingConvertor;
 import com.mocicarazvan.dayservice.convertors.DayTypeWritingConvertor;
+import com.mocicarazvan.dayservice.convertors.StringToJsonNodeConverter;
 import io.r2dbc.spi.ConnectionFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -12,10 +14,12 @@ import org.springframework.data.r2dbc.dialect.DialectResolver;
 public class DbConfig {
 
     @Bean
-    public R2dbcCustomConversions getCustomConverters(ConnectionFactory connectionFactory) {
+    public R2dbcCustomConversions getCustomConverters(ConnectionFactory connectionFactory
+    ) {
         return R2dbcCustomConversions.of(DialectResolver.getDialect(connectionFactory),
                 new DayTypeReadingConvertor(),
-                new DayTypeWritingConvertor()
+                new DayTypeWritingConvertor(),
+                new StringToJsonNodeConverter(new ObjectMapper())
         );
     }
 

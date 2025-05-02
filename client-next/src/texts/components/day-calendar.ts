@@ -7,6 +7,7 @@ import { DayCalendarEventTexts } from "@/components/days-calendar/day-calendar-e
 import { DayCalendarSingleDayTexts } from "@/components/days-calendar/day-calendar-single-day";
 import { getSingleDayTexts } from "@/texts/components/days";
 import { DaysCalendarCTATexts } from "@/components/days-calendar/days-calendar-cta";
+import { getDateRangePickerTexts } from "@/texts/components/ui";
 
 export async function getDayCalendarHeaderTexts(): Promise<DayCalendarHeaderTexts> {
   const [t] = await Promise.all([
@@ -39,15 +40,23 @@ export async function getDayCalendarSingleDayTexts(): Promise<DayCalendarSingleD
 }
 
 export async function getDayCalendarBodyMonthTexts(): Promise<DayCalendarBodyMonthTexts> {
-  const [t, calendarDayFormTexts, dayCalendarEventTexts] = await Promise.all([
-    getTranslations("components.daysCalendar.DayCalendarBodyMonthTexts"),
-    getCalendarDayFormTexts(),
-    getDayCalendarEventTexts(),
-  ]);
+  const [t, calendarDayFormTexts, dayCalendarEventTexts, dateRangePickerTexts] =
+    await Promise.all([
+      getTranslations("components.daysCalendar.DayCalendarBodyMonthTexts"),
+      getCalendarDayFormTexts(),
+      getDayCalendarEventTexts(),
+      getDateRangePickerTexts(),
+    ]);
   return {
     addAnchor: t("addAnchor"),
     calendarDayFormTexts,
     dayCalendarEventTexts,
+    wrapperChartTexts: {
+      dateRangePickerTexts,
+      errorText: t("wrapperChartTexts.errorText"),
+      noDataText: t("wrapperChartTexts.noDataText"),
+      titleText: t("wrapperChartTexts.titleText"),
+    },
   };
 }
 

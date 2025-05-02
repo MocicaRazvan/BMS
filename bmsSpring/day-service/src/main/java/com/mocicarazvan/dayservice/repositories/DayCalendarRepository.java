@@ -1,6 +1,7 @@
 package com.mocicarazvan.dayservice.repositories;
 
 import com.mocicarazvan.dayservice.dtos.dayCalendar.DayCalendarDbDto;
+import com.mocicarazvan.dayservice.dtos.dayCalendar.DayCalendarTrackingStats;
 import com.mocicarazvan.dayservice.dtos.dayCalendar.DayCalendarUserDates;
 import com.mocicarazvan.dayservice.models.DayCalendar;
 import org.springframework.data.r2dbc.repository.Query;
@@ -9,6 +10,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 public interface DayCalendarRepository extends R2dbcRepository<DayCalendar, Long> {
 
@@ -47,4 +49,34 @@ public interface DayCalendarRepository extends R2dbcRepository<DayCalendar, Long
             """)
     Flux<DayCalendarUserDates> findAllUserDatesByUserId(Long userId);
 
+
+    @Query("""
+                      WITH type_agg AS (
+                        SELECT
+                          MAX(dc.user_id) AS user_id,
+                          EXTRACT(YEAR FROM dc.custom_date) AS year,
+                          EXTRACT(MONTH FROM dc.custom_date) AS month,
+                          d.type,
+                          COUNT(*) AS cnt
+                        FROM day_calendar dc
+                        JOIN day d ON dc.day_id = d.id
+                        WHERE ( :dateAfter IS NULL OR  dc.custom_date >= :dateAfter )
+                          AND ( :dateBefore IS NULL OR  dc.custom_date <= :dateBefore )
+                          AND dc.user_id = :userId
+                        GROUP BY year, month, d.type
+                      )
+                      SELECT
+                        MAX(user_id) AS user_id,
+                        year,
+                        month,
+                        JSONB_OBJECT_AGG(type, cnt)::text AS type_counts
+                      FROM type_agg
+                      GROUP BY year, month
+                      ORDER BY year, month
+            """)
+    Flux<DayCalendarTrackingStats> findDayCalendarTrackingStats(
+            Long userId,
+            LocalDateTime dateAfter,
+            LocalDateTime dateBefore
+    );
 }

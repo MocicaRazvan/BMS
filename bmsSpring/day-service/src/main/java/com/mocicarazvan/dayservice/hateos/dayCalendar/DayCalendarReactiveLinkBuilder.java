@@ -47,6 +47,13 @@ public class DayCalendarReactiveLinkBuilder<T> implements ReactiveLinkBuilder<Da
                 .withRel("getUserDates")
         );
 
+        links.add(WebFluxLinkBuilder.linkTo(WebFluxLinkBuilder.methodOn(c).getTrackingStats(
+                        LocalDate.now(),
+                        LocalDate.now().minusDays(6),
+                        null
+                )
+        ).withRel("getTrackingStats"));
+
         return links;
     }
 }

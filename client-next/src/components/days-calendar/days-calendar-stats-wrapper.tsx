@@ -1,0 +1,142 @@
+"use client";
+
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  DateRangePicker,
+  DateRangePickerTexts,
+} from "@/components/ui/date-range-picker";
+import { useDayCalendar } from "@/context/day-calendar-context";
+import React, { Suspense, useEffect, useMemo, useState } from "react";
+import { endOfMonth, format, startOfMonth } from "date-fns";
+import { dateFormat } from "@/hoooks/useDateRangeFilterParams";
+import { useLocale } from "next-intl";
+import useFetchStream from "@/hoooks/useFetchStream";
+import { DayCalendarTrackingStats } from "@/types/dto";
+import { ro } from "date-fns/locale";
+import DayCalendarStatsChart from "@/components/charts/day-calendar-stats-chart";
+import { motion } from "framer-motion";
+import Lottie from "react-lottie-player";
+import noResultsLottie from "../../../public/lottie/noResults.json";
+
+const ChartSkeleton = () => (
+  <motion.div
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
+    transition={{ delay: 1 }}
+  >
+    <Skeleton className="h-[350px] w-full" />
+  </motion.div>
+);
+
+export interface DayCalendarStatsWrapperTexts {
+  dateRangePickerTexts: DateRangePickerTexts;
+  errorText: string;
+  noDataText: string;
+  titleText: string;
+}
+
+interface WrapperProps {
+  texts: DayCalendarStatsWrapperTexts;
+}
+export default function DayCalendarStatsWrapper({
+  texts: { dateRangePickerTexts, noDataText, errorText, titleText },
+}: WrapperProps) {
+  const { date, dayCalendars } = useDayCalendar();
+  const monthStartDate = useMemo(() => startOfMonth(date), [date]);
+  const monthEndDate = useMemo(() => endOfMonth(date), [date]);
+  const monthStart = useMemo(
+    () => format(monthStartDate, dateFormat),
+    [monthStartDate],
+  );
+  const monthEnd = useMemo(
+    () => format(monthEndDate, dateFormat),
+    [monthEndDate],
+  );
+  const [dateRange, setDateRange] = useState<
+    Record<string, string> | undefined
+  >({
+    from: monthStart,
+    to: monthEnd,
+  });
+
+  useEffect(() => {
+    setDateRange({
+      from: monthStart,
+      to: monthEnd,
+    });
+  }, [monthStart, monthEnd]);
+
+  const locale = useLocale();
+  const { messages, isFinished, error, refetch, isAbsoluteFinished } =
+    useFetchStream<DayCalendarTrackingStats>({
+      path: "/daysCalendar/trackingStats",
+      authToken: true,
+      queryParams: dateRange,
+    });
+
+  useEffect(() => {
+    if (isAbsoluteFinished) {
+      refetch();
+    }
+  }, [JSON.stringify(dayCalendars)]);
+
+  console.log("DayCalendarTrackingStats", messages);
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center mt-20">
+        <h1 className="text-destructive">{errorText}</h1>
+      </div>
+    );
+  }
+  return (
+    <div className="size-full space-y-3 md:space-y-8">
+      <h2 className="text-lg md:text-3xl text-center tracking-tight font-semibold capitalize">
+        {titleText}
+      </h2>
+      <div>
+        <DateRangePicker
+          key={`${monthStart}-${monthEnd}-${locale}-date-range-picker`}
+          showCompare={false}
+          showNone={true}
+          onUpdate={({ range }, none) => {
+            console.log("noneRange", none);
+            if (none) {
+              setDateRange(undefined);
+              return;
+            }
+            setDateRange({
+              from: format(range.from, dateFormat),
+              to: format(range.to || range.from, dateFormat),
+            });
+          }}
+          locale={locale === "ro" ? ro : undefined}
+          hiddenPresets={["pastYear", "today", "yesterday"]}
+          initialDateFrom={monthStartDate}
+          initialDateTo={monthEndDate}
+          {...dateRangePickerTexts}
+        />
+      </div>
+      {isFinished ? (
+        messages.length > 0 ? (
+          <DayCalendarStatsChart data={messages} />
+        ) : (
+          <div className="flex w-full items-center justify-center h-[350px]">
+            <Suspense fallback={<div className="md:w-1/2 md:h-1/2 mx-auto" />}>
+              <div className="flex flex-col items-center justify-center">
+                <Lottie
+                  animationData={noResultsLottie}
+                  loop
+                  className="md:w-1/2 md:h-1/2 mx-auto"
+                  play
+                />
+                <h1 className="font-medium text-lg">{noDataText}</h1>
+              </div>
+            </Suspense>
+          </div>
+        )
+      ) : (
+        <ChartSkeleton />
+      )}
+    </div>
+  );
+}

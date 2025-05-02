@@ -353,7 +353,12 @@
         "tracked": "Urmărite"
       },
       "DayCalendarBodyMonthTexts": {
-        "addAnchor": "Adaugă o zi"
+        "addAnchor": "Adaugă o zi",
+        "wrapperChartTexts": {
+          "errorText": "Graficul nu a putut fi încărcat",
+          "noDataText": "Nu există date pentru intervalul selectat",
+          "titleText": "Prezentare generală a zilelor urmărite"
+        }
       },
       "DayCalendarEventTexts": {
         "toastDescription": "Ziua a fost ștearsă cu succes"

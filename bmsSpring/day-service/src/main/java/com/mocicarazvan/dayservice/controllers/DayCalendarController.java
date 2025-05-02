@@ -2,6 +2,7 @@ package com.mocicarazvan.dayservice.controllers;
 
 import com.mocicarazvan.dayservice.dtos.dayCalendar.DayCalendarBody;
 import com.mocicarazvan.dayservice.dtos.dayCalendar.DayCalendarResponse;
+import com.mocicarazvan.dayservice.dtos.dayCalendar.DayCalendarTrackingStats;
 import com.mocicarazvan.dayservice.dtos.dayCalendar.DayCalendarUserDates;
 import com.mocicarazvan.dayservice.dtos.meal.MealResponse;
 import com.mocicarazvan.dayservice.dtos.recipe.RecipeResponse;
@@ -12,6 +13,7 @@ import com.mocicarazvan.templatemodule.hateos.CustomEntityModel;
 import com.mocicarazvan.templatemodule.utils.RequestsUtils;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -108,6 +110,19 @@ public class DayCalendarController {
     public Flux<DayCalendarUserDates> getUserDates(ServerWebExchange serverWebExchange) {
         return dayCalendarService.getAllDaysByUserId(
                 requestsUtils.extractAuthUser(serverWebExchange)
+        );
+    }
+
+    @GetMapping(value = "/trackingStats", produces = {MediaType.APPLICATION_NDJSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
+    public Flux<DayCalendarTrackingStats> getTrackingStats(
+            @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate from,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate to,
+            ServerWebExchange serverWebExchange
+    ) {
+        return dayCalendarService.getDayCalendarTrackingStats(
+                requestsUtils.extractAuthUser(serverWebExchange),
+                from,
+                to
         );
     }
 }

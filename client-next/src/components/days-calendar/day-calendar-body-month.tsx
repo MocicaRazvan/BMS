@@ -20,11 +20,15 @@ import CalendarDayForm, {
 import { Button } from "@/components/ui/button";
 import { Locale } from "@/navigation";
 import { useLocale } from "next-intl";
+import DayCalendarStatsWrapper, {
+  DayCalendarStatsWrapperTexts,
+} from "@/components/days-calendar/days-calendar-stats-wrapper";
 
 export interface DayCalendarBodyMonthTexts {
   addAnchor: string;
   calendarDayFormTexts: CalendarDayFormTexts;
   dayCalendarEventTexts: DayCalendarEventTexts;
+  wrapperChartTexts: DayCalendarStatsWrapperTexts;
 }
 const getLocalizedWeekdays = (appLocale: Locale) => {
   const locale = dateFnsLocaleMapper?.[appLocale];
@@ -39,6 +43,7 @@ export default function DayCalendarBodyMonth({
   addAnchor,
   calendarDayFormTexts,
   dayCalendarEventTexts,
+  wrapperChartTexts,
 }: DayCalendarBodyMonthTexts) {
   const locale = useLocale() as Locale;
   const { date, dayCalendars, calendarDays, monthStart } = useDayCalendar();
@@ -125,6 +130,9 @@ export default function DayCalendarBodyMonth({
           })}
         </motion.div>
       </AnimatePresence>
+      <div className="mt-14 md:mt-20 px-2 md:px-5">
+        <DayCalendarStatsWrapper texts={wrapperChartTexts} />
+      </div>
     </div>
   );
 }

@@ -6,7 +6,7 @@ import {
   DateRangePickerProps,
 } from "@/components/ui/date-range-picker";
 import { format } from "date-fns";
-const dateFormat = "dd-MM-yyyy";
+export const dateFormat = "dd-MM-yyyy";
 
 function verifyDate(date: string | undefined) {
   if (!date) return undefined;

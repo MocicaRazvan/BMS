@@ -354,7 +354,12 @@
         "tracked": "Tracked"
       },
       "DayCalendarBodyMonthTexts": {
-        "addAnchor": "Add Day"
+        "addAnchor": "Add Day",
+        "wrapperChartTexts": {
+          "errorText": "The chart could not be loaded",
+          "noDataText": "No data for the selected range",
+          "titleText": " Overview Of The Tracked Days"
+        }
       },
       "DayCalendarEventTexts": {
         "toastDescription": "Day was removed from the calendar"

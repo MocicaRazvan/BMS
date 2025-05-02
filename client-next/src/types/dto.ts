@@ -682,3 +682,7 @@ export interface PostCountSummaryResponse extends PostResponse {
   viewCount: number;
   rank: number;
 }
+export interface DayCalendarTrackingStats extends MonthYear {
+  userId: number;
+  typeCounts: Record<DayType, number>;
+}

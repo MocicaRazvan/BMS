@@ -1,10 +1,7 @@
 package com.mocicarazvan.dayservice.services.impl;
 
 import com.mocicarazvan.dayservice.clients.RecipeClient;
-import com.mocicarazvan.dayservice.dtos.dayCalendar.DayCalendarBody;
-import com.mocicarazvan.dayservice.dtos.dayCalendar.DayCalendarResponse;
-import com.mocicarazvan.dayservice.dtos.dayCalendar.DayCalendarSimpleResponse;
-import com.mocicarazvan.dayservice.dtos.dayCalendar.DayCalendarUserDates;
+import com.mocicarazvan.dayservice.dtos.dayCalendar.*;
 import com.mocicarazvan.dayservice.dtos.meal.MealResponse;
 import com.mocicarazvan.dayservice.dtos.recipe.RecipeResponse;
 import com.mocicarazvan.dayservice.mappers.DayCalendarMapper;
@@ -26,6 +23,8 @@ import reactor.core.publisher.Mono;
 
 import java.awt.print.PrinterException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -65,7 +64,7 @@ public class DayCalendarServiceImpl implements DayCalendarService {
                 }));
     }
 
-    @RedisReactiveChildCacheEvict(key = CACHE_KEY, id = "#id", masterId = "#userId")
+    @RedisReactiveChildCacheEvict(key = CACHE_KEY, masterId = "#userId")
     @Override
     public Mono<Boolean> deleteDayCalendar(Long id, String userId) {
         Long userIdLong = Long.parseLong(userId);
@@ -90,6 +89,18 @@ public class DayCalendarServiceImpl implements DayCalendarService {
                         )
 
                 ));
+    }
+
+    @RedisReactiveChildCache(key = CACHE_KEY, masterId = CACHE_KEY, idPath = "userId * 10000 + month + year")
+    @Override
+    public Flux<DayCalendarTrackingStats> getDayCalendarTrackingStats(String userId, LocalDate from, LocalDate to) {
+        LocalDateTime dateAfter = from == null ? null : from.atStartOfDay();
+        LocalDateTime dateBefore = to == null ? null : to.atTime(LocalTime.MAX);
+        return dayCalendarRepository.findDayCalendarTrackingStats(
+                Long.parseLong(userId),
+                dateAfter,
+                dateBefore
+        );
     }
 
     private Mono<DayCalendarResponse<MealResponse>> createFromDaySimpleResponse(DayCalendarSimpleResponse simpleResponse) {

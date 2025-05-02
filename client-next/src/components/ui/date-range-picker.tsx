@@ -1,7 +1,8 @@
 /* eslint-disable max-lines */
 "use client";
+import { ReactElement } from "react";
 
-import React, {
+import {
   type FC,
   useCallback,
   useEffect,
@@ -141,7 +142,7 @@ export const DateRangePicker: FC<
   triggerVariant = "outline",
   triggerClassName,
   none: { false: noneFalseText, true: noneTrueText },
-}): JSX.Element => {
+}): ReactElement => {
   const [none, setNone] = useState(defaultNone);
   const prevNone = useRef(defaultNone);
   const PRESETS = useMemo(
@@ -381,7 +382,7 @@ export const DateRangePicker: FC<
     label: string;
     isSelected: boolean;
     disabled?: boolean;
-  }): JSX.Element => (
+  }): ReactElement => (
     <Button
       className={cn(isSelected && "pointer-events-none")}
       variant="ghost"
@@ -690,7 +691,11 @@ export const DateRangePicker: FC<
                 setIsOpen(false);
                 if (
                   !areRangesEqual(range, openedRangeRef.current) ||
-                  !areRangesEqual(rangeCompare, openedRangeCompareRef.current)
+                  !areRangesEqual(
+                    rangeCompare,
+                    openedRangeCompareRef.current,
+                  ) ||
+                  prevNone.current
                 ) {
                   onUpdate?.({ range, rangeCompare }, none);
                 } else if (
