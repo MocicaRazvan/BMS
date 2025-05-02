@@ -107,6 +107,7 @@ public class DayCalendarController {
     }
 
     @GetMapping(value = "/userDates", produces = {MediaType.APPLICATION_NDJSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
+    @ResponseStatus(HttpStatus.OK)
     public Flux<DayCalendarUserDates> getUserDates(ServerWebExchange serverWebExchange) {
         return dayCalendarService.getAllDaysByUserId(
                 requestsUtils.extractAuthUser(serverWebExchange)
@@ -114,6 +115,7 @@ public class DayCalendarController {
     }
 
     @GetMapping(value = "/trackingStats", produces = {MediaType.APPLICATION_NDJSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
+    @ResponseStatus(HttpStatus.OK)
     public Flux<DayCalendarTrackingStats> getTrackingStats(
             @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate from,
             @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate to,
