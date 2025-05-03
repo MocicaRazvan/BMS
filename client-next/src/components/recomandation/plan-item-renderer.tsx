@@ -24,11 +24,11 @@ export default function PlanItemRenderer({ item, texts }: Props) {
         </Link>
       </div>
       <div className="flex items-center justify-between w-full">
-        <div className="flex flex-col items-start justify-center">
+        <div className="flex flex-col items-start justify-center gap-1">
           <span className="font-bold">{texts.objective}</span>
           <span>{item.objective.replace("_", " ")}</span>
         </div>
-        <div className="flex flex-col items-start justify-center gap-1">
+        <div className="flex flex-col items-end justify-center gap-1">
           <PlanType type={item.type} />
           <span className="font-bold max-w-44 overflow-x-hidden text-ellipsis">
             {formatIntl.number(item.price, {
