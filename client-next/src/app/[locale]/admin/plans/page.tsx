@@ -57,6 +57,7 @@ export default async function AdminPlansPage({ params: { locale } }: Props) {
       archivePlansTexts,
       topPlansTexts,
       findInSiteTexts,
+      archiveDayTexts,
     },
     authUser,
   ] = await Promise.all([
@@ -120,7 +121,7 @@ export default async function AdminPlansPage({ params: { locale } }: Props) {
                 prefix={"day"}
                 locale={locale}
                 showHeader={false}
-                {...archivePlansTexts}
+                {...archiveDayTexts}
                 authUser={authUser}
               />
             </div>
