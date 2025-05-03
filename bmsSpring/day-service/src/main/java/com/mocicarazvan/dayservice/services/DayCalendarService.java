@@ -7,6 +7,7 @@ import com.mocicarazvan.dayservice.dtos.dayCalendar.DayCalendarUserDates;
 import com.mocicarazvan.dayservice.dtos.meal.MealResponse;
 import com.mocicarazvan.dayservice.dtos.recipe.RecipeResponse;
 import com.mocicarazvan.templatemodule.dtos.response.ResponseWithChildList;
+import com.mocicarazvan.templatemodule.dtos.response.ResponseWithUserDtoEntity;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -32,6 +33,9 @@ public interface DayCalendarService {
             LocalDate startDate,
             LocalDate endDate
     );
+
+
+    Mono<ResponseWithUserDtoEntity<RecipeResponse>> getRecipeByIdWithUserForDayCalendar(Long dcId, Long dayId, Long recipeId, String userId);
 
     Flux<DayCalendarUserDates> getAllDaysByUserId(String userId);
 }

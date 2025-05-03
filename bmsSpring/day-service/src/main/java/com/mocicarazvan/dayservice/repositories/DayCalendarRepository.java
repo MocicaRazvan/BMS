@@ -79,4 +79,7 @@ public interface DayCalendarRepository extends R2dbcRepository<DayCalendar, Long
             LocalDateTime dateAfter,
             LocalDateTime dateBefore
     );
+
+    Mono<Boolean> existsByIdAndUserIdAndDayId(Long id, Long userId, Long dayId);
+
 }

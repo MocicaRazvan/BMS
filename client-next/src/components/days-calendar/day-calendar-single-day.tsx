@@ -49,6 +49,7 @@ export default function DayCalendarSingleDay({
             meals={dayCalendar.mealResponses}
             disableLikes={false}
             onReactCallback={refetch}
+            recipeBasePath={`/daysCalendar/recipe/${dayCalendar.id}`}
           />
         </div>
       </DialogContent>

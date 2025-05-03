@@ -109,23 +109,23 @@ public class OrderController implements CountInParentController {
 
 
     @GetMapping(value = "/subscriptions/recipe/{planId}/{dayId}/{recipeId}", produces = {MediaType.APPLICATION_NDJSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
-    Mono<ResponseEntity<ResponseWithUserDtoEntity<RecipeResponse>>> getRecipeByIdWithUserInternal(@PathVariable Long planId, @PathVariable Long dayId,
-                                                                                                  @PathVariable Long recipeId, ServerWebExchange exchange) {
+    public Mono<ResponseEntity<ResponseWithUserDtoEntity<RecipeResponse>>> getRecipeByIdWithUserInternal(@PathVariable Long planId, @PathVariable Long dayId,
+                                                                                                         @PathVariable Long recipeId, ServerWebExchange exchange) {
         return orderService.getRecipeByIdWithUser(planId, dayId, recipeId, requestsUtils.extractAuthUser(exchange))
                 .map(ResponseEntity::ok);
     }
 
     @GetMapping(value = "/subscriptions/days/{planId}/{dayId}", produces = {MediaType.APPLICATION_NDJSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
-    Mono<ResponseEntity<ResponseWithUserDtoEntity<DayResponse>>> getDayByIdWithUserInternal(@PathVariable Long planId, @PathVariable Long dayId,
-                                                                                            ServerWebExchange exchange) {
+    public Mono<ResponseEntity<ResponseWithUserDtoEntity<DayResponse>>> getDayByIdWithUserInternal(@PathVariable Long planId, @PathVariable Long dayId,
+                                                                                                   ServerWebExchange exchange) {
         return orderService.getDayByIdWithUser(planId, dayId, requestsUtils.extractAuthUser(exchange))
                 .map(ResponseEntity::ok);
     }
 
     @GetMapping(value = "/subscriptions/days/meals/{planId}/{dayId}", produces = {MediaType.APPLICATION_NDJSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
     @ResponseStatus(HttpStatus.OK)
-    Flux<CustomEntityModel<MealResponse>> getMealsByDayInternal(@PathVariable Long planId, @PathVariable Long dayId,
-                                                                ServerWebExchange exchange) {
+    public Flux<CustomEntityModel<MealResponse>> getMealsByDayInternal(@PathVariable Long planId, @PathVariable Long dayId,
+                                                                       ServerWebExchange exchange) {
         return orderService.getMealsByDayInternal(planId, dayId, requestsUtils.extractAuthUser(exchange));
     }
 

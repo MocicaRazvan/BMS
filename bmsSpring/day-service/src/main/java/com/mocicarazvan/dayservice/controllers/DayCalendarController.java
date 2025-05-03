@@ -9,6 +9,7 @@ import com.mocicarazvan.dayservice.dtos.recipe.RecipeResponse;
 import com.mocicarazvan.dayservice.hateos.dayCalendar.DayCalendarReactiveResponseBuilder;
 import com.mocicarazvan.dayservice.services.DayCalendarService;
 import com.mocicarazvan.templatemodule.dtos.response.ResponseWithChildList;
+import com.mocicarazvan.templatemodule.dtos.response.ResponseWithUserDtoEntity;
 import com.mocicarazvan.templatemodule.hateos.CustomEntityModel;
 import com.mocicarazvan.templatemodule.utils.RequestsUtils;
 import jakarta.validation.Valid;
@@ -127,4 +128,21 @@ public class DayCalendarController {
                 to
         );
     }
+
+    @GetMapping(value = "/recipe/{dcId}/{dayId}/{recipeId}", produces = {MediaType.APPLICATION_NDJSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
+    public Mono<ResponseEntity<ResponseWithUserDtoEntity<RecipeResponse>>> getRecipeByIdWithUserForDayCalendar(
+            @PathVariable Long dcId,
+            @PathVariable Long dayId,
+            @PathVariable Long recipeId,
+            ServerWebExchange serverWebExchange
+    ) {
+        return dayCalendarService.getRecipeByIdWithUserForDayCalendar(
+                        dcId,
+                        dayId,
+                        recipeId,
+                        requestsUtils.extractAuthUser(serverWebExchange)
+                )
+                .map(ResponseEntity::ok);
+    }
 }
+

@@ -86,6 +86,8 @@ create table if not exists day_calendar(
     UNIQUE (user_id, day_id, custom_date)
 );
 create index if not exists idx_day_calendar_user_id on day_calendar(user_id);
+create  index  if not exists id_day_calendar_id_user_id_day_id
+    on day_calendar (id, user_id, day_id);
 CREATE INDEX if not exists idx_day_calendar_custom_date_user
     ON day_calendar (custom_date DESC, user_id);
 

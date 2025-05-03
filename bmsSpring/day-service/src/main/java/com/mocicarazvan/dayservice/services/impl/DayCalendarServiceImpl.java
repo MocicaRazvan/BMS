@@ -14,6 +14,8 @@ import com.mocicarazvan.rediscache.annotation.RedisReactiveChildCacheEvict;
 import com.mocicarazvan.templatemodule.clients.UserClient;
 import com.mocicarazvan.templatemodule.dtos.generic.IdGenerateDto;
 import com.mocicarazvan.templatemodule.dtos.response.ResponseWithChildList;
+import com.mocicarazvan.templatemodule.dtos.response.ResponseWithUserDtoEntity;
+import com.mocicarazvan.templatemodule.exceptions.action.PrivateRouteException;
 import com.mocicarazvan.templatemodule.exceptions.notFound.NotFoundEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -189,6 +191,21 @@ public class DayCalendarServiceImpl implements DayCalendarService {
                                 })
 
                 );
+    }
+
+    @Override
+    public Mono<ResponseWithUserDtoEntity<RecipeResponse>> getRecipeByIdWithUserForDayCalendar(
+            Long dcId, Long dayId, Long recipeId, String userId
+    ) {
+        return dayCalendarRepository.existsByIdAndUserIdAndDayId(dcId,
+                Long.parseLong(userId),
+                dayId
+        ).flatMap(exists -> {
+            if (!exists) {
+                return Mono.error(new PrivateRouteException());
+            }
+            return recipeClient.getByIdWithUser(String.valueOf(recipeId), userId);
+        });
     }
 
 
