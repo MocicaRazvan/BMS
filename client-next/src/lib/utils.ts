@@ -320,8 +320,13 @@ export function trimHTML(html: string) {
 }
 export function normalizeText<T>(text: T): T {
   if (typeof text === "string") {
+    return cleanText(text.toLowerCase()) as T;
+  }
+  return text;
+}
+export function cleanText<T>(text: T): T {
+  if (typeof text === "string") {
     return text
-      .toLowerCase()
       .replace(/\s+/g, " ")
       .replace(/[\u200B-\u200D\uFEFF]/g, "")
       .normalize("NFKC")

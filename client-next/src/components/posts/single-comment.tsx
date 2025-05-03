@@ -38,6 +38,7 @@ import { fetchStream } from "@/lib/fetchers/fetchStream";
 import { getToxicity } from "@/actions/toxcity";
 import DOMPurify from "dompurify";
 import Editor, { EditorTexts } from "@/components/editor/editor";
+import { cleanText } from "@/lib/utils";
 
 export interface BaseSingleCommentProps {
   deleteCommentCallback: (commentId: number) => void;
@@ -103,6 +104,11 @@ export const SingleComment = memo<Props>(
     const [editMode, setEditMode] = useState("");
     const { isLoading, setIsLoading, router, errorMsg, setErrorMsg } =
       useLoadingErrorState();
+
+    const watchBody = form.watch("body");
+    const isSameBody = useMemo(() => {
+      return cleanText(watchBody) === cleanText(content.body);
+    }, [watchBody, content.body]);
 
     const onSubmit = useCallback(
       async (data: CommentSchemaType) => {
@@ -272,7 +278,7 @@ export const SingleComment = memo<Props>(
                       <ErrorMessage message={errorText} show={!!errorMsg} />
                       <ButtonSubmit
                         isLoading={isLoading}
-                        disable={false}
+                        disable={isLoading || isSameBody}
                         buttonSubmitTexts={buttonSubmitTexts}
                       />
                     </form>
