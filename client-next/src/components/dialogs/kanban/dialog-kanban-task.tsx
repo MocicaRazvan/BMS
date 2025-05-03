@@ -49,6 +49,7 @@ export interface DialogKanbanTaskTexts {
 interface Props extends DialogKanbanTaskTexts {
   successCallback: (content: string, type: KanbanTaskType) => Promise<void>;
   task?: KanbanTask;
+  setOuterOpen: (isOpen: boolean) => void;
 }
 
 function DialogKanbanTask({
@@ -61,12 +62,13 @@ function DialogKanbanTask({
   addTask,
   title,
   types,
+  setOuterOpen,
 }: Props) {
   const [taskContent, setTaskContent] = useState(task?.content || "");
   const [isOpen, setIsOpen] = useState(false);
   const [taskType, setTaskType] = useState<KanbanTaskType>(task?.type || "LOW");
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
-  const { setErrorMsg, errorMsg, router, isLoading, setIsLoading } =
+  const { setErrorMsg, errorMsg, isLoading, setIsLoading } =
     useLoadingErrorState();
 
   const handleCleanup = useCallback(() => {
@@ -84,16 +86,20 @@ function DialogKanbanTask({
         .then(() => {
           setErrorMsg("");
           setIsOpen(false);
+          setOuterOpen(false);
           handleCleanup();
         })
         .catch(() => setErrorMsg(error))
-        .finally(() => setIsLoading(false));
+        .finally(() => {
+          setIsLoading(false);
+        });
     },
     [
       error,
       handleCleanup,
       setErrorMsg,
       setIsLoading,
+      setOuterOpen,
       successCallback,
       taskType,
     ],
@@ -108,7 +114,13 @@ function DialogKanbanTask({
   }, [task, textAreaRef.current]);
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+    <Dialog
+      open={isOpen}
+      onOpenChange={(v) => {
+        setIsOpen(v);
+        setOuterOpen(v);
+      }}
+    >
       <DialogTrigger asChild>
         {!task ? (
           <Button

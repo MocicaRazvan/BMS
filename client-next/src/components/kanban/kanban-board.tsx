@@ -38,8 +38,6 @@ import {
   createDndIdColumn,
   createDndIdTask,
 } from "@/components/kanban/kanban-board-wrapper";
-import { useDebounce } from "@/components/ui/multiple-selector";
-import { usePathname } from "@/navigation";
 import {
   ReindexState,
   useKanbanRouteChange,
@@ -102,7 +100,6 @@ export default function KanbanBoard({
   );
 
   const { reindexState, setReindexState } = useKanbanRouteChange(handleUpdate);
-  const debounceReindex = useDebounce(reindexState, 1000);
 
   const [activeColumn, setActiveColumn] = useState<KanbanColumn | null>(null);
   const [activeTask, setActiveTask] = useState<KanbanTask | null>(null);

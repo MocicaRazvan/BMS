@@ -107,6 +107,7 @@ function KanbanTaskCard({
             task={task}
             successCallback={(c, t) => updateTask(task, c, t)}
             {...dialogKanbanTaskTexts}
+            setOuterOpen={setIsDialogOpen}
           />
 
           <DeleteKanbanItem
