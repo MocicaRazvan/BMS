@@ -478,8 +478,8 @@ export default function RecipeForm({
             <TitleBodyForm<RecipeSchemaType>
               control={form.control}
               titleBodyTexts={titleBodyTexts}
-              showAIPopDescription
-              showAIPopTitle
+              showAIPopDescription={true}
+              showAIPopTitle={true}
               aiFields={aiFields}
               editorKey={editorKey}
               aiDescriptionCallBack={(r) => baseAICallback("body", r)}

@@ -259,8 +259,8 @@ export default function PostForm({
             <TitleBodyForm<PostType>
               control={form.control}
               titleBodyTexts={titleBodyTexts}
-              showAIPopDescription
-              showAIPopTitle
+              showAIPopDescription={true}
+              showAIPopTitle={true}
               aiFields={aiFields}
               editorKey={editorKey}
               aiDescriptionCallBack={(r) => baseAICallback("body", r)}

@@ -75,6 +75,10 @@ export default function AIGeneratePop({
   const lastUpdateTime = useRef<number>(-1);
   const { csrfRawToken, addTokenConditionally } = useCsrfToken();
 
+  useEffect(() => {
+    setSentFields(fields);
+  }, [JSON.stringify(fields)]);
+
   const {
     messages,
     setMessages,
@@ -108,13 +112,12 @@ export default function AIGeneratePop({
           content: undefined,
           updatedAt: -1,
         };
-  // console.log("messageAI", message, lastUpdateTime.current);
 
   useEffect(() => {
     if (!isLoading && lastUpdateTime.current !== -1) {
       lastUpdateTime.current = -1;
     }
-  }, [isLoading, lastUpdateTime.current]);
+  }, [isLoading]);
 
   useEffect(() => {
     if (

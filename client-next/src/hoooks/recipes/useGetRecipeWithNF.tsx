@@ -15,6 +15,7 @@ export function useGetRecipeWithNF(id: string) {
     path: `/recipes/${id}`,
     method: "GET",
     authToken: true,
+    refetchOnFocus: false,
     // useAbortController: false,
   });
 
@@ -26,6 +27,7 @@ export function useGetRecipeWithNF(id: string) {
     path: `/recipes/ingredients/${id}`,
     method: "GET",
     authToken: true,
+    refetchOnFocus: false,
     // useAbortController: false,
   });
 

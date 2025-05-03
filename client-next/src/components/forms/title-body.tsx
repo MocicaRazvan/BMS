@@ -297,17 +297,17 @@ function AIResponse({
             }
           >
             <Button
-              type={"button"}
+              type="button"
               onClick={() => {
                 saveCallback({ answer: response });
                 setResponse(undefined);
               }}
-              variant={"success"}
+              variant="success"
             >
               {useButtonText}
             </Button>
             {!isLoading && (
-              <Button type={"button"} onClick={() => setResponse(undefined)}>
+              <Button type="button" onClick={() => setResponse(undefined)}>
                 {discardButtonText}
               </Button>
             )}

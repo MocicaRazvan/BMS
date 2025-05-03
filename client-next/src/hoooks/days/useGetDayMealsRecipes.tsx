@@ -20,6 +20,7 @@ export function useGetDayMealsRecipes(id: string) {
     method: "GET",
     authToken: true,
     useAbortController: false,
+    refetchOnFocus: false,
   });
 
   const {
@@ -34,6 +35,7 @@ export function useGetDayMealsRecipes(id: string) {
     method: "GET",
     authToken: true,
     useAbortController: false,
+    refetchOnFocus: false,
   });
 
   const initialData: InitialDataType = useMemo(

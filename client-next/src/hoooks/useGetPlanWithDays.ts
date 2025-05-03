@@ -14,6 +14,7 @@ export function useGetPlanWithDays(id: string) {
     method: "GET",
     authToken: true,
     useAbortController: false,
+    refetchOnFocus: false,
   });
 
   const {
