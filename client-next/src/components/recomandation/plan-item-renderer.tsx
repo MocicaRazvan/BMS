@@ -22,20 +22,22 @@ export default function PlanItemRenderer({ item, texts }: Props) {
         >
           {item.title}
         </Link>
-        <span className="font-bold">
-          {formatIntl.number(item.price, {
-            style: "currency",
-            currency: "EUR",
-            maximumFractionDigits: 2,
-          })}
-        </span>
       </div>
       <div className="flex items-center justify-between w-full">
         <div className="flex flex-col items-start justify-center">
           <span className="font-bold">{texts.objective}</span>
           <span>{item.objective.replace("_", " ")}</span>
         </div>
-        <PlanType type={item.type} />
+        <div className="flex flex-col items-start justify-center gap-1">
+          <PlanType type={item.type} />
+          <span className="font-bold">
+            {formatIntl.number(item.price, {
+              style: "currency",
+              currency: "EUR",
+              maximumFractionDigits: 2,
+            })}
+          </span>
+        </div>
       </div>
     </div>
   );
