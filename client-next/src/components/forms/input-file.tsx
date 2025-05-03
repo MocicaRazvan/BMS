@@ -197,13 +197,18 @@ export default function InputFile<T extends FieldValues>({
         const castedItem = itemToCrop as FieldInputItem;
         URL.revokeObjectURL(castedItem.src);
         castedItem.src = src;
-        const newName = "cropped_" + uuidv4() + castedItem.file.name;
+        const ext = blob.type.split("/")[1];
+        const base = castedItem.file.name.replace(/\.\w+$/, "");
+        const newName = `cropped_${uuidv4()}_${base}.${ext}`;
+
         castedItem.file = new File([blob], newName, {
           type: blob.type,
         });
+
         const newItems = fieldValue.map((item: FieldInputItem) =>
           item.id === id ? castedItem : item,
         );
+
         setValue(fieldName as Path<T>, newItems as PathValue<T, Path<T>>);
       }
     },

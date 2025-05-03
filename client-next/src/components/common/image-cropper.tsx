@@ -26,7 +26,7 @@ export interface ImageCropperProps {
   originalMime: string;
   texts: ImageCropTexts;
 }
-
+const PNG_MIME = "image/png" as const;
 export default function ImageCropper({
   src,
   onCropComplete,
@@ -297,6 +297,6 @@ export async function getCroppedImg(
           blob: file,
         });
       }
-    }, mime);
+    }, PNG_MIME);
   });
 }
