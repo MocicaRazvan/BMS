@@ -106,15 +106,15 @@ export default function RelativeItem<M extends WithUserDto>({
     prev: "",
   });
 
-  const relativePercent = useMemo(() => {
-    const raw =
+  const relativePercent = useMemo(
+    () =>
       count.prev > 0
         ? ((count.cur - count.prev) / count.prev) * 100
         : count.cur === 0
           ? 0
-          : 100;
-    return Math.max(-100, Math.min(100, raw));
-  }, [count.cur, count.prev]);
+          : count.cur,
+    [count.cur, count.prev],
+  );
 
   const maxCount = useMemo(
     () => Math.max(count.cur, count.prev),
