@@ -618,6 +618,7 @@ export const getPlanSchema = (texts: PlanSchemaTexts) =>
       price: z.coerce.number().min(1, texts.minPrice),
       objective: z.enum(planObjectives as [string, ...string[]], {
         invalid_type_error: texts.objective,
+        errorMap: () => ({ message: texts.objective }),
       }),
     })
     .and(getTitleBodySchema(texts))
