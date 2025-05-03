@@ -344,6 +344,7 @@ export const getIngredientSchema = ({
     name: z.string().min(2, minName),
     type: z.enum(dietTypes, {
       message: invalidDietType,
+      errorMap: () => ({ message: invalidDietType }),
     }),
   });
 
@@ -443,7 +444,10 @@ const getNutritionalFactSchema = ({
         // .positive({ message: salt.positive })
         .nonnegative({ message: salt.nonnegative })
         .max(100, { message: salt.max }),
-      unit: z.enum(unitTypes, { message: unit }),
+      unit: z.enum(unitTypes, {
+        message: unit,
+        errorMap: () => ({ message: unit }),
+      }),
     })
     .superRefine((data, ctx) => {
       if (data.saturatedFat > data.fat) {
@@ -688,6 +692,7 @@ export const getDaySchema = (texts: DaySchemaTexts) =>
     .object({
       type: z.enum(dayTypes as [string, ...string[]], {
         invalid_type_error: texts.type,
+        errorMap: () => ({ message: texts.type }),
       }),
       meals: z.array(getMealSchema(texts.meals)).min(1, texts.minMeals),
     })
