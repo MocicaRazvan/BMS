@@ -25,6 +25,8 @@ public interface PostService extends ApprovedService<Post, PostBody, PostRespons
     Mono<List<String>> seedEmbeddings();
 
 
+    Mono<Pair<PostResponse, Boolean>> reactToModelInvalidateApproved(Long id, String type, String userId);
+
     Flux<PostResponseWithSimilarity> getSimilarPosts(Long id, int limit, Double minSimilarity);
 
     Mono<Void> existsByIdAndApprovedIsTrue(Long id);

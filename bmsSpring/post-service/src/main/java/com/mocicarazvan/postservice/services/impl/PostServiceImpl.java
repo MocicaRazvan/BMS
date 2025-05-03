@@ -80,6 +80,13 @@ public class PostServiceImpl extends ApprovedServiceImpl<Post, PostBody, PostRes
     }
 
     @Override
+    @RedisReactiveApprovedCacheEvict(key = CACHE_KEY_PATH, id = "#id", forWhomPath = "#userId")
+    public Mono<Pair<PostResponse, Boolean>> reactToModelInvalidateApproved(Long id, String type, String userId) {
+        return super.reactToModel(id, type, userId)
+                .map(r -> Pair.of(r, r.isApproved()));
+    }
+
+    @Override
     @RedisReactiveCacheEvict(key = CACHE_KEY_PATH, id = "#id")
     public Mono<PostResponse> deleteModel(Long id, String userId) {
         return

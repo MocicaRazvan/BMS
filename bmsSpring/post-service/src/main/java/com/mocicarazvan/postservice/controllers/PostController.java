@@ -246,20 +246,19 @@ public class PostController implements ApproveController
                 .flatMapSequential(m -> postReactiveResponseBuilder.toModelPageable(m, PostController.class));
     }
 
-    // todo id displaying nr likes or dislikes invalidate the cache for id
     @Override
     @PatchMapping(value = "/like/{id}", produces = {MediaType.APPLICATION_NDJSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
     public Mono<ResponseEntity<CustomEntityModel<PostResponse>>> likeModel(@PathVariable Long id, ServerWebExchange exchange) {
-        return postService.reactToModel(id, "like", requestsUtils.extractAuthUser(exchange))
-                .flatMap(m -> postReactiveResponseBuilder.toModel(m, PostController.class))
+        return postService.reactToModelInvalidateApproved(id, "like", requestsUtils.extractAuthUser(exchange))
+                .flatMap(m -> postReactiveResponseBuilder.toModel(m.getFirst(), PostController.class))
                 .map(ResponseEntity::ok);
     }
 
     @Override
     @PatchMapping(value = "/dislike/{id}", produces = {MediaType.APPLICATION_NDJSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
     public Mono<ResponseEntity<CustomEntityModel<PostResponse>>> dislikeModel(@PathVariable Long id, ServerWebExchange exchange) {
-        return postService.reactToModel(id, "dislike", requestsUtils.extractAuthUser(exchange))
-                .flatMap(m -> postReactiveResponseBuilder.toModel(m, PostController.class))
+        return postService.reactToModelInvalidateApproved(id, "dislike", requestsUtils.extractAuthUser(exchange))
+                .flatMap(m -> postReactiveResponseBuilder.toModel(m.getFirst(), PostController.class))
                 .map(ResponseEntity::ok);
     }
 
