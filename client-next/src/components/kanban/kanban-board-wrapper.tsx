@@ -36,6 +36,7 @@ export default function KanbanBoardWrapper({ authUser, ...props }: Props) {
     path: "/kanban/column/byUserId",
     method: "GET",
     authToken: true,
+    refetchOnFocus: false,
   });
 
   const columns: KanbanColumn[] = useMemo(

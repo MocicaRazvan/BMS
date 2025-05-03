@@ -49,7 +49,7 @@ export interface DialogKanbanTaskTexts {
 interface Props extends DialogKanbanTaskTexts {
   successCallback: (content: string, type: KanbanTaskType) => Promise<void>;
   task?: KanbanTask;
-  setOuterOpen: (isOpen: boolean) => void;
+  setOuterOpen?: (isOpen: boolean) => void;
 }
 
 function DialogKanbanTask({
@@ -86,7 +86,7 @@ function DialogKanbanTask({
         .then(() => {
           setErrorMsg("");
           setIsOpen(false);
-          setOuterOpen(false);
+          setOuterOpen?.(false);
           handleCleanup();
         })
         .catch(() => setErrorMsg(error))
@@ -118,7 +118,7 @@ function DialogKanbanTask({
       open={isOpen}
       onOpenChange={(v) => {
         setIsOpen(v);
-        setOuterOpen(v);
+        setOuterOpen?.(v);
       }}
     >
       <DialogTrigger asChild>
