@@ -16,7 +16,7 @@ class MemoryVectorStoreCache {
     this.cache = new LRUCache({
       max: 70,
       maxSize: 1200,
-      sizeCalculation: (v, _) => v.documents.length,
+      sizeCalculation: (v, _) => v.documents.length || 1,
       ttl: 1000 * 60 * 5,
       allowStale: false,
       updateAgeOnGet: true,
