@@ -30,7 +30,7 @@ export default function PlanItemRenderer({ item, texts }: Props) {
         </div>
         <div className="flex flex-col items-start justify-center gap-1">
           <PlanType type={item.type} />
-          <span className="font-bold">
+          <span className="font-bold max-w-44 overflow-x-hidden text-ellipsis">
             {formatIntl.number(item.price, {
               style: "currency",
               currency: "EUR",
