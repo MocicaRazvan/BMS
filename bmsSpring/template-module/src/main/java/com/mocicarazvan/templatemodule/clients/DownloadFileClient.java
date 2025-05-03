@@ -4,6 +4,10 @@ import com.mocicarazvan.templatemodule.enums.FileType;
 import com.mocicarazvan.templatemodule.utils.FileSystemFilePart;
 import io.github.resilience4j.reactor.retry.RetryOperator;
 import io.github.resilience4j.retry.Retry;
+import org.springframework.http.client.reactive.ReactorClientHttpConnector;
+import reactor.netty.http.client.HttpClient;
+import io.netty.handler.ssl.SslContextBuilder;
+import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
@@ -15,6 +19,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
+import javax.net.ssl.SSLException;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -29,9 +34,20 @@ public class DownloadFileClient {
     private final Executor executor;
 
     public DownloadFileClient(int parallelism, Executor executor) {
+        HttpClient httpClient = HttpClient.create()
+                .secure(sslContextSpec -> {
+                    try {
+                        sslContextSpec.sslContext(SslContextBuilder.forClient()
+                                .trustManager(InsecureTrustManagerFactory.INSTANCE)
+                                .build());
+                    } catch (SSLException e) {
+                        throw new RuntimeException("Failed to create insecure SSL context", e);
+                    }
+                });
         this.parallelism = parallelism;
         this.executor = executor;
         this.webClient = WebClient.builder()
+                .clientConnector(new ReactorClientHttpConnector(httpClient))
                 .exchangeStrategies(useMaxMemory())
                 .build();
     }
