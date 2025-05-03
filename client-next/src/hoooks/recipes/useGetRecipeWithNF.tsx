@@ -10,7 +10,7 @@ export function useGetRecipeWithNF(id: string) {
   const {
     messages: recipeMessage,
     error: recipeError,
-    isFinished: recipeIsFinished,
+    isAbsoluteFinished: recipeIsFinished,
   } = useFetchStream<CustomEntityModel<RecipeResponse>>({
     path: `/recipes/${id}`,
     method: "GET",
@@ -21,7 +21,7 @@ export function useGetRecipeWithNF(id: string) {
   const {
     messages: IQMessage,
     error: IQError,
-    isFinished: IQIsFinished,
+    isAbsoluteFinished: IQIsFinished,
   } = useFetchStream<IngredientNutritionalFactResponseWithCount>({
     path: `/recipes/ingredients/${id}`,
     method: "GET",

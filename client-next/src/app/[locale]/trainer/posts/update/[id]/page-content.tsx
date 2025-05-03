@@ -20,7 +20,7 @@ export default function UpdatePostPageContent({
   postId,
   ...props
 }: Props) {
-  const { messages, error, isFinished } = useFetchStream<
+  const { messages, error, isAbsoluteFinished } = useFetchStream<
     CustomEntityModel<PostResponse>,
     BaseError
   >({
@@ -32,7 +32,7 @@ export default function UpdatePostPageContent({
 
   const { navigateToNotFound } = useClientNotFound();
 
-  if (!isFinished) return <LoadingSpinner />;
+  if (!isAbsoluteFinished) return <LoadingSpinner />;
 
   if (error || !messages[0]?.content) {
     console.log("HERE");

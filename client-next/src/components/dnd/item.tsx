@@ -21,9 +21,10 @@ import ImageCropper, {
   ImageCropTexts,
 } from "@/components/common/image-cropper";
 import { useDebounce } from "react-use";
+import { FieldInputItem } from "@/components/forms/input-file";
 
 type Props = {
-  item: SortableItem;
+  item: FieldInputItem;
   isOpacityEnabled?: boolean;
   isDragging?: boolean;
   type: SortableListType;
@@ -186,6 +187,7 @@ const Item = forwardRef<HTMLDivElement, Props>(
                 onCropComplete={(src, blob) => cropImage(item.id, src, blob)}
                 cropShape={cropShape}
                 texts={imageCropTexts}
+                originalMime={item.file.type}
               />
             </div>
           )}

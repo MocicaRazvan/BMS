@@ -1,13 +1,14 @@
 "use client";
-import { SortableItem, SortableListType } from "@/components/dnd/sortable-list";
+import { SortableListType } from "@/components/dnd/sortable-list";
 import { HTMLAttributes, useState } from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import Item, { ItemTexts } from "@/components/dnd/item";
 import { ImageCropTexts } from "@/components/common/image-cropper";
+import { FieldInputItem } from "@/components/forms/input-file";
 
 type Props = {
-  item: SortableItem;
+  item: FieldInputItem;
   type: SortableListType;
   index: number;
   deleteItem: (id: string | number) => void;

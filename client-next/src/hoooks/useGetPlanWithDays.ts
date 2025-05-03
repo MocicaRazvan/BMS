@@ -8,7 +8,7 @@ export function useGetPlanWithDays(id: string) {
   const {
     messages: plan,
     error: planError,
-    isFinished: planFinished,
+    isAbsoluteFinished: planFinished,
   } = useFetchStream<CustomEntityModel<PlanResponse>, BaseError>({
     path: `/plans/${id}`,
     method: "GET",
@@ -19,7 +19,7 @@ export function useGetPlanWithDays(id: string) {
   const {
     messages: days,
     error: dayError,
-    isFinished: dayFinished,
+    isAbsoluteFinished: dayFinished,
   } = useFetchStream<DayResponse, BaseError>({
     path: `/plans/days/${id}`,
     method: "GET",

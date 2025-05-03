@@ -23,6 +23,7 @@ export interface ImageCropperProps {
   onCropComplete: (src: string, blob: Blob) => void;
   dialogOpenObserver?: (isOpen: boolean) => void;
   cropShape?: "rect" | "round";
+  originalMime: string;
   texts: ImageCropTexts;
 }
 
@@ -31,6 +32,7 @@ export default function ImageCropper({
   onCropComplete,
   dialogOpenObserver,
   cropShape = "rect",
+  originalMime,
   texts: { tooltipText, buttonText },
 }: ImageCropperProps) {
   const [crop, setCrop] = useState<Point>({ x: 0, y: 0 });
@@ -81,6 +83,7 @@ export default function ImageCropper({
         src,
         croppedAreaPixels,
         rotation,
+        originalMime,
       );
       if (!croppedImage) {
         throw new Error("Failed to crop image");
@@ -219,6 +222,7 @@ export async function getCroppedImg(
   imageSrc: string,
   pixelCrop: Area,
   rotation = 0,
+  mime: string,
   flip = { horizontal: false, vertical: false },
 ): Promise<{
   url: string;
@@ -293,6 +297,6 @@ export async function getCroppedImg(
           blob: file,
         });
       }
-    }, "image/jpeg");
+    }, mime);
   });
 }

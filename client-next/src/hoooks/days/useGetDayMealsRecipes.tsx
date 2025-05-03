@@ -14,7 +14,7 @@ export function useGetDayMealsRecipes(id: string) {
   const {
     messages: day,
     error: dayError,
-    isFinished: dayFinished,
+    isAbsoluteFinished: dayFinished,
   } = useFetchStream<CustomEntityModel<DayResponse>, BaseError>({
     path: `/days/${id}`,
     method: "GET",
@@ -25,7 +25,7 @@ export function useGetDayMealsRecipes(id: string) {
   const {
     messages: meals,
     error: mealsError,
-    isFinished: mealsFinished,
+    isAbsoluteFinished: mealsFinished,
   } = useFetchStream<
     ResponseWithChildListEntity<MealResponse, RecipeResponse>,
     BaseError

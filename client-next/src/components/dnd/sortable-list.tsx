@@ -55,7 +55,7 @@ export default function SortableList({
   cropShape = "rect",
   imageCropTexts,
 }: Props) {
-  const [activeItem, setActiveItem] = useState<SortableItem>();
+  const [activeItem, setActiveItem] = useState<FieldInputItem>();
 
   const itemIds = useMemo(() => items.map((item) => item.id), [items]);
   const sensors = useSensors(
