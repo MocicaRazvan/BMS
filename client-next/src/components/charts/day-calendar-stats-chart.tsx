@@ -34,7 +34,7 @@ const chartConfig = dayTypes.reduce((acc, cur) => {
 }, {} as ChartConfig);
 
 export default function DayCalendarStatsChart({ data }: Props) {
-  const isSmall = useMedia("(max-width: 640px)", false);
+  const isSmall = useMedia("(max-width: 850px)", false);
   const chunkSize = isSmall ? 1 : 3;
   const { chartData, chunkedData, globalMax } = useMemo(() => {
     const entries: Record<string, number | string>[] = [];
