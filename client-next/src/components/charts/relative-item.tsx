@@ -276,7 +276,7 @@ export default function RelativeItem<M extends WithUserDto>({
             {relativePercent > 0 ? increase : decrease}
           </p>
           <Progress
-            value={Math.abs(relativePercent)}
+            value={Math.min(Math.abs(relativePercent), 100)}
             indicatorClassName={
               count.cur > count.prev ? "bg-success" : "bg-destructive"
             }
