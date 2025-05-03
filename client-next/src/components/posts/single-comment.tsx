@@ -216,7 +216,7 @@ export const SingleComment = memo<Props>(
             </div>
           </div>
           <Link
-            href={`/users/${userId}`}
+            href={`/users/single/${userId}`}
             className="text-sm italic cursor-pointer hover:underline"
           >
             {`${authorText} ${email}`}
