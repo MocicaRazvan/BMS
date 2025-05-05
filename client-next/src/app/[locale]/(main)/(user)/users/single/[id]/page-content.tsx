@@ -19,9 +19,9 @@ import {
 import UpdateProfile from "@/components/forms/update-profile";
 import { useCallback, useState } from "react";
 import { cn } from "@/lib/utils";
-import { Loader2, Notebook } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { fetchStream } from "@/lib/fetchers/fetchStream";
-import { Link, useRouter } from "@/navigation";
+import { useRouter } from "@/navigation";
 import { UpdateProfileTexts } from "@/texts/components/forms";
 import { useStompClient } from "react-stomp-hooks";
 import useClientNotFound from "@/hoooks/useClientNotFound";
@@ -102,6 +102,7 @@ export default function UserPageContent({
           email,
         },
       });
+
       if (error) {
         setRespMsg({
           message: errorText,

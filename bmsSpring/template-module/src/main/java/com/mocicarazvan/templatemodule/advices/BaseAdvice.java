@@ -8,6 +8,8 @@ import com.mocicarazvan.templatemodule.exceptions.action.SubEntityUsed;
 import com.mocicarazvan.templatemodule.exceptions.common.ServiceCallFailedException;
 import com.mocicarazvan.templatemodule.exceptions.common.SortingCriteriaException;
 import com.mocicarazvan.templatemodule.exceptions.common.UsernameNotFoundException;
+import com.mocicarazvan.templatemodule.exceptions.email.EmailFailToSend;
+import com.mocicarazvan.templatemodule.exceptions.email.EmailMXFail;
 import com.mocicarazvan.templatemodule.exceptions.notFound.IdNameException;
 import com.mocicarazvan.templatemodule.exceptions.notFound.NotFoundBase;
 import com.mocicarazvan.templatemodule.exceptions.notFound.TokenNotFound;
@@ -29,6 +31,12 @@ public abstract class BaseAdvice extends BaseExceptionMapping {
     public Mono<ResponseEntity<BaseErrorResponse>> handleBaseNotFound(NotFoundBase e, ServerWebExchange exchange) {
         return handleWithMessage(HttpStatus.NOT_FOUND, e, exchange);
     }
+
+    @ExceptionHandler({EmailFailToSend.class, EmailMXFail.class})
+    public Mono<ResponseEntity<BaseErrorResponse>> handleEmailFailToSend(Exception e, ServerWebExchange exchange) {
+        return handleWithMessage(HttpStatus.BAD_REQUEST, e, exchange);
+    }
+
 
     @ExceptionHandler(IdNameException.class)
     public Mono<ResponseEntity<IdNameResponse>> handleIdNameNotFound(IdNameException exception, ServerWebExchange exchange) {

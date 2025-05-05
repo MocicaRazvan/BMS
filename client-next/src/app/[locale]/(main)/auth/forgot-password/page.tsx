@@ -36,6 +36,7 @@ export default async function ForgotPasswordWrapper({
       submitButton={t("submitButton")}
       loadingButton={t("loadingButton")}
       successMessage={t("successMessage")}
+      mxError={t("mxError")}
       emailSchemaTexts={emailSchemaTexts}
       user={session?.user}
     />

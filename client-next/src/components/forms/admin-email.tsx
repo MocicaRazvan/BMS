@@ -32,11 +32,13 @@ import { fetchStream } from "@/lib/fetchers/fetchStream";
 import { toast } from "@/components/ui/use-toast";
 import { handleBaseError } from "@/lib/utils";
 import { useNavigationGuardI18nForm } from "@/hoooks/use-navigation-guard-i18n-form";
+import { MX_SPRING_MESSAGE } from "@/lib/constants";
 
 export interface AdminEmailTexts {
   adminEmailSchemaTexts: AdminEmailSchemaTexts;
   buttonSubmitTexts: ButtonSubmitTexts;
   error: string;
+  mxError: string;
   title: string;
   preview: string;
   toastDescription: string;
@@ -112,6 +114,7 @@ export default function AdminEmail({
   title,
   toastDescription,
   editorTexts,
+  mxError,
 }: Props) {
   const schema = useMemo(
     () => getAdminEmailSchema(adminEmailSchemaTexts),
@@ -146,22 +149,41 @@ export default function AdminEmail({
           token: authUser.token,
           body,
         });
+        if (res?.error?.status) {
+          const err = res?.error;
+
+          if (
+            err.status === 400 &&
+            typeof err.message === "string" &&
+            err.message.includes(MX_SPRING_MESSAGE)
+          ) {
+            setErrorMsg(mxError);
+            return;
+          }
+          setErrorMsg(error);
+          return;
+        }
         form.reset();
         setEditorKey(Math.random());
         toast({
           description: `${toastDescription} ${data.email} `,
           variant: "success",
         });
-        if (res?.error?.status) {
-          setErrorMsg(error);
-        }
       } catch (e) {
         handleBaseError(e, setErrorMsg, error);
       } finally {
         setIsLoading(false);
       }
     },
-    [authUser.token, error, form, setErrorMsg, setIsLoading, toastDescription],
+    [
+      authUser.token,
+      error,
+      form,
+      mxError,
+      setErrorMsg,
+      setIsLoading,
+      toastDescription,
+    ],
   );
 
   const content = form.watch("content");
@@ -243,7 +265,7 @@ export default function AdminEmail({
                 />
               </div>
             </div>
-            <ErrorMessage message={error} show={!!errorMsg} />
+            <ErrorMessage message={errorMsg} show={!!errorMsg} />
             <ButtonSubmit
               isLoading={isLoading}
               disable={false}

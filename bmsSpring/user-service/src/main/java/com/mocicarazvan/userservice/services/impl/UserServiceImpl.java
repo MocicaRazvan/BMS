@@ -2,6 +2,7 @@ package com.mocicarazvan.userservice.services.impl;
 
 
 import com.mocicarazvan.rediscache.annotation.RedisReactiveCache;
+import com.mocicarazvan.rediscache.annotation.RedisReactiveCacheEvict;
 import com.mocicarazvan.templatemodule.clients.FileClient;
 import com.mocicarazvan.templatemodule.dtos.PageableBody;
 import com.mocicarazvan.templatemodule.dtos.UserBody;
@@ -225,7 +226,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public Mono<Void> sendEmailAdmin(EmailRequest emailRequest) {
         return emailUtils.sendEmail(emailRequest.getRecipientEmail(), emailRequest.getSubject(),
-                EmailTemplates.adminTemplate(frontUrl, emailRequest.getContent()));
+                EmailTemplates.adminTemplate(frontUrl, emailRequest.getContent()), true);
     }
 
     @RedisReactiveCache(key = USER_SERVICE_NAME, idPath = "id")
@@ -239,4 +240,12 @@ public class UserServiceImpl implements UserService {
         return userRepository.findById(userId)
                 .switchIfEmpty(Mono.error(new NotFoundEntity("user", userId)));
     }
+
+    @Override
+    @RedisReactiveCacheEvict(key = USER_SERVICE_NAME, id = "#userCustom.id")
+    public Mono<UserCustom> invalidateCacheForUser(UserCustom userCustom) {
+        return Mono.just(userCustom);
+    }
+
+  
 }

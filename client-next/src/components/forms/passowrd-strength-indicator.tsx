@@ -1,5 +1,6 @@
 import { Progress } from "@/components/ui/progress";
 import { Check, X } from "lucide-react";
+import { useMemo } from "react";
 interface PasswordStrength {
   score: number;
   criteria: {
@@ -35,15 +36,13 @@ export interface PasswordStrengthIndicatorTexts {
 }
 
 interface PasswordStrengthIndicatorProps {
-  password: string;
+  strength: PasswordStrength;
   texts: PasswordStrengthIndicatorTexts;
 }
 export function PasswordStrengthIndicator({
-  password,
+  strength,
   texts,
 }: PasswordStrengthIndicatorProps) {
-  const strength = calculatePasswordStrength(password);
-
   const getColorClass = (score: number) => {
     if (score < 50) return "bg-destructive";
     if (score < 75) return "bg-yellow-500";
@@ -62,8 +61,9 @@ export function PasswordStrengthIndicator({
       <Progress
         value={strength.score}
         className={`w-full ${getColorClass(strength.score)} h-2`}
+        indicatorClassName="bg-success duration-300 ease-in-out"
       />
-      <p className={"text-sm text-gray-600"}>
+      <p className="text-sm text-muted-foreground font-semibold">
         {texts.strength}
         {strength.score < 50
           ? texts.weak
@@ -82,7 +82,7 @@ export function PasswordStrengthIndicator({
             ) : (
               <>
                 <X className="w-4 h-4 text-destructive" />
-                <span className="text-sm text-gray-600">{label}</span>
+                <span className="text-sm text-muted-foreground">{label}</span>
               </>
             )}
           </li>
@@ -91,3 +91,14 @@ export function PasswordStrengthIndicator({
     </div>
   );
 }
+
+export const usePasswordStrength = (password: string) => {
+  const strength = useMemo(
+    () => calculatePasswordStrength(password),
+    [password],
+  );
+
+  return {
+    strength,
+  };
+};

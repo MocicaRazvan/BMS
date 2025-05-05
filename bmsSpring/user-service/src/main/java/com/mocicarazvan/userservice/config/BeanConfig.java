@@ -3,6 +3,7 @@ package com.mocicarazvan.userservice.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mocicarazvan.templatemodule.clients.FileClient;
+import com.mocicarazvan.templatemodule.email.EmailMXCacher;
 import com.mocicarazvan.templatemodule.email.EmailUtils;
 import com.mocicarazvan.templatemodule.email.config.MailConfig;
 import com.mocicarazvan.templatemodule.email.impl.EmailUtilsImpl;
@@ -90,9 +91,9 @@ public class BeanConfig {
     }
 
     @Bean
-    public EmailUtils emailUtils(JavaMailSender jml) {
+    public EmailUtils emailUtils(JavaMailSender jml, EmailMXCacher emailMXCacher) {
 
-        return new EmailUtilsImpl(jml);
+        return new EmailUtilsImpl(jml, emailMXCacher);
     }
 
     @Bean(name = "fileWebClient")

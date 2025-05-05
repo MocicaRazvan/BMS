@@ -9,6 +9,7 @@ import com.mocicarazvan.rediscache.local.ReverseKeysLocalCache;
 import com.mocicarazvan.rediscache.utils.AspectUtils;
 import com.mocicarazvan.rediscache.utils.RedisChildCacheUtils;
 import com.mocicarazvan.templatemodule.clients.UserClient;
+import com.mocicarazvan.templatemodule.email.EmailMXCacher;
 import com.mocicarazvan.templatemodule.email.EmailUtils;
 import com.mocicarazvan.templatemodule.email.config.CustomMailProps;
 import com.mocicarazvan.templatemodule.email.config.MailConfig;
@@ -131,8 +132,8 @@ public class BeanConfig {
     }
 
     @Bean
-    public EmailUtils emailUtils(JavaMailSender jml) {
-        return new EmailUtilsImpl(jml);
+    public EmailUtils emailUtils(JavaMailSender jml, EmailMXCacher emailMXCacher) {
+        return new EmailUtilsImpl(jml, emailMXCacher);
     }
 
     @Bean

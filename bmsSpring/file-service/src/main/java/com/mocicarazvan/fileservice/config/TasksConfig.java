@@ -37,7 +37,7 @@ public class TasksConfig {
         Pair<Duration, Duration> durations = CronUtils.computeDurations(clearOldMediaCron, LocalDateTime.now());
         return Flux.interval(durations.getFirst(), durations.getSecond())
                 .concatMap(_ -> {
-                    log.info("Clearing old carts");
+                    log.info("Clearing old media");
                     return mediaService.hardDeleteFiles();
                 })
                 .subscribe(

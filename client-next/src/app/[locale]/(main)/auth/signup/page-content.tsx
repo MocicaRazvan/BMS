@@ -32,10 +32,11 @@ import { PasswordInput } from "@/components/ui/password-input";
 import { registerSubmit } from "@/actions/froms";
 import OauthProviders from "@/app/[locale]/(main)/auth/oauth-providers";
 import {
-  calculatePasswordStrength,
   PasswordStrengthIndicator,
   PasswordStrengthIndicatorTexts,
+  usePasswordStrength,
 } from "@/components/forms/passowrd-strength-indicator";
+import { MX_SPRING_MESSAGE } from "@/lib/constants";
 
 interface SignUpPageText {
   emailExistsError: string;
@@ -48,6 +49,7 @@ interface SignUpPageText {
   submitButton: string;
   loadingButton: string;
   linkSignIn: string;
+  mxError: string;
 }
 
 interface Props extends SignUpPageText {
@@ -68,6 +70,7 @@ export default function SignUp({
   cardTitle,
   registrationSchemaTexts,
   passwordStrengthTexts,
+  mxError,
 }: Props) {
   const schema = useMemo(
     () => getRegistrationSchema(registrationSchemaTexts),
@@ -87,26 +90,32 @@ export default function SignUp({
   const [errorMsg, setErrorMsg] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const password = form.watch("password");
-  const strength = useMemo(
-    () => calculatePasswordStrength(password),
-    [password],
-  );
+  const { strength } = usePasswordStrength(password);
 
   const onSubmit = async (values: RegisterType) => {
     setIsLoading(true);
-    const resp = await registerSubmit(values);
-    if (resp) {
-      console.log("resp", resp);
-      if (resp.message.includes("already exists")) {
-        setErrorMsg(emailExistsError);
+    try {
+      const resp = await registerSubmit(values);
+      if (resp) {
+        console.log("resp", resp);
+
+        if (resp.message.includes("already exists")) {
+          setErrorMsg(emailExistsError);
+        }
+        if (resp.message.includes(MX_SPRING_MESSAGE)) {
+          setErrorMsg(mxError);
+        } else {
+          setErrorMsg(resp.message);
+        }
       } else {
-        setErrorMsg(resp.message);
+        router.push("/auth/signin");
       }
+    } catch (error) {
+      console.error("Error during registration:", error);
+      setErrorMsg("An unexpected error occurred. Please try again.");
+    } finally {
       setIsLoading(false);
-    } else {
-      router.push("/auth/signin");
     }
-    setIsLoading(false);
   };
 
   return (
@@ -195,7 +204,7 @@ export default function SignUp({
                     <div className="pt-5">
                       <PasswordStrengthIndicator
                         texts={passwordStrengthTexts}
-                        password={password}
+                        strength={strength}
                       />
                     </div>
                   </FormItem>

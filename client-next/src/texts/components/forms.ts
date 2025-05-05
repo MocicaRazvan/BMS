@@ -588,6 +588,7 @@ export async function getAdminEmailTexts(): Promise<AdminEmailTexts> {
     error: t("error"),
     preview: t("preview"),
     toastDescription: t("toastDescription"),
+    mxError: t("mxError"),
     items: {
       ...["email", "subject", "content"].reduce(
         (acc, key) => ({

@@ -36,6 +36,7 @@ export default async function SignUpPageWrapper({
       linkSignIn={t("linkSignIn")}
       firstNameLabel={t("firstNameLabel")}
       lastNameLabel={t("lastNameLabel")}
+      mxError={t("mxError")}
       registrationSchemaTexts={registrationSchemaTexts}
       passwordStrengthTexts={passwordStrengthTexts}
     />

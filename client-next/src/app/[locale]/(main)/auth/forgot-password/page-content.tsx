@@ -9,7 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import {
   Form,
   FormControl,
@@ -23,6 +23,7 @@ import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { fetchStream } from "@/lib/fetchers/fetchStream";
 import { Session } from "next-auth";
+import { MX_SPRING_MESSAGE } from "@/lib/constants";
 
 export interface ForgotPasswordPageText {
   cardTitle: string;
@@ -30,6 +31,7 @@ export interface ForgotPasswordPageText {
   submitButton: string;
   loadingButton: string;
   successMessage: string;
+  mxError: string;
   user: Session["user"];
 }
 
@@ -45,6 +47,7 @@ export default function ForgotPasswordPage({
   successMessage,
   emailSchemaTexts,
   user,
+  mxError,
 }: ForgotPasswordPageProps) {
   const schema = useMemo(
     () => getEmailSchema(emailSchemaTexts),
@@ -60,21 +63,27 @@ export default function ForgotPasswordPage({
   const [isLoading, setIsLoading] = useState(false);
   const [show, setShow] = useState(false);
 
-  const onSubmit = async ({ email }: EmailType) => {
-    setShow(false);
-    setIsLoading(true);
-    const { messages, error } = await fetchStream({
-      path: "/auth/resetPassword",
-      method: "POST",
-      body: {
-        email,
-      },
-    });
-    console.log(messages);
-    console.log(error);
-    setIsLoading(false);
-    setShow(true);
-  };
+  const onSubmit = useCallback(
+    async ({ email }: EmailType) => {
+      setErrorMsg("");
+      setShow(false);
+      setIsLoading(true);
+      const { error } = await fetchStream({
+        path: "/auth/resetPassword",
+        method: "POST",
+        body: {
+          email,
+        },
+      });
+      if (error && error.message.includes(MX_SPRING_MESSAGE)) {
+        setErrorMsg(mxError);
+      } else {
+        setShow(true);
+      }
+      setIsLoading(false);
+    },
+    [mxError],
+  );
 
   return (
     <main className="w-full min-h-[calc(100vh-21rem)] flex items-center justify-center transition-all">

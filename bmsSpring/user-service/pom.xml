@@ -134,7 +134,6 @@
             <artifactId>ollama-search</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
-
     </dependencies>
     <dependencyManagement>
         <dependencies>

@@ -28,6 +28,11 @@ import { Session } from "next-auth";
 import { signIn, useSession } from "next-auth/react";
 import { logError } from "@/app/[locale]/(main)/auth/signin/actions";
 import useClientNotFound from "@/hoooks/useClientNotFound";
+import {
+  PasswordStrengthIndicator,
+  PasswordStrengthIndicatorTexts,
+  usePasswordStrength,
+} from "@/components/forms/passowrd-strength-indicator";
 
 export interface ResetPasswordPageText {
   cardTitle: string;
@@ -41,6 +46,7 @@ export interface ResetPasswordPageText {
 
 interface ResetPasswordPageProps extends ResetPasswordPageText {
   resetPasswordSchemaTexts: ResetPasswordSchemaTexts;
+  passwordStrengthTexts: PasswordStrengthIndicatorTexts;
   user: Session["user"];
 }
 
@@ -54,12 +60,14 @@ export default function ResetPasswordPage({
   cardTitle,
   errorMessages,
   user,
+  passwordStrengthTexts,
 }: ResetPasswordPageProps) {
   const session = useSession();
   const { navigateToNotFound } = useClientNotFound();
   const searchParams = useSearchParams();
   const token = searchParams.get("token") || "";
   const email = searchParams.get("email") || "";
+  const decodedEmail = decodeURIComponent(email);
 
   const schema = useMemo(
     () => getResetPasswordSchema(resetPasswordSchemaTexts),
@@ -77,6 +85,8 @@ export default function ResetPasswordPage({
   const router = useRouter();
   const [errorMsg, setErrorMsg] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const password = form.watch("password");
+  const { strength } = usePasswordStrength(password);
 
   const onSubmit = async ({ password }: ResetPasswordType) => {
     setIsLoading(true);
@@ -155,7 +165,7 @@ export default function ResetPasswordPage({
               <FormItem>
                 <FormLabel>{emailLabel}</FormLabel>
                 <FormControl>
-                  <Input disabled={true} value={email} />
+                  <Input disabled={true} value={decodedEmail} />
                 </FormControl>
               </FormItem>
 
@@ -174,12 +184,19 @@ export default function ResetPasswordPage({
                       />
                     </FormControl>
                     <FormMessage />
+                    <div className="pt-5">
+                      <PasswordStrengthIndicator
+                        texts={passwordStrengthTexts}
+                        strength={strength}
+                      />
+                    </div>
                   </FormItem>
                 )}
               />
               <FormField
                 control={form.control}
                 name="confirmPassword"
+                disabled={strength.score !== 100}
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>{confirmPasswordLabel}</FormLabel>

@@ -9,8 +9,7 @@ import java.lang.annotation.*;
  * <p>
  * Usage details:
  * <ul>
- *     <li>If the method invalidates the cache with <b>useOldRole</b>, it will <b>EXPECT</b> a <b>Mono&lt;Pair&lt;T, ROLE_ANN&gt;&gt;</b>
- *     where the ROLE_ANN is the old value of the approved for the given object</li>
+ *     <li>If the method invalidates the cache it will expect a Mono return type</li>
  * </ul>
  * Arguments:
  * <ul>
@@ -18,7 +17,7 @@ import java.lang.annotation.*;
  *  <li><b>id</b> - the id of the reverse index to be invalidated</li>
  *  <li><b>oldRole</b> - the old role of the object to invalidate</li>
  *  <li><b>newRole</b> - the new role of the object to invalidate</li>
- *  <li><b>oldRolePath</b> - the path to the old role in the object</li>
+ *  <li><b>oldRolePath</b> - the path to the old role in the object, this will take precedence over teh <b>oldRole</b></li>
  *  </ul>
  * <p>
  */
@@ -33,9 +32,18 @@ public @interface RedisReactiveRoleCacheEvict {
      */
     String id() default "";
 
+    /**
+     * The old role of the object to invalidate
+     */
     Role oldRole() default Role.ROLE_USER;
 
+    /**
+     * The new role of the object to invalidate
+     */
     Role newRole() default Role.ROLE_USER;
 
+    /**
+     * The path to the old role in the object, this will take precedence over the <b>oldRole</b>
+     */
     String oldRolePath() default "";
 }

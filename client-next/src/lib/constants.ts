@@ -1,6 +1,7 @@
 import { Option } from "@/components/ui/multiple-selector";
 import { SortingOption } from "@/components/list/grid-list";
 
+export const MX_SPRING_MESSAGE = "does not have a valid MX record" as const;
 export const GOOGLE_STATE_COOKIE_NAME = "googleState";
 
 export const tags = [

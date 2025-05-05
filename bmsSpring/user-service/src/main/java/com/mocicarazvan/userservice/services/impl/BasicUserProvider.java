@@ -1,8 +1,6 @@
 package com.mocicarazvan.userservice.services.impl;
 
 import com.mocicarazvan.templatemodule.enums.AuthProvider;
-import com.mocicarazvan.templatemodule.enums.Role;
-import com.mocicarazvan.userservice.cache.redis.annotations.RedisReactiveRoleCacheEvict;
 import com.mocicarazvan.userservice.dtos.auth.response.AuthResponse;
 import com.mocicarazvan.userservice.jwt.JwtUtils;
 import com.mocicarazvan.userservice.mappers.UserMapper;
@@ -12,8 +10,6 @@ import com.mocicarazvan.userservice.repositories.JwtTokenRepository;
 import com.mocicarazvan.userservice.repositories.UserRepository;
 import com.mocicarazvan.userservice.services.HandleUserProvider;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.util.Pair;
-import org.springframework.stereotype.Component;
 import org.springframework.transaction.reactive.TransactionalOperator;
 import reactor.core.publisher.Mono;
 
@@ -28,18 +24,10 @@ public class BasicUserProvider implements HandleUserProvider {
     protected final UserMapper userMapper;
     protected final TransactionalOperator transactionalOperator;
     protected final UserEmbedServiceImpl userEmbedService;
-    protected final BasicUserProviderRedisCache basicUserProviderRedisCache;
 
     public Mono<AuthResponse> saveOrUpdateUserProvider(AuthProvider provider, UserCustom user) {
         return userRepository.findByEmail(user.getEmail())
 //                .log()
-                .flatMap(u -> {
-                    if (!u.getProvider().equals(provider)) {
-                        return basicUserProviderRedisCache.invalidateOnProviderChange(u)
-                                .map(Pair::getFirst);
-                    }
-                    return Mono.just(u);
-                })
                 .flatMap(u -> generateResponse(u, u.getProvider()))
                 .switchIfEmpty(Mono.defer(() -> userRepository.save(user)
                         .flatMap(u -> generateResponse(u, provider))
@@ -70,11 +58,4 @@ public class BasicUserProvider implements HandleUserProvider {
     }
 
 
-    @Component
-    public static class BasicUserProviderRedisCache {
-        @RedisReactiveRoleCacheEvict(key = "userService", id = "#user.id", oldRolePath = "role")
-        public Mono<Pair<UserCustom, Role>> invalidateOnProviderChange(UserCustom user) {
-            return Mono.just(Pair.of(user, user.getRole()));
-        }
-    }
 }

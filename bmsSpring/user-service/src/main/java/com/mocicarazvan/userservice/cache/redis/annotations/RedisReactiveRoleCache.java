@@ -38,7 +38,13 @@ public @interface RedisReactiveRoleCache {
 
     boolean saveToCache() default true;
 
+    /**
+     * The role of the object to be cached. Must be set on a <b>FLUX</b> return.
+     */
     Role role() default Role.ROLE_USER;
 
+    /**
+     * The path to the role for <b>FLUX</b> argument. It will overwrite the role.
+     */
     String roleArgumentPath() default "";
 }

@@ -309,12 +309,13 @@
       "emailLabel": "Email",
       "submitButton": "Send Request",
       "loadingButton": "Please wait",
-      "successMessage": "Email was sent, please verify your inbox!"
+      "successMessage": "Email was sent, please verify your inbox!",
+      "mxError": "The email domain is not valid"
     },
     "ResetPasswordPageText": {
       "cardTitle": "Reset Your Password",
       "emailLabel": "Email",
-      "passwordLabel": "Password (Must be at least 4 characters)",
+      "passwordLabel": "Password",
       "confirmPasswordLabel": "Confirm Password",
       "submitButton": "Reset",
       "loadingButton": " Please wait",
@@ -340,7 +341,8 @@
       "confirmPasswordLabel": "Confirm Password",
       "submitButton": "Sign Up",
       "loadingButton": " Please wait",
-      "linkSignIn": "Already have an account? Sign In"
+      "linkSignIn": "Already have an account? Sign In",
+      "mxError": "The email domain is not valid"
     },
     "SignOutPageText": {
       "questionText": "Are you sure you want to sign out?",
@@ -598,6 +600,7 @@
         "error": "The email could not be sent",
         "title": "Send email with company template",
         "toastDescription": "The mail was sent to ",
+        "mxError": "The email could not be sent, the domain it is not valid",
         "items": {
           "email": {
             "label": "Recipient",

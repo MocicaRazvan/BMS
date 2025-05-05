@@ -1,6 +1,6 @@
 import fetchRetry, { FetchLibrary } from "fetch-retry";
 import { emitError, emitInfo } from "@/logger";
-const UNRETRIEABLE_STATUS_CODES = [400, 401, 403, 404];
+const UNRETRIEABLE_STATUS_CODES = [400, 401, 403, 404, 409];
 
 export default function fetchFactory<F extends FetchLibrary>(baseFetch: F) {
   return fetchRetry(baseFetch, {

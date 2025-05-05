@@ -5,7 +5,6 @@ import com.mocicarazvan.rediscache.local.LocalReactiveCache;
 import com.mocicarazvan.rediscache.local.ReverseKeysLocalCache;
 import com.mocicarazvan.rediscache.utils.AspectUtils;
 import com.mocicarazvan.rediscache.utils.RedisApprovedCacheUtils;
-import com.mocicarazvan.templatemodule.enums.Role;
 import com.mocicarazvan.userservice.cache.redis.annotations.RedisReactiveRoleCacheEvict;
 import com.mocicarazvan.userservice.cache.redis.enums.RoleAnn;
 import com.mocicarazvan.userservice.cache.redis.utils.RedisRoleCacheUtils;
@@ -44,7 +43,7 @@ public class RedisReactiveRoleCacheEvictAspect extends RedisReactiveCacheEvictAs
     }
 
     @Around("execution(* *(..)) && @annotation(com.mocicarazvan.userservice.cache.redis.annotations.RedisReactiveRoleCacheEvict)")
-    public Object redisReactiveCacheApprovedEvict(ProceedingJoinPoint joinPoint) {
+    public Object redisReactiveCacheRoleEvict(ProceedingJoinPoint joinPoint) {
         Method method = aspectUtils.getMethod(joinPoint);
         Class<?> returnType = method.getReturnType();
         RedisReactiveRoleCacheEvict annotation = method.getAnnotation(RedisReactiveRoleCacheEvict.class);
@@ -63,7 +62,6 @@ public class RedisReactiveRoleCacheEvictAspect extends RedisReactiveCacheEvictAs
                     .then(methodResponse(joinPoint));
         }
 
-        aspectUtils.validateReturnTypeIsMonoPairClass(method, Role.class);
 
         return Mono.defer(() -> methodMonoResponseToCacheInvalidateByRoles(joinPoint, key, idSpel, newRole, oldRolePath));
 

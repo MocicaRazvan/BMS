@@ -17,6 +17,7 @@ import com.mocicarazvan.userservice.repositories.OTPTokenRepository;
 import com.mocicarazvan.userservice.repositories.UserRepository;
 import com.mocicarazvan.userservice.services.AuthService;
 import com.mocicarazvan.userservice.services.OTPTokenService;
+import com.mocicarazvan.userservice.services.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -40,13 +41,17 @@ public class OTPTokenServiceImpl implements OTPTokenService {
     private final EmailUtils emailUtils;
     private final PasswordEncoder passwordEncoder;
     private final AuthService authService;
+    private final UserService userService;
 
     @Value("${front.url}")
     private String frontUrl;
 
     public Mono<Void> generatePasswordToken(OTPRequest otpRequest) {
-        return generateToken(otpRequest, OTPType.PASSWORD)
-                .flatMap(tuple -> sendResetEmail(tuple.getT1().getEmail(), tuple.getT2().getToken()));
+        return
+                emailUtils.verifyMX(otpRequest.getEmail())
+                        .then(Mono.defer(() -> generateToken(otpRequest, OTPType.PASSWORD)
+                                .onErrorResume(_ -> Mono.empty())
+                                .flatMap(tuple -> sendResetEmail(tuple.getT1().getEmail(), tuple.getT2().getToken()))));
     }
 
     public Mono<Void> generateEmailVerificationToken(OTPRequest otpRequest) {
@@ -70,39 +75,25 @@ public class OTPTokenServiceImpl implements OTPTokenService {
     }
 
     private Mono<Void> sendResetEmail(String email, String token) {
-//        String resetUrl = frontUrl + "/auth/reset-password?token=" + token + "&email=" + email;
-//        String emailContent = "<p>Click the link below to reset your password:</p>" +
-//                "<a href=\"" + resetUrl + "\">Reset Password</a>";
-        String resetUrl = STR."\{frontUrl}/auth/reset-password?token=\{token}&email=\{email}";
+
+        String resetUrl = STR."\{frontUrl}/auth/reset-password?token=\{emailUtils.encodeUrlQueryParam(token)}&email=\{emailUtils.encodeUrlQueryParam(email)}";
         String emailContent = EmailTemplates.resetPassword(frontUrl, resetUrl);
         return emailUtils.sendEmail(email, "Password Reset", emailContent);
     }
 
     private Mono<Void> sendEmailVerificationEmail(String email, String token, Long userId) {
-//        String confirmUrl = frontUrl + "/auth/confirm-email?token=" + token + "&email=" + email + "&userId=" + userId;
-//        String emailContent = "<p>Click the link below to confirm your email:</p>" +
-//                "<a href=\"" + confirmUrl + "\">Confirm Email</a>";
-        String confirmUrl = STR."\{frontUrl}/auth/confirm-email?token=\{token}&email=\{email}&userId=\{userId}";
+
+        String confirmUrl = STR."\{frontUrl}/auth/confirm-email?token=\{emailUtils.encodeUrlQueryParam(token)}&email=\{emailUtils.encodeUrlQueryParam(email)}&userId=\{userId}";
         String emailContent = EmailTemplates.verifyEmail(frontUrl, confirmUrl);
         return emailUtils.sendEmail(email, "Email Verification", emailContent);
     }
 
     public Mono<Void> confirmEmail(String email, String token) {
-//        return userRepository.findByEmailAndProvider(email, AuthProvider.LOCAL)
-//                .switchIfEmpty(Mono.error(new UsernameNotFoundException("User with email: " + email + " not found")))
-//                .flatMap(userCustom -> OTPTokenRepository.findByUserIdAndTokenAndType(userCustom.getId(), token, OTPType.CONFIRM_EMAIL)
-//                        .filter(prt -> prt.getToken().equals(token) &&
-//                                prt.getCreatedAt().plusSeconds(prt.getExpiresInSeconds()).isAfter(LocalDateTime.now()))
-//                        .switchIfEmpty(Mono.error(new UsernameNotFoundException("Invalid token")))
-//                        .flatMap(vt -> {
-//                            userCustom.setEmailVerified(true);
-//                            return userRepository.save(userCustom)
-//                                    .then(OTPTokenRepository.deleteAllByUserIdAndType(userCustom.getId(), OTPType.CONFIRM_EMAIL));
-//                        }));
 
         return handleToken(email, token, AuthProvider.LOCAL, OTPType.CONFIRM_EMAIL, tuple -> {
             tuple.getT1().setEmailVerified(true);
             return userRepository.save(tuple.getT1())
+                    .flatMap(userService::invalidateCacheForUser)
                     .then(OTPTokenRepository.deleteAllByUserIdAndType(tuple.getT1().getId(), OTPType.CONFIRM_EMAIL));
 
         });
@@ -111,18 +102,6 @@ public class OTPTokenServiceImpl implements OTPTokenService {
 
 
     public Mono<AuthResponse> resetPassword(ResetPasswordRequest resetPasswordRequest) {
-
-//        return userRepository.findByEmailAndProvider(resetPasswordRequest.getEmail(), AuthProvider.LOCAL)
-//                .switchIfEmpty(Mono.error(new UsernameNotFoundException("User with email: " + resetPasswordRequest.getEmail() + " not found")))
-//                .flatMap(userCustom -> OTPTokenRepository.findByUserIdAndTokenAndType(userCustom.getId(), resetPasswordRequest.getToken(), OTPType.PASSWORD)
-//                        .filter(prt -> prt.getToken().equals(resetPasswordRequest.getToken()) &&
-//                                prt.getCreatedAt().plusSeconds(prt.getExpiresInSeconds()).isAfter(LocalDateTime.now()))
-//                        .switchIfEmpty(Mono.error(new UsernameNotFoundException("Invalid token")))
-//                        .flatMap(vt -> {
-//                            userCustom.setPassword(passwordEncoder.encode(resetPasswordRequest.getNewPassword()));
-//                            return userRepository.save(userCustom)
-//                                    .then(OTPTokenRepository.deleteAllByUserIdAndType(userCustom.getId(), OTPType.PASSWORD));
-//                        }));
 
         return handleToken(resetPasswordRequest.getEmail(), resetPasswordRequest.getToken(), AuthProvider.LOCAL, OTPType.PASSWORD, tuple -> {
             tuple.getT1().setPassword(passwordEncoder.encode(resetPasswordRequest.getNewPassword()));
@@ -154,4 +133,5 @@ public class OTPTokenServiceImpl implements OTPTokenService {
 
 
     }
+
 }

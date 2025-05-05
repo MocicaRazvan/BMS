@@ -308,12 +308,13 @@
       "emailLabel": "Email",
       "submitButton": "Trimite cererea",
       "loadingButton": "Vă rugăm să așteptați",
-      "successMessage": "Emailul a fost trimis, vă rugăm să verificați căsuța poștală!"
+      "successMessage": "Emailul a fost trimis, vă rugăm să verificați căsuța poștală!",
+      "mxError": "Emailul nu are un domeniu valid"
     },
     "ResetPasswordPageText": {
       "cardTitle": "Resetați parola",
       "emailLabel": "Email",
-      "passwordLabel": "Parola (Trebuie să aibă cel puțin 4 caractere)",
+      "passwordLabel": "Parola",
       "confirmPasswordLabel": "Confirmați parola",
       "submitButton": "Resetează",
       "loadingButton": "Vă rugăm să așteptați",
@@ -339,7 +340,8 @@
       "confirmPasswordLabel": "Confirmați parola",
       "submitButton": "Înregistrare",
       "loadingButton": "Vă rugăm să așteptați",
-      "linkSignIn": "Aveți deja un cont? Autentificare"
+      "linkSignIn": "Aveți deja un cont? Autentificare",
+      "mxError": "Emailul nu are un domeniu valid"
     },
     "SignOutPageText": {
       "questionText": "Sunteți sigur că doriți să vă deconectați?",
@@ -597,6 +599,7 @@
         "error": "Emailul nu a putut fi trimis",
         "title": "Trimiteți un email cu templateul companiei",
         "toastDescription": "Emailul a fost trimis cu succes către ",
+        "mxError": "Emailul nu a putut fi trimis, domeniul nu este valid",
         "items": {
           "email": {
             "label": "Destinatar",

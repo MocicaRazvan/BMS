@@ -1,5 +1,6 @@
 package com.mocicarazvan.userservice.services.impl;
 
+import com.mocicarazvan.templatemodule.email.EmailUtils;
 import com.mocicarazvan.templatemodule.enums.AuthProvider;
 import com.mocicarazvan.templatemodule.enums.Role;
 import com.mocicarazvan.templatemodule.exceptions.common.UsernameNotFoundException;
@@ -35,35 +36,37 @@ public class AuthServiceImpl extends BasicUserProvider implements AuthService {
     private final GoogleUserService googleUserService;
     private final UserEmbedServiceImpl userEmbedService;
     private final TransactionalOperator transactionalOperator;
-    private final BasicUserProviderRedisCache basicUserProviderRedisCache;
+    private final EmailUtils emailUtils;
 
 
-    public AuthServiceImpl(UserRepository userRepository, JwtTokenRepository jwtTokenRepository, JwtUtils jwtUtil, UserMapper userMapper, WebClient.Builder webClient, PasswordEncoder passwordEncoder, GithubUserService githubUserService, GoogleUserService googleUserService, UserEmbedServiceImpl userEmbedService, TransactionalOperator transactionalOperator, BasicUserProviderRedisCache basicUserProviderRedisCache
+    public AuthServiceImpl(UserRepository userRepository, JwtTokenRepository jwtTokenRepository, JwtUtils jwtUtil, UserMapper userMapper, WebClient.Builder webClient, PasswordEncoder passwordEncoder, GithubUserService githubUserService, GoogleUserService googleUserService, UserEmbedServiceImpl userEmbedService, TransactionalOperator transactionalOperator, EmailUtils emailUtils
     ) {
-        super(userRepository, jwtTokenRepository, jwtUtil, userMapper, transactionalOperator, userEmbedService, basicUserProviderRedisCache);
+        super(userRepository, jwtTokenRepository, jwtUtil, userMapper, transactionalOperator, userEmbedService);
         this.webClient = webClient;
         this.passwordEncoder = passwordEncoder;
         this.githubUserService = githubUserService;
         this.googleUserService = googleUserService;
         this.userEmbedService = userEmbedService;
         this.transactionalOperator = transactionalOperator;
-        this.basicUserProviderRedisCache = basicUserProviderRedisCache;
+        this.emailUtils = emailUtils;
     }
 
     @Override
     @RedisReactiveRoleCacheEvict(key = "userService")
     public Mono<AuthResponse> register(RegisterRequest registerRequest) {
 //        log.error(userMapper.fromRegisterRequestToUserCustom(registerRequest).toString());
-        return userRepository.existsByEmail(registerRequest.getEmail())
-                .flatMap(exists -> {
-                    if (exists) {
-                        return Mono.error(new UserWithEmailExists(registerRequest.getEmail()));
-                    }
-                    return userRepository.save(userMapper.fromRegisterRequestToUserCustom(registerRequest))
-                            .flatMap(u -> userEmbedService.saveEmbedding(u.getId(), u.getEmail()).thenReturn(u))
-                            .as(transactionalOperator::transactional)
-                            .flatMap(u -> generateResponse(u, AuthProvider.LOCAL));
-                });
+        return
+                emailUtils.verifyMX(registerRequest.getEmail())
+                        .then(Mono.defer(() -> userRepository.existsByEmail(registerRequest.getEmail())
+                                .flatMap(exists -> {
+                                    if (exists) {
+                                        return Mono.error(new UserWithEmailExists(registerRequest.getEmail()));
+                                    }
+                                    return userRepository.save(userMapper.fromRegisterRequestToUserCustom(registerRequest))
+                                            .flatMap(u -> userEmbedService.saveEmbedding(u.getId(), u.getEmail()).thenReturn(u))
+                                            .as(transactionalOperator::transactional)
+                                            .flatMap(u -> generateResponse(u, AuthProvider.LOCAL));
+                                })));
     }
 
     @Override
