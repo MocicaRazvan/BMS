@@ -23,11 +23,17 @@ def predict_english(text: str) -> bool:
 
     predictions = pipe_lang_det(chunks)
     for chunk_preds in predictions:
+        found_english = False
         for p in chunk_preds:
+            if p['score'] < LANGUAGE_MIN_SCORE:
+                break
             if p['label'] == ENGLISH_LABEL and p['score'] >= LANGUAGE_MIN_SCORE:
-                return True
+                found_english = True
+                break
+        if not found_english:
+            return False
 
-    return False
+    return True
 
 
 def predict_toxicity(text: str) -> bool:
@@ -36,6 +42,8 @@ def predict_toxicity(text: str) -> bool:
     predictions = pipe_toxic_det(chunks)
     for chunk_preds in predictions:
         for p in chunk_preds:
+            if p['score'] < TOXIC_MIN_SCORE:
+                break
             if p['label'] not in NEUTRAL_LABELS_LIST and p['score'] >= TOXIC_MIN_SCORE:
                 return True
 

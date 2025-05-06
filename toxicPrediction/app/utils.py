@@ -24,6 +24,7 @@ def error_response(message, status=400, error=None):
     logger.error(message)
     return jsonify({"error": error, "message": message, "path": request.path, "status": status}), status
 
+
 def sliding_chunks(text, max_length):
     final_max_length = CHUNK_FACTOR * max_length
     stride = final_max_length // STRIDE_FACTOR
@@ -34,6 +35,7 @@ def sliding_chunks(text, max_length):
         chunks.append(chunk)
 
     return chunks
+
 
 class ToxicReason(Enum):
     LANGUAGE = "language"

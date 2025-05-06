@@ -1,4 +1,5 @@
 import traceback
+import re
 
 from flask import Flask, request, jsonify
 from flask_caching import Cache
@@ -24,7 +25,7 @@ metrics = GunicornInternalPrometheusMetrics(
 )
 app.config['MAX_CONTENT_LENGTH'] = MAX_BODY_SIZE
 
-metrics.info(APP_NAME.replace("-","_"), "Application info prometheus", version=APP_VERSION)
+metrics.info(APP_NAME.replace("-", "_"), "Application info prometheus", version=APP_VERSION)
 
 provider = TracerProvider(resource=Resource(attributes={"service.name": APP_NAME}),
                           sampler=ParentBased(TraceIdRatioBased(ZIPKIN_SAMPLE_RATE)))
@@ -46,27 +47,29 @@ cache = Cache(app, config={
     "CACHE_KEY_PREFIX": "toxicity"
 })
 
+
 @app.route("/healthz")
 def healthz():
     return "OK"
 
-@app.route("/isToxic",methods=["PATCH"])
+
+@app.route("/isToxic", methods=["PATCH"])
 @cache.cached(make_cache_key=make_cache_key, key_prefix="toxicity:isToxic")
 def toxicity():
     try:
         data = request.get_json(silent=True)
         text = data.get("text")
         if not text or not isinstance(text, str):
-            return  error_response("text is required")
+            return error_response("text is required")
 
-        stripped_text = text.strip().lower()
+        stripped_text = re.sub(r'\s+', ' ', text).strip().lower()
 
         is_english = predict_english(stripped_text)
 
         if not is_english:
-            return  jsonify({
-                'failure':True,
-                'reason':ToxicReason.LANGUAGE.value,
+            return jsonify({
+                'failure': True,
+                'reason': ToxicReason.LANGUAGE.value,
                 'message': "ENGLISH ONLY"
             })
 
@@ -74,21 +77,20 @@ def toxicity():
 
         if is_toxic:
             return jsonify({
-                'failure':True,
-                'reason':ToxicReason.TOXICITY.value,
+                'failure': True,
+                'reason': ToxicReason.TOXICITY.value,
                 'message': "TOXIC"
             })
 
         return jsonify({
-            'failure':False,
-            'reason':ToxicReason.NONE.value,
+            'failure': False,
+            'reason': ToxicReason.NONE.value,
             'message': "CLEAN"
         })
 
     except Exception as e:
         logger.exception("Error Traceback:", traceback.format_exc())
         return error_response("Exception", 500, str(e))
-
 
 
 if __name__ == "__main__":
