@@ -1,6 +1,6 @@
 package com.mocicarazvan.websocketservice.models;
 
-import com.mocicarazvan.websocketservice.models.generic.IdGenerated;
+import com.mocicarazvan.websocketservice.models.generic.EncryptedContent;
 import com.mocicarazvan.websocketservice.utils.Transformable;
 import jakarta.persistence.*;
 import lombok.*;
@@ -27,11 +27,8 @@ import java.util.Objects;
                 @Index(name = "idx_sender_id_receiver_id_chat_room_id_chat_message", columnList = "sender_id, receiver_id, chat_room_id")
         }
 )
-public class ChatMessage extends IdGenerated implements Transformable<ChatMessage> {
+public class ChatMessage extends EncryptedContent implements Transformable<ChatMessage> {
 
-//    @Id
-//    @GeneratedValue(strategy = GenerationType.IDENTITY)
-//    private Long id;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @OnDelete(action = OnDeleteAction.CASCADE)
@@ -48,8 +45,6 @@ public class ChatMessage extends IdGenerated implements Transformable<ChatMessag
     @JoinColumn(name = "chat_room_id", nullable = false)
     private ChatRoom chatRoom;
 
-    @Column(columnDefinition = "TEXT", nullable = false)
-    private String content;
 
     @Column(nullable = false)
     private LocalDateTime timestamp;

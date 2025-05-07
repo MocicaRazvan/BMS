@@ -22,7 +22,6 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 public class ChatRoomController {
-    // todo sort order users and conversation like project sem1
 
     private final ChatRoomService chatRoomService;
 

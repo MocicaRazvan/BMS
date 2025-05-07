@@ -2,7 +2,7 @@ package com.mocicarazvan.websocketservice.models;
 
 import com.mocicarazvan.websocketservice.convertors.AiChatRoleConvertor;
 import com.mocicarazvan.websocketservice.enums.AiChatRole;
-import com.mocicarazvan.websocketservice.models.generic.IdGenerated;
+import com.mocicarazvan.websocketservice.models.generic.EncryptedContent;
 import com.mocicarazvan.websocketservice.utils.Transformable;
 import jakarta.persistence.*;
 import lombok.*;
@@ -25,10 +25,8 @@ import java.util.Objects;
                 @Index(name = "idx_chat_ai_chat_message_room_id", columnList = "chat_room_id")
         }
 )
-public class AiChatMessage extends IdGenerated implements Transformable<AiChatMessage> {
+public class AiChatMessage extends EncryptedContent implements Transformable<AiChatMessage> {
 
-    @Column(columnDefinition = "TEXT")
-    private String content;
 
     // its not unique, its kinda annoying
     @Column(columnDefinition = "TEXT")

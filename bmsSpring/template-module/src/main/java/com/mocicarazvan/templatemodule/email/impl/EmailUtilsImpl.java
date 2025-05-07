@@ -7,6 +7,7 @@ import com.mocicarazvan.templatemodule.exceptions.email.EmailFailToSend;
 import com.mocicarazvan.templatemodule.exceptions.email.EmailMXFail;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -23,11 +24,13 @@ import java.time.Duration;
 
 @Slf4j
 @RequiredArgsConstructor
+@Setter
 public class EmailUtilsImpl implements EmailUtils {
 
 
     private final JavaMailSender mailSender;
     private final EmailMXCacher emailMXCacher;
+    private int mxCheckTimeoutSeconds = 10;
 
 
     @Override
@@ -82,7 +85,7 @@ public class EmailUtilsImpl implements EmailUtils {
         try {
 //            log.info("Checking MX records for domain: {}", domain);
             SimpleResolver resolver = new SimpleResolver();
-            resolver.setTimeout(Duration.ofSeconds(10));
+            resolver.setTimeout(Duration.ofSeconds(mxCheckTimeoutSeconds));
             Lookup lookup = new Lookup(domain, Type.MX);
             lookup.setResolver(resolver);
             Record[] mxs = lookup.run();
@@ -97,5 +100,6 @@ public class EmailUtilsImpl implements EmailUtils {
     public String encodeUrlQueryParam(String param) {
         return URLEncoder.encode(param, StandardCharsets.UTF_8);
     }
+
 
 }

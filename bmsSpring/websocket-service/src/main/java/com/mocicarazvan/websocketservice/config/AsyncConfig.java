@@ -3,11 +3,13 @@ package com.mocicarazvan.websocketservice.config;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.task.SimpleAsyncTaskExecutorBuilder;
 import org.springframework.boot.task.SimpleAsyncTaskSchedulerBuilder;
+import org.springframework.boot.task.ThreadPoolTaskExecutorBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.scheduling.concurrent.SimpleAsyncTaskScheduler;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
 import java.time.Duration;
@@ -19,6 +21,12 @@ public class AsyncConfig {
     private int threadPoolSize;
     @Value("${spring.custom.executor.async.concurrency.limit:64}")
     private int executorAsyncConcurrencyLimit;
+
+    @Value("${spring.custom.encryption.thread.pool.size:2}")
+    private int encryptionThreadPoolSize;
+
+    @Value("${spring.custom.encryption.thread.queue.capacity:40}")
+    private int encryptionThreadQueueCapacity;
 
 
     @Bean("scheduledExecutorService")
@@ -54,6 +62,17 @@ public class AsyncConfig {
         threadPoolTaskScheduler.setAwaitTerminationSeconds(60);
         threadPoolTaskScheduler.setThreadFactory(Thread.ofVirtual().factory());
         return threadPoolTaskScheduler;
+
+    }
+
+    @Bean
+    public ThreadPoolTaskExecutor encryptionExecutor() {
+        return new ThreadPoolTaskExecutorBuilder()
+                .corePoolSize(encryptionThreadPoolSize)
+                .maxPoolSize(encryptionThreadPoolSize * 2)
+                .threadNamePrefix("WSExecutorEncryption-")
+                .queueCapacity(encryptionThreadQueueCapacity)
+                .build();
 
     }
 

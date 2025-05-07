@@ -331,7 +331,7 @@ const ConversationContent = memo(
                 initial={{ opacity: 0, scale: 0 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0.5, scale: 0 }}
-                transition={{ delay: 0, duration: 0.35 }}
+                transition={{ delay: 0.7, duration: 0.35 }}
               >
                 <Loader className="p-0 m-0" />
               </motion.div>

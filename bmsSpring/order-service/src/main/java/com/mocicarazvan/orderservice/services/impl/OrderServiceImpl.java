@@ -3,7 +3,6 @@ package com.mocicarazvan.orderservice.services.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mocicarazvan.orderservice.cache.OrderWithAddressCacheHandler;
 import com.mocicarazvan.orderservice.clients.BoughtWebSocketClient;
 import com.mocicarazvan.orderservice.clients.PlanClient;
 import com.mocicarazvan.orderservice.dtos.*;
@@ -94,7 +93,6 @@ public class OrderServiceImpl implements OrderService {
     private final EntitiesUtils entitiesUtils;
     private final OrderMapper orderMapper;
     private final EmailUtils emailUtils;
-    private final OrderWithAddressCacheHandler orderWithAddressCacheHandler;
     private final OrderServiceRedisCacheWrapper self;
     private final OrderWithAddressServiceImpl.OrderWithAddRedisCacheWrapper orderWithAddRedisCacheWrapper;
     private final PlanOrderService planOrderService;

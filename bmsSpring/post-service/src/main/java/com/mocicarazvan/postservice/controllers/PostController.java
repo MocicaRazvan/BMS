@@ -10,7 +10,6 @@ import com.mocicarazvan.postservice.mappers.PostMapper;
 import com.mocicarazvan.postservice.models.Post;
 import com.mocicarazvan.postservice.repositories.PostRepository;
 import com.mocicarazvan.postservice.services.PostService;
-import com.mocicarazvan.templatemodule.cache.keys.FilterKeyType;
 import com.mocicarazvan.templatemodule.controllers.ApproveController;
 import com.mocicarazvan.templatemodule.dtos.PageableBody;
 import com.mocicarazvan.templatemodule.dtos.response.*;
@@ -100,7 +99,6 @@ public class PostController implements ApproveController
                                                                                                     ServerWebExchange exchange) {
 
 
-        FilterKeyType.KeyRouteType keyRouteType = Boolean.TRUE.equals(admin) ? FilterKeyType.KeyRouteType.createForAdmin() : FilterKeyType.KeyRouteType.createForPublic();
         return
 
                 postService.
@@ -123,8 +121,6 @@ public class PostController implements ApproveController
                                                                                     @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate updatedAtLowerBound,
                                                                                     @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate updatedAtUpperBound,
                                                                                     ServerWebExchange exchange) {
-
-        FilterKeyType.KeyRouteType keyRouteType = Boolean.TRUE.equals(admin) ? FilterKeyType.KeyRouteType.createForAdmin() : FilterKeyType.KeyRouteType.createForPublic();
 
         return
                 postService.
