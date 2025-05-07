@@ -1,14 +1,16 @@
 package com.mocicarazvan.websocketservice.repositories;
 
+import com.mocicarazvan.websocketservice.config.AsyncConfig;
+import com.mocicarazvan.websocketservice.config.CryptConfig;
+import com.mocicarazvan.websocketservice.config.EncryptionProperties;
 import com.mocicarazvan.websocketservice.config.TestContainerImages;
 import com.mocicarazvan.websocketservice.enums.AiChatRole;
 import com.mocicarazvan.websocketservice.enums.ConnectedStatus;
 import com.mocicarazvan.websocketservice.models.AiChatMessage;
 import com.mocicarazvan.websocketservice.models.AiChatRoom;
 import com.mocicarazvan.websocketservice.models.ConversationUser;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Order;
-import org.junit.jupiter.api.Test;
+import com.mocicarazvan.websocketservice.utils.AESUtils;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -17,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
+import org.springframework.context.annotation.Import;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -31,6 +34,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Testcontainers
+@Import({CryptConfig.class, AESUtils.class, AsyncConfig.class, EncryptionProperties.class})
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @Execution(ExecutionMode.SAME_THREAD)
 class AiChatMessageRepositoryTest {
     @Container
@@ -86,6 +91,15 @@ class AiChatMessageRepositoryTest {
         assertEquals(2, conversationUserRepository.count());
     }
 
+
+    @Test
+    void assertEncryptedContentIsNotNull() {
+        var roomId = aiChatRoomRepository.findAll().getFirst().getId();
+        var messages = aiChatMessageRepository.findAllByChatRoom_Id(roomId);
+        for (var message : messages) {
+            assertNotNull(message.getEncryptedContent());
+        }
+    }
 
     @ParameterizedTest
     @ValueSource(ints = {10, 20, 30})
