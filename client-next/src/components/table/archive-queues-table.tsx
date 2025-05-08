@@ -75,10 +75,8 @@ import { stripNonAlphaNumeric } from "@/lib/utils";
 const MotionTableRow = motion(TableRow);
 
 const fuzzyFilter: FilterFn<any> = (row, columnId, value, addMeta) => {
-  const cleanedRowValue = stripNonAlphaNumeric(
-    row.getValue(columnId) ?? "",
-  ).toLowerCase();
-  const cleanedFilterValue = stripNonAlphaNumeric(value ?? "").toLowerCase();
+  const cleanedRowValue = stripNonAlphaNumeric(row.getValue(columnId) ?? "");
+  const cleanedFilterValue = stripNonAlphaNumeric(value ?? "");
 
   const itemRank = rankItem(cleanedRowValue, cleanedFilterValue, {
     keepDiacritics: true,
