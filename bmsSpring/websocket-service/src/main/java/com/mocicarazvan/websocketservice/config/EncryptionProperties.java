@@ -11,6 +11,7 @@ import java.util.Base64;
 @Data
 public class EncryptionProperties {
     private String secretKey; // Base64 encoded secret key
+    private int keyId;
 
     public byte[] getSecretKeyBytes() {
         return Base64.getDecoder()

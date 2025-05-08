@@ -19,13 +19,16 @@ public class ContentEncryptor {
         checkAesUtil();
         if (msg.getContent() != null) {
             msg.setEncryptedContent(aesUtils.encryptAsync(msg.getContent()).join());
+            msg.setEncryptedKeyId(aesUtils.getKeyId());
         }
     }
 
     @PostLoad
     public void decrypt(EncryptedContent msg) {
         checkAesUtil();
-        if (msg.getEncryptedContent() != null) {
+        if (msg.getEncryptedContent() != null &&
+                msg.getEncryptedKeyId() == aesUtils.getKeyId()
+        ) {
             msg.setContent(aesUtils.decryptAsync(msg.getEncryptedContent()).join());
         }
     }

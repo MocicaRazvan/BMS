@@ -1,6 +1,7 @@
 package com.mocicarazvan.websocketservice.utils;
 
 import com.mocicarazvan.websocketservice.config.EncryptionProperties;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
@@ -26,6 +27,8 @@ public class AESUtils {
     private final ThreadLocal<Cipher> encryptCipher;
     private final ThreadLocal<Cipher> decryptCipher;
     private final ThreadLocal<SecureRandom> secureRandom = ThreadLocal.withInitial(SecureRandom::new);
+    @Getter
+    private final int keyId;
 
     public AESUtils(@Qualifier("encryptionExecutor") ThreadPoolTaskExecutor encryptionExecutor,
                     EncryptionProperties encryptionProperties) {
@@ -33,6 +36,7 @@ public class AESUtils {
         this.key = new SecretKeySpec(encryptionProperties.getSecretKeyBytes(), "AES");
         this.encryptCipher = ThreadLocal.withInitial(this::initCipherInstance);
         this.decryptCipher = ThreadLocal.withInitial(this::initCipherInstance);
+        this.keyId = encryptionProperties.getKeyId();
     }
 
 

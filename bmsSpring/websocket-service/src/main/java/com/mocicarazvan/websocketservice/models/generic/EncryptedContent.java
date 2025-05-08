@@ -22,4 +22,7 @@ public abstract class EncryptedContent extends IdGenerated {
 
     @Column(nullable = false, name = "encrypted_content")
     private byte[] encryptedContent;
+
+    @Column(nullable = false, name = "encrypted_key_id")
+    private int encryptedKeyId;
 }
