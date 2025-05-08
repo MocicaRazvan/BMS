@@ -34,7 +34,7 @@ export default function SearchInput({
         autoFocus
       />
       <Search className="absolute left-0 top-0 m-2.5 h-4 w-4 text-muted-foreground group-focus:text-ring" />
-      {onClear && (
+      {value !== "" && onClear && (
         <Button
           variant={"outline"}
           size={"icon"}
