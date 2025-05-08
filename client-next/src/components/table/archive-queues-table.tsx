@@ -8,7 +8,15 @@ import {
   getSortedRowModel,
   Table as TableType,
   useReactTable,
+  FilterFn,
+  SortingFn,
+  sortingFns,
 } from "@tanstack/react-table";
+import {
+  RankingInfo,
+  rankItem,
+  compareItems,
+} from "@tanstack/match-sorter-utils";
 import {
   Select,
   SelectContent,
@@ -64,6 +72,35 @@ import { useSearchParams } from "next/navigation";
 import { usePathname } from "@/navigation";
 
 const MotionTableRow = motion(TableRow);
+
+const fuzzyFilter: FilterFn<any> = (row, columnId, value, addMeta) => {
+  const itemRank = rankItem(row.getValue(columnId), value, {
+    keepDiacritics: true,
+  });
+  addMeta({ itemRank });
+  return itemRank.passed;
+};
+// eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
+const fuzzySort: SortingFn<any> = (rowA, rowB, columnId) => {
+  let dir = 0;
+  if (rowA.columnFiltersMeta[columnId]) {
+    // @ts-expect-error: itemRank is expected in custom FilterMeta shape
+    // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain,@typescript-eslint/no-non-null-assertion
+    const rankA = rowA.columnFiltersMeta[columnId]?.itemRank!;
+
+    // @ts-expect-error: itemRank is expected in custom FilterMeta shape
+    // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain,@typescript-eslint/no-non-null-assertion
+    const rankB = rowB.columnFiltersMeta[columnId]?.itemRank!;
+
+    if (!rankA || !rankB) {
+      return sortingFns.alphanumeric(rowA, rowB, columnId);
+    }
+
+    dir = compareItems(rankA as RankingInfo, rankB as RankingInfo);
+  }
+  return dir === 0 ? sortingFns.alphanumeric(rowA, rowB, columnId) : dir;
+};
+
 const containerActionColors = {
   [ContainerAction.START_CRON]: "amber",
   [ContainerAction.STOP]: "destructive",
@@ -97,7 +134,7 @@ export default function ArchiveQueuesTable({
   authUser,
   texts,
 }: ArchiveQueuesTableProps) {
-  const columns: ColumnDef<NotifyContainerAction>[] = useMemo(
+  const columns = useMemo<ColumnDef<NotifyContainerAction, any>[]>(
     () => [
       {
         id: "select",
@@ -142,7 +179,8 @@ export default function ArchiveQueuesTable({
         header: ({ column }) => (
           <HeaderSortingButton column={column} text={texts.columns.action} />
         ),
-        filterFn: "includesString",
+        filterFn: fuzzyFilter,
+        sortingFn: fuzzySort,
         cell: ({ row }) => (
           <p
             className={`text-${containerActionColors[row.original.action]} font-medium`}
@@ -157,7 +195,8 @@ export default function ArchiveQueuesTable({
         header: ({ column }) => (
           <HeaderSortingButton column={column} text={texts.columns.queueName} />
         ),
-        filterFn: "includesString",
+        filterFn: fuzzyFilter,
+        sortingFn: fuzzySort,
         cell: ({ row }) => <p>{row.original.queueName}</p>,
       },
       {
