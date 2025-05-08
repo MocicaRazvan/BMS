@@ -70,14 +70,21 @@ import PulsatingButton from "@/components/magicui/pulsating-button";
 import { useTableSearchParams } from "tanstack-table-search-params";
 import { useSearchParams } from "next/navigation";
 import { usePathname } from "@/navigation";
+import { stripNonAlphaNumeric } from "@/lib/utils";
 
 const MotionTableRow = motion(TableRow);
 
 const fuzzyFilter: FilterFn<any> = (row, columnId, value, addMeta) => {
-  const itemRank = rankItem(row.getValue(columnId), value, {
+  const cleanedRowValue = stripNonAlphaNumeric(
+    row.getValue(columnId) ?? "",
+  ).toLowerCase();
+  const cleanedFilterValue = stripNonAlphaNumeric(value ?? "").toLowerCase();
+
+  const itemRank = rankItem(cleanedRowValue, cleanedFilterValue, {
     keepDiacritics: true,
   });
   addMeta({ itemRank });
+
   return itemRank.passed;
 };
 // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain

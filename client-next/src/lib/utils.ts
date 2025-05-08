@@ -376,3 +376,6 @@ export const parseToUnix = (value: any): number => {
 
   return isValid(parsed) ? parsed.getTime() : NaN;
 };
+
+export const stripNonAlphaNumeric = (str: string): string =>
+  str.replace(/[^a-zA-Z0-9]/g, "").trim();
