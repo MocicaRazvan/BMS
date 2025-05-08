@@ -317,6 +317,7 @@ function DataTable({
             onChange={(event) =>
               table.getColumn("action")?.setFilterValue(event.target.value)
             }
+            onClear={() => table.getColumn("action")?.setFilterValue("")}
             className="max-w-sm"
           />
           <SearchInput
@@ -329,6 +330,7 @@ function DataTable({
             onChange={(event) =>
               table.getColumn("queueName")?.setFilterValue(event.target.value)
             }
+            onClear={() => table.getColumn("queueName")?.setFilterValue("")}
             className="max-w-sm"
           />
         </div>
