@@ -84,7 +84,7 @@ export async function getItemTool<T extends TitleBodyUserDto>(
         }
         return acc;
       },
-      `Found ${responseJson.length} result(s) for "${trimmedInput}" in ${modelName}.\n\n`,
+      `Search results for ${modelName}: ${responseJson.length} item(s) matched the query "${trimmedInput}".\n\n`,
     );
   } catch (error) {
     console.error("Error fetching items:", error);
