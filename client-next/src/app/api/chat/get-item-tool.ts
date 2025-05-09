@@ -25,9 +25,10 @@ export async function getItemTool<T extends TitleBodyUserDto>(
 ) {
   try {
     const csrf = await getCsrfNextAuthHeader();
+    const trimmedInput = input.trim();
     const response = await fetchFactory(fetch)(
       `${springUrl}${path}?${new URLSearchParams({
-        title: input.trim(),
+        title: trimmedInput,
         approved: "true",
       }).toString()}`,
       {
@@ -83,7 +84,7 @@ export async function getItemTool<T extends TitleBodyUserDto>(
         }
         return acc;
       },
-      `Search result for ${modelName}, there were ${responseJson.length} results.  \n\n`,
+      `Found ${responseJson.length} result(s) for "${trimmedInput}" in ${modelName}.\n\n`,
     );
   } catch (error) {
     console.error("Error fetching items:", error);
