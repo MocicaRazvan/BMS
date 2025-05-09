@@ -12,12 +12,8 @@ const modelName = process.env.OLLAMA_MODEL;
 const ollamaBaseUrl = process.env.OLLAMA_BASE_URL;
 
 function getMultiQuerySystemPrompt(extraQuestion?: string) {
-  return `You are an AI language model assistant on a nutritional related site. Your ONLY task is
-        to generate ##{queryCount}## different versions of the given user
-        input to retrieve relevant documents from a vector database.
-        By generating multiple perspectives on the user input,
-        your goal is to help the user overcome some of the limitations
-        of distance-based similarity. 
+  return `You are an AI language model assistant on a nutritional related site. Your ONLY task is to generate ##{queryCount}## different versions of the given user input to retrieve relevant documents from a vector database.
+        By generating multiple perspectives on the user input, your goal is to help the user overcome some limitations of distance-based similarity. 
         
         Keep the original meaning of the input intact, do not alter it or add any new information that was not present in the original input.
         
