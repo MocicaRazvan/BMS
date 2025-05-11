@@ -69,7 +69,7 @@ const AlertDialogDeleteIngredient = memo(
           ) : (
             <Button
               variant="outline"
-              className="border-destructive text-destructive"
+              className="border-destructive text-destructive w-full"
             >
               {dialogDeleteTexts.anchor}
             </Button>
