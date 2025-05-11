@@ -38,9 +38,7 @@ import ToggleDisplayIngredient from "@/components/dialogs/ingredients/ingredient
 import AlertDialogDeleteIngredient from "@/components/dialogs/ingredients/delete-ingredient";
 import useClientNotFound from "@/hoooks/useClientNotFound";
 import OverflowTextTooltip from "@/components/common/overflow-text-tooltip";
-import CreationFilter, {
-  CreationFilterTexts,
-} from "@/components/list/creation-filter";
+import { CreationFilterTexts } from "@/components/list/creation-filter";
 import { wrapItemToString } from "@/lib/utils";
 import {
   RadioSortButton,
@@ -403,26 +401,26 @@ export default function IngredientsTable({
         ),
         cell: ({ row }) => <p>{getCalories(row.original.model)}</p>,
       },
-      {
-        id: ingredientTableColumnTexts.unit,
-        accessorKey: "model.nutritionalFact.unit",
-        header: () => (
-          <p className="font-bold text-lg text-left">
-            {ingredientTableColumnTexts.unit}
-          </p>
-        ),
-        cell: ({ row }) => (
-          <Badge
-            variant={
-              row.original.model.nutritionalFact.unit === "GRAM"
-                ? "secondary"
-                : "default"
-            }
-          >
-            {row.original.model.nutritionalFact.unit}
-          </Badge>
-        ),
-      },
+      // {
+      //   id: ingredientTableColumnTexts.unit,
+      //   accessorKey: "model.nutritionalFact.unit",
+      //   header: () => (
+      //     <p className="font-bold text-lg text-left">
+      //       {ingredientTableColumnTexts.unit}
+      //     </p>
+      //   ),
+      //   cell: ({ row }) => (
+      //     <Badge
+      //       variant={
+      //         row.original.model.nutritionalFact.unit === "GRAM"
+      //           ? "secondary"
+      //           : "default"
+      //       }
+      //     >
+      //       {row.original.model.nutritionalFact.unit}
+      //     </Badge>
+      //   ),
+      // },
 
       forWhom === "admin"
         ? {
