@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS comment (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     images TEXT[] DEFAULT '{}',
-    reference_type varchar(55) NOT NULL,
+    reference_type varchar(55) NOT NULL
 );
 CREATE INDEX IF NOT EXISTS idx_reference_id ON comment (reference_id);
 CREATE INDEX IF NOT EXISTS idx_user_id_comment ON comment (user_id);
