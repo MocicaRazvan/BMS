@@ -484,7 +484,7 @@ export default function UsersTable({
                         buttonProps={{
                           size: "sm",
                           className:
-                            "text-md border-destructive text-destructive",
+                            "border-destructive text-destructive w-full",
                           variant: "outline",
                         }}
                         anchorText={makeTrainer}
@@ -497,8 +497,8 @@ export default function UsersTable({
                     <DropdownMenuSeparator />
                     <DropdownMenuItem asChild>
                       <Button
-                        variant="outline"
-                        className="cursor-pointer border-success text-success !hover:outline-none !hover:ring-0 !hover:border-success !hover:text-success"
+                        variant="outlineSuccess"
+                        className="w-full"
                         onClick={() => handleStartChat(user)}
                       >
                         {startChat}

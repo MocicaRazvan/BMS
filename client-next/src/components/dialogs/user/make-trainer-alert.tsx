@@ -14,7 +14,7 @@ import { fetchStream } from "@/lib/fetchers/fetchStream";
 import { UserDto } from "@/types/dto";
 import { WithUser } from "@/lib/user";
 import { toast } from "@/components/ui/use-toast";
-import { ReactNode, useEffect, useState } from "react";
+import { ReactNode, useCallback, useEffect, useState } from "react";
 import { getAlertDialogMakeTrainerTexts } from "@/texts/components/dialog";
 
 interface Props extends WithUser {
@@ -46,8 +46,7 @@ export function AlertDialogMakeTrainer({
     getAlertDialogMakeTrainerTexts(user.email).then(setTexts);
   }, [user.email]);
 
-  const makeTrainer = async () => {
-    console.log("object");
+  const makeTrainer = useCallback(async () => {
     if (!texts) return;
     try {
       const resp = await fetchStream({
@@ -58,6 +57,11 @@ export function AlertDialogMakeTrainer({
 
       if (resp.error) {
         console.log(resp.error);
+        toast({
+          title: user.email,
+          description: "Error",
+          variant: "destructive",
+        });
       } else {
         successCallback();
         toast({
@@ -69,7 +73,7 @@ export function AlertDialogMakeTrainer({
     } catch (error) {
       console.log(error);
     }
-  };
+  }, [authUser.token, successCallback, texts, user.email, user.id]);
 
   return (
     <AlertDialog>
