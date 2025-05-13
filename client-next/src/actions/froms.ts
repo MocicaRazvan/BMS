@@ -6,6 +6,7 @@ import { redirect } from "@/navigation";
 import { emitInfo } from "@/logger";
 import { getCsrfNextAuthHeader } from "@/actions/get-csr-next-auth";
 import fetchFactory from "@/lib/fetchers/fetchWithRetry";
+import { normalizeEmailWrapper } from "@/lib/email-normalizer-wrapper";
 
 export async function registerSubmit(data: RegisterType): Promise<BaseError> {
   const csrfHeader = await getCsrfNextAuthHeader();
@@ -13,7 +14,10 @@ export async function registerSubmit(data: RegisterType): Promise<BaseError> {
     process.env.NEXT_PUBLIC_SPRING! + "/auth/register",
     {
       method: "POST",
-      body: JSON.stringify(data),
+      body: JSON.stringify({
+        ...data,
+        email: normalizeEmailWrapper(data.email),
+      }),
       headers: { "Content-Type": "application/json", ...csrfHeader },
       credentials: "include",
     },

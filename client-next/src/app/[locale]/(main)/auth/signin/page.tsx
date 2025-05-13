@@ -4,6 +4,7 @@ import SingIn from "./page-content";
 import { LocaleProps } from "@/navigation";
 import { getIntlMetadata } from "@/texts/metadata";
 import { Metadata } from "next";
+import { getEmailFromFieldTexts } from "@/texts/components/forms";
 
 export async function generateMetadata({
   params: { locale },
@@ -17,14 +18,14 @@ export default async function SignInPageWrapper({
   params: { locale },
 }: LocaleProps) {
   unstable_setRequestLocale(locale);
-  const [t, signInSchemaTexts] = await Promise.all([
+  const [t, signInSchemaTexts, emailFromFieldTexts] = await Promise.all([
     getTranslations("auth.SignInPageText"),
     getSignInSchemaTexts(),
+    getEmailFromFieldTexts(),
   ]);
   return (
     <SingIn
       cardTitle={t("cardTitle")}
-      emailLabel={t("emailLabel")}
       passwordLabel={t("passwordLabel")}
       submitButton={t("submitButton")}
       loadingButton={t("loadingButton")}
@@ -32,6 +33,7 @@ export default async function SignInPageWrapper({
       linkSignUp={t("linkSignUp")}
       linkForgotPassword={t("linkForgotPassword")}
       signInSchemaTexts={signInSchemaTexts}
+      emailFromFieldTexts={emailFromFieldTexts}
       locale={locale}
     />
   );

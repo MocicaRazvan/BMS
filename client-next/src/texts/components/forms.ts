@@ -45,6 +45,7 @@ import { getImageCropTexts } from "@/texts/components/common";
 import { getEditorTexts } from "@/texts/components/editor";
 import { CalendarDayFormTexts } from "@/components/forms/calendar-day-form";
 import { AddDayToCalendarTexts } from "@/components/forms/add-day-to-calendar";
+import { EmailFromFieldTexts } from "@/components/forms/email-form-field";
 
 export type FormType = "create" | "update";
 
@@ -589,6 +590,7 @@ export async function getAdminEmailTexts(): Promise<AdminEmailTexts> {
     preview: t("preview"),
     toastDescription: t("toastDescription"),
     mxError: t("mxError"),
+    emailDescription: t("emailDescription"),
     items: {
       ...["email", "subject", "content"].reduce(
         (acc, key) => ({
@@ -735,5 +737,12 @@ export async function getAddDayToCalendarTexts(): Promise<AddDayToCalendarTexts>
     formLabel: t("formLabel"),
     formDescription: t("formDescription"),
     toastDescription: t("toastDescription"),
+  };
+}
+export async function getEmailFromFieldTexts(): Promise<EmailFromFieldTexts> {
+  const t = await getTranslations("components.forms.EmailFromFieldTexts");
+  return {
+    label: t("label"),
+    description: t("description"),
   };
 }

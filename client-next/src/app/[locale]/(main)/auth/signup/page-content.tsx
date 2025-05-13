@@ -37,13 +37,15 @@ import {
   usePasswordStrength,
 } from "@/components/forms/passowrd-strength-indicator";
 import { MX_SPRING_MESSAGE } from "@/lib/constants";
+import EmailFormField, {
+  EmailFromFieldTexts,
+} from "@/components/forms/email-form-field";
 
 interface SignUpPageText {
   emailExistsError: string;
   cardTitle: string;
   firstNameLabel: string;
   lastNameLabel: string;
-  emailLabel: string;
   passwordLabel: string;
   confirmPasswordLabel: string;
   submitButton: string;
@@ -55,6 +57,7 @@ interface SignUpPageText {
 interface Props extends SignUpPageText {
   registrationSchemaTexts: RegisterSchemaTexts;
   passwordStrengthTexts: PasswordStrengthIndicatorTexts;
+  emailFromFieldTexts: EmailFromFieldTexts;
 }
 
 export default function SignUp({
@@ -63,7 +66,7 @@ export default function SignUp({
   passwordLabel,
   firstNameLabel,
   lastNameLabel,
-  emailLabel,
+  emailFromFieldTexts,
   submitButton,
   loadingButton,
   emailExistsError,
@@ -167,24 +170,12 @@ export default function SignUp({
                   )}
                 />
               </div>
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{emailLabel}</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="johndoe@gmail.com"
-                        {...field}
-                        onFocus={() => {
-                          if (errorMsg) setErrorMsg("");
-                        }}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+              <EmailFormField
+                texts={emailFromFieldTexts}
+                form={form}
+                onFocus={() => {
+                  if (errorMsg) setErrorMsg("");
+                }}
               />
               <FormField
                 control={form.control}

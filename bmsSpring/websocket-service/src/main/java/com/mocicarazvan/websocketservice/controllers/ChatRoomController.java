@@ -7,6 +7,7 @@ import com.mocicarazvan.websocketservice.dtos.chatRoom.ChatRoomResponse;
 import com.mocicarazvan.websocketservice.dtos.chatRoom.ChatRoomResponseJoined;
 import com.mocicarazvan.websocketservice.dtos.chatRoom.DeleteChatRoomRequest;
 import com.mocicarazvan.websocketservice.service.ChatRoomService;
+import com.mocicarazvan.websocketservice.utils.EmailNormalizerWrapperHolder;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -39,14 +40,14 @@ public class ChatRoomController {
     public ResponseEntity<PageableResponse<List<ChatRoomResponse>>> getChatRoomsFilter(@PathVariable String email,
                                                                                        @RequestParam(required = false, defaultValue = "") String filterReceiver,
                                                                                        @Valid @RequestBody PageableBody pageableBody) {
-        return ResponseEntity.ok(chatRoomService.getChatRoomsFiltered(email, filterReceiver, pageableBody));
+        return ResponseEntity.ok(chatRoomService.getChatRoomsFiltered(email, EmailNormalizerWrapperHolder.EmailNormalizer.normalize(filterReceiver), pageableBody));
     }
 
     @PatchMapping("/chatRooms/filter-joined/{email}")
     public ResponseEntity<PageableResponse<List<ChatRoomResponseJoined>>> getChatRoomsFilterJoined(@PathVariable String email,
                                                                                                    @RequestParam(required = false, defaultValue = "") String filterReceiver,
                                                                                                    @Valid @RequestBody PageableBody pageableBody) {
-        return ResponseEntity.ok(chatRoomService.getChatRoomsFilteredJoined(email, filterReceiver, pageableBody));
+        return ResponseEntity.ok(chatRoomService.getChatRoomsFilteredJoined(email, EmailNormalizerWrapperHolder.EmailNormalizer.normalize(filterReceiver), pageableBody));
     }
 
     @DeleteMapping("/chatRooms")
@@ -57,12 +58,12 @@ public class ChatRoomController {
 
     @GetMapping("/chatRooms/findAllByEmails")
     public ResponseEntity<ChatRoomResponse> findAllByEmails(@RequestParam List<String> emails) {
-        return ResponseEntity.ok(chatRoomService.findAllByEmails(emails));
+        return ResponseEntity.ok(chatRoomService.findAllByEmails(EmailNormalizerWrapperHolder.EmailNormalizer.normalize(emails)));
     }
 
     @GetMapping("/chatRooms/findAllByEmails-joined")
     public ResponseEntity<ChatRoomResponseJoined> findAllByEmailsJoined(@RequestParam List<String> emails) {
-        return ResponseEntity.ok(chatRoomService.findAllByEmailsJoined(emails));
+        return ResponseEntity.ok(chatRoomService.findAllByEmailsJoined(EmailNormalizerWrapperHolder.EmailNormalizer.normalize(emails)));
     }
 
 }

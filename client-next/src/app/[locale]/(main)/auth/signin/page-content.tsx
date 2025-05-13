@@ -28,10 +28,13 @@ import { Loader2 } from "lucide-react";
 import { Link, Locale, useRouter } from "@/navigation";
 import { logError } from "@/app/[locale]/(main)/auth/signin/actions";
 import OauthProviders from "@/app/[locale]/(main)/auth/oauth-providers";
+import { normalizeEmailWrapper } from "@/lib/email-normalizer-wrapper";
+import EmailFormField, {
+  EmailFromFieldTexts,
+} from "@/components/forms/email-form-field";
 
 export interface SignInPageText {
   cardTitle: string;
-  emailLabel: string;
   passwordLabel: string;
   submitButton: string;
   loadingButton: string;
@@ -43,11 +46,12 @@ export interface SignInPageText {
 interface SignInPageProps extends SignInPageText {
   signInSchemaTexts: SignInSchemaTexts;
   locale: Locale;
+  emailFromFieldTexts: EmailFromFieldTexts;
 }
 
 export default function SingIn({
   cardTitle,
-  emailLabel,
+  emailFromFieldTexts,
   passwordLabel,
   submitButton,
   loadingButton,
@@ -78,7 +82,7 @@ export default function SingIn({
     try {
       const result = await signIn("credentials", {
         redirect: false,
-        email: values.email,
+        email: normalizeEmailWrapper(values.email),
         password: values.password,
       });
       console.log("Sign-in result:", result);
@@ -110,24 +114,12 @@ export default function SingIn({
         <CardContent>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{emailLabel}</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="johndoe@gmail.com"
-                        {...field}
-                        onFocus={() => {
-                          if (errorMsg) setErrorMsg("");
-                        }}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+              <EmailFormField
+                texts={emailFromFieldTexts}
+                form={form}
+                onFocus={() => {
+                  if (errorMsg) setErrorMsg("");
+                }}
               />
               <FormField
                 control={form.control}

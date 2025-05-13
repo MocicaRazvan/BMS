@@ -41,29 +41,6 @@ public interface ChatRoomRepository extends IdGeneratedRepository<ChatRoom> {
     @Query("SELECT cr FROM ChatRoom cr JOIN cr.users u WHERE u.email IN :emails GROUP BY cr HAVING COUNT(DISTINCT u.email) = :emailCount")
     List<ChatRoom> findAllByUserEmails(Collection<String> emails, long emailCount);
 
-    //    @Query("""
-//            SELECT DISTINCT cr FROM ChatRoom cr JOIN cr.users u
-//            WHERE LOWER( u.email) LIKE LOWER(CONCAT('%', :filterEmail, '%')) AND cr.id NOT IN (
-//            SELECT cr2.id FROM ChatRoom cr2 JOIN cr2.users u2 WHERE u2.email = :email)
-//            """)
-    //todo change, this works for 2 users in a room
-//    @Query("""
-//            SELECT DISTINCT cr FROM ChatRoom cr JOIN cr.users u
-//            WHERE LOWER( u.email) LIKE LOWER(CONCAT('%', :filterEmail, '%')) AND LOWER( u.email) != LOWER(:email)
-//            """)
-//    @Query("""
-//                SELECT cr FROM ChatRoom cr
-//                WHERE cr.id IN (
-//                    SELECT cr_inner.id
-//                    FROM ChatRoom cr_inner
-//                    JOIN cr_inner.users u_inner
-//                    GROUP BY cr_inner.id
-//                    HAVING COUNT(DISTINCT u_inner.id) = 2
-//                      AND SUM(CASE WHEN LOWER(u_inner.email) = LOWER(:email) THEN 1 ELSE 0 END) > 0
-//                      AND SUM(CASE WHEN LOWER(u_inner.email) LIKE LOWER(CONCAT('%', :filterEmail, '%')) THEN 1 ELSE 0 END) > 0
-//                )
-//            """)
-//    Page<ChatRoom> findFilteredChatRooms(String email, String filterEmail, Pageable pageable);
 
     @Query("""
                 SELECT cr FROM ChatRoom cr
@@ -73,10 +50,10 @@ public interface ChatRoomRepository extends IdGeneratedRepository<ChatRoom> {
                     JOIN cr_inner.users u_inner
                     GROUP BY cr_inner.id
                     HAVING COUNT(DISTINCT u_inner.id) = 2
-                      AND SUM(CASE WHEN LOWER(u_inner.email) = LOWER(:email) THEN 1 ELSE 0 END) > 0
+                      AND SUM(CASE WHEN u_inner.email = :email THEN 1 ELSE 0 END) > 0
                       AND SUM(CASE WHEN
-                          LOWER(u_inner.email) LIKE LOWER(CONCAT('%', :filterEmail, '%'))
-                          AND LOWER(u_inner.email)!=LOWER(:email)
+                          u_inner.email ILIKE CONCAT('%', :filterEmail, '%')
+                          AND u_inner.email!=:email
                        THEN 1 ELSE 0 END) > 0
                 )
             """)
@@ -86,12 +63,12 @@ public interface ChatRoomRepository extends IdGeneratedRepository<ChatRoom> {
                 SELECT * FROM (
                     SELECT cr.*,
                         similarity(
-                            (SELECT LOWER(u.email)
+                            (SELECT u.email
                              FROM chat_room_users cru
                              JOIN conversation_user u ON cru.user_id = u.id
                              WHERE cru.chat_room_id = cr.id AND u.email != :email
                              LIMIT 1),
-                            LOWER(:filterEmail)
+                            :filterEmail
                         ) AS email_similarity
                     FROM chat_room cr
                     WHERE cr.id IN (
@@ -100,11 +77,11 @@ public interface ChatRoomRepository extends IdGeneratedRepository<ChatRoom> {
                         JOIN conversation_user u ON cru.user_id = u.id
                         GROUP BY cru.chat_room_id
                         HAVING COUNT(DISTINCT u.id) = 2
-                            AND COUNT(*) FILTER (WHERE LOWER(u.email) = LOWER(:email)) > 0
+                            AND COUNT(*) FILTER (WHERE u.email = :email) > 0
                             AND COUNT(*) FILTER (WHERE
                                 u.email != :email AND (
                                     u.email ILIKE CONCAT('%', :filterEmail, '%')
-                                    OR similarity(LOWER(u.email), LOWER(:filterEmail)) > 0.3
+                                    OR similarity(u.email, :filterEmail) > 0.3
                                 )
                             ) > 0
                     )
@@ -120,11 +97,11 @@ public interface ChatRoomRepository extends IdGeneratedRepository<ChatRoom> {
                                 JOIN conversation_user u ON cru.user_id = u.id
                                 GROUP BY cru.chat_room_id
                                 HAVING COUNT(DISTINCT u.id) = 2
-                                    AND COUNT(*) FILTER (WHERE LOWER(u.email) = LOWER(:email)) > 0
+                                    AND COUNT(*) FILTER (WHERE u.email = :email) > 0
                                     AND COUNT(*) FILTER (WHERE
                                         u.email != :email AND (
                                             u.email ILIKE CONCAT('%', :filterEmail, '%')
-                                            OR similarity(LOWER(u.email), LOWER(:filterEmail)) > 0.3
+                                            OR similarity(u.email, :filterEmail) > 0.3
                                         )
                                     ) > 0
                             )

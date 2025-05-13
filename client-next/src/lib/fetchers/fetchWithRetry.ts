@@ -4,7 +4,7 @@ const UNRETRIEABLE_STATUS_CODES = [400, 401, 403, 404, 409];
 
 export default function fetchFactory<F extends FetchLibrary>(baseFetch: F) {
   return fetchRetry(baseFetch, {
-    retryDelay: (attempt) => Math.pow(2, attempt) * 500,
+    retryDelay: (attempt) => Math.pow(2, attempt) * 250,
     retryOn: (attempt, error, response) => {
       if (attempt >= 3) return false;
       if (

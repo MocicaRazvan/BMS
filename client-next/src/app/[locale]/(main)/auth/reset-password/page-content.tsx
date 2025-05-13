@@ -18,7 +18,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/ui/password-input";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
@@ -33,10 +32,14 @@ import {
   PasswordStrengthIndicatorTexts,
   usePasswordStrength,
 } from "@/components/forms/passowrd-strength-indicator";
+import { normalizeEmailWrapper } from "@/lib/email-normalizer-wrapper";
+import {
+  EmailFormFieldPlaceHolder,
+  EmailFromFieldTexts,
+} from "@/components/forms/email-form-field";
 
 export interface ResetPasswordPageText {
   cardTitle: string;
-  emailLabel: string;
   passwordLabel: string;
   confirmPasswordLabel: string;
   submitButton: string;
@@ -48,12 +51,12 @@ interface ResetPasswordPageProps extends ResetPasswordPageText {
   resetPasswordSchemaTexts: ResetPasswordSchemaTexts;
   passwordStrengthTexts: PasswordStrengthIndicatorTexts;
   user: Session["user"];
+  emailFromFieldTexts: EmailFromFieldTexts;
 }
 
 export default function ResetPasswordPage({
   passwordLabel,
   confirmPasswordLabel,
-  emailLabel,
   submitButton,
   loadingButton,
   resetPasswordSchemaTexts,
@@ -61,6 +64,7 @@ export default function ResetPasswordPage({
   errorMessages,
   user,
   passwordStrengthTexts,
+  emailFromFieldTexts,
 }: ResetPasswordPageProps) {
   const session = useSession();
   const { navigateToNotFound } = useClientNotFound();
@@ -97,7 +101,7 @@ export default function ResetPasswordPage({
       path: "/auth/changePassword",
       method: "POST",
       body: {
-        email,
+        email: normalizeEmailWrapper(email),
         token,
         newPassword: password,
       },
@@ -162,12 +166,10 @@ export default function ResetPasswordPage({
         <CardContent>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-              <FormItem>
-                <FormLabel>{emailLabel}</FormLabel>
-                <FormControl>
-                  <Input disabled={true} value={decodedEmail} />
-                </FormControl>
-              </FormItem>
+              <EmailFormFieldPlaceHolder
+                texts={emailFromFieldTexts}
+                value={decodedEmail}
+              />
 
               <FormField
                 control={form.control}

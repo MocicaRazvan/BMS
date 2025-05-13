@@ -381,6 +381,10 @@
       }
     },
     "forms": {
+      "EmailFromFieldTexts": {
+        "label": "Email",
+        "description": "Emailul va fi normalizat, emailul final:"
+      },
       "AddDayToCalendarTexts": {
         "errorText": "Ziua nu a putut fi adăugată",
         "anchorText": "Adaugă ziua în calendar",
@@ -600,6 +604,7 @@
         "title": "Trimiteți un email cu templateul companiei",
         "toastDescription": "Emailul a fost trimis cu succes către ",
         "mxError": "Emailul nu a putut fi trimis, domeniul nu este valid",
+        "emailDescription": "Emailul va fi normalizat, emailul final:",
         "items": {
           "email": {
             "label": "Destinatar",

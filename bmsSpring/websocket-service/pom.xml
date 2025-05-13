@@ -139,7 +139,11 @@
             <artifactId>resilience4j-spring-boot3</artifactId>
             <version>${resilience4j.version}</version>
         </dependency>
-
+        <dependency>
+            <groupId>io.pinggy.open</groupId>
+            <artifactId>normalize-email</artifactId>
+            <version>0.0.2</version>
+        </dependency>
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>testcontainers</artifactId>

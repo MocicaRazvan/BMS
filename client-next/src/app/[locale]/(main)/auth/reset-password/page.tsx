@@ -6,7 +6,10 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/auth-options";
 import { Metadata } from "next";
 import { getIntlMetadata } from "@/texts/metadata";
-import { getPasswordStrengthIndicatorTexts } from "@/texts/components/forms";
+import {
+  getEmailFromFieldTexts,
+  getPasswordStrengthIndicatorTexts,
+} from "@/texts/components/forms";
 
 export async function generateMetadata({
   params: { locale },
@@ -23,13 +26,19 @@ export default async function ResetPasswordWrapper({
   params: { locale },
 }: LocaleProps) {
   unstable_setRequestLocale(locale);
-  const [t, resetPasswordSchemaTexts, session, passwordStrengthTexts] =
-    await Promise.all([
-      getTranslations("auth.ResetPasswordPageText"),
-      getResetPasswordSchemaTexts(),
-      getServerSession(authOptions),
-      getPasswordStrengthIndicatorTexts(),
-    ]);
+  const [
+    t,
+    resetPasswordSchemaTexts,
+    session,
+    passwordStrengthTexts,
+    emailFromFieldTexts,
+  ] = await Promise.all([
+    getTranslations("auth.ResetPasswordPageText"),
+    getResetPasswordSchemaTexts(),
+    getServerSession(authOptions),
+    getPasswordStrengthIndicatorTexts(),
+    getEmailFromFieldTexts(),
+  ]);
   return (
     <ResetPasswordPage
       cardTitle={t("cardTitle")}
@@ -38,10 +47,10 @@ export default async function ResetPasswordWrapper({
       submitButton={t("submitButton")}
       loadingButton={t("loadingButton")}
       errorMessages={t("errorMessages")}
-      emailLabel={t("emailLabel")}
       passwordStrengthTexts={passwordStrengthTexts}
       resetPasswordSchemaTexts={resetPasswordSchemaTexts}
       user={session?.user}
+      emailFromFieldTexts={emailFromFieldTexts}
     />
   );
 }

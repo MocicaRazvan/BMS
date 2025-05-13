@@ -10,24 +10,19 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useCallback, useMemo, useState } from "react";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+import { Form } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { fetchStream } from "@/lib/fetchers/fetchStream";
 import { Session } from "next-auth";
 import { MX_SPRING_MESSAGE } from "@/lib/constants";
+import { normalizeEmailWrapper } from "@/lib/email-normalizer-wrapper";
+import EmailFormField, {
+  EmailFromFieldTexts,
+} from "@/components/forms/email-form-field";
 
 export interface ForgotPasswordPageText {
   cardTitle: string;
-  emailLabel: string;
   submitButton: string;
   loadingButton: string;
   successMessage: string;
@@ -37,11 +32,12 @@ export interface ForgotPasswordPageText {
 
 interface ForgotPasswordPageProps extends ForgotPasswordPageText {
   emailSchemaTexts: EmailSchemaTexts;
+  emailFromFieldTexts: EmailFromFieldTexts;
 }
 
 export default function ForgotPasswordPage({
   cardTitle,
-  emailLabel,
+  emailFromFieldTexts,
   submitButton,
   loadingButton,
   successMessage,
@@ -72,7 +68,7 @@ export default function ForgotPasswordPage({
         path: "/auth/resetPassword",
         method: "POST",
         body: {
-          email,
+          email: normalizeEmailWrapper(email),
         },
       });
       if (error && error.message.includes(MX_SPRING_MESSAGE)) {
@@ -94,25 +90,14 @@ export default function ForgotPasswordPage({
         <CardContent>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{emailLabel}</FormLabel>
-                    <FormControl>
-                      <Input
-                        disabled={!!user?.email}
-                        placeholder="johndoe@gmail.com"
-                        {...field}
-                        onFocus={() => {
-                          if (errorMsg) setErrorMsg("");
-                        }}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+              <EmailFormField
+                texts={emailFromFieldTexts}
+                form={form}
+                onFocus={() => {
+                  if (errorMsg) setErrorMsg("");
+                }}
+                disabled={!!user?.email}
+                duration={!!user?.email ? 0 : 0.2}
               />
               {errorMsg && (
                 <p className="font-medium text-destructive">{errorMsg}</p>

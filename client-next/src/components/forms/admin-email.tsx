@@ -17,6 +17,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -33,6 +34,8 @@ import { toast } from "@/components/ui/use-toast";
 import { handleBaseError } from "@/lib/utils";
 import { useNavigationGuardI18nForm } from "@/hoooks/use-navigation-guard-i18n-form";
 import { MX_SPRING_MESSAGE } from "@/lib/constants";
+import { normalizeEmailWrapper } from "@/lib/email-normalizer-wrapper";
+import { AnimatePresence, motion } from "framer-motion";
 
 export interface AdminEmailTexts {
   adminEmailSchemaTexts: AdminEmailSchemaTexts;
@@ -42,6 +45,7 @@ export interface AdminEmailTexts {
   title: string;
   preview: string;
   toastDescription: string;
+  emailDescription: string;
   items: Record<
     keyof AdminEmailSchemaType,
     {
@@ -115,6 +119,7 @@ export default function AdminEmail({
   toastDescription,
   editorTexts,
   mxError,
+  emailDescription,
 }: Props) {
   const schema = useMemo(
     () => getAdminEmailSchema(adminEmailSchemaTexts),
@@ -141,7 +146,10 @@ export default function AdminEmail({
     async (data: AdminEmailSchemaType) => {
       setIsLoading(true);
       setErrorMsg("");
-      const body: EmailRequest = { ...data, recipientEmail: data.email };
+      const body: EmailRequest = {
+        ...data,
+        recipientEmail: normalizeEmailWrapper(data.email),
+      };
       try {
         const res = await fetchStream({
           path: "/users/admin/email",
@@ -187,6 +195,7 @@ export default function AdminEmail({
   );
 
   const content = form.watch("content");
+  const emailValue = form.watch("email");
   const debounceContent = useDebounce(content, 500);
 
   useEffect(() => {
@@ -213,13 +222,28 @@ export default function AdminEmail({
                   <FormControl>
                     <Input placeholder={items.email.placeholder} {...field} />
                   </FormControl>
+                  <AnimatePresence>
+                    {emailValue && (
+                      <motion.div
+                        key="description-email"
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: "auto" }}
+                        exit={{ opacity: 0, height: 0 }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        <FormDescription>
+                          {`${emailDescription} ${normalizeEmailWrapper(emailValue)}`}
+                        </FormDescription>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                   <FormMessage />
                 </FormItem>
               )}
             />
             <FormField
               control={form.control}
-              name={"subject"}
+              name="subject"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="capitalize">

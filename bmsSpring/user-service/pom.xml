@@ -134,6 +134,13 @@
             <artifactId>ollama-search</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
+
+        <dependency>
+            <groupId>io.pinggy.open</groupId>
+            <artifactId>normalize-email</artifactId>
+            <version>0.0.2</version>
+        </dependency>
+
     </dependencies>
     <dependencyManagement>
         <dependencies>

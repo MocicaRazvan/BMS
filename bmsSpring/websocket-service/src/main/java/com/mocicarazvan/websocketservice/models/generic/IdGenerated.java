@@ -1,5 +1,6 @@
 package com.mocicarazvan.websocketservice.models.generic;
 
+import com.mocicarazvan.websocketservice.hibernate.IdGeneratedListener;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -15,6 +16,7 @@ import java.util.Objects;
 @AllArgsConstructor
 @SuperBuilder
 @MappedSuperclass
+@EntityListeners(IdGeneratedListener.class)
 public abstract class IdGenerated {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,13 +26,6 @@ public abstract class IdGenerated {
 
     private LocalDateTime updatedAt;
 
-    @PrePersist
-    public void postConstruct() {
-        if (this.createdAt == null) {
-            this.createdAt = LocalDateTime.now();
-        }
-        this.updatedAt = LocalDateTime.now();
-    }
 
     @Override
     public boolean equals(Object o) {

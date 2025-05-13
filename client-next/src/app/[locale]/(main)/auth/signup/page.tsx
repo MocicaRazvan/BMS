@@ -4,7 +4,10 @@ import { LocaleProps } from "@/navigation";
 import SignUp from "@/app/[locale]/(main)/auth/signup/page-content";
 import { Metadata } from "next";
 import { getIntlMetadata } from "@/texts/metadata";
-import { getPasswordStrengthIndicatorTexts } from "@/texts/components/forms";
+import {
+  getEmailFromFieldTexts,
+  getPasswordStrengthIndicatorTexts,
+} from "@/texts/components/forms";
 
 export async function generateMetadata({
   params: { locale },
@@ -17,17 +20,20 @@ export default async function SignUpPageWrapper({
   params: { locale },
 }: LocaleProps) {
   unstable_setRequestLocale(locale);
-  const [t, registrationSchemaTexts, passwordStrengthTexts] = await Promise.all(
-    [
-      getTranslations("auth.SignUpPageText"),
-      getRegistrationSchemaTexts(),
-      getPasswordStrengthIndicatorTexts(),
-    ],
-  );
+  const [
+    t,
+    registrationSchemaTexts,
+    passwordStrengthTexts,
+    emailFromFieldTexts,
+  ] = await Promise.all([
+    getTranslations("auth.SignUpPageText"),
+    getRegistrationSchemaTexts(),
+    getPasswordStrengthIndicatorTexts(),
+    getEmailFromFieldTexts(),
+  ]);
   return (
     <SignUp
       cardTitle={t("cardTitle")}
-      emailLabel={t("emailLabel")}
       passwordLabel={t("passwordLabel")}
       confirmPasswordLabel={t("confirmPasswordLabel")}
       submitButton={t("submitButton")}
@@ -39,6 +45,7 @@ export default async function SignUpPageWrapper({
       mxError={t("mxError")}
       registrationSchemaTexts={registrationSchemaTexts}
       passwordStrengthTexts={passwordStrengthTexts}
+      emailFromFieldTexts={emailFromFieldTexts}
     />
   );
 }

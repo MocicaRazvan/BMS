@@ -382,6 +382,10 @@
       }
     },
     "forms": {
+      "EmailFromFieldTexts": {
+        "label": "Email",
+        "description": "The email will be normalized, final email:"
+      },
       "AddDayToCalendarTexts": {
         "errorText": "The day could not be added",
         "anchorText": "Add the day to the calendar",
@@ -601,6 +605,7 @@
         "title": "Send email with company template",
         "toastDescription": "The mail was sent to ",
         "mxError": "The email could not be sent, the domain it is not valid",
+        "emailDescription": "The email will be normalized, final email:",
         "items": {
           "email": {
             "label": "Recipient",

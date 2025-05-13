@@ -146,9 +146,9 @@ public class ExtendedOrderWithAddressRepositoryImpl implements ExtendedOrderWith
 
         RepositoryUtils.MutableBoolean hasPreviousCriteria = new RepositoryUtils.MutableBoolean(false);
 
-        repositoryUtils.addStringField(city, queryBuilder, hasPreviousCriteria, " ( city ILIKE '%' || :city || '%' OR similarity(city, :city ) > 0.35 )");
-        repositoryUtils.addStringField(state, queryBuilder, hasPreviousCriteria, "( state ILIKE '%' || :state || '%' OR similarity(state, :state ) > 0.35 )");
-        repositoryUtils.addStringField(country, queryBuilder, hasPreviousCriteria, "( country ILIKE '%' || :country || '%' OR similarity(country, :country ) > 0.35 )");
+        repositoryUtils.addStringField(city, queryBuilder, hasPreviousCriteria, " ( city ILIKE '%' || :city || '%' OR similarity(city, :city ) > 0.3 )");
+        repositoryUtils.addStringField(state, queryBuilder, hasPreviousCriteria, "( state ILIKE '%' || :state || '%' OR similarity(state, :state ) > 0.3 )");
+        repositoryUtils.addStringField(country, queryBuilder, hasPreviousCriteria, "( country ILIKE '%' || :country || '%' OR similarity(country, :country ) > 0.3 )");
         repositoryUtils.addCreatedAtBound("custom_order", createdAtLowerBound, createdAtUpperBound, queryBuilder, hasPreviousCriteria);
         repositoryUtils.addUpdatedAtBound("custom_order", updatedAtLowerBound, updatedAtUpperBound, queryBuilder, hasPreviousCriteria);
     }

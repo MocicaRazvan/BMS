@@ -1,6 +1,7 @@
 package com.mocicarazvan.userservice.dtos.auth.requests;
 
 import com.mocicarazvan.templatemodule.utils.Transformable;
+import com.mocicarazvan.userservice.utils.EmailNormalizerWrapperHolder;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -25,4 +26,8 @@ public class LoginRequest implements Transformable<LoginRequest> {
     @Length(min = 4, message = "Password should be at least 4 characters!")
     @Schema(description = "The user actual password")
     private String password;
+
+    public void setEmail(String email) {
+        this.email = EmailNormalizerWrapperHolder.EmailNormalizer.normalize(email);
+    }
 }

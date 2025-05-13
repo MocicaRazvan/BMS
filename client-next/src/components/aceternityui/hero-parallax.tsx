@@ -128,10 +128,10 @@ export const Header = (texts: HeroParallaxTexts) => {
   }
   return (
     <div className="max-w-7xl relative mx-auto py-20 md:py-40 px-4 w-full  left-0 top-0 z-[1] pointer-events-none">
-      <h1 className="text-2xl md:text-7xl font-bold dark:text-white w-full py-1">
+      <h1 className="text-2xl md:text-7xl font-bold  w-full py-1">
         {/*<p dangerouslySetInnerHTML={{ __html: `${texts.title}` }} />*/}
         <p>{firstTitle}</p>
-        <span className="flex items-center gap-2 md:gap-5 pb-2">
+        <span className="hidden sm:flex items-center gap-2 md:gap-5 pb-2 ">
           <p>{`${secondTitle} `}</p>
           <BlurInOut
             outText={texts.platform}
@@ -141,8 +141,9 @@ export const Header = (texts: HeroParallaxTexts) => {
             inStartScale={1.12}
           />
         </span>
+        <span className="inline sm:hidden">{`${secondTitle} ${texts.community}`}</span>
       </h1>
-      <p className="max-w-2xl text-base md:text-xl mt-8 dark:text-neutral-200">
+      <p className="max-w-2xl text-base md:text-xl mt-8 text-primary/90">
         {texts.description}
       </p>
     </div>

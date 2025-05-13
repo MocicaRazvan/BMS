@@ -6,10 +6,7 @@ import com.mocicarazvan.templatemodule.enums.Role;
 import com.mocicarazvan.templatemodule.models.IdGenerated;
 import com.mocicarazvan.userservice.authorities.GrantedAuthority;
 import com.mocicarazvan.userservice.authorities.SimpleGrantedAuthority;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
@@ -34,6 +31,7 @@ public class UserCustom extends IdGenerated implements Cloneable {
     @Column("password")
     private String password;
     @Column("role")
+    @Builder.Default
     private Role role = Role.ROLE_USER;
     @Column("image")
     private String image;

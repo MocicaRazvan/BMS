@@ -4,11 +4,16 @@ import com.mocicarazvan.planservice.convertors.DietTypeReadingConvertor;
 import com.mocicarazvan.planservice.convertors.DietTypeWritingConvertor;
 import com.mocicarazvan.planservice.convertors.ObjectiveTypeReadingConvertor;
 import com.mocicarazvan.planservice.convertors.ObjectiveTypeWritingConvertor;
+import com.mocicarazvan.planservice.models.Plan;
+import com.mocicarazvan.templatemodule.dbCallbacks.TitleBodyImagesBeforeSaveCallback;
 import io.r2dbc.spi.ConnectionFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.data.r2dbc.convert.R2dbcCustomConversions;
 import org.springframework.data.r2dbc.dialect.DialectResolver;
+import org.springframework.data.r2dbc.mapping.event.BeforeSaveCallback;
 
 @Configuration
 public class DbConfig {
@@ -23,5 +28,9 @@ public class DbConfig {
         );
     }
 
-
+    @Bean
+    @Order(Ordered.LOWEST_PRECEDENCE)
+    public BeforeSaveCallback<Plan> planBeforeSaveCallback() {
+        return new TitleBodyImagesBeforeSaveCallback<>();
+    }
 }

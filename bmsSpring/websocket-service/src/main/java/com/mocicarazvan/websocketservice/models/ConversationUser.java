@@ -3,6 +3,7 @@ package com.mocicarazvan.websocketservice.models;
 
 import com.mocicarazvan.websocketservice.enums.ConnectedStatus;
 import com.mocicarazvan.websocketservice.models.generic.IdGenerated;
+import com.mocicarazvan.websocketservice.utils.EmailNormalizerWrapperHolder;
 import com.mocicarazvan.websocketservice.utils.Transformable;
 import jakarta.persistence.*;
 import lombok.*;
@@ -36,6 +37,12 @@ public class ConversationUser extends IdGenerated implements Transformable<Conve
 
     @Version
     private Long version;
+
+    @PrePersist
+    @PreUpdate
+    private void prePersist() {
+        this.email = EmailNormalizerWrapperHolder.EmailNormalizer.normalize(email);
+    }
 
     @Override
     public final boolean equals(Object o) {

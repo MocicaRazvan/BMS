@@ -13,6 +13,7 @@ import com.mocicarazvan.templatemodule.hateos.CustomEntityModel;
 import com.mocicarazvan.templatemodule.hateos.user.PageableUserAssembler;
 import com.mocicarazvan.templatemodule.utils.RequestsUtils;
 import com.mocicarazvan.userservice.services.UserService;
+import com.mocicarazvan.userservice.utils.EmailNormalizerWrapperHolder;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -80,7 +81,7 @@ public class UserControllerImpl implements UserController {
                                                                           @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate updatedAtLowerBound,
                                                                           @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate updatedAtUpperBound
     ) {
-        return userService.getAllUsers(pageableBody, email, roles, providers, emailVerified, admin, createdAtLowerBound, createdAtUpperBound, updatedAtLowerBound, updatedAtUpperBound)
+        return userService.getAllUsers(pageableBody, EmailNormalizerWrapperHolder.EmailNormalizer.normalize(email), roles, providers, emailVerified, admin, createdAtLowerBound, createdAtUpperBound, updatedAtLowerBound, updatedAtUpperBound)
                 .flatMapSequential(pageableUserAssembler::toModel);
     }
 
