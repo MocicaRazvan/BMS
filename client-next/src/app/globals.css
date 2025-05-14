@@ -116,6 +116,11 @@
 
         --nivo-unknown: #4b5563;
     }
+
+    ::selection {
+        background-color: hsl(var(--secondary-foreground));
+        color: hsl(var(--secondary));
+    }
 }
 
 /*reference line work around*/
