@@ -3,10 +3,10 @@ import {
   forwardRef,
   HTMLAttributes,
   useEffect,
+  useRef,
   useState,
 } from "react";
 import { SortableItem, SortableListType } from "@/components/dnd/sortable-list";
-import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { CircleAlert, Trash2 } from "lucide-react";
@@ -70,6 +70,18 @@ const Item = forwardRef<HTMLDivElement, Props>(
     const [videoSrc, setVideoSrc] = useState<string | null>(null);
     const [isDeletePressed, setIsDeletePressed] = useState(false);
     const [isImageLoaded, setIsImageLoaded] = useState(false);
+    const imgRef = useRef<HTMLImageElement | null>(null);
+    useEffect(() => {
+      if (type === "IMAGE") {
+        const img = imgRef.current;
+        if (img) {
+          img
+            .decode()
+            .then(() => setIsImageLoaded(true))
+            .catch(() => setIsImageLoaded(true));
+        }
+      }
+    }, [item.src, type]);
     useDebounce(
       () => {
         if (isDeletePressed) {
@@ -125,7 +137,9 @@ const Item = forwardRef<HTMLDivElement, Props>(
                   )}
                 />
               )}
-              <Image
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                ref={imgRef}
                 src={item.src}
                 alt={`${item.id}`}
                 className={cn(
@@ -134,11 +148,6 @@ const Item = forwardRef<HTMLDivElement, Props>(
                   cropShape === "round" &&
                     "rounded-full max-w-[120px] h-[120px]",
                 )}
-                onLoad={() => {
-                  setIsImageLoaded(true);
-                }}
-                height={cropShape === "round" ? 120 : 250}
-                width={cropShape === "round" ? 120 : 250}
                 loading="eager"
                 decoding="async"
               />

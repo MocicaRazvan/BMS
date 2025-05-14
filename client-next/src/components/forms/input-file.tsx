@@ -276,7 +276,7 @@ export default function InputFile<T extends FieldValues>({
                 </Button>
               )}
               {multiple && fieldValue.length > 0 && (
-                <motion.div layout>
+                <motion.div layout="size">
                   {!isDeleteAllPressed ? (
                     <Button
                       variant="destructive"
@@ -376,6 +376,7 @@ export default function InputFile<T extends FieldValues>({
                     </div>
                     {fieldValue?.length > 0 && (
                       <Button
+                        aria-expanded={!isListCollapsed}
                         type="button"
                         className=" mt-5 md:mt-10 text-[16px]"
                         onClick={() => setIsListCollapsed((prev) => !prev)}
@@ -407,6 +408,9 @@ export default function InputFile<T extends FieldValues>({
           }}
           transition={{ duration: 0.5 }}
           className="overflow-hidden w-full"
+          style={{
+            willChange: "opacity",
+          }}
         >
           <SortableList
             items={fieldValue}
