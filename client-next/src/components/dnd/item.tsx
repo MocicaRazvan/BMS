@@ -126,6 +126,9 @@ const Item = forwardRef<HTMLDivElement, Props>(
                 isDragging ? "shadow-none" : "shadow-md",
                 cropShape === "round" && "rounded-full max-w-[120px] h-[120px]",
               )}
+              style={{
+                contentVisibility: "visible",
+              }}
             >
               {!isImageLoaded && (
                 <Skeleton
@@ -150,6 +153,12 @@ const Item = forwardRef<HTMLDivElement, Props>(
                 )}
                 loading="eager"
                 decoding="async"
+                style={{
+                  contentVisibility: "visible",
+                  willChange: "transform",
+                  // to force GPU acceleration
+                  transform: "translateZ(0)",
+                }}
               />
             </div>
           ) : (
