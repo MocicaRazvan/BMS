@@ -140,6 +140,7 @@ const Item = forwardRef<HTMLDivElement, Props>(
                 height={cropShape === "round" ? 120 : 250}
                 width={cropShape === "round" ? 120 : 250}
                 loading="eager"
+                decoding="async"
               />
             </div>
           ) : (
