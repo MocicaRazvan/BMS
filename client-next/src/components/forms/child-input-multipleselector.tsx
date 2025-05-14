@@ -1,13 +1,14 @@
 "use client";
 
 import { WithUser } from "@/lib/user";
-import React, { useCallback } from "react";
+import React, { useCallback, useMemo, useRef, useState } from "react";
 import MultipleSelector, {
   MultipleSelectorProps,
   Option,
 } from "@/components/ui/multiple-selector";
-import { fetchStream } from "@/lib/fetchers/fetchStream";
+import { fetchStream, FetchStreamProps } from "@/lib/fetchers/fetchStream";
 import { SortDirection } from "@/types/fetch-utils";
+import useFetchStream, { UseFetchStreamProps } from "@/hoooks/useFetchStream";
 
 export interface ChildInputMultipleSelectorTexts {
   placeholder: string;
@@ -55,41 +56,80 @@ export default function ChildInputMultipleSelector<R>({
   addNameSortWhenSearchingInputEmpty = true,
   closeOnSelect = false,
 }: Props<R>) {
+  const baseParams: UseFetchStreamProps = useMemo(
+    () => ({
+      path,
+      token: authUser.token,
+      queryParams: {
+        [valueKey]: "",
+        ...(extraQueryParams && extraQueryParams),
+      },
+      method: "PATCH",
+      body: {
+        page: 0,
+        size: pageSize,
+        sortingCriteria: {
+          ...(addNameSortWhenSearchingInputEmpty
+            ? {
+                [valueKey]: "asc",
+              }
+            : {}),
+          ...sortingCriteria,
+        },
+      },
+      acceptHeader: "application/x-ndjson",
+      refetchOnFocus: false,
+      trigger: !value || value?.length === 0,
+    }),
+    [
+      addNameSortWhenSearchingInputEmpty,
+      authUser.token,
+      pageSize,
+      path,
+      JSON.stringify(extraQueryParams),
+      JSON.stringify(sortingCriteria),
+      valueKey,
+      JSON.stringify(value),
+    ],
+  );
+  const [curParams, setCurParams] = useState<UseFetchStreamProps>(baseParams);
+  const { messages: initialMessage, isFinished: initialFinished } =
+    useFetchStream<R>(curParams);
+  const initialOptions = useMemo(
+    () =>
+      initialMessage && initialMessage.length > 0
+        ? initialMessage?.map(mapping)
+        : [],
+    [initialMessage, mapping],
+  );
+
   const fetchData = useCallback(
-    async (value: string): Promise<Option[]> => {
+    async (searchValue: string): Promise<Option[]> => {
       const extraSortingCriteria: typeof sortingCriteria = {};
-      if (addNameSortWhenSearchingInputEmpty && value === "") {
+      if (addNameSortWhenSearchingInputEmpty && searchValue === "") {
         extraSortingCriteria[valueKey] = "asc";
       }
-      const res = await fetchStream<R>({
-        path,
-        token: authUser.token,
+      setCurParams((cur) => ({
+        ...cur,
         queryParams: {
-          [valueKey]: value,
+          [valueKey]: searchValue,
           ...(extraQueryParams && extraQueryParams),
         },
-        method: "PATCH",
         body: {
-          page: 0,
-          size: pageSize,
+          ...cur.body,
           sortingCriteria: {
             ...extraSortingCriteria,
             ...sortingCriteria,
           },
         },
-        acceptHeader: "application/x-ndjson",
-      });
-
-      return res.messages.map(mapping);
+        trigger: true,
+      }));
+      return [];
     },
     [
       addNameSortWhenSearchingInputEmpty,
-      authUser.token,
-      extraQueryParams,
-      mapping,
-      pageSize,
-      path,
-      sortingCriteria,
+      JSON.stringify(extraQueryParams),
+      JSON.stringify(sortingCriteria),
       valueKey,
     ],
   );
@@ -107,6 +147,9 @@ export default function ChildInputMultipleSelector<R>({
         allowDuplicates={allowDuplicates}
         hidePlaceholderWhenSelected={true}
         closeOnSelect={closeOnSelect}
+        defaultOptions={initialOptions}
+        watcherMode={true}
+        isWatcherLoading={!initialFinished}
         loadingIndicator={
           <p className="py-2 text-center text-lg leading-10 text-muted-foreground">
             {loading}

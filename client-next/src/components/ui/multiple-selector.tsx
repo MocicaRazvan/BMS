@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { forwardRef, useEffect } from "react";
+import { forwardRef, useCallback, useEffect } from "react";
 import { X } from "lucide-react";
 
 import {
@@ -77,6 +77,8 @@ export interface MultipleSelectorProps {
   giveUnselected?: boolean;
   allowDuplicates?: boolean;
   closeOnSelect?: boolean;
+  watcherMode?: boolean;
+  isWatcherLoading?: boolean;
 }
 
 export interface MultipleSelectorRef {
@@ -99,7 +101,7 @@ export function useDebounce<T>(value: T, delay?: number): T {
 }
 
 function transToGroupOption(options: Option[], groupBy?: string) {
-  if (options.length === 0) {
+  if (!Array.isArray(options) || options.length === 0) {
     return {};
   }
   if (!groupBy) {
@@ -123,6 +125,8 @@ function removePickedOption(groupOption: GroupOption, picked: Option[]) {
   const cloneOption = JSON.parse(JSON.stringify(groupOption)) as GroupOption;
 
   for (const [key, value] of Object.entries(cloneOption)) {
+    if (!Array.isArray(value)) continue;
+
     cloneOption[key] = value.filter(
       (val) => !picked.find((p) => p.value === val.value),
     );
@@ -187,6 +191,8 @@ const MultipleSelector = React.forwardRef<
       giveUnselected = false,
       allowDuplicates = false,
       closeOnSelect = false,
+      watcherMode = false,
+      isWatcherLoading = false,
     }: MultipleSelectorProps,
     ref: React.Ref<MultipleSelectorRef>,
   ) => {
@@ -209,6 +215,18 @@ const MultipleSelector = React.forwardRef<
       }),
       [selected],
     );
+
+    useEffect(() => {
+      if (watcherMode) {
+        setOptions(transToGroupOption(arrayDefaultOptions, groupBy));
+      }
+    }, [arrayDefaultOptions, groupBy, watcherMode]);
+
+    useEffect(() => {
+      if (watcherMode) {
+        setIsLoading(isWatcherLoading);
+      }
+    }, [isWatcherLoading, watcherMode]);
 
     const handleUnselect = React.useCallback(
       (option: Option, index?: number) => {
@@ -276,6 +294,11 @@ const MultipleSelector = React.forwardRef<
       const exec = async () => {
         if (!onSearch || !open) return;
 
+        if (watcherMode && onSearch && debouncedSearchTerm != undefined) {
+          await onSearch?.(debouncedSearchTerm);
+          return;
+        }
+
         if (triggerSearchOnFocus) {
           await doSearch();
         }
@@ -286,7 +309,7 @@ const MultipleSelector = React.forwardRef<
       };
 
       void exec();
-    }, [debouncedSearchTerm, open]);
+    }, [debouncedSearchTerm, open, arrayDefaultOptions?.length, watcherMode]);
 
     const CreatableItem = () => {
       if (!creatable) return undefined;
@@ -359,6 +382,24 @@ const MultipleSelector = React.forwardRef<
       // Using default filter in `cmdk`. We don't have to provide it.
       return undefined;
     }, [creatable, commandProps?.filter]);
+
+    const onSelect = useCallback(
+      (option: Option) => {
+        if (selected.length >= maxSelected) {
+          onMaxSelected?.(selected.length);
+          return;
+        }
+        setInputValue("");
+        const newOptions = [...selected, option];
+        setSelected(newOptions);
+        onChange?.(newOptions);
+        if (closeOnSelect) {
+          // setOpen(false);
+          inputRef.current?.blur();
+        }
+      },
+      [closeOnSelect, maxSelected, onChange, onMaxSelected, selected],
+    );
 
     return (
       <Command
@@ -456,18 +497,26 @@ const MultipleSelector = React.forwardRef<
           </div>
         </div>
         <div className="relative mt-2">
-          {open && (
-            <CommandList className="absolute top-0 z-[40] w-full  rounded-md border bg-popover text-popover-foreground shadow-md outline-none animate-in">
-              {isLoading ? (
-                <>{loadingIndicator}</>
-              ) : (
-                <>
-                  {EmptyItem()}
-                  {CreatableItem()}
-                  {!selectFirstItem && (
-                    <CommandItem value="-" className="hidden" />
-                  )}
-                  {Object.entries(selectables).map(([key, dropdowns]) => (
+          <CommandList
+            className={cn(
+              "absolute top-0 z-[40] w-full rounded-md border bg-popover text-popover-foreground shadow-md outline-none animate-in",
+              !open && "hidden",
+            )}
+          >
+            {isLoading ? (
+              <CommandItem value="__loading__" disabled>
+                {loadingIndicator}
+              </CommandItem>
+            ) : (
+              <>
+                {EmptyItem()}
+                {CreatableItem()}
+                {!selectFirstItem && (
+                  <CommandItem value="-" className="hidden" />
+                )}
+                {Object.entries(selectables).map(([key, dropdowns]) => {
+                  if (!Array.isArray(dropdowns)) return null;
+                  return (
                     <CommandGroup
                       key={key}
                       heading={key}
@@ -485,18 +534,7 @@ const MultipleSelector = React.forwardRef<
                                 e.stopPropagation();
                               }}
                               onSelect={() => {
-                                if (selected.length >= maxSelected) {
-                                  onMaxSelected?.(selected.length);
-                                  return;
-                                }
-                                setInputValue("");
-                                const newOptions = [...selected, option];
-                                setSelected(newOptions);
-                                onChange?.(newOptions);
-                                if (closeOnSelect) {
-                                  setOpen(false);
-                                  inputRef.current?.blur();
-                                }
+                                onSelect(option);
                               }}
                               className={cn(
                                 "cursor-pointer",
@@ -510,11 +548,11 @@ const MultipleSelector = React.forwardRef<
                         })}
                       </>
                     </CommandGroup>
-                  ))}
-                </>
-              )}
-            </CommandList>
-          )}
+                  );
+                })}
+              </>
+            )}
+          </CommandList>
         </div>
       </Command>
     );

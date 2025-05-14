@@ -343,7 +343,6 @@ export const getIngredientSchema = ({
   z.object({
     name: z.string().min(2, minName),
     type: z.enum(dietTypes, {
-      message: invalidDietType,
       errorMap: () => ({ message: invalidDietType }),
     }),
   });
@@ -445,7 +444,6 @@ const getNutritionalFactSchema = ({
         .nonnegative({ message: salt.nonnegative })
         .max(100, { message: salt.max }),
       unit: z.enum(unitTypes, {
-        message: unit,
         errorMap: () => ({ message: unit }),
       }),
     })
@@ -621,7 +619,6 @@ export const getPlanSchema = (texts: PlanSchemaTexts) =>
         .min(1, texts.minDays),
       price: z.coerce.number().min(1, texts.minPrice),
       objective: z.enum(planObjectives as [string, ...string[]], {
-        invalid_type_error: texts.objective,
         errorMap: () => ({ message: texts.objective }),
       }),
     })
@@ -691,7 +688,6 @@ export const getDaySchema = (texts: DaySchemaTexts) =>
   z
     .object({
       type: z.enum(dayTypes as [string, ...string[]], {
-        invalid_type_error: texts.type,
         errorMap: () => ({ message: texts.type }),
       }),
       meals: z.array(getMealSchema(texts.meals)).min(1, texts.minMeals),
