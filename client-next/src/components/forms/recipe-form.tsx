@@ -795,12 +795,13 @@ function SingleChildForm({
                           >
                         >
                           disabled={wasSubmitted}
-                          path={"/ingredients/filtered"}
+                          path="/ingredients/filtered"
                           // sortingCriteria={{ name: "asc" }}
                           extraQueryParams={{ display: "true" }}
-                          valueKey={"name"}
+                          valueKey="name"
                           maxSelected={1}
                           pageSize={20}
+                          closeOnSelect={true}
                           mapping={(i) => ({
                             value: i.content.content.ingredient.id.toString(),
                             label: i.content.content.ingredient.name,
