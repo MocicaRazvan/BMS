@@ -27,6 +27,7 @@ services:
       - "9999:80"
     volumes:
       - pgadmin_data:/var/lib/pgadmin
+      - ./seed/pg_exports:/var/lib/pgadmin/storage/admin_admin.com/exports
     networks:
       - bms
     restart: unless-stopped

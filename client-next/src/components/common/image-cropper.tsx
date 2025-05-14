@@ -13,7 +13,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import LoadingSpinner from "@/components/common/loading-spinner";
+import Loader from "@/components/ui/spinner";
 export interface ImageCropTexts {
   tooltipText: string;
   buttonText: string;
@@ -94,7 +94,14 @@ export default function ImageCropper({
     }
     setIsCropping(false);
     handleDialogOpen(false);
-  }, [croppedAreaPixels, handleDialogOpen, onCropComplete, rotation, src]);
+  }, [
+    croppedAreaPixels,
+    handleDialogOpen,
+    onCropComplete,
+    originalMime,
+    rotation,
+    src,
+  ]);
 
   return (
     <Dialog open={dialogOpen} onOpenChange={handleDialogOpen}>
@@ -185,10 +192,15 @@ export default function ImageCropper({
           <Button
             disabled={isCropping}
             onClick={handleCrop}
-            className="w-full"
+            className="w-full mt-1.5 font-semibold text-[16px]"
             type="button"
+            size="sm"
           >
-            {isCropping ? <LoadingSpinner /> : buttonText}
+            {isCropping ? (
+              <Loader className="text-background size-7" />
+            ) : (
+              buttonText
+            )}
           </Button>
         </div>
       </DialogContent>
