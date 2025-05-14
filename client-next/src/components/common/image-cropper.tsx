@@ -2,7 +2,11 @@
 import { useCallback, useEffect, useState } from "react";
 import Cropper from "react-easy-crop";
 import { Point, Area } from "react-easy-crop";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContentNoResize,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { RotateCcw, RotateCw, ZoomIn, ZoomOut, Crop } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
@@ -127,12 +131,13 @@ export default function ImageCropper({
           </Tooltip>
         </TooltipProvider>
       </DialogTrigger>
-      <DialogContent
+      <DialogContentNoResize
         className="w-full max-w-2xl"
         closeButtonClassName="border bg-primary text-background p-0.5"
       >
         <div className="relative w-full p-0.5 h-full min-h-[420px]">
           <Cropper
+            showGrid={false}
             crop={crop}
             onCropChange={setCrop}
             image={debounceSrc}
@@ -203,7 +208,7 @@ export default function ImageCropper({
             )}
           </Button>
         </div>
-      </DialogContent>
+      </DialogContentNoResize>
     </Dialog>
   );
 }
