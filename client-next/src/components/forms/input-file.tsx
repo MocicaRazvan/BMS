@@ -24,11 +24,13 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { ItemTexts } from "@/components/dnd/item";
-import { Loader2 } from "lucide-react";
+import { DownloadIcon, Loader2 } from "lucide-react";
 import { UploadIcon } from "@radix-ui/react-icons";
 import DotPattern from "@/components/magicui/dot-pattern";
 import ProgressText from "@/components/common/progres-text";
 import { ImageCropTexts } from "@/components/common/image-cropper";
+import { saveAs } from "file-saver";
+import JSZip from "jszip";
 
 export type InputFieldName = "images" | "videos";
 
@@ -178,8 +180,6 @@ export default function InputFile<T extends FieldValues>({
     [fieldName, fieldValue, setValue],
   );
 
-  console.log("FieldValues", fieldValue);
-
   const deleteAllItems = useCallback(() => {
     fieldValue.forEach((item: FieldInputItem) => {
       URL.revokeObjectURL(item.src);
@@ -215,6 +215,24 @@ export default function InputFile<T extends FieldValues>({
     [fieldName, fieldValue, setValue],
   );
 
+  const downloadAllFiles = useCallback(() => {
+    const zip = new JSZip();
+    const isImage = fieldName.includes("image");
+    fieldValue.forEach((item: FieldInputItem) => {
+      zip.file(item.file.name, item.file);
+    });
+    const now = new Date();
+    zip
+      .generateAsync({
+        type: "blob",
+        compression: isImage ? "DEFLATE" : "STORE",
+        compressionOptions: isImage ? { level: 9 } : undefined,
+      })
+      .then((content) => {
+        saveAs(content, `${fieldName}_${now.toISOString()}.zip`);
+      });
+  }, [fieldName, fieldValue]);
+
   useEffect(() => {
     if (fieldValue?.length === 0) {
       setIsListCollapsed(true);
@@ -234,15 +252,23 @@ export default function InputFile<T extends FieldValues>({
         name={fieldName as Path<T>}
         render={({ field: { value, onChange, ...fieldProps } }) => (
           <FormItem>
-            <div className="flex flex-col md:flex-row w-full h-full min-h-[50px] justify-end items-center">
+            <div className="flex  w-full h-full min-h-[50px] gap-5 justify-between items-center">
               <FormLabel className="capitalize sr-only">{title}</FormLabel>
+              <Button
+                variant="outline"
+                onClick={downloadAllFiles}
+                type="button"
+              >
+                <DownloadIcon />
+              </Button>
               {multiple && fieldValue.length > 0 && (
                 <Button
-                  variant={"destructive"}
-                  size={"sm"}
+                  variant="destructive"
+                  size="sm"
                   onClick={deleteAllItems}
                   disabled={isLoadingInitial}
-                  className="text-[16px]"
+                  className="md:text-[16px]"
+                  type="button"
                 >
                   {clearAll}
                 </Button>
