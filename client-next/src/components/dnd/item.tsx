@@ -22,6 +22,7 @@ import ImageCropper, {
 } from "@/components/common/image-cropper";
 import { useDebounce } from "react-use";
 import { FieldInputItem } from "@/components/forms/input-file";
+import { Skeleton } from "@/components/ui/skeleton";
 
 type Props = {
   item: FieldInputItem;
@@ -68,6 +69,7 @@ const Item = forwardRef<HTMLDivElement, Props>(
   ) => {
     const [videoSrc, setVideoSrc] = useState<string | null>(null);
     const [isDeletePressed, setIsDeletePressed] = useState(false);
+    const [isImageLoaded, setIsImageLoaded] = useState(false);
     useDebounce(
       () => {
         if (isDeletePressed) {
@@ -106,17 +108,40 @@ const Item = forwardRef<HTMLDivElement, Props>(
           className="relative hover:scale-105 transition-transform"
         >
           {type === "IMAGE" ? (
-            <Image
-              src={item.src}
-              alt={`${item.id}`}
+            <div
               className={cn(
-                "rounded-lg max-w-100 object-cover w-full  h-[250px]",
+                "relative w-full h-[250px]",
                 isDragging ? "shadow-none" : "shadow-md",
                 cropShape === "round" && "rounded-full max-w-[120px] h-[120px]",
               )}
-              height={0}
-              width={0}
-            />
+            >
+              {!isImageLoaded && (
+                <Skeleton
+                  className={cn(
+                    "absolute inset-0 size-full",
+                    isDragging ? "shadow-none" : "shadow-md",
+                    cropShape === "round" &&
+                      "rounded-full max-w-[120px] h-[120px]",
+                  )}
+                />
+              )}
+              <Image
+                src={item.src}
+                alt={`${item.id}`}
+                className={cn(
+                  "rounded-lg max-w-100 object-cover w-full  h-[250px]",
+                  isDragging ? "shadow-none" : "shadow-md",
+                  cropShape === "round" &&
+                    "rounded-full max-w-[120px] h-[120px]",
+                )}
+                onLoad={() => {
+                  setIsImageLoaded(true);
+                }}
+                height={cropShape === "round" ? 120 : 250}
+                width={cropShape === "round" ? 120 : 250}
+                loading="eager"
+              />
+            </div>
           ) : (
             videoSrc && (
               <video
@@ -184,7 +209,10 @@ const Item = forwardRef<HTMLDivElement, Props>(
               <ImageCropper
                 src={item.src}
                 dialogOpenObserver={dialogOpenObserver}
-                onCropComplete={(src, blob) => cropImage(item.id, src, blob)}
+                onCropComplete={(src, blob) => {
+                  setIsImageLoaded(false);
+                  cropImage(item.id, src, blob);
+                }}
                 cropShape={cropShape}
                 texts={imageCropTexts}
                 originalMime={item.file.type}
