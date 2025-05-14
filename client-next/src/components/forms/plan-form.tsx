@@ -398,7 +398,7 @@ export default function PlanForm({
   console.log("selectedOptions", selectedOptions);
   return (
     <Card className="max-w-7xl w-full sm:px-2 md:px-5 py-6">
-      <CardTitle className="font-bold text-2xl text-center capitalize">
+      <CardTitle className="font-bold text-2xl text-center capitalize mb-3.5">
         {header}
       </CardTitle>
       <CardContent className="w-full">

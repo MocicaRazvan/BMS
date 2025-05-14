@@ -464,7 +464,7 @@ export default function RecipeForm({
   }, [selectedOptions, watchBody, watchTitle]);
   return (
     <Card className="max-w-7xl w-full sm:px-2 md:px-5 py-6">
-      <CardTitle className="font-bold text-2xl text-center capitalize">
+      <CardTitle className="font-bold text-2xl text-center capitalize mb-3.5">
         {baseFormTexts.header}
         {title && <p className="inline ms-2">{title}</p>}
       </CardTitle>
