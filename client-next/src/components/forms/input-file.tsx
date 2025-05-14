@@ -254,13 +254,15 @@ export default function InputFile<T extends FieldValues>({
           <FormItem>
             <div className="flex  w-full h-full min-h-[50px] gap-5 justify-between items-center">
               <FormLabel className="capitalize sr-only">{title}</FormLabel>
-              <Button
-                variant="outline"
-                onClick={downloadAllFiles}
-                type="button"
-              >
-                <DownloadIcon />
-              </Button>
+              {fieldValue.length > 0 && (
+                <Button
+                  variant="outline"
+                  onClick={downloadAllFiles}
+                  type="button"
+                >
+                  <DownloadIcon />
+                </Button>
+              )}
               {multiple && fieldValue.length > 0 && (
                 <Button
                   variant="destructive"
