@@ -123,8 +123,8 @@ export default function ImageCropper({
               </Button>
             </TooltipTrigger>
             <TooltipContent
-              className="bg-accent text-accent-foreground border "
-              side={"left"}
+              className="bg-accent text-accent-foreground border"
+              side="left"
             >
               {tooltipText}
             </TooltipContent>
