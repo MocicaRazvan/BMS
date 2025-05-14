@@ -24,13 +24,14 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { ItemTexts } from "@/components/dnd/item";
-import { DownloadIcon, Loader2 } from "lucide-react";
+import { CircleAlert, DownloadIcon, Loader2 } from "lucide-react";
 import { UploadIcon } from "@radix-ui/react-icons";
 import DotPattern from "@/components/magicui/dot-pattern";
 import ProgressText from "@/components/common/progres-text";
 import { ImageCropTexts } from "@/components/common/image-cropper";
 import { saveAs } from "file-saver";
 import JSZip from "jszip";
+import { useDebounce } from "react-use";
 
 export type InputFieldName = "images" | "videos";
 
@@ -114,6 +115,16 @@ export default function InputFile<T extends FieldValues>({
   const { setValue, clearErrors, getValues } = useFormContext<T>();
   const [isListCollapsed, setIsListCollapsed] = useState(true);
   const [isLoadingInitial, setIsLoadingInitial] = useState(true);
+  const [isDeleteAllPressed, setIsDeleteAllPressed] = useState(false);
+  useDebounce(
+    () => {
+      if (isDeleteAllPressed) {
+        setIsDeleteAllPressed(false);
+      }
+    },
+    3000,
+    [isDeleteAllPressed],
+  );
 
   if (!(fieldName in getValues())) {
     throw new Error(`Invalid field name: ${fieldName}`);
@@ -186,6 +197,7 @@ export default function InputFile<T extends FieldValues>({
     });
     setValue(fieldName as Path<T>, [] as PathValue<T, Path<T>>);
     clearErrors(fieldName as Path<T>);
+    setIsDeleteAllPressed(false);
   }, [clearErrors, fieldName, fieldValue, setValue]);
 
   const cropItem = useCallback(
@@ -264,16 +276,31 @@ export default function InputFile<T extends FieldValues>({
                 </Button>
               )}
               {multiple && fieldValue.length > 0 && (
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  onClick={deleteAllItems}
-                  disabled={isLoadingInitial}
-                  className="md:text-[16px]"
-                  type="button"
-                >
-                  {clearAll}
-                </Button>
+                <motion.div layout>
+                  {!isDeleteAllPressed ? (
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => setIsDeleteAllPressed(true)}
+                      disabled={isLoadingInitial}
+                      className="md:text-[16px] min-w-[155px]"
+                      type="button"
+                    >
+                      {clearAll}
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="amber"
+                      size="sm"
+                      onClick={deleteAllItems}
+                      disabled={isLoadingInitial}
+                      className="min-w-[155px]"
+                      type="button"
+                    >
+                      <CircleAlert />
+                    </Button>
+                  )}
+                </motion.div>
               )}
             </div>
             <FormControl>
