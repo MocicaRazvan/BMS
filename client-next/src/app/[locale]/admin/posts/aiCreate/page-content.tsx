@@ -229,7 +229,7 @@ export default function AdminAIPostsCreateContent({
       const createOnePost = async (index: number) => {
         const randomTags = choseRandomItemsFromArray<string>(
           tags as unknown as string[],
-          choseRandomNumber(0, tags.length - 1),
+          choseRandomNumber(1, tags.length - 1),
         );
         const tagsField: AiIdeasField = {
           content: randomTags.join(","),
