@@ -1,12 +1,10 @@
 package com.mocicarazvan.ollamasearch.services;
 
-import com.mocicarazvan.ollamasearch.impl.EmbedModelImpl;
 import com.mocicarazvan.ollamasearch.impl.EmbedModelRepositoryTestImpl;
 import com.mocicarazvan.ollamasearch.impl.EmbedServiceTestImpl;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -86,23 +84,14 @@ class EmbedServiceTest {
         var pT = "publishedText";
         var entityId = 1L;
         Mono<String> innerMono = Mono.just(pT);
-        when(repository.deleteByEntityId(entityId)).thenReturn(Mono.empty());
         when(ollamaAPIService.generateEmbeddingFloatMono(newText)).thenReturn(Mono.just(embedding));
-        when(ollamaAPIService.convertToFloatPrimitive(embedding)).thenReturn(prmitiveEmbedding);
-        when(repository.save(any())).thenAnswer(i -> Mono.just(i.getArgument(0)));
+        when(repository.updateEmbeddingByEntityId(eq(entityId), eq(embedding))).thenReturn(Mono.just(true));
         when(transactionalOperator.transactional(any(Mono.class))).thenAnswer(i -> i.getArgument(0));
 
 
         StepVerifier.create(service.updateEmbeddingWithZip(newText, oldText, entityId, innerMono))
                 .expectNext(pT)
                 .verifyComplete();
-
-        var argumentCaptor = ArgumentCaptor.forClass(EmbedModelImpl.class);
-        verify(repository, times(1)).save(argumentCaptor.capture());
-
-        var savedEntity = argumentCaptor.getValue();
-        assertEquals(entityId, savedEntity.getEntityId());
-        assertArrayEquals(prmitiveEmbedding, savedEntity.getEmbedding());
 
     }
 }

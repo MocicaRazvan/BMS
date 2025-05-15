@@ -1,12 +1,10 @@
 package com.mocicarazvan.userservice.config;
 
+import com.mocicarazvan.ollamasearch.dbCallbacks.EmbedModelBeforeSaveCallback;
 import com.mocicarazvan.templatemodule.dbCallbacks.IdGeneratedBeforeSaveCallback;
 import com.mocicarazvan.userservice.convertors.*;
 import com.mocicarazvan.userservice.dbCallbacks.UserCustomBeforeSaveCallback;
-import com.mocicarazvan.userservice.models.JwtToken;
-import com.mocicarazvan.userservice.models.OTPToken;
-import com.mocicarazvan.userservice.models.OauthState;
-import com.mocicarazvan.userservice.models.UserCustom;
+import com.mocicarazvan.userservice.models.*;
 import io.r2dbc.spi.ConnectionFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -55,4 +53,9 @@ public class DbConfig {
         return new UserCustomBeforeSaveCallback();
     }
 
+    @Bean
+    @Order(Ordered.LOWEST_PRECEDENCE)
+    public BeforeSaveCallback<UserEmbedding> userEmbeddingBeforeSaveCallback() {
+        return new EmbedModelBeforeSaveCallback<>();
+    }
 }

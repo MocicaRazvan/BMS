@@ -157,6 +157,7 @@ const Item = forwardRef<HTMLDivElement, Props>(
                 onError={() => {
                   console.error(`Failed to load video: ${item.src}`);
                 }}
+                autoPlay={false}
               />
             )
           )}

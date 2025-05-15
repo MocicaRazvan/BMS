@@ -6,7 +6,9 @@ import com.mocicarazvan.dayservice.convertors.DayTypeWritingConvertor;
 import com.mocicarazvan.dayservice.convertors.StringToJsonNodeConverter;
 import com.mocicarazvan.dayservice.models.Day;
 import com.mocicarazvan.dayservice.models.DayCalendar;
+import com.mocicarazvan.dayservice.models.DayEmbedding;
 import com.mocicarazvan.dayservice.models.Meal;
+import com.mocicarazvan.ollamasearch.dbCallbacks.EmbedModelBeforeSaveCallback;
 import com.mocicarazvan.templatemodule.dbCallbacks.IdGeneratedBeforeSaveCallback;
 import com.mocicarazvan.templatemodule.dbCallbacks.TitleBodyBeforeSaveCallback;
 import io.r2dbc.spi.ConnectionFactory;
@@ -49,4 +51,9 @@ public class DbConfig {
         return new IdGeneratedBeforeSaveCallback<>();
     }
 
+    @Bean
+    @Order(Ordered.LOWEST_PRECEDENCE)
+    public BeforeSaveCallback<DayEmbedding> dayEmbeddingBeforeSaveCallback() {
+        return new EmbedModelBeforeSaveCallback<>();
+    }
 }

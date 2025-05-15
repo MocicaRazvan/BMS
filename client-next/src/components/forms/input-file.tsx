@@ -404,11 +404,12 @@ export default function InputFile<T extends FieldValues>({
           initial={false}
           animate={{
             height: isListCollapsed ? 0 : "auto",
+            pointerEvents: isListCollapsed ? "none" : "auto",
           }}
           transition={{
-            duration: 0.45,
-            delay: isListCollapsed ? 0 : 0.25,
-            ease: [0.4, 0, 0.2, 1],
+            duration: 0.4,
+            delay: isListCollapsed ? 0 : 0.17,
+            ease: "easeInOut",
           }}
         >
           <motion.div
@@ -416,10 +417,11 @@ export default function InputFile<T extends FieldValues>({
             animate={{
               opacity: !isListCollapsed ? 1 : 0,
               y: !isListCollapsed ? 0 : -10,
+              pointerEvents: isListCollapsed ? "none" : "auto",
             }}
             transition={{
-              duration: isListCollapsed ? 0.2 : 0.5,
-              delay: isListCollapsed ? 0 : 0.5,
+              duration: isListCollapsed ? 0.15 : 0.45,
+              delay: isListCollapsed ? 0 : 0.45,
               ease: isListCollapsed ? "easeIn" : "easeOut",
             }}
           >

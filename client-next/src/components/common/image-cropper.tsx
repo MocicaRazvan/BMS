@@ -5,6 +5,7 @@ import { Point, Area } from "react-easy-crop";
 import {
   Dialog,
   DialogContentNoResize,
+  DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { RotateCcw, RotateCw, ZoomIn, ZoomOut, Crop } from "lucide-react";
@@ -135,6 +136,7 @@ export default function ImageCropper({
         className="w-full max-w-2xl"
         closeButtonClassName="border bg-primary text-background p-0.5"
       >
+        <DialogTitle className="sr-only">{"Image cropper"}</DialogTitle>
         <div className="relative w-full p-0.5 h-full min-h-[420px]">
           <Cropper
             showGrid={false}

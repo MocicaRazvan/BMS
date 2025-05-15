@@ -15,6 +15,7 @@ public class PostEmbedServiceImpl extends EmbedServiceImpl<PostEmbedding, PostEm
         super(ollamaAPIService, transactionalOperator, embedRepository);
     }
 
+
     @Override
     protected PostEmbedding createEmbedding() {
         return PostEmbedding.builder().build();

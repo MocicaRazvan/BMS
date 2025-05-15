@@ -5,7 +5,9 @@ import com.mocicarazvan.ingredientservice.convertors.DietTypeWritingConvertor;
 import com.mocicarazvan.ingredientservice.convertors.UnitTypeReadingConvertor;
 import com.mocicarazvan.ingredientservice.convertors.UnitTypeWritingConvertor;
 import com.mocicarazvan.ingredientservice.models.Ingredient;
+import com.mocicarazvan.ingredientservice.models.IngredientEmbedding;
 import com.mocicarazvan.ingredientservice.models.NutritionalFact;
+import com.mocicarazvan.ollamasearch.dbCallbacks.EmbedModelBeforeSaveCallback;
 import com.mocicarazvan.templatemodule.dbCallbacks.IdGeneratedBeforeSaveCallback;
 import io.r2dbc.spi.ConnectionFactory;
 import org.springframework.context.annotation.Bean;
@@ -41,5 +43,9 @@ public class DbConfig {
         return new IdGeneratedBeforeSaveCallback<>();
     }
 
-
+    @Bean
+    @Order(Ordered.LOWEST_PRECEDENCE)
+    public BeforeSaveCallback<IngredientEmbedding> ingredientEmbeddingBeforeSaveCallback() {
+        return new EmbedModelBeforeSaveCallback<>();
+    }
 }

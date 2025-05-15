@@ -43,12 +43,16 @@ public abstract class EmbedServiceImpl<T extends EmbedModel, M extends EmbedMode
     @Override
     public <R> Mono<R> updateEmbeddingWithZip(String newText, String oldText, Long entityId, Mono<R> mono) {
         if (!Objects.equals(newText, oldText)) {
-            return embedRepository.deleteByEntityId(entityId)
-                    .then(Mono.zip(
-                            Mono.defer(() ->
-                                    saveEmbedding(entityId, newText)),
-                            Mono.defer(() -> mono)
-                    ).map(Tuple2::getT2)).as(transactionalOperator::transactional);
+            return Mono.zip(
+                    Mono.defer(() ->
+                            ollamaAPIService.generateEmbeddingFloatMono(newText)
+                                    .flatMap(e -> embedRepository.updateEmbeddingByEntityId(
+                                            entityId,
+                                            e
+                                    ))
+                    ),
+                    Mono.defer(() -> mono)
+            ).map(Tuple2::getT2).as(transactionalOperator::transactional);
         }
         return mono;
     }

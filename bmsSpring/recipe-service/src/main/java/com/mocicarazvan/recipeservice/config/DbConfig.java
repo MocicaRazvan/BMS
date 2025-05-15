@@ -1,9 +1,11 @@
 package com.mocicarazvan.recipeservice.config;
 
+import com.mocicarazvan.ollamasearch.dbCallbacks.EmbedModelBeforeSaveCallback;
 import com.mocicarazvan.recipeservice.convertors.DietTypeReadingConvertor;
 import com.mocicarazvan.recipeservice.convertors.DietTypeWritingConvertor;
 import com.mocicarazvan.recipeservice.models.IngredientQuantity;
 import com.mocicarazvan.recipeservice.models.Recipe;
+import com.mocicarazvan.recipeservice.models.RecipeEmbedding;
 import com.mocicarazvan.templatemodule.dbCallbacks.IdGeneratedBeforeSaveCallback;
 import com.mocicarazvan.templatemodule.dbCallbacks.TitleBodyImagesBeforeSaveCallback;
 import io.r2dbc.spi.ConnectionFactory;
@@ -38,4 +40,9 @@ public class DbConfig {
         return new IdGeneratedBeforeSaveCallback<>();
     }
 
+    @Bean
+    @Order(Ordered.LOWEST_PRECEDENCE)
+    public BeforeSaveCallback<RecipeEmbedding> recipeEmbeddingBeforeSaveCallback() {
+        return new EmbedModelBeforeSaveCallback<>();
+    }
 }

@@ -1,10 +1,12 @@
 package com.mocicarazvan.planservice.config;
 
+import com.mocicarazvan.ollamasearch.dbCallbacks.EmbedModelBeforeSaveCallback;
 import com.mocicarazvan.planservice.convertors.DietTypeReadingConvertor;
 import com.mocicarazvan.planservice.convertors.DietTypeWritingConvertor;
 import com.mocicarazvan.planservice.convertors.ObjectiveTypeReadingConvertor;
 import com.mocicarazvan.planservice.convertors.ObjectiveTypeWritingConvertor;
 import com.mocicarazvan.planservice.models.Plan;
+import com.mocicarazvan.planservice.models.PlanEmbedding;
 import com.mocicarazvan.templatemodule.dbCallbacks.TitleBodyImagesBeforeSaveCallback;
 import io.r2dbc.spi.ConnectionFactory;
 import org.springframework.context.annotation.Bean;
@@ -32,5 +34,11 @@ public class DbConfig {
     @Order(Ordered.LOWEST_PRECEDENCE)
     public BeforeSaveCallback<Plan> planBeforeSaveCallback() {
         return new TitleBodyImagesBeforeSaveCallback<>();
+    }
+
+    @Bean
+    @Order(Ordered.LOWEST_PRECEDENCE)
+    public BeforeSaveCallback<PlanEmbedding> planEmbeddingBeforeSaveCallback() {
+        return new EmbedModelBeforeSaveCallback<>();
     }
 }
