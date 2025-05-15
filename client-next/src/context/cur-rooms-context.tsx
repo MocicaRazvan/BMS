@@ -38,9 +38,12 @@ import { useChatNotification } from "@/context/chat-message-notification-context
 import { useCacheInvalidator } from "@/providers/cache-provider";
 
 export interface ChatRoomsState
-  extends UseFetchStreamReturn<
-      PageableResponse<ChatRoomResponseJoined[]>,
-      BaseError
+  extends Omit<
+      UseFetchStreamReturn<
+        PageableResponse<ChatRoomResponseJoined[]>,
+        BaseError
+      >,
+      "resetFinishes"
     >,
     WithUser {
   curRoom: ChatRoomResponseJoined | undefined;
