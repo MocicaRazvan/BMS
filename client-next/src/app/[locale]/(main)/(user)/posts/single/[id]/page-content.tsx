@@ -15,8 +15,6 @@ import ElementHeader, {
 } from "@/components/common/element-header";
 import CustomImageCarousel from "@/components/common/custom-image-crousel";
 import AuthorProfile from "@/components/common/author-profile";
-import AlertDialogDeletePost from "@/components/dialogs/posts/delete-post";
-import { Button } from "@/components/ui/button";
 import Loader from "@/components/ui/spinner";
 import { PostCommentsTexts } from "@/texts/components/posts";
 import PostComments from "@/components/posts/post-comments";
@@ -207,29 +205,29 @@ export default function SinglePostPageContent({
           />
         </>
       )}
-      {isOwnerOrAdmin && (
-        <div className="sticky bottom-0 hover:scale-105 flex items-center px-4 w-fit mx-auto justify-center gap-4 mt-5 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/70 p-2 rounded-md">
-          <AlertDialogDeletePost
-            post={item}
-            title={item.title}
-            token={authUser.token}
-            callBack={() => {
-              isAdmin
-                ? router.push("/admin/posts")
-                : router.push(`/trainer/user/${authUser.id}/posts`);
-            }}
-          />
-          {isOwner && (
-            <Button
-              onClick={() => {
-                router.push(`/trainer/posts/update/${item.id}`);
-              }}
-            >
-              {updateButton}
-            </Button>
-          )}
-        </div>
-      )}
+      {/*{isOwnerOrAdmin && (*/}
+      {/*  <div className="sticky bottom-0 hover:scale-105 flex items-center px-4 w-fit mx-auto justify-center gap-4 mt-5 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/70 p-2 rounded-md">*/}
+      {/*    <AlertDialogDeletePost*/}
+      {/*      post={item}*/}
+      {/*      title={item.title}*/}
+      {/*      token={authUser.token}*/}
+      {/*      callBack={() => {*/}
+      {/*        isAdmin*/}
+      {/*          ? router.push("/admin/posts")*/}
+      {/*          : router.push(`/trainer/user/${authUser.id}/posts`);*/}
+      {/*      }}*/}
+      {/*    />*/}
+      {/*    {isOwner && (*/}
+      {/*      <Button*/}
+      {/*        onClick={() => {*/}
+      {/*          router.push(`/trainer/posts/update/${item.id}`);*/}
+      {/*        }}*/}
+      {/*      >*/}
+      {/*        {updateButton}*/}
+      {/*      </Button>*/}
+      {/*    )}*/}
+      {/*  </div>*/}
+      {/*)}*/}
     </section>
   );
 }

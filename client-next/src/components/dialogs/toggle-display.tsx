@@ -1,6 +1,6 @@
 "use client";
 
-import { memo, ReactNode, useEffect, useState } from "react";
+import { memo, ReactNode } from "react";
 import { WithUser } from "@/lib/user";
 import { BaseDialogTexts } from "@/components/dialogs/delete-model";
 import { getAlertDialogToggleDisplayTexts } from "@/texts/components/dialog";
@@ -20,6 +20,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { cn, isDeepEqual } from "@/lib/utils";
 import LoadingDialogAnchor from "@/components/dialogs/loading-dialog-anchor";
+import { useClientLRUStore } from "@/lib/client-lru-store";
 
 export interface AlertDialogToggleDisplayTexts extends BaseDialogTexts {
   toast: string | ReactNode;
@@ -37,16 +38,11 @@ interface Props extends WithUser {
 
 const ToggleDisplayDialog = memo(
   ({ callBack, model, path, authUser }: Props) => {
-    const [texts, setTexts] = useState<AlertDialogToggleDisplayTexts | null>(
-      null,
-    );
-
-    useEffect(() => {
-      getAlertDialogToggleDisplayTexts(
-        model.name,
-        model.display.toString(),
-      ).then(setTexts);
-    }, [model.display, model.name]);
+    const texts = useClientLRUStore({
+      setter: () =>
+        getAlertDialogToggleDisplayTexts(model.name, model.display.toString()),
+      args: [`alertDialogToggleDisplayTexts-${model.name}-${model.display}`],
+    });
 
     const toggle = async () => {
       const resp = await fetchStream({

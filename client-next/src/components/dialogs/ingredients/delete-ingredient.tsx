@@ -11,31 +11,31 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { memo, useEffect, useState } from "react";
-import {
-  DeleteDialogTexts,
-  getAlertDialogDeleteTexts,
-} from "@/texts/components/dialog";
+import { memo, ReactNode } from "react";
+import { getAlertDialogDeleteTexts } from "@/texts/components/dialog";
 import { fetchStream } from "@/lib/fetchers/fetchStream";
 import { toast } from "@/components/ui/use-toast";
 import { isDeepEqual } from "@/lib/utils";
+import { useClientLRUStore } from "@/lib/client-lru-store";
 
 interface Props {
   ingredientNutritionalFactResponse: IngredientNutritionalFactResponse;
   token: string;
   callBack: () => void;
-  anchor?: React.ReactNode;
+  anchor?: ReactNode;
 }
 
 const AlertDialogDeleteIngredient = memo(
   ({ ingredientNutritionalFactResponse, token, callBack, anchor }: Props) => {
-    const [dialogDeleteTexts, setDialogDeleteTexts] =
-      useState<DeleteDialogTexts | null>(null);
-    useEffect(() => {
-      getAlertDialogDeleteTexts(
-        ingredientNutritionalFactResponse.ingredient.name,
-      ).then(setDialogDeleteTexts);
-    }, [ingredientNutritionalFactResponse.ingredient.name]);
+    const dialogDeleteTexts = useClientLRUStore({
+      setter: () =>
+        getAlertDialogDeleteTexts(
+          ingredientNutritionalFactResponse.ingredient.name,
+        ),
+      args: [
+        `alertDialogDeleteTexts-${ingredientNutritionalFactResponse.ingredient.name}-ingredients`,
+      ],
+    });
 
     const deleteModel = async () => {
       try {

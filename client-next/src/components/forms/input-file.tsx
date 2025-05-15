@@ -404,25 +404,37 @@ export default function InputFile<T extends FieldValues>({
           initial={false}
           animate={{
             height: isListCollapsed ? 0 : "auto",
-            opacity: isListCollapsed ? 0 : 1,
           }}
-          transition={{ duration: 0.5 }}
-          className="overflow-hidden w-full"
-          style={{
-            willChange: "opacity",
+          transition={{
+            duration: 0.45,
+            delay: isListCollapsed ? 0 : 0.25,
+            ease: [0.4, 0, 0.2, 1],
           }}
         >
-          <SortableList
-            items={fieldValue}
-            moveItems={moveItems}
-            deleteItem={deleteItem}
-            type={fieldName.includes("image") ? "IMAGE" : "VIDEO"}
-            itemTexts={itemTexts}
-            multiple={multiple}
-            cropImage={cropItem}
-            cropShape={cropShape}
-            imageCropTexts={imageCropTexts}
-          />
+          <motion.div
+            initial={false}
+            animate={{
+              opacity: !isListCollapsed ? 1 : 0,
+              y: !isListCollapsed ? 0 : -10,
+            }}
+            transition={{
+              duration: isListCollapsed ? 0.2 : 0.5,
+              delay: isListCollapsed ? 0 : 0.5,
+              ease: isListCollapsed ? "easeIn" : "easeOut",
+            }}
+          >
+            <SortableList
+              items={fieldValue}
+              moveItems={moveItems}
+              deleteItem={deleteItem}
+              type={fieldName.includes("image") ? "IMAGE" : "VIDEO"}
+              itemTexts={itemTexts}
+              multiple={multiple}
+              cropImage={cropItem}
+              cropShape={cropShape}
+              imageCropTexts={imageCropTexts}
+            />
+          </motion.div>
         </motion.div>
       )}
     </div>

@@ -14,13 +14,11 @@ import { Button } from "@/components/ui/button";
 import { fetchStream } from "@/lib/fetchers/fetchStream";
 import { TitleBodyUserDto } from "@/types/dto";
 import { toast } from "@/components/ui/use-toast";
-import { memo, ReactNode, useEffect, useState } from "react";
-import {
-  DeleteDialogTexts,
-  getAlertDialogDeleteTexts,
-} from "@/texts/components/dialog";
+import { memo, ReactNode } from "react";
+import { getAlertDialogDeleteTexts } from "@/texts/components/dialog";
 import LoadingDialogAnchor from "@/components/dialogs/loading-dialog-anchor";
 import { isDeepEqual } from "@/lib/utils";
+import { useClientLRUStore } from "@/lib/client-lru-store";
 
 export interface BaseDialogTexts {
   anchor: string;
@@ -36,17 +34,14 @@ interface Props {
   path: string;
   title: string;
   callBack: () => void;
-  anchor?: React.ReactNode;
+  anchor?: ReactNode;
 }
-
 const AlertDialogDelete = memo(
   ({ model, token, callBack, path, title, anchor }: Props) => {
-    const [dialogDeleteTexts, setDialogDeleteTexts] =
-      useState<DeleteDialogTexts | null>(null);
-
-    useEffect(() => {
-      getAlertDialogDeleteTexts(title).then(setDialogDeleteTexts);
-    }, [title]);
+    const dialogDeleteTexts = useClientLRUStore({
+      setter: () => getAlertDialogDeleteTexts(title),
+      args: [`alertDialogDeleteTexts-${title}-${path}`],
+    });
     const deleteModel = async () => {
       if (token === undefined) return;
       try {
@@ -70,7 +65,7 @@ const AlertDialogDelete = memo(
         console.log(error);
       }
     };
-    if (!dialogDeleteTexts) return <LoadingDialogAnchor />;
+    if (!dialogDeleteTexts) return <LoadingDialogAnchor className="w-full" />;
 
     return (
       <AlertDialog>

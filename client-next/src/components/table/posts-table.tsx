@@ -43,6 +43,7 @@ import {
   RadioSortDropDownWithExtra,
   RadioSortDropDownWithExtraDummy,
 } from "@/components/common/radio-sort";
+import AlertDialogDeletePost from "@/components/dialogs/posts/delete-post";
 
 export interface PostTableColumnsTexts {
   id: string;
@@ -375,6 +376,21 @@ export default function PostsTable({
                         >
                           {duplicate}
                         </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem
+                        asChild
+                        onClick={(e) => {
+                          e.stopPropagation();
+                        }}
+                        className="mt-5 py-2"
+                      >
+                        <AlertDialogDeletePost
+                          post={row.original}
+                          title={row.original.title}
+                          token={authUser.token}
+                          callBack={refetch}
+                        />
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
                     </>

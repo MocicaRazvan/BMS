@@ -1,9 +1,6 @@
 import { CommentResponse } from "@/types/dto";
-import { useEffect, useState } from "react";
-import {
-  DeleteDialogTexts,
-  getAlertDialogDeleteTexts,
-} from "@/texts/components/dialog";
+import { ReactNode } from "react";
+import { getAlertDialogDeleteTexts } from "@/texts/components/dialog";
 import { fetchStream } from "@/lib/fetchers/fetchStream";
 import { toast } from "@/components/ui/use-toast";
 import {
@@ -17,12 +14,13 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
+import { useClientLRUStore } from "@/lib/client-lru-store";
 
 interface Props {
   comment: CommentResponse;
   token: string | undefined;
   callBack: () => void;
-  anchor?: React.ReactNode;
+  anchor?: ReactNode;
   title: string;
 }
 
@@ -33,12 +31,10 @@ export default function AlertDialogDeleteComment({
   anchor,
   title,
 }: Props) {
-  const [dialogDeleteTexts, setDialogDeleteTexts] =
-    useState<DeleteDialogTexts | null>(null);
-
-  useEffect(() => {
-    getAlertDialogDeleteTexts(title).then(setDialogDeleteTexts);
-  }, [title]);
+  const dialogDeleteTexts = useClientLRUStore({
+    setter: () => getAlertDialogDeleteTexts(title),
+    args: [`alertDialogDeleteTexts-${title}-comments`],
+  });
   const deleteModel = async () => {
     if (token === undefined) return;
     try {

@@ -15,12 +15,13 @@ import { fetchStream } from "@/lib/fetchers/fetchStream";
 import { ApproveDto, ResponseWithUserDtoEntity } from "@/types/dto";
 import { toast } from "@/components/ui/use-toast";
 import { BaseDialogTexts } from "@/components/dialogs/delete-model";
-import { memo, ReactNode, useEffect, useState } from "react";
+import { memo, ReactNode } from "react";
 import { getAlertDialogApproveTexts } from "@/texts/components/dialog";
 import { cn, isDeepEqual } from "@/lib/utils";
 import { useStompClient } from "react-stomp-hooks";
 import { WithUser } from "@/lib/user";
 import LoadingDialogAnchor from "@/components/dialogs/loading-dialog-anchor";
+import { useClientLRUStore } from "@/lib/client-lru-store";
 
 export interface AlertDialogApproveProps extends WithUser {
   model: ApproveDto;
@@ -48,13 +49,12 @@ const AlertDialogApprove = memo(
     stompExtraLink,
   }: AlertDialogApproveProps) => {
     const stompClient = useStompClient();
-    const [dialogApproveTexts, setDialogApproveTexts] =
-      useState<AlertDialogApproveTexts | null>(null);
-    useEffect(() => {
-      getAlertDialogApproveTexts(title, (!approved).toString()).then(
-        setDialogApproveTexts,
-      );
-    }, [approved, title]);
+
+    const dialogApproveTexts = useClientLRUStore({
+      setter: () => getAlertDialogApproveTexts(title, (!approved).toString()),
+      args: [`alertDialogApproveTexts-${title}-${approved}`],
+    });
+
     const approve = async () => {
       if (!stompClient || !stompClient?.connected) return;
       try {

@@ -15,7 +15,8 @@ import {
   DeleteDialogTexts,
   getDeleteChatRoomDialogTexts,
 } from "@/texts/components/dialog";
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { useClientLRUStore } from "@/lib/client-lru-store";
 
 interface Props {
   anchor?: React.ReactNode;
@@ -31,24 +32,12 @@ export default function DeleteChatRoomDialog({
   deleteChatDialogTexts,
 }: Props) {
   const [isOpen, setIsOpen] = useState(false);
-  //todo dc nu merge aici si n altele merge nu stiu si nici nu voi afla, maretele sunt caile lui nextjs
 
-  const [dialogTexts, setDialogDeleteTexts] =
-    useState<DeleteDialogTexts | null>(null);
-  useEffect(() => {
-    getDeleteChatRoomDialogTexts(receiverEmail).then(setDialogDeleteTexts);
-  }, [receiverEmail]);
+  const dialogTexts = useClientLRUStore({
+    setter: () => getDeleteChatRoomDialogTexts(receiverEmail),
+    args: [`deleteChatRoomDialogTexts-${receiverEmail}`],
+  });
 
-  // console.log("DeleteChatRoomDialog", deleteChatDialogTexts);
-  // let description = deleteChatDialogTexts.description;
-  // if (typeof description === "string") {
-  //   description = description.replace("place_holder", receiverEmail);
-  // }
-  // console.log(
-  //   "deleteChatDialogTexts",
-  //   dialogTexts,
-  //   JSON.stringify(description),
-  // );
   if (!dialogTexts) {
     // if (anchor) return anchor;
     // else return null;

@@ -563,7 +563,7 @@ export default function PlansTable({
                           {update}
                         </Link>
                       </DropdownMenuItem>
-                      <DropdownMenuSeparator />{" "}
+                      <DropdownMenuSeparator />
                       <DropdownMenuItem asChild>
                         <Link
                           className="cursor-pointer"
@@ -589,7 +589,6 @@ export default function PlansTable({
                       <DropdownMenuSeparator />
                       {row.original.count === 0 && (
                         <>
-                          {" "}
                           <DropdownMenuItem
                             asChild
                             onClick={(e) => {

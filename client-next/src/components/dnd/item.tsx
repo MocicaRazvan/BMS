@@ -3,10 +3,9 @@ import {
   forwardRef,
   HTMLAttributes,
   useEffect,
-  useRef,
   useState,
 } from "react";
-import { SortableItem, SortableListType } from "@/components/dnd/sortable-list";
+import { SortableListType } from "@/components/dnd/sortable-list";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { CircleAlert, Trash2 } from "lucide-react";
@@ -23,6 +22,7 @@ import ImageCropper, {
 import { useDebounce } from "react-use";
 import { FieldInputItem } from "@/components/forms/input-file";
 import { Skeleton } from "@/components/ui/skeleton";
+import Image from "next/image";
 
 type Props = {
   item: FieldInputItem;
@@ -70,18 +70,7 @@ const Item = forwardRef<HTMLDivElement, Props>(
     const [videoSrc, setVideoSrc] = useState<string | null>(null);
     const [isDeletePressed, setIsDeletePressed] = useState(false);
     const [isImageLoaded, setIsImageLoaded] = useState(false);
-    const imgRef = useRef<HTMLImageElement | null>(null);
-    useEffect(() => {
-      if (type === "IMAGE") {
-        const img = imgRef.current;
-        if (img) {
-          img
-            .decode()
-            .then(() => setIsImageLoaded(true))
-            .catch(() => setIsImageLoaded(true));
-        }
-      }
-    }, [item.src, type]);
+
     useDebounce(
       () => {
         if (isDeletePressed) {
@@ -126,9 +115,6 @@ const Item = forwardRef<HTMLDivElement, Props>(
                 isDragging ? "shadow-none" : "shadow-md",
                 cropShape === "round" && "rounded-full max-w-[120px] h-[120px]",
               )}
-              style={{
-                contentVisibility: "visible",
-              }}
             >
               {!isImageLoaded && (
                 <Skeleton
@@ -140,9 +126,7 @@ const Item = forwardRef<HTMLDivElement, Props>(
                   )}
                 />
               )}
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                ref={imgRef}
+              <Image
                 src={item.src}
                 alt={`${item.id}`}
                 className={cn(
@@ -153,12 +137,10 @@ const Item = forwardRef<HTMLDivElement, Props>(
                 )}
                 loading="eager"
                 decoding="async"
-                style={{
-                  contentVisibility: "visible",
-                  willChange: "transform",
-                  // to force GPU acceleration
-                  transform: "translateZ(0)",
-                }}
+                onLoad={() => setIsImageLoaded(true)}
+                height={cropShape === "round" ? 120 : 250}
+                width={cropShape === "round" ? 120 : 250}
+                quality={70}
               />
             </div>
           ) : (

@@ -21,6 +21,9 @@ public class TitleBodyBeforeSaveCallback<T extends TitleBody> extends IdGenerate
             e.setUserDislikes(new ArrayList<>());
         }
 
+        e.setBody(e.getBody().strip());
+        e.setTitle(e.getTitle().replaceAll("\\s+", " ").strip());
+
         return e;
     }
 }
