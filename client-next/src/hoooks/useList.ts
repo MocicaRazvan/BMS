@@ -207,7 +207,7 @@ export default function useList<T>({
 
   const items = useMemo(
     () => messages?.map((m) => m.content) || [],
-    [JSON.stringify(messages)],
+    [messages],
   );
 
   useEffect(() => {
@@ -357,6 +357,11 @@ export default function useList<T>({
     }));
   }, []);
 
+  const refetchWithResetPage = useCallback(() => {
+    resetCurrentPage();
+    refetch();
+  }, [refetch, resetCurrentPage]);
+
   const updateSortState = useCallback((option: SortingOption) => {
     setSort((prev) => {
       const exists = prev.find(
@@ -420,5 +425,6 @@ export default function useList<T>({
     updatedAtRangeParams,
     createdAtRangeParams,
     nextMessages,
+    refetchWithResetPage,
   };
 }

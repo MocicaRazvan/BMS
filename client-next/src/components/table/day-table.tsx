@@ -4,6 +4,7 @@ import { ColumnActionsTexts } from "@/texts/components/table";
 import { dayColumnActions } from "@/lib/constants";
 import { DataTable, DataTableTexts } from "@/components/table/data-table";
 import useFilterDropdown, {
+  RadioFieldFilterCriteriaCallback,
   UseFilterDropdownTexts,
 } from "@/components/list/useFilterDropdown";
 import { ExtraTableProps } from "@/types/tables";
@@ -97,8 +98,8 @@ export default function DaysTable({
   const {
     value: dayType,
     updateFieldDropdownFilter: updateDayType,
-    filedFilterCriteriaCallback: dayTypeFilterCriteriaCallback,
-    fieldCriteriaRadioCallback: dayTypeRadioCriteriaCallback,
+    items: dayTypeItems,
+    setField: setDayType,
   } = useFilterDropdown({
     items: dayTypes.map((value) => ({
       value,
@@ -109,7 +110,6 @@ export default function DaysTable({
   });
 
   const {
-    messages,
     pageInfo,
     filter,
     sort,
@@ -195,7 +195,15 @@ export default function DaysTable({
                 {dayTableColumnTexts.type}
               </p>
             }
-            extraContent={dayTypeRadioCriteriaCallback(resetCurrentPage)}
+            extraContent={
+              <RadioFieldFilterCriteriaCallback
+                callback={resetCurrentPage}
+                fieldKey="type"
+                noFilterLabel={typeDropdownTexts.noFilterLabel}
+                setGlobalFilter={setDayType}
+                items={dayTypeItems}
+              />
+            }
           />
         ),
         cell: ({ row }) => (
@@ -361,25 +369,29 @@ export default function DaysTable({
       },
     ],
     [
-      authUser.id,
-      authUser.token,
-      dayTableColumnTexts.actions,
-      dayTableColumnTexts.count,
-      dayTableColumnTexts.createdAt,
       dayTableColumnTexts.id,
       dayTableColumnTexts.title,
       dayTableColumnTexts.type,
-      dayTableColumnTexts.updatedAt,
-      dayTableColumnTexts.userDislikes,
+      dayTableColumnTexts.count,
       dayTableColumnTexts.userLikes,
-      forWhom,
-      refetch,
-      router,
+      dayTableColumnTexts.userDislikes,
+      dayTableColumnTexts.createdAt,
+      dayTableColumnTexts.updatedAt,
+      dayTableColumnTexts.actions,
       radioArgs,
+      resetCurrentPage,
+      typeDropdownTexts.noFilterLabel,
+      setDayType,
+      dayTypeItems,
+      dayTypeBadgeTexts.labels,
+      creationFilterTexts,
       updateCreatedAtRange,
       updateUpdatedAtRange,
-      dayTypeRadioCriteriaCallback,
-      resetCurrentPage,
+      forWhom,
+      authUser.id,
+      authUser.token,
+      refetch,
+      router,
     ],
   );
 

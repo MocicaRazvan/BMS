@@ -1,6 +1,14 @@
 "use client";
 import { useSearchParams } from "next/navigation";
-import { useCallback, useMemo, useState } from "react";
+import {
+  Dispatch,
+  SetStateAction,
+  useCallback,
+  useMemo,
+  useState,
+} from "react";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -9,8 +17,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Label } from "@/components/ui/label";
 
 export interface FilterDropdownItem {
   label: string;
@@ -35,8 +41,9 @@ export default function useFilterDropdown({
   fieldKey,
   noFilterLabel,
 }: Args) {
+  const trimmedFieldKey = useMemo(() => fieldKey.trim(), [fieldKey]);
   const currentSearchParams = useSearchParams();
-  const fieldSearch = currentSearchParams.get(fieldKey);
+  const fieldSearch = currentSearchParams.get(trimmedFieldKey);
   const [field, setField] = useState<FilterDropdownItem>(
     items.find(({ value }) => value === fieldSearch) || {
       label: noFilterLabel,
@@ -45,136 +52,157 @@ export default function useFilterDropdown({
   );
 
   const fieldDropdownFilterQueryParam = useMemo(
-    () => ({ [fieldKey]: field.value }),
-    [field, fieldKey],
+    () => ({ [trimmedFieldKey]: field.value }),
+    [field, trimmedFieldKey],
   );
 
   const updateFieldDropdownFilter = useCallback(
     (searchParams: URLSearchParams) => {
       if (field.value) {
-        searchParams.set(fieldKey, field.value);
+        searchParams.set(trimmedFieldKey, field.value);
       } else {
-        searchParams.delete(fieldKey);
+        searchParams.delete(trimmedFieldKey);
       }
     },
-    [field, fieldKey],
+    [field, trimmedFieldKey],
   );
 
+  return {
+    updateFieldDropdownFilter,
+    fieldDropdownFilterQueryParam,
+    value: field.value,
+    field,
+    setField,
+    items,
+  };
+}
+interface CriteriaWithCallbackProps extends Args {
+  setGlobalFilter: Dispatch<SetStateAction<FilterDropdownItem>>;
+  callback: () => void;
+}
+
+const useFieldWithParams = ({
+  fieldKey,
+  items,
+  noFilterLabel,
+  setGlobalFilter,
+  callback,
+  emptyValue,
+}: CriteriaWithCallbackProps & {
+  emptyValue: string;
+}) => {
+  const currentSearchParams = useSearchParams();
+  const fieldSearch = currentSearchParams.get(fieldKey.trim());
+  const field = useMemo(
+    () =>
+      items.find(({ value }) => value === fieldSearch) || {
+        label: noFilterLabel,
+        value: "",
+      },
+    [fieldSearch, JSON.stringify(items), noFilterLabel],
+  );
   const handleChange = useCallback(
     (value: string) => {
-      setField((prev) =>
-        prev.value === value
+      setGlobalFilter((prev) =>
+        value === emptyValue
           ? {
               label: noFilterLabel,
               value: "",
             }
           : items.find((i) => i.value === value) || prev,
       );
+      callback();
     },
-    [items, noFilterLabel],
+    [callback, JSON.stringify(items), noFilterLabel, setGlobalFilter],
   );
+  return {
+    field,
+    handleChange,
+  };
+};
 
-  const filedFilterCriteria = useMemo(
-    () => (
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="outline">{`${field.label}`}</Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent className="w-56">
-          <DropdownMenuRadioGroup
-            value={field.value}
-            onValueChange={handleChange}
-          >
-            {items.map(({ label, value }) => (
-              <DropdownMenuRadioItem value={value} key={value}>
-                {label}
-              </DropdownMenuRadioItem>
-            ))}
-          </DropdownMenuRadioGroup>
-        </DropdownMenuContent>
-      </DropdownMenu>
-    ),
-    [field.label, field.value, handleChange, items],
-  );
-  const filedFilterCriteriaCallback = useCallback(
-    (callback: () => void) => (
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="outline">{`${field.label}`}</Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent className="w-56">
-          <DropdownMenuRadioGroup
-            value={field.value}
-            onValueChange={(e) => {
-              handleChange(e);
-              callback();
-            }}
-          >
-            {items.map(({ label, value }) => (
-              <DropdownMenuRadioItem value={value} key={value}>
-                {label}
-              </DropdownMenuRadioItem>
-            ))}
-          </DropdownMenuRadioGroup>
-        </DropdownMenuContent>
-      </DropdownMenu>
-    ),
-    [field.label, field.value, handleChange, items],
-  );
+export function RadioFieldFilterCriteriaCallback({
+  items,
+  fieldKey,
+  noFilterLabel,
+  ...rest
+}: CriteriaWithCallbackProps) {
+  const { field, handleChange } = useFieldWithParams({
+    ...rest,
+    fieldKey,
+    items,
+    noFilterLabel,
+    emptyValue: "null",
+  });
 
-  const fieldCriteriaRadioCallback = useCallback(
-    (callback: () => void) => (
-      <RadioGroup
-        defaultValue="null"
-        className="px-2 py-1.5 gap-4"
-        onValueChange={(value) => {
-          setField((prev) =>
-            value === "null"
-              ? {
-                  label: noFilterLabel,
-                  value: "",
-                }
-              : items.find((i) => i.value === value) || prev,
-          );
-          callback();
-        }}
-      >
-        {items.map(({ label, value }) => (
-          <Label
-            htmlFor={fieldKey + value}
-            className="flex items-center space-x-2 rounded hover:bg-muted cursor-pointer px-4 py-2 gap-2"
-            key={value}
-          >
-            <RadioGroupItem
-              value={value}
-              id={fieldKey + value}
-              className="ring-none outline-none border-none"
-            />
-            <p>{label}</p>
-          </Label>
-        ))}
+  return (
+    <RadioGroup
+      defaultValue={field.value || "null"}
+      className="px-2 py-1.5 gap-4"
+      onValueChange={handleChange}
+    >
+      {items.map(({ label, value }) => (
         <Label
-          htmlFor={fieldKey + "null"}
+          htmlFor={fieldKey + value}
           className="flex items-center space-x-2 rounded hover:bg-muted cursor-pointer px-4 py-2 gap-2"
+          key={value}
         >
           <RadioGroupItem
-            value={"null"}
-            id={fieldKey + "null"}
+            value={value}
+            id={fieldKey + value}
             className="ring-none outline-none border-none"
           />
-          <p>{noFilterLabel}</p>
+          <p>{label}</p>
         </Label>
-      </RadioGroup>
-    ),
-    [fieldKey, items, noFilterLabel],
+      ))}
+      <Label
+        htmlFor={fieldKey + "null"}
+        className="flex items-center space-x-2 rounded hover:bg-muted cursor-pointer px-4 py-2 gap-2"
+      >
+        <RadioGroupItem
+          value={"null"}
+          id={fieldKey + "null"}
+          className="ring-none outline-none border-none"
+        />
+        <p>{noFilterLabel}</p>
+      </Label>
+    </RadioGroup>
   );
+}
+export function DropDownFieldFilterCriteriaCallback({
+  items,
+  fieldKey,
+  noFilterLabel,
+  ...rest
+}: CriteriaWithCallbackProps) {
+  const { field, handleChange } = useFieldWithParams({
+    ...rest,
+    fieldKey,
+    items,
+    noFilterLabel,
+    emptyValue: "",
+  });
 
-  return {
-    updateFieldDropdownFilter,
-    filedFilterCriteria,
-    fieldDropdownFilterQueryParam,
-    value: field.value,
-    filedFilterCriteriaCallback,
-    fieldCriteriaRadioCallback,
-  };
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="outline">{`${field.label}`}</Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent className="w-56">
+        <DropdownMenuRadioGroup
+          value={field.value}
+          onValueChange={handleChange}
+        >
+          {items.map(({ label, value }) => (
+            <DropdownMenuRadioItem value={value} key={value}>
+              {label}
+            </DropdownMenuRadioItem>
+          ))}
+          <DropdownMenuRadioItem value={""}>
+            {noFilterLabel}
+          </DropdownMenuRadioItem>
+        </DropdownMenuRadioGroup>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
 }

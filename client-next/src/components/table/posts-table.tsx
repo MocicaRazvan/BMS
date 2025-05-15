@@ -15,7 +15,7 @@ import { CustomEntityModel, PostResponse } from "@/types/dto";
 
 import { ColumnDef } from "@tanstack/react-table";
 import { MoreHorizontal } from "lucide-react";
-import { Suspense, useCallback, useMemo } from "react";
+import React, { Suspense, useCallback, useMemo } from "react";
 
 import { ExtraTableProps } from "@/types/tables";
 import { format, parseISO } from "date-fns";
@@ -24,13 +24,16 @@ import { DataTable, DataTableTexts } from "@/components/table/data-table";
 import useList, { UseListProps } from "@/hoooks/useList";
 import LoadingSpinner from "@/components/common/loading-spinner";
 import useTagsExtraCriteria, {
+  TagsExtraCriteriaWithCallback,
   UseTagsExtraCriteriaTexts,
 } from "@/components/list/useTagsExtraCriteria";
 import { UseApprovedFilterTexts } from "@/components/list/useApprovedFilter";
 import { WithUser } from "@/lib/user";
 import AlertDialogApprovePost from "@/components/dialogs/posts/approve-post";
 import { ColumnActionsTexts } from "@/texts/components/table";
-import useBinaryFilter from "@/components/list/useBinaryFilter";
+import useBinaryFilter, {
+  RadioBinaryCriteriaWithCallback,
+} from "@/components/list/useBinaryFilter";
 import { postColumnActions } from "@/lib/constants";
 import useClientNotFound from "@/hoooks/useClientNotFound";
 import OverflowTextTooltip from "@/components/common/overflow-text-tooltip";
@@ -86,45 +89,30 @@ export default function PostsTable({
   mainDashboard = false,
   creationFilterTexts,
 }: Props) {
+  const { extraUpdateSearchParams, extraArrayQueryParam, tags, setTags } =
+    useTagsExtraCriteria();
+
   const {
-    extraUpdateSearchParams,
-    extraCriteria,
-    extraArrayQueryParam,
-    extraCriteriaWithCallBack,
-  } = useTagsExtraCriteria(useTagsExtraCriteriaTexts);
-  // const { updateApprovedSearch, approveCriteria, approved } = useApprovedFilter(
-  //   useApprovedFilterTexts,
-  // );
-  const {
-    fieldCriteria,
     field,
     updateFieldSearch,
-    fieldCriteriaCallBack,
-    fieldCriteriaRadioCallback: approvedCriteriaRadioCallback,
+    setField: setApproved,
   } = useBinaryFilter({
     fieldKey: "approved",
-    trueText: useApprovedFilterTexts.approved,
-    falseText: useApprovedFilterTexts.notApproved,
-    all: useApprovedFilterTexts.all,
   });
 
   const { navigateToNotFound } = useClientNotFound();
 
   const router = useRouter();
   const isAdmin = authUser?.role === "ROLE_ADMIN";
-  // console.log("AUTH", authUser);
+
   const {
-    messages,
     pageInfo,
     filter,
-    setFilter,
-    debouncedFilter,
     sort,
     setSort,
     sortValue,
     setSortValue,
     items,
-    updateSortState,
     isFinished,
     error,
     setPageInfo,
@@ -272,7 +260,18 @@ export default function PostsTable({
                 {postTableColumnsTexts.approved.header}
               </div>
             }
-            extraContent={approvedCriteriaRadioCallback(resetCurrentPage)}
+            extraContent={
+              <RadioBinaryCriteriaWithCallback
+                callback={resetCurrentPage}
+                fieldKey="approved"
+                texts={{
+                  trueText: useApprovedFilterTexts.approved,
+                  falseText: useApprovedFilterTexts.notApproved,
+                  all: useApprovedFilterTexts.all,
+                }}
+                setGlobalFilter={setApproved}
+              />
+            }
           />
         ),
         cell: ({ row }) => (
@@ -427,17 +426,19 @@ export default function PostsTable({
       postTableColumnsTexts.updatedAt,
       postTableColumnsTexts.approved,
       postTableColumnsTexts.actions,
+      radioArgs,
+      creationFilterTexts,
+      updateCreatedAtRange,
+      updateUpdatedAtRange,
+      resetCurrentPage,
+      useApprovedFilterTexts,
+      setApproved,
       forWhom,
       mainDashboard,
       authUser,
-      isAdmin,
       refetch,
+      isAdmin,
       router,
-      radioArgs,
-      updateUpdatedAtRange,
-      updateCreatedAtRange,
-      resetCurrentPage,
-      approvedCriteriaRadioCallback,
     ],
   );
 
@@ -494,9 +495,13 @@ export default function PostsTable({
           extraCriteria={
             <div className="flex items-start justify-center gap-8 flex-1 flex-wrap">
               <div className="flex-1 flex-wrap">
-                {extraCriteriaWithCallBack(resetCurrentPage)}
+                <TagsExtraCriteriaWithCallback
+                  texts={useTagsExtraCriteriaTexts}
+                  setTags={setTags}
+                  tags={tags}
+                  callback={resetCurrentPage}
+                />
               </div>
-              {/*{fieldCriteriaCallBack(resetCurrentPage)}*/}
             </div>
           }
           // rangeDateFilter={

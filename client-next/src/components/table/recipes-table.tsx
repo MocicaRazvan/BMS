@@ -5,12 +5,15 @@ import { recipeColumnActions } from "@/lib/constants";
 import { DataTable, DataTableTexts } from "@/components/table/data-table";
 import { UseApprovedFilterTexts } from "@/components/list/useApprovedFilter";
 import useFilterDropdown, {
+  RadioFieldFilterCriteriaCallback,
   UseFilterDropdownTexts,
 } from "@/components/list/useFilterDropdown";
 import { ExtraTableProps } from "@/types/tables";
 import useList, { UseListProps } from "@/hoooks/useList";
 import { WithUser } from "@/lib/user";
-import useBinaryFilter from "@/components/list/useBinaryFilter";
+import useBinaryFilter, {
+  RadioBinaryCriteriaWithCallback,
+} from "@/components/list/useBinaryFilter";
 import { dietTypes } from "@/types/forms";
 import { Link, useRouter } from "@/navigation";
 import {
@@ -101,20 +104,16 @@ export default function RecipeTable({
   const {
     field: approvedField,
     updateFieldSearch: updateApproveField,
-    fieldCriteriaCallBack: approvedFieldCriteriaCallBack,
-    fieldCriteriaRadioCallback: approvedCriteriaRadioCallback,
+    setField: setApproved,
   } = useBinaryFilter({
     fieldKey: "approved",
-    trueText: useApprovedFilterTexts.approved,
-    falseText: useApprovedFilterTexts.notApproved,
-    all: useApprovedFilterTexts.all,
   });
 
   const {
     value: dietType,
     updateFieldDropdownFilter: updateDietType,
-    filedFilterCriteriaCallback: dietTypeCriteriaCallback,
-    fieldCriteriaRadioCallback: dietTypeCriteriaRadioCallback,
+    items: dietTypeItems,
+    setField: setDietTypeField,
   } = useFilterDropdown({
     items: dietTypes.map((value) => ({
       value,
@@ -130,17 +129,13 @@ export default function RecipeTable({
   const isAdmin = authUser?.role === "ROLE_ADMIN";
 
   const {
-    messages,
     pageInfo,
     filter,
-    setFilter,
-    debouncedFilter,
     sort,
     setSort,
     sortValue,
     setSortValue,
     items,
-    updateSortState,
     isFinished,
     error,
     setPageInfo,
@@ -159,7 +154,6 @@ export default function RecipeTable({
     },
     extraArrayQueryParam,
     extraUpdateSearchParams: (p) => {
-      updateDietType(p);
       updateApproveField(p);
       updateDietType(p);
     },
@@ -224,7 +218,16 @@ export default function RecipeTable({
                 {recipeTableColumnsTexts.type}
               </p>
             }
-            extraContent={dietTypeCriteriaRadioCallback(resetCurrentPage)}
+            // extraContent={dietTypeCriteriaRadioCallback(resetCurrentPage)}
+            extraContent={
+              <RadioFieldFilterCriteriaCallback
+                callback={resetCurrentPage}
+                fieldKey="type"
+                noFilterLabel={dietDropdownTexts.noFilterLabel}
+                setGlobalFilter={setDietTypeField}
+                items={dietTypeItems}
+              />
+            }
           />
         ),
         cell: ({ row }) => {
@@ -355,7 +358,18 @@ export default function RecipeTable({
                 {recipeTableColumnsTexts.approved.header}
               </div>
             }
-            extraContent={approvedCriteriaRadioCallback(resetCurrentPage)}
+            extraContent={
+              <RadioBinaryCriteriaWithCallback
+                callback={resetCurrentPage}
+                fieldKey="approved"
+                texts={{
+                  trueText: useApprovedFilterTexts.approved,
+                  falseText: useApprovedFilterTexts.notApproved,
+                  all: useApprovedFilterTexts.all,
+                }}
+                setGlobalFilter={setApproved}
+              />
+            }
           />
         ),
         cell: ({ row }) => (
@@ -515,18 +529,24 @@ export default function RecipeTable({
       recipeTableColumnsTexts.updatedAt,
       recipeTableColumnsTexts.approved,
       recipeTableColumnsTexts.actions,
+      radioArgs,
+      resetCurrentPage,
+      dietDropdownTexts.noFilterLabel,
+      setDietTypeField,
+      dietTypeItems,
+      creationFilterTexts,
+      updateCreatedAtRange,
+      updateUpdatedAtRange,
+      useApprovedFilterTexts.approved,
+      useApprovedFilterTexts.notApproved,
+      useApprovedFilterTexts.all,
+      setApproved,
       forWhom,
       mainDashboard,
       authUser,
-      isAdmin,
       refetch,
+      isAdmin,
       router,
-      radioArgs,
-      updateUpdatedAtRange,
-      updateCreatedAtRange,
-      approvedCriteriaRadioCallback,
-      resetCurrentPage,
-      dietTypeCriteriaRadioCallback,
     ],
   );
 

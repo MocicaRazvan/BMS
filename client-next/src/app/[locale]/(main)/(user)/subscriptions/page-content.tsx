@@ -6,6 +6,7 @@ import GridList, {
 } from "@/components/list/grid-list";
 import { SortingOptionsTexts } from "@/lib/constants";
 import useFilterDropdown, {
+  DropDownFieldFilterCriteriaCallback,
   UseFilterDropdownTexts,
 } from "@/components/list/useFilterDropdown";
 import { WithUser } from "@/lib/user";
@@ -56,9 +57,9 @@ export default function SubscriptionsPageContent({
 
   const {
     value: dietType,
-    fieldDropdownFilterQueryParam: dietTypeQP,
     updateFieldDropdownFilter: updateDietType,
-    filedFilterCriteriaCallback: dietTypeCriteriaCallback,
+    items: dietItems,
+    setField: setDietType,
   } = useFilterDropdown({
     items: dietTypes.map((value) => ({
       value,
@@ -70,7 +71,8 @@ export default function SubscriptionsPageContent({
   const {
     value: objectiveType,
     updateFieldDropdownFilter: updateObjectiveType,
-    filedFilterCriteriaCallback: objectiveTypeCriteriaCallback,
+    items: objectiveItems,
+    setField: setObjectiveType,
   } = useFilterDropdown({
     items: planObjectives.map((value) => ({
       value,
@@ -121,9 +123,21 @@ export default function SubscriptionsPageContent({
         {...gridListTexts}
         passExtraHeader={extraHeader}
         extraCriteriaWithCallBack={(callback) => (
-          <div className="flex items-center justify-center flex-wrap gap-10">
-            {dietTypeCriteriaCallback(callback)}
-            {objectiveTypeCriteriaCallback(callback)}
+          <div className="flex items-center justify-center flex-wrap gap-4 ml-10">
+            <DropDownFieldFilterCriteriaCallback
+              callback={callback}
+              fieldKey={"type"}
+              noFilterLabel={dietDropdownTexts.noFilterLabel}
+              setGlobalFilter={setDietType}
+              items={dietItems}
+            />
+            <DropDownFieldFilterCriteriaCallback
+              callback={callback}
+              fieldKey={"objective"}
+              noFilterLabel={objectiveDropDownTexts.noFilterLabel}
+              setGlobalFilter={setObjectiveType}
+              items={objectiveItems}
+            />
           </div>
         )}
         passExtraImageOverlay={imageOverlay}

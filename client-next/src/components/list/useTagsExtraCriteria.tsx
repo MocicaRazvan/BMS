@@ -1,5 +1,11 @@
 import { useSearchParams } from "next/navigation";
-import { useCallback, useMemo, useState } from "react";
+import {
+  Dispatch,
+  SetStateAction,
+  useCallback,
+  useMemo,
+  useState,
+} from "react";
 import MultipleSelector, {
   Option,
   useDebounce,
@@ -11,12 +17,11 @@ export interface UseTagsExtraCriteriaTexts {
   tagsPlaceholder: string;
 }
 
-export default function useTagsExtraCriteria({
-  tagsPlaceholder,
-  tagsEmpty,
-}: UseTagsExtraCriteriaTexts) {
+export const TAGS_KEY = "tags" as const;
+
+export default function useTagsExtraCriteria() {
   const currentSearchParams = useSearchParams();
-  const searchTags = currentSearchParams.get("tags");
+  const searchTags = currentSearchParams.get(TAGS_KEY);
   const [tags, setTags] = useState<Option[]>(
     searchTags
       ? searchTags.split(",").reduce<Option[]>((acc, tag) => {
@@ -48,51 +53,42 @@ export default function useTagsExtraCriteria({
     [tags],
   );
 
-  const extraCriteria = useMemo(
-    () => (
-      <div className="flex-1">
-        <MultipleSelector
-          className="w-full h-full"
-          value={tags}
-          onChange={setTags}
-          defaultOptions={tagsOptions}
-          placeholder={tagsPlaceholder}
-          emptyIndicator={
-            <p className="text-center text-lg leading-10 text-gray-600 dark:text-gray-400">
-              {tagsEmpty}
-            </p>
-          }
-        />
-      </div>
-    ),
-    [tags, tagsEmpty, tagsPlaceholder],
-  );
-  const extraCriteriaWithCallBack = useCallback(
-    (callback: () => void) => (
-      <div className="flex-1">
-        <MultipleSelector
-          className="w-full h-full max-w-[400px] overflow-y-auto"
-          value={tags}
-          onChange={(e) => {
-            setTags(e);
-            callback();
-          }}
-          defaultOptions={tagsOptions}
-          placeholder={tagsPlaceholder}
-          emptyIndicator={
-            <p className="text-center text-lg leading-10 text-gray-600 dark:text-gray-400">
-              {tagsEmpty}
-            </p>
-          }
-        />
-      </div>
-    ),
-    [tags, tagsEmpty, tagsPlaceholder],
-  );
   return {
-    extraCriteria,
     extraArrayQueryParam,
     extraUpdateSearchParams,
-    extraCriteriaWithCallBack,
+    tags,
+    setTags,
   };
+}
+interface TagsExtraCriteriaWithCallbackProps {
+  texts: UseTagsExtraCriteriaTexts;
+  setTags: Dispatch<SetStateAction<Option[]>>;
+  tags: Option[];
+  callback: () => void;
+}
+export function TagsExtraCriteriaWithCallback({
+  texts: { tagsPlaceholder, tagsEmpty },
+  tags,
+  setTags,
+  callback,
+}: TagsExtraCriteriaWithCallbackProps) {
+  return (
+    <div className="w-full max-w-[400px]">
+      <MultipleSelector
+        className="max-w-[400px] overflow-y-auto"
+        value={tags}
+        onChange={(e) => {
+          setTags(e);
+          callback();
+        }}
+        defaultOptions={tagsOptions}
+        placeholder={tagsPlaceholder}
+        emptyIndicator={
+          <p className="text-center text-lg leading-10 text-gray-600 dark:text-gray-400">
+            {tagsEmpty}
+          </p>
+        }
+      />
+    </div>
+  );
 }

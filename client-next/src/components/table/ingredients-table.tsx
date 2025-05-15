@@ -4,9 +4,11 @@ import { ExtraTableProps } from "@/types/tables";
 import { WithUser } from "@/lib/user";
 import useList, { UseListProps } from "@/hoooks/useList";
 import useBinaryFilter, {
+  RadioBinaryCriteriaWithCallback,
   UseBinaryTexts,
 } from "@/components/list/useBinaryFilter";
 import useFilterDropdown, {
+  RadioFieldFilterCriteriaCallback,
   UseFilterDropdownTexts,
 } from "@/components/list/useFilterDropdown";
 import { dietTypes } from "@/types/forms";
@@ -108,21 +110,18 @@ export default function IngredientsTable({
   const {
     field,
     updateFieldSearch,
-    fieldCriteriaCallBack,
-    fieldCriteriaRadioCallback: displayFieldRadioCallback,
+    setField: setDisplay,
   } = useBinaryFilter({
     fieldKey: "display",
-    ...displayFilterTexts,
   });
 
   const { navigateToNotFound } = useClientNotFound();
 
   const {
     value: dietType,
-    fieldDropdownFilterQueryParam: dietTypeQP,
     updateFieldDropdownFilter: updateDietType,
-    filedFilterCriteriaCallback: dietTypeCriteriaCallback,
-    fieldCriteriaRadioCallback: dietTypeRadioCallback,
+    items: dietTypeItems,
+    setField: setDietType,
   } = useFilterDropdown({
     items: dietTypes.map((value) => ({
       value,
@@ -133,17 +132,13 @@ export default function IngredientsTable({
   });
 
   const {
-    messages,
     pageInfo,
     filter,
-    setFilter,
-    debouncedFilter,
     sort,
     setSort,
     sortValue,
     setSortValue,
     items,
-    updateSortState,
     isFinished,
     error,
     setPageInfo,
@@ -151,8 +146,6 @@ export default function IngredientsTable({
     updateFilterValue,
     clearFilterValue,
     resetCurrentPage,
-    updateCreatedAtRange,
-    updateUpdatedAtRange,
   } = useList<
     ResponseWithEntityCount<
       CustomEntityModel<IngredientNutritionalFactResponse>
@@ -237,7 +230,15 @@ export default function IngredientsTable({
                 {ingredientTableColumnTexts.type}
               </p>
             }
-            extraContent={dietTypeRadioCallback(resetCurrentPage)}
+            extraContent={
+              <RadioFieldFilterCriteriaCallback
+                callback={resetCurrentPage}
+                fieldKey="type"
+                noFilterLabel={dietDropdownTexts.noFilterLabel}
+                setGlobalFilter={setDietType}
+                items={dietTypeItems}
+              />
+            }
           />
         ),
         cell: ({ row }) => {
@@ -277,7 +278,14 @@ export default function IngredientsTable({
                 {ingredientTableColumnTexts.display.header}
               </p>
             }
-            extraContent={displayFieldRadioCallback(resetCurrentPage)}
+            extraContent={
+              <RadioBinaryCriteriaWithCallback
+                callback={resetCurrentPage}
+                fieldKey="display"
+                texts={displayFilterTexts}
+                setGlobalFilter={setDisplay}
+              />
+            }
           />
         ),
         cell: ({ row }) => (
@@ -538,31 +546,33 @@ export default function IngredientsTable({
           },
     ],
     [
-      authUser,
-      forWhom,
-      ingredientTableColumnTexts.actions,
-      ingredientTableColumnTexts.calories,
-      ingredientTableColumnTexts.carbohydrates,
-      ingredientTableColumnTexts.display.false,
-      ingredientTableColumnTexts.display.header,
-      ingredientTableColumnTexts.display.true,
-      ingredientTableColumnTexts.fat,
       ingredientTableColumnTexts.id,
       ingredientTableColumnTexts.name,
+      ingredientTableColumnTexts.type,
+      ingredientTableColumnTexts.display.header,
+      ingredientTableColumnTexts.display.true,
+      ingredientTableColumnTexts.display.false,
+      ingredientTableColumnTexts.count,
+      ingredientTableColumnTexts.fat,
+      ingredientTableColumnTexts.saturatedFat,
+      ingredientTableColumnTexts.carbohydrates,
+      ingredientTableColumnTexts.sugar,
       ingredientTableColumnTexts.protein,
       ingredientTableColumnTexts.salt,
-      ingredientTableColumnTexts.saturatedFat,
-      ingredientTableColumnTexts.sugar,
-      ingredientTableColumnTexts.type,
-      ingredientTableColumnTexts.unit,
-      ingredientTableColumnTexts.count,
+      ingredientTableColumnTexts.calories,
+      ingredientTableColumnTexts.actions,
+      forWhom,
+      radioArgs,
+      resetCurrentPage,
+      dietDropdownTexts.noFilterLabel,
+      setDietType,
+      dietTypeItems,
+      displayFilterTexts,
+      setDisplay,
       isAdmin,
       refetch,
+      authUser,
       router,
-      radioArgs,
-      dietTypeRadioCallback,
-      resetCurrentPage,
-      displayFieldRadioCallback,
     ],
   );
 

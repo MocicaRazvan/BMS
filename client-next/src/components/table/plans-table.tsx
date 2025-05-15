@@ -5,9 +5,11 @@ import { planColumnActions } from "@/lib/constants";
 import { DataTable, DataTableTexts } from "@/components/table/data-table";
 import { UseApprovedFilterTexts } from "@/components/list/useApprovedFilter";
 import useBinaryFilter, {
+  RadioBinaryCriteriaWithCallback,
   UseBinaryTexts,
 } from "@/components/list/useBinaryFilter";
 import useFilterDropdown, {
+  RadioFieldFilterCriteriaCallback,
   UseFilterDropdownTexts,
 } from "@/components/list/useFilterDropdown";
 import { ExtraTableProps } from "@/types/tables";
@@ -123,29 +125,22 @@ export default function PlansTable({
   const {
     field: displayField,
     updateFieldSearch: updateDisplay,
-    fieldCriteriaCallBack: displayCriteriaCallBack,
-    fieldCriteriaRadioCallback: displayCriteriaRadioCallback,
+    setField: setDisplay,
   } = useBinaryFilter({
     fieldKey: "display",
-    ...displayFilterTexts,
   });
   const {
     field: approvedField,
     updateFieldSearch: updateApproved,
-    fieldCriteriaCallBack: approvedCriteriaCallBack,
-    fieldCriteriaRadioCallback: approvedCriteriaRadioCallback,
+    setField: setApproved,
   } = useBinaryFilter({
     fieldKey: "approved",
-    trueText: useApprovedFilterTexts.approved,
-    falseText: useApprovedFilterTexts.notApproved,
-    all: useApprovedFilterTexts.all,
   });
   const {
     value: dietType,
-    fieldDropdownFilterQueryParam: dietTypeQP,
     updateFieldDropdownFilter: updateDietType,
-    filedFilterCriteriaCallback: dietTypeCriteriaCallback,
-    fieldCriteriaRadioCallback: dietTypeCriteriaRadioCallback,
+    items: dietTypeItems,
+    setField: setDietType,
   } = useFilterDropdown({
     items: dietTypes.map((value) => ({
       value,
@@ -157,8 +152,8 @@ export default function PlansTable({
   const {
     value: objectiveType,
     updateFieldDropdownFilter: updateObjectiveType,
-    filedFilterCriteriaCallback: objectiveTypeCriteriaCallback,
-    fieldCriteriaRadioCallback: objectiveTypeCriteriaRadioCallback,
+    items: objectiveTypeItems,
+    setField: setObjectiveType,
   } = useFilterDropdown({
     items: planObjectives.map((value) => ({
       value,
@@ -169,17 +164,13 @@ export default function PlansTable({
   });
 
   const {
-    messages,
     pageInfo,
     filter,
-    setFilter,
-    debouncedFilter,
     sort,
     setSort,
     sortValue,
     setSortValue,
     items,
-    updateSortState,
     isFinished,
     error,
     setPageInfo,
@@ -268,7 +259,15 @@ export default function PlansTable({
                 {planTableColumnsTexts.type}
               </p>
             }
-            extraContent={dietTypeCriteriaRadioCallback(resetCurrentPage)}
+            extraContent={
+              <RadioFieldFilterCriteriaCallback
+                callback={resetCurrentPage}
+                fieldKey="type"
+                noFilterLabel={dietDropdownTexts.noFilterLabel}
+                setGlobalFilter={setDietType}
+                items={dietTypeItems}
+              />
+            }
           />
         ),
         cell: ({ row }) => {
@@ -308,7 +307,15 @@ export default function PlansTable({
                 {planTableColumnsTexts.objective}
               </p>
             }
-            extraContent={objectiveTypeCriteriaRadioCallback(resetCurrentPage)}
+            extraContent={
+              <RadioFieldFilterCriteriaCallback
+                callback={resetCurrentPage}
+                fieldKey="objective"
+                noFilterLabel={objectiveDropDownTexts.noFilterLabel}
+                setGlobalFilter={setObjectiveType}
+                items={objectiveTypeItems}
+              />
+            }
           />
         ),
         cell: ({ row }) => (
@@ -327,7 +334,14 @@ export default function PlansTable({
                 {planTableColumnsTexts.display.header}
               </p>
             }
-            extraContent={displayCriteriaRadioCallback(resetCurrentPage)}
+            extraContent={
+              <RadioBinaryCriteriaWithCallback
+                callback={resetCurrentPage}
+                fieldKey="display"
+                texts={displayFilterTexts}
+                setGlobalFilter={setDisplay}
+              />
+            }
           />
         ),
         cell: ({ row }) => (
@@ -464,7 +478,18 @@ export default function PlansTable({
                 {planTableColumnsTexts.approved.header}
               </div>
             }
-            extraContent={approvedCriteriaRadioCallback(resetCurrentPage)}
+            extraContent={
+              <RadioBinaryCriteriaWithCallback
+                callback={resetCurrentPage}
+                fieldKey="approved"
+                texts={{
+                  trueText: useApprovedFilterTexts.approved,
+                  falseText: useApprovedFilterTexts.notApproved,
+                  all: useApprovedFilterTexts.all,
+                }}
+                setGlobalFilter={setApproved}
+              />
+            }
           />
         ),
         cell: ({ row }) => (
@@ -632,36 +657,43 @@ export default function PlansTable({
       },
     ],
     [
-      authUser,
-      forWhom,
-      formatIntl,
-      isAdmin,
-      mainDashboard,
-      planTableColumnsTexts.actions,
-      planTableColumnsTexts.approved,
-      planTableColumnsTexts.count,
-      planTableColumnsTexts.createdAt,
-      planTableColumnsTexts.display.false,
-      planTableColumnsTexts.display.header,
-      planTableColumnsTexts.display.true,
       planTableColumnsTexts.id,
-      planTableColumnsTexts.objective,
-      planTableColumnsTexts.price,
       planTableColumnsTexts.title,
       planTableColumnsTexts.type,
+      planTableColumnsTexts.objective,
+      planTableColumnsTexts.display.header,
+      planTableColumnsTexts.display.true,
+      planTableColumnsTexts.display.false,
+      planTableColumnsTexts.count,
+      planTableColumnsTexts.price,
+      planTableColumnsTexts.createdAt,
       planTableColumnsTexts.updatedAt,
-      planTableColumnsTexts.userDislikes,
-      planTableColumnsTexts.userLikes,
-      refetch,
-      router,
+      planTableColumnsTexts.approved,
+      planTableColumnsTexts.actions,
       radioArgs,
-      updateUpdatedAtRange,
-      updateCreatedAtRange,
       resetCurrentPage,
-      dietTypeCriteriaRadioCallback,
-      displayCriteriaRadioCallback,
-      approvedCriteriaRadioCallback,
-      objectiveTypeCriteriaRadioCallback,
+      dietDropdownTexts.noFilterLabel,
+      setDietType,
+      dietTypeItems,
+      objectiveDropDownTexts.noFilterLabel,
+      setObjectiveType,
+      objectiveTypeItems,
+      displayFilterTexts,
+      setDisplay,
+      formatIntl,
+      creationFilterTexts,
+      updateCreatedAtRange,
+      updateUpdatedAtRange,
+      useApprovedFilterTexts.approved,
+      useApprovedFilterTexts.notApproved,
+      useApprovedFilterTexts.all,
+      setApproved,
+      forWhom,
+      mainDashboard,
+      authUser,
+      refetch,
+      isAdmin,
+      router,
     ],
   );
   const finalCols = useMemo(

@@ -19,9 +19,11 @@ import { MoreHorizontal } from "lucide-react";
 import LoadingSpinner from "@/components/common/loading-spinner";
 import { DataTable, DataTableTexts } from "@/components/table/data-table";
 import useBinaryFilter, {
+  RadioBinaryCriteriaWithCallback,
   UseBinaryTexts,
 } from "@/components/list/useBinaryFilter";
 import useFilterDropdown, {
+  RadioFieldFilterCriteriaCallback,
   UseFilterDropdownTexts,
 } from "@/components/list/useFilterDropdown";
 import { format, parseISO } from "date-fns";
@@ -95,23 +97,18 @@ export default function UsersTable({
   const { navigateToNotFound } = useClientNotFound();
 
   const {
-    fieldCriteria,
     field,
     updateFieldSearch,
-    fieldCriteriaCallBack,
-    fieldCriteriaRadioCallback,
+    setField: setEmailVerified,
   } = useBinaryFilter({
     fieldKey: "emailVerified",
-    ...useBinaryEmailVerifiedTexts,
   });
 
   const {
     value: provider,
     updateFieldDropdownFilter: updateProvider,
-    fieldDropdownFilterQueryParam: providerDropdownFilterQueryParam,
-    filedFilterCriteria: providerFilterCriteria,
-    filedFilterCriteriaCallback: providerFilterCriteriaCallback,
-    fieldCriteriaRadioCallback: providerCriteriaRadioCallback,
+    items: providerItems,
+    setField: setProvider,
   } = useFilterDropdown({
     items: ["LOCAL", "GITHUB", "GOOGLE"].map((value) => ({
       value,
@@ -123,10 +120,8 @@ export default function UsersTable({
   const {
     value: role,
     updateFieldDropdownFilter: updateRole,
-    fieldDropdownFilterQueryParam: roleDropdownFilterQueryParam,
-    filedFilterCriteria: roleFilterCriteria,
-    filedFilterCriteriaCallback: roleFilterCriteriaCallback,
-    fieldCriteriaRadioCallback: roleCriteriaRadioCallback,
+    items: roleItems,
+    setField: setRole,
   } = useFilterDropdown({
     items: ["ROLE_USER", "ROLE_ADMIN", "ROLE_TRAINER"].map((value) => ({
       value,
@@ -137,17 +132,13 @@ export default function UsersTable({
   });
 
   const {
-    messages,
     pageInfo,
     filter,
-    setFilter,
-    debouncedFilter,
     sort,
     setSort,
     sortValue,
     setSortValue,
     items,
-    updateSortState,
     isFinished,
     error,
     setPageInfo,
@@ -155,7 +146,6 @@ export default function UsersTable({
     updateFilterValue,
     clearFilterValue,
     resetCurrentPage,
-    updateUpdatedAtRange,
     updateCreatedAtRange,
   } = useList<CustomEntityModel<UserDto>>({
     path,
@@ -228,16 +218,28 @@ export default function UsersTable({
         id: userTableColumnsTexts.email,
         accessorKey: "email",
         header: () => (
-          <RadioSortDropDownWithExtra
-            radioArgs={radioArgs}
-            sortingProperty="email"
-            trigger={
-              <p className="font-bold text-lg text-left">
-                {userTableColumnsTexts.email}
-              </p>
-            }
-            extraContent={fieldCriteriaRadioCallback(resetCurrentPage)}
-          />
+          // <RadioSortDropDownWithExtra
+          //   radioArgs={radioArgs}
+          //   sortingProperty="email"
+          //   trigger={
+          //     <p className="font-bold text-lg text-left">
+          //       {userTableColumnsTexts.email}
+          //     </p>
+          //   }
+          //   extraContent={
+          //     <RadioBinaryCriteriaWithCallback
+          //       callback={resetCurrentPage}
+          //       fieldKey="emailVerified"
+          //       texts={useBinaryEmailVerifiedTexts}
+          //       setGlobalFilter={setEmailVerified}
+          //     />
+          //   }
+          // />
+          <RadioSortButton sortingProperty="email" radioArgs={radioArgs}>
+            <p className="font-bold text-lg text-left">
+              {userTableColumnsTexts.email}
+            </p>
+          </RadioSortButton>
         ),
         cell: ({ row }) => (
           <OverflowTextTooltip
@@ -273,12 +275,24 @@ export default function UsersTable({
         id: userTableColumnsTexts.emailVerified.header,
         accessorKey: "emailVerified",
         header: () => (
-          <p className="font-bold text-lg text-left">
-            {userTableColumnsTexts.emailVerified.header}
-          </p>
+          <RadioSortDropDownWithExtraDummy
+            trigger={
+              <p className="font-bold text-lg text-left">
+                {userTableColumnsTexts.emailVerified.header}
+              </p>
+            }
+            extraContent={
+              <RadioBinaryCriteriaWithCallback
+                callback={resetCurrentPage}
+                fieldKey="emailVerified"
+                texts={useBinaryEmailVerifiedTexts}
+                setGlobalFilter={setEmailVerified}
+              />
+            }
+          />
         ),
         cell: ({ row }) => (
-          <p className="font-bold ">
+          <p className="font-bold">
             {row.original.emailVerified
               ? userTableColumnsTexts.emailVerified.trueText
               : userTableColumnsTexts.emailVerified.falseText}
@@ -295,7 +309,15 @@ export default function UsersTable({
                 {userTableColumnsTexts.provider}
               </p>
             }
-            extraContent={providerCriteriaRadioCallback(resetCurrentPage)}
+            extraContent={
+              <RadioFieldFilterCriteriaCallback
+                callback={resetCurrentPage}
+                fieldKey="provider"
+                noFilterLabel={useProviderFilterDropdownTexts.noFilterLabel}
+                setGlobalFilter={setProvider}
+                items={providerItems}
+              />
+            }
           />
         ),
         cell: ({ row }) => (
@@ -312,7 +334,15 @@ export default function UsersTable({
                 {userTableColumnsTexts.role}
               </p>
             }
-            extraContent={roleCriteriaRadioCallback(resetCurrentPage)}
+            extraContent={
+              <RadioFieldFilterCriteriaCallback
+                callback={resetCurrentPage}
+                fieldKey="role"
+                noFilterLabel={useRoleFilterTexts.noFilterLabel}
+                setGlobalFilter={setRole}
+                items={roleItems}
+              />
+            }
           />
         ),
         cell: ({ row }) => (
@@ -524,17 +554,24 @@ export default function UsersTable({
       userTableColumnsTexts.role,
       userTableColumnsTexts.createdAt,
       userTableColumnsTexts.actions,
+      radioArgs,
+      resetCurrentPage,
+      useBinaryEmailVerifiedTexts,
+      setEmailVerified,
+      useProviderFilterDropdownTexts.noFilterLabel,
+      setProvider,
+      providerItems,
+      useRoleFilterTexts.noFilterLabel,
+      setRole,
+      roleItems,
+      creationFilterTexts,
+      updateCreatedAtRange,
       isAdmin,
       refetch,
       authUser,
       router,
+      forWhom,
       handleStartChat,
-      radioArgs,
-      updateCreatedAtRange,
-      updateUpdatedAtRange,
-      providerCriteriaRadioCallback,
-      roleCriteriaRadioCallback,
-      resetCurrentPage,
     ],
   );
 
@@ -577,9 +614,6 @@ export default function UsersTable({
             <div className="flex items-start justify-center gap-8 flex-1 flex-wrap">
               <div className="flex items-center justify-end gap-4 flex-1 flex-wrap">
                 {extraCriteria}
-                {/*{fieldCriteriaCallBack(resetCurrentPage)}*/}
-                {/*{providerFilterCriteriaCallback(resetCurrentPage)}*/}
-                {/*{roleFilterCriteriaCallback(resetCurrentPage)}*/}
               </div>
             </div>
           }

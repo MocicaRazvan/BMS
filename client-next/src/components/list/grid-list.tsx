@@ -24,6 +24,7 @@ import Lottie from "react-lottie-player";
 import CreationFilter, {
   CreationFilterTexts,
 } from "@/components/list/creation-filter";
+import { ClassValue } from "clsx";
 
 export interface SortingOption {
   property: string;
@@ -49,6 +50,7 @@ interface GridListProps<T extends TitleBodyImagesUserDto>
   passExtraHeader?: (item: ResponseWithUserDtoEntity<T>) => ReactNode;
   passExtraImageOverlay?: (item: ResponseWithUserDtoEntity<T>) => ReactNode;
   extraCriteriaWithCallBack?: (callback: () => void) => ReactNode;
+  extraCriteriaClassname?: ClassValue;
 }
 
 export default function GridList<T extends TitleBodyImagesUserDto>({
@@ -71,19 +73,16 @@ export default function GridList<T extends TitleBodyImagesUserDto>({
   extraCriteriaWithCallBack,
   passExtraImageOverlay,
   creationFilterTexts,
+  extraCriteriaClassname,
 }: GridListProps<T>) {
   const {
-    messages,
     pageInfo,
     filter,
-    setFilter,
-    debouncedFilter,
     sort,
     setSort,
     sortValue,
     setSortValue,
     items,
-    updateSortState,
     isFinished,
     error,
     updateFilterValue,
@@ -113,7 +112,12 @@ export default function GridList<T extends TitleBodyImagesUserDto>({
             searchInputTexts={{ placeholder: search }}
           />
 
-          <div className="flex items-center justify-end ml-12 gap-4  flex-1">
+          <div
+            className={cn(
+              "flex items-center justify-end ml-12 gap-4 flex-1",
+              extraCriteriaClassname,
+            )}
+          >
             <RadioSort
               sortingOptions={sortingOptions}
               sort={sort}

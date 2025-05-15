@@ -7,6 +7,7 @@ import GridList, {
 import { PostResponse } from "@/types/dto";
 
 import useTagsExtraCriteria, {
+  TagsExtraCriteriaWithCallback,
   UseTagsExtraCriteriaTexts,
 } from "@/components/list/useTagsExtraCriteria";
 import { SortingOptionsTexts } from "@/lib/constants";
@@ -41,12 +42,8 @@ export default function PostApprovedPageContent({
   locale,
 }: Props) {
   const router = useRouter();
-  const {
-    extraUpdateSearchParams,
-    extraCriteria,
-    extraArrayQueryParam,
-    extraCriteriaWithCallBack,
-  } = useTagsExtraCriteria(tagsCriteriaTexts);
+  const { extraUpdateSearchParams, extraArrayQueryParam, tags, setTags } =
+    useTagsExtraCriteria();
   const searchParams = useSearchParams();
 
   const initialLiked = searchParams.get("liked");
@@ -88,10 +85,17 @@ export default function PostApprovedPageContent({
         //   </div>
         // )}
         {...gridListTexts}
+        extraCriteriaClassname="items-start"
         extraCriteriaWithCallBack={(callback) => (
-          <div className="flex items-start justify-center flex-wrap gap-10  flex-1">
-            {extraCriteriaWithCallBack(callback)}
-            <div className="flex items-center space-x-2 pt-2">
+          <div className="flex items-start justify-end flex-wrap  gap-5 lg:gap-8 flex-1">
+            <TagsExtraCriteriaWithCallback
+              texts={tagsCriteriaTexts}
+              setTags={setTags}
+              tags={tags}
+              callback={callback}
+            />
+
+            <div className="flex items-center space-x-2 pt-2 ">
               <Checkbox
                 id="liked"
                 checked={liked}

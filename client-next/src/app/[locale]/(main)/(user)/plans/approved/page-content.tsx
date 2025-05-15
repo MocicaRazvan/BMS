@@ -3,6 +3,7 @@
 import { UseApprovedFilterTexts } from "@/components/list/useApprovedFilter";
 import { UseBinaryTexts } from "@/components/list/useBinaryFilter";
 import useFilterDropdown, {
+  DropDownFieldFilterCriteriaCallback,
   UseFilterDropdownTexts,
 } from "@/components/list/useFilterDropdown";
 import GridList, {
@@ -72,9 +73,9 @@ export default function PlanApprovedPageContent({
 
   const {
     value: dietType,
-    fieldDropdownFilterQueryParam: dietTypeQP,
     updateFieldDropdownFilter: updateDietType,
-    filedFilterCriteriaCallback: dietTypeCriteriaCallback,
+    items: dietItems,
+    setField: setDietType,
   } = useFilterDropdown({
     items: dietTypes.map((value) => ({
       value,
@@ -87,7 +88,8 @@ export default function PlanApprovedPageContent({
   const {
     value: objectiveType,
     updateFieldDropdownFilter: updateObjectiveType,
-    filedFilterCriteriaCallback: objectiveTypeCriteriaCallback,
+    items: objectiveItems,
+    setField: setObjectiveType,
   } = useFilterDropdown({
     items: planObjectives.map((value) => ({
       value,
@@ -157,9 +159,21 @@ export default function PlanApprovedPageContent({
         {...gridListTexts}
         extraCriteriaWithCallBack={(callback) => {
           return (
-            <div className="flex items-center justify-center flex-wrap gap-10">
-              {dietTypeCriteriaCallback(callback)}
-              {objectiveTypeCriteriaCallback(callback)}
+            <div className="flex items-center justify-center flex-wrap gap-4 ml-10">
+              <DropDownFieldFilterCriteriaCallback
+                callback={callback}
+                fieldKey={"type"}
+                noFilterLabel={dietDropdownTexts.noFilterLabel}
+                setGlobalFilter={setDietType}
+                items={dietItems}
+              />
+              <DropDownFieldFilterCriteriaCallback
+                callback={callback}
+                fieldKey={"objective"}
+                noFilterLabel={objectiveDropDownTexts.noFilterLabel}
+                setGlobalFilter={setObjectiveType}
+                items={objectiveItems}
+              />
               <div className="flex items-center space-x-2">
                 <Checkbox
                   id="buyable"

@@ -1,5 +1,5 @@
 "use client";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSession } from "next-auth/react";
 import { BaseError } from "@/types/responses";
 import { AcceptHeader } from "@/types/fetch-utils";
@@ -48,6 +48,7 @@ export interface UseFetchStreamReturn<T, E> {
   refetchState: boolean;
   isAbsoluteFinished: boolean;
   manualFetcher: ManualFetcher<T>;
+  resetFinishes: () => void;
 }
 function stableStringify(obj: unknown): string {
   // if (obj === undefined) {
@@ -136,8 +137,6 @@ export function useFetchStream<T = unknown, E extends BaseError = BaseError>({
     isCacheKeyNotEmpty,
     handleBatchUpdate,
     finalSyncValueWithCache,
-    resetValue,
-    getFromCache,
     replaceBatchInForAnyKey,
     removeFromCache,
   } = useCachedValue<T>(cacheKey, batchSize);
@@ -149,16 +148,22 @@ export function useFetchStream<T = unknown, E extends BaseError = BaseError>({
   const { data: session, status: sessionStatus } = useSession();
   const [isAbsoluteFinished, setIsAbsoluteFinished] = useState(false);
   const [manualKeys, setManualKeys] = useState<string[]>([]);
+  const refetchClosure = useRef(false);
+
+  const resetFinishes = useCallback(() => {
+    setIsFinished(false);
+    setIsAbsoluteFinished(false);
+  }, []);
 
   const refetch = useCallback(() => {
     resetValueAndCache();
     removeArrayFromCache(manualKeys);
     setManualKeys([]);
-    setIsFinished(false);
     setError(null);
-    setIsAbsoluteFinished(false);
+    resetFinishes();
     setRefetchState((prevIndex) => !prevIndex);
-  }, [manualKeys, removeArrayFromCache, resetValueAndCache]);
+    refetchClosure.current = true;
+  }, [manualKeys, removeArrayFromCache, resetFinishes, resetValueAndCache]);
 
   const fetcher = useCallback(
     async (
@@ -341,7 +346,7 @@ export function useFetchStream<T = unknown, E extends BaseError = BaseError>({
       };
     }
     setError(null);
-    const localFinished = isCacheKeyNotEmpty();
+    const localFinished = refetchClosure.current ? false : isCacheKeyNotEmpty();
     setIsFinished(localFinished);
     setIsAbsoluteFinished(false);
     const token = authToken && session?.user?.token ? session.user.token : "";
@@ -375,12 +380,18 @@ export function useFetchStream<T = unknown, E extends BaseError = BaseError>({
     //   batchSize,
     //   method,
     //   acceptHeader,
+    //   refetchClosure.current,
     // );
     let isMounted = true;
 
     //moves the async operations outside of React's render phase
     const timeoutId = setTimeout(
-      () => fetcher(isMounted, abortController, fetchProps),
+      () =>
+        fetcher(isMounted, abortController, fetchProps).finally(() => {
+          if (refetchClosure.current) {
+            refetchClosure.current = false;
+          }
+        }),
       0,
     );
     return () => {
@@ -448,6 +459,7 @@ export function useFetchStream<T = unknown, E extends BaseError = BaseError>({
       window.removeEventListener("focus", handleFocus);
     };
   }, [focusDelay, refetchOnFocus]);
+
   return {
     messages,
     error,
@@ -459,6 +471,7 @@ export function useFetchStream<T = unknown, E extends BaseError = BaseError>({
     refetchState,
     isAbsoluteFinished,
     manualFetcher,
+    resetFinishes,
   };
 }
 
