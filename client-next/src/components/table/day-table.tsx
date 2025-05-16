@@ -329,10 +329,10 @@ export default function DaysTable({
                 >
                   {view}
                 </DropdownMenuItem>
-                <DropdownMenuSeparator />
                 {forWhom === "trainer" &&
                   parseInt(authUser.id) === row.original.model.userId && (
                     <>
+                      <DropdownMenuSeparator />
                       <DropdownMenuItem asChild>
                         <Link
                           className="cursor-pointer"
@@ -357,7 +357,6 @@ export default function DaysTable({
                               callBack={refetch}
                             />
                           </DropdownMenuItem>
-                          <DropdownMenuSeparator />
                         </>
                       )}
                     </>
