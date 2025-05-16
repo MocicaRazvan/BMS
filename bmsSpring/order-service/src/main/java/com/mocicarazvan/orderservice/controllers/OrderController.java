@@ -159,8 +159,7 @@ public class OrderController implements CountInParentController {
     }
 
 
-    @GetMapping("" +
-            "")
+    @GetMapping("/admin/seedPlanOrders")
     public Mono<ResponseEntity<String>> seedPlanOrders(
             ServerWebExchange exchange
     ) {
