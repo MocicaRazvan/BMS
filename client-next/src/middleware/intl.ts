@@ -12,7 +12,6 @@ export function pageMiddleware(
   redirectedLocales: string[],
 ) {
   // Extract the locale from the request URL
-  // console.log(`Runtime: ${process.env.NEXT_RUNTIME || "nodejs"}`);
 
   const { pathname, search, origin } = request.nextUrl;
   const locale = pathname.split("/")[1];
@@ -22,9 +21,6 @@ export function pageMiddleware(
     const newPathname = `/${localeCookie.value}${pathname}`;
     const url = new URL(newPathname, origin);
     url.search = search;
-    console.log("search", search);
-    console.log("newPathname", newPathname);
-    console.log("redirecting to", url.toString());
     return NextResponse.redirect(url);
   }
 

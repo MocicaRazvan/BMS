@@ -436,6 +436,7 @@ const NotificationTemplateAuthUser = <
       senderEmail: authUser?.email,
       type: null,
     },
+    refetchOnFocus: false,
   });
 
   useSubscription(
