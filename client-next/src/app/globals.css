@@ -286,6 +286,11 @@
     animation-name: particle-burst8;
 }
 
+.reactEasyCrop_Container {
+    background-color: hsl(var(--muted));
+    backdrop-filter: blur(10px);
+}
+
 @keyframes particle-burst1 {
     0% {
         opacity: 1;
@@ -398,4 +403,3 @@
         animation-delay: -3s;
     }
 }
-
