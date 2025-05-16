@@ -78,6 +78,7 @@ export default function UserPageContent({
     method: "GET",
     authToken: true,
     useAbortController: false,
+    refetchOnFocus: false,
   });
 
   const [respMsg, setRespMsg] = useState<{

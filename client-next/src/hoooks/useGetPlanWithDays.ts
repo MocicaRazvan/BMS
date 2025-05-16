@@ -25,6 +25,7 @@ export function useGetPlanWithDays(id: string) {
     path: `/plans/days/${id}`,
     method: "GET",
     authToken: true,
+    refetchOnFocus: false,
     useAbortController: false,
   });
 

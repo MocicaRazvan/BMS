@@ -25,6 +25,7 @@ export default function DuplicatePostPageContent({
     method: "GET",
     authToken: true,
     useAbortController: false,
+    refetchOnFocus: false,
   });
 
   const { navigateToNotFound } = useClientNotFound();
