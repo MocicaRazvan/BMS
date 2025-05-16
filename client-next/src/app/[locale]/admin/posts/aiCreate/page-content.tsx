@@ -293,9 +293,14 @@ export default function AdminAIPostsCreateContent({
 
       try {
         // secvential ca 1 ollama si 1 diffusion
-        for (let i = 0; i < data.numberOfPosts; i++) {
-          await createOnePost(i);
-        }
+        // for (let i = 0; i < data.numberOfPosts; i++) {
+        //   await createOnePost(i);
+        // }
+        await Promise.all(
+          Array.from({ length: data.numberOfPosts }, (_, i) =>
+            createOnePost(i),
+          ),
+        );
         form.reset();
         router.push(
           "/admin/posts?sort=createdAt:desc&title=&currentPage=0&pageSize=10&approved=false",
