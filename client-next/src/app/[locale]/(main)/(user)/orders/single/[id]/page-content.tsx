@@ -124,7 +124,7 @@ export default function SingleOrderPageContent({
         <h1 className="font-bold tracking-tighter text-3xl md:text-5xl  text-center">
           {title}
         </h1>
-        <span className="md:text-lg">
+        <span className="font-semibold tracking-tighter text-3xl md:text-5xl">
           {format(
             new Date(ordersAddress[0].content.order.createdAt),
             "dd/MM/yyyy HH:mm",
