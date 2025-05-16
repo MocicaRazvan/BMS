@@ -533,12 +533,12 @@ export default function DayForm({
               <ErrorMessage message={error} show={!!errorMsg} />
               {isOneMealCompletedButNotSubmitted && (
                 <div className="w-full space-y-8">
-                  <p className="text-lg font-medium text-destructive">
+                  <p className="text-lg font-medium text-amber">
                     {areMealsCompletedButNotSubmitted}
                   </p>
                   <Button
-                    variant={"destructive"}
-                    type={"button"}
+                    variant="amber"
+                    type="button"
                     onClick={() => {
                       setIsMealCompletedButNotSubmitted({});
                     }}
