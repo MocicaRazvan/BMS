@@ -112,8 +112,7 @@ export default function CheckoutDrawer({
 
   const onSubmit = useCallback(
     async ({ userConfirmedPrice }: CheckoutSchemaType) => {
-      console.log(userConfirmedPrice);
-
+      setIsLoading(true);
       const body: CheckoutRequestBody = {
         total: totalPrice,
         plans: plans,
@@ -135,12 +134,12 @@ export default function CheckoutDrawer({
         }
       } catch (e) {
         console.log(e);
+      } finally {
+        setIsLoading(false);
       }
     },
-    [],
+    [authUser.token],
   );
-
-  console.log("open", isDrawerOpen);
 
   return (
     <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
