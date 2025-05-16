@@ -548,7 +548,7 @@ public class OrderServiceImpl implements OrderService {
         return orderRepository.findAll()
                 .buffer(20)
                 .flatMap(os -> Flux.fromIterable(os)
-                        .flatMap(o -> planClient.getByIds(o.getPlanIds().stream().map(Object::toString).toList(), userId).collectList()
+                        .concatMap(o -> planClient.getByIds(o.getPlanIds().stream().map(Object::toString).toList(), userId).collectList()
                                 .flatMap(plans ->
                                         planOrderService.deleteAllByOrderId(o.getId())
                                                 .then(planOrderService.savePlansForOrder(plans
