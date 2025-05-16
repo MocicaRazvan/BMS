@@ -313,7 +313,7 @@ export default function DayForm({
 
   const onSubmit = useCallback(
     async (data: DaySchemaType) => {
-      setIsLoading(false);
+      setIsLoading(true);
       setErrorMsg("");
       const parsedMeals = data.meals.map(
         ({ period: { hour, minute }, recipes }) => ({
