@@ -244,7 +244,7 @@ export default function OrdersTable({
           </RadioSortButton>
         ),
         cell: ({ row }) => (
-          <div className="max-w-16 text-nowrap overflow-x-hidden">
+          <div className="max-w-40 text-nowrap overflow-x-hidden">
             <p>
               {formatIntl.number(row.original.order.total, {
                 style: "currency",
@@ -263,7 +263,9 @@ export default function OrdersTable({
             {orderTableColumnsTexts.plans}
           </p>
         ),
-        cell: ({ row }) => <p>{row.original.order.planIds.length}</p>,
+        cell: ({ row }) => (
+          <p className="max-w-16">{row.original.order.planIds.length}</p>
+        ),
       },
       {
         id: orderTableColumnsTexts.address,

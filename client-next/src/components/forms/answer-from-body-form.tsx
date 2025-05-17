@@ -174,7 +174,7 @@ export default function AnswerFromBodyForm({
                         <FormControl>
                           <Textarea
                             placeholder={questionPlaceholder}
-                            className="resize-none"
+                            className="resize-y min-h-12 overflow-y-auto max-h-64"
                             {...field}
                           />
                         </FormControl>
