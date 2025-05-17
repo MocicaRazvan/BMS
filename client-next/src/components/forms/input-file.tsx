@@ -229,7 +229,6 @@ export default function InputFile<T extends FieldValues>({
 
   const downloadAllFiles = useCallback(() => {
     const zip = new JSZip();
-    const isImage = fieldName.includes("image");
     fieldValue.forEach((item: FieldInputItem) => {
       zip.file(item.file.name, item.file);
     });
@@ -237,8 +236,7 @@ export default function InputFile<T extends FieldValues>({
     zip
       .generateAsync({
         type: "blob",
-        compression: isImage ? "DEFLATE" : "STORE",
-        compressionOptions: isImage ? { level: 9 } : undefined,
+        compression: "STORE",
       })
       .then((content) => {
         saveAs(content, `${fieldName}_${now.toISOString()}.zip`);

@@ -16,7 +16,6 @@ import { NavTexts } from "@/components/nav/nav";
 import { CartPopsTexts } from "@/components/nav/cart-pop";
 import { BoughtNotificationContentTexts } from "@/components/nav/bought-notification-content";
 import { FindInSiteTexts } from "@/components/nav/find-in-site";
-import { getDaysCalendarCTATexts } from "@/texts/components/day-calendar";
 
 export interface ThemeSwitchTexts {
   srButton: string;
@@ -234,6 +233,7 @@ export async function getNotificationPopTexts(
     recipes: t("recipes"),
     plans: t("plans"),
     bought: t("bought"),
+    archive: t("archive"),
   };
 }
 export async function getCartPopsTexts(): Promise<CartPopsTexts> {

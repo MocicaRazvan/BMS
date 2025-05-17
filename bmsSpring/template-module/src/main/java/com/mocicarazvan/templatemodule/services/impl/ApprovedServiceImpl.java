@@ -71,12 +71,12 @@ public abstract class ApprovedServiceImpl<MODEL extends Approve, BODY extends Ti
                                             return modelRepository.save(model)
                                                     .flatMap(m -> getModelGuardWithUser(authUser, m, !m.isApproved()))
                                                     .flatMap(r -> self.updateDeleteInvalidate(Pair.of(r.getModel(), true))
+                                                            .flatMap(_ -> Mono.fromRunnable(() -> rabbitMqApprovedSender.sendMessage(approved, r, authUser)))
                                                             .thenReturn(r)
                                                     );
                                         }
 
-                                ).doOnSuccess(r -> rabbitMqApprovedSender.sendMessage(approved, r, authUser))
-                        );
+                                ));
 
     }
 

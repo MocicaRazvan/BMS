@@ -18,7 +18,7 @@ import {
   dayTypes,
   ResponseWithEntityCount,
 } from "@/types/dto";
-import { Suspense, useCallback, useMemo } from "react";
+import React, { Suspense, useCallback, useMemo } from "react";
 import { ColumnDef } from "@tanstack/react-table";
 import { format, parseISO } from "date-fns";
 import {
@@ -169,7 +169,18 @@ export default function DaysTable({
             {dayTableColumnTexts.id}
           </p>
         ),
-        cell: ({ row }) => <p>{row.original.model.id}</p>,
+        cell: ({
+          row: {
+            original: {
+              model: { id },
+            },
+          },
+        }) => (
+          <OverflowTextTooltip
+            text={wrapItemToString(id)}
+            triggerClassName="w-10 max-w-10"
+          />
+        ),
       },
       {
         id: dayTableColumnTexts.title,
@@ -341,9 +352,9 @@ export default function DaysTable({
                           {update}
                         </Link>
                       </DropdownMenuItem>
-                      <DropdownMenuSeparator />
                       {row.original.count === 0 && (
                         <>
+                          <DropdownMenuSeparator />
                           <DropdownMenuItem
                             asChild
                             onClick={(e) => {

@@ -36,7 +36,7 @@ export default async function AdminLayout({
   ]);
   return (
     <SidebarToggleProvider>
-      <SidebarPanelLayout {...texts} mappingKey={"admin"} authUser={user}>
+      <SidebarPanelLayout {...texts} mappingKey="admin" authUser={user}>
         <ArchiveQueueUpdateProvider authUser={user} texts={queueTexts}>
           {children}
         </ArchiveQueueUpdateProvider>

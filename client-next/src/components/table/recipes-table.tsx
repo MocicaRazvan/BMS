@@ -21,7 +21,7 @@ import {
   RecipeResponse,
   ResponseWithEntityCount,
 } from "@/types/dto";
-import { Suspense, useCallback, useMemo } from "react";
+import React, { Suspense, useCallback, useMemo } from "react";
 import { ColumnDef } from "@tanstack/react-table";
 import { format, parseISO } from "date-fns";
 import { Badge } from "@/components/ui/badge";
@@ -192,7 +192,18 @@ export default function RecipeTable({
             {recipeTableColumnsTexts.id}
           </p>
         ),
-        cell: ({ row }) => <p>{row.original.model.id}</p>,
+        cell: ({
+          row: {
+            original: {
+              model: { id },
+            },
+          },
+        }) => (
+          <OverflowTextTooltip
+            text={wrapItemToString(id)}
+            triggerClassName="w-10 max-w-10"
+          />
+        ),
       },
       {
         id: recipeTableColumnsTexts.title,

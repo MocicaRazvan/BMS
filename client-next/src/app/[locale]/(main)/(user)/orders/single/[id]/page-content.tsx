@@ -14,7 +14,7 @@ import { checkOwnerOrAdmin, isSuccessCheckReturn } from "@/lib/utils";
 import LoadingSpinner from "@/components/common/loading-spinner";
 import React, { useEffect, useState } from "react";
 import { fetchStream } from "@/lib/fetchers/fetchStream";
-import { Link, useRouter } from "@/navigation";
+import { Link } from "@/navigation";
 import { Button } from "@/components/ui/button";
 
 import { Card } from "@/components/ui/card";
@@ -43,7 +43,6 @@ export default function SingleOrderPageContent({
   const [invoice, setInvoice] = useState<CustomInvoiceDto | null>(null);
   const [isMounted, setIsMounted] = useState(false);
   const formatIntl = useFormatter();
-  const router = useRouter();
   const { navigateToNotFound } = useClientNotFound();
 
   useEffect(() => {
@@ -58,9 +57,8 @@ export default function SingleOrderPageContent({
     path: `/orders/${id}`,
     method: "GET",
     authToken: true,
-    useAbortController: false,
+    refetchOnFocus: false,
   });
-  console.log("HOOKS After useFetchStream for orders");
 
   const {
     messages: plans,
@@ -71,10 +69,9 @@ export default function SingleOrderPageContent({
       path: `/orders/subscriptionsByOrder/${id}`,
       method: "GET",
       authToken: true,
+      refetchOnFocus: false,
     },
   );
-  console.log("HOOKS After useFetchStream for plans");
-  console.log("HOOKS Before useEffect for invoice fetching");
 
   useEffect(() => {
     if (ordersAddress.length > 0) {
@@ -83,13 +80,11 @@ export default function SingleOrderPageContent({
         method: "GET",
         token: authUser.token,
         successCallback: (data) => {
-          // todo test
           setInvoice(data);
         },
       }).catch(() => navigateToNotFound());
     }
   }, [authUser.token, JSON.stringify(ordersAddress)]);
-  console.log("HOOKS After useEffect for invoice fetching");
 
   if (!isMounted) return null;
 

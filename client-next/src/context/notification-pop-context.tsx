@@ -20,8 +20,8 @@ import {
   BoughtPayloadStomp,
   useBoughtNotification,
 } from "@/context/bought-notification-context";
-import { useStompClient, useSubscription } from "react-stomp-hooks";
-import { usePathname, useRouter } from "@/navigation";
+import { useStompClient } from "react-stomp-hooks";
+import { usePathname } from "@/navigation";
 import {
   getApprovedNotificationTextsByItems,
   getBoughtNotificationTextsByItems,
@@ -36,10 +36,10 @@ import {
   ApproveRecipeNotificationResponse,
   BoughtNotificationResponse,
   ChatMessageNotificationResponse,
-  ConversationUserResponse,
   NotificationPlanResponse,
   NotificationPostResponse,
   NotificationRecipeResponse,
+  NotifyContainerAction,
   PlanResponse,
 } from "@/types/dto";
 import { NotificationPopTexts } from "@/components/nav/notification-pop";
@@ -47,6 +47,7 @@ import { Client } from "@stomp/stompjs";
 import { NotificationState } from "@/context/notification-template-context";
 import { useLocale } from "next-intl";
 import { WithUser } from "@/lib/user";
+import { useArchiveNotifications } from "@/context/archive-notifications-context";
 
 interface NotificationPopProviderProps {
   children: ReactNode;
@@ -158,6 +159,10 @@ interface NotificationPopContextType {
     "NEW_BOUGHT",
     BoughtNotificationResponse
   >;
+  archiveQueueNotifications: NotifyContainerAction[];
+  deleteArchiveNotification: (id: string) => void;
+  deleteManyArchiveNotifications: (ids: string[]) => void;
+  deleteAllArchiveNotifications: () => void;
 }
 export const NotificationPopContext =
   createContext<NotificationPopContextType | null>(null);
@@ -170,6 +175,13 @@ export function NotificationPopProvider({
 
   const [notificationPopTexts, setNotificationPopTexts] =
     useState<NotificationPopTexts | null>(null);
+
+  const {
+    notifications: archiveQueueNotifications,
+    deleteNotification: deleteArchiveNotification,
+    deleteAllNotifications: deleteAllArchiveNotifications,
+    deleteManyNotifications: deleteManyArchiveNotifications,
+  } = useArchiveNotifications(authUser);
 
   const [chatMessageNotificationTexts, setChatMessageNotificationTexts] =
     useState<Record<string, ChatMessageNotificationContentTexts> | null>(null);
@@ -261,18 +273,19 @@ export function NotificationPopProvider({
       totalPostNotifications +
       totalRecipeNotifications +
       totalPlanNotifications +
-      totalBoughtNotifications,
+      totalBoughtNotifications +
+      archiveQueueNotifications.length,
     [
       totalChatNotifications,
       totalPostNotifications,
       totalRecipeNotifications,
       totalPlanNotifications,
       totalBoughtNotifications,
+      archiveQueueNotifications.length,
     ],
   );
   const chatNotificationsGroupedBySender = getNotificationsGroupedBySender();
   const stompClient = useStompClient();
-  const router = useRouter();
   const { removeBySender } = useChatNotification();
   const pathName = usePathname();
 
@@ -436,6 +449,10 @@ export function NotificationPopProvider({
         getRecipeNotificationState,
         getPostNotificationState,
         getBoughtNotificationState,
+        archiveQueueNotifications,
+        deleteArchiveNotification,
+        deleteManyArchiveNotifications,
+        deleteAllArchiveNotifications,
       }}
     >
       {children}

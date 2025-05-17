@@ -1,7 +1,7 @@
 "use client";
 
 import * as TooltipPrimitive from "@radix-ui/react-tooltip";
-import { ComponentPropsWithoutRef, PropsWithChildren, useState } from "react";
+import { ComponentPropsWithoutRef, useState } from "react";
 import {
   Tooltip,
   TooltipContent,
@@ -33,21 +33,29 @@ export default function OverflowTextTooltip({
         <TooltipTrigger asChild>
           <p
             className={cn(
-              "max-w-16 text-nowrap overflow-x-hidden text-ellipsis",
+              "max-w-16 text-nowrap overflow-x-hidden text-ellipsis overflow-y-hidden",
               triggerClassName,
             )}
           >
             {text}
           </p>
         </TooltipTrigger>
-        <TooltipContent {...props}>
+        <TooltipContent
+          {...props}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+          }}
+        >
           <div className="flex items-center justify-around gap-2">
             <span className="max-w-56 text-wrap">{text}</span>
             <Button
               variant="outline"
               size="icon"
               className="h-7 w-7"
-              onClick={() => {
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
                 navigator.clipboard.writeText(text).then(() => {
                   setIsCopied(true);
                   setTimeout(() => setIsCopied(false), 1000);

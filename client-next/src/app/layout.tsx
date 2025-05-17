@@ -27,6 +27,7 @@ import { CacheProvider } from "@/providers/cache-provider";
 import { Metadata } from "next";
 import ChatConnectContext from "@/context/chat-connect-context";
 import { UmamiAnalytics } from "@/lib/umami-analytics";
+import ArchiveNotificationsProvider from "@/context/archive-notifications-context";
 
 const fontSans = FontSans({
   subsets: ["latin"],
@@ -128,26 +129,32 @@ export default async function BaseLayout({
                                 <BoughtNotificationProvider
                                   authUser={session?.user}
                                 >
-                                  <NotificationPopProvider
+                                  <ArchiveNotificationsProvider
                                     authUser={session?.user}
                                   >
-                                    <CartProvider authUser={session?.user}>
-                                      <SubscriptionProvider
-                                        authUser={session?.user}
-                                      >
-                                        <KanbanRouteChangeProvider>
-                                          <ChatConnectContext
-                                            authUser={session?.user}
-                                          >
-                                            <>
-                                              {children}
-                                              <AiChatBoxWrapper {...aiTexts} />
-                                            </>
-                                          </ChatConnectContext>
-                                        </KanbanRouteChangeProvider>
-                                      </SubscriptionProvider>
-                                    </CartProvider>
-                                  </NotificationPopProvider>
+                                    <NotificationPopProvider
+                                      authUser={session?.user}
+                                    >
+                                      <CartProvider authUser={session?.user}>
+                                        <SubscriptionProvider
+                                          authUser={session?.user}
+                                        >
+                                          <KanbanRouteChangeProvider>
+                                            <ChatConnectContext
+                                              authUser={session?.user}
+                                            >
+                                              <>
+                                                {children}
+                                                <AiChatBoxWrapper
+                                                  {...aiTexts}
+                                                />
+                                              </>
+                                            </ChatConnectContext>
+                                          </KanbanRouteChangeProvider>
+                                        </SubscriptionProvider>
+                                      </CartProvider>
+                                    </NotificationPopProvider>
+                                  </ArchiveNotificationsProvider>
                                 </BoughtNotificationProvider>
                               </PlanApproveNotificationProvider>
                             </RecipeApproveNotificationProvider>

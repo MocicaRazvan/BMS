@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mocicarazvan.archiveservice.dtos.enums.ContainerAction;
 import com.mocicarazvan.archiveservice.dtos.websocket.NotifyContainerAction;
 import com.mocicarazvan.archiveservice.repositories.ContainerNotifyRepository;
+import com.mocicarazvan.archiveservice.services.ContainerActionPublisher;
 import com.mocicarazvan.archiveservice.services.ContainerNotify;
 import com.mocicarazvan.archiveservice.services.SimpleRedisCache;
 import com.mocicarazvan.archiveservice.websocket.BatchHandler;
@@ -23,14 +24,16 @@ public class ContainerNotifyImpl implements ContainerNotify {
     private final ReactiveRedisTemplate<String, String> redisTemplate;
     private final SimpleRedisCache simpleRedisCache;
     private final ContainerNotifyRepository containerNotifyRepository;
+    private final ContainerActionPublisher containerActionPublisher;
 
     public ContainerNotifyImpl(
             ObjectMapper objectMapper, ReactiveRedisTemplate<String, String> redisTemplate, SimpleRedisCache simpleRedisCache,
-            ContainerNotifyRepository containerNotifyRepository) {
+            ContainerNotifyRepository containerNotifyRepository, ContainerActionPublisher containerActionPublisher) {
         this.objectMapper = objectMapper;
         this.redisTemplate = redisTemplate;
         this.simpleRedisCache = simpleRedisCache;
         this.containerNotifyRepository = containerNotifyRepository;
+        this.containerActionPublisher = containerActionPublisher;
     }
 
     @Override
@@ -66,7 +69,8 @@ public class ContainerNotifyImpl implements ContainerNotify {
                         .build())
                 .flatMap(ca -> Mono.zip(Mono.fromCallable(() ->
                                         objectMapper.writeValueAsString(ca)),
-                                containerNotifyRepository.addNotification(ca)
+                                containerNotifyRepository.addNotification(ca),
+                                containerActionPublisher.sendContainerActionMessage(ca)
                         ).map(Tuple2::getT1)
                 )
                 .flatMap(json -> redisTemplate.convertAndSend(BatchHandler.getChannelName(), json))

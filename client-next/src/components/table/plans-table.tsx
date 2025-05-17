@@ -23,7 +23,7 @@ import {
   PlanResponse,
   ResponseWithEntityCount,
 } from "@/types/dto";
-import { Suspense, useCallback, useMemo } from "react";
+import React, { Suspense, useCallback, useMemo } from "react";
 import { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "@/components/ui/badge";
 import { format, parseISO } from "date-fns";
@@ -233,7 +233,18 @@ export default function PlansTable({
             {planTableColumnsTexts.id}
           </p>
         ),
-        cell: ({ row }) => <p>{row.original.model.id}</p>,
+        cell: ({
+          row: {
+            original: {
+              model: { id },
+            },
+          },
+        }) => (
+          <OverflowTextTooltip
+            text={wrapItemToString(id)}
+            triggerClassName="w-10 max-w-10"
+          />
+        ),
       },
       {
         id: planTableColumnsTexts.title,
@@ -758,11 +769,11 @@ export default function PlansTable({
               "#vegetarian": (r) => (r.model.type === "VEGETARIAN" ? 1 : 0),
               ["#" + planTableColumnsTexts.approved.header]: (p) =>
                 Number(p.model.approved),
-              [planTableColumnsTexts.count + " / 10"]: (p) => p.count / 10,
+              [planTableColumnsTexts.count + " / 100"]: (p) => p.count / 100,
               [planTableColumnsTexts.count +
               " * " +
               planTableColumnsTexts.price +
-              " / 100"]: (p) => (p.count * p.model.price) / 100,
+              " / 1000"]: (p) => (p.count * p.model.price) / 1000,
             },
             dateField: "model.createdAt",
           }}

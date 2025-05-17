@@ -34,6 +34,7 @@ import {
   RadialBarChart,
 } from "recharts";
 import { WithUser } from "@/lib/user";
+import OverflowTextTooltip from "@/components/common/overflow-text-tooltip";
 
 export interface TopPlansTexts {
   topChartWrapperTexts: TopChartWrapperTexts;
@@ -135,7 +136,10 @@ const PlanCard = memo(({ topSummary, texts, authUser }: PlanCardProps) => {
               className="hover:underline flex items-center justify-center gap-2"
             >
               <p>{texts.planAntet}</p>
-              <p>{plan.title}</p>
+              <OverflowTextTooltip
+                text={plan.title}
+                triggerClassName="max-w-[125px] sm:max-w-[230px] lg:max-w-[400px]"
+              />
             </Link>
           </CardTitle>
           <TopRankBadge rank={topSummary.rank} rankLabel={texts.rankLabel} />

@@ -378,7 +378,7 @@ public class SummaryServiceImpl implements SummaryService {
                     .map(r -> TopTrainersSummaryResponse.fromR2dbc(r, objectMapper));
         }
 
-        @RedisReactiveChildCache(key = OrderCacheKeys.CACHE_KEY_PATH, idPath = "id")
+        @RedisReactiveChildCache(key = OrderCacheKeys.CACHE_KEY_PATH, idPath = "17L * 31 + id.hashCode() + Long.hashCode(T(java.lang.Double).doubleToLongBits(value)) + Long.hashCode(T(java.lang.Double).doubleToLongBits(maxGroupTotal))")
         public Flux<CountryOrderSummary> getOrdersSummaryByCountryBase(CountrySummaryType type, LocalDate from, LocalDate to) {
 
             return

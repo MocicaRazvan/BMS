@@ -741,7 +741,8 @@
         "posts": "Posts",
         "recipes": "Recipes",
         "plans": "Plans",
-        "bought": "Sold Plans"
+        "bought": "Sold Plans",
+        "archive": "Archive Queues"
       },
       "CartPopsTexts": {
         "undo": "Undo",

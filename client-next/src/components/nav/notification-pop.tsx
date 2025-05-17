@@ -28,6 +28,7 @@ import ApproveNotificationContent from "@/components/nav/approve-notifications-c
 
 import BoughtNotificationContent from "@/components/nav/bought-notification-content";
 import { useNotificationPop } from "@/context/notification-pop-context";
+import ArchiveQueueNotificationContent from "@/components/nav/archive-queue-notification-content";
 
 interface NotificationPopProps {
   authUser: NonNullable<Session["user"]>;
@@ -39,6 +40,7 @@ enum ACCORDION_ITEMS {
   RECIPES = "recipes",
   PLANS = "plans",
   BOUGHT = "bought",
+  ARCHIVE = "archive",
 }
 
 type AccordionsState = Record<ACCORDION_ITEMS, ACCORDION_ITEMS | "">;
@@ -48,6 +50,7 @@ const initialAccordionsState: AccordionsState = {
   [ACCORDION_ITEMS.RECIPES]: "",
   [ACCORDION_ITEMS.PLANS]: "",
   [ACCORDION_ITEMS.BOUGHT]: "",
+  [ACCORDION_ITEMS.ARCHIVE]: "",
 };
 
 export interface NotificationPopTexts {
@@ -62,6 +65,7 @@ export interface NotificationPopTexts {
   recipes: string;
   plans: string;
   bought: string;
+  archive: string;
 }
 
 export default function NotificationPop({ authUser }: NotificationPopProps) {
@@ -73,12 +77,9 @@ export default function NotificationPop({ authUser }: NotificationPopProps) {
   const {
     chatMessageNotificationTexts,
     chatNotificationsGroupedBySender,
-    notificationPopTexts,
-    setNotificationPopTexts,
     boughtNotificationTexts,
-    setBoughtNotificationTexts,
+    notificationPopTexts,
     postMessageNotificationsTexts,
-    setPostMessageNotificationsTexts,
     recipeMessageNotificationsTexts,
     clearRecipeNotifications,
     planMessageNotificationsTexts,
@@ -96,16 +97,13 @@ export default function NotificationPop({ authUser }: NotificationPopProps) {
     removePostNotificationByAppId,
     removeRecipeNotificationByAppId,
     totalNotifications,
-    removeBySender,
-    setChatMessageNotificationTexts,
-    setPlanMessageNotificationsTexts,
-    setRecipeMessageNotificationsTexts,
     stompClient,
-    pathName,
     getPlanNotificationState,
     getRecipeNotificationState,
     getPostNotificationState,
     getBoughtNotificationState,
+    archiveQueueNotifications,
+    deleteAllArchiveNotifications,
   } = useNotificationPop();
 
   useEffect(() => {
@@ -132,7 +130,7 @@ export default function NotificationPop({ authUser }: NotificationPopProps) {
       open={isAccordionOpen}
       onOpenChange={(v) => setIsAccordionOpen(v)}
     >
-      <DropdownMenuTrigger asChild>
+      <DropdownMenuTrigger asChild disabled={totalNotifications === 0}>
         <div className="relative">
           <TooltipProvider disableHoverableContent>
             <Tooltip>
@@ -160,7 +158,7 @@ export default function NotificationPop({ authUser }: NotificationPopProps) {
         </div>
       </DropdownMenuTrigger>
       {totalNotifications > 0 && (
-        <DropdownMenuContent className={"max-w-[460px] w-screen p-4 ps-5"}>
+        <DropdownMenuContent className="max-w-[460px] w-screen p-4 ps-5 resize-y min-h-[140px] max-h-[75vh] overflow-y-auto">
           <div className=" mb-4 space-y-4 w-full">
             <div className="space-y-1">
               <h3 className="text-xl font-semibold">
@@ -197,6 +195,8 @@ export default function NotificationPop({ authUser }: NotificationPopProps) {
                       stompClient,
                       receiverEmail: authUser.email,
                     });
+
+                    deleteAllArchiveNotifications();
                   }
                 }}
               >
@@ -445,7 +445,6 @@ export default function NotificationPop({ authUser }: NotificationPopProps) {
                     }
                   >
                     <AccordionItem value={ACCORDION_ITEMS.PLANS}>
-                      {" "}
                       <div className="flex items-center justify-between gap-14 w-full">
                         <div className="w-1/2">
                           <AccordionTrigger className="hover:no-underline group">
@@ -507,7 +506,6 @@ export default function NotificationPop({ authUser }: NotificationPopProps) {
                     }
                   >
                     <AccordionItem value={ACCORDION_ITEMS.BOUGHT}>
-                      {" "}
                       <div className="flex items-center justify-between gap-14 w-full">
                         <div className="w-1/2">
                           <AccordionTrigger className="hover:no-underline group">
@@ -546,6 +544,56 @@ export default function NotificationPop({ authUser }: NotificationPopProps) {
                           deleteCallback={removeNotificationBought}
                           itemsText={boughtNotificationTexts}
                         />
+                      </AccordionContent>
+                    </AccordionItem>
+                  </Accordion>
+                )}
+              {archiveQueueNotifications.length > 0 &&
+                authUser?.role === "ROLE_ADMIN" && (
+                  <Accordion
+                    type={"single"}
+                    collapsible
+                    value={accordionsState.archive}
+                    onValueChange={(v) =>
+                      setAccordionsState(
+                        (prev) =>
+                          ({
+                            ...prev,
+                            archive: v,
+                          }) as AccordionsState,
+                      )
+                    }
+                  >
+                    <AccordionItem value={ACCORDION_ITEMS.ARCHIVE}>
+                      <div className="flex items-center justify-between gap-14 w-full">
+                        <div className="w-1/2">
+                          <AccordionTrigger className="hover:no-underline group">
+                            <div className="flex justify-start items-center gap-3 ">
+                              <h4 className="font-bold group-hover:underline">
+                                {notificationPopTexts.archive}
+                              </h4>
+                              <Badge
+                                variant={"destructive"}
+                                className="hover:bg-destructive hover:!no-underline"
+                              >
+                                {archiveQueueNotifications.length}
+                              </Badge>
+                            </div>
+                          </AccordionTrigger>
+                        </div>
+                        <Button
+                          variant="outline"
+                          size={"icon"}
+                          className="border-destructive text-destructive w-10 h-10"
+                          onClick={() => {
+                            deleteAllArchiveNotifications();
+                          }}
+                        >
+                          <Trash2 size={18} />
+                        </Button>
+                      </div>
+                      <AccordionContent className=" p-2">
+                        <ArchiveQueueNotificationContent authUser={authUser} />
                       </AccordionContent>
                     </AccordionItem>
                   </Accordion>

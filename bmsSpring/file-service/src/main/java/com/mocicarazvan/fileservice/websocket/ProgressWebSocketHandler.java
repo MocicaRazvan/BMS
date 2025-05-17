@@ -33,7 +33,7 @@ public class ProgressWebSocketHandler implements WebSocketHandler {
     @Override
     public Mono<Void> handle(WebSocketSession session) {
         // Extract clientId from the path
-        String clientId = session.getHandshakeInfo().getUri().getPath().split("/ws/progress/")[1];
+        String clientId = extractClientIdFromPath(session.getHandshakeInfo().getUri().getPath());
 
         String stringFileType = UriComponentsBuilder.fromUri(session.getHandshakeInfo().getUri())
                 .build()
@@ -48,13 +48,13 @@ public class ProgressWebSocketHandler implements WebSocketHandler {
         String key = clientId + "-" + fileType;
 
         Mono<Void> sendPing = session.send(
-                Flux.interval(Duration.ofSeconds(5), Duration.ofSeconds(5))
-                        .map(_ -> session.pingMessage(_ -> session.bufferFactory().allocateBuffer(1))));
+                        Flux.interval(Duration.ofSeconds(5), Duration.ofSeconds(5))
+                                .map(_ -> session.pingMessage(_ -> session.bufferFactory().allocateBuffer(1))))
+                .onErrorResume(_ ->
+                        session.close()
+                );
+        ;
 
-//        return redisTemplate.listenToChannel(key)
-//                .map(ReactiveSubscription.Message::getMessage)
-//                .flatMap(message -> session.send(Mono.just(session.textMessage(message))))
-//                .takeUntilOther(session.receive()).then();
 
         Flux<WebSocketMessage> outboundMessages = redisTemplate.listenToChannel(key)
                 .map(ReactiveSubscription.Message::getMessage)
@@ -77,7 +77,11 @@ public class ProgressWebSocketHandler implements WebSocketHandler {
                             .build()
             );
             redisTemplate.convertAndSend(key, message)
-                    .subscribe();
+                    .subscribe(
+                            _ -> {
+                            },
+                            error -> log.error("Error sending message to Redis: {}", error.getMessage())
+                    );
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
@@ -99,6 +103,20 @@ public class ProgressWebSocketHandler implements WebSocketHandler {
             e.printStackTrace();
         }
 
+    }
+
+    private String extractClientIdFromPath(String path) {
+        String prefix = "/ws/progress/";
+        if (path == null || !path.contains(prefix)) {
+            return null;
+        }
+
+        String[] parts = path.split(prefix, 2);
+        if (parts.length < 2 || parts[1].isEmpty()) {
+            return null;
+        }
+
+        return parts[1].split("/")[0];
     }
 
 

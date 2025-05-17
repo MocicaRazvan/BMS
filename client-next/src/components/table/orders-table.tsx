@@ -6,7 +6,7 @@ import { WithUser } from "@/lib/user";
 import { Link, useRouter } from "@/navigation";
 import { useFormatter } from "next-intl";
 import { CustomEntityModel, OrderDtoWithAddress } from "@/types/dto";
-import { Suspense, useCallback, useMemo, useState } from "react";
+import React, { Suspense, useCallback, useMemo, useState } from "react";
 import { ColumnDef } from "@tanstack/react-table";
 import { ColumnActionsTexts } from "@/texts/components/table";
 import { orderColumnActions } from "@/lib/constants";
@@ -33,6 +33,7 @@ import {
   RadioSortButton,
   RadioSortDropDownWithExtra,
 } from "@/components/common/radio-sort";
+import OverflowTextTooltip from "@/components/common/overflow-text-tooltip";
 
 export interface OrderTableColumnsTexts {
   id: string;
@@ -189,6 +190,18 @@ export default function OrdersTable({
           <p className="font-bold text-lg text-left">
             {orderTableColumnsTexts.id}
           </p>
+        ),
+        cell: ({
+          row: {
+            original: {
+              order: { id },
+            },
+          },
+        }) => (
+          <OverflowTextTooltip
+            text={wrapItemToString(id)}
+            triggerClassName="w-10 max-w-10"
+          />
         ),
       },
       {

@@ -17,7 +17,7 @@ import {
   IngredientNutritionalFactResponse,
   ResponseWithEntityCount,
 } from "@/types/dto";
-import { Suspense, useCallback, useMemo } from "react";
+import React, { Suspense, useCallback, useMemo } from "react";
 import { ColumnDef } from "@tanstack/react-table";
 import { DataTable, DataTableTexts } from "@/components/table/data-table";
 import LoadingSpinner from "@/components/common/loading-spinner";
@@ -204,7 +204,20 @@ export default function IngredientsTable({
             {ingredientTableColumnTexts.id}
           </p>
         ),
-        cell: ({ row }) => <p>{row.original.model.ingredient.id}</p>,
+        cell: ({
+          row: {
+            original: {
+              model: {
+                ingredient: { id },
+              },
+            },
+          },
+        }) => (
+          <OverflowTextTooltip
+            text={wrapItemToString(id)}
+            triggerClassName="w-10 max-w-10"
+          />
+        ),
       },
       {
         id: ingredientTableColumnTexts.name,

@@ -36,11 +36,11 @@ function ApproveNotificationContent<
   const locale = useLocale();
   const stompClient = useStompClient();
   return items.map((item, i) => {
-    const content = JSON.parse(item?.content);
+    // const content = JSON.parse(item?.content);
     return (
       <div
         className="grid gap-4 cursor-pointer hover:bg-accent p-2 rounded transition-all hover:shadow-lg hover:scale-[1.02] mb-3"
-        key={item?.reference?.appId + i}
+        key={item?.reference?.appId + item?.type + itemName}
         onClick={() => {
           if (stompClient && stompClient?.connected) {
             deleteCallback(item?.reference?.appId, stompClient);

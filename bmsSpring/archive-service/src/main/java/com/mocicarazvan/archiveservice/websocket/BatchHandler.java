@@ -2,6 +2,7 @@ package com.mocicarazvan.archiveservice.websocket;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mocicarazvan.archiveservice.utils.WebsocketUtils;
 import com.mocicarazvan.archiveservice.validators.QueueNameValidator;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -14,8 +15,6 @@ import org.springframework.web.reactive.socket.WebSocketMessage;
 import org.springframework.web.reactive.socket.WebSocketSession;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
-import java.time.Duration;
 
 @Slf4j
 @Component
@@ -31,9 +30,7 @@ public class BatchHandler implements WebSocketHandler {
     @Override
     public Mono<Void> handle(WebSocketSession session) {
 
-        Mono<Void> sendPing = session.send(
-                Flux.interval(Duration.ofSeconds(5), Duration.ofSeconds(5))
-                        .map(_ -> session.pingMessage(_ -> session.bufferFactory().allocateBuffer(1))));
+        Mono<Void> sendPing = WebsocketUtils.getPingMessage(session);
 
         Flux<WebSocketMessage> outboundMessages = redisTemplate.listenToChannel(CHANNEL_PREFIX)
                 .map(ReactiveSubscription.Message::getMessage)

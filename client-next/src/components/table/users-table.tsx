@@ -4,7 +4,7 @@ import useList, { UseListProps } from "@/hoooks/useList";
 import { WithUser } from "@/lib/user";
 import { Link, useRouter } from "@/navigation";
 import { CustomEntityModel, UserDto } from "@/types/dto";
-import { Suspense, useCallback, useMemo } from "react";
+import React, { Suspense, useCallback, useMemo } from "react";
 import { ColumnDef } from "@tanstack/react-table";
 import {
   DropdownMenu,
@@ -212,6 +212,16 @@ export default function UsersTable({
           <p className="font-bold text-lg text-left">
             {userTableColumnsTexts.id}
           </p>
+        ),
+        cell: ({
+          row: {
+            original: { id },
+          },
+        }) => (
+          <OverflowTextTooltip
+            text={wrapItemToString(id)}
+            triggerClassName="w-10 max-w-10"
+          />
         ),
       },
       {
@@ -512,7 +522,6 @@ export default function UsersTable({
                         successCallback={refetch}
                         authUser={authUser}
                         buttonProps={{
-                          size: "sm",
                           className:
                             "border-destructive text-destructive w-full",
                           variant: "outline",
@@ -527,8 +536,8 @@ export default function UsersTable({
                     <DropdownMenuSeparator />
                     <DropdownMenuItem asChild>
                       <Button
-                        variant="outlineSuccess"
-                        className="w-full"
+                        variant="outline"
+                        className="border-success text-success w-full"
                         onClick={() => handleStartChat(user)}
                       >
                         {startChat}

@@ -23,8 +23,7 @@ export const PlanImageOverlay = (
       <div
         className={cn(
           ` bg-${colorMap[item.model.content.type]} text-${colorMap[item.model.content.type]}-foreground rounded-full font-bold w-fit text-lg
-            p-1
-            `,
+            py-1 px-1.5`,
         )}
       >
         {item.model.content.type}

@@ -27,7 +27,6 @@ import {
   SetStateAction,
   useEffect,
   useMemo,
-  useRef,
   useState,
 } from "react";
 import { PageInfo } from "@/types/dto";
@@ -434,7 +433,7 @@ export function DataTable<TData extends Record<string, any>, TValue>({
               <TableRow>
                 <TableCell
                   colSpan={finalColumns.length}
-                  className="h-24 text-center"
+                  className="h-24 text-center text-lg font-semibold"
                 >
                   {noResults}
                 </TableCell>
@@ -471,8 +470,10 @@ export function DataTable<TData extends Record<string, any>, TValue>({
               }}
               {...chartProps}
             />
-          ) : (
+          ) : !isFinished ? (
             <Skeleton className="h-full w-full" />
+          ) : (
+            <></>
           )}
         </div>
       )}

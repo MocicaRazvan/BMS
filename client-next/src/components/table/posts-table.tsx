@@ -160,6 +160,16 @@ export default function PostsTable({
             {postTableColumnsTexts.id}
           </p>
         ),
+        cell: ({
+          row: {
+            original: { id },
+          },
+        }) => (
+          <OverflowTextTooltip
+            text={wrapItemToString(id)}
+            triggerClassName="w-10 max-w-10"
+          />
+        ),
       },
       {
         id: postTableColumnsTexts.title,

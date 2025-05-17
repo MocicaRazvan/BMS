@@ -46,6 +46,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
+import OverflowTextTooltip from "@/components/common/overflow-text-tooltip";
 
 export interface TopTrainersTexts {
   trainerCardTexts: TrainerCardTexts;
@@ -157,7 +158,10 @@ const TrainerCard = memo(
                 className="hover:underline flex items-center justify-center gap-2"
               >
                 <p>{userAntent}</p>
-                <p>{user.email}</p>
+                <OverflowTextTooltip
+                  text={user.email}
+                  triggerClassName="max-w-[125px] sm:max-w-[140px] md:max-w-[225px] lg:max-w-[400px]"
+                />
               </Link>
             </CardTitle>
             <TopRankBadge rank={topSummary.rank} rankLabel={rankLabel} />

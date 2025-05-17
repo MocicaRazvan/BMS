@@ -138,7 +138,7 @@ public class OrderServiceImpl implements OrderService {
                             .setClientReferenceId(customer.getEmail())
                             .setBillingAddressCollection(SessionCreateParams.BillingAddressCollection.REQUIRED)
                             .putAllMetadata(metadata)
-
+                            
                             .setInvoiceCreation(SessionCreateParams.InvoiceCreation.builder().setEnabled(true)
                                     .build());
 
@@ -382,7 +382,7 @@ public class OrderServiceImpl implements OrderService {
         }
 
         // Handle the event
-        System.out.println("Checkout Session completed for customer: " + customerEmail);
+//        System.out.println("Checkout Session completed for customer: " + customerEmail);
 //        System.out.println("Line Item IDs: " + lineItemIds);
 
         Session.CustomerDetails customerDetails = session.getCustomerDetails();

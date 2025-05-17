@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import useWebSocket from "react-use-websocket";
 
 interface ProgressUpdateDto {
@@ -18,7 +18,7 @@ const useProgressWebSocket = (
 
   const wsUrl = `${process.env.NEXT_PUBLIC_SPRING_CLIENT_WEBSOCKET}/files/ws/progress/${clientId}`;
 
-  const { sendMessage, lastMessage, readyState } = useWebSocket(wsUrl, {
+  const { sendMessage, readyState } = useWebSocket(wsUrl, {
     queryParams: {
       // authToken,
       fileType,
@@ -32,18 +32,17 @@ const useProgressWebSocket = (
     onError: (error) => {
       console.error("useProgressWebSocket WebSocket error:", error);
     },
-    shouldReconnect: (closeEvent) => true,
-  });
-
-  useEffect(() => {
-    if (lastMessage !== null) {
-      const message: ProgressUpdateDto = JSON.parse(lastMessage.data);
-      console.log("useProgressWebSocketData", message);
-      if (message.index >= 0) {
-        setMessages((prevMessages) => [...prevMessages, message]);
+    shouldReconnect: (_) => true,
+    onMessage: (lastMessage) => {
+      if (lastMessage !== null) {
+        const message: ProgressUpdateDto = JSON.parse(lastMessage.data);
+        console.log("useProgressWebSocketData", message);
+        if (message.index >= 0) {
+          setMessages((prevMessages) => [...prevMessages, message]);
+        }
       }
-    }
-  }, [lastMessage]);
+    },
+  });
 
   return { messages, sendMessage, readyState };
 };

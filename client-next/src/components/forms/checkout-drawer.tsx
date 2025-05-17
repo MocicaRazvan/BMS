@@ -127,7 +127,6 @@ export default function CheckoutDrawer({
           method: "POST",
         });
         if (messages.length > 0) {
-          console.log(messages[0]);
           window.location.href = messages[0].url;
           clearCartForUser();
           form.reset();

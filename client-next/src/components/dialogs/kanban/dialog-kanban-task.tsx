@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { memo, useCallback, useEffect, useRef, useState } from "react";
+import { memo, useCallback, useRef, useState } from "react";
 import { isDeepEqual } from "@/lib/utils";
 import { CirclePlus, FilePen } from "lucide-react";
 import {
@@ -105,14 +105,6 @@ function DialogKanbanTask({
     ],
   );
 
-  useEffect(() => {
-    if (textAreaRef.current && task && task.content) {
-      const length = task.content.length;
-      textAreaRef.current.setSelectionRange(length, length);
-      textAreaRef.current.focus();
-    }
-  }, [task, textAreaRef.current]);
-
   return (
     <Dialog
       open={isOpen}
@@ -131,12 +123,21 @@ function DialogKanbanTask({
             <CirclePlus /> {addTask}
           </Button>
         ) : (
-          <Button size={"icon"} variant={"ghost"}>
-            <FilePen className="h-4 w-4" />{" "}
+          <Button size="icon" variant="ghost">
+            <FilePen className="h-4 w-4" />
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[570px]">
+      <DialogContent
+        className="sm:max-w-[570px]"
+        onOpenAutoFocus={(event) => {
+          event.preventDefault();
+          if (!textAreaRef.current) return;
+          const len = task?.content?.length ?? 0;
+          textAreaRef.current.setSelectionRange(len, len);
+          textAreaRef.current.focus();
+        }}
+      >
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>{description} </DialogDescription>
@@ -166,14 +167,10 @@ function DialogKanbanTask({
               value={taskType}
               onValueChange={(value) => setTaskType(value as KanbanTaskType)}
             >
-              <SelectTrigger
-                id={"type"}
-                className="col-span-3"
-                value={taskType}
-              >
+              <SelectTrigger id="type" className="col-span-3" value={taskType}>
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent id={"type"}>
+              <SelectContent id="type_content">
                 <SelectGroup>
                   <SelectItem className="cursor-pointer" value="LOW">
                     {types.LOW}
@@ -204,4 +201,4 @@ function DialogKanbanTask({
   );
 }
 
-export default memo(DialogKanbanTask, (p, n) => isDeepEqual(p, n));
+export default memo(DialogKanbanTask, isDeepEqual);

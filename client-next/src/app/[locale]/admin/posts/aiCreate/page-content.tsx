@@ -172,8 +172,7 @@ export default function AdminAIPostsCreateContent({
     },
     [setCurrentStatus],
   );
-  //realistic, chicken with salad and tomatoes
-  //Make it about nutrition healthy earthing and having fun while being healthy
+
   const form = useForm<AdminAICreatePostSchemaType>({
     resolver: zodResolver(schema),
     defaultValues: {
@@ -415,7 +414,9 @@ export default function AdminAIPostsCreateContent({
                     <SelectContent>
                       {numberOfPostsOptions.map((n) => (
                         <Fragment key={n + " selectnop"}>
-                          <SelectItem value={`${n}`}>{n}</SelectItem>
+                          <SelectItem value={`${n}`} className="cursor-pointer">
+                            {n}
+                          </SelectItem>
                         </Fragment>
                       ))}
                     </SelectContent>

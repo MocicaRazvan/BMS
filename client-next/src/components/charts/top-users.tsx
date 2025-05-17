@@ -36,6 +36,7 @@ import TopChartWrapper, {
   TopChartWrapperTexts,
   TopRankBadge,
 } from "@/components/charts/top-chart-wrapper";
+import OverflowTextTooltip from "@/components/common/overflow-text-tooltip";
 
 const createChartData = <T extends string | number | symbol>(
   plansMessages: PageableResponse<CustomEntityModel<PlanResponse>>[],
@@ -200,7 +201,10 @@ const UserCard = memo(
                 className="hover:underline flex items-center justify-center gap-2"
               >
                 <p>{userAntent}</p>
-                <p>{user.email}</p>
+                <OverflowTextTooltip
+                  text={user.email}
+                  triggerClassName="max-w-[125px] sm:max-w-[140px] md:max-w-[225px] lg:max-w-[400px]"
+                />
               </Link>
             </CardTitle>
             <TopRankBadge rank={topSummary.rank} rankLabel={rank} />

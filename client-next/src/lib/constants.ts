@@ -1,5 +1,6 @@
 import { Option } from "@/components/ui/multiple-selector";
 import { SortingOption } from "@/components/list/grid-list";
+import { ContainerAction } from "@/types/dto";
 
 export const MX_SPRING_MESSAGE = "does not have a valid MX record" as const;
 export const GOOGLE_STATE_COOKIE_NAME = "googleState";
@@ -217,3 +218,8 @@ export const NEXT_CSRF_COOKIES = [
 export const NEXT_CSRF_HEADER_TOKEN = "x-csrf-token" as const;
 
 export const NEXT_CSRF_HEADER = "x-csrf-header" as const;
+export const containerActionColors = {
+  [ContainerAction.START_CRON]: "amber",
+  [ContainerAction.STOP]: "destructive",
+  [ContainerAction.START_MANUAL]: "success",
+};

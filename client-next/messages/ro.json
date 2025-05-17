@@ -741,7 +741,8 @@
         "posts": "Postări",
         "recipes": "Rețete",
         "plans": "Planuri",
-        "bought": "Planuri vândute"
+        "bought": "Planuri vândute",
+        "archive": "Cozile de arhivare"
       },
       "CartPopsTexts": {
         "undo": "Anulează",

@@ -111,37 +111,13 @@ interface Props {
   authUser: Session["user"];
   texts: ArchiveQueueUpdateTexts;
 }
+const wsUrl = `${process.env.NEXT_PUBLIC_SPRING_CLIENT_WEBSOCKET}/archive/queue/batch/update`;
 
 export default function ArchiveQueueUpdateProvider({
   authUser,
   children,
   texts,
 }: PropsWithChildren<Props>) {
-  const wsUrl =
-    authUser?.role === "ROLE_ADMIN"
-      ? `${process.env.NEXT_PUBLIC_SPRING_CLIENT_WEBSOCKET}/archive/queue/batch/update`
-      : null;
-  const { lastMessage, readyState } = useWebSocket(wsUrl, {
-    shouldReconnect: (_) => true,
-    queryParams: {
-      // authToken,
-    },
-    share: true,
-  });
-  const lastProcessedMessageId = useRef<string | null>(null);
-  const [batchUpdateMessages, setBatchUpdateMessages] = useState<
-    Record<
-      ArchiveQueue,
-      {
-        count: number;
-        finished: boolean;
-      }
-    >
-  >(initialBatchUpdate);
-  const [actions, setActions] =
-    useState<Record<ArchiveQueue, ContainerAction | undefined>>(initialActions);
-  const prevActionsState = useRef(actions);
-
   const handleLastMessageUpdate = useCallback((msg: unknown) => {
     if (isNotifyBatchUpdate(msg)) {
       setBatchUpdateMessages((prev) => ({
@@ -166,16 +142,42 @@ export default function ArchiveQueueUpdateProvider({
     }
   }, []);
 
-  useEffect(() => {
-    if (lastMessage) {
-      const parsedMessage = JSON.parse(lastMessage.data);
-      console.log("parsedMessage", parsedMessage);
-      if (parsedMessage?.id !== lastProcessedMessageId.current) {
-        lastProcessedMessageId.current = parsedMessage.id;
-        handleLastMessageUpdate(parsedMessage);
+  const lastProcessedMessageId = useRef<string | null>(null);
+
+  const { lastMessage, readyState } = useWebSocket(
+    wsUrl,
+    {
+      shouldReconnect: (_) => true,
+      queryParams: {
+        // authToken,
+      },
+      share: true,
+      onMessage: (msg) => {
+        if (msg !== null) {
+          const parsedMessage = JSON.parse(msg.data);
+          console.log("parsedMessage", parsedMessage);
+          if (parsedMessage?.id !== lastProcessedMessageId.current) {
+            lastProcessedMessageId.current = parsedMessage.id;
+            handleLastMessageUpdate(parsedMessage);
+          }
+        }
+      },
+    },
+    authUser?.role === "ROLE_ADMIN",
+  );
+
+  const [batchUpdateMessages, setBatchUpdateMessages] = useState<
+    Record<
+      ArchiveQueue,
+      {
+        count: number;
+        finished: boolean;
       }
-    }
-  }, [lastMessage, handleLastMessageUpdate]);
+    >
+  >(initialBatchUpdate);
+  const [actions, setActions] =
+    useState<Record<ArchiveQueue, ContainerAction | undefined>>(initialActions);
+  const prevActionsState = useRef(actions);
 
   const getBatchUpdates = useCallback(
     (q: ArchiveQueue) => batchUpdateMessages[q],

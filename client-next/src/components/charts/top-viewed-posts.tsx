@@ -28,6 +28,7 @@ import {
 } from "@/components/ui/date-range-picker";
 import { format, subMonths } from "date-fns";
 import { ro } from "date-fns/locale";
+import OverflowTextTooltip from "@/components/common/overflow-text-tooltip";
 
 export interface TopViewedPostsTexts extends PostViewCardTexts {
   title: string;
@@ -104,7 +105,7 @@ export default function TopViewedPosts({ path, authUser, texts }: Props) {
       <h2 className="text-2xl lg:text-3xl font-bold tracking-tight capitalize inline ">
         {texts.title}
       </h2>
-      <div className="flex items-center justify-around w-full mt-2 mb-12">
+      <div className="flex flex-col md:flex-row gap-5 items-center justify-around w-full mt-2 mb-12">
         <div className="flex items-center gap-2">
           <Label className="text-lg font-semibold">{texts.periodLabel}</Label>
           {dateRangePicker}
@@ -207,9 +208,12 @@ function PostViewCard({ postSummary, authUser, texts }: PostViewProps) {
         <CardTitle>
           <Link
             href={postLink}
-            className="hover:underline flex items-center justify-center gap-2"
+            className="hover:underline flex items-center justify-center gap-2 pb-1"
           >
-            <p className="line-clamp-2">{postSummary.title}</p>
+            <OverflowTextTooltip
+              text={postSummary.title}
+              triggerClassName="max-w-[230px] md:max-w-[400px]"
+            />
           </Link>
         </CardTitle>
       </CardHeader>

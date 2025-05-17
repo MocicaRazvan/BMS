@@ -1,21 +1,22 @@
 "use client";
 import {
+  Column,
   ColumnDef,
+  FilterFn,
   flexRender,
   getCoreRowModel,
   getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
-  Table as TableType,
-  useReactTable,
-  FilterFn,
   SortingFn,
   sortingFns,
+  Table as TableType,
+  useReactTable,
 } from "@tanstack/react-table";
 import {
+  compareItems,
   RankingInfo,
   rankItem,
-  compareItems,
 } from "@tanstack/match-sorter-utils";
 import {
   Select,
@@ -26,7 +27,6 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { ArrowDown, ArrowUpDown, Download } from "lucide-react";
-import { Column } from "@tanstack/react-table";
 import { useMemo, useState } from "react";
 import useExportTable from "@/hoooks/table/use-export-table";
 import { ContainerAction, NotifyContainerAction } from "@/types/dto";
@@ -71,6 +71,7 @@ import { useTableSearchParams } from "tanstack-table-search-params";
 import { useSearchParams } from "next/navigation";
 import { usePathname } from "@/navigation";
 import { stripNonAlphaNumeric } from "@/lib/utils";
+import { containerActionColors } from "@/lib/constants";
 
 const MotionTableRow = motion(TableRow);
 
@@ -104,12 +105,6 @@ const fuzzySort: SortingFn<any> = (rowA, rowB, columnId) => {
     dir = compareItems(rankA as RankingInfo, rankB as RankingInfo);
   }
   return dir === 0 ? sortingFns.alphanumeric(rowA, rowB, columnId) : dir;
-};
-
-const containerActionColors = {
-  [ContainerAction.START_CRON]: "amber",
-  [ContainerAction.STOP]: "destructive",
-  [ContainerAction.START_MANUAL]: "success",
 };
 
 export interface ArchiveQueuesTableTexts {
