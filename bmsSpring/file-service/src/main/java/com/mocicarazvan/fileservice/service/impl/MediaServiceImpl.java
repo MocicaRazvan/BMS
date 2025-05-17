@@ -279,9 +279,9 @@ public class MediaServiceImpl implements MediaService {
     public Mono<Void> deleteFile(String gridId) {
         return gridFsTemplate.delete(new Query(Criteria.where("_id").is(new ObjectId(gridId))))
 //                .subscribeOn(Schedulers.parallel())
-                .then(mediaRepository.findAllByGridFsId(gridId)
+                .then(Mono.defer(() -> mediaRepository.findAllByGridFsId(gridId)
                         .flatMap(media -> mediaMetadataRepository.deleteAllByMediaId(media.getId()))
-                        .then(mediaRepository.deleteAllByGridFsId(gridId)));
+                        .then(mediaRepository.deleteAllByGridFsId(gridId))));
     }
 
     @Override

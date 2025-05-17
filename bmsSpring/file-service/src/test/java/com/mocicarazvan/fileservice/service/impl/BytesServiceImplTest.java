@@ -114,15 +114,7 @@ class BytesServiceImplTest {
         assert file != null;
         return gridFsTemplate.getResource(file).block();
     }
-
-    @Test
-    void nada() {
-        var file = gridFsTemplate
-                .findOne(Query.query(Criteria.where("_id").is(fileId)))
-                .block();
-        System.out.println(file);
-    }
-
+    
     @Test
     void fullFile_returns0to14() {
         ReactiveGridFsResource res = loadResource();

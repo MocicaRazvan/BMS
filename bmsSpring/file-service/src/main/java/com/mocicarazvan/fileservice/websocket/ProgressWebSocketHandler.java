@@ -19,7 +19,6 @@ import java.time.Duration;
 
 @Component
 @Slf4j
-
 public class ProgressWebSocketHandler implements WebSocketHandler {
 
     private final ObjectMapper objectMapper;
@@ -32,7 +31,7 @@ public class ProgressWebSocketHandler implements WebSocketHandler {
 
     @Override
     public Mono<Void> handle(WebSocketSession session) {
-        // Extract clientId from the path
+       
         String clientId = extractClientIdFromPath(session.getHandshakeInfo().getUri().getPath());
 
         String stringFileType = UriComponentsBuilder.fromUri(session.getHandshakeInfo().getUri())
@@ -53,7 +52,6 @@ public class ProgressWebSocketHandler implements WebSocketHandler {
                 .onErrorResume(_ ->
                         session.close()
                 );
-        ;
 
 
         Flux<WebSocketMessage> outboundMessages = redisTemplate.listenToChannel(key)
@@ -83,7 +81,7 @@ public class ProgressWebSocketHandler implements WebSocketHandler {
                             error -> log.error("Error sending message to Redis: {}", error.getMessage())
                     );
         } catch (JsonProcessingException e) {
-            e.printStackTrace();
+            log.error("Error serializing message in sendProgressUpdate: {}", e.getMessage());
         }
 
     }
@@ -100,7 +98,7 @@ public class ProgressWebSocketHandler implements WebSocketHandler {
             );
             redisTemplate.convertAndSend(key, message).subscribe();
         } catch (JsonProcessingException e) {
-            e.printStackTrace();
+            log.error("Error serializing message in sendCompletionMessage: {}", e.getMessage());
         }
 
     }
