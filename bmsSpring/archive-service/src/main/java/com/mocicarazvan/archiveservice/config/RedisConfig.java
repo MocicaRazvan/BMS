@@ -8,13 +8,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
 import org.springframework.data.redis.connection.ReactiveRedisConnectionFactory;
-import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
-import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.ReactiveRedisTemplate;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
@@ -24,25 +20,6 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 @Configuration
 public class RedisConfig {
 
-    @Value("${spring.custom.cache.redis.host:localhost}")
-    private String redisHost;
-
-    @Value("${spring.custom.cache.redis.port:6379}")
-    private int redisPort;
-
-    @Value("${spring.custom.cache.redis.database:10}")
-    private int redisDatabase;
-
-
-    @Bean
-    @Primary
-    public ReactiveRedisConnectionFactory reactiveRedisConnectionFactory() {
-        RedisStandaloneConfiguration config = new RedisStandaloneConfiguration();
-        config.setHostName(redisHost);
-        config.setPort(redisPort);
-        config.setDatabase(redisDatabase);
-        return new LettuceConnectionFactory(config);
-    }
 
     @Bean
     public ObjectMapper redisObjectMapper() {

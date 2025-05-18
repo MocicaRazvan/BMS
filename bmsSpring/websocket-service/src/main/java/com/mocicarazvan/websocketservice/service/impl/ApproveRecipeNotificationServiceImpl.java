@@ -17,6 +17,7 @@ import com.mocicarazvan.websocketservice.service.generic.impl.ApproveNotificatio
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.support.TransactionTemplate;
 
 @Service
 public class ApproveRecipeNotificationServiceImpl
@@ -25,8 +26,11 @@ public class ApproveRecipeNotificationServiceImpl
                 RecipeRepository, ApproveRecipeNotificationRepository,
                 ApproveRecipeNotificationMapper>
         implements ApproveRecipeNotificationService {
-    public ApproveRecipeNotificationServiceImpl(RecipeRepository referenceRepository, ConversationUserService conversationUserService, SimpleAsyncTaskExecutor asyncExecutor, ApproveRecipeNotificationRepository notificationTemplateRepository, ApproveRecipeNotificationMapper notificationTemplateMapper, SimpMessagingTemplate messagingTemplate, CustomConvertAndSendToUser customConvertAndSendToUser) {
-        super(referenceRepository, conversationUserService, "chat_recipe", "approveRecipeNotification", asyncExecutor, notificationTemplateRepository, notificationTemplateMapper, messagingTemplate, customConvertAndSendToUser);
+    public ApproveRecipeNotificationServiceImpl(RecipeRepository referenceRepository, ConversationUserService conversationUserService, SimpleAsyncTaskExecutor asyncExecutor, ApproveRecipeNotificationRepository notificationTemplateRepository,
+                                                ApproveRecipeNotificationMapper notificationTemplateMapper, SimpMessagingTemplate messagingTemplate,
+                                                CustomConvertAndSendToUser customConvertAndSendToUser, TransactionTemplate transactionTemplate) {
+        super(referenceRepository, conversationUserService, "chat_recipe", "approveRecipeNotification",
+                asyncExecutor, notificationTemplateRepository, notificationTemplateMapper, messagingTemplate, customConvertAndSendToUser, transactionTemplate);
     }
 
     @Override

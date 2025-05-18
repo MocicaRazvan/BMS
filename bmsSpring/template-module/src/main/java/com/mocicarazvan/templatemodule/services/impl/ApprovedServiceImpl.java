@@ -63,20 +63,22 @@ public abstract class ApprovedServiceImpl<MODEL extends Approve, BODY extends Ti
         return
                 userClient.getUser("", userId)
                         .flatMap(authUser -> getModel(id)
-                                .flatMap(model -> {
-                                            if (model.isApproved() && approved) {
-                                                return Mono.error(new IllegalActionException(modelName + " with id " + id + " is already approved!"));
-                                            }
-                                            model.setApproved(approved);
-                                            return modelRepository.save(model)
-                                                    .flatMap(m -> getModelGuardWithUser(authUser, m, !m.isApproved()))
-                                                    .flatMap(r -> self.updateDeleteInvalidate(Pair.of(r.getModel(), true))
-                                                            .flatMap(_ -> Mono.fromRunnable(() -> rabbitMqApprovedSender.sendMessage(approved, r, authUser)))
-                                                            .thenReturn(r)
-                                                    );
-                                        }
+                                        .flatMap(model -> {
+                                                    if (model.isApproved() && approved) {
+                                                        return Mono.error(new IllegalActionException(modelName + " with id " + id + " is already approved!"));
+                                                    }
+                                                    model.setApproved(approved);
+                                                    return modelRepository.save(model)
+                                                            .flatMap(m -> getModelGuardWithUser(authUser, m, !m.isApproved()))
+                                                            .flatMap(r -> self.updateDeleteInvalidate(Pair.of(r.getModel(), true))
+//                                                            .flatMap(_ -> Mono.fromRunnable(() -> rabbitMqApprovedSender.sendMessage(approved, r, authUser)))
+                                                                            .thenReturn(r)
+                                                            );
+                                                }
 
-                                ));
+                                        )
+                                        .doOnSuccess(r -> rabbitMqApprovedSender.sendMessage(approved, r, authUser))
+                        );
 
     }
 

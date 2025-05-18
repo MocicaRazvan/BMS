@@ -14,11 +14,8 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.task.SimpleAsyncTaskExecutorBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.data.redis.connection.ReactiveRedisConnectionFactory;
-import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
-import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.ReactiveRedisTemplate;
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
@@ -29,15 +26,6 @@ import java.util.concurrent.Executor;
 @Configuration
 public class BeanConfigRedisCache {
 
-    @Value("${spring.custom.cache.redis.host:localhost}")
-    private String redisHost;
-
-    @Value("${spring.custom.cache.redis.port:6379}")
-    private int redisPort;
-
-    @Value("${spring.custom.cache.redis.database:0}")
-    private int redisDatabase;
-
     @Value("${spring.custom.executor.redis.async.concurrency.limit:128}")
     private int executorAsyncConcurrencyLimit;
 
@@ -47,18 +35,8 @@ public class BeanConfigRedisCache {
         return new ObjectMapper();
     }
 
-    @Bean
-    @Primary
-    public ReactiveRedisConnectionFactory reactiveRedisConnectionFactory() {
-        RedisStandaloneConfiguration config = new RedisStandaloneConfiguration();
-        config.setHostName(redisHost);
-        config.setPort(redisPort);
-        config.setDatabase(redisDatabase);
-        return new LettuceConnectionFactory(config);
-    }
 
     @Bean
-//    @Primary
     @ConditionalOnBean(ObjectMapper.class)
     public ReactiveRedisTemplate<String, Object> reactiveRedisTemplate(
             ReactiveRedisConnectionFactory reactiveRedisConnectionFactory,

@@ -21,6 +21,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,8 +40,12 @@ public abstract class ApproveNotificationServiceTemplateImpl<R extends ApprovedM
         extends NotificationTemplateServiceImpl<R, RRESP, ApprovedNotificationType, MODEL, BODY, RESPONSE, RREPO, MREOP, MMAP>
         implements ApproveNotificationServiceTemplate<R, RRESP, BODY, RESPONSE> {
 
-    public ApproveNotificationServiceTemplateImpl(RREPO referenceRepository, ConversationUserService conversationUserService, String referenceName, String notificationName, SimpleAsyncTaskExecutor asyncExecutor, MREOP notificationTemplateRepository, MMAP notificationTemplateMapper, SimpMessagingTemplate messagingTemplate, CustomConvertAndSendToUser customConvertAndSendToUser) {
+    private final TransactionTemplate transactionTemplate;
+
+
+    public ApproveNotificationServiceTemplateImpl(RREPO referenceRepository, ConversationUserService conversationUserService, String referenceName, String notificationName, SimpleAsyncTaskExecutor asyncExecutor, MREOP notificationTemplateRepository, MMAP notificationTemplateMapper, SimpMessagingTemplate messagingTemplate, CustomConvertAndSendToUser customConvertAndSendToUser, TransactionTemplate transactionTemplate) {
         super(referenceRepository, conversationUserService, referenceName, notificationName, asyncExecutor, notificationTemplateRepository, notificationTemplateMapper, messagingTemplate, customConvertAndSendToUser);
+        this.transactionTemplate = transactionTemplate;
     }
 
     public abstract R createApprovedReference(BODY body, Long appId, ConversationUser receiver);
@@ -79,25 +84,23 @@ public abstract class ApproveNotificationServiceTemplateImpl<R extends ApprovedM
 
         CompletableFuture<ConversationUser> senderFuture = conversationUserService.getUserByEmailAsync(body.getSenderEmail());
         CompletableFuture<ConversationUser> receiverFuture = conversationUserService.getUserByEmailAsync(body.getReceiverEmail());
-        CompletableFuture<R> referenceFuture = CompletableFuture.completedFuture(aboveReference);
 
 
-        return CompletableFuture.allOf(senderFuture, receiverFuture, referenceFuture)
-                .thenApplyAsync(u -> {
-                    try {
-                        ConversationUser sender = senderFuture.get();
-                        ConversationUser receiver = receiverFuture.get();
-                        R reference = referenceFuture.get();
-                        if (reference == null) {
-                            reference = referenceRepository.save(createApprovedReference(body, appId, receiver));
-                        } else {
-                            reference.setApproved(body.getType().equals(ApprovedNotificationType.APPROVED));
-                        }
-                        return createModelInstance(sender, receiver, body.getType(), reference, body.getContent(), body.getExtraLink());
-                    } catch (Exception e) {
-                        throw new RuntimeException(e);
+        return senderFuture.thenCombineAsync(receiverFuture, (sender, receiver) -> {
+            try {
+                R reference = transactionTemplate.execute(_ -> {
+                    if (aboveReference != null) {
+                        aboveReference.setApproved(body.getType().equals(ApprovedNotificationType.APPROVED));
+                        return aboveReference;
                     }
-                }, asyncExecutor);
+                    return referenceRepository.save(createApprovedReference(body, appId, receiver));
+                });
+                return createModelInstance(sender, receiver, body.getType(), reference, body.getContent(), body.getExtraLink());
+            } catch (Exception e) {
+                log.error("Error creating model instance", e);
+                throw new RuntimeException(e);
+            }
+        }, asyncExecutor);
     }
 
     @Override

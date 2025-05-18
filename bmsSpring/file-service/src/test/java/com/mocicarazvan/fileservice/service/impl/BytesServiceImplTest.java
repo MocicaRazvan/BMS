@@ -39,9 +39,9 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 @DataMongoTest
 @AutoConfigureDataMongo
 @Import({
-
         GridFsConfig.class,
-        BytesServiceImpl.class, AsyncConfig.class
+        BytesServiceImpl.class,
+        AsyncConfig.class
 })
 @ImportAutoConfiguration({MongoReactiveDataAutoConfiguration.class})
 @Execution(ExecutionMode.SAME_THREAD)
@@ -69,6 +69,8 @@ class BytesServiceImplTest {
 
     @Autowired
     DataBufferFactory dataBufferFactory;
+
+
     private ObjectId fileId;
 
     @BeforeEach
@@ -114,7 +116,7 @@ class BytesServiceImplTest {
         assert file != null;
         return gridFsTemplate.getResource(file).block();
     }
-    
+
     @Test
     void fullFile_returns0to14() {
         ReactiveGridFsResource res = loadResource();

@@ -17,14 +17,19 @@ import com.mocicarazvan.websocketservice.service.generic.impl.ApproveNotificatio
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.support.TransactionTemplate;
 
 @Service
 public class ApprovePostNotificationServiceImpl
         extends ApproveNotificationServiceTemplateImpl
         <Post, PostResponse, ApprovePostNotification, ApprovePostNotificationBody, ApprovePostNotificationResponse, PostRepository, ApprovePostNotificationRepository, ApprovePostNotificationMapper>
         implements ApprovePostNotificationService {
-    public ApprovePostNotificationServiceImpl(PostRepository referenceRepository, ConversationUserService conversationUserService, SimpleAsyncTaskExecutor asyncExecutor, ApprovePostNotificationRepository notificationTemplateRepository, ApprovePostNotificationMapper notificationTemplateMapper, SimpMessagingTemplate messagingTemplate, CustomConvertAndSendToUser customConvertAndSendToUser) {
-        super(referenceRepository, conversationUserService, "chat_post", "approvePostNotification", asyncExecutor, notificationTemplateRepository, notificationTemplateMapper, messagingTemplate, customConvertAndSendToUser);
+    public ApprovePostNotificationServiceImpl(PostRepository referenceRepository, ConversationUserService conversationUserService,
+                                              SimpleAsyncTaskExecutor asyncExecutor, ApprovePostNotificationRepository notificationTemplateRepository,
+                                              ApprovePostNotificationMapper notificationTemplateMapper, SimpMessagingTemplate messagingTemplate,
+                                              CustomConvertAndSendToUser customConvertAndSendToUser, TransactionTemplate transactionTemplate) {
+        super(referenceRepository, conversationUserService, "chat_post", "approvePostNotification",
+                asyncExecutor, notificationTemplateRepository, notificationTemplateMapper, messagingTemplate, customConvertAndSendToUser, transactionTemplate);
     }
 
     @Override
