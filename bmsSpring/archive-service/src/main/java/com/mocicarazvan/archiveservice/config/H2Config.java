@@ -41,7 +41,7 @@ public class H2Config {
             log.info("Configured H2 master host: {}", serverHost);
 
 
-            boolean shouldStart = localIp.equals(serverHost) || serverHost.contains(hostname);
+            boolean shouldStart = serverHost.equals(localIp) || serverHost.contains(hostname);
 
 
             if (shouldStart) {
