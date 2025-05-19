@@ -1,7 +1,7 @@
 package com.mocicarazvan.archiveservice.config;
 
 
-import com.mocicarazvan.archiveservice.repositories.ContainerNotifyRepository;
+import com.mocicarazvan.archiveservice.services.ContainerNotifyService;
 import com.mocicarazvan.archiveservice.utils.CronUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,7 +19,7 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 @Slf4j
 public class TasksConfig {
-    private final ContainerNotifyRepository containerNotifyRepository;
+    private final ContainerNotifyService containerNotifyService;
 
     @Value("${cart.clear-old-archive.cron:0 0 */2 * * *}")
     private String clearOldArchiveCron;
@@ -41,7 +41,7 @@ public class TasksConfig {
                 .concatMap(_ -> {
                     log.info("Clearing old archive");
                     return
-                            containerNotifyRepository.invalidateNotifications();
+                            containerNotifyService.invalidateNotifications();
                 })
                 .subscribe(
                         result -> log.info("Old archive cleared: {}", result),

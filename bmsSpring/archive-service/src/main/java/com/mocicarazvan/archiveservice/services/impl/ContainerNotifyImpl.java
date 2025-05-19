@@ -3,9 +3,9 @@ package com.mocicarazvan.archiveservice.services.impl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mocicarazvan.archiveservice.dtos.enums.ContainerAction;
 import com.mocicarazvan.archiveservice.dtos.websocket.NotifyContainerAction;
-import com.mocicarazvan.archiveservice.repositories.ContainerNotifyRepository;
 import com.mocicarazvan.archiveservice.services.ContainerActionPublisher;
 import com.mocicarazvan.archiveservice.services.ContainerNotify;
+import com.mocicarazvan.archiveservice.services.ContainerNotifyService;
 import com.mocicarazvan.archiveservice.services.SimpleRedisCache;
 import com.mocicarazvan.archiveservice.websocket.BatchHandler;
 import lombok.extern.slf4j.Slf4j;
@@ -23,16 +23,16 @@ public class ContainerNotifyImpl implements ContainerNotify {
     private final ObjectMapper objectMapper;
     private final ReactiveRedisTemplate<String, String> redisTemplate;
     private final SimpleRedisCache simpleRedisCache;
-    private final ContainerNotifyRepository containerNotifyRepository;
+    private final ContainerNotifyService containerNotifyService;
     private final ContainerActionPublisher containerActionPublisher;
 
     public ContainerNotifyImpl(
             ObjectMapper objectMapper, ReactiveRedisTemplate<String, String> redisTemplate, SimpleRedisCache simpleRedisCache,
-            ContainerNotifyRepository containerNotifyRepository, ContainerActionPublisher containerActionPublisher) {
+            ContainerNotifyService containerNotifyService, ContainerActionPublisher containerActionPublisher) {
         this.objectMapper = objectMapper;
         this.redisTemplate = redisTemplate;
         this.simpleRedisCache = simpleRedisCache;
-        this.containerNotifyRepository = containerNotifyRepository;
+        this.containerNotifyService = containerNotifyService;
         this.containerActionPublisher = containerActionPublisher;
     }
 
@@ -69,7 +69,7 @@ public class ContainerNotifyImpl implements ContainerNotify {
                         .build())
                 .flatMap(ca -> Mono.zip(Mono.fromCallable(() ->
                                         objectMapper.writeValueAsString(ca)),
-                                containerNotifyRepository.addNotification(ca),
+                                containerNotifyService.addNotification(ca),
                                 containerActionPublisher.sendContainerActionMessage(ca)
                         ).map(Tuple2::getT1)
                 )
