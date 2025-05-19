@@ -26,7 +26,7 @@ import java.net.InetAddress;
 @Slf4j
 public class H2Config {
 
-    @Value("${spring.custom.h2.server-host:localhost}")
+    @Value("${spring.custom.h2.server-host}")
     private String serverHost;
 
     private Server tcpServer;
@@ -35,9 +35,13 @@ public class H2Config {
     public void maybeStartH2Server() {
         try {
             String hostname = InetAddress.getLocalHost().getHostName();
+            String localIp = InetAddress.getLocalHost().getHostAddress();
             log.info("Detected hostname: {}", hostname);
+            log.info("Detected local IP: {}", localIp);
+            log.info("Configured H2 master host: {}", serverHost);
 
-            boolean shouldStart = hostname.equalsIgnoreCase(serverHost);
+
+            boolean shouldStart = localIp.equals(serverHost) || serverHost.contains(hostname);
 
 
             if (shouldStart) {
