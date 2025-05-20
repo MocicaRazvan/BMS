@@ -12,19 +12,22 @@ export interface HomeMapTexts {
 }
 
 export interface HomeMapProps extends HomeMapTexts {
-  svgMap: SVGMap;
+  svgMap?: SVGMap;
 }
 
 export default function HomeMap({ subtitle, title, svgMap }: HomeMapProps) {
   const { theme } = useTheme();
   const map = useMemo(() => {
+    if (!svgMap) {
+      return null;
+    }
     if (!theme) {
       return svgMap.dark;
     }
     return theme === "dark" ? svgMap.dark : svgMap.light;
-  }, [svgMap.dark, svgMap.light, theme]);
+  }, [svgMap?.dark, svgMap?.light, theme]);
 
-  if (!svgMap) {
+  if (!svgMap || !map) {
     return null;
   }
   return (
