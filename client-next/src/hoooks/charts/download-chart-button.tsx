@@ -80,11 +80,12 @@ export default function useDownloadChartButton<T extends DateString>({
 
       const dateToAppend =
         minDate === maxDate ? minDate : `${minDate}_${maxDate}`;
+      const now = new Date().toISOString();
 
       if (png) {
         FileSaver.saveAs(
           png,
-          `${name.toLowerCase().trim().replace(/\s+/g, "_")}_${dateToAppend}.png`,
+          `${name.toLowerCase().trim().replace(/\s+/g, "_")}-${dateToAppend}-${now}.png`,
         );
       }
     },
