@@ -89,7 +89,9 @@ export default function DayCalendarHeaderDate({
                 backgroundColor: `${c}`,
               }}
             />
-            <p className="text-sm text-muted-foreground">{t}</p>
+            <p className="text-sm text-muted-foreground">
+              {t.replace("_", " ")}
+            </p>
           </div>
         ))}
       </div>

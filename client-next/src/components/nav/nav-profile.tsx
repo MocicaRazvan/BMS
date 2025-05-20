@@ -48,7 +48,9 @@ export default function NavProfile({ authUser, dayCalendarCTATexts }: Props) {
                   alt={authUser?.email}
                 />
               </Avatar>
-              <p className="text-lg font-bold">{authUser.email}</p>
+              <p className="text-lg font-bold max-w-[350px] truncate">
+                {authUser.email}
+              </p>
               {authUser.role !== "ROLE_USER" && (
                 <Badge
                   variant={

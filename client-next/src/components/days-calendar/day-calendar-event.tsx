@@ -103,7 +103,7 @@ export default function DayCalendarEvent({
               }
             }
           >
-            {dayCalendar.dayResponse.type}
+            {dayCalendar.dayResponse.type.replace("_", " ")}
           </Badge>
         </div>
       </div>

@@ -27,7 +27,7 @@ interface Props {
 const colors = getColorsByDayType();
 const chartConfig = dayTypes.reduce((acc, cur) => {
   acc[cur] = {
-    label: cur,
+    label: cur.replace("_", " "),
     color: colors[cur],
   };
   return acc;

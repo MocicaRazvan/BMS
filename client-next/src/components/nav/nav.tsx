@@ -2,16 +2,10 @@
 
 import { useSession } from "next-auth/react";
 
-import { Link, usePathname } from "@/navigation";
+import { Link } from "@/navigation";
 import { ModeToggle } from "@/components/nav/theme-switch";
 import { LocaleSwitcher } from "@/components/i18n/LocaleSwitcher";
 import { ThemeSwitchTexts } from "@/texts/components/nav";
-import {
-  createPlansLinks,
-  createPostsLinks,
-  createRecipesLinks,
-  linkFactory,
-} from "@/components/nav/links";
 import { BurgerNav } from "@/components/nav/burger-nav";
 import NavProfile from "@/components/nav/nav-profile";
 import { DashboardIcon } from "@radix-ui/react-icons";
@@ -19,14 +13,17 @@ import NotificationPop from "@/components/nav/notification-pop";
 import CartPop, { CartPopsTexts } from "@/components/nav/cart-pop";
 import Logo from "@/components/logo/logo";
 import { LockKeyhole } from "lucide-react";
-import ActiveLink from "@/components/nav/active-link";
-import { useMemo } from "react";
+import React, { useMemo } from "react";
 import { appendCreatedAtDesc } from "@/lib/utils";
 import FindInSite, {
   FindInSiteTexts,
   MetadataValue,
 } from "@/components/nav/find-in-site";
 import { DaysCalendarCTATexts } from "@/components/days-calendar/days-calendar-cta";
+import { NavButtonGroup, NavItem } from "@/components/nav/nav-button";
+import { SheetClose } from "@/components/ui/sheet";
+import { Avatar } from "@/components/ui/avatar";
+import { AvatarImage } from "@radix-ui/react-avatar";
 
 export interface NavTexts {
   themeSwitchTexts: ThemeSwitchTexts;
@@ -70,25 +67,172 @@ export default function Nav({
   const session = useSession();
 
   const authUser = session?.data?.user;
-  const pathName = usePathname();
 
   const isUser = authUser?.role === "ROLE_USER";
   const isTrainer = authUser?.role === "ROLE_TRAINER";
   const isAdmin = authUser?.role === "ROLE_ADMIN";
   const isAdminOrTrainer = isAdmin || isTrainer;
 
-  const postsLinks = useMemo(
-    () => linkFactory(authUser, createPostsLinks, postsTexts),
-    [authUser, postsTexts],
+  const baseLinks: NavItem[] = useMemo(
+    () => [
+      {
+        link: appendCreatedAtDesc("/subscriptions"),
+        name: links.subscriptions,
+        isActive: (pathName) => pathName === "/subscriptions",
+      },
+      {
+        link: appendCreatedAtDesc("/orders"),
+        name: links.orders,
+        isActive: (pathName) => pathName === "/orders",
+      },
+      {
+        link: appendCreatedAtDesc("/posts/approved"),
+        name: links.posts,
+        isActive: (pathName) => pathName === "/posts/approved",
+      },
+      {
+        link: appendCreatedAtDesc("/plans/approved"),
+        name: links.plans,
+        isActive: (pathName) => pathName === "/plans/approved",
+      },
+      {
+        link: "/chat",
+        name: links.chat,
+        isActive: (pathName) => pathName === "/chat",
+      },
+      {
+        link: "/kanban",
+        name: links.kanban,
+        isActive: (pathName) => pathName === "/kanban",
+      },
+      {
+        link: "/calculator",
+        name: links.calculator,
+        isActive: (pathName) => pathName === "/calculator",
+      },
+    ],
+    [
+      links.calculator,
+      links.chat,
+      links.kanban,
+      links.orders,
+      links.plans,
+      links.posts,
+      links.subscriptions,
+    ],
   );
-  const recipesLinks = useMemo(
-    () => linkFactory(authUser, createRecipesLinks, recipesTexts),
-    [authUser, recipesTexts],
-  );
-  const plansLinks = useMemo(
-    () => linkFactory(authUser, createPlansLinks, plansTexts),
-    [authUser, plansTexts],
-  );
+
+  const privilegedLinks = useMemo(() => {
+    const privilegedLinks: NavItem[] = [];
+    if (isAdmin) {
+      privilegedLinks.push({
+        link: "/admin/dashboard",
+        name: links.adminDashboard,
+        Icon: LockKeyhole,
+      });
+    }
+    if (isAdminOrTrainer) {
+      privilegedLinks.push({
+        link: appendCreatedAtDesc(`/trainer/user/${authUser?.id}/posts`),
+        name: links.trainerDashboard,
+        Icon: DashboardIcon,
+      });
+    }
+    return privilegedLinks;
+  }, [
+    authUser?.id,
+    isAdmin,
+    isAdminOrTrainer,
+    links.adminDashboard,
+    links.trainerDashboard,
+  ]);
+
+  const linkItems: NavItem[] = useMemo(() => {
+    const finalLinks: NavItem[] = [
+      {
+        link: "/",
+        isActive: (pathName) => pathName === "/",
+        additional: <Logo width={40} height={40} />,
+        linkClassName: "mr-1.5 2xl:mr-3 px-1 md:px-1 py-1 md:py-1 rounded-full",
+      },
+    ];
+
+    finalLinks.push(...privilegedLinks);
+
+    finalLinks.push(...baseLinks);
+
+    return finalLinks;
+  }, [baseLinks, privilegedLinks]);
+
+  const burgerItems: NavItem[] = useMemo(() => {
+    const finalLinks: NavItem[] = [
+      {
+        link: "/",
+        isActive: (pathName) => pathName === "/",
+        additional: (
+          <div className="flex items-center gap-2">
+            <Logo width={40} height={40} />
+            <span className="text-sm md:text-lg">{links.home}</span>
+          </div>
+        ),
+        separator: <hr className="border my-2.5 w-full" />,
+      },
+    ];
+    const burgerPrivileged: NavItem[] = [];
+    if (isAdmin) {
+      burgerPrivileged.push({
+        link: "/admin/dashboard",
+        name: links.adminDashboard,
+        Icon: LockKeyhole,
+      });
+    }
+    if (isAdminOrTrainer) {
+      burgerPrivileged.push({
+        link: appendCreatedAtDesc(`/trainer/user/${authUser?.id}/posts`),
+        name: links.trainerDashboard,
+        Icon: DashboardIcon,
+        separator: <hr className="border my-2.5 w-full" />,
+      });
+    }
+
+    finalLinks.push(...burgerPrivileged);
+
+    finalLinks.push(...baseLinks);
+    if (authUser) {
+      finalLinks.push({
+        link: `/users/single/${authUser?.id}`,
+        beforeSeparator: <hr className="border my-2.5 w-full" />,
+        separator: <hr className="border my-2.5 w-full" />,
+        isActive: (pathName) => pathName === `/users/single/${authUser?.id}`,
+        additional: (
+          <SheetClose className="flex items-center justify-start gap-2 h-full w-full ps-2">
+            {authUser.image ? (
+              <div className="flex items-center justify-between w-full gap-2 b">
+                <Avatar className="cursor-pointer">
+                  <AvatarImage src={authUser?.image} alt={authUser?.email} />
+                </Avatar>
+                <p className="cursor-pointer text-xs hover:underline max-w-[230px] truncate">
+                  {authUser.email}
+                </p>
+              </div>
+            ) : (
+              <p className="cursor-pointer text-sm">{authUser.email}</p>
+            )}
+          </SheetClose>
+        ),
+      });
+    }
+
+    return finalLinks;
+  }, [
+    authUser,
+    baseLinks,
+    isAdmin,
+    isAdminOrTrainer,
+    links.adminDashboard,
+    links.home,
+    links.trainerDashboard,
+  ]);
 
   return (
     <nav
@@ -97,83 +241,15 @@ export default function Nav({
      supports-[backdrop-filter]:bg-background/60 flex-wrap 2xl:border-l 2xl:border-r"
       id="top-item"
     >
-      <div className="hidden xl:flex items-center justify-between w-full">
+      <div className="hidden lgxl:flex items-center justify-between w-full">
         <div className="flex items-center justify-center gap-1 ">
-          <div className="mr-[9px] 2xl:mr-5 flex items-center justify-start gap-1 ">
-            <Link
-              href="/"
-              className="font-bold hover:underline flex items-center justify-center gap-2 hover:scale-[1.05] transition-all px-3"
-            >
-              <Logo width={40} height={40} />
-              {/*{links.home}*/}
-            </Link>
-            {isAdmin && (
-              <Link
-                href="/admin/dashboard"
-                className="text-balance gap-1 font-bold hover:underline flex items-center justify-center hover:scale-[1.03] transition-all px-1 text-foreground/80"
-              >
-                <LockKeyhole className="w-5 h-5 text-foreground/80" />
-                <p>{links.adminDashboard}</p>
-              </Link>
-            )}
-            {isAdminOrTrainer && (
-              <Link
-                href={appendCreatedAtDesc(
-                  `/trainer/user/${authUser?.id}/posts`,
-                )}
-                className="text-balance gap-1 font-bold hover:underline flex items-center justify-center hover:scale-[1.03] transition-all px-1 text-foreground/80"
-              >
-                <DashboardIcon className="w-5 h-5 text-foreground/80" />
-                <p>{links.trainerDashboard}</p>
-              </Link>
-            )}
-          </div>
           {authUser && (
             <div className="flex items-start text-lg  justify-center gap-4 flex-wrap">
-              <ActiveLink
-                isActive={pathName === "/subscriptions"}
-                href={appendCreatedAtDesc("/subscriptions")}
-              >
-                {links.subscriptions}
-              </ActiveLink>
-              <ActiveLink
-                href={appendCreatedAtDesc("/orders")}
-                isActive={pathName === "/orders"}
-              >
-                {links.orders}
-              </ActiveLink>
-              <ActiveLink
-                href={appendCreatedAtDesc("/posts/approved")}
-                isActive={pathName === "/posts/approved"}
-              >
-                {links.posts}
-              </ActiveLink>
-              <ActiveLink
-                href={appendCreatedAtDesc("/plans/approved")}
-                isActive={pathName === "/plans/approved"}
-              >
-                {links.plans}
-              </ActiveLink>
-              <ActiveLink href="/chat" isActive={pathName === "/chat"}>
-                {links.chat}
-              </ActiveLink>
-              <ActiveLink href="/kanban" isActive={pathName === "/kanban"}>
-                {links.kanban}
-              </ActiveLink>
-              <ActiveLink
-                href="/calculator"
-                isActive={pathName === "/calculator"}
-              >
-                {links.calculator}
-              </ActiveLink>
+              <NavButtonGroup items={linkItems} />
             </div>
           )}
         </div>
-        <div
-          className="mx-auto  md:mr-1 flex items-center justify-center gap-6 md:gap-3
-      mt-2 sm:mt-0
-      "
-        >
+        <div className="mx-auto  md:mr-1 flex items-center justify-center gap-6 md:gap-3 mt-2 sm:mt-0">
           <FindInSite texts={findInSiteTexts} metadataValues={metadataValues} />
           {authUser && (
             <>
@@ -197,17 +273,9 @@ export default function Nav({
           <ModeToggle {...themeSwitchTexts} />
         </div>
       </div>
-      <div className="xl:hidden w-full flex items-center justify-between">
+      <div className="lgxl:hidden w-full flex items-center justify-between">
         <BurgerNav
           authUser={authUser}
-          postsLinks={postsLinks}
-          recipesLinks={recipesLinks}
-          plansLinks={plansLinks}
-          isAdminOrTrainer={isAdminOrTrainer}
-          isUser={isUser}
-          isTrainer={isTrainer}
-          isAdmin={isAdmin}
-          metadataValues={metadataValues}
           texts={{
             themeSwitchTexts,
             postsTexts,
@@ -217,10 +285,21 @@ export default function Nav({
             findInSiteTexts,
             dayCalendarCTATexts,
           }}
+          linkItems={burgerItems}
         />
-        <div className="flex items-center justify-center gap-5">
+        <div className="flex items-center justify-center gap-5 ">
+          <div className="mx-auto  md:mr-1 flex items-center justify-center gap-6 md:gap-3 mt-2 sm:mt-0">
+            <FindInSite
+              texts={findInSiteTexts}
+              metadataValues={metadataValues}
+            />
+          </div>
           {authUser && (
             <>
+              <NavProfile
+                authUser={authUser}
+                dayCalendarCTATexts={dayCalendarCTATexts}
+              />
               <NotificationPop authUser={authUser} />
               <CartPop authUser={authUser} cartPopTexts={cartPopTexts} />
             </>
