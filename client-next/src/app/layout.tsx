@@ -93,7 +93,7 @@ export default async function BaseLayout({
       <UmamiAnalytics />
       <body
         className={cn(
-          " bg-background font-sans antialiased ",
+          "bg-background font-sans antialiased ",
           fontSans.variable,
         )}
       >

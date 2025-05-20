@@ -2,16 +2,28 @@
 
 import { motion } from "framer-motion";
 import { WorldMap } from "@/components/aceternityui/world-map";
-import { SVGMap } from "@/components/aceternityui/world-wrapper";
+import { useTheme } from "next-themes";
+import { SVGMap } from "@/lib/world-svg-map";
+import { useMemo } from "react";
 
 export interface HomeMapTexts {
   title: string;
   subtitle: string;
 }
 
-export interface HomeMapProps extends HomeMapTexts, Partial<SVGMap> {}
+export interface HomeMapProps extends HomeMapTexts {
+  svgMap: SVGMap;
+}
 
 export default function HomeMap({ subtitle, title, svgMap }: HomeMapProps) {
+  const { theme } = useTheme();
+  const map = useMemo(() => {
+    if (!theme) {
+      return svgMap.dark;
+    }
+    return theme === "dark" ? svgMap.dark : svgMap.light;
+  }, [svgMap.dark, svgMap.light, theme]);
+
   if (!svgMap) {
     return null;
   }
@@ -45,7 +57,7 @@ export default function HomeMap({ subtitle, title, svgMap }: HomeMapProps) {
         </motion.p>
       </div>
       <WorldMap
-        svgMap={svgMap}
+        svgMap={map}
         dots={[
           {
             start: { lat: 44.4268, lng: 26.1025 }, // Bucharest

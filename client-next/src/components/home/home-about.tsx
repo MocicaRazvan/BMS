@@ -84,32 +84,36 @@ const HomeAbout = memo(
         </div>
         <motion.div
           {...getItemFramerProps(3)}
-          className="flex flex-col w-full md:w-1/2 mx-auto md:flex-row gap-8 md:gap-22 px-8 md:items-center justify-between text-3xl mb-16 sm:mb-20 mt-6 sm:mt-10"
+          className="flex flex-col w-full max-w-3xl mx-auto md:flex-row gap-8 md:gap-22 px-8 md:items-center justify-between text-3xl mb-16 sm:mb-20 mt-6 sm:mt-10"
         >
-          <div className="flex items-center justify-start gap-2 h-5 sm:h-4 w-full">
+          <div className="flex items-center justify-start gap-2 h-5 sm:h-4 ">
             <NumberTicker
               value={overallSummary.ordersCount}
               delay={ITEM_DELAY * 4}
-              className={`!text-success !dark:text-opacity-75 `}
+              className={`!text-success !dark:text-opacity-75 text-lg sm:text-xl md:text-3xl`}
               style={{
                 width: `${20 + overallSummary.ordersCount.toString().length * 20}px`,
               }}
             />
-            <p className="text-transparent text-[15px] sm:text-[16px] bg-clip-text bg-gradient-to-r from-[hsl(var(--foreground))] dark:to-neutral-400 to-neutral-500">
-              {ordersCompleted}{" "}
+            <p className="text-transparent bg-clip-text bg-gradient-to-r from-[hsl(var(--foreground))] dark:to-neutral-400 to-neutral-500">
+              <span className="text-lg sm:text-xl md:text-3xl">
+                {ordersCompleted}
+              </span>
             </p>
           </div>
-          <div className="flex items-center justify-start gap-2 h-5 sm:h-4 w-full">
+          <div className="flex items-center justify-start gap-2 h-5 sm:h-4 ">
             <NumberTicker
               value={overallSummary.plansCount}
               delay={ITEM_DELAY * 5}
-              className={`!text-success !dark:text-opacity-75`}
+              className={`!text-success !dark:text-opacity-75 text-lg sm:text-xl md:text-3xl`}
               style={{
                 width: `${20 + overallSummary.plansCount.toString().length * 20}px`,
               }}
             />
-            <p className="text-transparent text-[15px] sm:text-[16px] bg-clip-text bg-gradient-to-r from-[hsl(var(--foreground))] dark:to-neutral-400 to-neutral-500">
-              {plansSold}
+            <p className="text-transparent bg-clip-text bg-gradient-to-r from-[hsl(var(--foreground))] dark:to-neutral-400 to-neutral-500">
+              <span className="text-lg sm:text-xl md:text-3xl">
+                {plansSold}
+              </span>
             </p>
           </div>
         </motion.div>
