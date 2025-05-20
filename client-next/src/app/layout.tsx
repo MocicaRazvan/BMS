@@ -89,9 +89,7 @@ export default async function BaseLayout({
 
   return (
     <html lang={locale} suppressHydrationWarning>
-      <head>
-        <UmamiAnalytics />
-      </head>
+      <UmamiAnalytics />
       <body
         className={cn(
           " bg-background font-sans antialiased ",
