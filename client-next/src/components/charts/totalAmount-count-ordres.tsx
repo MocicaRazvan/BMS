@@ -24,7 +24,6 @@ import {
 } from "@/components/ui/chart";
 
 import { useLocale } from "next-intl";
-import { useDebounce } from "@/components/ui/multiple-selector";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -40,6 +39,7 @@ import * as ss from "simple-statistics";
 import { Skeleton } from "@/components/ui/skeleton";
 import useDownloadChartButton from "@/hoooks/charts/download-chart-button";
 import { v4 as uuidv4 } from "uuid";
+import { useDebounceWithFirstTrue } from "@/hoooks/useDebounceWithFirstTrue";
 
 export interface TotalAmountCountOrdersData {
   count: number;
@@ -108,7 +108,7 @@ export function TotalAmountCountOrders({
     ...(extraChartConfig && extraChartConfig),
   } satisfies ChartConfig;
 
-  const debounceDataAvailable = useDebounce(dataAvailable, 225);
+  const debounceDataAvailable = useDebounceWithFirstTrue(dataAvailable, 225);
 
   const regressionKey: "countLine" | "totalAmountLine" | null =
     showCount && showTotalAmount
@@ -125,10 +125,11 @@ export function TotalAmountCountOrders({
     const points = data.reduce<
       Record<keyof Omit<TotalAmountCountOrdersData, "date">, [number, number][]>
     >(
-      (acc, cur, i) => ({
-        count: [...acc.count, [i, cur.count]],
-        totalAmount: [...acc.totalAmount, [i, cur.totalAmount]],
-      }),
+      (acc, cur, i) => {
+        acc.count.push([i, cur.count]);
+        acc.totalAmount.push([i, cur.totalAmount]);
+        return acc;
+      },
       {
         count: [],
         totalAmount: [],
@@ -498,7 +499,7 @@ export function TotalAmountOrdersSingleBarChart({
     },
   } satisfies ChartConfig;
 
-  const debounceDataAvailable = useDebounce(dataAvailable, 225);
+  const debounceDataAvailable = useDebounceWithFirstTrue(dataAvailable, 225);
   const meanValue = useMemo(
     () => data.reduce((acc, curr) => acc + curr[fieldKey], 0) / data.length,
     [data, fieldKey],

@@ -14,7 +14,6 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import { useDebounce } from "@/components/ui/multiple-selector";
 import { Skeleton } from "@/components/ui/skeleton";
 import { motion } from "framer-motion";
 import Lottie from "react-lottie-player";
@@ -40,6 +39,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import useDownloadChartButton from "@/hoooks/charts/download-chart-button";
+import { useDebounceWithFirstTrue } from "@/hoooks/useDebounceWithFirstTrue";
 
 interface ColorIndexes {
   countColorIndex?: number;
@@ -217,7 +217,7 @@ const PredictionChartContainer = memo(
         color: `hsl(var(--chart-${totalAmountColorIndex}))`,
       },
     } satisfies ChartConfig;
-    const debounceDataAvailable = useDebounce(dataAvailable, 225);
+    const debounceDataAvailable = useDebounceWithFirstTrue(dataAvailable, 225);
 
     return (
       <div className="w-full py-16">

@@ -9,7 +9,6 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import { useDebounce } from "@/components/ui/multiple-selector";
 import {
   AverageAmount,
   DietType,
@@ -52,6 +51,7 @@ import useFetchStream from "@/hoooks/useFetchStream";
 import { MonthPickerSelect } from "@/components/common/month-picker";
 import { Separator } from "@/components/ui/separator";
 import { formatChartValue } from "@/lib/utils";
+import { useDebounceWithFirstTrue } from "@/hoooks/useDebounceWithFirstTrue";
 
 export interface PlanCharacteristicTexts {
   countLabel: string;
@@ -118,7 +118,7 @@ export default function PlanCharacteristic({
     },
     ...(extraChartConfig && extraChartConfig),
   } satisfies ChartConfig;
-  const debounceDataAvailable = useDebounce(dataAvailable, 225);
+  const debounceDataAvailable = useDebounceWithFirstTrue(dataAvailable, 225);
 
   const { downloadChartRef, DownloadChartButton } = useDownloadChartButton({
     data,
@@ -247,7 +247,7 @@ export function PlanCharacteristicScatter({
       color: `hsl(var(--chart-${averageAmountColorIndex}))`,
     },
   } satisfies ChartConfig;
-  const debounceDataAvailable = useDebounce(dataAvailable, 225);
+  const debounceDataAvailable = useDebounceWithFirstTrue(dataAvailable, 225);
 
   const { downloadChartRef, DownloadChartButton } = useDownloadChartButton({
     data,

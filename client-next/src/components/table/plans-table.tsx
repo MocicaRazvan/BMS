@@ -495,6 +495,7 @@ export default function PlansTable({
         ),
         cell: ({ row }) => (
           <Badge
+            className="px-2"
             variant={row.original.model.approved ? "success" : "destructive"}
           >
             {
