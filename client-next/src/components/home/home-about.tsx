@@ -84,9 +84,9 @@ const HomeAbout = memo(
         </div>
         <motion.div
           {...getItemFramerProps(3)}
-          className="flex flex-col w-full md:w-1/2 mx-auto md:flex-row gap-5 md:gap-22 px-8 md:items-center justify-between text-3xl mb-24 mt-14"
+          className="flex flex-col w-full md:w-1/2 mx-auto md:flex-row gap-8 md:gap-22 px-8 md:items-center justify-between text-3xl mb-16 sm:mb-20 mt-6 sm:mt-10"
         >
-          <div className="flex items-center justify-start gap-2 h-4">
+          <div className="flex items-center justify-start gap-2 h-5 sm:h-4">
             <NumberTicker
               value={overallSummary.ordersCount}
               delay={ITEM_DELAY * 4}
@@ -95,11 +95,11 @@ const HomeAbout = memo(
                 width: `${20 + overallSummary.ordersCount.toString().length * 20}px`,
               }}
             />
-            <p className="text-transparent bg-clip-text bg-gradient-to-r from-[hsl(var(--foreground))] dark:to-neutral-400 to-neutral-500">
+            <p className="text-transparent text-sm sm:text-base bg-clip-text bg-gradient-to-r from-[hsl(var(--foreground))] dark:to-neutral-400 to-neutral-500">
               {ordersCompleted}{" "}
             </p>
           </div>
-          <div className="flex items-center justify-start gap-2 h-4">
+          <div className="flex items-center justify-start gap-2 h-5 sm:h-4">
             <NumberTicker
               value={overallSummary.plansCount}
               delay={ITEM_DELAY * 5}
@@ -108,7 +108,7 @@ const HomeAbout = memo(
                 width: `${20 + overallSummary.plansCount.toString().length * 20}px`,
               }}
             />
-            <p className="text-transparent bg-clip-text bg-gradient-to-r from-[hsl(var(--foreground))] dark:to-neutral-400 to-neutral-500">
+            <p className="text-transparent text-sm sm:text-base bg-clip-text bg-gradient-to-r from-[hsl(var(--foreground))] dark:to-neutral-400 to-neutral-500">
               {plansSold}
             </p>
           </div>

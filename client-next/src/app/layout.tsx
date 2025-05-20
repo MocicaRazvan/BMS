@@ -28,6 +28,7 @@ import { Metadata } from "next";
 import ChatConnectContext from "@/context/chat-connect-context";
 import { UmamiAnalytics } from "@/lib/umami-analytics";
 import ArchiveNotificationsProvider from "@/context/archive-notifications-context";
+import { ReactNode } from "react";
 
 const fontSans = FontSans({
   subsets: ["latin"],
@@ -35,7 +36,7 @@ const fontSans = FontSans({
 });
 
 interface Props {
-  children: React.ReactNode;
+  children: ReactNode;
   params: { locale: Locale };
 }
 
