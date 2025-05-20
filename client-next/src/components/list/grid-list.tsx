@@ -1,7 +1,7 @@
 "use client";
 
 import { ResponseWithUserDtoEntity, TitleBodyImagesUserDto } from "@/types/dto";
-import { ReactNode, Suspense } from "react";
+import { ReactNode, Suspense, useMemo } from "react";
 import { cn } from "@/lib/utils";
 
 import { SortDirection } from "@/types/fetch-utils";
@@ -51,6 +51,7 @@ interface GridListProps<T extends TitleBodyImagesUserDto>
   passExtraImageOverlay?: (item: ResponseWithUserDtoEntity<T>) => ReactNode;
   extraCriteriaWithCallBack?: (callback: () => void) => ReactNode;
   extraCriteriaClassname?: ClassValue;
+  forbiddenSortingOptions?: string[];
 }
 
 export default function GridList<T extends TitleBodyImagesUserDto>({
@@ -74,7 +75,15 @@ export default function GridList<T extends TitleBodyImagesUserDto>({
   passExtraImageOverlay,
   creationFilterTexts,
   extraCriteriaClassname,
+  forbiddenSortingOptions = ["userDislikesLength"],
 }: GridListProps<T>) {
+  const finalSortingOptions = useMemo(
+    () =>
+      sortingOptions.filter(
+        ({ property }) => !forbiddenSortingOptions.includes(property),
+      ),
+    [JSON.stringify(sortingOptions), JSON.stringify(forbiddenSortingOptions)],
+  );
   const {
     pageInfo,
     filter,
@@ -98,7 +107,7 @@ export default function GridList<T extends TitleBodyImagesUserDto>({
     extraArrayQueryParam,
     extraUpdateSearchParams,
     sizeOptions,
-    sortingOptions,
+    sortingOptions: finalSortingOptions,
   });
 
   return (
@@ -119,14 +128,14 @@ export default function GridList<T extends TitleBodyImagesUserDto>({
             )}
           >
             <RadioSort
-              sortingOptions={sortingOptions}
+              sortingOptions={finalSortingOptions}
               sort={sort}
               sortValue={sortValue}
               setSort={setSort}
               setSortValue={setSortValue}
               {...radioSortTexts}
               callback={resetCurrentPage}
-              filterKey={"title"}
+              filterKey="title"
             />
             {extraCriteria && extraCriteria}
             {extraCriteriaWithCallBack &&

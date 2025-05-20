@@ -16,6 +16,7 @@ import { useSearchParams } from "next/navigation";
 import React, { useState } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { readingTime } from "reading-time-estimator";
+import { ThumbsUp } from "lucide-react";
 
 export interface ApprovedPostsTexts {
   gridListTexts: GridListTexts;
@@ -85,9 +86,9 @@ export default function PostApprovedPageContent({
         //   </div>
         // )}
         {...gridListTexts}
-        extraCriteriaClassname="items-start"
+        extraCriteriaClassname="items-start lg:gap-0"
         extraCriteriaWithCallBack={(callback) => (
-          <div className="flex items-start justify-end flex-wrap  gap-5 lg:gap-8 flex-1">
+          <div className="flex items-start justify-end flex-wrap gap-5 lg:gap-8 flex-1">
             <TagsExtraCriteriaWithCallback
               texts={tagsCriteriaTexts}
               setTags={setTags}
@@ -114,9 +115,15 @@ export default function PostApprovedPageContent({
           </div>
         )}
         passExtraHeader={(p) => (
-          <p className="text-sm text-muted-foreground font-semibold">
-            {readingTime(p.model.content.body, 200, locale).text}
-          </p>
+          <div className="flex items-center gap-3.5 justify-start max-w-[300px]">
+            <div className="flex items-start justify-center gap-0.5 font-semibold text-success">
+              <span className="mt-0.5">{p.model.content.userLikes.length}</span>
+              <ThumbsUp className="text-success" size={20} />
+            </div>
+            <p className="text-sm text-muted-foreground font-semibold">
+              {readingTime(p.model.content.body, 200, locale).text}
+            </p>
+          </div>
         )}
       />
     </section>

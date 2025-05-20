@@ -1,4 +1,4 @@
-package com.mocicarazvan.archiveservice.config;
+package com.mocicarazvan.archiveservice.config.rabbit;
 
 
 import lombok.Data;
@@ -7,8 +7,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.scheduling.support.CronExpression;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @Component
 @ConfigurationProperties(prefix = "spring.custom.queues")
@@ -22,8 +22,8 @@ public class QueuesPropertiesConfig {
     private int schedulerRepeatSeconds = 60;
     private int savingBufferSeconds = 60;
 
-    public List<String> getQueues() {
-        return List.copyOf(queuesJobs.keySet());
+    public Set<String> getQueues() {
+        return queuesJobs.keySet();
     }
 
     public String getQueueJob(String queue) {
@@ -35,16 +35,15 @@ public class QueuesPropertiesConfig {
             throw new IllegalArgumentException("Queues jobs map cannot be null or empty.");
         }
         queuesJobs.values().forEach(v -> {
-            if (v == null || v.trim().isEmpty()) {
+            if (v == null || v.isBlank()) {
                 throw new IllegalArgumentException("Cron expression cannot be null or empty.");
             }
             CronExpression.parse(v);
-            if ("* * * * * *".equals(v.trim())) {
+            if ("* * * * * *".equals(v.strip())) {
                 throw new IllegalArgumentException("Cron expression cannot be set to '* * * * * *' as it runs always.");
             }
         });
         this.queuesJobs = queuesJobs;
     }
-
-
+    
 }

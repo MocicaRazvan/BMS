@@ -1,4 +1,4 @@
-package com.mocicarazvan.archiveservice.config;
+package com.mocicarazvan.archiveservice.config.rabbit;
 
 import com.mocicarazvan.archiveservice.containers.SimpleMessageListenerContainerFactory;
 import com.mocicarazvan.archiveservice.schedulers.ContainerScheduler;

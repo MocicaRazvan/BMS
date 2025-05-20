@@ -1005,7 +1005,7 @@
           "action": "Acțiune",
           "queueName": "Numele cozii",
           "timestamp": "Data",
-          "id": "id"
+          "id": "ID"
         },
         "linkedChart": {
           "default": "Grafic asociat datelor curente din tabel",
@@ -1769,6 +1769,14 @@
         "title": {
           "asc": "Alfabetic după titlu",
           "desc": "Invers alfabetic după titlu"
+        },
+        "userLikesLength": {
+          "asc": "Cele mai puține aprecieri",
+          "desc": "Cele mai multe aprecieri"
+        },
+        "userDislikesLength": {
+          "asc": "Cele mai puține dezaprobări",
+          "desc": "Cele mai multe dezaprobări"
         }
       },
       "ApprovedPostsTexts": {
@@ -1794,6 +1802,14 @@
         "title": {
           "asc": "Alfabetic după titlu",
           "desc": "Invers alfabetic după titlu"
+        },
+        "userLikesLength": {
+          "asc": "Cele mai puține aprecieri",
+          "desc": "Cele mai multe aprecieri"
+        },
+        "userDislikesLength": {
+          "asc": "Cele mai puține dezaprobări",
+          "desc": "Cele mai multe dezaprobări"
         }
       },
       "UserRecipesPageContentTexts": {
@@ -1864,6 +1880,14 @@
         "title": {
           "asc": "Alfabetic după titlu",
           "desc": "Invers alfabetic după titlu"
+        },
+        "userLikesLength": {
+          "asc": "Cele mai puține aprecieri",
+          "desc": "Cele mai multe aprecieri"
+        },
+        "userDislikesLength": {
+          "asc": "Cele mai puține dezaprobări",
+          "desc": "Cele mai multe dezaprobări"
         }
       },
       "UserDaysPageTexts": {
@@ -1888,6 +1912,14 @@
         "price": {
           "asc": "Cel mai mic preț",
           "desc": "Cel mai mare preț"
+        },
+        "userLikesLength": {
+          "asc": "Cele mai puține aprecieri",
+          "desc": "Cele mai multe aprecieri"
+        },
+        "userDislikesLength": {
+          "asc": "Cele mai puține dezaprobări",
+          "desc": "Cele mai multe dezaprobări"
         }
       },
       "UserPlansPageTexts": {

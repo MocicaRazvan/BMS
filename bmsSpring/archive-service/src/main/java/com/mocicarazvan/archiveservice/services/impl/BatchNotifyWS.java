@@ -1,7 +1,7 @@
 package com.mocicarazvan.archiveservice.services.impl;
 
 
-import com.mocicarazvan.archiveservice.config.QueuesPropertiesConfig;
+import com.mocicarazvan.archiveservice.config.rabbit.QueuesPropertiesConfig;
 import com.mocicarazvan.archiveservice.dtos.websocket.NotifyBatchUpdate;
 import com.mocicarazvan.archiveservice.services.BatchNotify;
 import com.mocicarazvan.archiveservice.services.SimpleRedisCache;

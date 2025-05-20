@@ -241,9 +241,14 @@ export default function DaysTable({
         id: dayTableColumnTexts.userLikes,
         accessorKey: "model.userLikes",
         header: () => (
-          <p className="font-bold text-lg text-left">
-            {dayTableColumnTexts.userLikes}
-          </p>
+          <RadioSortButton
+            sortingProperty="userLikesLength"
+            radioArgs={radioArgs}
+          >
+            <p className="font-bold text-lg text-left">
+              {dayTableColumnTexts.userLikes}
+            </p>
+          </RadioSortButton>
         ),
         cell: ({ row }) => <p>{row.original.model.userLikes.length}</p>,
       },
@@ -251,9 +256,14 @@ export default function DaysTable({
         id: dayTableColumnTexts.userDislikes,
         accessorKey: "model.userDislikes",
         header: () => (
-          <p className="font-bold text-lg text-left">
-            {dayTableColumnTexts.userDislikes}
-          </p>
+          <RadioSortButton
+            sortingProperty="userDislikesLength"
+            radioArgs={radioArgs}
+          >
+            <p className="font-bold text-lg text-left">
+              {dayTableColumnTexts.userDislikes}
+            </p>
+          </RadioSortButton>
         ),
         cell: ({ row }) => <p>{row.original.model.userDislikes.length}</p>,
       },

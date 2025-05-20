@@ -187,9 +187,14 @@ export default function PostsTable({
         id: postTableColumnsTexts.userLikes,
         accessorKey: "userLikes",
         header: () => (
-          <p className="font-bold text-lg text-left ">
-            {postTableColumnsTexts.userLikes}
-          </p>
+          <RadioSortButton
+            sortingProperty="userLikesLength"
+            radioArgs={radioArgs}
+          >
+            <p className="font-bold text-lg text-left">
+              {postTableColumnsTexts.userLikes}
+            </p>
+          </RadioSortButton>
         ),
         cell: ({ row }) => <p>{row.original.userLikes.length}</p>,
       },
@@ -197,9 +202,14 @@ export default function PostsTable({
         id: postTableColumnsTexts.userDislikes,
         accessorKey: "userDislikes",
         header: () => (
-          <p className="font-bold text-lg text-left">
-            {postTableColumnsTexts.userDislikes}
-          </p>
+          <RadioSortButton
+            sortingProperty="userDislikesLength"
+            radioArgs={radioArgs}
+          >
+            <p className="font-bold text-lg text-left">
+              {postTableColumnsTexts.userDislikes}
+            </p>
+          </RadioSortButton>
         ),
         cell: ({ row }) => <p>{row.original.userDislikes.length}</p>,
       },

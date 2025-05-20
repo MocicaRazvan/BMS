@@ -1,7 +1,7 @@
 package com.mocicarazvan.archiveservice.schedulers;
 
 
-import com.mocicarazvan.archiveservice.config.QueuesPropertiesConfig;
+import com.mocicarazvan.archiveservice.config.rabbit.QueuesPropertiesConfig;
 import com.mocicarazvan.archiveservice.services.ContainerNotify;
 import com.mocicarazvan.archiveservice.triggers.AfterMillisTrigger;
 import jakarta.annotation.PreDestroy;

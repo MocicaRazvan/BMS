@@ -1,6 +1,6 @@
 package com.mocicarazvan.archiveservice.containers;
 
-import com.mocicarazvan.archiveservice.config.QueuesPropertiesConfig;
+import com.mocicarazvan.archiveservice.config.rabbit.QueuesPropertiesConfig;
 import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.amqp.core.AcknowledgeMode;

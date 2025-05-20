@@ -21,10 +21,10 @@ import java.time.LocalDateTime;
 public class TasksConfig {
     private final ContainerNotifyService containerNotifyService;
 
-    @Value("${cart.clear-old-archive.cron:0 0 */2 * * *}")
+    @Value("${spring.custom.clear-old-archive.cron:0 0 */2 * * *}")
     private String clearOldArchiveCron;
 
-    @Value("${cart.clear-old-archive.enabled:true}")
+    @Value("${spring.custom.clear-old-archive.enabled:true}")
     private boolean isClearEnabled;
 
 
@@ -40,8 +40,7 @@ public class TasksConfig {
         return Flux.interval(durations.getFirst(), durations.getSecond())
                 .concatMap(_ -> {
                     log.info("Clearing old archive");
-                    return
-                            containerNotifyService.invalidateNotifications();
+                    return containerNotifyService.invalidateNotifications();
                 })
                 .subscribe(
                         result -> log.info("Old archive cleared: {}", result),

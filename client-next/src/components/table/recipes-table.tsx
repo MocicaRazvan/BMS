@@ -286,9 +286,14 @@ export default function RecipeTable({
         id: recipeTableColumnsTexts.userLikes,
         accessorKey: "model.userLikes",
         header: () => (
-          <p className="font-bold text-lg text-left">
-            {recipeTableColumnsTexts.userLikes}
-          </p>
+          <RadioSortButton
+            sortingProperty="userLikesLength"
+            radioArgs={radioArgs}
+          >
+            <p className="font-bold text-lg text-left">
+              {recipeTableColumnsTexts.userLikes}
+            </p>
+          </RadioSortButton>
         ),
         cell: ({ row }) => <p>{row.original.model.userLikes.length}</p>,
       },
@@ -296,9 +301,14 @@ export default function RecipeTable({
         id: recipeTableColumnsTexts.userDislikes,
         accessorKey: "model.userDislikes",
         header: () => (
-          <p className="font-bold text-lg text-left">
-            {recipeTableColumnsTexts.userDislikes}
-          </p>
+          <RadioSortButton
+            sortingProperty="userDislikesLength"
+            radioArgs={radioArgs}
+          >
+            <p className="font-bold text-lg text-left">
+              {recipeTableColumnsTexts.userDislikes}
+            </p>
+          </RadioSortButton>
         ),
         cell: ({ row }) => <p>{row.original.model.userDislikes.length}</p>,
       },

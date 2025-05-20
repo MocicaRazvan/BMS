@@ -9,6 +9,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.data.domain.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -247,5 +248,18 @@ class PageableUtilsCustomTest {
         assertTrue(called.get());
     }
 
+    @ParameterizedTest
+    @ValueSource(strings = {"fieldCamel1", "field2"})
+    void getOrderColumnDefNormalColumn(String field) {
+        String expected = EntitiesUtils.camelToSnake(field);
+        String result = pageableUtilsCustom.getOrderColumnDef(field);
+        assertEquals(expected, result);
+    }
+
+    @Test
+    void getOrderColumnDefUserLikesDislikes() {
+        assertEquals("cardinality(user_likes)", pageableUtilsCustom.getOrderColumnDef(PageableUtilsCustom.USER_LIKES_LENGTH_SORT_PROPERTY));
+        assertEquals("cardinality(user_dislikes)", pageableUtilsCustom.getOrderColumnDef(PageableUtilsCustom.USER_DISLIKES_LENGTH_SORT_PROPERTY));
+    }
 
 }

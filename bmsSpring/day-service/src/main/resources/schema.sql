@@ -38,7 +38,8 @@ CREATE TABLE IF NOT EXISTS day
     );
 
 CREATE INDEX IF NOT EXISTS idx_day_user_id ON day (user_id);
-
+CREATE INDEX IF NOT EXISTS idx_day_user_likes_cardinality
+    ON day (cardinality(user_likes));
 
 CREATE TABLE IF NOT EXISTS meal
 (
@@ -90,6 +91,8 @@ create  index  if not exists id_day_calendar_id_user_id_day_id
     on day_calendar (id, user_id, day_id);
 CREATE INDEX if not exists idx_day_calendar_custom_date_user
     ON day_calendar (custom_date DESC, user_id);
+
+
 
 CREATE INDEX IF NOT EXISTS idx_meal_user_id ON meal (user_id);
 CREATE INDEX IF NOT EXISTS idx_meal_day_id ON meal (day_id);

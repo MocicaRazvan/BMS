@@ -28,6 +28,10 @@ CREATE INDEX IF NOT EXISTS idx_ingredient_quantity_ingredient_id ON ingredient_q
 
 CREATE INDEX IF NOT EXISTS idx_recipe_user_id ON recipe (user_id);
 
+CREATE INDEX IF NOT EXISTS idx_recipe_user_likes_cardinality
+    ON recipe (cardinality(user_likes));
+
+
 CREATE EXTENSION IF NOT EXISTS pg_trgm;
 
 CREATE INDEX IF NOT EXISTS idx_recipe_title_trgm ON recipe USING GIN (title gin_trgm_ops);

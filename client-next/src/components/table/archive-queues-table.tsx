@@ -549,7 +549,7 @@ function DataTablePagination<TData>({
               <SelectValue placeholder={table.getState().pagination.pageSize} />
             </SelectTrigger>
             <SelectContent side="top">
-              {[10, 20, 30, 40].map((pageSize) => (
+              {[10, 20, 30, 40, 100].map((pageSize) => (
                 <SelectItem key={pageSize} value={`${pageSize}`}>
                   {pageSize}
                 </SelectItem>
@@ -612,6 +612,7 @@ const HeaderSortingButton = <T,>({
 }) => (
   <Button
     variant="ghost"
+    className="px-1.5 py-1"
     onClick={() => {
       const sortState = column.getIsSorted();
       if (sortState === "asc") {

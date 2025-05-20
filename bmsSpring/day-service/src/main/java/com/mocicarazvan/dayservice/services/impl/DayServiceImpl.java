@@ -56,7 +56,7 @@ public class DayServiceImpl
     private final DayEmbedServiceImpl dayEmbedServiceImpl;
 
     public DayServiceImpl(DayRepository modelRepository, DayMapper modelMapper, PageableUtilsCustom pageableUtils, UserClient userClient, EntitiesUtils entitiesUtils, MealService mealService, TransactionalOperator transactionalOperator, ExtendedDayRepository extendedDayRepository, PlanClient planClient, RecipeClient recipeClient, DayServiceRedisCacheWrapper self, DayEmbedServiceImpl dayEmbedServiceImpl, RabbitMqUpdateDeleteService<Day> rabbitMqUpdateDeleteService) {
-        super(modelRepository, modelMapper, pageableUtils, userClient, "day", List.of("id", "userId", "type", "title", "createdAt", "updatedAt"), entitiesUtils, self, rabbitMqUpdateDeleteService);
+        super(modelRepository, modelMapper, pageableUtils, userClient, "day", List.of("id", "userId", "type", "title", "createdAt", "updatedAt", PageableUtilsCustom.USER_LIKES_LENGTH_SORT_PROPERTY, PageableUtilsCustom.USER_DISLIKES_LENGTH_SORT_PROPERTY), entitiesUtils, self, rabbitMqUpdateDeleteService);
         this.mealService = mealService;
         this.transactionalOperator = transactionalOperator;
         this.extendedDayRepository = extendedDayRepository;

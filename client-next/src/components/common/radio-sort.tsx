@@ -255,7 +255,7 @@ export const RadioSortButton = ({
       // disabled={isDefaultActive}
       variant="ghost"
       className={cn(
-        "hover:bg-transparent flex items-center justify-between gap-1 px-0 py-0",
+        "flex items-center justify-between gap-1 px-1.5 py-1",
         className,
       )}
       {...args}
@@ -358,7 +358,7 @@ export function RadioSortDropDownWithExtra({
         <Button
           variant="ghost"
           className={cn(
-            "hover:bg-transparent flex items-center justify-between gap-1 px-0 py-0",
+            "flex items-center justify-between gap-1 px-1.5 py-1",
             className,
           )}
         >
@@ -417,7 +417,7 @@ export function RadioSortDropDownWithExtraDummy({
         <Button
           variant="ghost"
           className={cn(
-            "hover:bg-transparent flex items-center justify-between gap-1 px-0 py-0",
+            "flex items-center justify-between gap-1 px-1.5 py-1",
             className,
           )}
         >

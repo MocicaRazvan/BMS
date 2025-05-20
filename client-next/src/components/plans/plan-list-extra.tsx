@@ -5,6 +5,8 @@ import AddToCartBtn, {
 } from "@/components/plans/add-to-cart-btn";
 import { Session } from "next-auth";
 import { NumberFormatOptions } from "use-intl";
+import { ThumbsUp } from "lucide-react";
+import React from "react";
 
 export const PlanImageOverlay = (
   item: ResponseWithUserDtoEntity<PlanResponse>,
@@ -45,7 +47,7 @@ export const PlanExtraContent = (
 export const PlanExtraHeader = (
   {
     model: {
-      content: { price },
+      content: { price, userLikes },
     },
   }: ResponseWithUserDtoEntity<PlanResponse>,
   formatFunction: (
@@ -53,11 +55,19 @@ export const PlanExtraHeader = (
     formatOrOptions?: string | NumberFormatOptions,
   ) => string,
 ) => (
-  <span className="font-bold">
-    {formatFunction(price, {
-      style: "currency",
-      currency: "EUR",
-      maximumFractionDigits: 2,
-    })}
-  </span>
+  <div className="flex items-center gap-3.5 justify-start max-w-[300px]">
+    <div className="flex items-start justify-center gap-0.5 font-semibold text-success">
+      <span className="mt-0.5">{userLikes.length}</span>
+      <ThumbsUp className="text-success" size={20} />
+    </div>
+    <p className="text-sm text-muted-foreground font-semibold">
+      <span className="font-bold">
+        {formatFunction(price, {
+          style: "currency",
+          currency: "EUR",
+          maximumFractionDigits: 2,
+        })}
+      </span>
+    </p>
+  </div>
 );

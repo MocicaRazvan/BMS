@@ -1,7 +1,7 @@
 package com.mocicarazvan.archiveservice.services.impl;
 
 
-import com.mocicarazvan.archiveservice.config.QueuesPropertiesConfig;
+import com.mocicarazvan.archiveservice.config.rabbit.QueuesPropertiesConfig;
 import com.mocicarazvan.archiveservice.dtos.QueueInformationWithTimestamp;
 import com.mocicarazvan.archiveservice.exceptions.QueueNameNotValid;
 import com.mocicarazvan.archiveservice.schedulers.ContainerScheduler;

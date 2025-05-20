@@ -2,7 +2,7 @@ package com.mocicarazvan.archiveservice.listeners;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
-import com.mocicarazvan.archiveservice.config.QueuesPropertiesConfig;
+import com.mocicarazvan.archiveservice.config.rabbit.QueuesPropertiesConfig;
 import com.mocicarazvan.archiveservice.services.SaveMessagesAggregator;
 import com.mocicarazvan.archiveservice.utils.MonoWrapper;
 import com.rabbitmq.client.Channel;

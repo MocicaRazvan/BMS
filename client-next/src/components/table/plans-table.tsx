@@ -25,7 +25,7 @@ import {
 } from "@/types/dto";
 import React, { Suspense, useCallback, useMemo } from "react";
 import { ColumnDef } from "@tanstack/react-table";
-import { Badge } from "@/components/ui/badge";
+import { Badge, BadgeVariants } from "@/components/ui/badge";
 import { format, parseISO } from "date-fns";
 import {
   DropdownMenu,
@@ -96,6 +96,12 @@ export interface PlanTableProps
     PlanTableTexts {
   isSidebarOpen?: boolean;
 }
+const colorMap = {
+  CARNIVORE: "destructive",
+  VEGAN: "success",
+  OMNIVORE: "default",
+  VEGETARIAN: "accent",
+} as const;
 
 export default function PlansTable({
   planTableColumnsTexts,
@@ -281,32 +287,14 @@ export default function PlansTable({
             }
           />
         ),
-        cell: ({ row }) => {
-          const colorMap = {
-            CARNIVORE: "destructive",
-            VEGAN: "success",
-            OMNIVORE: "default",
-            VEGETARIAN: "accent",
-          };
-
-          return (
-            <Badge
-              variant={
-                colorMap[row.original.model.type] as
-                  | "default"
-                  | "destructive"
-                  | "success"
-                  | "accent"
-                  | "secondary"
-                  | "outline"
-                  | null
-                  | undefined
-              }
-            >
-              {row.original.model.type}
-            </Badge>
-          );
-        },
+        cell: ({ row }) => (
+          <Badge
+            className="px-2"
+            variant={colorMap[row.original.model.type] as BadgeVariants}
+          >
+            {row.original.model.type}
+          </Badge>
+        ),
       },
       {
         id: planTableColumnsTexts.objective,
@@ -357,12 +345,42 @@ export default function PlansTable({
         ),
         cell: ({ row }) => (
           <Badge
+            className="px-2"
             variant={row.original.model.display ? "success" : "destructive"}
           >
             {row.original.model.display
               ? planTableColumnsTexts.display.true
               : planTableColumnsTexts.display.false}
           </Badge>
+        ),
+      },
+      {
+        id: planTableColumnsTexts.createdAt,
+        accessorKey: "model.createdAt",
+        header: () => (
+          <RadioSortDropDownWithExtra
+            radioArgs={radioArgs}
+            sortingProperty="createdAt"
+            trigger={
+              <p className="font-bold text-lg text-left">
+                {planTableColumnsTexts.createdAt}
+              </p>
+            }
+            showNone={false}
+            extraContent={
+              <CreationFilter
+                triggerVariant="ghost"
+                triggerClassName="px-5"
+                {...creationFilterTexts}
+                updateCreatedAtRange={updateCreatedAtRange}
+                hideUpdatedAt={true}
+                showLabels={false}
+              />
+            }
+          />
+        ),
+        cell: ({ row }) => (
+          <p>{format(parseISO(row.original.model.createdAt), "dd/MM/yyyy")}</p>
         ),
       },
       {
@@ -422,35 +440,7 @@ export default function PlansTable({
       //   ),
       //   cell: ({ row }) => <p>{row.original.model.userDislikes.length}</p>,
       // },
-      {
-        id: planTableColumnsTexts.createdAt,
-        accessorKey: "model.createdAt",
-        header: () => (
-          <RadioSortDropDownWithExtra
-            radioArgs={radioArgs}
-            sortingProperty="createdAt"
-            trigger={
-              <p className="font-bold text-lg text-left">
-                {planTableColumnsTexts.createdAt}
-              </p>
-            }
-            showNone={false}
-            extraContent={
-              <CreationFilter
-                triggerVariant="ghost"
-                triggerClassName="px-5"
-                {...creationFilterTexts}
-                updateCreatedAtRange={updateCreatedAtRange}
-                hideUpdatedAt={true}
-                showLabels={false}
-              />
-            }
-          />
-        ),
-        cell: ({ row }) => (
-          <p>{format(parseISO(row.original.model.createdAt), "dd/MM/yyyy")}</p>
-        ),
-      },
+
       {
         id: planTableColumnsTexts.updatedAt,
         accessorKey: "model.updatedAt",
@@ -708,7 +698,7 @@ export default function PlansTable({
     ],
   );
   const finalCols = useMemo(
-    () => (!isSidebarOpen ? columns : columns.slice(0, -5)),
+    () => (!isSidebarOpen ? columns : columns.slice(0, -4)),
     [isSidebarOpen, columns],
   );
 

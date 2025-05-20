@@ -86,6 +86,8 @@ create table if not exists post_embedding
 CREATE INDEX IF NOT EXISTS hnsw_post
     ON post_embedding USING hnsw (embedding vector_ip_ops) with (m=16, ef_construction =64 );
 
+CREATE INDEX IF NOT EXISTS idx_post_user_likes_cardinality
+    ON post (cardinality(user_likes));
 
 -- create table if not exists post_view_count (
 --     post_id  bigint primary key references post(id) on delete cascade,

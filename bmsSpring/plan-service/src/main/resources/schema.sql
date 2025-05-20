@@ -60,6 +60,8 @@ CREATE
     EXTENSION IF NOT EXISTS pg_trgm;
 CREATE INDEX IF NOT EXISTS idx_plan_title_trgm ON plan USING GIN (title gin_trgm_ops);
 
+CREATE INDEX IF NOT EXISTS  idx_plan_user_likes_cardinality
+    ON plan (cardinality(user_likes));
 
 create
     extension if not exists vector;

@@ -15,11 +15,15 @@ export const sortingPostsSortingOptionsKeys = [
   "title",
   "createdAt",
   "updatedAt",
+  "userLikesLength",
+  "userDislikesLength",
 ] as const;
 export const sortingRecipesSortingOptionsKeys = [
   "title",
   "createdAt",
   "updatedAt",
+  "userLikesLength",
+  "userDislikesLength",
 ] as const;
 
 export const sortingUsersSortingOptionsKeys = [
@@ -45,12 +49,16 @@ export const sortingDaysSortingOptionsKeys = [
   "title",
   "createdAt",
   "updatedAt",
+  "userLikesLength",
+  "userDislikesLength",
 ] as const;
 export const sortingPlansSortingOptionsKeys = [
   "title",
   "createdAt",
   "updatedAt",
   "price",
+  "userLikesLength",
+  "userDislikesLength",
 ] as const;
 export const sortingOrdersSortingOptionsKeys = ["createdAt", "total"] as const;
 export async function getSortingItemSortingOptions(

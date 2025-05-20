@@ -52,7 +52,7 @@ export default function ArchiveNotificationsProvider({
           const parsedMessage = JSON.parse(
             message.data,
           ) as NotifyContainerAction;
-          setNotifications((prevMessages) => [...prevMessages, parsedMessage]);
+          setNotifications((prevMessages) => [parsedMessage, ...prevMessages]);
         }
       },
     },

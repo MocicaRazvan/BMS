@@ -1,7 +1,7 @@
 package com.mocicarazvan.archiveservice.containers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mocicarazvan.archiveservice.config.QueuesPropertiesConfig;
+import com.mocicarazvan.archiveservice.config.rabbit.QueuesPropertiesConfig;
 import com.mocicarazvan.archiveservice.dtos.*;
 import com.mocicarazvan.archiveservice.exceptions.QueueNameNotValid;
 import com.mocicarazvan.archiveservice.exceptions.QueuePrefixNotFound;

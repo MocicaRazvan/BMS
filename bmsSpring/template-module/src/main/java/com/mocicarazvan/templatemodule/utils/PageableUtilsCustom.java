@@ -20,6 +20,9 @@ import java.util.function.Function;
 
 public class PageableUtilsCustom {
 
+    public static final String USER_LIKES_LENGTH_SORT_PROPERTY = "userLikesLength";
+    public static final String USER_DISLIKES_LENGTH_SORT_PROPERTY = "userDislikesLength";
+
     public Mono<Void> isSortingCriteriaValid(Map<String, String> sortingCriteria, List<String> allowedFields) {
         if (allowedFields == null || sortingCriteria == null) {
             return Mono.empty();
@@ -75,13 +78,21 @@ public class PageableUtilsCustom {
                 ));
     }
 
+    public String getOrderColumnDef(String property) {
+        return switch (property) {
+            case USER_LIKES_LENGTH_SORT_PROPERTY -> "cardinality(user_likes)";
+            case USER_DISLIKES_LENGTH_SORT_PROPERTY -> "cardinality(user_dislikes)";
+            default -> EntitiesUtils.camelToSnake(property);
+        };
+    }
+
     public String createPageRequestQuery(PageRequest pageRequest) {
         StringBuilder queryString = new StringBuilder();
 
         if (pageRequest.getSort().isSorted()) {
             queryString.append(" ORDER BY ");
             pageRequest.getSort().forEach(order -> {
-                queryString.append(EntitiesUtils.camelToSnake(order.getProperty()))
+                queryString.append(getOrderColumnDef(order.getProperty()))
                         .append(" ")
                         .append(order.getDirection().name())
                         .append(", ");
