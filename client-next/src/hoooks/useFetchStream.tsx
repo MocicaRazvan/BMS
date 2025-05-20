@@ -100,7 +100,7 @@ export function useFetchStream<T = unknown, E extends BaseError = BaseError>({
   useAbortController = true,
   batchSize = 6,
   refetchOnFocus = true,
-  focusDelay = 30,
+  focusDelay = 300,
   trigger = true,
 }: UseFetchStreamProps): UseFetchStreamReturn<T, E> {
   const stableStringifyQueryParams = stableStringify(queryParams);
