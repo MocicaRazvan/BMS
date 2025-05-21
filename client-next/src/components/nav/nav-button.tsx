@@ -106,6 +106,7 @@ export function NavButton({
   setActive,
   onItemClick,
 }: NavButtonProps) {
+  const isActive = active === idx;
   return (
     <Link
       href={item.link}
@@ -116,7 +117,7 @@ export function NavButton({
         item.linkClassName,
       )}
     >
-      {active === idx && (
+      {isActive && (
         <motion.div
           layoutId="hovered"
           className="absolute inset-0 h-full w-full rounded-full bg-muted"
@@ -124,7 +125,7 @@ export function NavButton({
       )}
       <motion.div
         className="relative z-20 flex items-center gap-2"
-        animate={{ scale: active === idx ? 1.05 : 1 }}
+        animate={{ scale: isActive ? 1.05 : 1 }}
         transition={{ type: "spring", stiffness: 300, damping: 20 }}
       >
         {item.Icon && (

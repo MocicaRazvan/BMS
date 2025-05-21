@@ -214,8 +214,6 @@ const groupDataByDate = <TData,>(
     (acc, item) => {
       const rawValue = fromStringOfDotToObjectValue(dateField, item as object);
 
-      console.log("rawValue", rawValue);
-
       let date: Date | null = null;
 
       if (typeof rawValue === "number") {

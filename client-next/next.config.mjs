@@ -1,4 +1,5 @@
 import createNextIntlPlugin from "next-intl/plugin";
+import { PHASE_DEVELOPMENT_SERVER } from "next/constants.js";
 
 import generated from "@next/bundle-analyzer";
 
@@ -8,7 +9,7 @@ const withBundleAnalyzer = generated({
 });
 
 /** @type {import('next').NextConfig} */
-const nextConfig = {
+const baseConfig = {
   // reactStrictMode: false,
   output: "standalone",
   images: {
@@ -51,4 +52,19 @@ const nextConfig = {
 
   // reactStrictMode: false
 };
-export default withBundleAnalyzer(withNextIntl(nextConfig));
+const finalConfig = (phase) => {
+  const isDev = phase === PHASE_DEVELOPMENT_SERVER;
+  /**
+   * @type {import('next').NextConfig}
+   */
+  const nextConfig = {
+    ...baseConfig,
+    assetPrefix: isDev ? undefined : "https://im51.go.ro",
+  };
+  /**
+   * @type {import('next').NextConfig}
+   */
+  return withBundleAnalyzer(withNextIntl(nextConfig));
+};
+
+export default finalConfig;
