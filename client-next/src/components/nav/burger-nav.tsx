@@ -33,11 +33,11 @@ const BurgerNav = memo<Props>(({ authUser, texts, linkItems }: Props) => {
         </Button>
       </SheetTrigger>
       <SheetContent
-        side={"left"}
-        className="w-[75%] z-[100] min-h-[100vh] "
-        closeClassNames="h-8 w-8"
+        side="left"
+        className="w-[75%] z-[100] min-h-[100vh]"
+        closeClassNames="h-5 w-5"
       >
-        <ScrollArea className="py-4 pb-10 px-4 my-8  h-full  flex flex-col gap-6 ">
+        <ScrollArea className="pb-8 px-4 my-8  h-full  flex flex-col gap-6 ">
           {!authUser && (
             <div className="mb-8">
               <Link
@@ -53,10 +53,12 @@ const BurgerNav = memo<Props>(({ authUser, texts, linkItems }: Props) => {
           )}
 
           {authUser && (
-            <NavButtonGroup
-              items={linkItems}
-              className="flex-col items-start gap-0.5"
-            />
+            <div className="pt-2.5">
+              <NavButtonGroup
+                items={linkItems}
+                className="flex-col items-start gap-0.5"
+              />
+            </div>
           )}
 
           {!authUser && (

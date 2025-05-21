@@ -170,9 +170,9 @@ export default function Nav({
         link: "/",
         isActive: (pathName) => pathName === "/",
         additional: (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5">
             <Logo width={40} height={40} />
-            <span className="text-sm md:text-lg">{links.home}</span>
+            <span className="md:text-lg">{links.home}</span>
           </div>
         ),
         separator: <hr className="border my-2.5 w-full" />,
@@ -207,7 +207,7 @@ export default function Nav({
         additional: (
           <SheetClose className="flex items-center justify-start gap-2 h-full w-full ps-2">
             {authUser.image ? (
-              <div className="flex items-center justify-between w-full gap-2 b">
+              <div className="flex items-center justify-between w-full gap-2 ">
                 <Avatar className="cursor-pointer">
                   <AvatarImage src={authUser?.image} alt={authUser?.email} />
                 </Avatar>

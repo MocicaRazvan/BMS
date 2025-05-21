@@ -86,6 +86,7 @@ const config = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        nivo: "var(--nivo-unknown)",
         shadow_color: "var(--shadow-color)",
       },
       borderRadius: {
@@ -150,7 +151,11 @@ const config = {
       },
     },
   },
-  plugins: [require("tailwindcss-animate"), require("@tailwindcss/typography")],
+  plugins: [
+    require("tailwindcss-animate"),
+    require("@tailwindcss/typography"),
+    require("tailwindcss-spring"),
+  ],
 } satisfies Config;
 
 export default config;

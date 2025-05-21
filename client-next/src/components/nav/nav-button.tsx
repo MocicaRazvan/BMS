@@ -1,8 +1,8 @@
 "use client";
 import { cn } from "@/lib/utils";
-import { motion } from "framer-motion";
 
 import React, {
+  CSSProperties,
   Dispatch,
   ElementType,
   Fragment,
@@ -11,10 +11,12 @@ import React, {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import { Link, usePathname } from "@/navigation";
 import { ClassValue } from "clsx";
+import { v4 as uuidv4 } from "uuid";
 
 export interface BaseNavItem {
   isActive?: (pathName: string) => boolean;
@@ -67,75 +69,97 @@ export const NavButtonGroup = ({
   className,
   onItemClick,
 }: NavItemsProps) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [highlightStyle, setHighlightStyle] = useState<CSSProperties>({});
   const { active, setActive, setDefaultActive } = useNavGroup(items);
+  const uniqueId = useMemo(() => uuidv4(), []);
 
+  const createItemKey = useCallback(
+    (idx: number) => `nav-button-${idx}-${uniqueId}`,
+    [uniqueId],
+  );
+
+  useEffect(() => {
+    if (active !== null) {
+      const btn = document.getElementById(createItemKey(active));
+      const cont = containerRef.current;
+      if (btn instanceof HTMLElement && cont) {
+        setHighlightStyle({
+          left: btn.offsetLeft,
+          top: btn.offsetTop,
+          width: btn.offsetWidth,
+          height: btn.offsetHeight,
+        });
+      }
+    }
+  }, [active, createItemKey]);
   return (
-    <motion.div
+    <div
+      ref={containerRef}
       onMouseLeave={setDefaultActive}
-      className={cn("flex flex-row items-center justify-center", className)}
+      className={cn(
+        "relative flex flex-row items-center justify-center",
+        className,
+      )}
     >
+      <div
+        className="absolute rounded-full bg-primary/10 dark:bg-muted transition-all spring-bounce-30 spring-duration-300 backdrop-blur-3xl
+         supports-[backdrop-filter]:bg-primary/5 dark:supports-[backdrop-filter]:bg-muted/50"
+        style={highlightStyle}
+      />
+
       {items.map((item, idx) => (
-        <Fragment key={item.link + idx}>
+        <Fragment key={item.link + idx + uniqueId}>
           {item.beforeSeparator && item.beforeSeparator}
           <NavButton
+            id={createItemKey(idx)}
             item={item}
             idx={idx}
-            active={active}
             setActive={setActive}
             onItemClick={onItemClick}
           />
           {item.separator && item.separator}
         </Fragment>
       ))}
-    </motion.div>
+    </div>
   );
 };
 
 interface NavButtonProps {
   item: NavItem;
   idx: number;
-  active: number | null;
   setActive: Dispatch<SetStateAction<number | null>>;
   onItemClick?: () => void;
+  id: string;
 }
 
 export function NavButton({
+  id,
   item,
   idx,
-  active,
   setActive,
   onItemClick,
 }: NavButtonProps) {
-  const isActive = active === idx;
   return (
     <Link
+      id={id}
       href={item.link}
       onMouseEnter={() => setActive(idx)}
       onClick={onItemClick}
       className={cn(
-        "relative px-2 md:px-3 py-1 md:py-1.5 text-foreground",
+        "relative px-2 md:px-3 py-1 md:py-1.5 text-foreground inline-block hover:scale-105 transition-transform duration-200 ease-in-out",
         item.linkClassName,
       )}
     >
-      {isActive && (
-        <motion.div
-          layoutId="hovered"
-          className="absolute inset-0 h-full w-full rounded-full bg-muted"
-        />
-      )}
-      <motion.div
-        className="relative z-20 flex items-center gap-2"
-        animate={{ scale: isActive ? 1.05 : 1 }}
-        transition={{ type: "spring", stiffness: 300, damping: 20 }}
-      >
+      <div className="relative z-20 flex items-center gap-2">
         {item.Icon && (
           <item.Icon
             className={cn("w-5 h-5 text-foreground/80", item.iconClassName)}
           />
         )}
-        {item.name && <span className="text-sm md:text-lg">{item.name}</span>}
+        {item.name && <span className="md:text-lg">{item.name}</span>}
         {item.additional && item.additional}
-      </motion.div>
+      </div>
     </Link>
   );
 }
