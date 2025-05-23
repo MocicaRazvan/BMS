@@ -30,8 +30,8 @@ public interface PostRepository extends ApprovedRepository<Post> {
 
     @Query("""
             SELECT * FROM post
-            WHERE EXTRACT(MONTH FROM created_at) = :month
-            AND EXTRACT(YEAR FROM created_at) = :year
+            WHERE created_at >= make_timestamp(:year, :month, 1, 0, 0, 0)
+            AND created_at < make_timestamp(:year, :month, 1, 0, 0, 0) + INTERVAL '1 month'
             ORDER BY created_at DESC
             """)
     Flux<Post> findModelByMonth(int month, int year);

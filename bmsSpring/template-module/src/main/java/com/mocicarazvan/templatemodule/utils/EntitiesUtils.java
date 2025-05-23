@@ -10,6 +10,7 @@ import com.mocicarazvan.templatemodule.exceptions.notFound.NotFoundEntity;
 import com.mocicarazvan.templatemodule.models.Approve;
 import com.mocicarazvan.templatemodule.models.ManyToOneUser;
 import com.mocicarazvan.templatemodule.models.TitleBody;
+import com.mocicarazvan.templatemodule.repositories.AssociativeEntityRepository;
 import com.mocicarazvan.templatemodule.repositories.CountIds;
 import com.mocicarazvan.templatemodule.repositories.ManyToOneUserRepository;
 import io.r2dbc.spi.Row;
@@ -25,6 +26,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class EntitiesUtils {
 
+
     public <M extends ManyToOneUser, R extends ManyToOneUserRepository<M> & CountIds> Mono<Void> validIds(List<Long> ids, R modelRepository, String name) {
         return modelRepository.countByIds(ids)
                 .map(count -> count == ids.size())
@@ -33,29 +35,43 @@ public class EntitiesUtils {
                 .then();
     }
 
-    public <M extends TitleBody> Mono<M> setReaction(M model, UserDto user, String type) {
+    public <M extends TitleBody> Mono<M> setReaction(M model, UserDto user, String type,
+                                                     AssociativeEntityRepository userLikesRepository,
+                                                     AssociativeEntityRepository userDislikesRepository
+    ) {
         Set<Long> likes = new HashSet<>(model.getUserLikes());
         Set<Long> dislikes = new HashSet<>(model.getUserDislikes());
 
-        if (type.equalsIgnoreCase("like")) {
-            if (likes.contains(user.getId())) {
-                likes.remove(user.getId());
-            } else {
-                likes.add(user.getId());
-                dislikes.remove(user.getId());
-            }
-        } else if (type.equalsIgnoreCase("dislike")) {
-            if (dislikes.contains(user.getId())) {
-                dislikes.remove(user.getId());
-            } else {
-                dislikes.add(user.getId());
-                likes.remove(user.getId());
-            }
-        }
+        return Mono.just(model)
+                .flatMap(monoModel -> {
+                    if (type.equalsIgnoreCase("like")) {
+                        return getMono(user, userDislikesRepository, userLikesRepository, dislikes, likes, monoModel);
+                    } else if (type.equalsIgnoreCase("dislike")) {
+                        return getMono(user, userLikesRepository, userDislikesRepository, likes, dislikes, monoModel);
+                    }
+                    return Mono.just(monoModel);
+                })
+                .map(monoModel -> {
+                    monoModel.setUserLikes(likes.stream().toList());
+                    monoModel.setUserDislikes(dislikes.stream().toList());
+                    return monoModel;
+                });
 
-        model.setUserLikes(likes.stream().toList());
-        model.setUserDislikes(dislikes.stream().toList());
-        return Mono.just(model);
+    }
+
+    private <M extends TitleBody> Mono<? extends M> getMono(UserDto user, AssociativeEntityRepository otherRepo, AssociativeEntityRepository curRepo,
+                                                            Set<Long> otherAction, Set<Long> curAction, M monoModel) {
+        if (curAction.contains(user.getId())) {
+            curAction.remove(user.getId());
+            return curRepo.removeChild(monoModel.getId(), user.getId()).thenReturn(monoModel);
+        } else {
+            curAction.add(user.getId());
+            otherAction.remove(user.getId());
+            return Mono.zip(
+                    curRepo.addChild(monoModel.getId(), user.getId()),
+                    otherRepo.removeChild(monoModel.getId(), user.getId())
+            ).thenReturn(monoModel);
+        }
     }
 
     public <T> Mono<T> getEntityById(Long id, String name, R2dbcRepository<T, Long> repository) {

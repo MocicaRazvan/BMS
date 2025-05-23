@@ -1,4 +1,4 @@
-import {
+import React, {
   CSSProperties,
   forwardRef,
   HTMLAttributes,
@@ -7,8 +7,6 @@ import {
 } from "react";
 import { SortableListType } from "@/components/dnd/sortable-list";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { CircleAlert, Trash2 } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -19,10 +17,10 @@ import ImageCropper, {
   ImageCropperProps,
   ImageCropTexts,
 } from "@/components/common/image-cropper";
-import { useDebounce } from "react-use";
 import { FieldInputItem } from "@/components/forms/input-file";
 import { Skeleton } from "@/components/ui/skeleton";
 import Image from "next/image";
+import TwoStepDeleteButton from "@/components/common/two-step-delete-button";
 
 type Props = {
   item: FieldInputItem;
@@ -68,18 +66,7 @@ const Item = forwardRef<HTMLDivElement, Props>(
     ref,
   ) => {
     const [videoSrc, setVideoSrc] = useState<string | null>(null);
-    const [isDeletePressed, setIsDeletePressed] = useState(false);
     const [isImageLoaded, setIsImageLoaded] = useState(false);
-
-    useDebounce(
-      () => {
-        if (isDeletePressed) {
-          setIsDeletePressed(false);
-        }
-      },
-      3000,
-      [isDeletePressed],
-    );
 
     useEffect(() => {
       if (type === "VIDEO" && item.src) {
@@ -178,34 +165,9 @@ const Item = forwardRef<HTMLDivElement, Props>(
               </TooltipProvider>
             </div>
           )}
-          {deleteItem &&
-            (!isDeletePressed ? (
-              <Button
-                size="icon"
-                variant="destructive"
-                className="absolute top-1 right-2"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setIsDeletePressed(true);
-                }}
-                type="button"
-              >
-                <Trash2 />
-              </Button>
-            ) : (
-              <Button
-                size="icon"
-                variant="amber"
-                className="absolute top-1 right-2"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  deleteItem?.(item.id);
-                }}
-                type="button"
-              >
-                <CircleAlert />
-              </Button>
-            ))}
+          {deleteItem && (
+            <TwoStepDeleteButton onClick={() => deleteItem(item.id)} />
+          )}
           {type === "IMAGE" && cropImage && (
             <div className="absolute bottom-1 right-1">
               <ImageCropper

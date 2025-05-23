@@ -16,6 +16,7 @@ import com.mocicarazvan.templatemodule.exceptions.action.PrivateRouteException;
 import com.mocicarazvan.templatemodule.mappers.DtoMapper;
 import com.mocicarazvan.templatemodule.models.Approve;
 import com.mocicarazvan.templatemodule.repositories.ApprovedRepository;
+import com.mocicarazvan.templatemodule.repositories.AssociativeEntityRepository;
 import com.mocicarazvan.templatemodule.services.ApprovedService;
 import com.mocicarazvan.templatemodule.services.RabbitMqApprovedSender;
 import com.mocicarazvan.templatemodule.services.RabbitMqUpdateDeleteService;
@@ -27,6 +28,7 @@ import org.jooq.lambda.function.Function3;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.util.Pair;
 import org.springframework.http.codec.multipart.FilePart;
+import org.springframework.transaction.reactive.TransactionalOperator;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuple2;
@@ -50,9 +52,10 @@ public abstract class ApprovedServiceImpl<MODEL extends Approve, BODY extends Ti
                                UserClient userClient, String modelName, List<String> allowedSortingFields,
                                EntitiesUtils entitiesUtils, FileClient fileClient,
                                RabbitMqApprovedSender<RESPONSE> rabbitMqApprovedSender,
-                               CR self, RabbitMqUpdateDeleteService<MODEL> rabbitMqUpdateDeleteService) {
+                               CR self, RabbitMqUpdateDeleteService<MODEL> rabbitMqUpdateDeleteService, TransactionalOperator transactionalOperator,
+                               AssociativeEntityRepository userLikesRepository, AssociativeEntityRepository userDislikesRepository) {
         super(modelRepository, modelMapper, pageableUtils, userClient, modelName,
-                allowedSortingFields, entitiesUtils, fileClient, self, rabbitMqUpdateDeleteService);
+                allowedSortingFields, entitiesUtils, fileClient, self, rabbitMqUpdateDeleteService, transactionalOperator, userLikesRepository, userDislikesRepository);
         this.rabbitMqApprovedSender = rabbitMqApprovedSender;
     }
 

@@ -12,10 +12,12 @@ public interface OrderRepository extends ManyToOneUserRepository<Order>, CountIn
 
 
     @Query("""
-            SELECT count(*) > 0
-                FROM custom_order o
-                WHERE o.user_id = :userId
-                AND o.plan_ids && :planIds
+            SELECT count(*)
+            FROM custom_order o
+            join plan_order po
+            on o.id = po.order_id
+            WHERE o.user_id = :userId
+              AND po.plan_id in (:planIds)
             """)
     Mono<Boolean> existsUserWithPlan(Long userId, Long[] planIds);
 
@@ -29,18 +31,30 @@ public interface OrderRepository extends ManyToOneUserRepository<Order>, CountIn
 
     @Override
     @Query("""
-                select distinct o.id from custom_order o
-                where :childId = any (o.plan_ids)
+              SELECT count(o.id)
+                FROM custom_order o
+                JOIN plan_order   p
+                  ON p.order_id = o.id
+                 AND p.plan_id  = :childId
             """)
-    Flux<Long> countInParent(Long childId);
+    Mono<Long> countInParent(Long childId);
 
-    @Query("SELECT COUNT(*) > 0 FROM custom_order WHERE user_id = :userId AND :planId = ANY(plan_ids)")
+    @Query("""
+              SELECT EXISTS (
+                SELECT 1
+                  FROM custom_order o
+                  JOIN plan_order   p
+                    ON p.order_id = o.id
+                   AND p.plan_id  = :planId
+                 WHERE o.user_id = :userId
+              )
+            """)
     Mono<Boolean> existsByUserIdAndPlanId(Long userId, Long planId);
 
     @Query("""
             SELECT * FROM custom_order
-            WHERE EXTRACT(MONTH FROM created_at) = :month
-            AND EXTRACT(YEAR FROM created_at) = :year
+            WHERE created_at >= make_timestamp(:year, :month, 1, 0, 0, 0)
+            AND created_at < make_timestamp(:year, :month, 1, 0, 0, 0) + INTERVAL '1 month'
             ORDER BY created_at DESC
             """)
     Flux<Order> findModelByMonth(int month, int year);

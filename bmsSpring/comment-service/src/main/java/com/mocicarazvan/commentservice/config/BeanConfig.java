@@ -12,6 +12,8 @@ import com.mocicarazvan.rediscache.utils.RedisChildCacheUtils;
 import com.mocicarazvan.templatemodule.clients.ReferenceClient;
 import com.mocicarazvan.templatemodule.clients.UserClient;
 import com.mocicarazvan.templatemodule.jackson.CustomObjectMapper;
+import com.mocicarazvan.templatemodule.repositories.AssociativeEntityRepository;
+import com.mocicarazvan.templatemodule.repositories.impl.AssociativeEntityRepositoryImpl;
 import com.mocicarazvan.templatemodule.utils.EntitiesUtils;
 import com.mocicarazvan.templatemodule.utils.PageableUtilsCustom;
 import com.mocicarazvan.templatemodule.utils.RequestsUtils;
@@ -27,6 +29,8 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.data.redis.core.ReactiveRedisTemplate;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
+import org.springframework.r2dbc.core.DatabaseClient;
+import org.springframework.transaction.reactive.TransactionalOperator;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.Map;
@@ -97,6 +101,18 @@ public class BeanConfig {
             PostClient postClient
     ) {
         return Map.of(CommentReferenceType.POST, postClient);
+    }
+
+    @Bean
+    public AssociativeEntityRepository userLikesRepository(DatabaseClient databaseClient,
+                                                           TransactionalOperator transactionalOperator) {
+        return new AssociativeEntityRepositoryImpl(databaseClient, transactionalOperator, "comment_likes");
+    }
+
+    @Bean
+    public AssociativeEntityRepository userDislikesRepository(DatabaseClient databaseClient,
+                                                              TransactionalOperator transactionalOperator) {
+        return new AssociativeEntityRepositoryImpl(databaseClient, transactionalOperator, "comment_dislikes");
     }
 
 

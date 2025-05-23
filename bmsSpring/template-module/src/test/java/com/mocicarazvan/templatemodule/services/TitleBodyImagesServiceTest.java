@@ -12,6 +12,7 @@ import com.mocicarazvan.templatemodule.exceptions.action.PrivateRouteException;
 import com.mocicarazvan.templatemodule.mappers.DtoMapper;
 import com.mocicarazvan.templatemodule.models.TitleBodyImages;
 import com.mocicarazvan.templatemodule.models.TitleBodyImagesImpl;
+import com.mocicarazvan.templatemodule.repositories.AssociativeEntityRepository;
 import com.mocicarazvan.templatemodule.repositories.TitleBodyImagesRepository;
 import com.mocicarazvan.templatemodule.services.impl.TitleBodyImagesServiceImpl;
 import com.mocicarazvan.templatemodule.testUtils.AssertionTestUtils;
@@ -29,6 +30,7 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.transaction.reactive.TransactionalOperator;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -64,6 +66,15 @@ class TitleBodyImagesServiceTest {
 
     @Mock
     FileClient fileClient;
+
+    @Mock
+    private AssociativeEntityRepository userLikesRepository;
+
+    @Mock
+    private AssociativeEntityRepository userDislikesRepository;
+
+    @Mock
+    private TransactionalOperator transactionalOperator;
 
     private final UserDto user1 = UserDto.builder().id(1L)
             .firstName("John")
@@ -145,7 +156,8 @@ class TitleBodyImagesServiceTest {
         );
         service = new TitleBodyImagesServiceImpl<>(
                 repository, mapper, pageableUtils, userClient, MODEL_NAME, ALLOWED_SORTING_FIELDS,
-                entitiesUtils, fileClient, mockedCacheWrapper, rabbitMqUpdateDeleteService
+                entitiesUtils, fileClient, mockedCacheWrapper, rabbitMqUpdateDeleteService,
+                transactionalOperator, userLikesRepository, userDislikesRepository
         ) {
             @Override
             public TitleBodyImagesImpl cloneModel(TitleBodyImagesImpl titleBodyImages) {

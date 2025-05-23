@@ -16,24 +16,26 @@ import java.util.List;
 public interface DayRepository extends TitleBodyRepository<Day>, CountInParent, CountIds {
 
 
+    @Override
     @Query("""
-                select  distinct d.id from day d
+                select coalesce(sum(mr.multiplicity),0) from day d
                 join meal m on m.day_id = d.id
-                where :childId = any (m.recipes)
+                join meal_recipes mr on mr.master_id=m.id
+                where mr.child_id=:childId
             """)
-    Flux<Long> countInParent(Long childId);
+    Mono<Long> countInParent(Long childId);
 
     @Override
     @Query("""
-                select distinct d.id from day d
+                select count(d.id) from day d
                 where d.id in (:ids)
             """)
-    Flux<Long> countByIds(Collection<Long> ids);
+    Mono<Long> countByIds(Collection<Long> ids);
 
     @Query("""
             SELECT * FROM day
-            WHERE EXTRACT(MONTH FROM created_at) = :month
-            AND EXTRACT(YEAR FROM created_at) = :year
+            WHERE created_at >= make_timestamp(:year, :month, 1, 0, 0, 0)
+            AND created_at < make_timestamp(:year, :month, 1, 0, 0, 0) + INTERVAL '1 month'
             ORDER BY created_at DESC
             """)
     Flux<Day> findModelByMonth(int month, int year);

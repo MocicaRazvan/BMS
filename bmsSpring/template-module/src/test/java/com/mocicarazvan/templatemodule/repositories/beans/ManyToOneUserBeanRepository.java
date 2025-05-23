@@ -10,8 +10,8 @@ import reactor.core.publisher.Flux;
 public interface ManyToOneUserBeanRepository extends ManyToOneUserRepository<ManyToOneUserImpl> {
     @Query("""
             SELECT * FROM many_to_one_user
-            WHERE EXTRACT(MONTH FROM created_at) = :month
-            AND EXTRACT(YEAR FROM created_at) = :year
+            WHERE created_at >= make_timestamp(:year, :month, 1, 0, 0, 0)
+            AND created_at < make_timestamp(:year, :month, 1, 0, 0, 0) + INTERVAL '1 month'
             ORDER BY created_at DESC
             """)
     Flux<ManyToOneUserImpl> findModelByMonth(int month, int year);

@@ -10,8 +10,10 @@ import com.mocicarazvan.templatemodule.exceptions.notFound.NotFoundEntity;
 import com.mocicarazvan.templatemodule.models.ApproveImpl;
 import com.mocicarazvan.templatemodule.models.ManyToOneUserImpl;
 import com.mocicarazvan.templatemodule.models.TitleBodyImpl;
+import com.mocicarazvan.templatemodule.repositories.AssociativeEntityRepository;
 import com.mocicarazvan.templatemodule.repositories.CountIds;
 import com.mocicarazvan.templatemodule.repositories.ManyToOneUserRepository;
+import io.r2dbc.spi.Row;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -19,7 +21,6 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
@@ -27,8 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.anyLong;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 
 @ExtendWith(MockitoExtension.class)
@@ -40,10 +40,16 @@ class EntitiesUtilsTest {
     @InjectMocks
     private EntitiesUtils entitiesUtils;
 
+    @Mock
+    private AssociativeEntityRepository userLikesRepository;
+
+    @Mock
+    private AssociativeEntityRepository userDislikesRepository;
+
     @Test
     void validIds_valid() {
         var ids = List.of(1L, 2L, 3L);
-        when(repository.countByIds(ids)).thenReturn(Flux.just((long) ids.size()));
+        when(repository.countByIds(ids)).thenReturn(Mono.just((long) ids.size()));
         StepVerifier.create(entitiesUtils.validIds(ids, repository, "dummy"))
                 .expectSubscription()
                 .verifyComplete();
@@ -52,7 +58,7 @@ class EntitiesUtilsTest {
     @Test
     void validIds_listEmpty() {
         var ids = new ArrayList<Long>();
-        when(repository.countByIds(ids)).thenReturn(Flux.just((long) ids.size()));
+        when(repository.countByIds(ids)).thenReturn(Mono.just((long) ids.size()));
         StepVerifier.create(entitiesUtils.validIds(ids, repository, "dummy"))
                 .expectSubscription()
                 .verifyComplete();
@@ -61,7 +67,7 @@ class EntitiesUtilsTest {
     @Test
     void validIds_shouldThrow() {
         var ids = List.of(1L, 2L, 3L);
-        when(repository.countByIds(ids)).thenReturn(Flux.just(0L));
+        when(repository.countByIds(ids)).thenReturn(Mono.just(0L));
         StepVerifier.create(entitiesUtils.validIds(ids, repository, "dummy"))
                 .expectErrorMatches(e -> e instanceof IllegalActionException
                         && e.getMessage().equals("dummy " + ids + " are not valid"))
@@ -75,8 +81,10 @@ class EntitiesUtilsTest {
                 .userDislikes(List.of(10L))
                 .build();
         var user = UserDto.builder().id(1L).build();
+        when(userLikesRepository.addChild(model.getId(), user.getId())).thenReturn(Mono.just(0L));
+        when(userDislikesRepository.removeChild(model.getId(), user.getId())).thenReturn(Mono.just(0L));
 
-        StepVerifier.create(entitiesUtils.setReaction(model, user, "like"))
+        StepVerifier.create(entitiesUtils.setReaction(model, user, "like", userLikesRepository, userDislikesRepository))
                 .expectNextMatches(e -> e.getUserLikes().contains(user.getId()))
                 .verifyComplete();
     }
@@ -88,36 +96,46 @@ class EntitiesUtilsTest {
                 .userDislikes(List.of(10L))
                 .build();
         var user = UserDto.builder().id(1L).build();
+        when(userLikesRepository.removeChild(model.getId(), user.getId())).thenReturn(Mono.just(0L));
 
-        StepVerifier.create(entitiesUtils.setReaction(model, user, "like"))
+        StepVerifier.create(entitiesUtils.setReaction(model, user, "like", userLikesRepository, userDislikesRepository))
                 .expectNextMatches(e -> !e.getUserLikes().contains(user.getId()))
                 .verifyComplete();
+
+        verifyNoInteractions(userDislikesRepository);
     }
 
     @Test
-    void setReaction_dislikeUserNotInLikes() {
+    void setReaction_dislikeUserNotInDislikes() {
         var model = TitleBodyImpl.builder()
                 .userLikes(List.of(15L))
                 .userDislikes(List.of(10L))
                 .build();
         var user = UserDto.builder().id(1L).build();
 
-        StepVerifier.create(entitiesUtils.setReaction(model, user, "dislike"))
+        when(userLikesRepository.removeChild(model.getId(), user.getId())).thenReturn(Mono.just(0L));
+        when(userDislikesRepository.addChild(model.getId(), user.getId())).thenReturn(Mono.just(0L));
+
+        StepVerifier.create(entitiesUtils.setReaction(model, user, "dislike", userLikesRepository, userDislikesRepository))
                 .expectNextMatches(e -> e.getUserDislikes().contains(user.getId()))
                 .verifyComplete();
     }
 
     @Test
-    void setReaction_dislikeUserInLikes() {
+    void setReaction_dislikeUserInDislikes() {
         var model = TitleBodyImpl.builder()
                 .userLikes(List.of(15L))
                 .userDislikes(List.of(10L, 1L))
                 .build();
         var user = UserDto.builder().id(1L).build();
 
-        StepVerifier.create(entitiesUtils.setReaction(model, user, "dislike"))
+        when(userDislikesRepository.removeChild(model.getId(), user.getId())).thenReturn(Mono.just(0L));
+
+        StepVerifier.create(entitiesUtils.setReaction(model, user, "dislike", userLikesRepository, userDislikesRepository))
                 .expectNextMatches(e -> !e.getUserDislikes().contains(user.getId()))
                 .verifyComplete();
+
+        verifyNoInteractions(userLikesRepository);
     }
 
     @Test
@@ -128,11 +146,14 @@ class EntitiesUtilsTest {
                 .build();
         var user = UserDto.builder().id(1L).build();
 
-        StepVerifier.create(entitiesUtils.setReaction(model, user, "inv"))
+        StepVerifier.create(entitiesUtils.setReaction(model, user, "inv", userLikesRepository, userDislikesRepository))
                 .expectNextMatches(e ->
                         e.getUserLikes().equals(List.of(15L)) && e.getUserDislikes().equals(List.of(10L))
                 )
                 .verifyComplete();
+
+        verifyNoInteractions(userLikesRepository);
+        verifyNoInteractions(userDislikesRepository);
     }
 
     @Test
@@ -329,6 +350,26 @@ class EntitiesUtilsTest {
 
         assertNotNull(result);
         assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void getDoubleValue_returnsValueWhenPresent() {
+        Row row = mock(Row.class);
+        when(row.get("price", Double.class)).thenReturn(12.34);
+
+        Double result = EntitiesUtils.getDoubleValue(row, "price");
+
+        assertEquals(12.34, result);
+    }
+
+    @Test
+    void getDoubleValue_returnsZeroWhenNull() {
+        Row row = mock(Row.class);
+        when(row.get("price", Double.class)).thenReturn(null);
+
+        Double result = EntitiesUtils.getDoubleValue(row, "price");
+
+        assertEquals(0.0, result);
     }
 
     public interface MTC extends ManyToOneUserRepository<ManyToOneUserImpl>, CountIds {

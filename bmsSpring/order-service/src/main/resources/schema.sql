@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS address
 CREATE TABLE IF NOT EXISTS custom_order
 (
     id                SERIAL PRIMARY KEY,
-    user_id           BIGINT,
+    user_id           BIGINT   NOT NULL,
     created_at        TIMESTAMP         DEFAULT CURRENT_TIMESTAMP,
     updated_at        TIMESTAMP         DEFAULT CURRENT_TIMESTAMP,
     address_id        BIGINT   NOT NULL REFERENCES address (id),

@@ -46,7 +46,6 @@ import {
   PlanResponse,
 } from "@/types/dto";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import InputFile, { FieldInputTexts } from "@/components/forms/input-file";
 import { cn, handleBaseError } from "@/lib/utils";
 import ButtonSubmit, {
@@ -74,7 +73,7 @@ import {
   useSortable,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { Grip, Trash2 } from "lucide-react";
+import { Grip } from "lucide-react";
 import {
   closestCenter,
   DndContext,
@@ -102,6 +101,7 @@ import DiffusionImagesForm, {
 } from "@/components/forms/diffusion-images-form";
 import useGetDiffusionImages from "@/hoooks/useGetDiffusionImages";
 import { useNavigationGuardI18nForm } from "@/hoooks/use-navigation-guard-i18n-form";
+import TwoStepDeleteButton from "@/components/common/two-step-delete-button";
 
 export interface PlanFormTexts extends AITitleBodyForm {
   titleBodyTexts: TitleBodyTexts;
@@ -786,13 +786,7 @@ const DayItem = forwardRef<HTMLDivElement, DayItemProps>(
             </div>
           )}
           {deleteItem && (
-            <Button
-              size={"icon"}
-              variant={"destructive"}
-              onClick={() => deleteItem(item)}
-            >
-              <Trash2 />
-            </Button>
+            <TwoStepDeleteButton onClick={() => deleteItem(item)} />
           )}
         </div>
         <div className="flex-1 flex flex-col items-center justify-between p-4">
@@ -807,5 +801,4 @@ const DayItem = forwardRef<HTMLDivElement, DayItemProps>(
     );
   },
 );
-
 DayItem.displayName = "DayItem";

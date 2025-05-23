@@ -61,6 +61,27 @@ class RepositoryUtilsTest {
     }
 
     @Test
+    void addFieldFirstCriteria() {
+        StringBuilder query = new StringBuilder();
+        RepositoryUtils.MutableBoolean hasPrevious = new RepositoryUtils.MutableBoolean(false);
+
+        repositoryUtils.addField(query, hasPrevious, "name = test");
+
+        assertEquals(" WHERE name = test", query.toString());
+        assertTrue(hasPrevious.isValue());
+    }
+
+    @Test
+    void addFieldSubsequentCriteria() {
+        StringBuilder query = new StringBuilder();
+        RepositoryUtils.MutableBoolean hasPrevious = new RepositoryUtils.MutableBoolean(true);
+
+        repositoryUtils.addField(query, hasPrevious, "age = 25");
+
+        assertEquals(" AND age = 25", query.toString());
+    }
+
+    @Test
     void addNotNullFieldWithOrClause() {
         StringBuilder query = new StringBuilder();
         RepositoryUtils.MutableBoolean hasPrevious = new RepositoryUtils.MutableBoolean(true);

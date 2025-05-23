@@ -21,14 +21,17 @@ import com.mocicarazvan.templatemodule.dtos.response.PageableResponse;
 import com.mocicarazvan.templatemodule.dtos.response.ResponseWithChildList;
 import com.mocicarazvan.templatemodule.dtos.response.ResponseWithUserDto;
 import com.mocicarazvan.templatemodule.exceptions.action.SubEntityUsed;
+import com.mocicarazvan.templatemodule.repositories.AssociativeEntityRepository;
 import com.mocicarazvan.templatemodule.services.RabbitMqUpdateDeleteService;
 import com.mocicarazvan.templatemodule.services.impl.ManyToOneUserServiceImpl;
 import com.mocicarazvan.templatemodule.utils.EntitiesUtils;
 import com.mocicarazvan.templatemodule.utils.PageableUtilsCustom;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.reactive.TransactionalOperator;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -46,14 +49,23 @@ public class MealServiceImpl
     private final PlanClient planClient;
     private final EntitiesUtils entitiesUtils;
     private final MealRepository mealRepository;
+    private final AssociativeEntityRepository associativeEntityRepository;
+    private final TransactionalOperator transactionalOperator;
 
 
-    public MealServiceImpl(MealRepository modelRepository, MealMapper modelMapper, PageableUtilsCustom pageableUtils, UserClient userClient, RecipeClient recipeClient, PlanClient planClient, EntitiesUtils entitiesUtils, MealRepository mealRepository, MealServiceRedisCacheWrapper self, RabbitMqUpdateDeleteService<Meal> rabbitMqUpdateDeleteService) {
-        super(modelRepository, modelMapper, pageableUtils, userClient, "meal", List.of("id", "userId", "period", "title", "createdAt", "updatedAt"), self, rabbitMqUpdateDeleteService);
+    public MealServiceImpl(MealRepository modelRepository, MealMapper modelMapper,
+                           PageableUtilsCustom pageableUtils, UserClient userClient, RecipeClient recipeClient,
+                           PlanClient planClient, EntitiesUtils entitiesUtils, MealRepository mealRepository,
+                           MealServiceRedisCacheWrapper self, RabbitMqUpdateDeleteService<Meal> rabbitMqUpdateDeleteService,
+                           @Qualifier("mealRecipesRepository") AssociativeEntityRepository associativeEntityRepository, TransactionalOperator transactionalOperator) {
+        super(modelRepository, modelMapper, pageableUtils, userClient, "meal",
+                List.of("id", "userId", "period", "title", "createdAt", "updatedAt"), self, rabbitMqUpdateDeleteService);
         this.recipeClient = recipeClient;
         this.planClient = planClient;
         this.entitiesUtils = entitiesUtils;
         this.mealRepository = mealRepository;
+        this.associativeEntityRepository = associativeEntityRepository;
+        this.transactionalOperator = transactionalOperator;
     }
 
 
@@ -136,13 +148,22 @@ public class MealServiceImpl
                 .flatMap(ids -> recipeClient.determineMostRestrictiveDietType(ids.stream().map(Object::toString).toList(), userId));
     }
 
+    private Mono<MealResponse> createModelWithAssociation(MealBody mealBody, String userId) {
+        return
+                super.createModel(mealBody, userId)
+                        .flatMap(mealResponse ->
+                                associativeEntityRepository.insertForMasterAndChildren(mealResponse.getId(), mealResponse.getRecipes())
+                                        .thenReturn(mealResponse)
+                        ).as(transactionalOperator::transactional);
+    }
+
     @Override
     @RedisReactiveChildCacheEvict(key = CACHE_KEY_PATH, masterPath = "dayId")
     public Mono<MealResponse> createModel(MealBody mealBody, String userId) {
 
         return
                 recipeClient.verifyIds(mealBody.getRecipes().stream().map(Object::toString).toList(), userId)
-                        .then(super.createModel(mealBody, userId));
+                        .then(createModelWithAssociation(mealBody, userId));
     }
 
     @Override
@@ -152,7 +173,7 @@ public class MealServiceImpl
         return
                 recipeClient.verifyIds(mealBody.getRecipes().stream().filter(r -> !idsToNotVerify.contains(r)).map(Object::toString).toList(),
                                 userId)
-                        .then(super.createModel(mealBody, userId));
+                        .then(createModelWithAssociation(mealBody, userId));
     }
 
     @Override
@@ -161,10 +182,16 @@ public class MealServiceImpl
 
         return
                 getModelById(id, userId)
-                        .map(meal -> mealBody.getRecipes().stream().filter(r -> !meal.getRecipes().contains(r))
-                                .map(Object::toString).toList())
-                        .flatMap(ids -> recipeClient.verifyIds(ids, userId))
-                        .then(super.updateModel(id, mealBody, userId));
+                        .flatMap(meal -> {
+                            List<String> ids = mealBody.getRecipes().stream().filter(r -> !meal.getRecipes().contains(r))
+                                    .map(Object::toString).toList();
+                            return recipeClient.verifyIds(ids, userId)
+                                    .then(super.updateModel(id, mealBody, userId))
+                                    .flatMap(uM -> associativeEntityRepository.consensusChildrenForMaster(
+                                                    uM.getId(), uM.getRecipes()
+                                            ).thenReturn(uM)
+                                    );
+                        }).as(transactionalOperator::transactional);
 
     }
 

@@ -230,7 +230,12 @@ export default function OrdersTable({
           />
         ),
         cell: ({ row }) => (
-          <p>{format(parseISO(row.original.order.createdAt), "dd/MM/yyyy")}</p>
+          <p>
+            {format(
+              parseISO(row.original.order.createdAt),
+              "dd/MM/yyyy HH:mm:ss",
+            )}
+          </p>
         ),
       },
       {

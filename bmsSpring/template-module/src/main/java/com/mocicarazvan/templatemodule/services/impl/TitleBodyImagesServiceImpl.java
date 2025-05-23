@@ -8,6 +8,7 @@ import com.mocicarazvan.templatemodule.dtos.response.FileUploadResponse;
 import com.mocicarazvan.templatemodule.enums.FileType;
 import com.mocicarazvan.templatemodule.mappers.DtoMapper;
 import com.mocicarazvan.templatemodule.models.TitleBodyImages;
+import com.mocicarazvan.templatemodule.repositories.AssociativeEntityRepository;
 import com.mocicarazvan.templatemodule.repositories.TitleBodyImagesRepository;
 import com.mocicarazvan.templatemodule.services.RabbitMqUpdateDeleteService;
 import com.mocicarazvan.templatemodule.services.TitleBodyImagesService;
@@ -15,6 +16,7 @@ import com.mocicarazvan.templatemodule.utils.EntitiesUtils;
 import com.mocicarazvan.templatemodule.utils.PageableUtilsCustom;
 import lombok.Getter;
 import org.springframework.http.codec.multipart.FilePart;
+import org.springframework.transaction.reactive.TransactionalOperator;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -33,8 +35,8 @@ public abstract class TitleBodyImagesServiceImpl<MODEL extends TitleBodyImages, 
 
     public TitleBodyImagesServiceImpl(S modelRepository, M modelMapper, PageableUtilsCustom pageableUtils, UserClient userClient, String modelName,
                                       List<String> allowedSortingFields, EntitiesUtils entitiesUtils,
-                                      FileClient fileClient, CR self, RabbitMqUpdateDeleteService<MODEL> rabbitMqUpdateDeleteService) {
-        super(modelRepository, modelMapper, pageableUtils, userClient, modelName, allowedSortingFields, entitiesUtils, self, rabbitMqUpdateDeleteService);
+                                      FileClient fileClient, CR self, RabbitMqUpdateDeleteService<MODEL> rabbitMqUpdateDeleteService, TransactionalOperator transactionalOperator, AssociativeEntityRepository userLikesRepository, AssociativeEntityRepository userDislikesRepository) {
+        super(modelRepository, modelMapper, pageableUtils, userClient, modelName, allowedSortingFields, entitiesUtils, self, rabbitMqUpdateDeleteService, transactionalOperator, userLikesRepository, userDislikesRepository);
         this.fileClient = fileClient;
     }
 

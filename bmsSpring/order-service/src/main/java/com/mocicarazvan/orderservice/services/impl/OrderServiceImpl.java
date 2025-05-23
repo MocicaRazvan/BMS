@@ -138,7 +138,7 @@ public class OrderServiceImpl implements OrderService {
                             .setClientReferenceId(customer.getEmail())
                             .setBillingAddressCollection(SessionCreateParams.BillingAddressCollection.REQUIRED)
                             .putAllMetadata(metadata)
-                            
+
                             .setInvoiceCreation(SessionCreateParams.InvoiceCreation.builder().setEnabled(true)
                                     .build());
 
@@ -475,7 +475,6 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public Mono<EntityCount> countInParent(Long childId) {
         return orderRepository.countInParent(childId)
-                .collectList()
                 .map(EntityCount::new);
     }
 

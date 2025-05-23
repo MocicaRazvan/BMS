@@ -29,9 +29,10 @@ public interface CommentRepository extends TitleBodyRepository<Comment> {
     Flux<Comment> findAllByReferenceIdEqualsAndReferenceType(Long referenceId, CommentReferenceType referenceType);
 
     @Query("""
-            SELECT * FROM comment
-            WHERE EXTRACT(MONTH FROM created_at) = :month
-            AND EXTRACT(YEAR FROM created_at) = :year
+            SELECT *
+            FROM comment
+            WHERE created_at >= make_timestamp(:year, :month, 1, 0, 0, 0)
+            AND created_at < make_timestamp(:year, :month, 1, 0, 0, 0) + INTERVAL '1 month'
             ORDER BY created_at DESC
             """)
     Flux<Comment> findModelByMonth(int month, int year);

@@ -7,6 +7,7 @@ import com.mocicarazvan.templatemodule.repositories.CountIds;
 import com.mocicarazvan.templatemodule.repositories.CountInParent;
 import org.springframework.data.r2dbc.repository.Query;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.util.Collection;
 import java.util.List;
@@ -14,24 +15,25 @@ import java.util.List;
 public interface PlanRepository extends ApprovedRepository<Plan>, CountInParent, CountIds {
 
     @Query("""
-                    select distinct p.id from plan p
-                    where :childId = any (p.days)
+                    select  coalesce(sum(pd.multiplicity),0) from plan p
+                    join plan_days pd on p.id=pd.master_id
+                    where pd.child_id= :childId
             """)
-    Flux<Long> countInParent(Long childId);
+    Mono<Long> countInParent(Long childId);
 
     @Override
     @Query("""
-                select distinct p.id  from plan p
-                where p.id in (:ids) and p.approved = true
+                select count(p.id)  from plan p
+                where p.approved = true and p.id in (:ids)
             """)
-    Flux<Long> countByIds(Collection<Long> ids);
+    Mono<Long> countByIds(Collection<Long> ids);
 
     Flux<Plan> findAllByIdInAndApprovedTrue(List<Long> ids);
 
     @Query("""
             SELECT * FROM plan
-            WHERE EXTRACT(MONTH FROM created_at) = :month
-            AND EXTRACT(YEAR FROM created_at) = :year
+            WHERE created_at >= make_timestamp(:year, :month, 1, 0, 0, 0)
+            AND created_at < make_timestamp(:year, :month, 1, 0, 0, 0) + INTERVAL '1 month'
             ORDER BY created_at DESC
             """)
     Flux<Plan> findModelByMonth(int month, int year);

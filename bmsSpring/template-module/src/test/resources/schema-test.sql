@@ -10,3 +10,10 @@ create table if not exists many_to_one_user(
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     user_id    BIGINT NOT NULL
 );
+
+create table if not exists associative_entity(
+    master_id BIGINT NOT NULL,
+    child_id  BIGINT NOT NULL,
+    multiplicity BIGINT NOT NULL DEFAULT 1,
+    primary key (master_id, child_id)
+)

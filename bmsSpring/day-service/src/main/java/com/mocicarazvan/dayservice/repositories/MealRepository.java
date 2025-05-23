@@ -12,8 +12,8 @@ public interface MealRepository extends ManyToOneUserRepository<Meal> {
 
     @Query("""
             SELECT * FROM meal
-            WHERE EXTRACT(MONTH FROM created_at) = :month
-            AND EXTRACT(YEAR FROM created_at) = :year
+            WHERE created_at >= make_timestamp(:year, :month, 1, 0, 0, 0)
+            AND created_at < make_timestamp(:year, :month, 1, 0, 0, 0) + INTERVAL '1 month'
             ORDER BY created_at DESC
             """)
     Flux<Meal> findModelByMonth(int month, int year);
@@ -24,9 +24,10 @@ public interface MealRepository extends ManyToOneUserRepository<Meal> {
     @Query("""
              SELECT EXISTS(
                  SELECT 1
-                 FROM meal
+                 FROM meal m
+                 join meal_recipes mr on m.id = mr.master_id
                  WHERE day_id = :dayId
-                 AND :recipeId = ANY(recipes)
+                 AND mr.child_id= :recipeId
              )
             """)
     Mono<Boolean> existsByDayIdAndRecipesContaining(Long dayId, Long recipeId);

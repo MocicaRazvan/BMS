@@ -13,8 +13,8 @@ import java.time.LocalDateTime;
 public interface SummaryRepository extends Repository<Order, Long> {
     @Query("""
             SELECT * FROM custom_order
-            WHERE EXTRACT(MONTH FROM created_at) = :month
-            AND EXTRACT(YEAR FROM created_at) = :year
+             WHERE created_at >= make_timestamp(:year, :month, 1, 0, 0, 0)
+            AND created_at < make_timestamp(:year, :month, 1, 0, 0, 0) + INTERVAL '1 month'
             ORDER BY created_at DESC
             """)
     Flux<Order> findModelByMonth(int month, int year);
@@ -60,7 +60,7 @@ public interface SummaryRepository extends Repository<Order, Long> {
                        po.user_id,
                        po.price
                 from custom_order co
-                         join plan_order po on co.id = po.order_id
+                join plan_order po on co.id = po.order_id
             
             )
             SELECT EXTRACT(YEAR FROM agg.created_at) AS year,

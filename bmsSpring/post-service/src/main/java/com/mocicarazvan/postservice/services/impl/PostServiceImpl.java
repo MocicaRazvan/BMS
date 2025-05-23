@@ -22,6 +22,7 @@ import com.mocicarazvan.templatemodule.dtos.PageableBody;
 import com.mocicarazvan.templatemodule.dtos.UserDto;
 import com.mocicarazvan.templatemodule.dtos.response.*;
 import com.mocicarazvan.templatemodule.exceptions.notFound.NotFoundEntity;
+import com.mocicarazvan.templatemodule.repositories.AssociativeEntityRepository;
 import com.mocicarazvan.templatemodule.services.RabbitMqApprovedSender;
 import com.mocicarazvan.templatemodule.services.RabbitMqUpdateDeleteService;
 import com.mocicarazvan.templatemodule.services.impl.ApprovedServiceImpl;
@@ -29,6 +30,7 @@ import com.mocicarazvan.templatemodule.utils.EntitiesUtils;
 import com.mocicarazvan.templatemodule.utils.PageableUtilsCustom;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.util.Pair;
 import org.springframework.http.codec.multipart.FilePart;
@@ -54,9 +56,15 @@ public class PostServiceImpl extends ApprovedServiceImpl<Post, PostBody, PostRes
     private final PostEmbedServiceImpl postEmbedServiceImpl;
 
 
-    public PostServiceImpl(PostRepository modelRepository, PostMapper modelMapper, PageableUtilsCustom pageableUtils, UserClient userClient, EntitiesUtils entitiesUtils, FileClient fileClient, CommentClient commentClient, PostExtendedRepository postExtendedRepository, RabbitMqApprovedSender<PostResponse> rabbitMqSender, PostServiceRedisCacheWrapper self, TransactionalOperator transactionalOperator, PostEmbedServiceImpl postEmbedServiceImpl, RabbitMqUpdateDeleteService<Post> rabbitMqUpdateDeleteService) {
+    public PostServiceImpl(PostRepository modelRepository, PostMapper modelMapper, PageableUtilsCustom pageableUtils,
+                           UserClient userClient, EntitiesUtils entitiesUtils, FileClient fileClient, CommentClient commentClient,
+                           PostExtendedRepository postExtendedRepository, RabbitMqApprovedSender<PostResponse> rabbitMqSender,
+                           PostServiceRedisCacheWrapper self, TransactionalOperator transactionalOperator,
+                           PostEmbedServiceImpl postEmbedServiceImpl, RabbitMqUpdateDeleteService<Post> rabbitMqUpdateDeleteService,
+                           @Qualifier("userLikesRepository") AssociativeEntityRepository userLikesRepository, @Qualifier("userDislikesRepository") AssociativeEntityRepository userDislikesRepository
+    ) {
         super(modelRepository, modelMapper, pageableUtils, userClient, "post", List.of("id", "userId", "title", "createdAt", "updatedAt", "approved", PageableUtilsCustom.USER_LIKES_LENGTH_SORT_PROPERTY, PageableUtilsCustom.USER_DISLIKES_LENGTH_SORT_PROPERTY),
-                entitiesUtils, fileClient, rabbitMqSender, self, rabbitMqUpdateDeleteService
+                entitiesUtils, fileClient, rabbitMqSender, self, rabbitMqUpdateDeleteService, transactionalOperator, userLikesRepository, userDislikesRepository
         );
         this.commentClient = commentClient;
         this.postExtendedRepository = postExtendedRepository;

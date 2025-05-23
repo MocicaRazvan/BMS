@@ -1,5 +1,6 @@
 package com.mocicarazvan.templatemodule.testUtils;
 
+import com.mocicarazvan.templatemodule.models.AssociativeEntityImpl;
 import com.mocicarazvan.templatemodule.models.IdGeneratedImpl;
 import com.mocicarazvan.templatemodule.models.ManyToOneUserImpl;
 
@@ -33,5 +34,12 @@ public class ItemSeeder {
                     .userId(userId)
                     .build();
         }).collect(Collectors.toUnmodifiableList());
+    }
+
+    public static List<AssociativeEntityImpl> generateAssociativeEntity() {
+        return IntStream.range(0, 10).mapToObj(i -> AssociativeEntityImpl.builder()
+                .masterId(i % 2 == 0 ? 1L : 2L)
+                .childId((long) i)
+                .build()).collect(Collectors.toUnmodifiableList());
     }
 }

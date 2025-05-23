@@ -28,6 +28,10 @@ public class RepositoryUtils {
         }
     }
 
+    public void addField(StringBuilder queryBuilder, MutableBoolean hasPreviousCriteria, String clause) {
+        addNotNullField(true, queryBuilder, hasPreviousCriteria, clause);
+    }
+
     public <T> void addNotNullField(T field, StringBuilder queryBuilder, MutableBoolean hasPreviousCriteria, String clause, Boolean isOr) {
         if (field != null) {
             if (hasPreviousCriteria.isValue()) {

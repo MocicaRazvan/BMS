@@ -7,12 +7,14 @@ import com.mocicarazvan.templatemodule.dtos.generic.WithUserDto;
 import com.mocicarazvan.templatemodule.dtos.response.ResponseWithUserLikesAndDislikes;
 import com.mocicarazvan.templatemodule.mappers.DtoMapper;
 import com.mocicarazvan.templatemodule.models.TitleBody;
+import com.mocicarazvan.templatemodule.repositories.AssociativeEntityRepository;
 import com.mocicarazvan.templatemodule.repositories.TitleBodyRepository;
 import com.mocicarazvan.templatemodule.services.RabbitMqUpdateDeleteService;
 import com.mocicarazvan.templatemodule.services.TitleBodyService;
 import com.mocicarazvan.templatemodule.utils.EntitiesUtils;
 import com.mocicarazvan.templatemodule.utils.PageableUtilsCustom;
 import lombok.Getter;
+import org.springframework.transaction.reactive.TransactionalOperator;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
@@ -28,12 +30,19 @@ public abstract class TitleBodyServiceImpl<MODEL extends TitleBody, BODY, RESPON
 
 
     protected final EntitiesUtils entitiesUtils;
+    protected final AssociativeEntityRepository userLikesRepository;
+    protected final AssociativeEntityRepository userDislikesRepository;
+    protected final TransactionalOperator transactionalOperator;
 
 
     public TitleBodyServiceImpl(S modelRepository, M modelMapper, PageableUtilsCustom pageableUtils, UserClient userClient, String modelName, List<String> allowedSortingFields,
-                                EntitiesUtils entitiesUtils, CR titleBodyServiceRedisCacheWrapper, RabbitMqUpdateDeleteService<MODEL> rabbitMqUpdateDeleteService) {
+                                EntitiesUtils entitiesUtils, CR titleBodyServiceRedisCacheWrapper, RabbitMqUpdateDeleteService<MODEL> rabbitMqUpdateDeleteService,
+                                TransactionalOperator transactionalOperator, AssociativeEntityRepository userLikesRepository, AssociativeEntityRepository userDislikesRepository) {
         super(modelRepository, modelMapper, pageableUtils, userClient, modelName, allowedSortingFields, titleBodyServiceRedisCacheWrapper, rabbitMqUpdateDeleteService);
         this.entitiesUtils = entitiesUtils;
+        this.userLikesRepository = userLikesRepository;
+        this.userDislikesRepository = userDislikesRepository;
+        this.transactionalOperator = transactionalOperator;
     }
 
 
@@ -44,12 +53,14 @@ public abstract class TitleBodyServiceImpl<MODEL extends TitleBody, BODY, RESPON
 
                 userClient.getUser("", userId)
                         .flatMap(authUser -> getModel(id)
-                                .flatMap(model -> entitiesUtils.setReaction(model, authUser, type)
+                                .flatMap(model -> entitiesUtils.setReaction(model, authUser, type, userLikesRepository, userDislikesRepository)
                                         .flatMap(modelRepository::save)
                                         .map(modelMapper::fromModelToResponse)
                                 )
 
-                        ).flatMap(self::reactToModelInvalidate);
+                        )
+                        .as(transactionalOperator::transactional)
+                        .flatMap(self::reactToModelInvalidate);
 
     }
 

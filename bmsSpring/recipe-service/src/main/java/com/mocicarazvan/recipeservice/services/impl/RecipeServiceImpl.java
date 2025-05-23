@@ -27,6 +27,7 @@ import com.mocicarazvan.templatemodule.dtos.response.*;
 import com.mocicarazvan.templatemodule.enums.FileType;
 import com.mocicarazvan.templatemodule.exceptions.action.IllegalActionException;
 import com.mocicarazvan.templatemodule.exceptions.action.SubEntityUsed;
+import com.mocicarazvan.templatemodule.repositories.AssociativeEntityRepository;
 import com.mocicarazvan.templatemodule.services.RabbitMqApprovedSender;
 import com.mocicarazvan.templatemodule.services.RabbitMqUpdateDeleteService;
 import com.mocicarazvan.templatemodule.services.impl.ApprovedServiceImpl;
@@ -35,6 +36,7 @@ import com.mocicarazvan.templatemodule.utils.OrderEnsurer;
 import com.mocicarazvan.templatemodule.utils.PageableUtilsCustom;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.util.Pair;
 import org.springframework.http.codec.multipart.FilePart;
@@ -63,8 +65,18 @@ public class RecipeServiceImpl extends ApprovedServiceImpl<Recipe, RecipeBody, R
     private final TransactionalOperator transactionalOperator;
     private final RecipeEmbedServiceImpl recipeEmbedServiceImpl;
 
-    public RecipeServiceImpl(RecipeRepository modelRepository, RecipeMapper modelMapper, PageableUtilsCustom pageableUtils, UserClient userClient, EntitiesUtils entitiesUtils, FileClient fileClient, RecipeExtendedRepository recipeExtendedRepository, IngredientClient ingredientClient, IngredientQuantityService ingredientQuantityService, RabbitMqApprovedSender<RecipeResponse> rabbitMqSender, DayClient dayClient, RecipeServiceRedisCacheWrapper self, TransactionalOperator transactionalOperator, RecipeEmbedServiceImpl recipeEmbedServiceImpl, RabbitMqUpdateDeleteService<Recipe> recipeRabbitMqUpdateDeleteService) {
-        super(modelRepository, modelMapper, pageableUtils, userClient, "recipe", List.of("id", "userId", "type", "title", "createdAt", "updatedAt", "approved", PageableUtilsCustom.USER_LIKES_LENGTH_SORT_PROPERTY, PageableUtilsCustom.USER_DISLIKES_LENGTH_SORT_PROPERTY), entitiesUtils, fileClient, rabbitMqSender, self, recipeRabbitMqUpdateDeleteService);
+    public RecipeServiceImpl(RecipeRepository modelRepository, RecipeMapper modelMapper,
+                             PageableUtilsCustom pageableUtils, UserClient userClient, EntitiesUtils entitiesUtils,
+                             FileClient fileClient, RecipeExtendedRepository recipeExtendedRepository,
+                             IngredientClient ingredientClient, IngredientQuantityService ingredientQuantityService,
+                             RabbitMqApprovedSender<RecipeResponse> rabbitMqSender, DayClient dayClient,
+                             RecipeServiceRedisCacheWrapper self, TransactionalOperator transactionalOperator,
+                             RecipeEmbedServiceImpl recipeEmbedServiceImpl,
+                             RabbitMqUpdateDeleteService<Recipe> recipeRabbitMqUpdateDeleteService,
+                             @Qualifier("userLikesRepository") AssociativeEntityRepository userLikesRepository, @Qualifier("userDislikesRepository") AssociativeEntityRepository userDislikesRepository
+    ) {
+        super(modelRepository, modelMapper, pageableUtils, userClient, "recipe", List.of("id", "userId", "type", "title", "createdAt", "updatedAt", "approved", PageableUtilsCustom.USER_LIKES_LENGTH_SORT_PROPERTY, PageableUtilsCustom.USER_DISLIKES_LENGTH_SORT_PROPERTY),
+                entitiesUtils, fileClient, rabbitMqSender, self, recipeRabbitMqUpdateDeleteService, transactionalOperator, userLikesRepository, userDislikesRepository);
         this.recipeExtendedRepository = recipeExtendedRepository;
         this.ingredientClient = ingredientClient;
         this.ingredientQuantityService = ingredientQuantityService;
@@ -330,7 +342,6 @@ public class RecipeServiceImpl extends ApprovedServiceImpl<Recipe, RecipeBody, R
     public Mono<EntityCount> countInParent(Long childId) {
         return
                 modelRepository.countInParent(childId)
-                        .collectList()
                         .map(EntityCount::new)
 //                        .log()
                 ;

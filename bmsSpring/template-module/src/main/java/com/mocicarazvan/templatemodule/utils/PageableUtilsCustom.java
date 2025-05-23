@@ -44,19 +44,6 @@ public class PageableUtilsCustom {
     }
 
     public Mono<Sort> createSortFromMap(LinkedHashMap<String, String> sortCriteria) {
-//        return Mono.just(Sort.by(
-//                sortCriteria.entrySet().stream().filter(
-//                        entry -> entry.getValue().equals("asc") || entry.getValue().equals("desc")
-//                ).map(
-//                        entry -> new Sort.Order(
-//                                entry.getValue().equals("asc") ? Sort.Direction.ASC : Sort.Direction.DESC,
-//                                entry.getKey()
-//                        )
-//                ).collect(Collectors.toList())
-//
-//        ))
-//                .log()
-        ;
 
         return Flux.fromIterable(sortCriteria.entrySet())
                 .filter(e -> e.getValue().equalsIgnoreCase("asc") || e.getValue().equalsIgnoreCase("desc"))

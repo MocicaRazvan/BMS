@@ -11,8 +11,8 @@ public interface KanbanTaskRepository extends ManyToOneUserRepository<KanbanTask
 
     @Query("""
             SELECT * FROM kanban_task
-            WHERE EXTRACT(MONTH FROM created_at) = :month
-            AND EXTRACT(YEAR FROM created_at) = :year
+             WHERE created_at >= make_timestamp(:year, :month, 1, 0, 0, 0)
+            AND created_at < make_timestamp(:year, :month, 1, 0, 0, 0) + INTERVAL '1 month'
             ORDER BY created_at DESC
             """)
     Flux<KanbanTask> findModelByMonth(int month, int year);

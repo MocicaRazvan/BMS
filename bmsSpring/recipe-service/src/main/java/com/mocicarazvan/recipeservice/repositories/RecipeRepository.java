@@ -20,23 +20,23 @@ public interface RecipeRepository extends ApprovedRepository<Recipe>, CountInPar
 
 
     @Query("""
-                select distinct  r.id from recipe r
+                select count(r.id) from recipe r
                 join ingredient_quantity i on r.id = i.recipe_id
                 where i.ingredient_id = :childId
             """)
-    Flux<Long> countInParent(Long childId);
+    Mono<Long> countInParent(Long childId);
 
     @Override
     @Query(""" 
-                            select distinct  r.id from recipe r 
-                            where r.id in (:ids) and r.approved = true
+                            select count(r.id) from recipe r 
+                            where r.approved = true and r.id in (:ids)
             """)
-    Flux<Long> countByIds(Collection<Long> ids);
+    Mono<Long> countByIds(Collection<Long> ids);
 
 
     @Query("""
                 select count(*) from recipe r
-                where r.id in (:ids) and r.approved = true and r.user_id = :userId
+                where r.approved = true and r.user_id = :userId and r.id in (:ids)
             """)
     Mono<Long> countAllByIdsUser(List<Long> ids, Long userId);
 
@@ -44,8 +44,8 @@ public interface RecipeRepository extends ApprovedRepository<Recipe>, CountInPar
 
     @Query("""
             SELECT * FROM recipe
-            WHERE EXTRACT(MONTH FROM created_at) = :month
-            AND EXTRACT(YEAR FROM created_at) = :year
+            WHERE created_at >= make_timestamp(:year, :month, 1, 0, 0, 0)
+            AND created_at < make_timestamp(:year, :month, 1, 0, 0, 0) + INTERVAL '1 month'
             ORDER BY created_at DESC
             """)
     Flux<Recipe> findModelByMonth(int month, int year);

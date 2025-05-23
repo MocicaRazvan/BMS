@@ -36,7 +36,7 @@ public class PostExtendedRepositoryImpl implements PostExtendedRepository {
 
     private static final String SELECT_ALL = "SELECT p.* FROM post p join post_embedding e on p.id = e.entity_id ";
     private static final String COUNT_ALL = "SELECT COUNT(p.id) FROM post p join post_embedding e on p.id = e.entity_id ";
-
+    private static final String ASSOCIATIVE_ENTITY_JOIN = "JOIN post_likes pl ON p.id = pl.master_id ";
 
     @Override
     public Flux<Post> getPostsFiltered(String title, Boolean approved, List<String> tags, Long likedUserId,
@@ -46,12 +46,13 @@ public class PostExtendedRepositoryImpl implements PostExtendedRepository {
 
 
         return ollamaAPIService.getEmbedding(title, embedCache).flatMapMany(embeddings -> {
-            StringBuilder queryBuilder = new StringBuilder(SELECT_ALL);
+            String query = likedUserId != null ? SELECT_ALL + ASSOCIATIVE_ENTITY_JOIN : SELECT_ALL;
+            StringBuilder queryBuilder = new StringBuilder(query);
 
             appendWhereClause(queryBuilder, title, embeddings, approved, tags, createdAtLowerBound, createdAtUpperBound, updatedAtLowerBound, updatedAtUpperBound);
 
-            repositoryUtils.addNotNullField(likedUserId, queryBuilder, new RepositoryUtils.MutableBoolean(queryBuilder.length() > SELECT_ALL.length()),
-                    " :user_like_id = ANY(user_likes) ");
+            repositoryUtils.addNotNullField(likedUserId, queryBuilder, new RepositoryUtils.MutableBoolean(queryBuilder.length() > query.length()),
+                    " pl.child_id = :user_like_id");
 
 
             pageableUtils.appendPageRequestQueryCallbackIfFieldIsNotEmpty(queryBuilder, pageRequest, embeddings, ollamaQueryUtils::addOrder);
@@ -100,14 +101,14 @@ public class PostExtendedRepositoryImpl implements PostExtendedRepository {
     public Mono<Long> countPostsFiltered(String title, Boolean approved, List<String> tags, LocalDate createdAtLowerBound, LocalDate createdAtUpperBound,
                                          LocalDate updatedAtLowerBound, LocalDate updatedAtUpperBound, Long likedUserId) {
         return ollamaAPIService.getEmbedding(title, embedCache).flatMap(embeddings -> {
-
-            StringBuilder queryBuilder = new StringBuilder(COUNT_ALL);
+            String query = likedUserId != null ? COUNT_ALL + ASSOCIATIVE_ENTITY_JOIN : COUNT_ALL;
+            StringBuilder queryBuilder = new StringBuilder(query);
 
 
             appendWhereClause(queryBuilder, title, embeddings, approved, tags, createdAtLowerBound, createdAtUpperBound, updatedAtLowerBound, updatedAtUpperBound);
 
-            repositoryUtils.addNotNullField(likedUserId, queryBuilder, new RepositoryUtils.MutableBoolean(queryBuilder.length() > COUNT_ALL.length()),
-                    " :user_like_id = ANY(user_likes) ");
+            repositoryUtils.addNotNullField(likedUserId, queryBuilder, new RepositoryUtils.MutableBoolean(queryBuilder.length() > query.length()),
+                    " pl.child_id = :user_like_id");
 
             DatabaseClient.GenericExecuteSpec executeSpec = getGenericExecuteSpec(title, approved, tags, queryBuilder, createdAtLowerBound, createdAtUpperBound, updatedAtLowerBound, updatedAtUpperBound);
 
@@ -177,11 +178,22 @@ public class PostExtendedRepositoryImpl implements PostExtendedRepository {
 
 
         if (tags != null && !tags.isEmpty()) {
-            for (int i = 0; i < tags.size(); i++) {
-                repositoryUtils.addNotNullField(tags.get(i), queryBuilder, hasPreviousCriteria, ":tag" + i + " = ANY(tags)");
+            StringBuilder tagsBuilder = getTagsQuery(tags);
+            repositoryUtils.addField(queryBuilder, hasPreviousCriteria, tagsBuilder.toString());
+
+        }
+    }
+
+    private static StringBuilder getTagsQuery(List<String> tags) {
+        StringBuilder tagsBuilder = new StringBuilder();
+        tagsBuilder.append("CAST(array[ ");
+        for (int i = 0; i < tags.size(); i++) {
+            tagsBuilder.append(":tag").append(i);
+            if (i < tags.size() - 1) {
+                tagsBuilder.append(", ");
             }
         }
-
-
+        tagsBuilder.append(" ] AS text[]) <@ tags ");
+        return tagsBuilder;
     }
 }

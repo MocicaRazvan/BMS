@@ -15,6 +15,7 @@ import com.mocicarazvan.templatemodule.exceptions.action.PrivateRouteException;
 import com.mocicarazvan.templatemodule.mappers.DtoMapper;
 import com.mocicarazvan.templatemodule.models.ApproveImpl;
 import com.mocicarazvan.templatemodule.repositories.ApprovedRepository;
+import com.mocicarazvan.templatemodule.repositories.AssociativeEntityRepository;
 import com.mocicarazvan.templatemodule.services.impl.ApprovedServiceImpl;
 import com.mocicarazvan.templatemodule.testUtils.AssertionTestUtils;
 import com.mocicarazvan.templatemodule.testUtils.FilePartTestUtils;
@@ -36,6 +37,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.util.Pair;
 import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.transaction.reactive.TransactionalOperator;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -80,6 +82,15 @@ class ApprovedServiceTest {
 
     @Mock
     FileClient fileClient;
+
+    @Mock
+    private AssociativeEntityRepository userLikesRepository;
+
+    @Mock
+    private AssociativeEntityRepository userDislikesRepository;
+
+    @Mock
+    private TransactionalOperator transactionalOperator;
 
     private final UserDto user1 = UserDto.builder().id(1L)
             .firstName("John")
@@ -219,7 +230,8 @@ class ApprovedServiceTest {
                 repository, mapper, pageableUtils,
                 userClient, MODEL_NAME, ALLOWED_SORTING_FIELDS,
                 entitiesUtils, fileClient, rabbitMqApprovedSender,
-                mockedCacheWrapper, rabbitMqUpdateDeleteService
+                mockedCacheWrapper, rabbitMqUpdateDeleteService,
+                transactionalOperator, userLikesRepository, userDislikesRepository
         ) {
             @Override
             public ApproveImpl cloneModel(ApproveImpl approve) {

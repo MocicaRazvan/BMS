@@ -25,6 +25,7 @@ import com.mocicarazvan.templatemodule.dtos.PageableBody;
 import com.mocicarazvan.templatemodule.dtos.UserDto;
 import com.mocicarazvan.templatemodule.dtos.response.*;
 import com.mocicarazvan.templatemodule.exceptions.action.IllegalActionException;
+import com.mocicarazvan.templatemodule.repositories.AssociativeEntityRepository;
 import com.mocicarazvan.templatemodule.services.RabbitMqUpdateDeleteService;
 import com.mocicarazvan.templatemodule.services.ValidIds;
 import com.mocicarazvan.templatemodule.services.impl.TitleBodyServiceImpl;
@@ -33,6 +34,7 @@ import com.mocicarazvan.templatemodule.utils.OrderEnsurer;
 import com.mocicarazvan.templatemodule.utils.PageableUtilsCustom;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.reactive.TransactionalOperator;
@@ -55,8 +57,15 @@ public class DayServiceImpl
     private final RecipeClient recipeClient;
     private final DayEmbedServiceImpl dayEmbedServiceImpl;
 
-    public DayServiceImpl(DayRepository modelRepository, DayMapper modelMapper, PageableUtilsCustom pageableUtils, UserClient userClient, EntitiesUtils entitiesUtils, MealService mealService, TransactionalOperator transactionalOperator, ExtendedDayRepository extendedDayRepository, PlanClient planClient, RecipeClient recipeClient, DayServiceRedisCacheWrapper self, DayEmbedServiceImpl dayEmbedServiceImpl, RabbitMqUpdateDeleteService<Day> rabbitMqUpdateDeleteService) {
-        super(modelRepository, modelMapper, pageableUtils, userClient, "day", List.of("id", "userId", "type", "title", "createdAt", "updatedAt", PageableUtilsCustom.USER_LIKES_LENGTH_SORT_PROPERTY, PageableUtilsCustom.USER_DISLIKES_LENGTH_SORT_PROPERTY), entitiesUtils, self, rabbitMqUpdateDeleteService);
+    public DayServiceImpl(DayRepository modelRepository, DayMapper modelMapper, PageableUtilsCustom pageableUtils,
+                          UserClient userClient, EntitiesUtils entitiesUtils, MealService mealService,
+                          TransactionalOperator transactionalOperator, ExtendedDayRepository extendedDayRepository,
+                          PlanClient planClient, RecipeClient recipeClient, DayServiceRedisCacheWrapper self,
+                          DayEmbedServiceImpl dayEmbedServiceImpl, RabbitMqUpdateDeleteService<Day> rabbitMqUpdateDeleteService,
+                          @Qualifier("userLikesRepository") AssociativeEntityRepository userLikesRepository, @Qualifier("userDislikesRepository") AssociativeEntityRepository userDislikesRepository) {
+        super(modelRepository, modelMapper, pageableUtils, userClient, "day",
+                List.of("id", "userId", "type", "title", "createdAt", "updatedAt", PageableUtilsCustom.USER_LIKES_LENGTH_SORT_PROPERTY, PageableUtilsCustom.USER_DISLIKES_LENGTH_SORT_PROPERTY), entitiesUtils, self, rabbitMqUpdateDeleteService,
+                transactionalOperator, userLikesRepository, userDislikesRepository);
         this.mealService = mealService;
         this.transactionalOperator = transactionalOperator;
         this.extendedDayRepository = extendedDayRepository;
@@ -92,7 +101,8 @@ public class DayServiceImpl
     @RedisReactiveChildCacheEvict(key = CACHE_KEY_PATH, id = "#id", masterId = "#userId")
     public Mono<DayResponse> updateModel(Long id, DayBody body, String userId) {
         return updateModelWithSuccess(id, userId, model ->
-                dayEmbedServiceImpl.updateEmbeddingWithZip(body.getTitle(), model.getTitle(), model.getId(), modelMapper.updateModelFromBody(body, model))).as(transactionalOperator::transactional);
+                dayEmbedServiceImpl.updateEmbeddingWithZip(body.getTitle(), model.getTitle(), model.getId(),
+                        modelMapper.updateModelFromBody(body, model))).as(transactionalOperator::transactional);
     }
 
     @Override
@@ -254,7 +264,6 @@ public class DayServiceImpl
     public Mono<EntityCount> countInParent(Long childId) {
         return
                 modelRepository.countInParent(childId)
-                        .collectList()
                         .map(EntityCount::new);
     }
 

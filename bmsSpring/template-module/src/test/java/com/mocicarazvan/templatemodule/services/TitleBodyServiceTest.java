@@ -8,6 +8,7 @@ import com.mocicarazvan.templatemodule.enums.Role;
 import com.mocicarazvan.templatemodule.exceptions.action.PrivateRouteException;
 import com.mocicarazvan.templatemodule.mappers.DtoMapper;
 import com.mocicarazvan.templatemodule.models.TitleBodyImpl;
+import com.mocicarazvan.templatemodule.repositories.AssociativeEntityRepository;
 import com.mocicarazvan.templatemodule.repositories.TitleBodyRepository;
 import com.mocicarazvan.templatemodule.services.impl.TitleBodyServiceImpl;
 import com.mocicarazvan.templatemodule.testUtils.AssertionTestUtils;
@@ -21,6 +22,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.transaction.reactive.TransactionalOperator;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -144,6 +146,15 @@ class TitleBodyServiceTest {
                     >
             > service;
 
+    @Mock
+    private AssociativeEntityRepository userLikesRepository;
+
+    @Mock
+    private AssociativeEntityRepository userDislikesRepository;
+
+    @Mock
+    private TransactionalOperator transactionalOperator;
+
     private static final String MODEL_NAME = "titleBody";
     private static final List<String> ALLOWED_SORTING_FIELDS = List.of("createdAt", "updatedAt", "id", "title", "body");
 
@@ -154,7 +165,7 @@ class TitleBodyServiceTest {
         );
         service = new TitleBodyServiceImpl<>(
                 repository, mapper, pageableUtils, userClient, MODEL_NAME, ALLOWED_SORTING_FIELDS, entitiesUtils, mockedCacheWrapper,
-                rabbitMqUpdateDeleteService
+                rabbitMqUpdateDeleteService, transactionalOperator, userLikesRepository, userDislikesRepository
         ) {
 
             @Override
@@ -345,10 +356,11 @@ class TitleBodyServiceTest {
     void reactModel_success(String type) {
         when(repository.findById(model1.getId())).thenReturn(Mono.just(model1));
         when(userClient.getUser("", "1")).thenReturn(Mono.just(user1));
-        when(entitiesUtils.setReaction(model1, user1, type)).thenReturn(Mono.just(model1));
+        when(entitiesUtils.setReaction(model1, user1, type, userLikesRepository, userDislikesRepository)).thenReturn(Mono.just(model1));
         when(repository.save(model1)).thenReturn(Mono.just(model1));
         when(mapper.fromModelToResponse(model1)).thenReturn(bodyResp1);
         when(mockedCacheWrapper.reactToModelInvalidate(bodyResp1)).thenReturn(Mono.just(bodyResp1));
+        when(transactionalOperator.transactional(any(Mono.class))).thenAnswer(invocation -> invocation.getArgument(0, Mono.class));
 
         StepVerifier.create(service.reactToModel(model1.getId(), type, user1.getId().toString()))
                 .expectNext(bodyResp1)
@@ -359,6 +371,7 @@ class TitleBodyServiceTest {
     void reactModel_throwsNotFound() {
         when(userClient.getUser("", "1")).thenReturn(Mono.just(user1));
         when(repository.findById(model1.getId())).thenReturn(Mono.empty());
+        when(transactionalOperator.transactional(any(Mono.class))).thenAnswer(invocation -> invocation.getArgument(0, Mono.class));
 
         StepVerifier.create(service.reactToModel(model1.getId(), "like", user1.getId().toString()))
                 .expectErrorMatches(t -> AssertionTestUtils.assertNotFound(t, MODEL_NAME, model1))

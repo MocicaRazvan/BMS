@@ -264,6 +264,7 @@ export default function IngredientsTable({
 
           return (
             <Badge
+              className="px-2"
               variant={
                 colorMap[row.original.model.ingredient.type] as
                   | "default"
@@ -303,6 +304,7 @@ export default function IngredientsTable({
         ),
         cell: ({ row }) => (
           <Badge
+            className="px-2"
             variant={
               row.original.model.ingredient.display ? "success" : "destructive"
             }
@@ -359,7 +361,7 @@ export default function IngredientsTable({
         header: () => (
           <RadioSortButton
             sortingProperty="carbohydrates"
-            className="max-w-[80px] text-nowrap overflow-x-hidden"
+            className="max-w-[90px] text-nowrap overflow-x-hidden"
             radioArgs={radioArgs}
           >
             <div className="max-w-16 text-nowrap overflow-x-hidden">

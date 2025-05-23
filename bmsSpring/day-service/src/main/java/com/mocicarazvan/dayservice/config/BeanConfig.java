@@ -11,6 +11,8 @@ import com.mocicarazvan.rediscache.utils.RedisChildCacheUtils;
 import com.mocicarazvan.templatemodule.clients.FileClient;
 import com.mocicarazvan.templatemodule.clients.UserClient;
 import com.mocicarazvan.templatemodule.jackson.CustomObjectMapper;
+import com.mocicarazvan.templatemodule.repositories.AssociativeEntityRepository;
+import com.mocicarazvan.templatemodule.repositories.impl.AssociativeEntityRepositoryImpl;
 import com.mocicarazvan.templatemodule.utils.EntitiesUtils;
 import com.mocicarazvan.templatemodule.utils.PageableUtilsCustom;
 import com.mocicarazvan.templatemodule.utils.RepositoryUtils;
@@ -28,6 +30,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.data.redis.core.ReactiveRedisTemplate;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
+import org.springframework.r2dbc.core.DatabaseClient;
 import org.springframework.transaction.ReactiveTransactionManager;
 import org.springframework.transaction.reactive.TransactionalOperator;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
@@ -148,6 +151,24 @@ public class BeanConfig {
 
 
     @Bean
+    public AssociativeEntityRepository userLikesRepository(DatabaseClient databaseClient,
+                                                           TransactionalOperator transactionalOperator) {
+        return new AssociativeEntityRepositoryImpl(databaseClient, transactionalOperator, "day_likes");
+    }
+
+    @Bean
+    public AssociativeEntityRepository userDislikesRepository(DatabaseClient databaseClient,
+                                                              TransactionalOperator transactionalOperator) {
+        return new AssociativeEntityRepositoryImpl(databaseClient, transactionalOperator, "day_dislikes");
+    }
+
+    @Bean
+    public AssociativeEntityRepository mealRecipesRepository(DatabaseClient databaseClient,
+                                                             TransactionalOperator transactionalOperator) {
+        return new AssociativeEntityRepositoryImpl(databaseClient, transactionalOperator, "meal_recipes");
+    }
+
+    @Bean
     public RedisChildCacheUtils redisChildCacheUtils(ReactiveRedisTemplate<String, Object> reactiveRedisTemplate,
                                                      AspectUtils aspectUtils) {
         return new RedisChildCacheUtils(aspectUtils, reactiveRedisTemplate);
@@ -173,5 +194,5 @@ public class BeanConfig {
                 reverseKeysLocalCache, localReactiveCache, executorService);
     }
 
-   
+
 }

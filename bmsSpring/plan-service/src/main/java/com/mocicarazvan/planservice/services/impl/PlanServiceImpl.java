@@ -33,6 +33,7 @@ import com.mocicarazvan.templatemodule.exceptions.action.PrivateRouteException;
 import com.mocicarazvan.templatemodule.exceptions.action.SubEntityUsed;
 import com.mocicarazvan.templatemodule.exceptions.notFound.NotFoundEntity;
 import com.mocicarazvan.templatemodule.hateos.CustomEntityModel;
+import com.mocicarazvan.templatemodule.repositories.AssociativeEntityRepository;
 import com.mocicarazvan.templatemodule.services.RabbitMqApprovedSender;
 import com.mocicarazvan.templatemodule.services.RabbitMqUpdateDeleteService;
 import com.mocicarazvan.templatemodule.services.impl.ApprovedServiceImpl;
@@ -40,6 +41,7 @@ import com.mocicarazvan.templatemodule.utils.EntitiesUtils;
 import com.mocicarazvan.templatemodule.utils.PageableUtilsCustom;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.util.Pair;
 import org.springframework.http.codec.multipart.FilePart;
@@ -48,6 +50,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.reactive.TransactionalOperator;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.util.function.Tuple2;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -64,18 +67,28 @@ public class PlanServiceImpl
     private final ExtendedPlanRepository extendedPlanRepository;
     private final DayClient dayClient;
     private final OrderClient orderClient;
-    private final RabbitMqApprovedSender<PlanResponse> rabbitMqSender;
     private final TransactionalOperator transactionalOperator;
     private final PlanEmbedServiceImpl planEmbedServiceImpl;
+    private final AssociativeEntityRepository planDaysRepository;
 
-    public PlanServiceImpl(PlanRepository modelRepository, PlanMapper modelMapper, PageableUtilsCustom pageableUtils, UserClient userClient, EntitiesUtils entitiesUtils, FileClient fileClient, ExtendedPlanRepository extendedPlanRepository, DayClient dayClient, OrderClient orderClient, RabbitMqApprovedSender<PlanResponse> rabbitMqSender, PlanServiceRedisCacheWrapper self, TransactionalOperator transactionalOperator, PlanEmbedServiceImpl planEmbedServiceImpl, RabbitMqUpdateDeleteService<Plan> rabbitMqUpdateDeleteService) {
-        super(modelRepository, modelMapper, pageableUtils, userClient, "plan", List.of("id", "userId", "type", "title", "createdAt", "updatedAt", "approved", "display", PageableUtilsCustom.USER_LIKES_LENGTH_SORT_PROPERTY, PageableUtilsCustom.USER_DISLIKES_LENGTH_SORT_PROPERTY), entitiesUtils, fileClient, rabbitMqSender, self, rabbitMqUpdateDeleteService);
+    public PlanServiceImpl(PlanRepository modelRepository, PlanMapper modelMapper, PageableUtilsCustom pageableUtils,
+                           UserClient userClient, EntitiesUtils entitiesUtils, FileClient fileClient,
+                           ExtendedPlanRepository extendedPlanRepository, DayClient dayClient, OrderClient orderClient,
+                           RabbitMqApprovedSender<PlanResponse> rabbitMqSender, PlanServiceRedisCacheWrapper self,
+                           TransactionalOperator transactionalOperator, PlanEmbedServiceImpl planEmbedServiceImpl,
+                           RabbitMqUpdateDeleteService<Plan> rabbitMqUpdateDeleteService,
+                           @Qualifier("userLikesRepository") AssociativeEntityRepository userLikesRepository, @Qualifier("userDislikesRepository") AssociativeEntityRepository userDislikesRepository,
+                           @Qualifier("planDaysRepository") AssociativeEntityRepository planDaysRepository
+    ) {
+        super(modelRepository, modelMapper, pageableUtils, userClient, "plan",
+                List.of("id", "userId", "type", "title", "createdAt", "updatedAt", "approved", "display", PageableUtilsCustom.USER_LIKES_LENGTH_SORT_PROPERTY, PageableUtilsCustom.USER_DISLIKES_LENGTH_SORT_PROPERTY),
+                entitiesUtils, fileClient, rabbitMqSender, self, rabbitMqUpdateDeleteService, transactionalOperator, userLikesRepository, userDislikesRepository);
         this.extendedPlanRepository = extendedPlanRepository;
         this.dayClient = dayClient;
         this.orderClient = orderClient;
-        this.rabbitMqSender = rabbitMqSender;
         this.transactionalOperator = transactionalOperator;
         this.planEmbedServiceImpl = planEmbedServiceImpl;
+        this.planDaysRepository = planDaysRepository;
     }
 
     @Override
@@ -170,8 +183,17 @@ public class PlanServiceImpl
     @Override
     public Flux<DayResponse> getDaysByPlan(Long id, String userId) {
         return getModelById(id, userId)
-                .flatMapMany(model -> dayClient.getByIds(model.getDays()
-                        .stream().map(Object::toString).toList(), userId));
+                .flatMapMany(model -> {
+                            List<String> ids = model.getDays()
+                                    .stream().map(Object::toString).toList();
+                            return dayClient.getByIds(ids, userId)
+                                    .collectMap(DayResponse::getId)
+                                    .flatMapMany(map ->
+                                            Flux.fromIterable(model.getDays())
+                                                    .map(map::get)
+                                    );
+                        }
+                );
     }
 
     @Override
@@ -322,7 +344,6 @@ public class PlanServiceImpl
     public Mono<EntityCount> countInParent(Long childId) {
         return
                 modelRepository.countInParent(childId)
-                        .collectList()
                         .map(EntityCount::new);
     }
 
@@ -342,7 +363,12 @@ public class PlanServiceImpl
 
                         .then(
                                 super.createModel(images, planBody, userId, clientId))
-                        .flatMap(plan -> planEmbedServiceImpl.saveEmbedding(plan.getId(), plan.getTitle()).thenReturn(plan))
+                        .flatMap(plan ->
+                                Mono.zip(
+                                                planEmbedServiceImpl.saveEmbedding(plan.getId(), plan.getTitle()),
+                                                planDaysRepository.insertForMasterAndChildren(plan.getId(), plan.getDays())
+                                        )
+                                        .thenReturn(plan))
                         .flatMap(self::createInvalidate)
                         .map(Pair::getFirst).as(transactionalOperator::transactional);
     }
@@ -363,7 +389,12 @@ public class PlanServiceImpl
         return
                 verifyDayIds(id, planBody, userId)
                         .then(super.updateModelWithImagesGetOriginalApproved(images, id, planBody, userId, clientId,
-                                ((planBody1, s, plan) -> planEmbedServiceImpl.updateEmbeddingWithZip(planBody1.getTitle(), s, plan.getId(), modelRepository.save(plan)))
+                                ((planBody1, s, plan) -> planEmbedServiceImpl.updateEmbeddingWithZip(planBody1.getTitle(), s, plan.getId(),
+                                        Mono.zip(
+                                                modelRepository.save(plan),
+                                                planDaysRepository.consensusChildrenForMaster(plan.getId(), planBody1.getDays())
+                                        ).map(Tuple2::getT1)
+                                ))
                         ))
                         .flatMap(self::updateDeleteInvalidate).as(transactionalOperator::transactional);
     }

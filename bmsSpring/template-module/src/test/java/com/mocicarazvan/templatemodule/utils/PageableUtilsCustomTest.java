@@ -164,6 +164,32 @@ class PageableUtilsCustomTest {
     }
 
     @Test
+    void createPageRequestQueryListExtraOrder_noSortingCriteria() {
+        PageRequest pr = PageRequest.of(0, 10);
+        var extraOrder = List.of("name ASC", "age DESC");
+        String expected = " ORDER BY name ASC , age DESC LIMIT 10 OFFSET 0";
+        assertEquals(expected, pageableUtilsCustom.createPageRequestQuery(pr, extraOrder));
+    }
+
+    @Test
+    void createPageRequestQueryListExtraOrder_sortingCriteria() {
+        PageRequest pr = PageRequest.of(0, 10, Sort.by(Sort.Order.asc("p1"),
+                Sort.Order.desc("p2")));
+        var extraOrder = List.of("name ASC", "age DESC");
+        String expected = " ORDER BY p1 ASC, p2 DESC , name ASC , age DESC LIMIT 10 OFFSET 0";
+        assertEquals(expected, pageableUtilsCustom.createPageRequestQuery(pr, extraOrder));
+    }
+
+    @ParameterizedTest
+    @NullAndEmptySource
+    void createPageRequestQueryListExtraOrderEmpty_sortingCriteria(List<String> extraOrder) {
+        PageRequest pr = PageRequest.of(0, 10, Sort.by(Sort.Order.asc("p1"),
+                Sort.Order.desc("p2")));
+        String expected = " ORDER BY p1 ASC, p2 DESC LIMIT 10 OFFSET 0";
+        assertEquals(expected, pageableUtilsCustom.createPageRequestQuery(pr, extraOrder));
+    }
+
+    @Test
     void createPageableRequest() {
         Flux<Integer> content = Flux.range(0, 10);
         Pageable pageable = PageRequest.of(0, 3);
