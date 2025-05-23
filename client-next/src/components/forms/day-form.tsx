@@ -131,9 +131,11 @@ export default function DayForm({
   const initialCurrentMeals = useMemo(
     () =>
       initialData
-        ? Object.values(initialData)
-            .sort((a, b) => a.period.hour - b.period.hour)
-            .sort((a, b) => a.period.minute - b.period.minute)
+        ? Object.values(initialData).sort(
+            (a, b) =>
+              a.period.hour - b.period.hour ||
+              a.period.minute - b.period.minute,
+          )
         : [],
     [JSON.stringify(initialData)],
   );

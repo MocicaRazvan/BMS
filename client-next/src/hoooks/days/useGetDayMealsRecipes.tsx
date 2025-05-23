@@ -9,6 +9,7 @@ import {
 import { BaseError } from "@/types/responses";
 import { InitialDataType } from "@/components/forms/day-form";
 import { useMemo } from "react";
+import { wrapItemToString } from "@/lib/utils";
 
 export function useGetDayMealsRecipes(id: string) {
   const {
@@ -19,7 +20,6 @@ export function useGetDayMealsRecipes(id: string) {
     path: `/days/${id}`,
     method: "GET",
     authToken: true,
-    useAbortController: false,
     refetchOnFocus: false,
   });
 
@@ -34,7 +34,6 @@ export function useGetDayMealsRecipes(id: string) {
     path: `/meals/day/recipes/${id}`,
     method: "GET",
     authToken: true,
-    useAbortController: false,
     refetchOnFocus: false,
   });
 
@@ -51,22 +50,20 @@ export function useGetDayMealsRecipes(id: string) {
           },
         ) => {
           const periodArr = period.split(":");
-          return {
-            ...acc,
-            [id]: {
-              period: {
-                hour: parseInt(periodArr[0], 10) || 0,
-                minute: parseInt(periodArr[1], 10) || 0,
-              },
-              recipes,
-              id,
-              optionRecipes: children.map(({ id, title, type }) => ({
-                label: title + " - " + type,
-                value: id.toString(),
-                type,
-              })),
+          acc[id] = {
+            period: {
+              hour: parseInt(periodArr[0], 10) || 0,
+              minute: parseInt(periodArr[1], 10) || 0,
             },
+            recipes,
+            id: wrapItemToString(id),
+            optionRecipes: children.map(({ id, title, type }) => ({
+              label: title + " - " + type,
+              value: id.toString(),
+              type,
+            })),
           };
+          return acc;
         },
         {} as InitialDataType,
       ),

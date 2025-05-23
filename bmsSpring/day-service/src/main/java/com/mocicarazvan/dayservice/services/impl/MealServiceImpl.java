@@ -100,7 +100,7 @@ public class MealServiceImpl
                 userClient.getUser("", userId)
                         .flatMapMany(user ->
                                 mealRepository.findAllByDayIdCustomPeriodSort(dayId)
-                                        .flatMap(model -> entitiesUtils.checkEntityOwnerOrAdmin(model, user)
+                                        .flatMapSequential(model -> entitiesUtils.checkEntityOwnerOrAdmin(model, user)
                                                 .thenReturn(modelMapper.fromModelToResponse(model))));
 
     }
@@ -108,9 +108,7 @@ public class MealServiceImpl
 
     @Override
     public Flux<MealResponse> getMealsByDayInternal(Long dayId, String userId) {
-
         return
-
                 self.findAllByDayIdCustomPeriodSort(dayId)
                         .map(modelMapper::fromModelToResponse);
     }
@@ -123,8 +121,7 @@ public class MealServiceImpl
                 mealRepository.findAllByDayId(dayId)
                         .collectList()
                         .doOnSuccess(rabbitMqUpdateDeleteService::sendBatchDeleteMessage)
-                        .then(
-                                modelRepository.deleteAllByDayId(dayId));
+                        .then(modelRepository.deleteAllByDayId(dayId));
     }
 
     @Override

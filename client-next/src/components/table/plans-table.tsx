@@ -248,7 +248,7 @@ export default function PlansTable({
         }) => (
           <OverflowTextTooltip
             text={wrapItemToString(id)}
-            triggerClassName="w-10 max-w-10"
+            triggerClassName="w-9 max-w-9"
           />
         ),
       },
@@ -289,7 +289,7 @@ export default function PlansTable({
         ),
         cell: ({ row }) => (
           <Badge
-            className="px-2"
+            className="px-1.5"
             variant={colorMap[row.original.model.type] as BadgeVariants}
           >
             {row.original.model.type}
@@ -319,7 +319,7 @@ export default function PlansTable({
         ),
         cell: ({ row }) => (
           <div className="max-w-30 text-xs font-bold text-nowrap overflow-x-hidden">
-            <p>{row.original.model.objective}</p>
+            <p>{row.original.model.objective.replace("_", " ")}</p>
           </div>
         ),
       },
