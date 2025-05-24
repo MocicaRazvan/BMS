@@ -27,7 +27,9 @@ CREATE INDEX IF NOT EXISTS idx_plan_user_likes_cardinality ON plan (cardinality(
 
 CREATE INDEX IF NOT EXISTS idx_plan_created_at ON plan (created_at desc);
 
+CREATE INDEX IF NOT EXISTS idx_plan_type ON plan (type);
 
+CREATE INDEX IF NOT EXISTS idx_plan_objective ON plan (objective);
 
 CREATE EXTENSION if NOT EXISTS vector;
 

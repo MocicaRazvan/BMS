@@ -35,6 +35,7 @@ CREATE INDEX IF NOT EXISTS idx_recipe_user_likes_cardinality
 
 CREATE INDEX IF NOT EXISTS idx_recipe_created_at ON recipe (created_at desc);
 
+CREATE INDEX IF NOT EXISTS idx_recipe_type ON recipe (type);
 
 CREATE EXTENSION IF NOT EXISTS pg_trgm;
 

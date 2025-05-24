@@ -17,6 +17,8 @@ CREATE INDEX IF NOT EXISTS idx_day_user_likes_cardinality ON DAY (cardinality(us
 
 CREATE INDEX IF NOT EXISTS idx_DAY_created_at ON DAY (created_at);
 
+CREATE INDEX IF NOT EXISTS idx_day_type ON DAY (type);
+
 
 CREATE TABLE IF NOT EXISTS Meal
 (
