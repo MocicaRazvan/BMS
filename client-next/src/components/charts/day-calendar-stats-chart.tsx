@@ -16,10 +16,10 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart";
 import { useMemo } from "react";
-import { getColorsByDayType } from "@/context/day-calendar-context";
 import chunk from "lodash/chunk";
 import { Separator } from "@/components/ui/separator";
 import { useMedia } from "react-use";
+import { getColorsByDayType } from "@/lib/constants";
 
 interface Props {
   data: DayCalendarTrackingStats[];

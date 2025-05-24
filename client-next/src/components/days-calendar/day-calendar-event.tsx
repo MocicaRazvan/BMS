@@ -4,10 +4,7 @@ import { CustomEntityModel, DayCalendarResponse } from "@/types/dto";
 import { useCallback, useEffect, useState } from "react";
 import useLoadingErrorState from "@/hoooks/useLoadingErrorState";
 import { fetchStream } from "@/lib/fetchers/fetchStream";
-import {
-  getColorByDayType,
-  useDayCalendar,
-} from "@/context/day-calendar-context";
+import { useDayCalendar } from "@/context/day-calendar-context";
 import { toast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
 import { Info, Trash2 } from "lucide-react";
@@ -15,6 +12,7 @@ import DayCalendarSingleDay, {
   DayCalendarSingleDayTexts,
 } from "@/components/days-calendar/day-calendar-single-day";
 import { Badge } from "@/components/ui/badge";
+import { getColorByDayType } from "@/lib/constants";
 
 export interface DayCalendarEventTexts {
   toastDescription: string;

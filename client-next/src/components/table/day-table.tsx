@@ -1,7 +1,7 @@
 "use client";
 
 import { ColumnActionsTexts } from "@/texts/components/table";
-import { dayColumnActions } from "@/lib/constants";
+import { dayColumnActions, getColorsByDayType } from "@/lib/constants";
 import { DataTable, DataTableTexts } from "@/components/table/data-table";
 import useFilterDropdown, {
   RadioFieldFilterCriteriaCallback,
@@ -45,7 +45,6 @@ import {
   RadioSortDropDownWithExtra,
   RadioSortDropDownWithExtraDummy,
 } from "@/components/common/radio-sort";
-import { getColorsByDayType } from "@/context/day-calendar-context";
 
 export interface DayTableColumnsTexts {
   id: string;
@@ -77,6 +76,18 @@ export interface DayTableProps
 }
 
 const typeColors = getColorsByDayType();
+
+const getDayTypeChart = (type: DayType) => ({
+  [`#${type.replace("_", " ").toLowerCase()}`]: (
+    d: ResponseWithEntityCount<DayResponse>,
+  ) => (d.model.type === type ? 1 : 0),
+});
+
+const dayChartTypes = dayTypes.reduce(
+  (acc, type) => ({ ...acc, ...getDayTypeChart(type) }),
+  {},
+);
+
 export default function DaysTable({
   dayTableColumnTexts,
   dataTableTexts,
@@ -206,9 +217,7 @@ export default function DaysTable({
         header: () => (
           <RadioSortDropDownWithExtraDummy
             trigger={
-              <p
-                className={`font-bold text-lg text-left text-[${typeColors[dayType as DayType]}]`}
-              >
+              <p className="font-bold text-lg text-left">
                 {dayTableColumnTexts.type}
               </p>
             }
@@ -219,13 +228,21 @@ export default function DaysTable({
                 noFilterLabel={typeDropdownTexts.noFilterLabel}
                 setGlobalFilter={setDayType}
                 items={dayTypeItems}
+                className="capitalize"
               />
             }
           />
         ),
         cell: ({ row }) => (
           <div className="max-w-32 text-sm font-bold text-nowrap overflow-x-hidden">
-            <p>{dayTypeBadgeTexts.labels[row.original.model.type]}</p>
+            <p
+              className="capitalize"
+              style={{
+                color: typeColors[row.original.model.type],
+              }}
+            >
+              {dayTypeBadgeTexts.labels[row.original.model.type]}
+            </p>
           </div>
         ),
       },
@@ -465,20 +482,14 @@ export default function DaysTable({
             callback: resetCurrentPage,
             filterKey: "title",
           }}
-          // extraCriteria={
-          //   <div className="flex items-start justify-center gap-8 flex-1 flex-wrap">
-          //     <div className="flex items-center justify-end gap-4 flex-1 flex-wrap">
-          //       {dayTypeFilterCriteriaCallback(resetCurrentPage)}
-          //     </div>
-          //   </div>
-          // }
-          // rangeDateFilter={
-          //   <CreationFilter
-          //     {...creationFilterTexts}
-          //     updateCreatedAtRange={updateCreatedAtRange}
-          //     updateUpdatedAtRange={updateUpdatedAtRange}
-          //   />
-          // }
+          chartProps={{
+            aggregatorConfig: {
+              "#": (_) => 1,
+              ...dayChartTypes,
+            },
+            dateField: "model.createdAt",
+          }}
+          showChart={true}
         />
       </Suspense>
     </div>

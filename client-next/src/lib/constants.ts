@@ -1,6 +1,6 @@
 import { Option } from "@/components/ui/multiple-selector";
 import { SortingOption } from "@/components/list/grid-list";
-import { ContainerAction } from "@/types/dto";
+import { ContainerAction, DayType } from "@/types/dto";
 
 export const MX_SPRING_MESSAGE = "does not have a valid MX record" as const;
 export const GOOGLE_STATE_COOKIE_NAME = "googleState";
@@ -223,3 +223,14 @@ export const containerActionColors = {
   [ContainerAction.STOP]: "destructive",
   [ContainerAction.START_MANUAL]: "success",
 };
+export const getColorsByDayType = (opacity = 1): Record<DayType, string> => ({
+  LOW_CARB: `hsl(var(--chart-1)/${opacity})`,
+  HIGH_CARB: `hsl(var(--chart-2)/${opacity})`,
+  HIGH_PROTEIN: `hsl(var(--chart-8)/${opacity})`,
+  LOW_FAT: `hsl(var(--chart-4)/${opacity})`,
+  HIGH_FAT: `hsl(var(--chart-10)/${opacity})`,
+  LOW_PROTEIN: `hsl(var(--chart-6)/${opacity})`,
+  BALANCED: `hsl(var(--chart-9)/${opacity})`,
+});
+export const getColorByDayType = (dayType: DayType, opacity = 1) =>
+  getColorsByDayType(opacity)?.[dayType];

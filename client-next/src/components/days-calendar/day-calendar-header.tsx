@@ -1,15 +1,13 @@
 "use client";
 
-import {
-  getColorsByDayType,
-  useDayCalendar,
-} from "@/context/day-calendar-context";
+import { useDayCalendar } from "@/context/day-calendar-context";
 import { addMonths, format, isSameMonth, subMonths } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useLocale } from "next-intl";
 import { Locale } from "@/navigation";
 import { dateFnsLocaleMapper } from "@/lib/utils";
+import { getColorsByDayType } from "@/lib/constants";
 
 export interface DayCalendarHeaderTexts {
   tracked: string;

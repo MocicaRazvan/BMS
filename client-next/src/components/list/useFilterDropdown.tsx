@@ -17,6 +17,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { ClassValue } from "clsx";
 
 export interface FilterDropdownItem {
   label: string;
@@ -121,12 +123,18 @@ const useFieldWithParams = ({
   };
 };
 
+interface RadioFieldFilterCriteriaCallbackProps
+  extends CriteriaWithCallbackProps {
+  className?: ClassValue;
+}
+
 export function RadioFieldFilterCriteriaCallback({
   items,
   fieldKey,
   noFilterLabel,
+  className,
   ...rest
-}: CriteriaWithCallbackProps) {
+}: RadioFieldFilterCriteriaCallbackProps) {
   const { field, handleChange } = useFieldWithParams({
     ...rest,
     fieldKey,
@@ -138,7 +146,7 @@ export function RadioFieldFilterCriteriaCallback({
   return (
     <RadioGroup
       defaultValue={field.value || "null"}
-      className="px-2 py-1.5 gap-4"
+      className={cn("px-2 py-1.5 gap-4", className)}
       onValueChange={handleChange}
     >
       {items.map(({ label, value }) => (

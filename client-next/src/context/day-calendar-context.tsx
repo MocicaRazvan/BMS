@@ -19,7 +19,7 @@ import {
   startOfMonth,
   startOfWeek,
 } from "date-fns";
-import { CustomEntityModel, DayCalendarResponse, DayType } from "@/types/dto";
+import { CustomEntityModel, DayCalendarResponse } from "@/types/dto";
 import useFetchStream, { UseFetchStreamProps } from "@/hoooks/useFetchStream";
 import { usePathname, useRouter } from "@/navigation";
 import { useSearchParams } from "next/navigation";
@@ -64,19 +64,6 @@ function getDateRanges(date: Date) {
   });
   return { monthStart, monthEnd, calendarStart, calendarEnd, calendarDays };
 }
-
-export const getColorsByDayType = (opacity = 1): Record<DayType, string> => ({
-  LOW_CARB: `hsl(var(--chart-1)/${opacity})`,
-  HIGH_CARB: `hsl(var(--chart-2)/${opacity})`,
-  HIGH_PROTEIN: `hsl(var(--chart-8)/${opacity})`,
-  LOW_FAT: `hsl(var(--chart-4)/${opacity})`,
-  HIGH_FAT: `hsl(var(--chart-10)/${opacity})`,
-  LOW_PROTEIN: `hsl(var(--chart-6)/${opacity})`,
-  BALANCED: `hsl(var(--chart-9)/${opacity})`,
-});
-
-export const getColorByDayType = (dayType: DayType, opacity = 1) =>
-  getColorsByDayType(opacity)?.[dayType];
 
 const baseFetchAgs: UseFetchStreamProps = {
   path: "/daysCalendar/byRange",
