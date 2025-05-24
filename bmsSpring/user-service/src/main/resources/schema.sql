@@ -53,6 +53,7 @@ CREATE INDEX IF NOT EXISTS idx_user_custom_created_at ON user_custom (created_at
 
 CREATE INDEX if NOT EXISTS idx_user_custom_email_role ON user_custom USING btree (email, role);
 
+CREATE INDEX IF NOT EXISTS idx_user_custom_provider ON user_custom USING btree (provider);
 
 CREATE EXTENSION IF NOT EXISTS pg_trgm;
 
