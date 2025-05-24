@@ -8,6 +8,7 @@ import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
 import { WithUser } from "@/lib/user";
+import { Link } from "@/navigation";
 
 export const ArchiveQueueNotificationContent = memo(
   ({ authUser }: WithUser) => {
@@ -24,9 +25,12 @@ export const ArchiveQueueNotificationContent = memo(
           <div className="flex items-center justify-between gap-10 w-full">
             <div className="flex items-center justify-between w-full">
               <div className="space-y-1.5">
-                <h4 className="font-semibold text-[15px]">
+                <Link
+                  href="/admin/archiveQueues"
+                  className="font-semibold text-[15px] hover:underline"
+                >
                   {message.queueName}
-                </h4>
+                </Link>
                 <p
                   className={`text-${containerActionColors[message.action]} font-medium`}
                 >

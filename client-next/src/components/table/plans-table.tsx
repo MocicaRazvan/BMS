@@ -769,13 +769,6 @@ export default function PlansTable({
             dateField: "model.createdAt",
           }}
           showChart={true}
-          // rangeDateFilter={
-          //   <CreationFilter
-          //     {...creationFilterTexts}
-          //     updateCreatedAtRange={updateCreatedAtRange}
-          //     updateUpdatedAtRange={updateUpdatedAtRange}
-          //   />
-          // }
         />
       </Suspense>
     </div>
