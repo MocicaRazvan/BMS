@@ -28,6 +28,9 @@ export const ArchiveQueueNotificationContent = memo(
                 <Link
                   href={`/admin/archiveQueues?columnFilters=queueName.%2522${message.queueName}%2522%2Caction.%2522${message.action}%2522`}
                   className="font-semibold text-[15px] hover:underline"
+                  onClick={() => {
+                    deleteNotification(message.id);
+                  }}
                 >
                   {message.queueName}
                 </Link>
