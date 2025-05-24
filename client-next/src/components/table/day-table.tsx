@@ -15,6 +15,7 @@ import useClientNotFound from "@/hoooks/useClientNotFound";
 import {
   CustomEntityModel,
   DayResponse,
+  DayType,
   dayTypes,
   ResponseWithEntityCount,
 } from "@/types/dto";
@@ -44,6 +45,7 @@ import {
   RadioSortDropDownWithExtra,
   RadioSortDropDownWithExtraDummy,
 } from "@/components/common/radio-sort";
+import { getColorsByDayType } from "@/context/day-calendar-context";
 
 export interface DayTableColumnsTexts {
   id: string;
@@ -73,6 +75,8 @@ export interface DayTableProps
     DayTableTexts {
   isSidebarOpen?: boolean;
 }
+
+const typeColors = getColorsByDayType();
 export default function DaysTable({
   dayTableColumnTexts,
   dataTableTexts,
@@ -202,7 +206,9 @@ export default function DaysTable({
         header: () => (
           <RadioSortDropDownWithExtraDummy
             trigger={
-              <p className="font-bold text-lg text-left">
+              <p
+                className={`font-bold text-lg text-left text-[${typeColors[dayType as DayType]}]`}
+              >
                 {dayTableColumnTexts.type}
               </p>
             }
