@@ -26,7 +26,7 @@ export const ArchiveQueueNotificationContent = memo(
             <div className="flex items-center justify-between w-full">
               <div className="space-y-1.5">
                 <Link
-                  href="/admin/archiveQueues"
+                  href={`/admin/archiveQueues?columnFilters=queueName.%2522${message.queueName}%2522%2Caction.%2522${message.action}%2522`}
                   className="font-semibold text-[15px] hover:underline"
                 >
                   {message.queueName}

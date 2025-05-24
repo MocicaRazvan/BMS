@@ -15,6 +15,7 @@ export interface SearchInputProps {
   onClear?: () => void;
   searchInputTexts: SearchInputTexts;
   className?: string;
+  autoFocus?: boolean;
 }
 
 export default function SearchInput({
@@ -23,6 +24,7 @@ export default function SearchInput({
   onClear,
   searchInputTexts: { placeholder },
   className,
+  autoFocus = true,
 }: SearchInputProps) {
   return (
     <div className={cn("relative w-[350px] group", className)}>
@@ -31,7 +33,7 @@ export default function SearchInput({
         placeholder={placeholder}
         value={value}
         onChange={onChange}
-        autoFocus
+        autoFocus={autoFocus}
       />
       <Search className="absolute left-0 top-0 m-2.5 h-4 w-4 text-muted-foreground group-focus:text-ring" />
       {value !== "" && onClear && (

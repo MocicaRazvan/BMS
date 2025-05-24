@@ -327,6 +327,7 @@ function DataTable({
             }
             onClear={() => table.getColumn("queueName")?.setFilterValue("")}
             className="max-w-sm"
+            autoFocus={false}
           />
         </div>
         <div className="flex items-center justify-end gap-2">
