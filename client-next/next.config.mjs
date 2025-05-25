@@ -54,12 +54,20 @@ const baseConfig = {
 };
 const finalConfig = (phase) => {
   const isDev = phase === PHASE_DEVELOPMENT_SERVER;
+  const envPrefix = process.env.ASSETS_PREFIX_URL;
+  const assetPrefix = isDev
+    ? undefined
+    : !envPrefix
+      ? "https://im51.go.ro"
+      : envPrefix === "local"
+        ? undefined
+        : envPrefix;
   /**
    * @type {import('next').NextConfig}
    */
   const nextConfig = {
     ...baseConfig,
-    assetPrefix: isDev ? undefined : "https://im51.go.ro",
+    assetPrefix,
   };
   /**
    * @type {import('next').NextConfig}
