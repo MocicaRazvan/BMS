@@ -208,6 +208,9 @@ export default function UsersTable({
       {
         id: userTableColumnsTexts.id,
         accessorKey: "id",
+        enableResizing: true,
+        minSize: 35,
+        size: 35,
         header: () => (
           <p className="font-bold text-lg text-left">
             {userTableColumnsTexts.id}
@@ -227,40 +230,31 @@ export default function UsersTable({
       {
         id: userTableColumnsTexts.email,
         accessorKey: "email",
+        enableResizing: true,
+        minSize: 220,
+        size: 220,
         header: () => (
-          // <RadioSortDropDownWithExtra
-          //   radioArgs={radioArgs}
-          //   sortingProperty="email"
-          //   trigger={
-          //     <p className="font-bold text-lg text-left">
-          //       {userTableColumnsTexts.email}
-          //     </p>
-          //   }
-          //   extraContent={
-          //     <RadioBinaryCriteriaWithCallback
-          //       callback={resetCurrentPage}
-          //       fieldKey="emailVerified"
-          //       texts={useBinaryEmailVerifiedTexts}
-          //       setGlobalFilter={setEmailVerified}
-          //     />
-          //   }
-          // />
           <RadioSortButton sortingProperty="email" radioArgs={radioArgs}>
             <p className="font-bold text-lg text-left">
               {userTableColumnsTexts.email}
             </p>
           </RadioSortButton>
         ),
-        cell: ({ row }) => (
+        cell: ({ row, cell }) => (
           <OverflowTextTooltip
             text={row.original.email}
-            triggerClassName="max-w-[200px]"
+            triggerStyle={{
+              maxWidth: `calc(var(--col-${cell.column.id}-size) * 1px - 10px)`,
+            }}
           />
         ),
       },
       {
         id: userTableColumnsTexts.firstName,
         accessorKey: "firstName",
+        enableResizing: true,
+        minSize: 110,
+        size: 110,
         header: () => (
           <RadioSortButton sortingProperty="firstName" radioArgs={radioArgs}>
             <p className="font-bold text-lg text-left">
@@ -272,6 +266,9 @@ export default function UsersTable({
       {
         id: userTableColumnsTexts.lastName,
         accessorKey: "lastName",
+        enableResizing: true,
+        minSize: 110,
+        size: 110,
         header: () => (
           <RadioSortButton sortingProperty="lastName" radioArgs={radioArgs}>
             <p className="font-bold text-lg text-left">

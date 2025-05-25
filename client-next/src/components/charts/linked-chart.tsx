@@ -1,6 +1,6 @@
 "use client";
 import * as React from "react";
-import { useState, useMemo, useRef } from "react";
+import { useState, useMemo, useRef, memo } from "react";
 
 import {
   format as formatDate,
@@ -57,7 +57,11 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import { fromStringOfDotToObjectValue, parseToUnix } from "@/lib/utils";
+import {
+  fromStringOfDotToObjectValue,
+  isDeepEqual,
+  parseToUnix,
+} from "@/lib/utils";
 
 export interface GroupedData {
   dateLabel: string;
@@ -477,7 +481,7 @@ function useChartInteraction<TData>({
   };
 
   const handleMouseDown = (e: any) => {
-    if (e.activeLabel) {
+    if (e?.activeLabel) {
       setRefAreaLeft(e.activeLabel);
       setRefAreaRight(e.activeLabel);
       setInitialX(e.chartX);
@@ -486,9 +490,9 @@ function useChartInteraction<TData>({
   };
 
   const handleMouseMove = (e: any) => {
-    if (isSelecting && e.activeLabel && initialX !== null) {
+    if (isSelecting && e?.activeLabel && initialX !== null) {
       // Moving right
-      if (e.chartX > initialX) {
+      if (e?.chartX > initialX) {
         setRefAreaRight(e.activeLabel);
       }
       // Moving left
@@ -833,3 +837,11 @@ export function LinkedChart<TData extends object>({
     </Card>
   );
 }
+export const MemoizedLinkedChart = memo(
+  LinkedChart,
+  isDeepEqual,
+) as typeof LinkedChart;
+
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+MemoizedLinkedChart.displayName = "LinkedChart";

@@ -187,6 +187,9 @@ export default function RecipeTable({
       {
         id: recipeTableColumnsTexts.id,
         accessorKey: "model.id",
+        enableResizing: true,
+        minSize: 35,
+        size: 35,
         header: () => (
           <p className="font-bold text-lg text-left">
             {recipeTableColumnsTexts.id}
@@ -208,6 +211,9 @@ export default function RecipeTable({
       {
         id: recipeTableColumnsTexts.title,
         accessorKey: "model.title",
+        enableResizing: true,
+        minSize: 60,
+        size: 60,
         header: () => (
           <RadioSortButton sortingProperty="title" radioArgs={radioArgs}>
             <p className="font-bold text-lg text-left">
@@ -215,8 +221,13 @@ export default function RecipeTable({
             </p>
           </RadioSortButton>
         ),
-        cell: ({ row }) => (
-          <OverflowTextTooltip text={row.original.model.title} />
+        cell: ({ row, cell }) => (
+          <OverflowTextTooltip
+            text={row.original.model.title}
+            triggerStyle={{
+              maxWidth: `calc(var(--col-${cell.column.id}-size) * 1px - 10px)`,
+            }}
+          />
         ),
       },
       {
@@ -271,6 +282,9 @@ export default function RecipeTable({
       {
         id: recipeTableColumnsTexts.count,
         accessorKey: "count",
+        enableResizing: true,
+        minSize: 35,
+        size: 35,
         header: () => (
           <p className="font-bold text-lg text-left">
             {recipeTableColumnsTexts.count}
@@ -285,6 +299,7 @@ export default function RecipeTable({
       {
         id: recipeTableColumnsTexts.userLikes,
         accessorKey: "model.userLikes",
+        enableResizing: true,
         header: () => (
           <RadioSortButton
             sortingProperty="userLikesLength"
@@ -300,6 +315,7 @@ export default function RecipeTable({
       {
         id: recipeTableColumnsTexts.userDislikes,
         accessorKey: "model.userDislikes",
+        enableResizing: true,
         header: () => (
           <RadioSortButton
             sortingProperty="userDislikesLength"

@@ -155,6 +155,9 @@ export default function PostsTable({
       {
         id: postTableColumnsTexts.id,
         accessorKey: "id",
+        enableResizing: true,
+        minSize: 35,
+        size: 35,
         header: () => (
           <p className="font-bold text-lg text-left">
             {postTableColumnsTexts.id}
@@ -174,6 +177,9 @@ export default function PostsTable({
       {
         id: postTableColumnsTexts.title,
         accessorKey: "title",
+        enableResizing: true,
+        minSize: 160,
+        size: 160,
         header: () => (
           <RadioSortButton sortingProperty="title" radioArgs={radioArgs}>
             <p className="font-bold text-lg text-left">
@@ -181,11 +187,19 @@ export default function PostsTable({
             </p>
           </RadioSortButton>
         ),
-        cell: ({ row }) => <OverflowTextTooltip text={row.original.title} />,
+        cell: ({ row, cell }) => (
+          <OverflowTextTooltip
+            text={row.original.title}
+            triggerStyle={{
+              maxWidth: `calc(var(--col-${cell.column.id}-size) * 1px - 10px)`,
+            }}
+          />
+        ),
       },
       {
         id: postTableColumnsTexts.userLikes,
         accessorKey: "userLikes",
+        enableResizing: true,
         header: () => (
           <RadioSortButton
             sortingProperty="userLikesLength"
@@ -201,6 +215,7 @@ export default function PostsTable({
       {
         id: postTableColumnsTexts.userDislikes,
         accessorKey: "userDislikes",
+        enableResizing: true,
         header: () => (
           <RadioSortButton
             sortingProperty="userDislikesLength"
@@ -306,6 +321,7 @@ export default function PostsTable({
       },
       {
         id: "actions",
+        enableResizing: false,
         cell: ({ row }) => {
           const {
             button,

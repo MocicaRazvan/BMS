@@ -5,8 +5,7 @@ import {
   ColumnFiltersState,
   flexRender,
   getCoreRowModel,
-  Row,
-  RowSelectionState,
+  Table as TableType,
   useReactTable,
   VisibilityState,
 } from "@tanstack/react-table";
@@ -23,10 +22,13 @@ import {
 import { Button } from "@/components/ui/button";
 import {
   Dispatch,
+  memo,
+  MutableRefObject,
   ReactNode,
   SetStateAction,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import { PageInfo } from "@/types/dto";
@@ -63,7 +65,19 @@ import {
   LinkedChart,
   LinkedChartProps,
   LinkedChartTexts,
+  MemoizedLinkedChart,
 } from "@/components/charts/linked-chart";
+import { ColumnResizer } from "@/components/table/column-resizer";
+import { useDraggable } from "react-use-draggable-scroll";
+import { cn, isDeepEqual } from "@/lib/utils";
+import useTableColResize, {
+  calcVar,
+  createColumnKeySize,
+  createColumnLeft,
+  createHeaderKeySize,
+  createHeaderLeft,
+} from "@/hoooks/table/use-table-col-resize";
+import useTableRowSelection from "@/hoooks/table/use-table-row-selection";
 
 export interface TableFilter {
   key: string;
@@ -102,9 +116,8 @@ interface DataTableProps<TData extends Record<string, any>, TValue>
   useRadioSort?: boolean;
   chartProps?: Omit<Partial<LinkedChartProps<TData>>, "data" | "texts">;
   showChart?: boolean;
+  stickyColumnIds?: string[];
 }
-
-const MotionTableRow = motion(TableRow);
 
 export function DataTable<TData extends Record<string, any>, TValue>({
   columns,
@@ -135,22 +148,33 @@ export function DataTable<TData extends Record<string, any>, TValue>({
   chartProps,
   linkedChartTexts,
   showChart = false,
+  stickyColumnIds = ["ID", "id", "select"],
 }: DataTableProps<TData, TValue>) {
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-  const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
-  // const persistedRowsRef = useRef<Row<TData>[]>([]);
-  const [persistedRows, setPersistedRows] = useState<Row<TData>[]>([]);
-
-  const selectedLength = useMemo(
-    () => Object.keys(rowSelection).length,
-    [rowSelection],
-  );
+  const scrollRef =
+    useRef<HTMLDivElement>() as MutableRefObject<HTMLInputElement>;
+  const { events } = useDraggable(scrollRef, {
+    isMounted: true,
+    safeDisplacement: 15,
+  });
+  const {
+    rowSelection,
+    setRowSelection,
+    persistedRows,
+    updatePersistedRows,
+    selectedLength,
+    clearRowSelection,
+  } = useTableRowSelection<TData>();
 
   const finalColumns: ColumnDef<TData, TValue>[] = useMemo(
     () => [
       {
         id: "select",
+        enableResizing: false,
+        size: 35,
+        minSize: 35,
+        maxSize: 35,
         header: ({ table }) => (
           <Checkbox
             checked={
@@ -164,11 +188,13 @@ export function DataTable<TData extends Record<string, any>, TValue>({
           />
         ),
         cell: ({ row }) => (
-          <Checkbox
-            checked={row.getIsSelected()}
-            onCheckedChange={(value) => row.toggleSelected(!!value)}
-            aria-label="Select row"
-          />
+          <div className="w-full pe-1">
+            <Checkbox
+              checked={row.getIsSelected()}
+              onCheckedChange={(value) => row.toggleSelected(!!value)}
+              aria-label="Select row"
+            />
+          </div>
         ),
         enableSorting: false,
         enableHiding: false,
@@ -191,7 +217,13 @@ export function DataTable<TData extends Record<string, any>, TValue>({
     onColumnVisibilityChange: setColumnVisibility,
     onColumnFiltersChange: setColumnFilters,
     onRowSelectionChange: setRowSelection,
+    columnResizeMode: "onChange",
     getRowId,
+    defaultColumn: {
+      minSize: 35,
+      maxSize: 800,
+      enableResizing: false,
+    },
     state: {
       columnVisibility,
       columnFilters,
@@ -202,6 +234,8 @@ export function DataTable<TData extends Record<string, any>, TValue>({
       rowSelection,
     },
   });
+
+  const [columnSizeVars, leftSizeVars] = useTableColResize({ table });
 
   const chartData: {
     data: TData[];
@@ -220,23 +254,11 @@ export function DataTable<TData extends Record<string, any>, TValue>({
     [persistedRows, table, data.length],
   );
   useEffect(() => {
-    const ids = Object.keys(rowSelection);
-    // const prev = persistedRowsRef.current;
-
-    const prevMap = new Map(
-      persistedRows.map((row) => [getRowId(row.original), row]),
-    );
-    const tableRows = table.getCoreRowModel().rows;
-    const tableRowMap = new Map(
-      tableRows.map((row) => [getRowId(row.original), row]),
-    );
-
-    // persistedRowsRef.current
-    const updated = ids
-      .map((id) => prevMap.get(id) || tableRowMap.get(id))
-      .filter((row): row is Row<TData> => Boolean(row));
-    setPersistedRows(updated);
-  }, [getRowId, rowSelection, table]);
+    updatePersistedRows({
+      getRowId,
+      table,
+    });
+  }, [getRowId, updatePersistedRows, table]);
 
   const { exportPdf, exportCsv } = useExportTable<TData, TValue>({
     lastLengthColumns,
@@ -353,7 +375,7 @@ export function DataTable<TData extends Record<string, any>, TValue>({
         </div>
       </div>
       {rangeDateFilter && <div className="w-full mb-4">{rangeDateFilter}</div>}
-      <div className="rounded-md border relative">
+      <div className="rounded-md border relative p-0">
         <AnimatePresence mode="wait">
           {selectedLength > 0 && (
             <motion.div
@@ -365,81 +387,79 @@ export function DataTable<TData extends Record<string, any>, TValue>({
             >
               <Checkbox
                 checked={selectedLength > 0}
-                onCheckedChange={() => setRowSelection({})}
+                onCheckedChange={clearRowSelection}
                 aria-label="Unselect all"
               />
             </motion.div>
           )}
         </AnimatePresence>
-        <Table wrapperClassName="lg:overflow-visible ">
-          <TableHeader className="bg-accent/50">
+
+        <Table
+          wrapperClassName="max-w-full scrollbar-hide"
+          style={{
+            ...columnSizeVars,
+            ...leftSizeVars,
+            width: table.getTotalSize(),
+            minWidth: "100%",
+            userSelect: "none",
+          }}
+          wrapperRef={scrollRef}
+          {...events}
+        >
+          <TableHeader
+            className="bg-accent/50 w-full"
+            onMouseDown={(e) => {
+              e.stopPropagation();
+            }}
+          >
             {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
+              <TableRow key={headerGroup.id} className="bg-muted">
                 {headerGroup.headers.map((header) => {
+                  const isSticky = stickyColumnIds?.includes(header.column.id);
                   return (
-                    <TableHead key={header.id}>
+                    <TableHead
+                      key={header.id}
+                      className={cn(
+                        "relative group",
+                        isSticky && "sticky z-10 bg-inherit",
+                      )}
+                      style={{
+                        width: calcVar(createHeaderKeySize(header?.id)),
+                        ...(isSticky && {
+                          left: calcVar(createHeaderLeft(header?.id)),
+                        }),
+                      }}
+                    >
                       {header.isPlaceholder
                         ? null
                         : flexRender(
                             header.column.columnDef.header,
                             header.getContext(),
                           )}
+                      <ColumnResizer header={header} />
                     </TableHead>
                   );
                 })}
               </TableRow>
             ))}
           </TableHeader>
-          <TableBody className="relative !overflow-y-visible w-full">
-            {!isFinished ? (
-              Array.from({ length: 10 }).map((_, i) => (
-                <TableRow key={`loading-${i}`}>
-                  {finalColumns.map((_, j) => (
-                    <TableCell key={`loading-cell-${j}-row-${i}`}>
-                      <Skeleton className="w-full h-[33px]" />
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))
-            ) : table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row, i) => (
-                <MotionTableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
-                  className="lg:hover:relative z-20  hover:bg-muted "
-                  // initial={{ opacity: 0, y: 20, scale: 0.8 }}
-                  // animate={{ opacity: 1, y: 0, scale: 1 }}
-                  transition={{
-                    duration: 0.1,
-                    // delay: i * 0.11,
-                    ease: "linear",
-                  }}
-                  whileHover={{
-                    scale: 1.02,
-                    transition: { duration: 0.1, delay: 0 },
-                  }}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext(),
-                      )}
-                    </TableCell>
-                  ))}
-                </MotionTableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={finalColumns.length}
-                  className="h-24 text-center text-lg font-semibold"
-                >
-                  {noResults}
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
+          {table.getState().columnSizingInfo.isResizingColumn ? (
+            <MemoizedTableBody
+              table={table}
+              isFinished={isFinished}
+              noResults={noResults}
+              finalColumns={finalColumns}
+              stickyColumnIds={stickyColumnIds}
+            />
+          ) : (
+            <DataTableBody
+              table={table}
+              isFinished={isFinished}
+              noResults={noResults}
+              finalColumns={finalColumns}
+              stickyColumnIds={stickyColumnIds}
+            />
+          )}
         </Table>
       </div>
 
@@ -457,9 +477,14 @@ export function DataTable<TData extends Record<string, any>, TValue>({
         />
       </div>
       {showChart && (
-        <div className="h-[500px] md:h-[625px] mt-12">
+        <div
+          className={cn(
+            "h-[500px] md:h-[625px] mt-12",
+            isFinished && chartData.data.length === 0 && "hidden",
+          )}
+        >
           {chartData.data.length > 0 ? (
-            <LinkedChart
+            <MemoizedLinkedChart
               data={chartData.data}
               columns={columns}
               dateField="createdAt"
@@ -480,3 +505,86 @@ export function DataTable<TData extends Record<string, any>, TValue>({
     </div>
   );
 }
+
+interface DataTableBodyProp<TData extends Record<string, any>> {
+  table: ReturnType<typeof useReactTable<TData>>;
+  isFinished: boolean;
+  noResults: string;
+  finalColumns: ColumnDef<TData, any>[];
+  stickyColumnIds?: string[];
+}
+
+function DataTableBody<TData extends Record<string, any>>({
+  table,
+  isFinished,
+  noResults,
+  finalColumns,
+  stickyColumnIds,
+}: DataTableBodyProp<TData>) {
+  return (
+    <TableBody className="relative w-full ">
+      {!isFinished ? (
+        Array.from({ length: 10 }).map((_, i) => (
+          <TableRow key={`loading-${i}`} className="hover:bg-background">
+            {finalColumns.map((_, j) => (
+              <TableCell key={`loading-cell-${j}-row-${i}`}>
+                <Skeleton className="w-full h-[33px] min-w-4" />
+              </TableCell>
+            ))}
+          </TableRow>
+        ))
+      ) : table.getRowModel().rows?.length ? (
+        table.getRowModel().rows.map((row, i) => (
+          <TableRow
+            key={row.id}
+            data-state={row.getIsSelected() && "selected"}
+            className="lg:hover:relative z-20  hover:bg-muted group"
+          >
+            {row.getVisibleCells().map((cell) => {
+              const isSticky = stickyColumnIds?.includes(cell.column.id);
+              return (
+                <TableCell
+                  key={cell.id}
+                  className={cn(isSticky && "sticky left-0 z-10")}
+                  style={{
+                    width: calcVar(createColumnKeySize(cell.column.id)),
+                    ...(isSticky && {
+                      left: calcVar(createColumnLeft(cell.column.id)),
+                    }),
+                  }}
+                >
+                  <div className="group-hover:scale-[1.055] transition-transform duration-200 ease-in-out">
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </div>
+                </TableCell>
+              );
+            })}
+          </TableRow>
+        ))
+      ) : (
+        <TableRow>
+          <TableCell
+            colSpan={finalColumns.length}
+            className="h-24 text-center text-lg font-semibold"
+          >
+            {noResults}
+          </TableCell>
+        </TableRow>
+      )}
+    </TableBody>
+  );
+}
+
+const MemoizedTableBody = memo(
+  DataTableBody,
+  (prev, next) =>
+    prev.table.options.data === next.table.options.data &&
+    prev.isFinished === next.isFinished &&
+    prev.noResults === next.noResults &&
+    prev.finalColumns === next.finalColumns &&
+    isDeepEqual(prev.stickyColumnIds, next.stickyColumnIds),
+) as typeof DataTableBody;
+
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+MemoizedTableBody.displayName = "MemoizedTableBody";

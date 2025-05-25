@@ -179,6 +179,9 @@ export default function DaysTable({
       {
         id: dayTableColumnTexts.id,
         accessorKey: "model.id",
+        enableResizing: true,
+        minSize: 35,
+        size: 35,
         header: () => (
           <p className="font-bold text-lg text-left">
             {dayTableColumnTexts.id}
@@ -200,6 +203,9 @@ export default function DaysTable({
       {
         id: dayTableColumnTexts.title,
         accessorKey: "model.title",
+        enableResizing: true,
+        minSize: 100,
+        size: 100,
         header: () => (
           <RadioSortButton sortingProperty="title" radioArgs={radioArgs}>
             <p className="font-bold text-lg text-left">
@@ -207,8 +213,13 @@ export default function DaysTable({
             </p>
           </RadioSortButton>
         ),
-        cell: ({ row }) => (
-          <OverflowTextTooltip text={row.original.model.title} />
+        cell: ({ row, cell }) => (
+          <OverflowTextTooltip
+            text={row.original.model.title}
+            triggerStyle={{
+              maxWidth: `calc(var(--col-${cell.column.id}-size) * 1px - 10px)`,
+            }}
+          />
         ),
       },
       {
@@ -249,6 +260,9 @@ export default function DaysTable({
       {
         id: dayTableColumnTexts.count,
         accessorKey: "count",
+        enableResizing: true,
+        minSize: 35,
+        size: 35,
         header: () => (
           <p className="font-bold text-lg text-left">
             {dayTableColumnTexts.count}
@@ -263,6 +277,7 @@ export default function DaysTable({
       {
         id: dayTableColumnTexts.userLikes,
         accessorKey: "model.userLikes",
+        enableResizing: true,
         header: () => (
           <RadioSortButton
             sortingProperty="userLikesLength"
@@ -278,6 +293,7 @@ export default function DaysTable({
       {
         id: dayTableColumnTexts.userDislikes,
         accessorKey: "model.userDislikes",
+        enableResizing: true,
         header: () => (
           <RadioSortButton
             sortingProperty="userDislikesLength"

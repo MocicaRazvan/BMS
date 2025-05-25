@@ -6,9 +6,15 @@ const Table = React.forwardRef<
   HTMLTableElement,
   React.HTMLAttributes<HTMLTableElement> & {
     wrapperClassName?: string;
+    wrapperStyle?: React.CSSProperties;
+    wrapperRef?: React.Ref<HTMLDivElement>;
   }
->(({ wrapperClassName, className, ...props }, ref) => (
-  <div className={cn("relative w-full overflow-auto", wrapperClassName)}>
+>(({ wrapperClassName, className, wrapperStyle, ...props }, ref) => (
+  <div
+    className={cn("relative w-full overflow-auto", wrapperClassName)}
+    style={wrapperStyle}
+    ref={props.wrapperRef}
+  >
     <table
       ref={ref}
       className={cn("w-full caption-bottom text-sm", className)}
@@ -60,7 +66,7 @@ const TableRow = React.forwardRef<
   <tr
     ref={ref}
     className={cn(
-      "border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted/80",
+      "border-b transition-colors hover:bg-muted data-[state=selected]:bg-muted bg-background",
       className,
     )}
     {...props}
@@ -75,7 +81,7 @@ const TableHead = React.forwardRef<
   <th
     ref={ref}
     className={cn(
-      "h-12 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0",
+      "bg-inherit h-12 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]",
       className,
     )}
     {...props}
@@ -89,7 +95,10 @@ const TableCell = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <td
     ref={ref}
-    className={cn("p-4 align-middle [&:has([role=checkbox])]:pr-0", className)}
+    className={cn(
+      " bg-inherit p-4 align-middle [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]",
+      className,
+    )}
     {...props}
   />
 ));

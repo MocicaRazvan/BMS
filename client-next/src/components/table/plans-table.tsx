@@ -234,6 +234,9 @@ export default function PlansTable({
       {
         id: planTableColumnsTexts.id,
         accessorKey: "model.id",
+        enableResizing: true,
+        minSize: 35,
+        size: 35,
         header: () => (
           <p className="font-bold text-lg text-left">
             {planTableColumnsTexts.id}
@@ -255,6 +258,9 @@ export default function PlansTable({
       {
         id: planTableColumnsTexts.title,
         accessorKey: "model.title",
+        enableResizing: true,
+        minSize: 60,
+        size: 60,
         header: () => (
           <RadioSortButton sortingProperty="title" radioArgs={radioArgs}>
             <p className="font-bold text-lg text-left">
@@ -262,13 +268,19 @@ export default function PlansTable({
             </p>
           </RadioSortButton>
         ),
-        cell: ({ row }) => (
-          <OverflowTextTooltip text={row.original.model.title} />
+        cell: ({ row, cell }) => (
+          <OverflowTextTooltip
+            text={row.original.model.title}
+            triggerStyle={{
+              maxWidth: `calc(var(--col-${cell.column.id}-size) * 1px - 10px)`,
+            }}
+          />
         ),
       },
       {
         id: planTableColumnsTexts.type,
         accessorKey: "model.type",
+        size: 30,
         header: () => (
           <RadioSortDropDownWithExtraDummy
             trigger={
@@ -299,6 +311,7 @@ export default function PlansTable({
       {
         id: planTableColumnsTexts.objective,
         accessorKey: "model.objective",
+        size: 30,
         header: () => (
           <RadioSortDropDownWithExtraDummy
             trigger={
@@ -326,6 +339,7 @@ export default function PlansTable({
       {
         id: planTableColumnsTexts.display.header,
         accessorKey: "model.display",
+        size: 30,
         header: () => (
           <RadioSortDropDownWithExtraDummy
             trigger={
@@ -386,6 +400,9 @@ export default function PlansTable({
       {
         id: planTableColumnsTexts.count,
         accessorKey: "count",
+        enableResizing: true,
+        minSize: 35,
+        size: 35,
         header: () => (
           <p className="font-bold text-lg text-left">
             {planTableColumnsTexts.count}
@@ -400,6 +417,9 @@ export default function PlansTable({
       {
         id: planTableColumnsTexts.price,
         accessorKey: "model.price",
+        enableResizing: true,
+        minSize: 35,
+        size: 35,
         header: () => (
           <RadioSortButton sortingProperty="price" radioArgs={radioArgs}>
             <p className="font-bold text-lg text-left">
@@ -420,26 +440,38 @@ export default function PlansTable({
         ),
       },
       //todo vezi cum le aduagi daca e ca e overflow
-      // {
-      //   id: planTableColumnsTexts.userLikes,
-      //   accessorKey: "model.userLikes",
-      //   header: () => (
-      //     <p className="font-bold text-lg text-left">
-      //       {planTableColumnsTexts.userLikes}
-      //     </p>
-      //   ),
-      //   cell: ({ row }) => <p>{row.original.model.userLikes.length}</p>,
-      // },
-      // {
-      //   id: planTableColumnsTexts.userDislikes,
-      //   accessorKey: "model.userDislikes",
-      //   header: () => (
-      //     <p className="font-bold text-lg text-left">
-      //       {planTableColumnsTexts.userDislikes}
-      //     </p>
-      //   ),
-      //   cell: ({ row }) => <p>{row.original.model.userDislikes.length}</p>,
-      // },
+      {
+        id: planTableColumnsTexts.userLikes,
+        accessorKey: "model.userLikes",
+        enableResizing: true,
+        header: () => (
+          <RadioSortButton
+            sortingProperty="userLikesLength"
+            radioArgs={radioArgs}
+          >
+            <p className="font-bold text-lg text-left">
+              {planTableColumnsTexts.userLikes}
+            </p>
+          </RadioSortButton>
+        ),
+        cell: ({ row }) => <p>{row.original.model.userLikes.length}</p>,
+      },
+      {
+        id: planTableColumnsTexts.userDislikes,
+        accessorKey: "model.userDislikes",
+        enableResizing: true,
+        header: () => (
+          <RadioSortButton
+            sortingProperty="userDislikesLength"
+            radioArgs={radioArgs}
+          >
+            <p className="font-bold text-lg text-left">
+              {planTableColumnsTexts.userDislikes}
+            </p>
+          </RadioSortButton>
+        ),
+        cell: ({ row }) => <p>{row.original.model.userDislikes.length}</p>,
+      },
 
       {
         id: planTableColumnsTexts.updatedAt,

@@ -1,7 +1,7 @@
 "use client";
 
 import * as TooltipPrimitive from "@radix-ui/react-tooltip";
-import { ComponentPropsWithoutRef, useState } from "react";
+import { ComponentPropsWithoutRef, CSSProperties, useState } from "react";
 import {
   Tooltip,
   TooltipContent,
@@ -19,11 +19,13 @@ interface Props
   > {
   text: string;
   triggerClassName?: string;
+  triggerStyle?: CSSProperties;
 }
 
 export default function OverflowTextTooltip({
   text,
   triggerClassName,
+  triggerStyle,
   ...props
 }: Props) {
   const [isCopied, setIsCopied] = useState(false);
@@ -36,6 +38,7 @@ export default function OverflowTextTooltip({
               "max-w-16 text-nowrap overflow-x-hidden text-ellipsis overflow-y-hidden",
               triggerClassName,
             )}
+            style={{ ...triggerStyle }}
           >
             {text}
           </p>
@@ -46,9 +49,17 @@ export default function OverflowTextTooltip({
             e.preventDefault();
             e.stopPropagation();
           }}
+          onMouseDown={(e) => {
+            e.stopPropagation();
+          }}
         >
           <div className="flex items-center justify-around gap-2">
-            <span className="max-w-56 text-wrap">{text}</span>
+            <span
+              className="max-w-56 text-wrap select-text"
+              style={{ contain: "layout paint" }}
+            >
+              {text}
+            </span>
             <Button
               variant="outline"
               size="icon"

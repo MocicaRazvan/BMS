@@ -57,7 +57,6 @@ import useArchiveContainerNotifications from "@/hoooks/use-archive-container-not
 import { Checkbox } from "@/components/ui/checkbox";
 import OverflowTextTooltip from "@/components/common/overflow-text-tooltip";
 import { format } from "date-fns";
-import { motion } from "framer-motion";
 import {
   ChevronLeftIcon,
   ChevronRightIcon,
@@ -72,8 +71,6 @@ import { useSearchParams } from "next/navigation";
 import { usePathname } from "@/navigation";
 import { stripNonAlphaNumeric } from "@/lib/utils";
 import { containerActionColors } from "@/lib/constants";
-
-const MotionTableRow = motion(TableRow);
 
 const fuzzyFilter: FilterFn<any> = (row, columnId, value, addMeta) => {
   const cleanedRowValue = stripNonAlphaNumeric(row.getValue(columnId) ?? "");
@@ -409,7 +406,7 @@ function DataTable({
         <Table wrapperClassName="lg:overflow-visible ">
           <TableHeader className="bg-accent/50">
             {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
+              <TableRow key={headerGroup.id} className="bg-muted">
                 {headerGroup.headers.map((header) => {
                   return (
                     <TableHead key={header.id}>
@@ -438,31 +435,25 @@ function DataTable({
               ))
             ) : table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
-                <MotionTableRow
+                <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
-                  className="lg:hover:relative z-20  hover:bg-muted "
-                  // initial={{ opacity: 0, y: 20, scale: 0.8 }}
-                  // animate={{ opacity: 1, y: 0, scale: 1 }}
-                  transition={{
-                    duration: 0.1,
-                    // delay: i * 0.11,
-                    ease: "linear",
-                  }}
-                  whileHover={{
-                    scale: 1.02,
-                    transition: { duration: 0.1, delay: 0 },
-                  }}
+                  className="lg:hover:relative z-20  hover:bg-muted group"
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext(),
-                      )}
+                    <TableCell>
+                      <div
+                        className="group-hover:scale-[1.055] transition-transform duration-200 ease-in-out"
+                        key={cell.id}
+                      >
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext(),
+                        )}
+                      </div>
                     </TableCell>
                   ))}
-                </MotionTableRow>
+                </TableRow>
               ))
             ) : (
               <TableRow>

@@ -186,6 +186,9 @@ export default function OrdersTable({
       {
         id: orderTableColumnsTexts.id,
         accessorKey: "order.id",
+        enableResizing: true,
+        minSize: 35,
+        size: 35,
         header: () => (
           <p className="font-bold text-lg text-left">
             {orderTableColumnsTexts.id}
@@ -207,6 +210,7 @@ export default function OrdersTable({
       {
         id: orderTableColumnsTexts.date,
         accessorKey: "order.createdAt",
+        size: 215,
         header: () => (
           <RadioSortDropDownWithExtra
             radioArgs={radioArgs}
@@ -241,6 +245,9 @@ export default function OrdersTable({
       {
         id: orderTableColumnsTexts.total,
         accessorKey: "order.total",
+        enableResizing: true,
+        minSize: 200,
+        size: 200,
         header: () => (
           <RadioSortButton sortingProperty="total" radioArgs={radioArgs}>
             <p className="font-bold text-lg text-left">
@@ -263,6 +270,9 @@ export default function OrdersTable({
       {
         id: orderTableColumnsTexts.plans,
         accessorKey: "order.planIds",
+        enableResizing: false,
+        minSize: 20,
+        size: 20,
         header: () => (
           <p className="font-bold text-lg text-left">
             {orderTableColumnsTexts.plans}
@@ -275,6 +285,9 @@ export default function OrdersTable({
       {
         id: orderTableColumnsTexts.address,
         accessorKey: "address",
+        enableResizing: true,
+        minSize: 280,
+        size: 400,
         header: () => (
           <p className="font-bold text-lg text-left">
             {orderTableColumnsTexts.address}

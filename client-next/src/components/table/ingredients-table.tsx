@@ -86,6 +86,13 @@ export type IngredientTableProps = ExtraTableProps &
     isSidebarOpen?: boolean;
   };
 
+const typeColorMap = {
+  CARNIVORE: "destructive",
+  VEGAN: "success",
+  OMNIVORE: "default",
+  VEGETARIAN: "accent",
+};
+
 export default function IngredientsTable({
   forWhom,
   authUser,
@@ -199,6 +206,9 @@ export default function IngredientsTable({
       {
         id: ingredientTableColumnTexts.id,
         accessorKey: "model.ingredient.id",
+        enableResizing: true,
+        minSize: 20,
+        size: 20,
         header: () => (
           <p className="font-bold text-lg text-left">
             {ingredientTableColumnTexts.id}
@@ -222,6 +232,9 @@ export default function IngredientsTable({
       {
         id: ingredientTableColumnTexts.name,
         accessorKey: "model.ingredient.name",
+        enableResizing: true,
+        minSize: 60,
+        size: 60,
         header: () => (
           <RadioSortButton sortingProperty="name" radioArgs={radioArgs}>
             <p className="font-bold text-lg text-left">
@@ -229,13 +242,19 @@ export default function IngredientsTable({
             </p>
           </RadioSortButton>
         ),
-        cell: ({ row }) => (
-          <OverflowTextTooltip text={row.original.model.ingredient.name} />
+        cell: ({ row, cell }) => (
+          <OverflowTextTooltip
+            text={row.original.model.ingredient.name}
+            triggerStyle={{
+              maxWidth: `calc(var(--col-${cell.column.id}-size) * 1px - 10px)`,
+            }}
+          />
         ),
       },
       {
         id: ingredientTableColumnTexts.type,
         accessorKey: "model.ingredient.type",
+        size: 30,
         header: () => (
           <RadioSortDropDownWithExtraDummy
             trigger={
@@ -255,18 +274,11 @@ export default function IngredientsTable({
           />
         ),
         cell: ({ row }) => {
-          const colorMap = {
-            CARNIVORE: "destructive",
-            VEGAN: "success",
-            OMNIVORE: "default",
-            VEGETARIAN: "accent",
-          };
-
           return (
             <Badge
               className="px-2"
               variant={
-                colorMap[row.original.model.ingredient.type] as
+                typeColorMap[row.original.model.ingredient.type] as
                   | "default"
                   | "destructive"
                   | "success"
@@ -285,6 +297,7 @@ export default function IngredientsTable({
       {
         id: ingredientTableColumnTexts.display.header,
         accessorKey: "model.ingredient.display",
+        size: 30,
         header: () => (
           <RadioSortDropDownWithExtraDummy
             trigger={
@@ -318,6 +331,9 @@ export default function IngredientsTable({
       {
         id: ingredientTableColumnTexts.count,
         accessorKey: "count",
+        enableResizing: true,
+        minSize: 30,
+        size: 30,
         header: () => (
           <p className="font-bold text-lg text-left">
             {ingredientTableColumnTexts.count}
@@ -332,6 +348,9 @@ export default function IngredientsTable({
       {
         id: ingredientTableColumnTexts.fat,
         accessorKey: "model.nutritionalFact.fat",
+        enableResizing: true,
+        minSize: 30,
+        size: 30,
         header: () => (
           <RadioSortButton sortingProperty="fat" radioArgs={radioArgs}>
             <p className="font-bold text-lg text-left">
@@ -344,6 +363,9 @@ export default function IngredientsTable({
       {
         id: ingredientTableColumnTexts.saturatedFat,
         accessorKey: "model.nutritionalFact.saturatedFat",
+        enableResizing: true,
+        minSize: 30,
+        size: 30,
         header: () => (
           <RadioSortButton sortingProperty="saturatedFat" radioArgs={radioArgs}>
             <p className="font-bold text-lg text-left">
@@ -358,6 +380,9 @@ export default function IngredientsTable({
       {
         id: ingredientTableColumnTexts.carbohydrates,
         accessorKey: "model.nutritionalFact.carbohydrates",
+        enableResizing: true,
+        minSize: 30,
+        size: 30,
         header: () => (
           <RadioSortButton
             sortingProperty="carbohydrates"
@@ -379,6 +404,9 @@ export default function IngredientsTable({
       {
         id: ingredientTableColumnTexts.sugar,
         accessorKey: "model.nutritionalFact.sugar",
+        enableResizing: true,
+        minSize: 30,
+        size: 30,
         header: () => (
           <RadioSortButton sortingProperty="sugar" radioArgs={radioArgs}>
             <p className="font-bold text-lg text-left">
@@ -391,6 +419,9 @@ export default function IngredientsTable({
       {
         id: ingredientTableColumnTexts.protein,
         accessorKey: "model.nutritionalFact.protein",
+        enableResizing: true,
+        minSize: 30,
+        size: 30,
         header: () => (
           <RadioSortButton sortingProperty="protein" radioArgs={radioArgs}>
             <p className="font-bold text-lg text-left">
@@ -404,6 +435,9 @@ export default function IngredientsTable({
       {
         id: ingredientTableColumnTexts.salt,
         accessorKey: "model.nutritionalFact.salt",
+        enableResizing: true,
+        minSize: 30,
+        size: 30,
         header: () => (
           <RadioSortButton sortingProperty="salt" radioArgs={radioArgs}>
             <p className="font-bold text-lg text-left">
@@ -415,6 +449,9 @@ export default function IngredientsTable({
       },
       {
         id: ingredientTableColumnTexts.calories,
+        enableResizing: true,
+        minSize: 30,
+        size: 30,
         header: () => (
           <RadioSortButton sortingProperty="calories" radioArgs={radioArgs}>
             <p className="font-bold text-lg text-left">

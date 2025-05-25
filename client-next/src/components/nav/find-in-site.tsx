@@ -23,7 +23,7 @@ import { Role } from "@/types/fetch-utils";
 import Fuse, { FuseResultMatch } from "fuse.js";
 import { Link, useRouter } from "@/navigation";
 import { useDebounceWithCallBack } from "@/hoooks/useDebounceWithCallback";
-import { isDeepEqual } from "@/lib/utils";
+import { cn, isDeepEqual } from "@/lib/utils";
 
 export interface FindInSiteTexts {
   title: string;
@@ -64,15 +64,14 @@ const highlightMatchFuseMatch = (
 
   return (
     <>
-      {parts.map(({ word, highlight }, i) =>
-        highlight ? (
-          <span key={i} className="text-success">
-            {word}
-          </span>
-        ) : (
-          word
-        ),
-      )}
+      {parts.map(({ word, highlight }, i) => (
+        <span
+          key={i}
+          className={cn("transition-colors", highlight && "text-success")}
+        >
+          {word}
+        </span>
+      ))}
     </>
   );
 };
@@ -88,15 +87,17 @@ const highlightMatch = (text: string, query: string) => {
 
   return (
     <>
-      {parts.map((part, i) =>
-        regex.test(part) ? (
-          <span key={i} className="text-success">
-            {part}
-          </span>
-        ) : (
-          part
-        ),
-      )}
+      {parts.map((part, i) => (
+        <span
+          key={i}
+          className={cn(
+            "transition-colors",
+            regex.test(part) && "text-success",
+          )}
+        >
+          {part}
+        </span>
+      ))}
     </>
   );
 };
@@ -325,9 +326,12 @@ const FindInSite = memo(
                         {highlightMatchFuseMatch(
                           result.metadata.description,
                           result.matches["metadata.description"],
-                          searchQuery.length / 2,
+                          searchQuery.length / 2.5,
                         )}
-                        {/*{highlightMatchFuseMatch(result.metadata.description, searchQuery)}*/}
+                        {/*{highlightMatch(*/}
+                        {/*  result.metadata.description,*/}
+                        {/*  searchQuery,*/}
+                        {/*)}*/}
                       </div>
                     </Link>
                   ))}
