@@ -441,11 +441,8 @@ function DataTable({
                   className="lg:hover:relative z-20  hover:bg-muted group"
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell>
-                      <div
-                        className="group-hover:scale-[1.055] transition-transform duration-200 ease-in-out"
-                        key={cell.id}
-                      >
+                    <TableCell key={cell.id}>
+                      <div className="group-hover:scale-[1.055] transition-transform duration-200 ease-in-out">
                         {flexRender(
                           cell.column.columnDef.cell,
                           cell.getContext(),
