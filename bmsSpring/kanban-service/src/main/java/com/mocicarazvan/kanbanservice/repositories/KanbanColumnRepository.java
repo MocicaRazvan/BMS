@@ -12,7 +12,7 @@ public interface KanbanColumnRepository extends ManyToOneUserRepository<KanbanCo
 
     @Query("""
             SELECT * FROM kanban_column
-             WHERE created_at >= make_timestamp(:year, :month, 1, 0, 0, 0)
+            WHERE created_at >= make_timestamp(:year, :month, 1, 0, 0, 0)
             AND created_at < make_timestamp(:year, :month, 1, 0, 0, 0) + INTERVAL '1 month'
             ORDER BY created_at DESC
             """)

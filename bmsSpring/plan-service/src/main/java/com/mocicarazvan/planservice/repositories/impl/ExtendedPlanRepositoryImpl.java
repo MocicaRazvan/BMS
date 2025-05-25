@@ -217,7 +217,7 @@ public class ExtendedPlanRepositoryImpl implements ExtendedPlanRepository {
         RepositoryUtils.MutableBoolean hasPreviousCriteria = new RepositoryUtils.MutableBoolean(false);
         repositoryUtils.addNotNullField(approved, queryBuilder, hasPreviousCriteria, "approved = :approved");
         repositoryUtils.addNotNullField(display, queryBuilder, hasPreviousCriteria, "display = :display");
-        repositoryUtils.addStringField(title, queryBuilder, hasPreviousCriteria, ollamaQueryUtils.addThresholdFilter(embeddings, " OR title ILIKE '%' || :title || '%' OR similarity(title, :title ) > 0.35 "));
+        repositoryUtils.addStringField(title, queryBuilder, hasPreviousCriteria, ollamaQueryUtils.addThresholdFilter(embeddings, " OR title ILIKE '%' || :title || '%' OR title % :title "));
         repositoryUtils.addNotNullField(type, queryBuilder, hasPreviousCriteria, " type = :type");
         repositoryUtils.addNotNullField(objective, queryBuilder, hasPreviousCriteria, " objective = :objective");
         repositoryUtils.addCreatedAtBound("p", createdAtLowerBound, createdAtUpperBound, queryBuilder, hasPreviousCriteria);

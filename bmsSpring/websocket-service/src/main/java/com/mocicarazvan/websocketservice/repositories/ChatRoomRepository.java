@@ -81,7 +81,7 @@ public interface ChatRoomRepository extends IdGeneratedRepository<ChatRoom> {
                             AND COUNT(*) FILTER (WHERE
                                 u.email != :email AND (
                                     u.email ILIKE CONCAT('%', :filterEmail, '%')
-                                    OR similarity(u.email, :filterEmail) > 0.3
+                                    OR u.email % :filterEmail
                                 )
                             ) > 0
                     )
@@ -101,7 +101,7 @@ public interface ChatRoomRepository extends IdGeneratedRepository<ChatRoom> {
                                     AND COUNT(*) FILTER (WHERE
                                         u.email != :email AND (
                                             u.email ILIKE CONCAT('%', :filterEmail, '%')
-                                            OR similarity(u.email, :filterEmail) > 0.3
+                                            OR u.email % :filterEmail
                                         )
                                     ) > 0
                             )

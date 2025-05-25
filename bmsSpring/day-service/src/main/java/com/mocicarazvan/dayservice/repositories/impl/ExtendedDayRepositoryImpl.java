@@ -164,7 +164,7 @@ public class ExtendedDayRepositoryImpl implements ExtendedDayRepository {
                                    LocalDate updatedAtLowerBound, LocalDate updatedAtUpperBound
     ) {
         RepositoryUtils.MutableBoolean hasPreviousCriteria = new RepositoryUtils.MutableBoolean(false);
-        repositoryUtils.addStringField(title, queryBuilder, hasPreviousCriteria, ollamaQueryUtils.addThresholdFilter(embeddings, " OR title ILIKE '%' || :title || '%' OR similarity(title, :title ) > 0.35  "));
+        repositoryUtils.addStringField(title, queryBuilder, hasPreviousCriteria, ollamaQueryUtils.addThresholdFilter(embeddings, " OR title ILIKE '%' || :title || '%' OR title % :title  "));
         repositoryUtils.addCreatedAtBound("d", createdAtLowerBound, createdAtUpperBound, queryBuilder, hasPreviousCriteria);
         repositoryUtils.addUpdatedAtBound("d", updatedAtLowerBound, updatedAtUpperBound, queryBuilder, hasPreviousCriteria);
 

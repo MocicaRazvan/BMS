@@ -12,8 +12,8 @@ public interface NutritionalFactRepository extends ManyToOneUserRepository<Nutri
 
     @Query("""
             SELECT * FROM nutritional_fact
-            WHERE EXTRACT(MONTH FROM created_at) = :month
-            AND EXTRACT(YEAR FROM created_at) = :year
+            WHERE created_at >= make_timestamp(:year, :month, 1, 0, 0, 0)
+            AND created_at < make_timestamp(:year, :month, 1, 0, 0, 0) + INTERVAL '1 month'
             ORDER BY created_at DESC
             """)
     Flux<NutritionalFact> findModelByMonth(int month, int year);

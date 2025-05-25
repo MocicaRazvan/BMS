@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 public interface SummaryRepository extends Repository<Order, Long> {
     @Query("""
             SELECT * FROM custom_order
-             WHERE created_at >= make_timestamp(:year, :month, 1, 0, 0, 0)
+            WHERE created_at >= make_timestamp(:year, :month, 1, 0, 0, 0)
             AND created_at < make_timestamp(:year, :month, 1, 0, 0, 0) + INTERVAL '1 month'
             ORDER BY created_at DESC
             """)
@@ -22,7 +22,7 @@ public interface SummaryRepository extends Repository<Order, Long> {
     @Query("""
             SELECT EXTRACT(YEAR FROM created_at) AS year,
                    EXTRACT(MONTH FROM created_at) AS month,
-                   COUNT(*) AS count, 
+                   COUNT(*) AS count,
                    SUM(total) AS total_amount
             FROM custom_order
             WHERE created_at >= :startDate AND created_at < :endDate

@@ -5,6 +5,7 @@ import lombok.Data;
 import org.springframework.r2dbc.core.DatabaseClient;
 
 import java.lang.reflect.Array;
+import java.text.Normalizer;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -80,7 +81,7 @@ public class RepositoryUtils {
 
     public DatabaseClient.GenericExecuteSpec bindStringField(String field, DatabaseClient.GenericExecuteSpec executeSpec, String name) {
         if (isNotNullOrEmpty(field)) {
-            return bindNotNullField(field, executeSpec, name);
+            return bindNotNullField(Normalizer.normalize(field, Normalizer.Form.NFKD), executeSpec, name);
         }
         return executeSpec;
     }

@@ -95,7 +95,7 @@ public class ExtendedUserRepositoryImpl implements ExtendedUserRepository {
                                    LocalDate updatedAtLowerBound, LocalDate updatedAtUpperBound
     ) {
         RepositoryUtils.MutableBoolean hasPreviousCriteria = new RepositoryUtils.MutableBoolean(false);
-        repositoryUtils.addStringField(email, queryBuilder, hasPreviousCriteria, ollamaQueryUtils.addThresholdFilter(embeddings, " OR email ILIKE '%' || :email || '%' OR similarity(email, :email ) > 0.35  "));
+        repositoryUtils.addStringField(email, queryBuilder, hasPreviousCriteria, ollamaQueryUtils.addThresholdFilter(embeddings, " OR email ILIKE '%' || :email || '%' OR  email % :email "));
         repositoryUtils.addListField(roleList, queryBuilder, hasPreviousCriteria, "role = ANY(:roles) ");
         repositoryUtils.addListField(providerList, queryBuilder, hasPreviousCriteria, "provider = ANY(:providers) ");
         repositoryUtils.addNotNullField(emailVerified, queryBuilder, hasPreviousCriteria, "is_email_verified = :emailVerified ");

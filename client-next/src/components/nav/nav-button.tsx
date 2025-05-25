@@ -103,7 +103,7 @@ export const NavButtonGroup = ({
       )}
     >
       <div
-        className="absolute rounded-full bg-primary/10 dark:bg-muted transition-all spring-bounce-30 spring-duration-300 backdrop-blur-3xl
+        className="absolute rounded-full bg-primary/10 dark:bg-muted/90 transition-all spring-bounce-30 spring-duration-300 backdrop-blur-3xl
          supports-[backdrop-filter]:bg-primary/5 dark:supports-[backdrop-filter]:bg-muted/50"
         style={highlightStyle}
       />
