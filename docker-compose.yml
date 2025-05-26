@@ -669,7 +669,8 @@ services:
         POSTGRES_PORT: 5432
         NEXT_PUBLIC_NEXTAUTH_URL: http://localhost:3000
         ASSETS_PREFIX_URL: local
-        NODE_ENV: development
+        NODE_ENV: production
+        CACHE_HANDLER_REDIS_URL: redis://redis:6379/10
     environment:
       NEXTAUTH_URL: http://localhost:3000
       NEXTAUTH_URL_INTERNAL: http://next-js:3000
@@ -695,7 +696,8 @@ services:
       POSTGRES_USER: myuser
       POSTGRES_PASSWORD: mypassword
       POSTGRES_DB: scrape_documents
-      NODE_ENV: development
+      NODE_ENV: production
+      CACHE_HANDLER_REDIS_URL: redis://redis:6379/10
     ports:
       - "3000:3000"
       - "9464:9464"

@@ -41,6 +41,9 @@ const baseConfig = {
     removeConsole:
       process.env.NODE_ENV === "production" ? { exclude: ["error"] } : false,
   },
+  cacheHandler:
+    process.env.NODE_ENV === "production" ? "./cache-handler.mjs" : undefined,
+  cacheMaxMemorySize: process.env.NODE_ENV === "production" ? 0 : undefined,
   experimental: {
     instrumentationHook: true,
     serverComponentsExternalPackages: [
