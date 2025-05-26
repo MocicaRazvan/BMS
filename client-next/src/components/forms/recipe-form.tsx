@@ -646,7 +646,7 @@ export default function RecipeForm({
             {!isOneIngredientCompletedButNotSubmitted && (
               <ButtonSubmit
                 isLoading={isLoading}
-                disable={false}
+                disable={imagesChunkProgress < 100 || videosChunkProgress < 100}
                 buttonSubmitTexts={buttonSubmitTexts}
               />
             )}

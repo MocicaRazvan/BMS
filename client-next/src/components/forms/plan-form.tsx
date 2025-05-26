@@ -552,7 +552,7 @@ export default function PlanForm({
             <ErrorMessage message={error} show={!!errorMsg} />
             <ButtonSubmit
               isLoading={isLoading}
-              disable={false}
+              disable={chunkProgressValue < 100}
               buttonSubmitTexts={buttonSubmitTexts}
             />
             {isLoading && (

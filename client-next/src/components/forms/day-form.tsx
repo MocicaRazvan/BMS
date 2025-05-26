@@ -246,8 +246,6 @@ export default function DayForm({
     [currentMeals, form],
   );
 
-  console.log("totalOptions D", currentMeals[0]);
-
   const aiFields: AiIdeasField[] = useMemo(() => {
     const fields: AiIdeasField[] = [];
     if (watchTitle.trim()) {

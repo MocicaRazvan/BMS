@@ -6,7 +6,7 @@ import useLoadingErrorState from "@/hoooks/useLoadingErrorState";
 import { WithUser } from "@/lib/user";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import useFilesBase64 from "@/hoooks/useFilesObjectURL";
+import useFilesObjectURL from "@/hoooks/useFilesObjectURL";
 import {
   Form,
   FormControl,
@@ -123,7 +123,7 @@ export default function UpdateProfile({
     ],
   );
 
-  const { fileCleanup } = useFilesBase64({
+  const { fileCleanup, chunkProgressValue } = useFilesObjectURL({
     files: authUser.image ? [authUser.image] : [],
     fieldName: "image",
     setValue: form.setValue,
@@ -189,11 +189,12 @@ export default function UpdateProfile({
             multiple={false}
             initialLength={authUser.image ? 1 : 0}
             cropShape="round"
+            loadingProgress={chunkProgressValue}
           />
           <ErrorMessage message={errorText} show={!!errorMsg} />
           <ButtonSubmit
             isLoading={isLoading}
-            disable={false}
+            disable={chunkProgressValue < 100}
             buttonSubmitTexts={buttonSubmitTexts}
           />
         </form>

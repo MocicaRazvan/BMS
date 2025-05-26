@@ -29,7 +29,7 @@ import { BaseFormTexts } from "@/texts/components/forms";
 import ErrorMessage from "@/components/forms/error-message";
 import useLoadingErrorState from "@/hoooks/useLoadingErrorState";
 import { toast } from "@/components/ui/use-toast";
-import useFilesBase64 from "@/hoooks/useFilesObjectURL";
+import useFilesObjectURL from "@/hoooks/useFilesObjectURL";
 import { handleBaseError } from "@/lib/utils";
 import useProgressWebSocket from "@/hoooks/useProgressWebSocket";
 import { v4 as uuidv4 } from "uuid";
@@ -147,7 +147,7 @@ export default function PostForm({
     }
     return fields;
   }, [watchBody, watchTags, watchTitle]);
-  const { fileCleanup, chunkProgressValue } = useFilesBase64({
+  const { fileCleanup, chunkProgressValue } = useFilesObjectURL({
     files: images,
     fieldName: "images",
     setValue: form.setValue,
@@ -291,7 +291,7 @@ export default function PostForm({
             <ErrorMessage message={error} show={!!errorMsg} />
             <ButtonSubmit
               isLoading={isLoading}
-              disable={false}
+              disable={chunkProgressValue < 100}
               buttonSubmitTexts={buttonSubmitTexts}
             />
             {isLoading && (
