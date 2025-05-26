@@ -1,5 +1,5 @@
 import OrderCompletePageContent from "@/app/[locale]/(main)/(user)/orderComplete/page-content";
-import { Link, Locale } from "@/navigation";
+import { Link, LocaleProps } from "@/navigation";
 import { Button } from "@/components/ui/button";
 import { unstable_setRequestLocale } from "next-intl/server";
 import { getOrderCompletePageTexts } from "@/texts/pages";
@@ -11,19 +11,18 @@ export interface OrderCompletePageTexts {
   ordersBtn: string;
   plansBtn: string;
 }
-interface Props {
-  params: { locale: Locale };
-}
 
 export async function generateMetadata({
   params: { locale },
-}: Props): Promise<Metadata> {
+}: LocaleProps): Promise<Metadata> {
   return {
     ...(await getIntlMetadata("user.OrderComplete", "/orderComplete", locale)),
   };
 }
 
-export default async function OrderCompletePage({ params: { locale } }: Props) {
+export default async function OrderCompletePage({
+  params: { locale },
+}: LocaleProps) {
   unstable_setRequestLocale(locale);
   const { ordersBtn, plansBtn, title } = await getOrderCompletePageTexts();
   return (

@@ -3,10 +3,15 @@ import "../globals.css";
 import { Locale, locales } from "@/navigation";
 import { unstable_setRequestLocale } from "next-intl/server";
 import { getIntlMetadata } from "@/texts/metadata";
+import { ReactNode } from "react";
 
 interface Props {
-  children: React.ReactNode;
+  children: ReactNode;
   params: { locale: Locale };
+}
+
+export function generateStaticParams() {
+  return locales.map((locale) => ({ locale }));
 }
 
 export async function generateMetadata({

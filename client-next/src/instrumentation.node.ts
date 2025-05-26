@@ -4,8 +4,8 @@ import { ATTR_SERVICE_NAME } from "@opentelemetry/semantic-conventions";
 import { BatchSpanProcessor } from "@opentelemetry/sdk-trace-node";
 import { getNodeAutoInstrumentations } from "@opentelemetry/auto-instrumentations-node";
 import {
-  TraceIdRatioBasedSampler,
   ParentBasedSampler,
+  TraceIdRatioBasedSampler,
 } from "@opentelemetry/sdk-trace-base";
 import {
   browserDetector,
@@ -28,6 +28,7 @@ import {
 } from "@opentelemetry/sdk-logs";
 import { OTLPLogExporter } from "@opentelemetry/exporter-logs-otlp-http";
 import { IORedisInstrumentation } from "@opentelemetry/instrumentation-ioredis";
+import { RedisInstrumentation } from "@opentelemetry/instrumentation-redis-4";
 import { PgInstrumentation } from "@opentelemetry/instrumentation-pg";
 
 if (
@@ -79,6 +80,9 @@ registerInstrumentations({
     }),
     new PgInstrumentation({
       enhancedDatabaseReporting: true,
+      requireParentSpan: false,
+    }),
+    new RedisInstrumentation({
       requireParentSpan: false,
     }),
   ],

@@ -1,8 +1,8 @@
-import { Locale } from "@/navigation";
 import { unstable_setRequestLocale } from "next-intl/server";
 import { getTermsOfServiceTexts, terms } from "@/texts/pages";
 import { Metadata } from "next";
 import { getIntlMetadata } from "@/texts/metadata";
+import { LocaleProps } from "@/navigation";
 
 export interface TermsOfServiceTexts {
   title: string;
@@ -15,16 +15,15 @@ export interface TermsOfServiceTexts {
   >;
 }
 
-interface Props {
-  params: { locale: Locale };
-}
 export async function generateMetadata({
   params: { locale },
-}: Props): Promise<Metadata> {
+}: LocaleProps): Promise<Metadata> {
   return await getIntlMetadata("terms-of-service", "/terms-of-service", locale);
 }
 
-export default async function TermsOfService({ params: { locale } }: Props) {
+export default async function TermsOfService({
+  params: { locale },
+}: LocaleProps) {
   unstable_setRequestLocale(locale);
   const { title, terms } = await getTermsOfServiceTexts();
   return (

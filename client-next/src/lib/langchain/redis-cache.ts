@@ -1,6 +1,7 @@
 import { Redis } from "ioredis";
 import { RedisCache } from "@langchain/community/caches/ioredis";
 import murmur from "murmurhash";
+import { PHASE_PRODUCTION_BUILD } from "next/constants";
 
 class CustomRedis extends Redis {
   static REDIS_TTL = process.env.LANGCHAIN_CACHE_REDIS_TTL
@@ -21,7 +22,9 @@ export function generateHashKey(string: string, antet?: string) {
 
 function initRedis() {
   if (!globalThis.redisInstance) {
-    console.log("Creating a new Redis connection...");
+    const isBuildPhase = process.env.NEXT_PHASE === PHASE_PRODUCTION_BUILD;
+
+    console.log("Creating a new Langhchain Redis connection...");
     globalThis.redisInstance = new CustomRedis({
       db: process.env.LANGCHAIN_CACHE_REDIS_DB
         ? parseInt(process.env.LANGCHAIN_CACHE_REDIS_DB)
@@ -30,6 +33,8 @@ function initRedis() {
         ? parseInt(process.env.LANGCHAIN_CACHE_REDIS_PORT)
         : 6379,
       host: process.env.LANGCHAIN_CACHE_REDIS_HOST || "localhost",
+      name: "langchain-cache",
+      lazyConnect: isBuildPhase,
     });
 
     globalThis.redisInstance.on("connect", () =>

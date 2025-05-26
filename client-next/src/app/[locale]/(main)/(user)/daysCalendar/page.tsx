@@ -1,4 +1,4 @@
-import { Locale } from "@/navigation";
+import { LocaleProps } from "@/navigation";
 import { unstable_setRequestLocale } from "next-intl/server";
 import {
   getDayCalendarBodyMonthTexts,
@@ -14,17 +14,13 @@ import LoadingSpinner from "@/components/common/loading-spinner";
 
 export async function generateMetadata({
   params: { locale },
-}: Props): Promise<Metadata> {
+}: LocaleProps): Promise<Metadata> {
   return {
     ...(await getIntlMetadata("user.DaysCalendar", "/daysCalendar", locale)),
   };
 }
-interface Props {
-  params: {
-    locale: Locale;
-  };
-}
-export default async function Page({ params: { locale } }: Props) {
+
+export default async function Page({ params: { locale } }: LocaleProps) {
   unstable_setRequestLocale(locale);
   const [dayCalendarHeaderTexts, dayCalendarBodyMonthTexts] = await Promise.all(
     [getDayCalendarHeaderTexts(), getDayCalendarBodyMonthTexts()],

@@ -1,4 +1,3 @@
-import { Locale } from "@/navigation";
 import { Metadata } from "next";
 import { getIntlMetadata, getMetadataValues } from "@/texts/metadata";
 import { unstable_setRequestLocale } from "next-intl/server";
@@ -16,14 +15,11 @@ import AdminAIPostsCreateContent, {
   AdminAIPostsCreateContentTexts,
 } from "@/app/[locale]/admin/posts/aiCreate/page-content";
 import { FindInSiteTexts } from "@/components/nav/find-in-site";
-
-interface Props {
-  params: { locale: Locale };
-}
+import { LocaleProps } from "@/navigation";
 
 export async function generateMetadata({
   params: { locale },
-}: Props): Promise<Metadata> {
+}: LocaleProps): Promise<Metadata> {
   return await getIntlMetadata(
     "admin.CreatePostAI",
     "/admin/posts/aiCreate",
@@ -38,7 +34,7 @@ export interface AdminAIPostsCreateTexts
 }
 export default async function AdminAIPostsCreate({
   params: { locale },
-}: Props) {
+}: LocaleProps) {
   unstable_setRequestLocale(locale);
   const [themeSwitchTexts, authUser, texts, findInSiteTexts] =
     await Promise.all([

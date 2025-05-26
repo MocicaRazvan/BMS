@@ -1,4 +1,3 @@
-import { Locale } from "@/navigation";
 import { unstable_setRequestLocale } from "next-intl/server";
 import { PlanTableTexts } from "@/components/table/plans-table";
 import { getSortingOptions, SortingOptionsTexts } from "@/lib/constants";
@@ -20,10 +19,7 @@ import ArchiveQueueCards, {
 import { Separator } from "@/components/ui/separator";
 import TopPlans, { TopPlansTexts } from "@/components/charts/top-plans";
 import { FindInSiteTexts } from "@/components/nav/find-in-site";
-
-interface Props {
-  params: { locale: Locale };
-}
+import { LocaleProps } from "@/navigation";
 
 export interface AdminPlansPageTexts {
   planTableTexts: PlanTableTexts;
@@ -40,11 +36,13 @@ export interface AdminPlansPageTexts {
 
 export async function generateMetadata({
   params: { locale },
-}: Props): Promise<Metadata> {
+}: LocaleProps): Promise<Metadata> {
   return await getIntlMetadata("admin.Plans", "/admin/plans", locale);
 }
 
-export default async function AdminPlansPage({ params: { locale } }: Props) {
+export default async function AdminPlansPage({
+  params: { locale },
+}: LocaleProps) {
   unstable_setRequestLocale(locale);
   const [
     {

@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 import { getIntlMetadata } from "@/texts/metadata";
-import { Locale } from "@/navigation";
+import { Locale, LocaleProps } from "@/navigation";
 import { Suspense } from "react";
 import LoadingSpinner from "@/components/common/loading-spinner";
 import CalculatorPageContent from "@/app/[locale]/(main)/(user)/calculator/page-content";
@@ -10,6 +10,7 @@ import {
   GenderText,
 } from "@/types/forms";
 import { getCalculatorPageTexts, intakeTitles } from "@/texts/pages";
+import { unstable_setRequestLocale } from "next-intl/server";
 
 interface Props {
   params: { locale: Locale };
@@ -46,7 +47,11 @@ export interface CalculatorPageTexts {
   message2: string;
 }
 
-export default async function CalculatorPage() {
+export default async function CalculatorPage({
+  params: { locale },
+}: LocaleProps) {
+  unstable_setRequestLocale(locale);
+
   const [texts] = await Promise.all([getCalculatorPageTexts()]);
   return (
     <div className="space-y-10  w-full transition-all mt-5 p-10 max-w-[1350px] mx-auto ">

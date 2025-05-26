@@ -1,4 +1,4 @@
-import { Locale } from "@/navigation";
+import { LocaleProps } from "@/navigation";
 import { KanbanBoardTexts } from "@/components/kanban/kanban-board";
 import { getKanbanPageTexts } from "@/texts/pages";
 import { unstable_setRequestLocale } from "next-intl/server";
@@ -10,12 +10,9 @@ import KanbanBoardWrapper from "@/components/kanban/kanban-board-wrapper";
 import { Metadata } from "next";
 import { getIntlMetadata } from "@/texts/metadata";
 
-interface Props {
-  params: { locale: Locale };
-}
 export async function generateMetadata({
   params: { locale },
-}: Props): Promise<Metadata> {
+}: LocaleProps): Promise<Metadata> {
   return {
     ...(await getIntlMetadata("user.Kanban", "/kanban", locale)),
   };
@@ -26,7 +23,7 @@ export interface KanbanPageTexts {
   kanbanBoardTexts: KanbanBoardTexts;
 }
 
-export default async function KanbanPage({ params: { locale } }: Props) {
+export default async function KanbanPage({ params: { locale } }: LocaleProps) {
   unstable_setRequestLocale(locale);
 
   const [texts, user] = await Promise.all([getKanbanPageTexts(), getUser()]);

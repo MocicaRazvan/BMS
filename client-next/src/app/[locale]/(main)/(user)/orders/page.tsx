@@ -1,6 +1,6 @@
 import OrdersTable, { OrderTableTexts } from "@/components/table/orders-table";
 import { getSortingOptions, SortingOptionsTexts } from "@/lib/constants";
-import { Locale } from "@/navigation";
+import { LocaleProps } from "@/navigation";
 import { unstable_setRequestLocale } from "next-intl/server";
 import { getUserOrdersPageTexts } from "@/texts/pages";
 import { getUser } from "@/lib/user";
@@ -16,18 +16,17 @@ export interface UserOrdersPageTexts {
   header: string;
 }
 
-interface Props {
-  params: { locale: Locale };
-}
 export async function generateMetadata({
   params: { locale },
-}: Props): Promise<Metadata> {
+}: LocaleProps): Promise<Metadata> {
   return {
     ...(await getIntlMetadata("user.Orders", "/orders", locale)),
   };
 }
 
-export default async function UserOrdersPage({ params: { locale } }: Props) {
+export default async function UserOrdersPage({
+  params: { locale },
+}: LocaleProps) {
   unstable_setRequestLocale(locale);
   const [texts, user] = await Promise.all([
     getUserOrdersPageTexts(),
