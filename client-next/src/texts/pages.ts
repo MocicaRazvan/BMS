@@ -927,6 +927,7 @@ export const getUserPageTexts: () => Promise<UserPageTexts> = async () => {
     visitorTitle: t("visitorTitle"),
     errorText: t("errorText"),
     emailSent: t("emailSent"),
+    toastSuccess: t("toastSuccess"),
   };
 };
 

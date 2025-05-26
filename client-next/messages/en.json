@@ -1750,7 +1750,8 @@
         "changePassword": "Change Password",
         "startChat": "Start Chat",
         "errorText": "Something went wrong please try again",
-        "emailSent": "Email sent, please verify your inbox!"
+        "emailSent": "Email sent, please verify your inbox!",
+        "toastSuccess": "Profile updated successfully"
       }
     },
     "posts": {

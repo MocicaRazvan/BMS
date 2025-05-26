@@ -42,6 +42,7 @@ export interface UserPageTexts {
   errorText: string;
   emailSent: string;
   dayCalendarCTATexts: DaysCalendarCTATexts;
+  toastSuccess: string;
 }
 
 interface Props extends WithUser, UserPageTexts {
@@ -65,6 +66,7 @@ export default function UserPageContent({
   errorText,
   showDayCalendarCTA = false,
   dayCalendarCTATexts,
+  toastSuccess,
 }: Props) {
   const router = useRouter();
   const stompClient = useStompClient();
@@ -245,6 +247,7 @@ export default function UserPageContent({
               <AccordionTrigger>{editProfile}</AccordionTrigger>
               <AccordionContent>
                 <UpdateProfile
+                  toastSuccess={toastSuccess}
                   authUser={userState}
                   {...updateProfileTexts}
                   successCallback={({

@@ -1749,7 +1749,8 @@
         "changePassword": "Schimbă parola",
         "startChat": "Începeți un chatul",
         "errorText": "Ceva nu a mers bine, vă rugăm să reîncercați",
-        "emailSent": "Emailul a fost trimis, vă rugăm să verificați inboxul!"
+        "emailSent": "Emailul a fost trimis, vă rugăm să verificați inboxul!",
+        "toastSuccess": "Profilul a fost actualizat cu succes!"
       }
     },
     "posts": {

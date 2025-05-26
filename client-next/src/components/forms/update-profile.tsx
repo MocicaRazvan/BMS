@@ -26,9 +26,11 @@ import { fetchWithFiles } from "@/hoooks/fetchWithFiles";
 import { CustomEntityModel, UserBody, UserDto } from "@/types/dto";
 import { BaseError } from "@/types/responses";
 import { useNavigationGuardI18nForm } from "@/hoooks/use-navigation-guard-i18n-form";
+import { toast } from "@/components/ui/use-toast";
 
 interface Props extends WithUser, UpdateProfileTexts {
   successCallback: (userDto: UserDto) => void;
+  toastSuccess: string;
 }
 
 export default function UpdateProfile({
@@ -40,6 +42,7 @@ export default function UpdateProfile({
   lastName,
   firstName,
   successCallback,
+  toastSuccess,
 }: Props) {
   const schema = useMemo(
     () => getUpdateProfileSchema(updateProfileSchemaTexts),
@@ -98,6 +101,10 @@ export default function UpdateProfile({
           },
         });
         successCallback(res.content);
+        toast({
+          variant: "success",
+          title: toastSuccess,
+        });
       } catch (e) {
         handleBaseError(e, setErrorMsg, errorText);
       } finally {
@@ -112,6 +119,7 @@ export default function UpdateProfile({
       setErrorMsg,
       setIsLoading,
       successCallback,
+      toastSuccess,
     ],
   );
 
