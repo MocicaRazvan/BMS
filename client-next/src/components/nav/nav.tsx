@@ -22,8 +22,7 @@ import FindInSite, {
 import { DaysCalendarCTATexts } from "@/components/days-calendar/days-calendar-cta";
 import { NavButtonGroup, NavItem } from "@/components/nav/nav-button";
 import { SheetClose } from "@/components/ui/sheet";
-import { Avatar } from "@/components/ui/avatar";
-import { AvatarImage } from "@radix-ui/react-avatar";
+import { Avatar, AvatarImage } from "@/components/ui/avatar";
 
 export interface NavTexts {
   themeSwitchTexts: ThemeSwitchTexts;

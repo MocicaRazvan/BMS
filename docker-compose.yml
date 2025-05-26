@@ -645,55 +645,67 @@ services:
       ]
 
 
-
   next-js:
     container_name: next-js-container-bms
     image: razvanmocica/next-js-bms
-    #    build:
-    #      context: ./client-next
-    #      dockerfile: Dockerfile
-    #      args:
-    #      NEXTAUTH_URL: ${NEXTAUTH_URL}
-    #      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET}
-    #      NEXTAUTH_URL_INTERNAL: ${NEXTAUTH_URL_INTERNAL}
-    #      NEXT_PUBLIC_SPRING: ${NEXT_PUBLIC_SPRING}
-    #      NEXT_PUBLIC_SPRING_CLIENT: ${NEXT_PUBLIC_SPRING_CLIENT}
-    #      GITHUB_CLIENT_SECRET: ${GIT_CLIENT_SECRET}
-    #      GITHUB_CLIENT_ID: ${GIT_CLIENT_ID}
-    #      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
-    #      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
-    #      NODE_TLS_REJECT_UNAUTHORIZED: ${NODE_TLS_REJECT_UNAUTHORIZED}
+    build:
+      context: ./client-next
+      dockerfile: Dockerfile
+      args:
+        NEXTAUTH_URL: http://localhost:3000
+        NEXT_PUBLIC_SPRING: http://host.docker.internal:8080
+        NEXT_PUBLIC_SPRING_CLIENT: http://localhost:8080
+        NEXT_PUBLIC_SPRING_CLIENT_WEBSOCKET: ws://localhost:8080
+        OLLAMA_MODEL: gemma3:1b
+        OLLAMA_BASE_URL: http://ollama:11434
+        OLLAMA_EMBEDDING: bge-m3
+        OLLAMA_TEMPERATURE: 0.7
+        OLLAMA_CHAT_COUNT: 20
+        NEXT_ZIPKIN_URL: http://zipkin:9411/api/v2/spans
+        NEXT_SERVICE_NAME: next-js-bms
+        NEXT_OTEL_VERBOSE: 1
+        NEXT_TRACING_PROBABILITY: 0.05
+        POSTGRES_HOST: postgres-vectors
+        POSTGRES_PORT: 5432
+        NEXT_PUBLIC_NEXTAUTH_URL: http://localhost:3000
+        ASSETS_PREFIX_URL: local
+        NODE_ENV: development
     environment:
-      NEXTAUTH_URL: ${NEXTAUTH_URL}
+      NEXTAUTH_URL: http://localhost:3000
+      NEXTAUTH_URL_INTERNAL: http://next-js:3000
       NEXTAUTH_SECRET: ${NEXTAUTH_SECRET}
-      NEXTAUTH_URL_INTERNAL: ${NEXTAUTH_URL_INTERNAL}
-      NEXT_PUBLIC_SPRING: ${NEXT_PUBLIC_SPRING}
-      NEXT_PUBLIC_SPRING_CLIENT: ${NEXT_PUBLIC_SPRING_CLIENT}
-      GITHUB_CLIENT_SECRET: ${GIT_CLIENT_SECRET}
-      GITHUB_CLIENT_ID: ${GIT_CLIENT_ID}
-      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      NEXT_SERVICE_NAME: ${NEXT_SERVICE_NAME}
+      NEXT_ZIPKIN_URL: http://zipkin:9411/api/v2/spans
+      NEXT_OTEL_VERBOSE: ${NEXT_OTEL_VERBOSE}
+      NEXT_TRACING_PROBABILITY: ${NEXT_TRACING_PROBABILITY}
+      GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET}
+      GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID}
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
-      NODE_TLS_REJECT_UNAUTHORIZED: ${NODE_TLS_REJECT_UNAUTHORIZED}
-      OLLAMA_MODEL: ${OLLAMA_MODEL}
-      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL}
-      OLLAMA_EMBEDDING: ${OLLAMA_EMBEDDING}
-      OLLAMA_CHAT_COUNT: ${OLLAMA_CHAT_COUNT}
-      OLLAMA_TEMPERATURE: ${OLLAMA_TEMPERATURE}
-      POSTGRES_HOST: $POSTGRES_HOST
-      POSTGRES_PORT: $POSTGRES_PORT
-      POSTGRES_USER: $POSTGRES_USER
-      POSTGRES_PASSWORD: $POSTGRES_PASSWORD
-      POSTGRES_DB: $POSTGRES_DB
-
-    #    ports:
-    #      - "3000:3000"
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      NODE_TLS_REJECT_UNAUTHORIZED: 0
+      OLLAMA_MODEL: gemma3:1b
+      OLLAMA_BASE_URL: http://ollama:11434
+      OLLAMA_EMBEDDING: bge-m3
+      LANGCHAIN_CACHE_REDIS_DB: ${LANGCHAIN_CACHE_REDIS_DB}
+      LANGCHAIN_CACHE_REDIS_HOST: redis
+      LANGCHAIN_CACHE_REDIS_PORT: 6379
+      LANGCHAIN_CACHE_REDIS_TTL: 300
+      POSTGRES_HOST: postgres-vectors
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: myuser
+      POSTGRES_PASSWORD: mypassword
+      POSTGRES_DB: scrape_documents
+      NODE_ENV: development
+    ports:
+      - "3000:3000"
+      - "9464:9464"
     networks:
       - bms
     restart: unless-stopped
-    depends_on:
-      - nginx-gateway
-      - ollama
-      - pgpool-vectors
+  #    depends_on:
+  #      - nginx-gateway
+  #      - ollama
+  #      - pgpool-vectors
 
   nginx-gateway:
     image: nginx:latest
@@ -725,7 +737,7 @@ services:
     restart: unless-stopped
     depends_on:
       - gateway-service
-
+  
   
   
   nginx-files:

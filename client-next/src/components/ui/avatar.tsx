@@ -5,6 +5,11 @@ import * as AvatarPrimitive from "@radix-ui/react-avatar";
 import Image, { StaticImageData } from "next/image";
 
 import { cn } from "@/lib/utils";
+import { useMemo } from "react";
+import {
+  imageLoader,
+  isLoaderCompatible,
+} from "@/components/common/custom-image";
 
 const Avatar = React.forwardRef<
   React.ElementRef<typeof AvatarPrimitive.Root>,
@@ -54,9 +59,15 @@ const AvatarImage = React.forwardRef<
   React.HTMLAttributes<HTMLDivElement> & {
     src?: string | StaticImageData;
     alt?: string;
+    thumblinator?: boolean;
   }
->(({ className, src, alt = "Avatar", ...props }, ref) => {
+>(({ className, src, alt = "Avatar", thumblinator = true, ...props }, ref) => {
   const [imageError, setImageError] = React.useState(false);
+
+  const loader = useMemo(
+    () => (isLoaderCompatible(thumblinator, src) ? imageLoader : undefined),
+    [src, thumblinator],
+  );
 
   React.useEffect(() => {
     setImageError(false);
@@ -76,6 +87,7 @@ const AvatarImage = React.forwardRef<
           objectFit="cover"
           className="rounded-full"
           onError={() => setImageError(true)}
+          loader={loader}
         />
       ) : (
         <div

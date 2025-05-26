@@ -1,5 +1,5 @@
 import fetchRetry, { FetchLibrary } from "fetch-retry";
-import { emitError, emitInfo } from "@/logger";
+import { emitError } from "@/logger";
 const UNRETRIEABLE_STATUS_CODES = [400, 401, 403, 404, 409];
 
 export default function fetchFactory<F extends FetchLibrary>(baseFetch: F) {
@@ -13,11 +13,17 @@ export default function fetchFactory<F extends FetchLibrary>(baseFetch: F) {
           response?.status >= 400 &&
           !UNRETRIEABLE_STATUS_CODES.includes(response?.status))
       ) {
-        emitError(
-          `fetchStream failed with status ${response?.status} and error ${error}`,
+        if (process.env.NODE_ENV === "production") {
+          emitError(
+            `fetchStream failed with status ${response?.status} and error ${error}`,
+          );
+        }
+        console.warn(
+          "fetchStream retrying attempt",
+          attempt,
+          JSON.stringify(error),
+          JSON.stringify(response),
         );
-        emitInfo(`fetchStream retrying attempt ${attempt}`);
-        console.log("fetchStream retrying attempt", attempt);
         return true;
       }
       return false;
