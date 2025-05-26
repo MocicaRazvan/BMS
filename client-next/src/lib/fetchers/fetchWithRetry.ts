@@ -18,14 +18,12 @@ export default function fetchFactory<F extends FetchLibrary>(baseFetch: F) {
             `fetchStream failed with status ${response?.status} and error ${error}`,
           );
         }
-
         console.warn(
           "fetchStream retrying attempt",
           attempt,
           JSON.stringify(error),
           JSON.stringify(response),
         );
-
         return true;
       }
       return false;
