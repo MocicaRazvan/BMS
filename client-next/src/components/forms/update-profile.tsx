@@ -130,6 +130,11 @@ export default function UpdateProfile({
     getValues: form.getValues,
   });
 
+  const isSubmitDisabled = useMemo(
+    () => chunkProgressValue < 100 && !!authUser.image,
+    [chunkProgressValue, authUser.image],
+  );
+
   useEffect(() => {
     return () => {
       fileCleanup();
@@ -194,7 +199,7 @@ export default function UpdateProfile({
           <ErrorMessage message={errorText} show={!!errorMsg} />
           <ButtonSubmit
             isLoading={isLoading}
-            disable={chunkProgressValue < 100}
+            disable={isSubmitDisabled}
             buttonSubmitTexts={buttonSubmitTexts}
           />
         </form>

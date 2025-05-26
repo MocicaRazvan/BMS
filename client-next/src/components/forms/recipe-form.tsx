@@ -213,6 +213,13 @@ export default function RecipeForm({
     getValues: form.getValues,
   });
 
+  const isSubmitDisabled = useMemo(
+    () =>
+      (imagesChunkProgress < 100 && images.length > 0) ||
+      (videosChunkProgress < 100 && videos.length > 0),
+    [imagesChunkProgress, images.length, videosChunkProgress, videos.length],
+  );
+
   const { isLoading, setIsLoading, router, errorMsg, setErrorMsg } =
     useLoadingErrorState();
 
@@ -646,7 +653,7 @@ export default function RecipeForm({
             {!isOneIngredientCompletedButNotSubmitted && (
               <ButtonSubmit
                 isLoading={isLoading}
-                disable={imagesChunkProgress < 100 || videosChunkProgress < 100}
+                disable={isSubmitDisabled}
                 buttonSubmitTexts={buttonSubmitTexts}
               />
             )}
@@ -893,7 +900,7 @@ function SingleChildForm({
                   >
                     <DiamondMinus className="me-2" />
                     <p>{removeChild}</p>
-                  </Button>{" "}
+                  </Button>
                   <Button
                     variant="destructive"
                     type="button"

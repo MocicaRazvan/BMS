@@ -270,6 +270,11 @@ export default function PlanForm({
     getValues: form.getValues,
   });
 
+  const isSubmitDisabled = useMemo(
+    () => chunkProgressValue < 100 && images.length > 0,
+    [chunkProgressValue, images.length],
+  );
+
   const { invalidateImages, getImages, addImagesCallback } =
     useGetDiffusionImages({
       cleanUpArgs: {
@@ -552,7 +557,7 @@ export default function PlanForm({
             <ErrorMessage message={error} show={!!errorMsg} />
             <ButtonSubmit
               isLoading={isLoading}
-              disable={chunkProgressValue < 100}
+              disable={isSubmitDisabled}
               buttonSubmitTexts={buttonSubmitTexts}
             />
             {isLoading && (
