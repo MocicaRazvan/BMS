@@ -10,6 +10,9 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 
+const springUrl = process.env.NEXT_PUBLIC_SPRING!;
+const springClientUrl = process.env.NEXT_PUBLIC_SPRING_CLIENT!;
+
 export default function CustomImage({
   src,
   thumblinator = false,
@@ -63,8 +66,13 @@ export default function CustomImage({
 const convertToInt = (value: number | `${number}`) =>
   typeof value !== "number" ? Math.floor(parseFloat(value)) : Math.floor(value);
 
-export const imageLoader: ImageProps["loader"] = ({ src, width, quality }) =>
-  `${src.replace(process.env.NEXT_PUBLIC_SPRING!, process.env.NEXT_PUBLIC_SPRING_CLIENT!)}?width=${width}&q=${quality || 75}`;
+export const imageLoader: ImageProps["loader"] = ({ src, width, quality }) => {
+  const finalSrc =
+    springUrl !== springClientUrl
+      ? src.replace(springUrl, springClientUrl)
+      : src;
+  return `${finalSrc}?width=${width}&q=${quality || 75}`;
+};
 
 export function isLoaderCompatible(
   thumblinator: undefined | boolean,
@@ -73,7 +81,6 @@ export function isLoaderCompatible(
   return (
     thumblinator &&
     typeof src === "string" &&
-    (src.startsWith(process.env.NEXT_PUBLIC_SPRING!) ||
-      src.startsWith(process.env.NEXT_PUBLIC_SPRING_CLIENT!))
+    (src.startsWith(springUrl) || src.startsWith(springClientUrl))
   );
 }
