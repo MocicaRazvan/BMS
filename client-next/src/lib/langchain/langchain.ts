@@ -143,7 +143,7 @@ export class VectorStoreSingleton {
 
   public async getFilter(): Promise<EmbeddingsFilter | undefined> {
     if (!this.isInitialized) {
-      await this.initialize();
+      await this.initialize(false, false);
     }
     return this.filter;
   }
@@ -157,7 +157,7 @@ export class VectorStoreSingleton {
 
   public async getEmbeddings(): Promise<OllamaEmbeddings | undefined> {
     if (!this.isInitialized) {
-      await this.initialize();
+      await this.initialize(false, false);
     }
     return this.embeddings;
   }

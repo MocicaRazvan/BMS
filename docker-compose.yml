@@ -699,6 +699,7 @@ services:
       POSTGRES_DB: scrape_documents
       NODE_ENV: production
       CACHE_HANDLER_REDIS_URL: redis://redis:6379/10
+      OLLAMA_NUM_CTX: 2048
     ports:
       - "3000:3000"
       - "9464:9464"

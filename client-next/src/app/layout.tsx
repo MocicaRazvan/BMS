@@ -54,12 +54,12 @@ export const metadata: Metadata = {
   },
 };
 
+const spring = process.env.NEXT_PUBLIC_SPRING_CLIENT!;
+
 export default async function BaseLayout({
   children,
   params: { locale },
 }: Props) {
-  const spring = process.env.NEXT_PUBLIC_SPRING_CLIENT!;
-
   // let aiTexts;
 
   // if (process.env.NODE_ENV === "production") {

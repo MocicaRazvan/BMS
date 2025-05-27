@@ -43,7 +43,7 @@ if (
   console.log("Environment variables loaded correctly");
 }
 const customResource = new Resource({
-  [ATTR_SERVICE_NAME]: process.env.NEXT_SERVICE_NAME,
+  [ATTR_SERVICE_NAME]: process.env.NEXT_SERVICE_NAME?.replace(/-/g, "_"),
 });
 const detectedResources = detectResourcesSync({
   detectors: [envDetector, hostDetector, processDetector, browserDetector],

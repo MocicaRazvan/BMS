@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { emitInfo } from "@/logger";
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   emitInfo({
     message: "Health Check",
