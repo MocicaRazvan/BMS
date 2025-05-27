@@ -6,7 +6,7 @@ import IngredientsTable, {
 import { useSidebarToggle } from "@/context/sidebar-toggle";
 
 export default function AdminIngredientsCreatePageContent(
-  props: IngredientTableProps,
+  props: Omit<IngredientTableProps, "authUser">,
 ) {
   const { isOpen } = useSidebarToggle();
 

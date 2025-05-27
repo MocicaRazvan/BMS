@@ -1,6 +1,5 @@
 "use client";
 
-import { WithUser } from "@/lib/user";
 import React, { Suspense, useCallback } from "react";
 import { fetchStream } from "@/lib/fetchers/fetchStream";
 import { CustomEntityModel, PostResponse } from "@/types/dto";
@@ -31,6 +30,7 @@ import useFetchStream from "@/hoooks/useFetchStream";
 import { readingTime } from "reading-time-estimator";
 import { useLocale } from "next-intl";
 import { Locale } from "@/navigation";
+import { useAuthUserMinRole } from "@/context/auth-user-min-role-context";
 
 export interface SinglePostPageTexts {
   elementHeaderTexts: ElementHeaderTexts;
@@ -41,13 +41,12 @@ export interface SinglePostPageTexts {
   numberOfReads: string;
 }
 
-interface Props extends WithUser, SinglePostPageTexts {
+interface Props extends SinglePostPageTexts {
   showRecommendations?: boolean;
   trackViews?: boolean;
 }
 
 export default function SinglePostPageContent({
-  authUser,
   elementHeaderTexts,
   updateButton,
   postCommentsTexts,
@@ -57,6 +56,8 @@ export default function SinglePostPageContent({
   trackViews = false,
   numberOfReads,
 }: Props) {
+  const { authUser } = useAuthUserMinRole();
+
   const locale = useLocale() as Locale;
   const {
     itemState: postState,

@@ -8,12 +8,11 @@ import {
 } from "@/components/ui/select";
 import { ArchiveQueuePrefix, archiveQueuePrefixes } from "@/types/dto";
 import { memo, useMemo, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import ArchiveQueueCards, {
   ArchiveQueueCardsTexts,
 } from "@/components/common/archive-queue-card";
 import { Locale } from "@/navigation";
-import { WithUser } from "@/lib/user";
 import { isDeepEqual } from "@/lib/utils";
 
 const augmentedArchiveQueuePrefixes = ["all" as const, ...archiveQueuePrefixes];
@@ -23,14 +22,14 @@ export interface ArchiveContentTexts {
   selectItems: Record<AugmentedArchiveQueuePrefix, string>;
 }
 
-interface Props extends WithUser, ArchiveContentTexts {
+interface Props extends ArchiveContentTexts {
   archiveTexts: Record<ArchiveQueuePrefix, ArchiveQueueCardsTexts>;
   archiveTitle: string;
   locale: Locale;
 }
 
 const ArchiveContent = memo(
-  ({ archiveTexts, archiveTitle, locale, authUser, selectItems }: Props) => {
+  ({ archiveTexts, archiveTitle, locale, selectItems }: Props) => {
     const [selected, setSelected] =
       useState<AugmentedArchiveQueuePrefix>("all");
     const selectedPrefixes = useMemo(
@@ -75,7 +74,6 @@ const ArchiveContent = memo(
                 prefix={p}
                 locale={locale}
                 {...archiveTexts[p]}
-                authUser={authUser}
               />
             </motion.div>
           ))}

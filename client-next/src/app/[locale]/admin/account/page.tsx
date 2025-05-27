@@ -1,8 +1,7 @@
 import { Locale } from "@/navigation";
 import { Metadata } from "next";
-import { getIntlMetadata, getMetadataValues } from "@/texts/metadata";
+import { getIntlMetadata } from "@/texts/metadata";
 import { unstable_setRequestLocale } from "next-intl/server";
-import { getUser } from "@/lib/user";
 import { getUserPageTexts } from "@/texts/pages";
 import UserPageContent from "@/app/[locale]/(main)/(user)/users/single/[id]/page-content";
 import {
@@ -29,40 +28,31 @@ export async function generateMetadata({
 export default async function AdminAccountPage({ params: { locale } }: Props) {
   unstable_setRequestLocale(locale);
 
-  const [
-    authUser,
-    userPageTexts,
-    themeSwitchTexts,
-    menuTexts,
-    findInSiteTexts,
-    ,
-  ] = await Promise.all([
-    getUser(),
-    getUserPageTexts(),
-    getThemeSwitchTexts(),
-    getSidebarMenuTexts("admin", adminGroupLabels, adminLabels, adminSubLabels),
-    getFindInSiteTexts(),
-  ]);
-  const metadataValues = await getMetadataValues(authUser, locale);
+  const [userPageTexts, themeSwitchTexts, menuTexts, findInSiteTexts] =
+    await Promise.all([
+      getUserPageTexts(),
+      getThemeSwitchTexts(),
+      getSidebarMenuTexts(
+        "admin",
+        adminGroupLabels,
+        adminLabels,
+        adminSubLabels,
+      ),
+      getFindInSiteTexts(),
+    ]);
 
   return (
     <SidebarContentLayout
       navbarProps={{
         title: userPageTexts.ownerTitle,
         themeSwitchTexts: themeSwitchTexts,
-        authUser,
         menuTexts: menuTexts,
         mappingKey: "admin",
         findInSiteTexts,
-        metadataValues,
       }}
     >
       <div className="w-full h-full bg-background">
-        <UserPageContent
-          authUser={authUser}
-          id={authUser.id}
-          {...userPageTexts}
-        />
+        <UserPageContent {...userPageTexts} />
       </div>
     </SidebarContentLayout>
   );

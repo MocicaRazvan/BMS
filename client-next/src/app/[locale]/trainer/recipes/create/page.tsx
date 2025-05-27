@@ -1,12 +1,11 @@
 import { Locale } from "@/navigation";
 import { unstable_setRequestLocale } from "next-intl/server";
 import { getRecipeFormTexts } from "@/texts/components/forms";
-import { getUserWithMinRole } from "@/lib/user";
 import LoadingSpinner from "@/components/common/loading-spinner";
 import { Suspense } from "react";
 import RecipeForm from "@/components/forms/recipe-form";
 import { Metadata } from "next";
-import { getIntlMetadata, getMetadataValues } from "@/texts/metadata";
+import { getIntlMetadata } from "@/texts/metadata";
 import { ThemeSwitchTexts } from "@/texts/components/nav";
 import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
 import { getCreateRecipePageTexts } from "@/texts/pages";
@@ -36,14 +35,8 @@ export interface CreateRecipePageTexts {
 
 export default async function CreateRecipePage({ params: { locale } }: Props) {
   unstable_setRequestLocale(locale);
-  const [
-    authUser,
-    { recipeFormTexts, themeSwitchTexts, menuTexts, findInSiteTexts },
-  ] = await Promise.all([
-    getUserWithMinRole("ROLE_TRAINER"),
-    getCreateRecipePageTexts(),
-  ]);
-  const metadataValues = await getMetadataValues(authUser, locale);
+  const [{ recipeFormTexts, themeSwitchTexts, menuTexts, findInSiteTexts }] =
+    await Promise.all([getCreateRecipePageTexts()]);
 
   return (
     <SidebarContentLayout
@@ -51,22 +44,19 @@ export default async function CreateRecipePage({ params: { locale } }: Props) {
         title: recipeFormTexts.baseFormTexts.header,
         themeSwitchTexts,
         menuTexts,
-        authUser,
         mappingKey: "trainer",
         findInSiteTexts,
-        metadataValues,
       }}
     >
       <main className="flex items-center justify-center px-6 py-10">
         <Suspense fallback={<LoadingSpinner />}>
           <RecipeForm
-            authUser={authUser}
             {...recipeFormTexts}
             path={"/recipes/createWithVideos"}
             type="create"
           />
         </Suspense>
-      </main>{" "}
+      </main>
     </SidebarContentLayout>
   );
 }

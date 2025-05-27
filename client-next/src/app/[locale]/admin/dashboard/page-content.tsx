@@ -1,6 +1,5 @@
 "use client";
 
-import { WithUser } from "@/lib/user";
 import { ArchiveQueueCardsTexts } from "@/components/common/archive-queue-card";
 import RelativeItem, {
   relativeItems,
@@ -28,6 +27,7 @@ import { FindInSiteTexts } from "@/components/nav/find-in-site";
 import TopViewedPosts, {
   TopViewedPostsTexts,
 } from "@/components/charts/top-viewed-posts";
+import { useAuthUserMinRole } from "@/context/auth-user-min-role-context";
 
 export interface AdminDashboardPageTexts {
   title: string;
@@ -46,12 +46,11 @@ export interface AdminDashboardPageTexts {
   topViewedPostsTexts: TopViewedPostsTexts;
 }
 
-interface Props extends WithUser, AdminDashboardPageTexts {
+interface Props extends AdminDashboardPageTexts {
   locale: Locale;
 }
 
 export default function AdminDashboardPageContent({
-  authUser,
   relativeItemTexts,
   relativeItemsSummaryTexts,
   archiveTexts,
@@ -63,6 +62,8 @@ export default function AdminDashboardPageContent({
   topTrainersTexts,
   topViewedPostsTexts,
 }: Props) {
+  const { authUser } = useAuthUserMinRole();
+
   const [relativeItemsCount, setRelativeItemsCount] = useState<
     Record<RelativeItems, number>
   >({
@@ -139,7 +140,6 @@ export default function AdminDashboardPageContent({
           texts={topPlansTexts}
           locale={locale}
           path="/orders/admin/topPlans"
-          authUser={authUser}
         />
       </div>
       <Separator className="mt-2" />
@@ -151,7 +151,6 @@ export default function AdminDashboardPageContent({
         <TopViewedPosts
           path="/posts/admin/viewStats"
           texts={topViewedPostsTexts}
-          authUser={authUser}
         />
       </div>
       <Separator />
@@ -160,7 +159,6 @@ export default function AdminDashboardPageContent({
           locale={locale}
           archiveTexts={archiveTexts}
           archiveTitle={archiveTitle}
-          authUser={authUser}
           selectItems={selectItems}
         />
       </div>

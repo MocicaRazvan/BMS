@@ -64,6 +64,7 @@ import { useRouter } from "@/navigation";
 import { AiIdeasField } from "@/types/ai-ideas-types";
 import useBaseAICallbackTitleBody from "@/hoooks/useBaseAICallbackTitleBody";
 import { useNavigationGuardI18nForm } from "@/hoooks/use-navigation-guard-i18n-form";
+import { useAuthUserMinRole } from "@/context/auth-user-min-role-context";
 
 export interface DayFromTexts extends SingleMealTexts, AITitleBodyForm {
   titleBodyTexts: TitleBodyTexts;
@@ -88,7 +89,7 @@ export type InitialDataType = Record<
     optionRecipes: (Option & { type: DietType })[];
   }
 >;
-export interface DayFormProps extends WithUser, DayFromTexts, BaseFormProps {
+export interface DayFormProps extends DayFromTexts, BaseFormProps {
   initialData?: InitialDataType;
   existingDay?: Partial<Omit<DaySchemaType, "meals">>;
 }
@@ -100,7 +101,6 @@ export default function DayForm({
   baseFormTexts: { descriptionToast, toastAction, altToast, header, error },
   buttonSubmitTexts,
   path,
-  authUser,
   typeLabel,
   typePlaceholder,
   mealsLabel,
@@ -126,6 +126,8 @@ export default function DayForm({
   titleAIGeneratedPopTexts,
   bodyAIGeneratedPopTexts,
 }: DayFormProps) {
+  const { authUser } = useAuthUserMinRole();
+
   const router = useRouter();
 
   const initialCurrentMeals = useMemo(

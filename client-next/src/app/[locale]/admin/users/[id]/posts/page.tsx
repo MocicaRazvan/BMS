@@ -4,13 +4,12 @@ import { PostTableTexts } from "@/components/table/posts-table";
 import { getSortingOptions, SortingOptionsTexts } from "@/lib/constants";
 import { ThemeSwitchTexts } from "@/texts/components/nav";
 import { getUserPostsAdminPageTexts } from "@/texts/pages";
-import { getUserWithMinRole } from "@/lib/user";
 import { notFound } from "next/navigation";
 import UserPostsAdminPageContent from "@/app/[locale]/admin/users/[id]/posts/page-content";
 import { sortingPostsSortingOptionsKeys } from "@/texts/components/list";
 import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
 import { Metadata } from "next";
-import { getIntlMetadata, getMetadataValues } from "@/texts/metadata";
+import { getIntlMetadata } from "@/texts/metadata";
 import { FindInSiteTexts } from "@/components/nav/find-in-site";
 
 export interface UserPostsAdminPageTexts {
@@ -41,11 +40,7 @@ export default async function UserPostsAdminPage({
 }: Props) {
   unstable_setRequestLocale(locale);
 
-  const [texts, authUser] = await Promise.all([
-    getUserPostsAdminPageTexts(),
-    getUserWithMinRole("ROLE_ADMIN"),
-  ]);
-  const metadataValues = await getMetadataValues(authUser, locale);
+  const [texts] = await Promise.all([getUserPostsAdminPageTexts()]);
 
   const postOptions = getSortingOptions(
     sortingPostsSortingOptionsKeys,
@@ -57,11 +52,9 @@ export default async function UserPostsAdminPage({
   return (
     <UserPostsAdminPageContent
       id={id}
-      authUser={authUser}
       {...texts}
       sortingOptions={postOptions}
       path={`/posts/trainer/tags/${id}`}
-      metadataValues={metadataValues}
     />
   );
 }

@@ -1,7 +1,6 @@
 "use client";
 
 import { ExtraTableProps } from "@/types/tables";
-import { WithUser } from "@/lib/user";
 import useList, { UseListProps } from "@/hoooks/useList";
 import useBinaryFilter, {
   RadioBinaryCriteriaWithCallback,
@@ -46,6 +45,7 @@ import {
   RadioSortButton,
   RadioSortDropDownWithExtraDummy,
 } from "@/components/common/radio-sort";
+import { useAuthUserMinRole } from "@/context/auth-user-min-role-context";
 
 export interface IngredientTableColumnTexts {
   id: string;
@@ -80,7 +80,6 @@ export interface IngredientTableTexts {
 }
 
 export type IngredientTableProps = ExtraTableProps &
-  WithUser &
   UseListProps &
   IngredientTableTexts & {
     isSidebarOpen?: boolean;
@@ -95,7 +94,6 @@ const typeColorMap = {
 
 export default function IngredientsTable({
   forWhom,
-  authUser,
   mainDashboard,
   sortingOptions,
   sizeOptions,
@@ -112,6 +110,8 @@ export default function IngredientsTable({
   search,
   creationFilterTexts,
 }: IngredientTableProps) {
+  const { authUser } = useAuthUserMinRole();
+
   const router = useRouter();
   const isAdmin = authUser?.role === "ROLE_ADMIN";
   const {

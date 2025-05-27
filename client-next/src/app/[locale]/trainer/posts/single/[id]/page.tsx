@@ -5,13 +5,12 @@ import SinglePostPageContent, {
   SinglePostPageTexts,
 } from "@/app/[locale]/(main)/(user)/posts/single/[id]/page-content";
 import { unstable_setRequestLocale } from "next-intl/server";
-import { getUser } from "@/lib/user";
 import { getTrainerPostPageTexts } from "@/texts/pages";
 import SidebarContentLayout from "@/components/sidebar/sidebar-content-layout";
 import { Suspense } from "react";
 import LoadingSpinner from "@/components/common/loading-spinner";
 import { Metadata } from "next";
-import { getIntlMetadata, getMetadataValues } from "@/texts/metadata";
+import { getIntlMetadata } from "@/texts/metadata";
 import ScrollProgress from "@/components/common/scroll-progress";
 import { FindInSiteTexts } from "@/components/nav/find-in-site";
 
@@ -40,29 +39,20 @@ export default async function TrainerPostPage({
 }: Props) {
   unstable_setRequestLocale(locale);
 
-  const [authUser, texts] = await Promise.all([
-    getUser(),
-    getTrainerPostPageTexts(),
-  ]);
-  const metadataValues = await getMetadataValues(authUser, locale);
+  const [texts] = await Promise.all([getTrainerPostPageTexts()]);
 
   return (
     <SidebarContentLayout
       navbarProps={{
         ...texts,
-        authUser,
         mappingKey: "trainer",
-        metadataValues,
       }}
     >
       <ScrollProgress />
       <div className="w-full bg-background ">
         <Suspense fallback={<LoadingSpinner />}>
           <div className="mt-5">
-            <SinglePostPageContent
-              authUser={authUser}
-              {...texts.singlePostPageTexts}
-            />
+            <SinglePostPageContent {...texts.singlePostPageTexts} />
           </div>
         </Suspense>
       </div>

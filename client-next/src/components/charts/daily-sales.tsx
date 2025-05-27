@@ -1,6 +1,5 @@
 "use client";
 import { ro } from "date-fns/locale";
-import { WithUser } from "@/lib/user";
 import { format, subMonths } from "date-fns";
 import { useLocale } from "next-intl";
 import { useMemo, useState } from "react";
@@ -25,7 +24,7 @@ export interface DailySalesTexts {
   dateRangePickerTexts: DateRangePickerTexts;
 }
 
-interface Props extends WithUser, DailySalesTexts {
+interface Props extends DailySalesTexts {
   path: string;
   countColorIndex?: number;
   totalAmountColorIndex?: number;
@@ -40,7 +39,6 @@ const formattedNow = format(now, dateFormat);
 const formattedOneMonthAgo = format(oneMonthAgo, dateFormat);
 
 export default function DailySales({
-  authUser,
   dateRangePickerTexts,
   totalAmountCountOrdersTexts,
   path,

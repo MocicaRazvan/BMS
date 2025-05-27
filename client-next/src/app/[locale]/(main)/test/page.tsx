@@ -1,7 +1,6 @@
 import { Locale } from "@/navigation";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/auth-options";
-import { getUser } from "@/lib/user";
 import React from "react";
 
 import TestPageContent from "./page-content";
@@ -18,7 +17,5 @@ export default async function TestPage({ params }: Props) {
   unstable_setRequestLocale(params.locale);
   const session = await getServerSession(authOptions);
   const texts = await getArchiveQueuesTableTexts();
-  const authUser = await getUser();
-
-  return <TestPageContent authUser={authUser} texts={texts} />;
+  return <TestPageContent texts={texts} />;
 }

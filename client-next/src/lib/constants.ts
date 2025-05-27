@@ -1,6 +1,7 @@
 import { Option } from "@/components/ui/multiple-selector";
 import { SortingOption } from "@/components/list/grid-list";
 import { ContainerAction, DayType } from "@/types/dto";
+import { Role } from "@/types/fetch-utils";
 
 export const MX_SPRING_MESSAGE = "does not have a valid MX record" as const;
 export const GOOGLE_STATE_COOKIE_NAME = "googleState";
@@ -234,3 +235,10 @@ export const getColorsByDayType = (opacity = 1): Record<DayType, string> => ({
 });
 export const getColorByDayType = (dayType: DayType, opacity = 1) =>
   getColorsByDayType(opacity)?.[dayType];
+
+export const HIERARCHY: Record<Role | "undefined", number> = {
+  undefined: 0,
+  ROLE_USER: 1,
+  ROLE_TRAINER: 2,
+  ROLE_ADMIN: 3,
+};

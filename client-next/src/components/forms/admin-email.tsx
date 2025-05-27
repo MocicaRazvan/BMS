@@ -5,7 +5,6 @@ import {
   AdminEmailSchemaType,
   getAdminEmailSchema,
 } from "@/types/forms";
-import { WithUser } from "@/lib/user";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import useLoadingErrorState from "@/hoooks/useLoadingErrorState";
 import ButtonSubmit, {
@@ -36,6 +35,7 @@ import { useNavigationGuardI18nForm } from "@/hoooks/use-navigation-guard-i18n-f
 import { MX_SPRING_MESSAGE } from "@/lib/constants";
 import { normalizeEmailWrapper } from "@/lib/email-normalizer-wrapper";
 import { AnimatePresence, motion } from "framer-motion";
+import { useAuthUserMinRole } from "@/context/auth-user-min-role-context";
 
 export interface AdminEmailTexts {
   adminEmailSchemaTexts: AdminEmailSchemaTexts;
@@ -106,11 +106,10 @@ const render = (value: string) => `
     </tbody>
   </table>`;
 
-interface Props extends WithUser, AdminEmailTexts {}
+interface Props extends AdminEmailTexts {}
 
 export default function AdminEmail({
   adminEmailSchemaTexts,
-  authUser,
   error,
   items,
   buttonSubmitTexts,
@@ -121,6 +120,8 @@ export default function AdminEmail({
   mxError,
   emailDescription,
 }: Props) {
+  const { authUser } = useAuthUserMinRole();
+
   const schema = useMemo(
     () => getAdminEmailSchema(adminEmailSchemaTexts),
     [adminEmailSchemaTexts],

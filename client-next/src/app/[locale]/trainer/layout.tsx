@@ -10,6 +10,7 @@ import {
   trainerSubLabels,
 } from "@/components/sidebar/menu-list";
 import SidebarPanelLayout from "@/components/sidebar/sidebar-panel-layout";
+import { AuthUserMinRoleProvider } from "@/context/auth-user-min-role-context";
 
 export default async function TrainerLayout({
   children,
@@ -30,10 +31,12 @@ export default async function TrainerLayout({
   ]);
 
   return (
-    <SidebarToggleProvider>
-      <SidebarPanelLayout {...texts} mappingKey={"trainer"} authUser={user}>
-        {children}
-      </SidebarPanelLayout>
-    </SidebarToggleProvider>
+    <AuthUserMinRoleProvider minRole="ROLE_TRAINER">
+      <SidebarToggleProvider>
+        <SidebarPanelLayout {...texts} mappingKey={"trainer"}>
+          {children}
+        </SidebarPanelLayout>
+      </SidebarToggleProvider>
+    </AuthUserMinRoleProvider>
   );
 }

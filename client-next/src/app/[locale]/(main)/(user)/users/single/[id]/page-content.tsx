@@ -1,6 +1,5 @@
 "use client";
 
-import { WithUser } from "@/lib/user";
 import useFetchStream from "@/hoooks/useFetchStream";
 import { CustomEntityModel, UserDto } from "@/types/dto";
 import { BaseError } from "@/types/responses";
@@ -28,6 +27,7 @@ import useClientNotFound from "@/hoooks/useClientNotFound";
 import DaysCalendarCTA, {
   DaysCalendarCTATexts,
 } from "@/components/days-calendar/days-calendar-cta";
+import { useAuthUserMinRole } from "@/context/auth-user-min-role-context";
 
 export interface UserPageTexts {
   updateProfileTexts: UpdateProfileTexts;
@@ -45,13 +45,12 @@ export interface UserPageTexts {
   toastSuccess: string;
 }
 
-interface Props extends WithUser, UserPageTexts {
-  id: string;
+interface Props extends UserPageTexts {
+  id?: string;
   showDayCalendarCTA?: boolean;
 }
 
 export default function UserPageContent({
-  authUser,
   id,
   updateProfileTexts,
   editProfile,
@@ -68,6 +67,8 @@ export default function UserPageContent({
   dayCalendarCTATexts,
   toastSuccess,
 }: Props) {
+  const { authUser } = useAuthUserMinRole();
+
   const router = useRouter();
   const stompClient = useStompClient();
   const [userState, setUserState] = useState<typeof authUser>(authUser);
@@ -76,7 +77,7 @@ export default function UserPageContent({
     CustomEntityModel<UserDto>,
     BaseError
   >({
-    path: `/users/${id}`,
+    path: `/users/${id || authUser?.id}`,
     method: "GET",
     authToken: true,
     useAbortController: false,

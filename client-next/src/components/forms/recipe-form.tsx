@@ -70,6 +70,7 @@ import DiffusionImagesForm, {
 } from "@/components/forms/diffusion-images-form";
 import useGetDiffusionImages from "@/hoooks/useGetDiffusionImages";
 import { useNavigationGuardI18nForm } from "@/hoooks/use-navigation-guard-i18n-form";
+import { useAuthUserMinRole } from "@/context/auth-user-min-role-context";
 
 export interface RecipeFormTexts extends SingleChildFormTexts, AITitleBodyForm {
   ingredientQuantitySchemaTexts: IngredientQuantitySchemaTexts;
@@ -93,8 +94,7 @@ export interface RecipeFormTexts extends SingleChildFormTexts, AITitleBodyForm {
 }
 
 export interface RecipeFormProps
-  extends WithUser,
-    RecipeFormTexts,
+  extends RecipeFormTexts,
     BaseFormProps,
     Partial<TitleBodyType> {
   images?: string[];
@@ -103,7 +103,6 @@ export interface RecipeFormProps
   // initialIngredients?: RecipeSchemaType["ingredients"];
 }
 export default function RecipeForm({
-  authUser,
   recipeSchemaTexts,
   ingredientQuantitySchemaTexts,
   ingredientPieChartTexts,
@@ -140,6 +139,8 @@ export default function RecipeForm({
   aiCheckBoxes,
   diffusionImagesFormTexts,
 }: RecipeFormProps) {
+  const { authUser } = useAuthUserMinRole();
+
   const initialChildrenKeys = Object.keys(initialChildren);
   const initialChildrenValues = Object.values(initialChildren);
   const recipeSchema = useMemo(

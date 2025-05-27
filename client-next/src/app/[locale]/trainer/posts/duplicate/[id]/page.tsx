@@ -1,7 +1,6 @@
 import { Locale } from "@/navigation";
 import { unstable_setRequestLocale } from "next-intl/server";
 import DuplicatePostPageContent from "@/app/[locale]/trainer/posts/duplicate/[id]/page-content";
-import { getUserWithMinRole } from "@/lib/user";
 import { ThemeSwitchTexts } from "@/texts/components/nav";
 import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
 import { getPostFormTexts } from "@/texts/components/forms";
@@ -10,7 +9,7 @@ import SidebarContentLayout from "@/components/sidebar/sidebar-content-layout";
 import { Suspense } from "react";
 import LoadingSpinner from "@/components/common/loading-spinner";
 import { Metadata } from "next";
-import { getIntlMetadata, getMetadataValues } from "@/texts/metadata";
+import { getIntlMetadata } from "@/texts/metadata";
 import { FindInSiteTexts } from "@/components/nav/find-in-site";
 
 interface Props {
@@ -42,7 +41,6 @@ export default async function UserDuplicatePostPage({
 }: Props) {
   unstable_setRequestLocale(locale);
   const [
-    authUser,
     {
       postFormTexts: {
         titleBodyTexts,
@@ -59,26 +57,19 @@ export default async function UserDuplicatePostPage({
       },
       ...rest
     },
-  ] = await Promise.all([
-    getUserWithMinRole("ROLE_TRAINER"),
-    getUserDuplicatePostPage(),
-  ]);
-  const metadataValues = await getMetadataValues(authUser, locale);
+  ] = await Promise.all([getUserDuplicatePostPage()]);
 
   return (
     <SidebarContentLayout
       navbarProps={{
         title: baseFormTexts.header,
         ...rest,
-        authUser,
         mappingKey: "trainer",
-        metadataValues,
       }}
     >
       <main className="flex items-center justify-center px-6 py-10">
         <Suspense fallback={<LoadingSpinner />}>
           <DuplicatePostPageContent
-            authUser={authUser}
             postId={id}
             postSchemaTexts={postSchemaTexts}
             fieldTexts={fieldTexts}

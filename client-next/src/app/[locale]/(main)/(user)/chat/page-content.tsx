@@ -1,10 +1,10 @@
 "use client";
 
-import { WithUser } from "@/lib/user";
 import { useStompClient } from "react-stomp-hooks";
 import { Suspense, useEffect } from "react";
 import LoadingSpinner from "@/components/common/loading-spinner";
 import ChatRooms, { ChatRoomsTexts } from "@/components/chat/chat-rooms";
+import { useAuthUserMinRole } from "@/context/auth-user-min-role-context";
 
 export interface ChatPageTexts {
   chatRoomsTexts: ChatRoomsTexts;
@@ -12,13 +12,14 @@ export interface ChatPageTexts {
   headingText: string;
 }
 
-interface Props extends WithUser, ChatPageTexts {}
+interface Props extends ChatPageTexts {}
 export default function ChatPageMainPageContent({
-  authUser,
   chatRoomsTexts,
   noChatSelectedText,
   headingText,
 }: Props) {
+  const { authUser } = useAuthUserMinRole();
+
   const stompClient = useStompClient();
 
   useEffect(() => {

@@ -1,16 +1,16 @@
 "use client";
 
-import { Session } from "next-auth";
 import { ReactNode, useEffect } from "react";
 import { useStompClient } from "react-stomp-hooks";
+import { useSession } from "next-auth/react";
 
 export default function ChatConnectContext({
-  authUser,
   children,
 }: {
-  authUser: Session["user"];
   children: ReactNode;
 }) {
+  const session = useSession();
+  const authUser = session.data?.user;
   const stompClient = useStompClient();
   const userEmail = authUser?.email;
   useEffect(() => {

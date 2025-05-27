@@ -1,9 +1,8 @@
 import { Locale } from "@/navigation";
 import { Metadata } from "next";
-import { getIntlMetadata, getMetadataValues } from "@/texts/metadata";
+import { getIntlMetadata } from "@/texts/metadata";
 import { unstable_setRequestLocale } from "next-intl/server";
 import { getAdminArchiveQueuesPageTexts } from "@/texts/pages";
-import { getUserWithMinRole } from "@/lib/user";
 import { ThemeSwitchTexts } from "@/texts/components/nav";
 import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
 import { ArchiveQueuePrefix } from "@/types/dto";
@@ -50,21 +49,15 @@ export default async function AdminArchiveQueues({
   params: { locale },
 }: Props) {
   unstable_setRequestLocale(locale);
-  const [texts, authUser] = await Promise.all([
-    getAdminArchiveQueuesPageTexts(),
-    getUserWithMinRole("ROLE_ADMIN"),
-  ]);
-  const metadataValues = await getMetadataValues(authUser, locale);
+  const [texts] = await Promise.all([getAdminArchiveQueuesPageTexts()]);
   return (
     <SidebarContentLayout
       navbarProps={{
         title: texts.title,
         themeSwitchTexts: texts.themeSwitchTexts,
-        authUser,
         menuTexts: texts.menuTexts,
         mappingKey: "admin",
         findInSiteTexts: texts.findInSiteTexts,
-        metadataValues,
       }}
     >
       <div className="w-full h-full bg-background">
@@ -73,17 +66,13 @@ export default async function AdminArchiveQueues({
           <h2 className="text-lg md:text-xl tracking-tight font-semibold mt-8 mb-3">
             {texts.archiveTableTitle}
           </h2>
-          <ArchiveQueuesTable
-            authUser={authUser}
-            texts={texts.archiveQueueTableTexts}
-          />
+          <ArchiveQueuesTable texts={texts.archiveQueueTableTexts} />
           <Separator className="my-10" />
           <div className="mt-10 h-full">
             <ArchiveContent
               locale={locale}
               archiveTexts={texts.archiveTexts}
               archiveTitle={texts.archiveTitle}
-              authUser={authUser}
               selectItems={texts.selectItems}
             />
           </div>

@@ -1,6 +1,5 @@
 "use client";
 
-import { WithUser } from "@/lib/user";
 import { useGetTitleBodyUser } from "@/hoooks/useGetTitleBodyUser";
 import { CustomEntityModel, PlanResponse } from "@/types/dto";
 import LoadingSpinner from "@/components/common/loading-spinner";
@@ -20,6 +19,7 @@ import DietBadge from "@/components/common/diet-badge";
 import { fetchStream } from "@/lib/fetchers/fetchStream";
 import { AnswerFromBodyFormTexts } from "@/components/forms/answer-from-body-form";
 import ItemBodyQa from "@/components/common/item-body-qa";
+import { useAuthUserMinRole } from "@/context/auth-user-min-role-context";
 
 export interface SingleTrainerPlanPageTexts {
   elementHeaderTexts: ElementHeaderTexts;
@@ -33,13 +33,13 @@ export interface SingleTrainerPlanPageTexts {
   answerFromBodyFormTexts: AnswerFromBodyFormTexts;
 }
 
-interface Props extends WithUser, SingleTrainerPlanPageTexts {
+interface Props extends SingleTrainerPlanPageTexts {
   id: string;
 }
 
 export default function SingleTrainerPlanPageContent({
   id,
-  authUser,
+
   elementHeaderTexts,
   nutritionalTableTexts,
   ingredientPieChartTexts,
@@ -50,6 +50,8 @@ export default function SingleTrainerPlanPageContent({
   daysListTexts,
   answerFromBodyFormTexts,
 }: Props) {
+  const { authUser } = useAuthUserMinRole();
+
   const {
     itemState: planState,
     setItemState: setPlanState,

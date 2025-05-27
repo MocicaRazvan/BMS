@@ -5,13 +5,12 @@ import SingleOrderPageContent, {
   SingleOrderPageContentTexts,
 } from "@/app/[locale]/(main)/(user)/orders/single/[id]/page-content";
 import { unstable_setRequestLocale } from "next-intl/server";
-import { getUser } from "@/lib/user";
 import { getAdminOrderPageTexts } from "@/texts/pages";
 import LoadingSpinner from "@/components/common/loading-spinner";
 import SidebarContentLayout from "@/components/sidebar/sidebar-content-layout";
 import { Suspense } from "react";
 import { Metadata } from "next";
-import { getIntlMetadata, getMetadataValues } from "@/texts/metadata";
+import { getIntlMetadata } from "@/texts/metadata";
 import { FindInSiteTexts } from "@/components/nav/find-in-site";
 
 interface Props {
@@ -41,28 +40,20 @@ export default async function AdminOrderPage({
   params: { locale, id },
 }: Props) {
   unstable_setRequestLocale(locale);
-  const [authUser, texts] = await Promise.all([
-    getUser(),
-    getAdminOrderPageTexts(),
-  ]);
-  const metadataValues = await getMetadataValues(authUser, locale);
+  const [texts] = await Promise.all([getAdminOrderPageTexts()]);
 
   return (
     <SidebarContentLayout
       navbarProps={{
         ...texts,
-        authUser,
         mappingKey: "admin",
-        metadataValues,
       }}
     >
       <div className="w-full bg-background ">
         <Suspense fallback={<LoadingSpinner />}>
           <div className="mt-5">
-            {" "}
             <SingleOrderPageContent
               id={id}
-              authUser={authUser}
               {...texts.singleOrderPageContentTexts}
             />
           </div>

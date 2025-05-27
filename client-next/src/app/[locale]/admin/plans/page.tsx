@@ -3,7 +3,6 @@ import { PlanTableTexts } from "@/components/table/plans-table";
 import { getSortingOptions, SortingOptionsTexts } from "@/lib/constants";
 import { ThemeSwitchTexts } from "@/texts/components/nav";
 import { getAdminPlansPageTexts } from "@/texts/pages";
-import { getUserWithMinRole } from "@/lib/user";
 import { sortingPlansSortingOptionsKeys } from "@/texts/components/list";
 import SidebarContentLayout from "@/components/sidebar/sidebar-content-layout";
 import Heading from "@/components/common/heading";
@@ -12,7 +11,7 @@ import { Suspense } from "react";
 import AdminPlansPageContent from "@/app/[locale]/admin/plans/page-content";
 import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
 import { Metadata } from "next";
-import { getIntlMetadata, getMetadataValues } from "@/texts/metadata";
+import { getIntlMetadata } from "@/texts/metadata";
 import ArchiveQueueCards, {
   ArchiveQueueCardsTexts,
 } from "@/components/common/archive-queue-card";
@@ -57,12 +56,7 @@ export default async function AdminPlansPage({
       findInSiteTexts,
       archiveDayTexts,
     },
-    authUser,
-  ] = await Promise.all([
-    getAdminPlansPageTexts(),
-    getUserWithMinRole("ROLE_ADMIN"),
-  ]);
-  const metadataValues = await getMetadataValues(authUser, locale);
+  ] = await Promise.all([getAdminPlansPageTexts()]);
 
   const plansOptions = getSortingOptions(
     sortingPlansSortingOptionsKeys,
@@ -74,11 +68,10 @@ export default async function AdminPlansPage({
       navbarProps={{
         title,
         themeSwitchTexts,
-        authUser,
+
         menuTexts,
         mappingKey: "admin",
         findInSiteTexts,
-        metadataValues,
       }}
     >
       <div className="w-full h-full bg-background">
@@ -91,7 +84,6 @@ export default async function AdminPlansPage({
               {...planTableTexts}
               sortingOptions={plansOptions}
               sizeOptions={[10, 20, 30, 40]}
-              authUser={authUser}
               mainDashboard={true}
               extraQueryParams={{
                 admin: "true",
@@ -103,7 +95,6 @@ export default async function AdminPlansPage({
                 texts={topPlansTexts}
                 locale={locale}
                 path="/orders/admin/topPlans"
-                authUser={authUser}
               />
             </div>
             <Separator />
@@ -113,14 +104,12 @@ export default async function AdminPlansPage({
                 locale={locale}
                 showHeader={true}
                 {...archivePlansTexts}
-                authUser={authUser}
               />
               <ArchiveQueueCards
                 prefix={"day"}
                 locale={locale}
                 showHeader={false}
                 {...archiveDayTexts}
-                authUser={authUser}
               />
             </div>
           </div>

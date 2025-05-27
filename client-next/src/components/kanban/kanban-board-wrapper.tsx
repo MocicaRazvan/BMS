@@ -1,6 +1,5 @@
 "use client";
 
-import { WithUser } from "@/lib/user";
 import useFetchStream from "@/hoooks/useFetchStream";
 import { BaseError } from "@/types/responses";
 import {
@@ -17,12 +16,15 @@ import KanbanBoard, {
 import { fetchStream } from "@/lib/fetchers/fetchStream";
 import LoadingSpinner from "@/components/common/loading-spinner";
 import { motion } from "framer-motion";
+import { useAuthUserMinRole } from "@/context/auth-user-min-role-context";
 
-interface Props extends WithUser, KanbanBoardTexts {}
+interface Props extends KanbanBoardTexts {}
 export const createDndIdColumn = (id: number) => `column-${id}`;
 export const createDndIdTask = (id: number) => `task-${id}`;
 
-export default function KanbanBoardWrapper({ authUser, ...props }: Props) {
+export default function KanbanBoardWrapper({ ...props }: Props) {
+  const { authUser } = useAuthUserMinRole();
+
   const [columnsIds, setColumnsIds] = useState<number[]>([]);
   const [groupedTasks, setGroupedTasks] = useState<GroupedKanbanTasks>({});
   const [groupedTasksFinished, setGroupedTasksFinished] = useState<

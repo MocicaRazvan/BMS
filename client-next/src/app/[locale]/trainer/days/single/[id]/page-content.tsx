@@ -1,25 +1,26 @@
 "use client";
 
-import { WithUser } from "@/lib/user";
 import useGetDaysWithMeals from "@/hoooks/days/useGetDayWithMeals";
 import useClientNotFound from "@/hoooks/useClientNotFound";
 import LoadingSpinner from "@/components/common/loading-spinner";
 import React from "react";
 import { checkOwnerOrAdmin, isSuccessCheckReturn } from "@/lib/utils";
 import SingleDay, { SingleDayTexts } from "@/components/days/single-day";
+import { useAuthUserMinRole } from "@/context/auth-user-min-role-context";
 
 export interface SingleDayPageTexts {
   singleDayTexts: SingleDayTexts;
 }
 
-interface Props extends WithUser, SingleDayPageTexts {
+interface Props extends SingleDayPageTexts {
   id: string;
 }
 export default function SingleDayTrainerPageContent({
-  authUser,
   id,
   singleDayTexts,
 }: Props) {
+  const { authUser } = useAuthUserMinRole();
+
   const {
     isLiked,
     day,

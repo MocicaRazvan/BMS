@@ -6,16 +6,15 @@ import React from "react";
 import { checkOwner } from "@/lib/utils";
 import useClientNotFound from "@/hoooks/useClientNotFound";
 import { useGetPlanWithDays } from "@/hoooks/useGetPlanWithDays";
+import { useAuthUserMinRole } from "@/context/auth-user-min-role-context";
 
 interface Props extends PlanFormProps {
   id: string;
 }
 
-export default function UpdatePlanPageContent({
-  id,
-  authUser,
-  ...props
-}: Props) {
+export default function UpdatePlanPageContent({ id, ...props }: Props) {
+  const { authUser } = useAuthUserMinRole();
+
   const {
     plan,
     planError,
@@ -54,7 +53,6 @@ export default function UpdatePlanPageContent({
 
   return (
     <PlanForm
-      authUser={authUser}
       {...props}
       price={planResponse.price}
       title={planResponse.title}

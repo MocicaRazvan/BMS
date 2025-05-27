@@ -3,7 +3,6 @@ import DaysTable, { DayTableTexts } from "@/components/table/day-table";
 import { getSortingOptions, SortingOptionsTexts } from "@/lib/constants";
 import { unstable_setRequestLocale } from "next-intl/server";
 import { getUserDaysPageTexts } from "@/texts/pages";
-import { getTheSameUserOrAdmin } from "@/lib/user";
 import { sortingDaysSortingOptionsKeys } from "@/texts/components/list";
 import Heading from "@/components/common/heading";
 import { ThemeSwitchTexts } from "@/texts/components/nav";
@@ -12,8 +11,9 @@ import LoadingSpinner from "@/components/common/loading-spinner";
 import SidebarContentLayout from "@/components/sidebar/sidebar-content-layout";
 import { Suspense } from "react";
 import { Metadata } from "next";
-import { getIntlMetadata, getMetadataValues } from "@/texts/metadata";
+import { getIntlMetadata } from "@/texts/metadata";
 import { FindInSiteTexts } from "@/components/nav/find-in-site";
+import IsTheSameUserOrAdmin from "@/app/[locale]/trainer/user/is-the-same-user-or-admin";
 
 interface Props {
   params: { locale: Locale; id: string };
@@ -42,11 +42,7 @@ export interface UserDaysPageTexts {
 export default async function UserDaysPage({ params: { locale, id } }: Props) {
   unstable_setRequestLocale(locale);
 
-  const [userDaysPageTexts, authUser] = await Promise.all([
-    getUserDaysPageTexts(),
-    getTheSameUserOrAdmin(id),
-  ]);
-  const metadataValues = await getMetadataValues(authUser, locale);
+  const [userDaysPageTexts] = await Promise.all([getUserDaysPageTexts()]);
 
   const daysOptions = getSortingOptions(
     sortingDaysSortingOptionsKeys,
@@ -54,32 +50,31 @@ export default async function UserDaysPage({ params: { locale, id } }: Props) {
   );
 
   return (
-    <SidebarContentLayout
-      navbarProps={{
-        title: userDaysPageTexts.title,
-        themeSwitchTexts: userDaysPageTexts.themeSwitchTexts,
-        authUser,
-        menuTexts: userDaysPageTexts.menuTexts,
-        mappingKey: "trainer",
-        findInSiteTexts: userDaysPageTexts.findInSiteTexts,
-        metadataValues,
-      }}
-    >
-      <div className="space-y-10 lg:space-y-16 w-full transition-all py-5 px-4 mx-auto ">
-        <Heading {...userDaysPageTexts} />
-        <Suspense fallback={<LoadingSpinner />}>
-          <div>
-            <DaysTable
-              path={`/days/trainer/filteredWithCount/${id}`}
-              forWhom={"trainer"}
-              {...userDaysPageTexts.dayTableTexts}
-              sortingOptions={daysOptions}
-              authUser={authUser}
-              sizeOptions={[10, 20, 30, 40]}
-            />
-          </div>
-        </Suspense>
-      </div>
-    </SidebarContentLayout>
+    <IsTheSameUserOrAdmin id={id}>
+      <SidebarContentLayout
+        navbarProps={{
+          title: userDaysPageTexts.title,
+          themeSwitchTexts: userDaysPageTexts.themeSwitchTexts,
+          menuTexts: userDaysPageTexts.menuTexts,
+          mappingKey: "trainer",
+          findInSiteTexts: userDaysPageTexts.findInSiteTexts,
+        }}
+      >
+        <div className="space-y-10 lg:space-y-16 w-full transition-all py-5 px-4 mx-auto ">
+          <Heading {...userDaysPageTexts} />
+          <Suspense fallback={<LoadingSpinner />}>
+            <div>
+              <DaysTable
+                path={`/days/trainer/filteredWithCount/${id}`}
+                forWhom={"trainer"}
+                {...userDaysPageTexts.dayTableTexts}
+                sortingOptions={daysOptions}
+                sizeOptions={[10, 20, 30, 40]}
+              />
+            </div>
+          </Suspense>
+        </div>
+      </SidebarContentLayout>
+    </IsTheSameUserOrAdmin>
   );
 }

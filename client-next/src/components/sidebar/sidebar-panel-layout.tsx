@@ -7,21 +7,21 @@ import {
   MappingListFunctionKeys,
   SidebarMenuTexts,
 } from "@/components/sidebar/menu-list";
-import { Session } from "next-auth";
+import { ReactNode } from "react";
+import { useAuthUserMinRole } from "@/context/auth-user-min-role-context";
 
 export default function SidebarPanelLayout({
   children,
   menuTexts,
   mainSite,
   mappingKey,
-  authUser,
 }: {
-  children: React.ReactNode;
+  children: ReactNode;
   menuTexts: SidebarMenuTexts;
   mainSite: string;
   mappingKey: MappingListFunctionKeys;
-  authUser: NonNullable<Session["user"]>;
 }) {
+  const { authUser } = useAuthUserMinRole();
   const { toggleIsOpen, isOpen } = useSidebarToggle();
 
   return (

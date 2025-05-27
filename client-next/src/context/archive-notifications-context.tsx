@@ -12,6 +12,7 @@ import {
 import { Session } from "next-auth";
 import useFetchStream from "@/hoooks/useFetchStream";
 import useWebSocket from "react-use-websocket";
+import { useSession } from "next-auth/react";
 
 interface ArchiveNotificationsContextType {
   notifications: NotifyContainerAction[];
@@ -26,13 +27,11 @@ const wsUrl = `${process.env.NEXT_PUBLIC_SPRING_CLIENT_WEBSOCKET}/archive/contai
 
 interface Props {
   children: ReactNode;
-  authUser: Session["user"];
 }
 
-export default function ArchiveNotificationsProvider({
-  authUser,
-  children,
-}: Props) {
+export default function ArchiveNotificationsProvider({ children }: Props) {
+  const session = useSession();
+  const authUser = session.data?.user;
   const [notifications, setNotifications] = useState<NotifyContainerAction[]>(
     [],
   );

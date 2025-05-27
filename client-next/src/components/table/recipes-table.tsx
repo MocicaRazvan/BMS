@@ -10,7 +10,6 @@ import useFilterDropdown, {
 } from "@/components/list/useFilterDropdown";
 import { ExtraTableProps } from "@/types/tables";
 import useList, { UseListProps } from "@/hoooks/useList";
-import { WithUser } from "@/lib/user";
 import useBinaryFilter, {
   RadioBinaryCriteriaWithCallback,
 } from "@/components/list/useBinaryFilter";
@@ -49,6 +48,7 @@ import {
   RadioSortDropDownWithExtra,
   RadioSortDropDownWithExtraDummy,
 } from "@/components/common/radio-sort";
+import { useAuthUserMinRole } from "@/context/auth-user-min-role-context";
 
 export interface RecipeTableColumnsTexts {
   id: string;
@@ -76,11 +76,7 @@ export interface RecipeTableTexts {
   creationFilterTexts: CreationFilterTexts;
 }
 
-interface Props
-  extends ExtraTableProps,
-    RecipeTableTexts,
-    UseListProps,
-    WithUser {
+interface Props extends ExtraTableProps, RecipeTableTexts, UseListProps {
   isSidebarOpen?: boolean;
 }
 
@@ -95,12 +91,13 @@ export default function RecipeTable({
   dietDropdownTexts,
   search,
   recipeTableColumnsTexts,
-  authUser,
   mainDashboard = false,
   extraArrayQueryParam,
   isSidebarOpen = false,
   creationFilterTexts,
 }: Props) {
+  const { authUser } = useAuthUserMinRole();
+
   const {
     field: approvedField,
     updateFieldSearch: updateApproveField,

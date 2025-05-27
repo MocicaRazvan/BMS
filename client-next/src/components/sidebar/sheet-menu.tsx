@@ -16,14 +16,16 @@ import {
   SidebarMenuTexts,
 } from "@/components/sidebar/menu-list";
 import Logo from "@/components/logo/logo";
-import { WithUser } from "@/lib/user";
+import { useAuthUserMinRole } from "@/context/auth-user-min-role-context";
 
-interface Props extends WithUser {
+interface Props {
   texts: SidebarMenuTexts;
   mappingKey: MappingListFunctionKeys;
 }
 
-export function SheetMenu({ texts, mappingKey, authUser }: Props) {
+export function SheetMenu({ texts, mappingKey }: Props) {
+  const { authUser } = useAuthUserMinRole();
+
   return (
     <Sheet>
       <SheetTrigger className="lg:hidden" asChild>

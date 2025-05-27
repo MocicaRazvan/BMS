@@ -1,7 +1,6 @@
 import { Locale } from "@/navigation";
 import { ThemeSwitchTexts } from "@/texts/components/nav";
 import { getAdminMonthlySalesTexts } from "@/texts/pages";
-import { getUserWithMinRole } from "@/lib/user";
 import { unstable_setRequestLocale } from "next-intl/server";
 import SidebarContentLayout from "@/components/sidebar/sidebar-content-layout";
 import Heading from "@/components/common/heading";
@@ -12,7 +11,7 @@ import MonthlySales, {
 } from "@/components/charts/monthly-sales";
 import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
 import { Metadata } from "next";
-import { getIntlMetadata, getMetadataValues } from "@/texts/metadata";
+import { getIntlMetadata } from "@/texts/metadata";
 import { Separator } from "@/components/ui/separator";
 import { FindInSiteTexts } from "@/components/nav/find-in-site";
 
@@ -42,22 +41,16 @@ export async function generateMetadata({
 
 export default async function AdminMonthlySales({ params: { locale } }: Props) {
   unstable_setRequestLocale(locale);
-  const [texts, authUser] = await Promise.all([
-    getAdminMonthlySalesTexts(),
-    getUserWithMinRole("ROLE_ADMIN"),
-  ]);
-  const metadataValues = await getMetadataValues(authUser, locale);
+  const [texts] = await Promise.all([getAdminMonthlySalesTexts()]);
 
   return (
     <SidebarContentLayout
       navbarProps={{
         title: texts.title,
         themeSwitchTexts: texts.themeSwitchTexts,
-        authUser,
         menuTexts: texts.menuTexts,
         mappingKey: "admin",
         findInSiteTexts: texts.findInSiteTexts,
-        metadataValues,
       }}
     >
       <div className="w-full h-full bg-background">
@@ -67,7 +60,6 @@ export default async function AdminMonthlySales({ params: { locale } }: Props) {
             <MonthlySales
               path={"/orders/admin/countAndAmount"}
               predictionPath={"/orders/admin/countAndAmount/prediction"}
-              authUser={authUser}
               {...texts.monthlySalesTexts}
             />
           </div>
@@ -81,7 +73,6 @@ export default async function AdminMonthlySales({ params: { locale } }: Props) {
             <MonthlySales
               path={"/orders/admin/plans/countAndAmount"}
               predictionPath={"/orders/admin/plans/countAndAmount/prediction"}
-              authUser={authUser}
               {...texts.plansMonthlySales}
               hideTotalAmount={true}
               countColorIndex={9}

@@ -1,6 +1,5 @@
 import { Locale } from "@/navigation";
 import { unstable_setRequestLocale } from "next-intl/server";
-import { getUserWithMinRole } from "@/lib/user";
 import { sortingIngredientsSortingOptionsKeys } from "@/texts/components/list";
 import { getSortingOptions, SortingOptionsTexts } from "@/lib/constants";
 import { IngredientTableTexts } from "@/components/table/ingredients-table";
@@ -13,7 +12,7 @@ import { Suspense } from "react";
 import AdminIngredientsCreatePageContent from "@/app/[locale]/admin/ingredients/page-content";
 import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
 import { Metadata } from "next";
-import { getIntlMetadata, getMetadataValues } from "@/texts/metadata";
+import { getIntlMetadata } from "@/texts/metadata";
 import ArchiveQueueCards, {
   ArchiveQueueCardsTexts,
 } from "@/components/common/archive-queue-card";
@@ -59,12 +58,7 @@ export default async function AdminIngredientsPage({
       archiveIngredientsTexts,
       findInSiteTexts,
     },
-    authUser,
-  ] = await Promise.all([
-    getAdminIngredientsPageTexts(),
-    getUserWithMinRole("ROLE_ADMIN"),
-  ]);
-  const metadataValues = await getMetadataValues(authUser, locale);
+  ] = await Promise.all([getAdminIngredientsPageTexts()]);
   const ingredientOptions = getSortingOptions(
     sortingIngredientsSortingOptionsKeys,
     sortingIngredientsSortingOptions,
@@ -75,11 +69,9 @@ export default async function AdminIngredientsPage({
       navbarProps={{
         title,
         themeSwitchTexts,
-        authUser,
         menuTexts,
         mappingKey: "admin",
         findInSiteTexts,
-        metadataValues,
       }}
     >
       <div className="w-full h-full bg-background ">
@@ -90,7 +82,6 @@ export default async function AdminIngredientsPage({
               path={"/ingredients/filtered"}
               {...ingredientTableTexts}
               sortingOptions={ingredientOptions}
-              authUser={authUser}
               sizeOptions={[10, 15, 20, 50]}
               forWhom={"admin"}
               extraQueryParams={{
@@ -103,7 +94,6 @@ export default async function AdminIngredientsPage({
               locale={locale}
               showHeader={true}
               {...archiveIngredientsTexts}
-              authUser={authUser}
             />
           </div>
         </Suspense>

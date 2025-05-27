@@ -21,7 +21,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import { Form } from "@/components/ui/form";
 import { tagsOptions } from "@/lib/constants";
-import { Session } from "next-auth";
 import { CustomEntityModel, PostBody, PostResponse } from "@/types/dto";
 import { fetchWithFiles } from "@/hoooks/fetchWithFiles";
 import { BaseError } from "@/types/responses";
@@ -44,6 +43,7 @@ import DiffusionImagesForm, {
   DiffusionImagesFormTexts,
 } from "@/components/forms/diffusion-images-form";
 import { useNavigationGuardI18nForm } from "@/hoooks/use-navigation-guard-i18n-form";
+import { useAuthUserMinRole } from "@/context/auth-user-min-role-context";
 
 export interface PostFormProps
   extends Partial<Omit<PostType, "images">>,
@@ -55,7 +55,6 @@ export interface PostFormProps
   titleBodyTexts: TitleBodyTexts;
   inputMultipleSelectorTexts: InputMultipleSelectorTexts;
   buttonSubmitTexts: ButtonSubmitTexts;
-  authUser: NonNullable<Session["user"]>;
   images?: string[];
   loadedImages: UploadingProgressTexts;
   diffusionImagesFormTexts: DiffusionImagesFormTexts;
@@ -72,7 +71,6 @@ export default function PostForm({
   title = "",
   images = [],
   tags = [],
-  authUser,
   error,
   descriptionToast,
   toastAction,
@@ -85,6 +83,8 @@ export default function PostForm({
   aiCheckBoxes,
   diffusionImagesFormTexts,
 }: PostFormProps) {
+  const { authUser } = useAuthUserMinRole();
+
   const schema = useMemo(
     () => getPostSchema(postSchemaTexts),
     [postSchemaTexts],

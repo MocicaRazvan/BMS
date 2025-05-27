@@ -6,7 +6,6 @@ import { getSortingOptions, SortingOptionsTexts } from "@/lib/constants";
 import { ThemeSwitchTexts } from "@/texts/components/nav";
 import { unstable_setRequestLocale } from "next-intl/server";
 import { getAdminRecipesPageTexts } from "@/texts/pages";
-import { getUserWithMinRole } from "@/lib/user";
 import { sortingRecipesSortingOptionsKeys } from "@/texts/components/list";
 import SidebarContentLayout from "@/components/sidebar/sidebar-content-layout";
 import Heading from "@/components/common/heading";
@@ -14,7 +13,7 @@ import { Suspense } from "react";
 import LoadingSpinner from "@/components/common/loading-spinner";
 import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
 import { Metadata } from "next";
-import { getIntlMetadata, getMetadataValues } from "@/texts/metadata";
+import { getIntlMetadata } from "@/texts/metadata";
 import ArchiveQueueCards, {
   ArchiveQueueCardsTexts,
 } from "@/components/common/archive-queue-card";
@@ -55,12 +54,7 @@ export default async function AdminRecipesPage({ params: { locale } }: Props) {
       archiveMealsTexts,
       findInSiteTexts,
     },
-    authUser,
-  ] = await Promise.all([
-    getAdminRecipesPageTexts(),
-    getUserWithMinRole("ROLE_ADMIN"),
-  ]);
-  const metadataValues = await getMetadataValues(authUser, locale);
+  ] = await Promise.all([getAdminRecipesPageTexts()]);
 
   const recipesOptions = getSortingOptions(
     sortingRecipesSortingOptionsKeys,
@@ -71,11 +65,9 @@ export default async function AdminRecipesPage({ params: { locale } }: Props) {
       navbarProps={{
         title,
         themeSwitchTexts,
-        authUser,
         menuTexts,
         mappingKey: "admin",
         findInSiteTexts,
-        metadataValues,
       }}
     >
       <div className="w-full h-full bg-background">
@@ -87,7 +79,6 @@ export default async function AdminRecipesPage({ params: { locale } }: Props) {
               forWhom="admin"
               sortingOptions={recipesOptions}
               {...recipeTableTexts}
-              authUser={authUser}
               sizeOptions={[10, 20, 30, 40]}
               mainDashboard={true}
               extraQueryParams={{
@@ -101,14 +92,12 @@ export default async function AdminRecipesPage({ params: { locale } }: Props) {
                 locale={locale}
                 showHeader={true}
                 {...archiveRecipesTexts}
-                authUser={authUser}
               />
               <ArchiveQueueCards
                 prefix={"meal"}
                 locale={locale}
                 showHeader={false}
                 {...archiveMealsTexts}
-                authUser={authUser}
               />
             </div>
           </div>

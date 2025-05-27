@@ -1,6 +1,5 @@
 "use client";
 
-import { WithUser } from "@/lib/user";
 import PostForm, { PostFormProps } from "@/components/forms/post-form";
 import useFetchStream from "@/hoooks/useFetchStream";
 import { CustomEntityModel, PostResponse } from "@/types/dto";
@@ -10,16 +9,15 @@ import { checkOwner } from "@/lib/utils";
 import { Option } from "@/components/ui/multiple-selector";
 import React from "react";
 import useClientNotFound from "@/hoooks/useClientNotFound";
+import { useAuthUserMinRole } from "@/context/auth-user-min-role-context";
 
-interface Props extends WithUser, PostFormProps {
+interface Props extends PostFormProps {
   postId: string;
 }
 
-export default function UpdatePostPageContent({
-  authUser,
-  postId,
-  ...props
-}: Props) {
+export default function UpdatePostPageContent({ postId, ...props }: Props) {
+  const { authUser } = useAuthUserMinRole();
+
   const { messages, error, isAbsoluteFinished } = useFetchStream<
     CustomEntityModel<PostResponse>,
     BaseError
@@ -56,7 +54,6 @@ export default function UpdatePostPageContent({
       title={post.title}
       tags={tags}
       images={post.images}
-      authUser={authUser}
     />
   );
 }

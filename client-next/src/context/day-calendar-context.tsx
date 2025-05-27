@@ -23,6 +23,7 @@ import { CustomEntityModel, DayCalendarResponse } from "@/types/dto";
 import useFetchStream, { UseFetchStreamProps } from "@/hoooks/useFetchStream";
 import { usePathname, useRouter } from "@/navigation";
 import { useSearchParams } from "next/navigation";
+import { useAuthUserMinRole } from "@/context/auth-user-min-role-context";
 
 interface DayCalendarContextType extends WithUser {
   dayCalendars: DayCalendarResponse[];
@@ -42,7 +43,7 @@ interface DayCalendarContextType extends WithUser {
 
 const DayCalendarContext = createContext<DayCalendarContextType | null>(null);
 
-interface Props extends WithUser {
+interface Props {
   children: ReactNode;
 }
 
@@ -70,7 +71,8 @@ const baseFetchAgs: UseFetchStreamProps = {
   authToken: true,
 };
 
-export default function DayCalendarProvider({ children, authUser }: Props) {
+export default function DayCalendarProvider({ children }: Props) {
+  const { authUser } = useAuthUserMinRole();
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();

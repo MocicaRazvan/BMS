@@ -14,17 +14,19 @@ import {
 } from "@/types/dto";
 import { createContext, useCallback } from "react";
 import { Client } from "@stomp/stompjs";
+import { useSession } from "next-auth/react";
 
 export const PostApproveNotificationContext =
   createContext<NotificationContextType<any, any, any> | null>(null);
 
 export function PostApproveNotificationProvider({
   children,
-  authUser,
 }: Omit<
   NotificationProviderProps,
-  "notificationName" | "NotificationContext"
+  "notificationName" | "NotificationContext" | "authUser"
 >) {
+  const session = useSession();
+  const authUser = session.data?.user;
   return (
     <ApproveNotificationTemplateProvider<
       NotificationPostResponse,

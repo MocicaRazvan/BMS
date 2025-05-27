@@ -5,13 +5,12 @@ import SingleTrainerPlanPageContent, {
   SingleTrainerPlanPageTexts,
 } from "@/app/[locale]/trainer/plans/single/[id]/page-content";
 import { unstable_setRequestLocale } from "next-intl/server";
-import { getUser } from "@/lib/user";
 import { getAdminPlanPageTexts } from "@/texts/pages";
 import SidebarContentLayout from "@/components/sidebar/sidebar-content-layout";
 import { Suspense } from "react";
 import LoadingSpinner from "@/components/common/loading-spinner";
 import { Metadata } from "next";
-import { getIntlMetadata, getMetadataValues } from "@/texts/metadata";
+import { getIntlMetadata } from "@/texts/metadata";
 import ScrollProgress from "@/components/common/scroll-progress";
 import { FindInSiteTexts } from "@/components/nav/find-in-site";
 
@@ -41,19 +40,13 @@ export async function generateMetadata({
 export default async function AdminPlanPage({ params: { locale, id } }: Props) {
   unstable_setRequestLocale(locale);
 
-  const [authUser, texts] = await Promise.all([
-    getUser(),
-    getAdminPlanPageTexts(),
-  ]);
-  const metadataValues = await getMetadataValues(authUser, locale);
+  const [texts] = await Promise.all([getAdminPlanPageTexts()]);
 
   return (
     <SidebarContentLayout
       navbarProps={{
         ...texts,
-        authUser,
         mappingKey: "admin",
-        metadataValues,
       }}
     >
       <ScrollProgress />
@@ -61,7 +54,6 @@ export default async function AdminPlanPage({ params: { locale, id } }: Props) {
         <Suspense fallback={<LoadingSpinner />}>
           <div>
             <SingleTrainerPlanPageContent
-              authUser={authUser}
               {...texts.singleTrainerPlanPageTexts}
               id={id}
             />

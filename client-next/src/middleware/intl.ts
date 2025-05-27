@@ -1,13 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { locales } from "@/navigation";
 import createMiddleware from "next-intl/middleware";
+
 const intlMiddleware = createMiddleware({
   // A list of all locales that are supported
   locales,
   // Used when no locale matches
   defaultLocale: "en",
 });
-export function pageMiddleware(
+export function intlPageMiddleware(
   request: NextRequest,
   redirectedLocales: string[],
 ) {

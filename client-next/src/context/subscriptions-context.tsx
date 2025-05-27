@@ -8,9 +8,9 @@ import {
   useEffect,
   useReducer,
 } from "react";
-import { Session } from "next-auth";
 import { fetchStream } from "@/lib/fetchers/fetchStream";
 import { UserSubscriptionDto } from "@/types/dto";
+import { useSession } from "next-auth/react";
 
 export interface UserSubscriptions {
   planIds: number[];
@@ -60,10 +60,11 @@ export const SubscriptionContext =
 
 interface Props {
   children: ReactNode;
-  authUser: Session["user"];
 }
 
-export const SubscriptionProvider = ({ children, authUser }: Props) => {
+export const SubscriptionProvider = ({ children }: Props) => {
+  const session = useSession();
+  const authUser = session.data?.user;
   const [state, dispatch] = useReducer(subscriptionReducer, initialState);
 
   useEffect(() => {

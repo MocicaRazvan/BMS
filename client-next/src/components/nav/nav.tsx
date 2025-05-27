@@ -1,7 +1,6 @@
 "use client";
 
 import { useSession } from "next-auth/react";
-
 import { Link } from "@/navigation";
 import { ModeToggle } from "@/components/nav/theme-switch";
 import { LocaleSwitcher } from "@/components/i18n/LocaleSwitcher";
@@ -64,7 +63,6 @@ export default function Nav({
   dayCalendarCTATexts,
 }: NavProps) {
   const session = useSession();
-
   const authUser = session?.data?.user;
 
   const isUser = authUser?.role === "ROLE_USER";
@@ -242,10 +240,17 @@ export default function Nav({
     >
       <div className="hidden lgxl:flex items-center justify-between w-full">
         <div className="flex items-center justify-center gap-1 ">
-          {authUser && (
+          {authUser ? (
             <div className="flex items-start text-lg  justify-center gap-4 flex-wrap">
               <NavButtonGroup items={linkItems} />
             </div>
+          ) : (
+            <Link
+              href="/"
+              className="mr-1.5 2xl:mr-3 px-1 md:px-1 py-1 md:py-1 rounded-full  hover:scale-105 transition-transform duration-200 ease-in-out"
+            >
+              <Logo width={40} height={40} />
+            </Link>
           )}
         </div>
         <div className="mx-auto  md:mr-1 flex items-center justify-center gap-6 md:gap-3 mt-2 sm:mt-0">

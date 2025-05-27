@@ -2,7 +2,6 @@ import { Locale } from "@/navigation";
 import { unstable_setRequestLocale } from "next-intl/server";
 import UsersTable, { UserTableTexts } from "@/components/table/users-table";
 import { getAdminUsersPageTexts } from "@/texts/pages";
-import { getUserWithMinRole } from "@/lib/user";
 import SidebarContentLayout from "@/components/sidebar/sidebar-content-layout";
 import Heading from "@/components/common/heading";
 import { Suspense } from "react";
@@ -12,7 +11,7 @@ import { getSortingOptions, SortingOptionsTexts } from "@/lib/constants";
 import { sortingUsersSortingOptionsKeys } from "@/texts/components/list";
 import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
 import { Metadata } from "next";
-import { getIntlMetadata, getMetadataValues } from "@/texts/metadata";
+import { getIntlMetadata } from "@/texts/metadata";
 import ArchiveQueueCards, {
   ArchiveQueueCardsTexts,
 } from "@/components/common/archive-queue-card";
@@ -60,12 +59,7 @@ export default async function AdminUsersPage({ params: { locale } }: Props) {
       topTrainersTexts,
       findInSiteTexts,
     },
-    authUser,
-  ] = await Promise.all([
-    getAdminUsersPageTexts(),
-    getUserWithMinRole("ROLE_ADMIN"),
-  ]);
-  const metadataValues = await getMetadataValues(authUser, locale);
+  ] = await Promise.all([getAdminUsersPageTexts()]);
 
   const userOptions = getSortingOptions(
     sortingUsersSortingOptionsKeys,
@@ -77,10 +71,8 @@ export default async function AdminUsersPage({ params: { locale } }: Props) {
       navbarProps={{
         title,
         themeSwitchTexts,
-        authUser,
         menuTexts,
         mappingKey: "admin",
-        metadataValues,
         findInSiteTexts,
       }}
     >
@@ -92,7 +84,6 @@ export default async function AdminUsersPage({ params: { locale } }: Props) {
               path={"/users"}
               forWhom={"admin"}
               sortingOptions={userOptions}
-              authUser={authUser}
               {...userTableTexts}
               sizeOptions={[10, 20, 30, 40]}
               extraQueryParams={{
@@ -114,7 +105,6 @@ export default async function AdminUsersPage({ params: { locale } }: Props) {
               locale={locale}
               showHeader={true}
               {...archiveUsersTexts}
-              authUser={authUser}
             />
           </div>
         </Suspense>

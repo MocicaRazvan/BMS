@@ -28,7 +28,6 @@ import useTagsExtraCriteria, {
   UseTagsExtraCriteriaTexts,
 } from "@/components/list/useTagsExtraCriteria";
 import { UseApprovedFilterTexts } from "@/components/list/useApprovedFilter";
-import { WithUser } from "@/lib/user";
 import AlertDialogApprovePost from "@/components/dialogs/posts/approve-post";
 import { ColumnActionsTexts } from "@/texts/components/table";
 import useBinaryFilter, {
@@ -47,6 +46,7 @@ import {
   RadioSortDropDownWithExtraDummy,
 } from "@/components/common/radio-sort";
 import AlertDialogDeletePost from "@/components/dialogs/posts/delete-post";
+import { useAuthUserMinRole } from "@/context/auth-user-min-role-context";
 
 export interface PostTableColumnsTexts {
   id: string;
@@ -72,7 +72,7 @@ export interface PostTableTexts {
   creationFilterTexts: CreationFilterTexts;
 }
 
-type Props = ExtraTableProps & PostTableTexts & UseListProps & WithUser;
+type Props = ExtraTableProps & PostTableTexts & UseListProps;
 
 export default function PostsTable({
   forWhom,
@@ -85,10 +85,11 @@ export default function PostsTable({
   useTagsExtraCriteriaTexts,
   search,
   postTableColumnsTexts,
-  authUser,
   mainDashboard = false,
   creationFilterTexts,
 }: Props) {
+  const { authUser } = useAuthUserMinRole();
+
   const { extraUpdateSearchParams, extraArrayQueryParam, tags, setTags } =
     useTagsExtraCriteria();
 

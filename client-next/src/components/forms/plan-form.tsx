@@ -7,7 +7,6 @@ import {
   PlanSchemaTexts,
   PlanSchemaType,
 } from "@/types/forms";
-import { WithUser } from "@/lib/user";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import React, {
@@ -102,6 +101,7 @@ import DiffusionImagesForm, {
 import useGetDiffusionImages from "@/hoooks/useGetDiffusionImages";
 import { useNavigationGuardI18nForm } from "@/hoooks/use-navigation-guard-i18n-form";
 import TwoStepDeleteButton from "@/components/common/two-step-delete-button";
+import { useAuthUserMinRole } from "@/context/auth-user-min-role-context";
 
 export interface PlanFormTexts extends AITitleBodyForm {
   titleBodyTexts: TitleBodyTexts;
@@ -123,8 +123,7 @@ export interface PlanFormTexts extends AITitleBodyForm {
   diffusionImagesFormTexts: DiffusionImagesFormTexts;
 }
 export interface PlanFormProps
-  extends WithUser,
-    PlanFormTexts,
+  extends PlanFormTexts,
     BaseFormProps,
     Partial<Omit<PlanSchemaType, "images">> {
   images?: string[];
@@ -133,7 +132,6 @@ export interface PlanFormProps
 
 export default function PlanForm({
   titleBodyTexts,
-  authUser,
   childInputMultipleSelectorTexts,
   imagesText,
   buttonSubmitTexts,
@@ -162,6 +160,8 @@ export default function PlanForm({
   bodyAIGeneratedPopTexts,
   diffusionImagesFormTexts,
 }: PlanFormProps) {
+  const { authUser } = useAuthUserMinRole();
+
   const planSchema = useMemo(
     () => getPlanSchema(planSchemaTexts),
     [planSchemaTexts],

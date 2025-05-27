@@ -13,7 +13,6 @@ import useFilterDropdown, {
   UseFilterDropdownTexts,
 } from "@/components/list/useFilterDropdown";
 import { ExtraTableProps } from "@/types/tables";
-import { WithUser } from "@/lib/user";
 import useList, { UseListProps } from "@/hoooks/useList";
 import { Link, useRouter } from "@/navigation";
 import { dietTypes } from "@/types/forms";
@@ -53,6 +52,7 @@ import {
   RadioSortDropDownWithExtra,
   RadioSortDropDownWithExtraDummy,
 } from "@/components/common/radio-sort";
+import { useAuthUserMinRole } from "@/context/auth-user-min-role-context";
 
 export interface PlanTableColumnsTexts {
   id: string;
@@ -91,7 +91,6 @@ export interface PlanTableTexts {
 
 export interface PlanTableProps
   extends ExtraTableProps,
-    WithUser,
     UseListProps,
     PlanTableTexts {
   isSidebarOpen?: boolean;
@@ -111,7 +110,6 @@ export default function PlansTable({
   search,
   isSidebarOpen,
   useApprovedFilterTexts,
-  authUser,
   mainDashboard,
   sortingOptions,
   sizeOptions,
@@ -124,6 +122,8 @@ export default function PlansTable({
   creationFilterTexts,
   forWhom,
 }: PlanTableProps) {
+  const { authUser } = useAuthUserMinRole();
+
   const router = useRouter();
   const isAdmin = authUser?.role === "ROLE_ADMIN";
   const formatIntl = useFormatter();

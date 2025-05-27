@@ -4,8 +4,6 @@ import { Locale } from "@/navigation";
 import { ThemeProvider } from "@/providers/theme-provider";
 import { NextAuthSessionProvider } from "@/providers/session-provider";
 import { Toaster } from "@/components/ui/toaster";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/auth-options";
 import { StompProvider } from "@/providers/stomp-provider";
 import { ChatMessageNotificationProvider } from "@/context/chat-message-notification-context";
 import { PostApproveNotificationProvider } from "@/context/post-approve-notification-context";
@@ -15,7 +13,6 @@ import { CartProvider } from "@/context/cart-context";
 import { SubscriptionProvider } from "@/context/subscriptions-context";
 import { BoughtNotificationProvider } from "@/context/bought-notification-context";
 import ScrollTopProvider from "@/providers/scroll-top";
-import { vectorStoreInstance } from "@/lib/langchain/langchain";
 import { getAiChatBoxTexts } from "@/texts/components/ai-chat";
 import ValidUserSessionContext from "@/context/valid-user-session";
 import { NotificationPopProvider } from "@/context/notification-pop-context";
@@ -28,6 +25,7 @@ import ChatConnectContext from "@/context/chat-connect-context";
 import { UmamiAnalytics } from "@/lib/umami-analytics";
 import ArchiveNotificationsProvider from "@/context/archive-notifications-context";
 import { ReactNode } from "react";
+import { AbstractIntlMessages, NextIntlClientProvider } from "next-intl";
 
 const fontSans = FontSans({
   subsets: ["latin"],
@@ -62,26 +60,23 @@ export default async function BaseLayout({
 }: Props) {
   const spring = process.env.NEXT_PUBLIC_SPRING_CLIENT!;
 
-  let session;
-  let aiTexts;
+  // let aiTexts;
 
-  if (process.env.NODE_ENV === "production") {
-    const [sessionP, lg, aiTextsP] = await Promise.all([
-      getServerSession(authOptions),
-      vectorStoreInstance.initialize(false, false),
-      getAiChatBoxTexts(),
-    ]);
-    session = sessionP;
-    aiTexts = aiTextsP;
-  } else {
-    const [sessionP, lg, aiTextsP] = await Promise.all([
-      getServerSession(authOptions),
-      vectorStoreInstance.initialize(false, false),
-      getAiChatBoxTexts(),
-    ]);
-    session = sessionP;
-    aiTexts = aiTextsP;
-  }
+  // if (process.env.NODE_ENV === "production") {
+  //   const [lg, aiTextsP] = await Promise.all([
+  //     vectorStoreInstance.initialize(false, false),
+  //     getAiChatBoxTexts(),
+  //   ]);
+  //   aiTexts = aiTextsP;
+  // } else {
+  //   const [lg, aiTextsP] = await Promise.all([
+  //     vectorStoreInstance.initialize(false, false),
+  //     getAiChatBoxTexts(),
+  //   ]);
+  //   aiTexts = aiTextsP;
+  // }
+
+  const aiTexts = await getAiChatBoxTexts();
 
   return (
     <html lang={locale} suppressHydrationWarning>
@@ -92,71 +87,58 @@ export default async function BaseLayout({
           fontSans.variable,
         )}
       >
-        <CacheProvider>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            enableSystem
-            disableTransitionOnChange
-          >
-            <NavigationGuardProvider>
-              <NextAuthSessionProvider>
-                <ScrollTopProvider>
-                  <ValidUserSessionContext>
-                    <StompProvider
-                      url={spring + "/ws/ws-service"}
-                      authUser={session?.user}
-                    >
-                      <ChatMessageNotificationProvider authUser={session?.user}>
-                        <PostApproveNotificationProvider
-                          authUser={session?.user}
-                        >
-                          <RecipeApproveNotificationProvider
-                            authUser={session?.user}
-                          >
-                            <PlanApproveNotificationProvider
-                              authUser={session?.user}
-                            >
-                              <BoughtNotificationProvider
-                                authUser={session?.user}
-                              >
-                                <ArchiveNotificationsProvider
-                                  authUser={session?.user}
-                                >
-                                  <NotificationPopProvider
-                                    authUser={session?.user}
-                                  >
-                                    <CartProvider authUser={session?.user}>
-                                      <SubscriptionProvider
-                                        authUser={session?.user}
-                                      >
-                                        <KanbanRouteChangeProvider>
-                                          <ChatConnectContext
-                                            authUser={session?.user}
-                                          >
-                                            <>
-                                              {children}
-                                              <AiChatBoxWrapper {...aiTexts} />
-                                            </>
-                                          </ChatConnectContext>
-                                        </KanbanRouteChangeProvider>
-                                      </SubscriptionProvider>
-                                    </CartProvider>
-                                  </NotificationPopProvider>
-                                </ArchiveNotificationsProvider>
-                              </BoughtNotificationProvider>
-                            </PlanApproveNotificationProvider>
-                          </RecipeApproveNotificationProvider>
-                        </PostApproveNotificationProvider>
-                      </ChatMessageNotificationProvider>
-                    </StompProvider>
-                  </ValidUserSessionContext>
-                </ScrollTopProvider>
-              </NextAuthSessionProvider>
-              <Toaster />
-            </NavigationGuardProvider>
-          </ThemeProvider>
-        </CacheProvider>
+        <NextIntlClientProvider
+          messages={null as unknown as AbstractIntlMessages}
+        >
+          <CacheProvider>
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="system"
+              enableSystem
+              disableTransitionOnChange
+            >
+              <NavigationGuardProvider>
+                <NextAuthSessionProvider>
+                  <ScrollTopProvider>
+                    <ValidUserSessionContext>
+                      <StompProvider url={spring + "/ws/ws-service"}>
+                        <ChatMessageNotificationProvider>
+                          <PostApproveNotificationProvider>
+                            <RecipeApproveNotificationProvider>
+                              <PlanApproveNotificationProvider>
+                                <BoughtNotificationProvider>
+                                  <ArchiveNotificationsProvider>
+                                    <NotificationPopProvider>
+                                      <CartProvider>
+                                        <SubscriptionProvider>
+                                          <KanbanRouteChangeProvider>
+                                            <ChatConnectContext>
+                                              <>
+                                                {children}
+                                                <AiChatBoxWrapper
+                                                  {...aiTexts}
+                                                />
+                                              </>
+                                            </ChatConnectContext>
+                                          </KanbanRouteChangeProvider>
+                                        </SubscriptionProvider>
+                                      </CartProvider>
+                                    </NotificationPopProvider>
+                                  </ArchiveNotificationsProvider>
+                                </BoughtNotificationProvider>
+                              </PlanApproveNotificationProvider>
+                            </RecipeApproveNotificationProvider>
+                          </PostApproveNotificationProvider>
+                        </ChatMessageNotificationProvider>
+                      </StompProvider>
+                    </ValidUserSessionContext>
+                  </ScrollTopProvider>
+                </NextAuthSessionProvider>
+                <Toaster />
+              </NavigationGuardProvider>
+            </ThemeProvider>
+          </CacheProvider>
+        </NextIntlClientProvider>
       </body>
     </html>
   );

@@ -1,7 +1,6 @@
 "use client";
 
 import { UserOrdersAdminPageTexts } from "@/app/[locale]/admin/users/[id]/orders/page";
-import { WithUser } from "@/lib/user";
 import { UseListProps } from "@/hoooks/useList";
 import useGetUser from "@/hoooks/useGetUser";
 import SidebarContentLayout from "@/components/sidebar/sidebar-content-layout";
@@ -10,11 +9,10 @@ import LoadingSpinner from "@/components/common/loading-spinner";
 import { Suspense } from "react";
 import OrdersTable from "@/components/table/orders-table";
 import useClientNotFound from "@/hoooks/useClientNotFound";
-import { MetadataValue } from "@/components/nav/find-in-site";
+import { useAuthUserMinRole } from "@/context/auth-user-min-role-context";
 
-interface Props extends UserOrdersAdminPageTexts, WithUser, UseListProps {
+interface Props extends UserOrdersAdminPageTexts, UseListProps {
   id: string;
-  metadataValues: MetadataValue[];
 }
 
 export default function UserOrdersAdminPageContent({
@@ -24,13 +22,13 @@ export default function UserOrdersAdminPageContent({
   orderTableTexts,
   sortingOrdersSortingOptions,
   header,
-  authUser,
   path,
   sortingOptions,
   menuTexts,
   findInSiteTexts,
-  metadataValues,
 }: Props) {
+  const { authUser } = useAuthUserMinRole();
+
   const { user, messages, error, isFinished } = useGetUser(id);
   const { navigateToNotFound } = useClientNotFound();
   if (isFinished && error?.status) {
@@ -40,12 +38,10 @@ export default function UserOrdersAdminPageContent({
     <SidebarContentLayout
       navbarProps={{
         title: `${title} ${user?.email || ""}`,
-        authUser,
         themeSwitchTexts,
         menuTexts,
         mappingKey: "admin",
         findInSiteTexts,
-        metadataValues,
       }}
     >
       <div className="w-full h-full bg-background">
@@ -55,13 +51,11 @@ export default function UserOrdersAdminPageContent({
         />
         <Suspense fallback={<LoadingSpinner />}>
           <div className="mt-10 h-full">
-            {" "}
             <OrdersTable
               path={path}
               forWhom="admin"
               sortingOptions={sortingOptions}
               {...orderTableTexts}
-              authUser={authUser}
               sizeOptions={[1, 10, 20, 30, 40]}
               mainDashboard={true}
             />

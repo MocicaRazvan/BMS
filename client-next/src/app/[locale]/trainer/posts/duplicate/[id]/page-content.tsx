@@ -5,18 +5,16 @@ import { BaseError } from "@/types/responses";
 import LoadingSpinner from "@/components/common/loading-spinner";
 import useClientNotFound from "@/hoooks/useClientNotFound";
 import { checkOwner } from "@/lib/utils";
-import { WithUser } from "@/lib/user";
 import PostForm, { PostFormProps } from "@/components/forms/post-form";
 import { Option } from "@/components/ui/multiple-selector";
+import { useAuthUserMinRole } from "@/context/auth-user-min-role-context";
 
-interface Props extends WithUser, PostFormProps {
+interface Props extends PostFormProps {
   postId: string;
 }
-export default function DuplicatePostPageContent({
-  authUser,
-  postId,
-  ...props
-}: Props) {
+export default function DuplicatePostPageContent({ postId, ...props }: Props) {
+  const { authUser } = useAuthUserMinRole();
+
   const { messages, error, isFinished } = useFetchStream<
     CustomEntityModel<PostResponse>,
     BaseError
@@ -53,7 +51,6 @@ export default function DuplicatePostPageContent({
       title={undefined}
       tags={tags}
       images={post.images}
-      authUser={authUser}
     />
   );
 }

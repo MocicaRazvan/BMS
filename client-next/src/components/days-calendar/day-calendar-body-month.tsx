@@ -107,12 +107,18 @@ export default function DayCalendarBodyMonth({
                   {dayEvents.length > 0 ? (
                     <div className="flex items-center justify-center flex-1">
                       {dayEvents.map((d) => (
-                        <div key={d.id + d.date} className="w-full h-full">
+                        <motion.div
+                          key={d.id + d.date}
+                          className="w-full h-full"
+                          initial={{ opacity: 0.1 }}
+                          animate={{ opacity: 1 }}
+                          transition={{ duration: 0.25, ease: "easeInOut" }}
+                        >
                           <DayCalendarEvent
                             dayCalendar={d}
                             texts={dayCalendarEventTexts}
                           />
-                        </div>
+                        </motion.div>
                       ))}
                     </div>
                   ) : (

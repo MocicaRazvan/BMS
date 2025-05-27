@@ -1,6 +1,5 @@
 "use client";
 
-import { WithUser } from "@/lib/user";
 import useFetchStream from "@/hoooks/useFetchStream";
 import {
   CustomEntityModel,
@@ -22,6 +21,7 @@ import NutritionalTable, {
   NutritionalTableTexts,
 } from "@/components/common/nutritional-table";
 import useClientNotFound from "@/hoooks/useClientNotFound";
+import { useAuthUserMinRole } from "@/context/auth-user-min-role-context";
 
 const tableColsKeys: (keyof NutritionalFactResponse &
   keyof IngredientTableColumnTexts)[] = [
@@ -43,17 +43,18 @@ export interface SingleIngredientPageTexts {
   // tableCaption: string;
   nutritionalTableTexts: NutritionalTableTexts;
 }
-interface Props extends WithUser, SingleIngredientPageTexts {
+interface Props extends SingleIngredientPageTexts {
   id: string;
 }
 
 export default function SingleIngredientPageContent({
   id,
-  authUser,
   nutritionalTableTexts,
   ingredientColumnTexts,
   ingredientPieChartTexts,
 }: Props) {
+  const { authUser } = useAuthUserMinRole();
+
   const { messages, error, isFinished } = useFetchStream<
     CustomEntityModel<IngredientNutritionalFactResponse>
   >({

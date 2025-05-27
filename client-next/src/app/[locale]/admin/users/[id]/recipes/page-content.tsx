@@ -1,7 +1,6 @@
 "use client";
 
 import { UserRecipesAdminPageTexts } from "@/app/[locale]/admin/users/[id]/recipes/page";
-import { WithUser } from "@/lib/user";
 import { UseListProps } from "@/hoooks/useList";
 import SidebarContentLayout from "@/components/sidebar/sidebar-content-layout";
 import LoadingSpinner from "@/components/common/loading-spinner";
@@ -10,11 +9,10 @@ import { Suspense } from "react";
 import RecipeTable from "@/components/table/recipes-table";
 import useGetUser from "@/hoooks/useGetUser";
 import useClientNotFound from "@/hoooks/useClientNotFound";
-import { MetadataValue } from "@/components/nav/find-in-site";
+import { useAuthUserMinRole } from "@/context/auth-user-min-role-context";
 
-interface Props extends UserRecipesAdminPageTexts, WithUser, UseListProps {
+interface Props extends UserRecipesAdminPageTexts, UseListProps {
   id: string;
-  metadataValues: MetadataValue[];
 }
 
 export default function UserRecipesAdminPageContent({
@@ -24,12 +22,10 @@ export default function UserRecipesAdminPageContent({
   recipesTableTexts,
   sortingRecipesSortingOptions,
   header,
-  authUser,
   path,
   sortingOptions,
   menuTexts,
   findInSiteTexts,
-  metadataValues,
 }: Props) {
   // const { messages, error, refetch, isFinished } = useFetchStream<
   //   CustomEntityModel<UserDto>,
@@ -40,6 +36,8 @@ export default function UserRecipesAdminPageContent({
   //   authToken: true,
   //   useAbortController: false,
   // });
+  const { authUser } = useAuthUserMinRole();
+
   const { user, messages, error, isFinished } = useGetUser(id);
   const { navigateToNotFound } = useClientNotFound();
   if (isFinished && error?.status) {
@@ -55,12 +53,10 @@ export default function UserRecipesAdminPageContent({
     <SidebarContentLayout
       navbarProps={{
         title: `${title} ${user?.email || ""}`,
-        authUser,
         themeSwitchTexts,
         menuTexts,
         mappingKey: "admin",
         findInSiteTexts,
-        metadataValues,
       }}
     >
       <div className="w-full h-full bg-background">
@@ -79,7 +75,6 @@ export default function UserRecipesAdminPageContent({
                   forWhom="admin"
                   sortingOptions={sortingOptions}
                   {...recipesTableTexts}
-                  authUser={authUser}
                   sizeOptions={[10, 20, 30, 40]}
                   mainDashboard={true}
                 />

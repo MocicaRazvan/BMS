@@ -8,7 +8,6 @@ import useFilterDropdown, {
   UseFilterDropdownTexts,
 } from "@/components/list/useFilterDropdown";
 import { ExtraTableProps } from "@/types/tables";
-import { WithUser } from "@/lib/user";
 import useList, { UseListProps } from "@/hoooks/useList";
 import { Link, useRouter } from "@/navigation";
 import useClientNotFound from "@/hoooks/useClientNotFound";
@@ -45,6 +44,7 @@ import {
   RadioSortDropDownWithExtra,
   RadioSortDropDownWithExtraDummy,
 } from "@/components/common/radio-sort";
+import { useAuthUserMinRole } from "@/context/auth-user-min-role-context";
 
 export interface DayTableColumnsTexts {
   id: string;
@@ -69,7 +69,6 @@ export interface DayTableTexts {
 
 export interface DayTableProps
   extends ExtraTableProps,
-    WithUser,
     UseListProps,
     DayTableTexts {
   isSidebarOpen?: boolean;
@@ -99,7 +98,6 @@ export default function DaysTable({
   forWhom,
   extraQueryParams,
   extraArrayQueryParam,
-  authUser,
   path,
   sortingOptions,
   sizeOptions,
@@ -107,6 +105,8 @@ export default function DaysTable({
   dayTypeBadgeTexts,
   creationFilterTexts,
 }: DayTableProps) {
+  const { authUser } = useAuthUserMinRole();
+
   const router = useRouter();
   const { navigateToNotFound } = useClientNotFound();
 

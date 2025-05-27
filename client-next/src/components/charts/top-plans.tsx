@@ -35,6 +35,7 @@ import {
 } from "recharts";
 import { WithUser } from "@/lib/user";
 import OverflowTextTooltip from "@/components/common/overflow-text-tooltip";
+import { useAuthUserMinRole } from "@/context/auth-user-min-role-context";
 
 export interface TopPlansTexts {
   topChartWrapperTexts: TopChartWrapperTexts;
@@ -42,7 +43,7 @@ export interface TopPlansTexts {
   title: string;
 }
 
-interface Props extends WithUser {
+interface Props {
   texts: TopPlansTexts;
   locale: Locale;
   path: string;
@@ -52,8 +53,9 @@ export const TopPlans = memo(
     locale,
     path,
     texts: { topChartWrapperTexts, title, planCardTexts },
-    authUser,
   }: Props) => {
+    const { authUser } = useAuthUserMinRole();
+
     return (
       <TopChartWrapper<TopPlansSummary>
         texts={topChartWrapperTexts}

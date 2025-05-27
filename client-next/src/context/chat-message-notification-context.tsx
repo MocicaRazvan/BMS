@@ -11,12 +11,11 @@ import {
   ChatMessageNotificationType,
   ChatRoomResponse,
 } from "@/types/dto";
-import { Session } from "next-auth";
 import { Client } from "@stomp/stompjs";
+import { useSession } from "next-auth/react";
 
 interface ChatMessageNotificationProviderProps {
   children: ReactNode;
-  authUser: Session["user"];
 }
 
 export const ChatMessageNotificationContext =
@@ -24,8 +23,9 @@ export const ChatMessageNotificationContext =
 
 export function ChatMessageNotificationProvider({
   children,
-  authUser,
 }: ChatMessageNotificationProviderProps) {
+  const session = useSession();
+  const authUser = session.data?.user;
   return (
     <NotificationTemplateProvider<
       ChatRoomResponse,

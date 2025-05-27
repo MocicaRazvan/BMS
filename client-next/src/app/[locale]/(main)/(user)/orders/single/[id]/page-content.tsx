@@ -1,6 +1,5 @@
 "use client";
 
-import { WithUser } from "@/lib/user";
 import useFetchStream from "@/hoooks/useFetchStream";
 import {
   CustomEntityModel,
@@ -24,22 +23,24 @@ import { format } from "date-fns";
 import useClientNotFound from "@/hoooks/useClientNotFound";
 import { motion } from "framer-motion";
 import CustomImage from "@/components/common/custom-image";
+import { useAuthUserMinRole } from "@/context/auth-user-min-role-context";
 
 export interface SingleOrderPageContentTexts {
   title: string;
   total: string;
   seeInvoice: string;
 }
-interface Props extends WithUser, SingleOrderPageContentTexts {
+interface Props extends SingleOrderPageContentTexts {
   id: string;
 }
 export default function SingleOrderPageContent({
-  authUser,
   id,
   total,
   title,
   seeInvoice,
 }: Props) {
+  const { authUser } = useAuthUserMinRole();
+
   const [invoice, setInvoice] = useState<CustomInvoiceDto | null>(null);
   const [isMounted, setIsMounted] = useState(false);
   const formatIntl = useFormatter();

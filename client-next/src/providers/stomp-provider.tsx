@@ -2,17 +2,17 @@
 
 import { StompSessionProvider } from "react-stomp-hooks";
 import * as React from "react";
-import { Session } from "next-auth";
+import { useSession } from "next-auth/react";
 
 export const StompProvider = ({
   children,
   url,
-  authUser,
 }: {
   children: React.ReactNode;
   url: string;
-  authUser: Session["user"];
 }) => {
+  const session = useSession();
+  const authUser = session.data?.user;
   const headers = {
     Authorization: `Bearer ${authUser?.token}`,
   };

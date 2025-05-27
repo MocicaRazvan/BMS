@@ -1,6 +1,5 @@
 import { Locale } from "@/navigation";
 import { unstable_setRequestLocale } from "next-intl/server";
-import { getUser } from "@/lib/user";
 import UserPageContent from "@/app/[locale]/(main)/(user)/users/single/[id]/page-content";
 import { getUserPageTexts } from "@/texts/pages";
 import { Metadata } from "next";
@@ -24,17 +23,9 @@ export async function generateMetadata({
 export default async function UserPage({ params: { locale, id } }: Props) {
   unstable_setRequestLocale(locale);
 
-  const [authUser, userPageTexts] = await Promise.all([
-    getUser(),
-    getUserPageTexts(),
-  ]);
+  const [userPageTexts] = await Promise.all([getUserPageTexts()]);
 
   return (
-    <UserPageContent
-      authUser={authUser}
-      id={id}
-      {...userPageTexts}
-      showDayCalendarCTA={true}
-    />
+    <UserPageContent id={id} {...userPageTexts} showDayCalendarCTA={true} />
   );
 }

@@ -1,12 +1,11 @@
 import { Locale } from "@/navigation";
 import { unstable_setRequestLocale } from "next-intl/server";
-import { getUserWithMinRole } from "@/lib/user";
 import { getPostFormTexts } from "@/texts/components/forms";
 import { Suspense } from "react";
 import LoadingSpinner from "@/components/common/loading-spinner";
 import UpdatePostPageContent from "@/app/[locale]/trainer/posts/update/[id]/page-content";
 import { Metadata } from "next";
-import { getIntlMetadata, getMetadataValues } from "@/texts/metadata";
+import { getIntlMetadata } from "@/texts/metadata";
 import { ThemeSwitchTexts } from "@/texts/components/nav";
 import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
 import { getUpdatePostPageTexts } from "@/texts/pages";
@@ -58,27 +57,19 @@ export default async function UpdatePostPage({
       },
       ...rest
     },
-    authUser,
-  ] = await Promise.all([
-    getUpdatePostPageTexts(),
-    getUserWithMinRole("ROLE_TRAINER"),
-  ]);
-  const metadataValues = await getMetadataValues(authUser, locale);
+  ] = await Promise.all([getUpdatePostPageTexts()]);
 
   return (
     <SidebarContentLayout
       navbarProps={{
         title: baseFormTexts.header,
         ...rest,
-        authUser,
         mappingKey: "trainer",
-        metadataValues,
       }}
     >
       <main className="flex items-center justify-center px-6 py-10">
         <Suspense fallback={<LoadingSpinner />}>
           <UpdatePostPageContent
-            authUser={authUser}
             postId={id}
             postSchemaTexts={postSchemaTexts}
             fieldTexts={fieldTexts}

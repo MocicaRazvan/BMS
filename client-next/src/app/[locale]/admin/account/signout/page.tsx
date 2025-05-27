@@ -52,11 +52,9 @@ export default async function AdminSignOut({ params: { locale } }: Props) {
       navbarProps={{
         title: "Sign Out",
         themeSwitchTexts: themeSwitchTexts,
-        authUser,
         menuTexts: menuTexts,
         mappingKey: "admin",
         findInSiteTexts,
-        metadataValues,
       }}
     >
       <div className="w-full h-full bg-background">

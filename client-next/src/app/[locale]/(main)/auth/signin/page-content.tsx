@@ -32,6 +32,7 @@ import { normalizeEmailWrapper } from "@/lib/email-normalizer-wrapper";
 import EmailFormField, {
   EmailFromFieldTexts,
 } from "@/components/forms/email-form-field";
+import { useSearchParams } from "next/navigation";
 
 export interface SignInPageText {
   cardTitle: string;
@@ -61,6 +62,7 @@ export default function SingIn({
   signInSchemaTexts,
   locale,
 }: SignInPageProps) {
+  const parms = useSearchParams();
   const schema = useMemo(
     () => getSignInSchema(signInSchemaTexts),
     [signInSchemaTexts],
@@ -95,7 +97,12 @@ export default function SingIn({
       } else {
         // router.push("/", {});
         if (window) {
-          window.location.href = "/" + locale + "/";
+          const callbackUrl = parms.get("callbackUrl");
+          if (callbackUrl) {
+            window.location.href = callbackUrl;
+          } else {
+            window.location.href = "/" + locale + "/";
+          }
         }
       }
     } catch (error) {

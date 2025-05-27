@@ -6,15 +6,14 @@ import { checkOwner } from "@/lib/utils";
 import React from "react";
 import useClientNotFound from "@/hoooks/useClientNotFound";
 import { useGetRecipeWithNF } from "@/hoooks/recipes/useGetRecipeWithNF";
+import { useAuthUserMinRole } from "@/context/auth-user-min-role-context";
 
 interface Props extends RecipeFormProps {
   id: string;
 }
-export default function DuplicateRecipePageContent({
-  id,
-  authUser,
-  ...props
-}: Props) {
+export default function DuplicateRecipePageContent({ id, ...props }: Props) {
+  const { authUser } = useAuthUserMinRole();
+
   const {
     recipeIsFinished,
     recipeMessage,
@@ -48,7 +47,6 @@ export default function DuplicateRecipePageContent({
 
   return (
     <RecipeForm
-      authUser={authUser}
       {...props}
       title={undefined}
       body={recipe.body}

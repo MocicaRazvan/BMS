@@ -5,15 +5,14 @@ import LoadingSpinner from "@/components/common/loading-spinner";
 import React from "react";
 import { checkOwner } from "@/lib/utils";
 import { useGetDayMealsRecipes } from "@/hoooks/days/useGetDayMealsRecipes";
+import { useAuthUserMinRole } from "@/context/auth-user-min-role-context";
 
 interface Props extends DayFormProps {
   id: string;
 }
-export default function UpdateDayPageContent({
-  id,
-  authUser,
-  ...props
-}: Props) {
+export default function UpdateDayPageContent({ id, ...props }: Props) {
+  const { authUser } = useAuthUserMinRole();
+
   const {
     day,
     dayFinished,
@@ -49,7 +48,6 @@ export default function UpdateDayPageContent({
   return (
     <DayForm
       {...props}
-      authUser={authUser}
       path={"/days/update/meals/" + id}
       initialData={initialData}
       existingDay={dayResponse}

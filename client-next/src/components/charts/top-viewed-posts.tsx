@@ -29,6 +29,7 @@ import {
 import { format, subMonths } from "date-fns";
 import { ro } from "date-fns/locale";
 import OverflowTextTooltip from "@/components/common/overflow-text-tooltip";
+import { useAuthUserMinRole } from "@/context/auth-user-min-role-context";
 
 export interface TopViewedPostsTexts extends PostViewCardTexts {
   title: string;
@@ -37,7 +38,7 @@ export interface TopViewedPostsTexts extends PostViewCardTexts {
   dateRangePickerTexts: DateRangePickerTexts;
   periodLabel: string;
 }
-interface Props extends WithUser {
+interface Props {
   path: string;
   texts: TopViewedPostsTexts;
 }
@@ -48,7 +49,9 @@ const oneMonthAgo = subMonths(now, 1);
 const dateFormat = "dd-MM-yyyy";
 const formattedNow = format(now, dateFormat);
 const formattedOneMonthAgo = format(oneMonthAgo, dateFormat);
-export default function TopViewedPosts({ path, authUser, texts }: Props) {
+export default function TopViewedPosts({ path, texts }: Props) {
+  const { authUser } = useAuthUserMinRole();
+
   const locale = useLocale() as Locale;
   const [top, setTop] = useState<string>("3");
   const [dateRange, setDateRange] = useState<DateRangeParams | null>(null);

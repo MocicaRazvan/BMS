@@ -37,7 +37,6 @@ import { useToxicPrompt } from "@/components/forms/diffusion-images-form";
 import { AiIdeasField } from "@/types/ai-ideas-types";
 import { fetchWithFiles } from "@/hoooks/fetchWithFiles";
 import { BaseError } from "@/types/responses";
-import { WithUser } from "@/lib/user";
 import { v4 as uuidv4 } from "uuid";
 import useLoadingErrorState from "@/hoooks/useLoadingErrorState";
 import {
@@ -54,6 +53,7 @@ import { motion } from "framer-motion";
 import { purifyAIDescription } from "@/components/forms/title-body";
 import useCsrfToken, { CsrfToken } from "@/hoooks/useCsrfToken";
 import fetchFactory from "@/lib/fetchers/fetchWithRetry";
+import { useAuthUserMinRole } from "@/context/auth-user-min-role-context";
 
 export interface AdminAIPostsCreateContentTexts {
   schemaTexts: AdminAICreatePostSchemaTexts;
@@ -120,10 +120,10 @@ async function getAIIdeaResponse(
   return res.answer as string;
 }
 const numberOfPostsOptions = Array.from({ length: 5 }, (_, i) => i + 1);
-interface Props extends AdminAIPostsCreateContentTexts, WithUser {}
+interface Props extends AdminAIPostsCreateContentTexts {}
 export default function AdminAIPostsCreateContent({
   schemaTexts,
-  authUser,
+
   error,
   toxicError,
   englishError,
@@ -143,6 +143,8 @@ export default function AdminAIPostsCreateContent({
   numberOfPostsLabel,
   singlePostLabel,
 }: Props) {
+  const { authUser } = useAuthUserMinRole();
+
   const { isLoading, setIsLoading, router, errorMsg, setErrorMsg } =
     useLoadingErrorState();
   const [createdPostsNumber, setCreatedPostsNumber] = useState<number>(0);

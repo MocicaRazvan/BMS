@@ -2,7 +2,6 @@ import { Locale } from "@/navigation";
 import { ThemeSwitchTexts } from "@/texts/components/nav";
 import { unstable_setRequestLocale } from "next-intl/server";
 import { getAdminDailySalesTexts } from "@/texts/pages";
-import { getUserWithMinRole } from "@/lib/user";
 import SidebarContentLayout from "@/components/sidebar/sidebar-content-layout";
 import Heading from "@/components/common/heading";
 import { Suspense } from "react";
@@ -10,7 +9,7 @@ import LoadingSpinner from "@/components/common/loading-spinner";
 import DailySales, { DailySalesTexts } from "@/components/charts/daily-sales";
 import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
 import { Metadata } from "next";
-import { getIntlMetadata, getMetadataValues } from "@/texts/metadata";
+import { getIntlMetadata } from "@/texts/metadata";
 import { Separator } from "@/components/ui/separator";
 import { FindInSiteTexts } from "@/components/nav/find-in-site";
 
@@ -36,22 +35,17 @@ export async function generateMetadata({
 }
 export default async function AdminDailySales({ params: { locale } }: Props) {
   unstable_setRequestLocale(locale);
-  const [texts, authUser] = await Promise.all([
-    getAdminDailySalesTexts(),
-    getUserWithMinRole("ROLE_ADMIN"),
-  ]);
-  const metadataValues = await getMetadataValues(authUser, locale);
+  const [texts] = await Promise.all([getAdminDailySalesTexts()]);
 
   return (
     <SidebarContentLayout
       navbarProps={{
         title: texts.title,
         themeSwitchTexts: texts.themeSwitchTexts,
-        authUser,
+
         menuTexts: texts.menuTexts,
         mappingKey: "admin",
         findInSiteTexts: texts.findInSiteTexts,
-        metadataValues,
       }}
     >
       <div className="w-full h-full bg-background">
@@ -60,7 +54,6 @@ export default async function AdminDailySales({ params: { locale } }: Props) {
           <div className="mt-10 h-full">
             <DailySales
               path={"/orders/admin/countAndAmount/daily"}
-              authUser={authUser}
               {...texts.dailySalesTexts}
             />
           </div>
@@ -73,7 +66,6 @@ export default async function AdminDailySales({ params: { locale } }: Props) {
           <div className="mt-10 h-full">
             <DailySales
               path={"/orders/admin/countAndAmount/daily"}
-              authUser={authUser}
               {...texts.plansDailySalesTexts}
               hideTotalAmount={true}
               countColorIndex={9}

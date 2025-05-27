@@ -1,6 +1,5 @@
 "use client";
 
-import { WithUser } from "@/lib/user";
 import { UseListProps } from "@/hoooks/useList";
 import { UserPlansAdminPageTexts } from "@/app/[locale]/admin/users/[id]/plans/page";
 import useGetUser from "@/hoooks/useGetUser";
@@ -14,12 +13,11 @@ import useClientNotFound from "@/hoooks/useClientNotFound";
 import { Separator } from "@/components/ui/separator";
 import TopPlans from "@/components/charts/top-plans";
 import { Locale } from "@/navigation";
-import { MetadataValue } from "@/components/nav/find-in-site";
+import { useAuthUserMinRole } from "@/context/auth-user-min-role-context";
 
-interface Props extends UserPlansAdminPageTexts, WithUser, UseListProps {
+interface Props extends UserPlansAdminPageTexts, UseListProps {
   id: string;
   locale: Locale;
-  metadataValues: MetadataValue[];
 }
 
 export default function UserPlansAdminPageContent({
@@ -28,15 +26,15 @@ export default function UserPlansAdminPageContent({
   themeSwitchTexts,
   plansTableTexts,
   header,
-  authUser,
   path,
   sortingOptions,
   menuTexts,
   topPlansTexts,
   locale,
   findInSiteTexts,
-  metadataValues,
 }: Props) {
+  const { authUser } = useAuthUserMinRole();
+
   const { isOpen } = useSidebarToggle();
   const { user, messages, error, isFinished } = useGetUser(id);
   const { navigateToNotFound } = useClientNotFound();
@@ -47,12 +45,10 @@ export default function UserPlansAdminPageContent({
     <SidebarContentLayout
       navbarProps={{
         title: `${title} ${user?.email || ""}`,
-        authUser,
         themeSwitchTexts,
         menuTexts,
         mappingKey: "admin",
         findInSiteTexts,
-        metadataValues,
       }}
     >
       <div className="w-full h-full bg-background">
@@ -71,7 +67,6 @@ export default function UserPlansAdminPageContent({
                   forWhom={"admin"}
                   sortingOptions={sortingOptions}
                   {...plansTableTexts}
-                  authUser={authUser}
                   sizeOptions={[10, 20, 30, 40]}
                   isSidebarOpen={isOpen}
                   mainDashboard={true}
@@ -82,7 +77,6 @@ export default function UserPlansAdminPageContent({
                     texts={topPlansTexts}
                     locale={locale}
                     path={`/orders/trainer/topPlans/${id}`}
-                    authUser={authUser}
                   />
                 </div>
               </div>

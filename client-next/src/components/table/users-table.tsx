@@ -1,7 +1,6 @@
 "use client";
 import { ExtraTableProps } from "@/types/tables";
 import useList, { UseListProps } from "@/hoooks/useList";
-import { WithUser } from "@/lib/user";
 import { Link, useRouter } from "@/navigation";
 import { CustomEntityModel, UserDto } from "@/types/dto";
 import React, { Suspense, useCallback, useMemo } from "react";
@@ -42,6 +41,7 @@ import {
   RadioSortDropDownWithExtra,
   RadioSortDropDownWithExtraDummy,
 } from "@/components/common/radio-sort";
+import { useAuthUserMinRole } from "@/context/auth-user-min-role-context";
 
 export interface UserTableColumnsTexts {
   id: string;
@@ -69,10 +69,9 @@ export interface UserTableTexts {
   creationFilterTexts: CreationFilterTexts;
 }
 
-type Props = ExtraTableProps & UseListProps & WithUser & UserTableTexts;
+type Props = ExtraTableProps & UseListProps & UserTableTexts;
 
 export default function UsersTable({
-  authUser,
   mainDashboard,
   extraQueryParams,
   extraArrayQueryParam,
@@ -90,6 +89,8 @@ export default function UsersTable({
   search,
   creationFilterTexts,
 }: Props) {
+  const { authUser } = useAuthUserMinRole();
+
   const stompClient = useStompClient();
   const router = useRouter();
   const isAdmin = authUser?.role === "ROLE_ADMIN";

@@ -48,6 +48,7 @@ import { WithUser } from "@/lib/user";
 import FadeTextChange from "@/components/ui/fade-text-change";
 import { useArchiveQueueUpdateContext } from "@/context/archive-queue-update-context";
 import { convert } from "crontzconvert";
+import { useAuthUserMinRole } from "@/context/auth-user-min-role-context";
 
 export interface ArchiveQueueCardsTexts {
   title: Record<"delete" | "update", string>;
@@ -62,7 +63,7 @@ export interface ArchiveQueueCardsTexts {
   managePopTexts: ManagePopTexts;
 }
 
-interface Props extends ArchiveQueueCardsTexts, WithUser {
+interface Props extends ArchiveQueueCardsTexts {
   prefix: ArchiveQueuePrefix;
   locale: Locale;
   showHeader?: boolean;
@@ -77,6 +78,8 @@ type AliveOptionKey = keyof typeof aliveOptions;
 
 const ArchiveQueueCards = memo(
   ({ prefix, locale, header, showHeader, ...rest }: Props) => {
+    const { authUser } = useAuthUserMinRole();
+
     const queueNames = getArchiveQueuesNameByPrefix(prefix);
     const deleteQueueName = queueNames.find((q) =>
       q.includes("delete"),
@@ -127,6 +130,7 @@ const ArchiveQueueCards = memo(
               toggleRefresh={toggleRefresh}
               locale={locale}
               {...rest}
+              authUser={authUser}
               title={rest.title.delete}
             />
           </MotionCardWrapper>
@@ -137,6 +141,7 @@ const ArchiveQueueCards = memo(
               toggleRefresh={toggleRefresh}
               locale={locale}
               {...rest}
+              authUser={authUser}
               title={rest.title.update}
             />
           </MotionCardWrapper>

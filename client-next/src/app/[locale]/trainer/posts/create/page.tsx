@@ -4,9 +4,8 @@ import { getPostFormTexts } from "@/texts/components/forms";
 import { Suspense } from "react";
 import LoadingSpinner from "@/components/common/loading-spinner";
 import PostForm from "@/components/forms/post-form";
-import { getUserWithMinRole } from "@/lib/user";
 import { Metadata } from "next";
-import { getIntlMetadata, getMetadataValues } from "@/texts/metadata";
+import { getIntlMetadata } from "@/texts/metadata";
 import { ThemeSwitchTexts } from "@/texts/components/nav";
 import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
 import { getCreatePostPageTexts } from "@/texts/pages";
@@ -55,21 +54,14 @@ export default async function CreatePostPage({ params: { locale } }: Props) {
       },
       ...rest
     },
-    authUser,
-  ] = await Promise.all([
-    getCreatePostPageTexts(),
-    getUserWithMinRole("ROLE_TRAINER"),
-  ]);
-  const metadataValues = await getMetadataValues(authUser, locale);
+  ] = await Promise.all([getCreatePostPageTexts()]);
 
   return (
     <SidebarContentLayout
       navbarProps={{
         title: baseFormTexts.header,
         ...rest,
-        authUser,
         mappingKey: "trainer",
-        metadataValues,
       }}
     >
       <main className="flex items-center justify-center px-6 py-10">
@@ -82,7 +74,6 @@ export default async function CreatePostPage({ params: { locale } }: Props) {
             buttonSubmitTexts={buttonSubmitTexts}
             loadedImages={loadedImages}
             {...baseFormTexts}
-            authUser={authUser}
             path={"/posts/createWithImages"}
             titleAIGeneratedPopTexts={titleAIGeneratedPopTexts}
             bodyAIGeneratedPopTexts={bodyAIGeneratedPopTexts}

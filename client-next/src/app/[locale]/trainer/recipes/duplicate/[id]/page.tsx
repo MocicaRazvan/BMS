@@ -1,10 +1,9 @@
 import { Locale } from "@/navigation";
 import { unstable_setRequestLocale } from "next-intl/server";
-import { getUserWithMinRole } from "@/lib/user";
 import { getRecipeFormTexts } from "@/texts/components/forms";
 import { Suspense } from "react";
 import { Metadata } from "next";
-import { getIntlMetadata, getMetadataValues } from "@/texts/metadata";
+import { getIntlMetadata } from "@/texts/metadata";
 import { ThemeSwitchTexts } from "@/texts/components/nav";
 import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
 import LoadingSpinner from "@/components/common/loading-spinner";
@@ -42,27 +41,22 @@ export default async function DuplicateRecipePage({
   params: { locale, id },
 }: Props) {
   unstable_setRequestLocale(locale);
-  const [authUser, { recipeFormTexts, ...rest }] = await Promise.all([
-    getUserWithMinRole("ROLE_TRAINER"),
+  const [{ recipeFormTexts, ...rest }] = await Promise.all([
     getDuplicateRecipePageTexts(),
   ]);
-  const metadataValues = await getMetadataValues(authUser, locale);
 
   return (
     <SidebarContentLayout
       navbarProps={{
         title: recipeFormTexts.baseFormTexts.header,
         ...rest,
-        authUser,
         mappingKey: "trainer",
-        metadataValues,
       }}
     >
       <main className="flex items-center justify-center px-6 py-10">
         <Suspense fallback={<LoadingSpinner />}>
           <DuplicateRecipePageContent
             id={id}
-            authUser={authUser}
             {...recipeFormTexts}
             path={`/recipes/createWithVideos`}
           />

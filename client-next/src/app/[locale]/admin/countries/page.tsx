@@ -5,14 +5,13 @@ import GeographyChart, {
 import { Locale } from "@/navigation";
 import { unstable_setRequestLocale } from "next-intl/server";
 import { getAdminCountriesTexts } from "@/texts/pages";
-import { getUserWithMinRole } from "@/lib/user";
 import Heading from "@/components/common/heading";
 import LoadingSpinner from "@/components/common/loading-spinner";
 import { Suspense } from "react";
 import SidebarContentLayout from "@/components/sidebar/sidebar-content-layout";
 import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
 import { Metadata } from "next";
-import { getIntlMetadata, getMetadataValues } from "@/texts/metadata";
+import { getIntlMetadata } from "@/texts/metadata";
 import { FindInSiteTexts } from "@/components/nav/find-in-site";
 
 export interface AdminCountriesTexts {
@@ -35,22 +34,16 @@ export async function generateMetadata({
 export default async function AdminCountries({ params: { locale } }: Props) {
   unstable_setRequestLocale(locale);
 
-  const [texts, authUser] = await Promise.all([
-    getAdminCountriesTexts(),
-    getUserWithMinRole("ROLE_ADMIN"),
-  ]);
-  const metadataValues = await getMetadataValues(authUser, locale);
+  const [texts] = await Promise.all([getAdminCountriesTexts()]);
 
   return (
     <SidebarContentLayout
       navbarProps={{
         title: texts.title,
         themeSwitchTexts: texts.themeSwitchTexts,
-        authUser,
         menuTexts: texts.menuTexts,
         mappingKey: "admin",
         findInSiteTexts: texts.findInSiteTexts,
-        metadataValues,
       }}
     >
       <div className="w-full h-full bg-background">

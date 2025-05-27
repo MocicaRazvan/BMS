@@ -3,11 +3,10 @@ import { getSortingOptions, SortingOptionsTexts } from "@/lib/constants";
 import { Locale } from "@/navigation";
 import { unstable_setRequestLocale } from "next-intl/server";
 import { getUserPlansPageTexts } from "@/texts/pages";
-import { getTheSameUserOrAdmin } from "@/lib/user";
 import { sortingPlansSortingOptionsKeys } from "@/texts/components/list";
 import Heading from "@/components/common/heading";
 import { Metadata } from "next";
-import { getIntlMetadata, getMetadataValues } from "@/texts/metadata";
+import { getIntlMetadata } from "@/texts/metadata";
 import { ThemeSwitchTexts } from "@/texts/components/nav";
 import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
 import LoadingSpinner from "@/components/common/loading-spinner";
@@ -17,6 +16,7 @@ import UsersPlansPageContent from "@/app/[locale]/trainer/user/[id]/plans/page-c
 import { Separator } from "@/components/ui/separator";
 import TopPlans, { TopPlansTexts } from "@/components/charts/top-plans";
 import { FindInSiteTexts } from "@/components/nav/find-in-site";
+import IsTheSameUserOrAdmin from "@/app/[locale]/trainer/user/is-the-same-user-or-admin";
 
 export interface UserPlansPageTexts {
   planTableTexts: PlanTableTexts;
@@ -49,49 +49,43 @@ export default async function UsersPlansPage({
 }: Props) {
   unstable_setRequestLocale(locale);
 
-  const [userPlansPageTexts, authUser] = await Promise.all([
-    getUserPlansPageTexts(),
-    getTheSameUserOrAdmin(id),
-  ]);
-  const metadataValues = await getMetadataValues(authUser, locale);
+  const [userPlansPageTexts] = await Promise.all([getUserPlansPageTexts()]);
 
   const plansOptions = getSortingOptions(
     sortingPlansSortingOptionsKeys,
     userPlansPageTexts.sortingPlansSortingOptions,
   );
   return (
-    <SidebarContentLayout
-      navbarProps={{
-        ...userPlansPageTexts,
-        authUser,
-        mappingKey: "trainer",
-        metadataValues,
-      }}
-    >
-      <div className="space-y-10 lg:space-y-16 w-full transition-all py-5 px-4 mx-auto ">
-        <Heading {...userPlansPageTexts} />
-        <Suspense fallback={<LoadingSpinner />}>
-          <div>
-            <UsersPlansPageContent
-              path={`/plans/trainer/filteredWithCount/${id}`}
-              forWhom={"trainer"}
-              {...userPlansPageTexts.planTableTexts}
-              sortingOptions={plansOptions}
-              authUser={authUser}
-              sizeOptions={[10, 20, 30, 40]}
-            />
-            <Separator className="mt-2" />
-            <div className=" my-5 h-full w-full">
-              <TopPlans
-                texts={userPlansPageTexts.topPlansTexts}
-                locale={locale}
-                path={`/orders/trainer/topPlans/${id}`}
-                authUser={authUser}
+    <IsTheSameUserOrAdmin id={id}>
+      <SidebarContentLayout
+        navbarProps={{
+          ...userPlansPageTexts,
+          mappingKey: "trainer",
+        }}
+      >
+        <div className="space-y-10 lg:space-y-16 w-full transition-all py-5 px-4 mx-auto ">
+          <Heading {...userPlansPageTexts} />
+          <Suspense fallback={<LoadingSpinner />}>
+            <div>
+              <UsersPlansPageContent
+                path={`/plans/trainer/filteredWithCount/${id}`}
+                forWhom={"trainer"}
+                {...userPlansPageTexts.planTableTexts}
+                sortingOptions={plansOptions}
+                sizeOptions={[10, 20, 30, 40]}
               />
+              <Separator className="mt-2" />
+              <div className=" my-5 h-full w-full">
+                <TopPlans
+                  texts={userPlansPageTexts.topPlansTexts}
+                  locale={locale}
+                  path={`/orders/trainer/topPlans/${id}`}
+                />
+              </div>
             </div>
-          </div>
-        </Suspense>
-      </div>
-    </SidebarContentLayout>
+          </Suspense>
+        </div>
+      </SidebarContentLayout>
+    </IsTheSameUserOrAdmin>
   );
 }

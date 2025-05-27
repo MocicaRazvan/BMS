@@ -2,7 +2,6 @@ import { Locale } from "@/navigation";
 import { Metadata } from "next";
 import { getIntlMetadata } from "@/texts/metadata";
 import { unstable_setRequestLocale } from "next-intl/server";
-import { getUser } from "@/lib/user";
 import ChatPageMainPageContent from "@/app/[locale]/(main)/(user)/chat/page-content";
 import { getChatPageTexts } from "@/texts/pages";
 
@@ -25,13 +24,10 @@ export default async function ChatPage({
   params: { locale },
 }: Props) {
   unstable_setRequestLocale(locale);
-  const [authUser, chatPageTexts] = await Promise.all([
-    getUser(),
-    getChatPageTexts(),
-  ]);
+  const [chatPageTexts] = await Promise.all([getChatPageTexts()]);
   return (
     <div className="w-full h-full">
-      <ChatPageMainPageContent authUser={authUser} {...chatPageTexts} />
+      <ChatPageMainPageContent {...chatPageTexts} />
     </div>
   );
 }

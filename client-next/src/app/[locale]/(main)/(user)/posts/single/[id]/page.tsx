@@ -1,4 +1,3 @@
-import { getUserWithMinRole } from "@/lib/user";
 import { Suspense } from "react";
 import LoadingSpinner from "@/components/common/loading-spinner";
 import { getSinglePostPageTexts } from "@/texts/pages";
@@ -26,15 +25,11 @@ export async function generateMetadata({
 }
 export default async function SinglePostPage({ params: { locale } }: Props) {
   unstable_setRequestLocale(locale);
-  const [user, singlePostPageTexts] = await Promise.all([
-    getUserWithMinRole("ROLE_USER"),
-    getSinglePostPageTexts(),
-  ]);
+  const [singlePostPageTexts] = await Promise.all([getSinglePostPageTexts()]);
   return (
     <Suspense fallback={<LoadingSpinner />}>
       <ScrollProgress />
       <SinglePostPageContent
-        authUser={user}
         {...singlePostPageTexts}
         showRecommendations={true}
         trackViews={true}

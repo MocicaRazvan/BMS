@@ -12,6 +12,7 @@ import {
   PlanResponse,
 } from "@/types/dto";
 import { Client } from "@stomp/stompjs";
+import { useSession } from "next-auth/react";
 
 export const BoughtNotificationContext = createContext<NotificationContextType<
   PlanResponse,
@@ -22,11 +23,12 @@ export const BoughtNotificationContext = createContext<NotificationContextType<
 export const boughtNotification = "boughtNotification" as const;
 export function BoughtNotificationProvider({
   children,
-  authUser,
 }: Omit<
   NotificationProviderProps,
-  "notificationName" | "NotificationContext"
+  "notificationName" | "NotificationContext" | "authUser"
 >) {
+  const session = useSession();
+  const authUser = session.data?.user;
   return (
     <NotificationTemplateProvider<
       PlanResponse,

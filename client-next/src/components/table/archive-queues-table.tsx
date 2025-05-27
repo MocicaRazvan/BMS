@@ -52,7 +52,6 @@ import {
   LinkedChartTexts,
   timestampFilter,
 } from "@/components/charts/linked-chart";
-import { WithUser } from "@/lib/user";
 import useArchiveContainerNotifications from "@/hoooks/use-archive-container-notifications";
 import { Checkbox } from "@/components/ui/checkbox";
 import OverflowTextTooltip from "@/components/common/overflow-text-tooltip";
@@ -71,6 +70,7 @@ import { useSearchParams } from "next/navigation";
 import { usePathname } from "@/navigation";
 import { stripNonAlphaNumeric } from "@/lib/utils";
 import { containerActionColors } from "@/lib/constants";
+import { useAuthUserMinRole } from "@/context/auth-user-min-role-context";
 
 const fuzzyFilter: FilterFn<any> = (row, columnId, value, addMeta) => {
   const cleanedRowValue = stripNonAlphaNumeric(row.getValue(columnId) ?? "");
@@ -123,14 +123,13 @@ export interface ArchiveQueuesTableTexts {
   };
   downloadSelected: string;
 }
-interface ArchiveQueuesTableProps extends WithUser {
+interface ArchiveQueuesTableProps {
   texts: ArchiveQueuesTableTexts;
 }
 
-export default function ArchiveQueuesTable({
-  authUser,
-  texts,
-}: ArchiveQueuesTableProps) {
+export default function ArchiveQueuesTable({ texts }: ArchiveQueuesTableProps) {
+  const { authUser } = useAuthUserMinRole();
+
   const columns = useMemo<ColumnDef<NotifyContainerAction, any>[]>(
     () => [
       {

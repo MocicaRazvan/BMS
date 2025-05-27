@@ -2,7 +2,6 @@
 import { DataTable, DataTableTexts } from "@/components/table/data-table";
 import { ExtraTableProps } from "@/types/tables";
 import useList, { UseListProps } from "@/hoooks/useList";
-import { WithUser } from "@/lib/user";
 import { Link, useRouter } from "@/navigation";
 import { useFormatter } from "next-intl";
 import { CustomEntityModel, OrderDtoWithAddress } from "@/types/dto";
@@ -34,6 +33,7 @@ import {
   RadioSortDropDownWithExtra,
 } from "@/components/common/radio-sort";
 import OverflowTextTooltip from "@/components/common/overflow-text-tooltip";
+import { useAuthUserMinRole } from "@/context/auth-user-min-role-context";
 
 export interface OrderTableColumnsTexts {
   id: string;
@@ -52,7 +52,7 @@ export interface OrderTableTexts {
   creationFilterTexts: CreationFilterTexts;
 }
 
-type Props = ExtraTableProps & OrderTableTexts & UseListProps & WithUser;
+export type OrdersTableProps = ExtraTableProps & OrderTableTexts & UseListProps;
 
 const fieldKeys = ["country", "city", "state"] as const;
 export default function OrdersTable({
@@ -68,10 +68,11 @@ export default function OrdersTable({
   mainDashboard,
   sortingOptions,
   sizeOptions,
-  authUser,
   searchKeyLabel,
   creationFilterTexts,
-}: Props) {
+}: OrdersTableProps) {
+  const { authUser } = useAuthUserMinRole();
+
   const router = useRouter();
   const isAdmin = authUser?.role === "ROLE_ADMIN";
   const formatIntl = useFormatter();

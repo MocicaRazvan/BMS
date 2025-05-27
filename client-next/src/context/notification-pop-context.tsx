@@ -1,14 +1,15 @@
 "use client";
 import {
   createContext,
+  Dispatch,
   ReactNode,
+  SetStateAction,
   useContext,
   useEffect,
   useMemo,
   useRef,
   useState,
 } from "react";
-import { Session } from "next-auth";
 import { ChatMessageNotificationContentTexts } from "@/components/nav/chat-notitifications-content";
 import { ApproveNotificationContentTexts } from "@/components/nav/approve-notifications-content";
 import { BoughtNotificationContentTexts } from "@/components/nav/bought-notification-content";
@@ -48,54 +49,51 @@ import { NotificationState } from "@/context/notification-template-context";
 import { useLocale } from "next-intl";
 import { WithUser } from "@/lib/user";
 import { useArchiveNotifications } from "@/context/archive-notifications-context";
+import { useSession } from "next-auth/react";
 
 interface NotificationPopProviderProps {
   children: ReactNode;
-  authUser: Session["user"];
 }
 
 interface NotificationPopContextType {
   notificationPopTexts: NotificationPopTexts | null;
-  setNotificationPopTexts: React.Dispatch<
-    React.SetStateAction<NotificationPopTexts | null>
+  setNotificationPopTexts: Dispatch<
+    SetStateAction<NotificationPopTexts | null>
   >;
   chatMessageNotificationTexts: Record<
     string,
     ChatMessageNotificationContentTexts
   > | null;
-  setChatMessageNotificationTexts: React.Dispatch<
-    React.SetStateAction<Record<
-      string,
-      ChatMessageNotificationContentTexts
-    > | null>
+  setChatMessageNotificationTexts: Dispatch<
+    SetStateAction<Record<string, ChatMessageNotificationContentTexts> | null>
   >;
   postMessageNotificationsTexts: Record<
     string,
     ApproveNotificationContentTexts
   > | null;
-  setPostMessageNotificationsTexts: React.Dispatch<
-    React.SetStateAction<Record<string, ApproveNotificationContentTexts> | null>
+  setPostMessageNotificationsTexts: Dispatch<
+    SetStateAction<Record<string, ApproveNotificationContentTexts> | null>
   >;
   recipeMessageNotificationsTexts: Record<
     string,
     ApproveNotificationContentTexts
   > | null;
-  setRecipeMessageNotificationsTexts: React.Dispatch<
-    React.SetStateAction<Record<string, ApproveNotificationContentTexts> | null>
+  setRecipeMessageNotificationsTexts: Dispatch<
+    SetStateAction<Record<string, ApproveNotificationContentTexts> | null>
   >;
   planMessageNotificationsTexts: Record<
     string,
     ApproveNotificationContentTexts
   > | null;
-  setPlanMessageNotificationsTexts: React.Dispatch<
-    React.SetStateAction<Record<string, ApproveNotificationContentTexts> | null>
+  setPlanMessageNotificationsTexts: Dispatch<
+    SetStateAction<Record<string, ApproveNotificationContentTexts> | null>
   >;
   boughtNotificationTexts: Record<
     string,
     BoughtNotificationContentTexts
   > | null;
-  setBoughtNotificationTexts: React.Dispatch<
-    React.SetStateAction<Record<string, BoughtNotificationContentTexts> | null>
+  setBoughtNotificationTexts: Dispatch<
+    SetStateAction<Record<string, BoughtNotificationContentTexts> | null>
   >;
   totalNotifications: number;
   totalChatNotifications: number;
@@ -169,8 +167,9 @@ export const NotificationPopContext =
 
 export function NotificationPopProvider({
   children,
-  authUser,
 }: NotificationPopProviderProps) {
+  const session = useSession();
+  const authUser = session.data?.user;
   const locale = useLocale();
 
   const [notificationPopTexts, setNotificationPopTexts] =

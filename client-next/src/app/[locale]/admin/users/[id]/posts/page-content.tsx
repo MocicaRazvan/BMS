@@ -1,6 +1,5 @@
 "use client";
 import { UserPostsAdminPageTexts } from "@/app/[locale]/admin/users/[id]/posts/page";
-import { WithUser } from "@/lib/user";
 import SidebarContentLayout from "@/components/sidebar/sidebar-content-layout";
 import Heading from "@/components/common/heading";
 import { Suspense } from "react";
@@ -9,11 +8,10 @@ import PostsTable from "@/components/table/posts-table";
 import { UseListProps } from "@/hoooks/useList";
 import useGetUser from "@/hoooks/useGetUser";
 import useClientNotFound from "@/hoooks/useClientNotFound";
-import { MetadataValue } from "@/components/nav/find-in-site";
+import { useAuthUserMinRole } from "@/context/auth-user-min-role-context";
 
-interface Props extends UserPostsAdminPageTexts, WithUser, UseListProps {
+interface Props extends UserPostsAdminPageTexts, UseListProps {
   id: string;
-  metadataValues: MetadataValue[];
 }
 
 export default function UserPostsAdminPageContent({
@@ -23,12 +21,10 @@ export default function UserPostsAdminPageContent({
   postTableTexts,
   sortingPostsSortingOptions,
   header,
-  authUser,
   path,
   sortingOptions,
   menuTexts,
   findInSiteTexts,
-  metadataValues,
 }: Props) {
   // const { messages, error, refetch, isFinished } = useFetchStream<
   //   CustomEntityModel<UserDto>,
@@ -39,6 +35,7 @@ export default function UserPostsAdminPageContent({
   //   authToken: true,
   //   useAbortController: false,
   // });
+  const { authUser } = useAuthUserMinRole();
 
   const { user, messages, error, isFinished } = useGetUser(id);
   const { navigateToNotFound } = useClientNotFound();
@@ -55,12 +52,10 @@ export default function UserPostsAdminPageContent({
     <SidebarContentLayout
       navbarProps={{
         title: `${title} ${user?.email || ""}`,
-        authUser,
         themeSwitchTexts,
         menuTexts,
         mappingKey: "admin",
         findInSiteTexts,
-        metadataValues,
       }}
     >
       <div className="w-full h-full bg-background">
@@ -80,7 +75,6 @@ export default function UserPostsAdminPageContent({
                   {...postTableTexts}
                   sortingOptions={sortingOptions}
                   sizeOptions={[10, 20, 30, 40]}
-                  authUser={authUser}
                   mainDashboard={true}
                 />
               </div>

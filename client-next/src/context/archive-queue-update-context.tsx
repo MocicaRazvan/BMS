@@ -15,9 +15,9 @@ import {
   useRef,
   useState,
 } from "react";
-import { Session } from "next-auth";
 import useWebSocket, { ReadyState } from "react-use-websocket";
 import { toast } from "@/components/ui/use-toast";
+import { useAuthUserMinRole } from "@/context/auth-user-min-role-context";
 
 interface ItemCnt {
   count: number;
@@ -108,16 +108,16 @@ export function isNotifyContainerAction(
 }
 
 interface Props {
-  authUser: Session["user"];
   texts: ArchiveQueueUpdateTexts;
 }
 const wsUrl = `${process.env.NEXT_PUBLIC_SPRING_CLIENT_WEBSOCKET}/archive/queue/batch/update`;
 
 export default function ArchiveQueueUpdateProvider({
-  authUser,
   children,
   texts,
 }: PropsWithChildren<Props>) {
+  const { authUser } = useAuthUserMinRole();
+
   const handleLastMessageUpdate = useCallback((msg: unknown) => {
     if (isNotifyBatchUpdate(msg)) {
       setBatchUpdateMessages((prev) => ({

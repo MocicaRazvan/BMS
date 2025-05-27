@@ -3,7 +3,6 @@ import { unstable_setRequestLocale } from "next-intl/server";
 import PostsTable, { PostTableTexts } from "@/components/table/posts-table";
 import { getSortingOptions, SortingOptionsTexts } from "@/lib/constants";
 import { getAdminPostsPageTexts } from "@/texts/pages";
-import { getUserWithMinRole } from "@/lib/user";
 import SidebarContentLayout from "@/components/sidebar/sidebar-content-layout";
 import { ThemeSwitchTexts } from "@/texts/components/nav";
 import Heading from "@/components/common/heading";
@@ -12,7 +11,7 @@ import LoadingSpinner from "@/components/common/loading-spinner";
 import { sortingPostsSortingOptionsKeys } from "@/texts/components/list";
 import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
 import { Metadata } from "next";
-import { getIntlMetadata, getMetadataValues } from "@/texts/metadata";
+import { getIntlMetadata } from "@/texts/metadata";
 import ArchiveQueueCards, {
   ArchiveQueueCardsTexts,
 } from "@/components/common/archive-queue-card";
@@ -59,12 +58,7 @@ export default async function AdminPostsPage({ params: { locale } }: Props) {
       findInSiteTexts,
       topViewedPostsTexts,
     },
-    authUser,
-  ] = await Promise.all([
-    getAdminPostsPageTexts(),
-    getUserWithMinRole("ROLE_ADMIN"),
-  ]);
-  const metadataValues = await getMetadataValues(authUser, locale);
+  ] = await Promise.all([getAdminPostsPageTexts()]);
 
   const postOptions = getSortingOptions(
     sortingPostsSortingOptionsKeys,
@@ -75,11 +69,9 @@ export default async function AdminPostsPage({ params: { locale } }: Props) {
       navbarProps={{
         title,
         themeSwitchTexts,
-        authUser,
         menuTexts,
         mappingKey: "admin",
         findInSiteTexts,
-        metadataValues,
       }}
     >
       <div className="w-full h-full bg-background">
@@ -92,7 +84,6 @@ export default async function AdminPostsPage({ params: { locale } }: Props) {
               {...postTableTexts}
               sortingOptions={postOptions}
               sizeOptions={[10, 20, 30, 40]}
-              authUser={authUser}
               mainDashboard={true}
               extraQueryParams={{
                 admin: "true",
@@ -102,7 +93,6 @@ export default async function AdminPostsPage({ params: { locale } }: Props) {
             <TopViewedPosts
               path="/posts/admin/viewStats"
               texts={topViewedPostsTexts}
-              authUser={authUser}
             />
             <Separator />
             <div className="space-y-5">
@@ -111,14 +101,12 @@ export default async function AdminPostsPage({ params: { locale } }: Props) {
                 locale={locale}
                 showHeader={true}
                 {...archivePostsTexts}
-                authUser={authUser}
               />
               <ArchiveQueueCards
                 prefix={"comment"}
                 locale={locale}
                 showHeader={false}
                 {...archiveCommentsTexts}
-                authUser={authUser}
               />
             </div>
           </div>

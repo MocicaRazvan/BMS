@@ -11,7 +11,6 @@ import GridList, {
   SortingOption,
 } from "@/components/list/grid-list";
 import { SortingOptionsTexts } from "@/lib/constants";
-import { WithUser } from "@/lib/user";
 import { dietTypes } from "@/types/forms";
 import Heading from "@/components/common/heading";
 import {
@@ -31,6 +30,7 @@ import {
   PlanExtraHeader,
   PlanImageOverlay,
 } from "@/components/plans/plan-list-extra";
+import { useAuthUserMinRole } from "@/context/auth-user-min-role-context";
 
 export interface ApprovedPlansTexts {
   gridListTexts: GridListTexts;
@@ -45,7 +45,7 @@ export interface ApprovedPlansTexts {
   buyableLabel: string;
 }
 
-interface Props extends WithUser, ApprovedPlansTexts {
+interface Props extends ApprovedPlansTexts {
   options: SortingOption[];
 }
 
@@ -58,11 +58,12 @@ export default function PlanApprovedPageContent({
   useApprovedFilterTexts,
   gridListTexts,
   dietDropdownTexts,
-  authUser,
   addToCartBtnTexts,
   buyableLabel,
   objectiveDropDownTexts,
 }: Props) {
+  const { authUser } = useAuthUserMinRole();
+
   const router = useRouter();
   const formatIntl = useFormatter();
   const { getSubscriptionPlanIds } = usePlansSubscription();

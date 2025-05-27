@@ -1,6 +1,5 @@
 "use client";
 
-import { WithUser } from "@/lib/user";
 import { Link, useRouter } from "@/navigation";
 import { useToast } from "@/components/ui/use-toast";
 import { useCartForUser } from "@/context/cart-context";
@@ -16,6 +15,7 @@ import CheckoutDrawer, {
 } from "@/components/forms/checkout-drawer";
 import { getCheckoutSchemaTexts } from "@/texts/components/forms-server";
 import CustomImage from "@/components/common/custom-image";
+import { useAuthUserMinRole } from "@/context/auth-user-min-role-context";
 
 export interface CartPageContentTexts {
   emptyCart: string;
@@ -31,10 +31,9 @@ export interface CartPageContentTexts {
   checkoutDrawerTexts: CheckoutDrawerTexts;
 }
 
-interface Props extends WithUser, CartPageContentTexts {}
+interface Props extends CartPageContentTexts {}
 
 export default function CartPageContent({
-  authUser,
   emptyCart,
   clearAll,
   toastRemoveAllDescription,
@@ -47,6 +46,8 @@ export default function CartPageContent({
   seeThePlans,
   checkoutDrawerTexts,
 }: Props) {
+  const { authUser } = useAuthUserMinRole();
+
   const [checkoutSchemaTexts, setCheckoutSchemaTexts] =
     useState<CheckoutSchemaTexts | null>(null);
 

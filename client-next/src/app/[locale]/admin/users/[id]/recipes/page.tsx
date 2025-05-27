@@ -4,13 +4,12 @@ import { ThemeSwitchTexts } from "@/texts/components/nav";
 import { Locale } from "@/navigation";
 import { unstable_setRequestLocale } from "next-intl/server";
 import { getUserRecipesAdminPageTexts } from "@/texts/pages";
-import { getUserWithMinRole } from "@/lib/user";
 import { sortingRecipesSortingOptionsKeys } from "@/texts/components/list";
 import UserRecipesAdminPageContent from "@/app/[locale]/admin/users/[id]/recipes/page-content";
 import { notFound } from "next/navigation";
 import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
 import { Metadata } from "next";
-import { getIntlMetadata, getMetadataValues } from "@/texts/metadata";
+import { getIntlMetadata } from "@/texts/metadata";
 import { FindInSiteTexts } from "@/components/nav/find-in-site";
 
 export interface UserRecipesAdminPageTexts {
@@ -40,11 +39,7 @@ export default async function UserRecipesAdminPage({
   params: { locale, id },
 }: Props) {
   unstable_setRequestLocale(locale);
-  const [texts, authUser] = await Promise.all([
-    getUserRecipesAdminPageTexts(),
-    getUserWithMinRole("ROLE_ADMIN"),
-  ]);
-  const metadataValues = await getMetadataValues(authUser, locale);
+  const [texts] = await Promise.all([getUserRecipesAdminPageTexts()]);
 
   const recipesOptions = getSortingOptions(
     sortingRecipesSortingOptionsKeys,
@@ -56,11 +51,9 @@ export default async function UserRecipesAdminPage({
   return (
     <UserRecipesAdminPageContent
       id={id}
-      authUser={authUser}
       sortingOptions={recipesOptions}
       {...texts}
       path={`/recipes/trainer/filteredWithCount/${id}`}
-      metadataValues={metadataValues}
     />
   );
 }

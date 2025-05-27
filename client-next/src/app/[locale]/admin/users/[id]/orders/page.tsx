@@ -4,12 +4,11 @@ import { getSortingOptions, SortingOptionsTexts } from "@/lib/constants";
 import { ThemeSwitchTexts } from "@/texts/components/nav";
 import { unstable_setRequestLocale } from "next-intl/server";
 import { getUserOrdersAdminPageTexts } from "@/texts/pages";
-import { getUserWithMinRole } from "@/lib/user";
 import { sortingOrdersSortingOptionsKeys } from "@/texts/components/list";
 import UserOrdersAdminPageContent from "@/app/[locale]/admin/users/[id]/orders/page-content";
 import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
 import { Metadata } from "next";
-import { getIntlMetadata, getMetadataValues } from "@/texts/metadata";
+import { getIntlMetadata } from "@/texts/metadata";
 import { FindInSiteTexts } from "@/components/nav/find-in-site";
 
 interface Props {
@@ -38,25 +37,19 @@ export default async function UserOrdersAdminPage({
   params: { id, locale },
 }: Props) {
   unstable_setRequestLocale(locale);
-  const [texts, authUser] = await Promise.all([
-    getUserOrdersAdminPageTexts(),
-    getUserWithMinRole("ROLE_ADMIN"),
-  ]);
+  const [texts] = await Promise.all([getUserOrdersAdminPageTexts()]);
 
   const ordersOptions = getSortingOptions(
     sortingOrdersSortingOptionsKeys,
     texts.sortingOrdersSortingOptions,
   );
-  const metadataValues = await getMetadataValues(authUser, locale);
 
   return (
     <UserOrdersAdminPageContent
       id={id}
-      authUser={authUser}
       sortingOptions={ordersOptions}
       {...texts}
       path={`/orders/filtered/${id}`}
-      metadataValues={metadataValues}
     />
   );
 }

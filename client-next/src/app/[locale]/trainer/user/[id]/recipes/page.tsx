@@ -5,17 +5,17 @@ import { getSortingOptions, SortingOptionsTexts } from "@/lib/constants";
 import { Locale } from "@/navigation";
 import { unstable_setRequestLocale } from "next-intl/server";
 import { getUserRecipesPageContentTexts } from "@/texts/pages";
-import { getTheSameUserOrAdmin } from "@/lib/user";
 import { sortingRecipesSortingOptionsKeys } from "@/texts/components/list";
 import Heading from "@/components/common/heading";
 import { Suspense } from "react";
 import LoadingSpinner from "@/components/common/loading-spinner";
 import { Metadata } from "next";
-import { getIntlMetadata, getMetadataValues } from "@/texts/metadata";
+import { getIntlMetadata } from "@/texts/metadata";
 import { ThemeSwitchTexts } from "@/texts/components/nav";
 import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
 import SidebarContentLayout from "@/components/sidebar/sidebar-content-layout";
 import { FindInSiteTexts } from "@/components/nav/find-in-site";
+import IsTheSameUserOrAdmin from "@/app/[locale]/trainer/user/is-the-same-user-or-admin";
 
 export interface UserRecipesPageTexts {
   recipesTableTexts: RecipeTableTexts;
@@ -46,11 +46,9 @@ export default async function UsersRecipesPage({
   params: { locale, id },
 }: Props) {
   unstable_setRequestLocale(locale);
-  const [userRecipesPageTexts, authUser] = await Promise.all([
+  const [userRecipesPageTexts] = await Promise.all([
     getUserRecipesPageContentTexts(),
-    getTheSameUserOrAdmin(id),
   ]);
-  const metadataValues = await getMetadataValues(authUser, locale);
 
   const recipesOptions = getSortingOptions(
     sortingRecipesSortingOptionsKeys,
@@ -58,32 +56,31 @@ export default async function UsersRecipesPage({
   );
 
   return (
-    <SidebarContentLayout
-      navbarProps={{
-        title: userRecipesPageTexts.title,
-        themeSwitchTexts: userRecipesPageTexts.themeSwitchTexts,
-        authUser,
-        menuTexts: userRecipesPageTexts.menuTexts,
-        mappingKey: "trainer",
-        findInSiteTexts: userRecipesPageTexts.findInSiteTexts,
-        metadataValues,
-      }}
-    >
-      <div className="space-y-10 lg:space-y-16 w-full transition-all py-5 px-4 mx-auto ">
-        <Heading {...userRecipesPageTexts} />
-        <Suspense fallback={<LoadingSpinner />}>
-          <div className="">
-            <RecipeTable
-              path={`/recipes/trainer/filteredWithCount/${id}`}
-              forWhom="trainer"
-              sortingOptions={recipesOptions}
-              {...userRecipesPageTexts.recipesTableTexts}
-              authUser={authUser}
-              sizeOptions={[10, 20, 30, 40]}
-            />
-          </div>
-        </Suspense>
-      </div>
-    </SidebarContentLayout>
+    <IsTheSameUserOrAdmin id={id}>
+      <SidebarContentLayout
+        navbarProps={{
+          title: userRecipesPageTexts.title,
+          themeSwitchTexts: userRecipesPageTexts.themeSwitchTexts,
+          menuTexts: userRecipesPageTexts.menuTexts,
+          mappingKey: "trainer",
+          findInSiteTexts: userRecipesPageTexts.findInSiteTexts,
+        }}
+      >
+        <div className="space-y-10 lg:space-y-16 w-full transition-all py-5 px-4 mx-auto ">
+          <Heading {...userRecipesPageTexts} />
+          <Suspense fallback={<LoadingSpinner />}>
+            <div className="">
+              <RecipeTable
+                path={`/recipes/trainer/filteredWithCount/${id}`}
+                forWhom="trainer"
+                sortingOptions={recipesOptions}
+                {...userRecipesPageTexts.recipesTableTexts}
+                sizeOptions={[10, 20, 30, 40]}
+              />
+            </div>
+          </Suspense>
+        </div>
+      </SidebarContentLayout>
+    </IsTheSameUserOrAdmin>
   );
 }

@@ -4,10 +4,9 @@ import { ThemeSwitchTexts } from "@/texts/components/nav";
 import { DailySalesTexts } from "@/components/charts/daily-sales";
 import { unstable_setRequestLocale } from "next-intl/server";
 import { getUserAdminDailySalesPageTexts } from "@/texts/pages";
-import { getUserWithMinRole } from "@/lib/user";
 import UserAdminDailySalesPageContent from "@/app/[locale]/admin/users/[id]/dailySales/page-content";
 import { Metadata } from "next";
-import { getIntlMetadata, getMetadataValues } from "@/texts/metadata";
+import { getIntlMetadata } from "@/texts/metadata";
 import { FindInSiteTexts } from "@/components/nav/find-in-site";
 
 interface Props {
@@ -37,18 +36,7 @@ export default async function UserAdminDailySalesPage({
 }: Props) {
   unstable_setRequestLocale(locale);
 
-  const [texts, authUser] = await Promise.all([
-    getUserAdminDailySalesPageTexts(),
-    getUserWithMinRole("ROLE_ADMIN"),
-  ]);
-  const metadataValues = await getMetadataValues(authUser, locale);
+  const [texts] = await Promise.all([getUserAdminDailySalesPageTexts()]);
 
-  return (
-    <UserAdminDailySalesPageContent
-      id={id}
-      {...texts}
-      authUser={authUser}
-      metadataValues={metadataValues}
-    />
-  );
+  return <UserAdminDailySalesPageContent id={id} {...texts} />;
 }

@@ -1,5 +1,4 @@
 "use client";
-import { WithUser } from "@/lib/user";
 import useFetchStream from "@/hoooks/useFetchStream";
 import { BaseError } from "@/types/responses";
 import {
@@ -11,17 +10,19 @@ import IngredientForm, {
   IngredientFormTexts,
 } from "@/components/forms/ingredient-form";
 import useClientNotFound from "@/hoooks/useClientNotFound";
+import { useAuthUserMinRole } from "@/context/auth-user-min-role-context";
 
-interface Props extends WithUser {
+interface Props {
   id: string;
   ingredientFormTexts: IngredientFormTexts;
 }
 
 export default function AdminIngredientsPageContent({
   id,
-  authUser,
   ingredientFormTexts,
 }: Props) {
+  const { authUser } = useAuthUserMinRole();
+
   const { messages, error, isFinished } = useFetchStream<
     CustomEntityModel<IngredientNutritionalFactResponse>,
     BaseError

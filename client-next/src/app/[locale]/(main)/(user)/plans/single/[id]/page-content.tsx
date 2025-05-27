@@ -1,6 +1,5 @@
 "use client";
 
-import { WithUser } from "@/lib/user";
 import { useGetTitleBodyUser } from "@/hoooks/useGetTitleBodyUser";
 import { PlanResponse } from "@/types/dto";
 import { useFormatter } from "next-intl";
@@ -23,6 +22,7 @@ import PlanRecommendationList, {
   PlanRecommendationListTexts,
 } from "@/components/recomandation/plan-recommendation-list";
 import { Separator } from "@/components/ui/separator";
+import { useAuthUserMinRole } from "@/context/auth-user-min-role-context";
 
 export interface UserPlanPageContentTexts {
   elementHeaderTexts: ElementHeaderTexts;
@@ -32,10 +32,9 @@ export interface UserPlanPageContentTexts {
   buyPrompt: string;
   planRecommendationListTexts: PlanRecommendationListTexts;
 }
-interface Props extends WithUser, UserPlanPageContentTexts {}
+interface Props extends UserPlanPageContentTexts {}
 
 export default function UserPlanPageContent({
-  authUser,
   elementHeaderTexts,
   price,
   addToCartBtnTexts,
@@ -43,6 +42,8 @@ export default function UserPlanPageContent({
   numberDays,
   planRecommendationListTexts,
 }: Props) {
+  const { authUser } = useAuthUserMinRole();
+
   const { navigateToNotFound } = useClientNotFound();
   const {
     itemState: planState,

@@ -1,4 +1,3 @@
-import { getUserWithMinRole } from "@/lib/user";
 import { Suspense } from "react";
 import LoadingSpinner from "@/components/common/loading-spinner";
 import SingeRecipePageContent, {
@@ -8,7 +7,7 @@ import { Locale } from "@/navigation";
 import { unstable_setRequestLocale } from "next-intl/server";
 import { getTrainerSingleRecipePageTexts } from "@/texts/pages";
 import { Metadata } from "next";
-import { getIntlMetadata, getMetadataValues } from "@/texts/metadata";
+import { getIntlMetadata } from "@/texts/metadata";
 import { ThemeSwitchTexts } from "@/texts/components/nav";
 import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
 import SidebarContentLayout from "@/components/sidebar/sidebar-content-layout";
@@ -44,31 +43,21 @@ export default async function SingleRecipePage({
 }: Props) {
   unstable_setRequestLocale(locale);
 
-  const [authUser, texts] = await Promise.all([
-    getUserWithMinRole("ROLE_TRAINER"),
-    getTrainerSingleRecipePageTexts(),
-  ]);
-  const metadataValues = await getMetadataValues(authUser, locale);
+  const [texts] = await Promise.all([getTrainerSingleRecipePageTexts()]);
 
   return (
     <SidebarContentLayout
       navbarProps={{
         ...texts,
-        authUser,
         mappingKey: "trainer",
-        metadataValues,
       }}
     >
       <ScrollProgress />
       <div className="w-full bg-background ">
         <Suspense fallback={<LoadingSpinner />}>
-          <SingeRecipePageContent
-            authUser={authUser}
-            id={id}
-            {...texts.singleRecipePageTexts}
-          />
+          <SingeRecipePageContent id={id} {...texts.singleRecipePageTexts} />
         </Suspense>
-      </div>{" "}
+      </div>
     </SidebarContentLayout>
   );
 }

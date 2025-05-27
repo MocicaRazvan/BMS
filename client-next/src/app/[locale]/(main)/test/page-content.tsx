@@ -1,14 +1,23 @@
 "use client";
 
-import { WithUser } from "@/lib/user";
-
 import { ArchiveQueuesTableTexts } from "@/components/table/archive-queues-table";
+import { useEffect, useRef } from "react";
+import useGetUser from "@/hoooks/use-get-user";
+import { Role } from "@/types/fetch-utils";
 
-interface Props extends WithUser {
+interface Props {
   texts: ArchiveQueuesTableTexts;
 }
-export default function TestPage({ authUser, texts }: Props) {
+const minRole: Role = "ROLE_ADMIN";
+export default function TestPage({ texts }: Props) {
+  const { authUser, status } = useGetUser(minRole);
+  const statusRef = useRef<string[]>([]);
+  useEffect(() => {
+    statusRef.current.push(status);
+  }, [status]);
   return (
-    <div className="flex flex-col items-center justify-center mt-20"></div>
+    <div className="flex flex-col items-center justify-center mt-20">
+      {JSON.stringify(statusRef)} {minRole}
+    </div>
   );
 }

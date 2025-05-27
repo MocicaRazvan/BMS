@@ -9,9 +9,8 @@ import Heading from "@/components/common/heading";
 import { Suspense } from "react";
 import LoadingSpinner from "@/components/common/loading-spinner";
 import KanbanBoardWrapper from "@/components/kanban/kanban-board-wrapper";
-import { getUser } from "@/lib/user";
 import { Metadata } from "next";
-import { getIntlMetadata, getMetadataValues } from "@/texts/metadata";
+import { getIntlMetadata } from "@/texts/metadata";
 import { FindInSiteTexts } from "@/components/nav/find-in-site";
 
 interface Props {
@@ -36,32 +35,23 @@ export interface TrainerKanbanPageTexts {
 export default async function TrainerKanban({ params: { locale } }: Props) {
   unstable_setRequestLocale(locale);
 
-  const [authUser, texts] = await Promise.all([
-    getUser(),
-    getTrainerKanbanPageTexts(),
-  ]);
-  const metadataValues = await getMetadataValues(authUser, locale);
+  const [texts] = await Promise.all([getTrainerKanbanPageTexts()]);
 
   return (
     <SidebarContentLayout
       navbarProps={{
         title: texts.title,
         themeSwitchTexts: texts.themeSwitchTexts,
-        authUser,
         menuTexts: texts.menuTexts,
         mappingKey: "admin",
         findInSiteTexts: texts.findInSiteTexts,
-        metadataValues,
       }}
     >
       <div className="w-full h-full bg-background">
         <Heading {...texts} />
         <Suspense fallback={<LoadingSpinner />}>
           <div className="mt-10 h-full ">
-            <KanbanBoardWrapper
-              authUser={authUser}
-              {...texts.kanbanBoardTexts}
-            />
+            <KanbanBoardWrapper {...texts.kanbanBoardTexts} />
           </div>
         </Suspense>
       </div>

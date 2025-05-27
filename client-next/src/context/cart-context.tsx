@@ -24,6 +24,7 @@ import {
 import { fetchStream } from "@/lib/fetchers/fetchStream";
 import { Session } from "next-auth";
 import { BaseError } from "@/types/responses";
+import { useSession } from "next-auth/react";
 
 const initialState: UserCart = {
   plans: [],
@@ -311,10 +312,11 @@ export const CartContext = createContext<CartContextType | null>(null);
 
 interface Props {
   children: ReactNode;
-  authUser: Session["user"];
 }
 
-export const CartProvider = ({ children, authUser }: Props) => {
+export const CartProvider = ({ children }: Props) => {
+  const session = useSession();
+  const authUser = session.data?.user;
   const authUserId = authUser?.id;
   const [state, dispatch] = useReducer(cartReducer, {
     plans: [],

@@ -647,12 +647,12 @@ services:
 
   next-js:
     container_name: next-js-container-bms
-    image: razvanmocica/next-js-bms
     build:
       context: ./client-next
       dockerfile: Dockerfile
       args:
         NEXTAUTH_URL: http://localhost:3000
+        NEXTAUTH_URL_INTERNAL: http://next-js:3000
         NEXT_PUBLIC_SPRING: http://host.docker.internal:8080
         NEXT_PUBLIC_SPRING_CLIENT: http://localhost:8080
         NEXT_PUBLIC_SPRING_CLIENT_WEBSOCKET: ws://localhost:8080
@@ -671,6 +671,7 @@ services:
         ASSETS_PREFIX_URL: local
         NODE_ENV: production
         CACHE_HANDLER_REDIS_URL: redis://redis:6379/10
+        NEXT_AUTH_SECRET: ${NEXTAUTH_SECRET}
     environment:
       NEXTAUTH_URL: http://localhost:3000
       NEXTAUTH_URL_INTERNAL: http://next-js:3000

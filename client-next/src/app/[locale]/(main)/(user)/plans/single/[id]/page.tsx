@@ -1,6 +1,5 @@
 import { Locale } from "@/navigation";
 import { getUserPlanPageContentTexts } from "@/texts/pages";
-import { getUserWithMinRole } from "@/lib/user";
 import { unstable_setRequestLocale } from "next-intl/server";
 import { Suspense } from "react";
 import LoadingSpinner from "@/components/common/loading-spinner";
@@ -25,14 +24,11 @@ export async function generateMetadata({
 }
 export default async function UserPlanPage({ params: { locale } }: Props) {
   unstable_setRequestLocale(locale);
-  const [user, texts] = await Promise.all([
-    getUserWithMinRole("ROLE_USER"),
-    getUserPlanPageContentTexts(),
-  ]);
+  const [texts] = await Promise.all([getUserPlanPageContentTexts()]);
   return (
     <Suspense fallback={<LoadingSpinner />}>
       <ScrollProgress />
-      <UserPlanPageContent authUser={user} {...texts} />
+      <UserPlanPageContent {...texts} />
     </Suspense>
   );
 }

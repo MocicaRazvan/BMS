@@ -1,5 +1,4 @@
 import { Locale } from "@/navigation";
-import { getUserWithMinRole } from "@/lib/user";
 import { Suspense } from "react";
 import LoadingSpinner from "@/components/common/loading-spinner";
 import SingleTrainerPlanPageContent, {
@@ -8,7 +7,7 @@ import SingleTrainerPlanPageContent, {
 import { getTrainerPlanPageTexts } from "@/texts/pages";
 import { unstable_setRequestLocale } from "next-intl/server";
 import { Metadata } from "next";
-import { getIntlMetadata, getMetadataValues } from "@/texts/metadata";
+import { getIntlMetadata } from "@/texts/metadata";
 import { ThemeSwitchTexts } from "@/texts/components/nav";
 import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
 import SidebarContentLayout from "@/components/sidebar/sidebar-content-layout";
@@ -42,18 +41,15 @@ export default async function SingleTrainerPlanPage({
   params: { locale, id },
 }: Props) {
   unstable_setRequestLocale(locale);
-  const [authUser, { singleTrainerPlanPageTexts, ...rest }] = await Promise.all(
-    [getUserWithMinRole("ROLE_TRAINER"), getTrainerPlanPageTexts()],
-  );
-  const metadataValues = await getMetadataValues(authUser, locale);
+  const [{ singleTrainerPlanPageTexts, ...rest }] = await Promise.all([
+    getTrainerPlanPageTexts(),
+  ]);
 
   return (
     <SidebarContentLayout
       navbarProps={{
         ...rest,
-        authUser,
         mappingKey: "trainer",
-        metadataValues,
       }}
     >
       <ScrollProgress />
@@ -61,7 +57,6 @@ export default async function SingleTrainerPlanPage({
         <Suspense fallback={<LoadingSpinner />}>
           <SingleTrainerPlanPageContent
             id={id}
-            authUser={authUser}
             {...singleTrainerPlanPageTexts}
           />
         </Suspense>

@@ -1,6 +1,5 @@
 "use client";
 
-import { WithUser } from "@/lib/user";
 import { format, subMonths, subYears } from "date-fns";
 import { useLocale } from "next-intl";
 import { useEffect, useMemo, useState } from "react";
@@ -47,7 +46,7 @@ export interface MonthlySalesTexts {
   planCharacteristicWrapperTexts: PlanCharacteristicWrapperTexts;
   predictionTexts: PredictionChartTexts;
 }
-interface Props extends WithUser, MonthlySalesTexts {
+interface Props extends MonthlySalesTexts {
   path: string;
   predictionPath: string;
   countColorIndex?: number;
@@ -63,7 +62,6 @@ interface Props extends WithUser, MonthlySalesTexts {
   };
 }
 export default function MonthlySales({
-  authUser,
   dateRangePickerTexts,
   totalAmountCountOrdersTexts,
   path,

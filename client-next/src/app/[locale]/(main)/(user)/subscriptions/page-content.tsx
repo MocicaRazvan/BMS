@@ -9,7 +9,6 @@ import useFilterDropdown, {
   DropDownFieldFilterCriteriaCallback,
   UseFilterDropdownTexts,
 } from "@/components/list/useFilterDropdown";
-import { WithUser } from "@/lib/user";
 import { dietTypes } from "@/types/forms";
 import { useRouter } from "@/navigation";
 import { useCallback } from "react";
@@ -27,6 +26,7 @@ import {
 import DaysCalendarCTA, {
   DaysCalendarCTATexts,
 } from "@/components/days-calendar/days-calendar-cta";
+import { useAuthUserMinRole } from "@/context/auth-user-min-role-context";
 
 export interface SubscriptionsPageContentTexts {
   gridListTexts: GridListTexts;
@@ -37,7 +37,7 @@ export interface SubscriptionsPageContentTexts {
   header: string;
   dayCalendarCTATexts: DaysCalendarCTATexts;
 }
-interface Props extends WithUser, SubscriptionsPageContentTexts {
+interface Props extends SubscriptionsPageContentTexts {
   options: SortingOption[];
 }
 
@@ -48,10 +48,11 @@ export default function SubscriptionsPageContent({
   title,
   gridListTexts,
   dietDropdownTexts,
-  authUser,
   objectiveDropDownTexts,
   dayCalendarCTATexts,
 }: Props) {
+  const { authUser } = useAuthUserMinRole();
+
   const router = useRouter();
   const formatIntl = useFormatter();
 

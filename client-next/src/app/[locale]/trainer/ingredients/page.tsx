@@ -11,7 +11,7 @@ import Heading from "@/components/common/heading";
 import LoadingSpinner from "@/components/common/loading-spinner";
 import { Suspense } from "react";
 import { Metadata } from "next";
-import { getIntlMetadata, getMetadataValues } from "@/texts/metadata";
+import { getIntlMetadata } from "@/texts/metadata";
 import { ThemeSwitchTexts } from "@/texts/components/nav";
 import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
 import SidebarContentLayout from "@/components/sidebar/sidebar-content-layout";
@@ -47,7 +47,6 @@ export default async function IngredientsPage({ params: { locale } }: Props) {
     getIngredientsPageTexts(),
     getUserWithMinRole("ROLE_TRAINER"),
   ]);
-  const metadataValues = await getMetadataValues(authUser, locale);
 
   const ingredientOptions = getSortingOptions(
     sortingIngredientsSortingOptionsKeys,
@@ -57,12 +56,10 @@ export default async function IngredientsPage({ params: { locale } }: Props) {
     <SidebarContentLayout
       navbarProps={{
         ...ingredientsPageTexts,
-        authUser,
         mappingKey: "trainer",
-        metadataValues,
       }}
     >
-      <div className="w-full h-full bg-background ">
+      <div className="space-y-10 lg:space-y-16 w-full py-5 px-4 mx-auto">
         <Heading {...ingredientsPageTexts} />
         <Suspense fallback={<LoadingSpinner />}>
           <div className="h-full w-full mt-10">
@@ -70,7 +67,6 @@ export default async function IngredientsPage({ params: { locale } }: Props) {
               path={"/ingredients/filtered"}
               sortingOptions={ingredientOptions}
               forWhom={"trainer"}
-              authUser={authUser}
               {...ingredientsPageTexts.ingredientTableTexts}
               sizeOptions={[10, 15, 20, 50]}
             />

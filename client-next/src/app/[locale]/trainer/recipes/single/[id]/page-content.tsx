@@ -1,6 +1,5 @@
 "use client";
 
-import { WithUser } from "@/lib/user";
 import LoadingSpinner from "@/components/common/loading-spinner";
 import { checkOwnerOrAdmin, cn, isSuccessCheckReturn } from "@/lib/utils";
 import React from "react";
@@ -18,6 +17,7 @@ import DietBadge from "@/components/common/diet-badge";
 import RecipeIngredients from "@/components/recipes/recipe-ingredients";
 import { AnswerFromBodyFormTexts } from "@/components/forms/answer-from-body-form";
 import ItemBodyQa from "@/components/common/item-body-qa";
+import { useAuthUserMinRole } from "@/context/auth-user-min-role-context";
 
 export interface SingleRecipePageTexts {
   elementHeaderTexts: ElementHeaderTexts;
@@ -27,11 +27,10 @@ export interface SingleRecipePageTexts {
   answerFromBodyFormTexts: AnswerFromBodyFormTexts;
 }
 
-interface Props extends WithUser, SingleRecipePageTexts {
+interface Props extends SingleRecipePageTexts {
   id: string;
 }
 export default function SingeRecipePageContent({
-  authUser,
   id,
   elementHeaderTexts,
   nutritionalTableTexts,
@@ -39,6 +38,8 @@ export default function SingeRecipePageContent({
   showIngredients,
   answerFromBodyFormTexts,
 }: Props) {
+  const { authUser } = useAuthUserMinRole();
+
   const {
     recipeState,
     setRecipeState,

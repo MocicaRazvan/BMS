@@ -1,10 +1,9 @@
 import { Locale } from "@/navigation";
 import { unstable_setRequestLocale } from "next-intl/server";
-import { getUserWithMinRole } from "@/lib/user";
 import { Suspense } from "react";
 import UpdatePlanPageContent from "@/app/[locale]/trainer/plans/update/[id]/page-content";
 import { Metadata } from "next";
-import { getIntlMetadata, getMetadataValues } from "@/texts/metadata";
+import { getIntlMetadata } from "@/texts/metadata";
 import { ThemeSwitchTexts } from "@/texts/components/nav";
 import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
 import { PlanFormTexts } from "@/components/forms/plan-form";
@@ -43,26 +42,21 @@ export default async function UpdatePlanPage({
   params: { locale, id },
 }: Props) {
   unstable_setRequestLocale(locale);
-  const [authUser, { planFormTexts, ...rest }] = await Promise.all([
-    getUserWithMinRole("ROLE_TRAINER"),
+  const [{ planFormTexts, ...rest }] = await Promise.all([
     getUpdatePlanPageTexts(),
   ]);
-  const metadataValues = await getMetadataValues(authUser, locale);
 
   return (
     <SidebarContentLayout
       navbarProps={{
         title: planFormTexts.baseFormTexts.header,
         ...rest,
-        authUser,
         mappingKey: "trainer",
-        metadataValues,
       }}
     >
       <main className="flex items-center justify-center px-6 py-10">
         <Suspense fallback={<LoadingSpinner />}>
           <UpdatePlanPageContent
-            authUser={authUser}
             id={id}
             {...planFormTexts}
             path={`/plans/updateWithImages/${id}`}

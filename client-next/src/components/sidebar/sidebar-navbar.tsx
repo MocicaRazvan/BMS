@@ -2,34 +2,28 @@ import { SheetMenu } from "@/components/sidebar/sheet-menu";
 import { ModeToggle } from "@/components/nav/theme-switch";
 import { ThemeSwitchTexts } from "@/texts/components/nav";
 import { LocaleSwitcher } from "@/components/i18n/LocaleSwitcher";
-import NotificationPop from "@/components/nav/notification-pop";
-import { WithUser } from "@/lib/user";
 import {
   MappingListFunctionKeys,
   SidebarMenuTexts,
 } from "@/components/sidebar/menu-list";
-import FindInSite, {
-  FindInSiteTexts,
-  MetadataValue,
-} from "@/components/nav/find-in-site";
+import { FindInSiteTexts } from "@/components/nav/find-in-site";
+import SidebarNotificationPop from "@/components/sidebar/sidebar-notification-pop";
+import SidebarFindInSite from "@/components/sidebar/sidebar-find-in-site";
 
-export interface SidebarNavbarProps extends WithUser {
+export interface SidebarNavbarProps {
   title: string;
   themeSwitchTexts: ThemeSwitchTexts;
   menuTexts: SidebarMenuTexts;
   mappingKey: MappingListFunctionKeys;
   findInSiteTexts: FindInSiteTexts;
-  metadataValues: MetadataValue[];
 }
 
 export function SidebarNavbar({
   title,
   themeSwitchTexts,
-  authUser,
   menuTexts,
   mappingKey,
   findInSiteTexts,
-  metadataValues,
 }: SidebarNavbarProps) {
   return (
     <header
@@ -38,16 +32,12 @@ export function SidebarNavbar({
     >
       <div className="mx-4 sm:mx-8 flex h-14 items-center">
         <div className="flex items-center space-x-4 lg:space-x-0">
-          <SheetMenu
-            texts={menuTexts}
-            mappingKey={mappingKey}
-            authUser={authUser}
-          />
+          <SheetMenu texts={menuTexts} mappingKey={mappingKey} />
           <h1 className="font-bold">{title}</h1>
         </div>
         <div className="flex flex-1 items-center space-x-4 justify-end">
-          <FindInSite texts={findInSiteTexts} metadataValues={metadataValues} />
-          <NotificationPop authUser={authUser} />
+          <SidebarFindInSite texts={findInSiteTexts} />
+          <SidebarNotificationPop />
           <LocaleSwitcher />
           <ModeToggle {...themeSwitchTexts} />
         </div>

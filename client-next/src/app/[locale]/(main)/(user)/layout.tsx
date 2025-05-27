@@ -1,9 +1,10 @@
 import { ReactNode } from "react";
 import { unstable_setRequestLocale } from "next-intl/server";
-import { Locale, redirect } from "@/navigation";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/auth-options";
+import { Locale } from "@/navigation";
+// import { getServerSession } from "next-auth";
+// import { authOptions } from "@/app/api/auth/[...nextauth]/auth-options";
 import DayCalendarProvider from "@/context/day-calendar-context";
+import { AuthUserMinRoleProvider } from "@/context/auth-user-min-role-context";
 
 export default async function UserLayout({
   children,
@@ -13,17 +14,15 @@ export default async function UserLayout({
   params: { locale: Locale };
 }) {
   unstable_setRequestLocale(locale);
-  const session = await getServerSession(authOptions);
-
-  if (!session || !session.user) {
-    return redirect("/auth/signin");
-  }
+  // const session = await getServerSession(authOptions);
+  //
+  // if (!session || !session.user) {
+  //   return redirect("/auth/signin");
+  // }
 
   return (
-    <>
-      <DayCalendarProvider authUser={session.user}>
-        {children}
-      </DayCalendarProvider>
-    </>
+    <AuthUserMinRoleProvider minRole="ROLE_USER">
+      <DayCalendarProvider>{children}</DayCalendarProvider>
+    </AuthUserMinRoleProvider>
   );
 }
