@@ -19,6 +19,7 @@ import { getAlertDialogDeleteTexts } from "@/texts/components/dialog";
 import LoadingDialogAnchor from "@/components/dialogs/loading-dialog-anchor";
 import { isDeepEqual } from "@/lib/utils";
 import { useClientLRUStore } from "@/lib/client-lru-store";
+import { useLocale } from "next-intl";
 
 export interface BaseDialogTexts {
   anchor: string;
@@ -38,9 +39,11 @@ interface Props {
 }
 const AlertDialogDelete = memo(
   ({ model, token, callBack, path, title, anchor }: Props) => {
+    const locale = useLocale();
+
     const dialogDeleteTexts = useClientLRUStore({
       setter: () => getAlertDialogDeleteTexts(title),
-      args: [`alertDialogDeleteTexts-${title}-${path}`],
+      args: [`alertDialogDeleteTexts-${title}-${path}`, locale],
     });
     const deleteModel = async () => {
       if (token === undefined) return;

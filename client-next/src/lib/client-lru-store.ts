@@ -3,6 +3,7 @@
 import { LRUCache } from "lru-cache";
 import murmur from "murmurhash";
 import { useEffect, useState } from "react";
+import stringify from "safe-stable-stringify";
 
 class ClientLRUStore {
   private static instance: ClientLRUStore;
@@ -66,6 +67,8 @@ export const useClientLRUStore = <T>({
   setter,
   args,
 }: UseClientLRUStoreArgs<T>) => {
+  const stableArgs = stringify(args) || "__undefined";
+
   const [state, setState] = useState<T | null>(null);
   useEffect(() => {
     const cachedValue = clientLRUStore.get<T>(...args);
@@ -82,7 +85,7 @@ export const useClientLRUStore = <T>({
           setState(null);
         });
     }
-  }, [JSON.stringify(args)]);
+  }, [stableArgs]);
 
   return state;
 };

@@ -17,6 +17,7 @@ import {
 } from "@/texts/components/dialog";
 import { useState } from "react";
 import { useClientLRUStore } from "@/lib/client-lru-store";
+import { useLocale } from "next-intl";
 
 interface Props {
   anchor?: React.ReactNode;
@@ -31,11 +32,12 @@ export default function DeleteChatRoomDialog({
   receiverEmail,
   deleteChatDialogTexts,
 }: Props) {
+  const locale = useLocale();
   const [isOpen, setIsOpen] = useState(false);
 
   const dialogTexts = useClientLRUStore({
     setter: () => getDeleteChatRoomDialogTexts(receiverEmail),
-    args: [`deleteChatRoomDialogTexts-${receiverEmail}`],
+    args: [`deleteChatRoomDialogTexts-${receiverEmail}`, locale],
   });
 
   if (!dialogTexts) {

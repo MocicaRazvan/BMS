@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { useClientLRUStore } from "@/lib/client-lru-store";
+import { useLocale } from "next-intl";
 
 interface Props {
   comment: CommentResponse;
@@ -31,9 +32,11 @@ export default function AlertDialogDeleteComment({
   anchor,
   title,
 }: Props) {
+  const locale = useLocale();
+
   const dialogDeleteTexts = useClientLRUStore({
     setter: () => getAlertDialogDeleteTexts(title),
-    args: [`alertDialogDeleteTexts-${title}-comments`],
+    args: [`alertDialogDeleteTexts-${title}-comments`, locale],
   });
   const deleteModel = async () => {
     if (token === undefined) return;

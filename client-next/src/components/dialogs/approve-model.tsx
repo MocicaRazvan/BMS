@@ -22,6 +22,7 @@ import { useStompClient } from "react-stomp-hooks";
 import { WithUser } from "@/lib/user";
 import LoadingDialogAnchor from "@/components/dialogs/loading-dialog-anchor";
 import { useClientLRUStore } from "@/lib/client-lru-store";
+import { useLocale } from "next-intl";
 
 export interface AlertDialogApproveProps extends WithUser {
   model: ApproveDto;
@@ -48,11 +49,12 @@ const AlertDialogApprove = memo(
     notificationName,
     stompExtraLink,
   }: AlertDialogApproveProps) => {
+    const locale = useLocale();
     const stompClient = useStompClient();
 
     const dialogApproveTexts = useClientLRUStore({
       setter: () => getAlertDialogApproveTexts(title, (!approved).toString()),
-      args: [`alertDialogApproveTexts-${title}-${approved}`],
+      args: [`alertDialogApproveTexts-${title}-${approved}`, locale],
     });
 
     const approve = async () => {

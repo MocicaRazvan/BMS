@@ -21,6 +21,7 @@ import { Button } from "@/components/ui/button";
 import { cn, isDeepEqual } from "@/lib/utils";
 import LoadingDialogAnchor from "@/components/dialogs/loading-dialog-anchor";
 import { useClientLRUStore } from "@/lib/client-lru-store";
+import { useLocale } from "next-intl";
 
 export interface AlertDialogToggleDisplayTexts extends BaseDialogTexts {
   toast: string | ReactNode;
@@ -38,10 +39,15 @@ interface Props extends WithUser {
 
 const ToggleDisplayDialog = memo(
   ({ callBack, model, path, authUser }: Props) => {
+    const locale = useLocale();
+
     const texts = useClientLRUStore({
       setter: () =>
         getAlertDialogToggleDisplayTexts(model.name, model.display.toString()),
-      args: [`alertDialogToggleDisplayTexts-${model.name}-${model.display}`],
+      args: [
+        `alertDialogToggleDisplayTexts-${model.name}-${model.display}`,
+        locale,
+      ],
     });
 
     const toggle = async () => {

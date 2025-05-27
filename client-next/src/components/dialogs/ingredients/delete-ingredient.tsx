@@ -17,6 +17,7 @@ import { fetchStream } from "@/lib/fetchers/fetchStream";
 import { toast } from "@/components/ui/use-toast";
 import { isDeepEqual } from "@/lib/utils";
 import { useClientLRUStore } from "@/lib/client-lru-store";
+import { useLocale } from "next-intl";
 
 interface Props {
   ingredientNutritionalFactResponse: IngredientNutritionalFactResponse;
@@ -27,6 +28,8 @@ interface Props {
 
 const AlertDialogDeleteIngredient = memo(
   ({ ingredientNutritionalFactResponse, token, callBack, anchor }: Props) => {
+    const locale = useLocale();
+
     const dialogDeleteTexts = useClientLRUStore({
       setter: () =>
         getAlertDialogDeleteTexts(
@@ -34,6 +37,7 @@ const AlertDialogDeleteIngredient = memo(
         ),
       args: [
         `alertDialogDeleteTexts-${ingredientNutritionalFactResponse.ingredient.name}-ingredients`,
+        locale,
       ],
     });
 
