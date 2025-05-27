@@ -234,7 +234,7 @@ export default function UserPageContent({
             <Button onClick={() => handleStartChat(user)}>{startChat}</Button>
           </div>
         )}
-        {showDayCalendarCTA && (
+        {showDayCalendarCTA && isOwner && (
           <div className="my-5 flex items-center justify-center z-[1]">
             <DaysCalendarCTA
               {...dayCalendarCTATexts}

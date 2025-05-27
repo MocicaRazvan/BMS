@@ -28,7 +28,11 @@ export async function GET() {
       },
     );
   }
-  await MemoryVectorStore.fromDocuments(documents, embeddingModel);
+  const store = await MemoryVectorStore.fromDocuments(
+    documents,
+    embeddingModel,
+  );
+  await store.similaritySearch("test document", 1);
   console.error("OLLAMA CTX", process.env.OLLAMA_NUM_CTX, new Date().getTime());
   const model = new ChatOllama({
     model: modelName,
@@ -42,11 +46,12 @@ export async function GET() {
     streaming: false,
   });
 
-  const res = await model.invoke(
+  const res = await model.invoke([
+    "human",
     "keep it very short and simple, no more than 10 words",
-  );
+  ]);
 
-  console.log("AI Seed initialized with response:", res);
+  console.error("AI Seed initialized with response:", res);
 
   return NextResponse.json({
     message: "AI Seed initialized successfully",
