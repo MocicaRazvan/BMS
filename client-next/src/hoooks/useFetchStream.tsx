@@ -51,22 +51,6 @@ export interface UseFetchStreamReturn<T, E> {
   resetFinishes: () => void;
 }
 function stableStringify(obj: unknown): string {
-  // if (obj === undefined) {
-  //   return "undefined";
-  // }
-  // if (obj === null || typeof obj !== "object") return JSON.stringify(obj);
-  //
-  // return JSON.stringify(
-  //   Object.keys(obj)
-  //     .sort()
-  //     .reduce(
-  //       (sortedObj, key) => {
-  //         sortedObj[key] = obj[key];
-  //         return sortedObj;
-  //       },
-  //       {} as Record<string, any>,
-  //     ),
-  // );
   return stringify(obj) || "__undefined";
 }
 

@@ -319,7 +319,7 @@ export default function DayForm({
       setErrorMsg("");
       const parsedMeals = data.meals.map(
         ({ period: { hour, minute }, recipes }) => ({
-          period: `${hour}:${minute}`,
+          period: `${hour}:${minute < 10 ? `0${minute}` : minute}`,
           recipes,
         }),
       );
@@ -353,7 +353,6 @@ export default function DayForm({
       }
     },
     [
-      altToast,
       authUser.token,
       descriptionToast,
       error,
@@ -361,7 +360,6 @@ export default function DayForm({
       router,
       setErrorMsg,
       setIsLoading,
-      toastAction,
     ],
   );
   const [editorKey, setEditorKey] = useState<number>(0);
@@ -428,7 +426,7 @@ export default function DayForm({
                         </SelectItem>
                       ))}
                     </SelectContent>
-                  </Select>{" "}
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}
