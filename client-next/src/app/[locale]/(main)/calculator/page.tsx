@@ -3,7 +3,7 @@ import { getIntlMetadata } from "@/texts/metadata";
 import { Locale, LocaleProps } from "@/navigation";
 import { Suspense } from "react";
 import LoadingSpinner from "@/components/common/loading-spinner";
-import CalculatorPageContent from "@/app/[locale]/(main)/(user)/calculator/page-content";
+import CalculatorPageContent from "@/app/[locale]/(main)/calculator/page-content";
 import {
   ActivitiesTexts,
   CalculatorSchemaTexts,

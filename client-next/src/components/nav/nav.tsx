@@ -1,7 +1,7 @@
 "use client";
 
 import { useSession } from "next-auth/react";
-import { Link } from "@/navigation";
+import { Link, usePathname } from "@/navigation";
 import { ModeToggle } from "@/components/nav/theme-switch";
 import { LocaleSwitcher } from "@/components/i18n/LocaleSwitcher";
 import { ThemeSwitchTexts } from "@/texts/components/nav";
@@ -22,6 +22,7 @@ import { DaysCalendarCTATexts } from "@/components/days-calendar/days-calendar-c
 import { NavButtonGroup, NavItem } from "@/components/nav/nav-button";
 import { SheetClose } from "@/components/ui/sheet";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
+import ActiveLink from "@/components/nav/active-link";
 
 export interface NavTexts {
   themeSwitchTexts: ThemeSwitchTexts;
@@ -64,6 +65,7 @@ export default function Nav({
 }: NavProps) {
   const session = useSession();
   const authUser = session?.data?.user;
+  const globalPathname = usePathname();
 
   const isUser = authUser?.role === "ROLE_USER";
   const isTrainer = authUser?.role === "ROLE_TRAINER";
@@ -245,12 +247,22 @@ export default function Nav({
               <NavButtonGroup items={linkItems} />
             </div>
           ) : (
-            <Link
-              href="/"
-              className="mr-1.5 2xl:mr-3 px-1 md:px-1 py-1 md:py-1 rounded-full  hover:scale-105 transition-transform duration-200 ease-in-out"
-            >
-              <Logo width={40} height={40} />
-            </Link>
+            <>
+              <Link
+                href="/"
+                className="mr-1.5 2xl:mr-3 px-1 md:px-1 py-1 md:py-1 rounded-full  hover:scale-105 transition-transform duration-200 ease-in-out"
+              >
+                <Logo width={40} height={40} />
+              </Link>
+              <div className="ms-6">
+                <ActiveLink
+                  href={"/calculator"}
+                  isActive={globalPathname === "/calculator"}
+                >
+                  {links.calculator}
+                </ActiveLink>
+              </div>
+            </>
           )}
         </div>
         <div className="mx-auto  md:mr-1 flex items-center justify-center gap-6 md:gap-3 mt-2 sm:mt-0">

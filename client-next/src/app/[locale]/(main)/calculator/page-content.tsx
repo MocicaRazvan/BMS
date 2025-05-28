@@ -1,6 +1,6 @@
 "use client";
 
-import { CalculatorPageTexts } from "@/app/[locale]/(main)/(user)/calculator/page";
+import { CalculatorPageTexts } from "@/app/[locale]/(main)/calculator/page";
 import { useCallback, useMemo, useState } from "react";
 import {
   activities,

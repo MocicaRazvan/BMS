@@ -19,9 +19,9 @@ const PUBLIC_REGEX = createPathRegex([
   "auth",
   "not-found",
   "termsOfService",
+  "calculator",
 ]);
 const USER_REGEX = createPathRegex([
-  "calculator",
   "cart",
   "chat",
   "daysCalendar",

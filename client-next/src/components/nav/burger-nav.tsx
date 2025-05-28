@@ -1,6 +1,6 @@
 "use client";
 
-import { memo, useState } from "react";
+import React, { memo, useState } from "react";
 import {
   Sheet,
   SheetClose,
@@ -12,19 +12,21 @@ import { Home, LogOut, Menu } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Session } from "next-auth";
 import { isDeepEqual } from "@/lib/utils";
-import { Link } from "@/navigation";
+import { Link, usePathname } from "@/navigation";
 import { NavTexts } from "@/components/nav/nav";
 import { NavButtonGroup, NavItem } from "@/components/nav/nav-button";
+import ActiveLink from "@/components/nav/active-link";
 
 interface Props {
   authUser: Session["user"];
-
   texts: NavTexts;
   linkItems: NavItem[];
 }
 
 const BurgerNav = memo<Props>(({ authUser, texts, linkItems }: Props) => {
   const [sheetOpen, setSheetOpen] = useState(false);
+  const globalPathname = usePathname();
+
   return (
     <Sheet open={sheetOpen} onOpenChange={setSheetOpen} modal={true}>
       <SheetTrigger asChild>
@@ -39,7 +41,7 @@ const BurgerNav = memo<Props>(({ authUser, texts, linkItems }: Props) => {
       >
         <ScrollArea className="pb-8 px-4 my-8  h-full  flex flex-col gap-6 ">
           {!authUser && (
-            <div className="mb-8">
+            <div className="mb-8 space-y-6">
               <Link
                 href="/"
                 className="font-bold hover:underline flex items-center justify-start gap-2 text-xl transition-all hover:scale-[1.02]"
@@ -48,6 +50,13 @@ const BurgerNav = memo<Props>(({ authUser, texts, linkItems }: Props) => {
                   <Home className="h-8 w-8" /> {texts.links.home}
                 </SheetClose>
               </Link>
+              <ActiveLink
+                href={"/calculator"}
+                isActive={globalPathname === "/calculator"}
+                className="text-lg"
+              >
+                {texts.links.calculator}
+              </ActiveLink>
               <hr className="border my-5" />
             </div>
           )}

@@ -125,7 +125,7 @@ import {
   CalculatorPageTexts,
   IntakeTitle,
   ItemTexts,
-} from "@/app/[locale]/(main)/(user)/calculator/page";
+} from "@/app/[locale]/(main)/calculator/page";
 import { UserDaysPageTexts } from "@/app/[locale]/trainer/user/[id]/days/page";
 import { getDaysListTexts, getSingleDayTexts } from "@/texts/components/days";
 import { planObjectives } from "@/types/dto";
