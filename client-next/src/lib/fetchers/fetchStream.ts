@@ -47,13 +47,15 @@ export async function fetchStream<
   errorCallback,
   successArrayCallback,
   acceptHeader = "application/x-ndjson",
-  batchSize = 6,
+  batchSize: initialBatchSize = 6,
   csrf,
   updateOnEmpty = false,
   nextRequestConfig,
   onAbort,
   extraOptions,
 }: FetchStreamProps<T>) {
+  const batchSize = initialBatchSize > 0 ? initialBatchSize : 6;
+
   let batchBuffer: T[] = [];
   let batchIndex = 0;
   let messages: T[] = [];

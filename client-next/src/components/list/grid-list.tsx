@@ -14,7 +14,10 @@ import {
 } from "@/components/table/data-table-pagination";
 
 import SearchInput from "@/components/forms/input-serach";
-import useList, { UseListProps } from "@/hoooks/useList";
+import useList, {
+  PartialFetchStreamProps,
+  UseListProps,
+} from "@/hoooks/useList";
 import RadioSort, { RadioSortTexts } from "@/components/common/radio-sort";
 
 import { motion } from "framer-motion";
@@ -44,7 +47,11 @@ export interface GridListTexts {
 
 interface GridListProps<T extends TitleBodyImagesUserDto>
   extends GridListTexts,
-    UseListProps {
+    UseListProps,
+    Omit<
+      PartialFetchStreamProps<T>,
+      "onAbort" | "successCallback" | "successArrayCallback"
+    > {
   onItemClick: (item: ResponseWithUserDtoEntity<T>) => void;
   passExtraContent?: (item: ResponseWithUserDtoEntity<T>) => ReactNode;
   passExtraHeader?: (item: ResponseWithUserDtoEntity<T>) => ReactNode;
@@ -76,6 +83,7 @@ export default function GridList<T extends TitleBodyImagesUserDto>({
   creationFilterTexts,
   extraCriteriaClassname,
   forbiddenSortingOptions = ["userDislikesLength"],
+  ...rest
 }: GridListProps<T>) {
   const finalSortingOptions = useMemo(
     () =>
@@ -108,6 +116,7 @@ export default function GridList<T extends TitleBodyImagesUserDto>({
     extraUpdateSearchParams,
     sizeOptions,
     sortingOptions: finalSortingOptions,
+    ...rest,
   });
 
   return (

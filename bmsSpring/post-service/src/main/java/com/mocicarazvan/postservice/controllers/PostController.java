@@ -30,6 +30,7 @@ import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -103,9 +104,7 @@ public class PostController implements ApproveController
 
                 postService.
                         getPostsFilteredWithUser(title, pageableBody, requestsUtils.extractAuthUser(exchange), approved, tags, liked, admin, createdAtLowerBound, createdAtUpperBound, updatedAtLowerBound, updatedAtUpperBound)
-//                .delayElements(Duration.ofSeconds(3))
-                        .flatMapSequential(m -> postReactiveResponseBuilder.toModelWithUserPageable(m, PostController.class))
-                ;
+                        .flatMapSequential(m -> postReactiveResponseBuilder.toModelWithUserPageable(m, PostController.class));
     }
 
     @PatchMapping("/tags")
@@ -125,7 +124,6 @@ public class PostController implements ApproveController
         return
                 postService.
                         getPostsFiltered(title, pageableBody, requestsUtils.extractAuthUser(exchange), approved, tags, liked, admin, createdAtLowerBound, createdAtUpperBound, updatedAtLowerBound, updatedAtUpperBound)
-//                .delayElements(Duration.ofSeconds(3))
                         .flatMapSequential(m -> postReactiveResponseBuilder.toModelPageable(m, PostController.class));
     }
 
@@ -163,8 +161,7 @@ public class PostController implements ApproveController
     public Mono<ResponseEntity<CustomEntityModel<PostResponse>>> createModel(@Valid @RequestBody PostBody body, ServerWebExchange exchange) {
         return postService.createModel(body, requestsUtils.extractAuthUser(exchange))
                 .flatMap(m -> postReactiveResponseBuilder.toModel(m, PostController.class))
-                .map(ResponseEntity::ok)
-                ;
+                .map(ResponseEntity::ok);
     }
 
 
@@ -359,6 +356,31 @@ public class PostController implements ApproveController
     @GetMapping("/invalidateCache/{id}")
     public Mono<?> invalidateCache(@PathVariable Long id) {
         return postService.invalidateCache(id);
+    }
+
+
+    @PatchMapping("/demo/withUser")
+    @ResponseStatus(HttpStatus.OK)
+    public Flux<PageableResponse<ResponseWithUserDtoEntity<PostResponse>>> getPostsFilteredWithUserDemo(@RequestParam(required = false) String title,
+                                                                                                        @RequestParam(name = "approved", required = false) Boolean approved,
+                                                                                                        @RequestParam(required = false) List<String> tags,
+                                                                                                        @RequestParam(required = false) Boolean liked,
+                                                                                                        @Valid @RequestBody PageableBody pageableBody,
+                                                                                                        @RequestParam(name = "admin", required = false, defaultValue = "false") Boolean admin,
+                                                                                                        @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate createdAtLowerBound,
+                                                                                                        @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate createdAtUpperBound,
+                                                                                                        @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate updatedAtLowerBound,
+                                                                                                        @RequestParam(required = false) @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate updatedAtUpperBound,
+                                                                                                        @RequestParam(required = false, defaultValue = "0") Integer delay,
+                                                                                                        ServerWebExchange exchange) {
+
+
+        return
+
+                postService.
+                        getPostsFilteredWithUser(title, pageableBody, requestsUtils.extractAuthUser(exchange), approved, tags, liked, admin, createdAtLowerBound, createdAtUpperBound, updatedAtLowerBound, updatedAtUpperBound)
+                        .delayElements(Duration.ofSeconds(delay))
+                        .flatMapSequential(m -> postReactiveResponseBuilder.toModelWithUserPageable(m, PostController.class));
     }
 
 }

@@ -9,7 +9,6 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install
 
-RUN npx update-browserslist-db@latest || true
 
 
 FROM base AS builder

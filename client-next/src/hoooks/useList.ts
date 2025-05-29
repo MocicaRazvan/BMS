@@ -51,16 +51,14 @@ type FilterKey =
   | "country";
 type Filter = { [key in FilterKey]?: string };
 
-//
-export interface UseListArgs<T>
-  extends Partial<
-    Omit<
-      FetchStreamProps<T>,
-      "path" | "arrayQueryParam" | "queryParams" | "body" | "token"
-    >
-  > {
-  path: string;
+export type PartialFetchStreamProps<T> = Omit<
+  FetchStreamProps<T>,
+  "path" | "arrayQueryParam" | "queryParams" | "body" | "token"
+>;
 
+//
+export interface UseListArgs<T> extends PartialFetchStreamProps<T> {
+  path: string;
   sortingOptions: SortingOption[];
   sizeOptions?: number[];
   extraQueryParams?: Record<string, string>;
@@ -189,6 +187,8 @@ export default function useList<T>({
   const [nextMessages, setNextMessages] = useState<
     PageableResponse<T>[] | null
   >(null);
+
+  console.log("MESSAGES at path " + path, messages);
 
   const debounceCallback = useCallback(() => {
     setPageInfo((prev) => ({
