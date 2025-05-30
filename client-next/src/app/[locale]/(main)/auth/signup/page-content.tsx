@@ -139,6 +139,8 @@ export default function SignUp({
                       <FormLabel>{firstNameLabel}</FormLabel>
                       <FormControl>
                         <Input
+                          id="signup-first-name"
+                          autoComplete="given-name"
                           placeholder="John"
                           {...field}
                           onFocus={() => {
@@ -158,6 +160,8 @@ export default function SignUp({
                       <FormLabel>{lastNameLabel}</FormLabel>
                       <FormControl>
                         <Input
+                          id="signup-last-name"
+                          autoComplete="family-name"
                           placeholder="Doe"
                           {...field}
                           onFocus={() => {

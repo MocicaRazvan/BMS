@@ -12,6 +12,8 @@ import { Input } from "@/components/ui/input";
 import { Path, UseFormReturn } from "react-hook-form";
 import { normalizeEmailWrapper } from "@/lib/email-normalizer-wrapper";
 import { AnimatePresence, motion } from "framer-motion";
+import { v4 as uuidv4 } from "uuid";
+import { useMemo } from "react";
 
 export interface EmailFromFieldTexts {
   label: string;
@@ -39,6 +41,8 @@ export default function EmailFormField<T extends BaseEmail>({
 }: Props<T>) {
   const pathEmail = "email" as Path<T>;
   const value = form.watch(pathEmail);
+  const uniqueId = useMemo(() => uuidv4(), []);
+
   return (
     <FormField
       control={form.control}
@@ -48,6 +52,9 @@ export default function EmailFormField<T extends BaseEmail>({
           <FormLabel>{label}</FormLabel>
           <FormControl>
             <Input
+              id={`input-email-${uniqueId}`}
+              autoComplete="email"
+              type="email"
               placeholder="johndoe@gmail.com"
               disabled={disabled}
               {...field}
