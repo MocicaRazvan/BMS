@@ -129,7 +129,11 @@ export default function SignUp({
         </CardHeader>
         <CardContent>
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+            <form
+              onSubmit={form.handleSubmit(onSubmit)}
+              className="space-y-8"
+              noValidate
+            >
               <div className="w-full flex items-center justify-center gap-4">
                 <FormField
                   control={form.control}

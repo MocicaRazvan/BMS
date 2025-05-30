@@ -89,7 +89,11 @@ export default function ForgotPasswordPage({
         </CardHeader>
         <CardContent>
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+            <form
+              onSubmit={form.handleSubmit(onSubmit)}
+              className="space-y-8"
+              noValidate
+            >
               <EmailFormField
                 texts={emailFromFieldTexts}
                 form={form}
