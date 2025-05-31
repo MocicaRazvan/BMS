@@ -538,7 +538,7 @@ function DataTableBody<TData extends Record<string, any>>({
           <TableRow
             key={row.id}
             data-state={row.getIsSelected() && "selected"}
-            className="lg:hover:relative z-20  hover:bg-muted group"
+            className="lg:hover:relative hover:bg-muted group"
           >
             {row.getVisibleCells().map((cell) => {
               const isSticky = stickyColumnIds?.includes(cell.column.id);

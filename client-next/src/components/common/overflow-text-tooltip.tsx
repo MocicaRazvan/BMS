@@ -1,16 +1,17 @@
 "use client";
 
-import * as TooltipPrimitive from "@radix-ui/react-tooltip";
 import { ComponentPropsWithoutRef, CSSProperties, useState } from "react";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
+  TooltipPortal,
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Check, Clipboard } from "lucide-react";
+import * as TooltipPrimitive from "@radix-ui/react-tooltip";
 
 interface Props
   extends Omit<
@@ -43,44 +44,46 @@ export default function OverflowTextTooltip({
             {text}
           </p>
         </TooltipTrigger>
-        <TooltipContent
-          {...props}
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-          }}
-          onMouseDown={(e) => {
-            e.stopPropagation();
-          }}
-        >
-          <div className="flex items-center justify-around gap-2">
-            <span
-              className="max-w-56 text-wrap select-text"
-              style={{ contain: "layout paint" }}
-            >
-              {text}
-            </span>
-            <Button
-              variant="outline"
-              size="icon"
-              className="h-7 w-7"
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                navigator.clipboard.writeText(text).then(() => {
-                  setIsCopied(true);
-                  setTimeout(() => setIsCopied(false), 1000);
-                });
-              }}
-            >
-              {isCopied ? (
-                <Check size="16" className="text-success" />
-              ) : (
-                <Clipboard size="16" />
-              )}
-            </Button>
-          </div>
-        </TooltipContent>
+        <TooltipPortal>
+          <TooltipContent
+            {...props}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+            }}
+            onMouseDown={(e) => {
+              e.stopPropagation();
+            }}
+          >
+            <div className="flex items-start justify-around gap-2">
+              <span
+                className="max-w-56 text-wrap select-text"
+                style={{ contain: "layout paint" }}
+              >
+                {text}
+              </span>
+              <Button
+                variant="outline"
+                size="icon"
+                className="h-7 w-7"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  navigator.clipboard.writeText(text).then(() => {
+                    setIsCopied(true);
+                    setTimeout(() => setIsCopied(false), 1000);
+                  });
+                }}
+              >
+                {isCopied ? (
+                  <Check size="16" className="text-success" />
+                ) : (
+                  <Clipboard size="16" />
+                )}
+              </Button>
+            </div>
+          </TooltipContent>
+        </TooltipPortal>
       </Tooltip>
     </TooltipProvider>
   );
