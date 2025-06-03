@@ -16,6 +16,8 @@ import LoadingSpinner from "@/components/common/loading-spinner";
 import {
   ChartConfig,
   ChartContainer,
+  ChartLegend,
+  ChartLegendContent,
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
@@ -50,7 +52,7 @@ const createChartData = <T extends string | number | symbol>(
           acc[key] = {
             type: key,
             value: 1,
-            fill: `var(--color-${String(key).toLowerCase()})`,
+            fill: `var(--color-${String(key)})`,
           };
         } else {
           acc[key].value += 1;
@@ -68,16 +70,16 @@ const createChartData = <T extends string | number | symbol>(
     ),
   );
 
-const typePieChartConfig: ChartConfig = createChartConfig([
-  "VEGAN",
-  "VEGETARIAN",
-  "OMNIVORE",
-]);
-const objectivePieChartConfig: ChartConfig = createChartConfig([
-  "GAIN_MASS",
-  "LOSE_WEIGHT",
-  "MAINTAIN_WEIGHT",
-]);
+const typePieChartConfig: ChartConfig = createChartConfig(
+  ["VEGAN", "VEGETARIAN", "OMNIVORE"],
+  0,
+  false,
+);
+const objectivePieChartConfig: ChartConfig = createChartConfig(
+  ["GAIN_MASS", "LOSE_WEIGHT", "MAINTAIN_WEIGHT"],
+  0,
+  false,
+);
 
 export interface TopUsersTexts {
   userCardTexts: UserCardTexts;
@@ -326,8 +328,14 @@ const UserPieChart = memo(
             stroke="0"
             nameKey="type"
             label={true}
+            labelLine={true}
           />
           <ChartTooltip content={<ChartTooltipContent />} />
+          <ChartLegend
+            content={
+              <ChartLegendContent className="flex-wrap min-h-[90px] items-start" />
+            }
+          />
         </PieChart>
       </ChartContainer>
     );

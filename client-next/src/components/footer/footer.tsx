@@ -83,17 +83,17 @@ export default async function Footer() {
           </div>
           <div className="space-y-2 col-span-1 capitalize">
             <div className="transition-all hover:scale-[1.02]">
-              <Link className="text-sm font-medium " href="/termsOfService">
+              <Link className="text-sm font-medium" href="/termsOfService">
                 {termsOfService}
               </Link>
             </div>
             <div className="transition-all hover:scale-[1.02]">
-              <Link className="text-sm font-medium" href="#">
+              <Link className="text-sm font-medium" href="/termsOfService">
                 {privacyPolicy}
               </Link>
             </div>
             <div className="transition-all hover:scale-[1.02]">
-              <Link className="text-sm font-medium" href="#">
+              <Link className="text-sm font-medium" href="/termsOfService">
                 {disclaimer}
               </Link>
             </div>

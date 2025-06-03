@@ -257,7 +257,7 @@ export const createChartConfig = (
 ) =>
   arr.reduce((acc, t, i) => {
     acc[lowerCase ? t.toLowerCase() : t] = {
-      label: t,
+      label: t.replace("_", " "),
       color: `hsl(var(--chart-${((i + 1 + offset) % 10) + 1}))`,
     };
     return acc;

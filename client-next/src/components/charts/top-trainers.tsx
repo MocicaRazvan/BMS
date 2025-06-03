@@ -17,7 +17,7 @@ import {
   TopTrainersSummary,
   UserDto,
 } from "@/types/dto";
-import { cn, isDeepEqual } from "@/lib/utils";
+import { isDeepEqual } from "@/lib/utils";
 import { motion } from "framer-motion";
 import {
   Card,
@@ -284,13 +284,10 @@ const TopTrainersPieChart = memo(
       [type, offset],
     );
 
-    const numberOfLabels = (type === "type" ? dietTypes : planObjectives)
-      .length;
-
     return (
       <ChartContainer
         config={chartConfig}
-        className="min-h-[300px] h-full mx-auto aspect-square [&_.recharts-pie-label-text]:fill-foreground my-0 p-0 "
+        className="min-h-[300px] h-full mx-auto aspect-square [&_.recharts-pie-label-text]:fill-foreground my-0 p-0"
       >
         <PieChart>
           <Pie
@@ -304,7 +301,9 @@ const TopTrainersPieChart = memo(
           />
           <ChartTooltip content={<ChartTooltipContent />} />
           <ChartLegend
-            content={<ChartLegendContent className="text-sm gap-3" />}
+            content={
+              <ChartLegendContent className="flex-wrap min-h-16 items-start" />
+            }
           />
         </PieChart>
       </ChartContainer>
