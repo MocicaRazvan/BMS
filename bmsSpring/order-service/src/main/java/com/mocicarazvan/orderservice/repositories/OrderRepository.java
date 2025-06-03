@@ -8,23 +8,28 @@ import org.springframework.data.r2dbc.repository.Query;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.Collection;
+
 public interface OrderRepository extends ManyToOneUserRepository<Order>, CountInParent {
 
 
     @Query("""
-            SELECT count(*)
-            FROM custom_order o
-            join plan_order po
-            on o.id = po.order_id
-            WHERE o.user_id = :userId
-              AND po.plan_id in (:planIds)
+            
+            SELECT EXISTS (
+             SELECT 1
+             FROM custom_order o
+             join plan_order po
+             on o.id = po.order_id
+             WHERE o.user_id = :userId
+               AND po.plan_id in (:planIds)
+            )
             """)
-    Mono<Boolean> existsUserWithPlan(Long userId, Long[] planIds);
+    Mono<Boolean> existsUserWithPlan(Long userId, Collection<Long> planIds);
 
-
+    // todo remove distinct its useless with the current buying logic
     @Query("""
             select distinct unnest(plan_ids) from custom_order
-            where user_id=:userId
+            where user_id = :userId
             """)
     Flux<Long> findUserPlanIds(Long userId);
 

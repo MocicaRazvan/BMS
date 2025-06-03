@@ -375,7 +375,7 @@ public class OrderServiceImpl implements OrderService {
         List<Long> planIds;
         try {
             String plansJson = metadata.get("plans");
-            planIds = objectMapper.readValue(plansJson, new TypeReference<List<Long>>() {
+            planIds = objectMapper.readValue(plansJson, new TypeReference<>() {
             });
         } catch (JsonProcessingException e) {
             return Mono.error(new RuntimeException("Failed to deserialize plans", e));
@@ -445,9 +445,9 @@ public class OrderServiceImpl implements OrderService {
     }
 
     private Mono<Void> checkIfUserOwnsAPlan(String userId, List<Long> planIds) {
-        return orderRepository.existsUserWithPlan(Long.valueOf(userId), planIds.toArray(new Long[0]))
+        return orderRepository.existsUserWithPlan(Long.valueOf(userId), planIds)
                 .flatMap(exists -> {
-                    log.error("User already owns a plan: " + exists);
+                    log.info("User already owns a plan: " + exists);
                     if (exists) {
                         return Mono.error(new IllegalActionException("User already owns a plan"));
                     }
