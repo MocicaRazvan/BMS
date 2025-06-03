@@ -210,25 +210,29 @@ export default function GeographyChart({
                   </motion.div>
                 )}
               </AnimatePresence>
-              <div className=" top-4 w-full right-4 z-10 flex items-center justify-between flex-wrap gap-2 mb-10">
-                <div
-                  className={"flex items-center justify-center flex-wrap gap-4"}
-                >
-                  <Button onClick={() => zoomIn()}>
-                    {zoomInLabel} <ZoomInIcon className="ms-2" />
+              <div className=" w-full z-10 flex items-center justify-between flex-wrap gap-1 mb-10 ">
+                <div className="flex items-center justify-center flex-wrap gap-4">
+                  <Button onClick={() => zoomIn()} size="sm">
+                    {zoomInLabel} <ZoomInIcon className="ms-1" />
                   </Button>
-                  <Button onClick={() => zoomOut()}>
-                    {zoomOutLabel} <ZoomOutIcon className="ms-2" />
+                  <Button onClick={() => zoomOut()} size="sm">
+                    {zoomOutLabel} <ZoomOutIcon className="ms-1" />
                   </Button>
-                  <Button onClick={() => centerView()}>{centerLabel}</Button>
-                  <Button onClick={() => resetTransform()}>{resetLabel}</Button>
+                  <Button onClick={() => centerView()} size="sm">
+                    {centerLabel}
+                  </Button>
+                  <Button onClick={() => resetTransform()} size="sm">
+                    {resetLabel}
+                  </Button>
                 </div>
-                <div className="flex w-full md:w-fit items-center justify-around mt-5 md:mt-0 md:justify-end gap-3 md:gap-8 lg:gap-12">
-                  <CreationFilter
-                    {...creationFilterTexts}
-                    updateCreatedAtRange={updateCreatedAtRange}
-                    hideUpdatedAt={true}
-                  />
+                <div className="flex w-full md:w-fit items-center justify-around mt-5 md:mt-0 md:justify-end gap-2.5 lg:gap-3 flex-w">
+                  <div>
+                    <CreationFilter
+                      {...creationFilterTexts}
+                      updateCreatedAtRange={updateCreatedAtRange}
+                      hideUpdatedAt={true}
+                    />
+                  </div>
                   <DropDownMenuGeographySelect
                     radioOption={radioOption}
                     onRadioOptionChange={setRadioOption}
@@ -238,7 +242,7 @@ export default function GeographyChart({
                     onClick={() => handleDivDownload()}
                     disabled={isLoading}
                     type="button"
-                    className="min-w-[65px]"
+                    className="w-14"
                     variant="outline"
                   >
                     {isLoading ? (
@@ -258,7 +262,7 @@ export default function GeographyChart({
                 <div className="h-full w-full mx-auto relative cursor-grabbing bg-opacity-50 ">
                   {!isFinished ? (
                     // <Loader className={"mx-auto h-full "} />
-                    <Skeleton className={"mx-auto h-full "} />
+                    <Skeleton className="mx-auto h-full" />
                   ) : (
                     <>
                       <ScaleWrapper setScale={setScale} />
@@ -377,7 +381,9 @@ export function DropDownMenuGeographySelect({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline">{labels[radioOption]}</Button>
+        <Button variant="outline" className="w-48">
+          {labels[radioOption]}
+        </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56">
         <DropdownMenuRadioGroup
