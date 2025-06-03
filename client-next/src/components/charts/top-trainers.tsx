@@ -17,7 +17,7 @@ import {
   TopTrainersSummary,
   UserDto,
 } from "@/types/dto";
-import { isDeepEqual } from "@/lib/utils";
+import { cn, isDeepEqual } from "@/lib/utils";
 import { motion } from "framer-motion";
 import {
   Card,
@@ -284,6 +284,9 @@ const TopTrainersPieChart = memo(
       [type, offset],
     );
 
+    const numberOfLabels = (type === "type" ? dietTypes : planObjectives)
+      .length;
+
     return (
       <ChartContainer
         config={chartConfig}
@@ -300,7 +303,13 @@ const TopTrainersPieChart = memo(
             labelLine={true}
           />
           <ChartTooltip content={<ChartTooltipContent />} />
-          <ChartLegend content={<ChartLegendContent />} />
+          <ChartLegend
+            content={
+              <ChartLegendContent
+                className={cn(numberOfLabels > 3 && "grid grid-cols-3 gap-1")}
+              />
+            }
+          />
         </PieChart>
       </ChartContainer>
     );
@@ -337,7 +346,9 @@ export function DropDownMenuTopTrainersPieSelect({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline">{label}</Button>
+        <Button variant="outline" className="w-44">
+          {label}
+        </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56">
         <DropdownMenuRadioGroup
