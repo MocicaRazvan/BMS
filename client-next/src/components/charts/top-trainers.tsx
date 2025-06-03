@@ -304,11 +304,7 @@ const TopTrainersPieChart = memo(
           />
           <ChartTooltip content={<ChartTooltipContent />} />
           <ChartLegend
-            content={
-              <ChartLegendContent
-                className={cn(numberOfLabels > 3 && "grid grid-cols-3 gap-1")}
-              />
-            }
+            content={<ChartLegendContent className="text-sm gap-3" />}
           />
         </PieChart>
       </ChartContainer>
