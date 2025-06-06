@@ -3,7 +3,6 @@
 import { CountryOrderSummary, CountrySummaryType } from "@/types/dto";
 import { ResponsiveChoropleth } from "@nivo/geo";
 import { geoData } from "@/../public/geoData";
-import * as React from "react";
 import {
   Dispatch,
   SetStateAction,

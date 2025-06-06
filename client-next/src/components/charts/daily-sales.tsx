@@ -4,10 +4,8 @@ import { format, subMonths } from "date-fns";
 import { useLocale } from "next-intl";
 import { useMemo, useState } from "react";
 import {
-  TotalAmountCountOrders,
   TotalAmountCountOrdersData,
   TotalAmountCountOrdersTexts,
-  TrendLineButton,
 } from "@/components/charts/totalAmount-count-ordres";
 import {
   DateRangeParams,
@@ -18,6 +16,24 @@ import useFetchStream from "@/hoooks/useFetchStream";
 import { DailyOrderSummary } from "@/types/dto";
 import useClientNotFound from "@/hoooks/useClientNotFound";
 import { Separator } from "@/components/ui/separator";
+import dynamic from "next/dynamic";
+import { Skeleton } from "@/components/ui/skeleton";
+import { TrendLineButton } from "@/components/charts/totalAmount-count-orders-inputs";
+
+const DynamicTotalAmountCountOrders = dynamic(
+  () =>
+    import("@/components/charts/totalAmount-count-ordres").then(
+      (mod) => mod.TotalAmountCountOrders,
+    ),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="w-full py-16">
+        <Skeleton className="aspect-auto h-[450px] w-full" />
+      </div>
+    ),
+  },
+);
 
 export interface DailySalesTexts {
   totalAmountCountOrdersTexts: TotalAmountCountOrdersTexts;
@@ -118,7 +134,7 @@ export default function DailySales({
             )}
           </div>
         </div>
-        <TotalAmountCountOrders
+        <DynamicTotalAmountCountOrders
           data={formattedData}
           dataAvailable={isFinished}
           {...totalAmountCountOrdersTexts}
@@ -149,7 +165,7 @@ export default function DailySales({
                 )}
               </div>
             </div>
-            <TotalAmountCountOrders
+            <DynamicTotalAmountCountOrders
               data={formattedData}
               dataAvailable={isFinished}
               {...totalAmountCountOrdersTexts}

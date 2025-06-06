@@ -65,7 +65,7 @@ export default function DayCalendarStatsChart({ data }: Props) {
         >
           <ChartContainer
             config={chartConfig}
-            className="aspect-auto h-[350px] w-full "
+            className="aspect-auto h-[350px] w-full"
           >
             <BarChart
               accessibilityLayer

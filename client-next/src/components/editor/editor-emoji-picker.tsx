@@ -8,7 +8,8 @@ import {
 import { SmilePlus } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import CustomEmojiPicker from "@/components/common/custom-emoji-picker";
+import dynamic from "next/dynamic";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export interface EditorEmojiPickerTexts {
   searchPlaceholder: string;
@@ -18,6 +19,14 @@ interface Props {
   onEmojiSelect: (e: string) => void;
   texts: EditorEmojiPickerTexts;
 }
+
+const DynamicEmojiPicker = dynamic(
+  () => import("@/components/common/custom-emoji-picker"),
+  {
+    ssr: false,
+    loading: () => <Skeleton className="h-36 w-36 md:h-[450px] md:w-[350px]" />,
+  },
+);
 
 export default function EditorEmojiPicker({
   onEmojiSelect,
@@ -37,7 +46,7 @@ export default function EditorEmojiPicker({
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-full md:w-fit">
-        <CustomEmojiPicker
+        <DynamicEmojiPicker
           onEmojiClick={(e) => {
             onEmojiSelect(e.emoji);
           }}

@@ -41,8 +41,7 @@ import { v4 as uuidv4 } from "uuid";
 import { TitleBodyForm, TitleBodyTexts } from "@/components/forms/title-body";
 import InputFile, { FieldInputTexts } from "@/components/forms/input-file";
 import { determineMostRestrictiveDiet, handleBaseError } from "@/lib/utils";
-import IngredientMacrosPieChart, {
-  calculateMacroProportions,
+import {
   IngredientPieChartTexts,
   MacroChartElement,
 } from "@/components/charts/ingredient-macros-pie-chart";
@@ -71,6 +70,50 @@ import DiffusionImagesForm, {
 import useGetDiffusionImages from "@/hoooks/useGetDiffusionImages";
 import { useNavigationGuardI18nForm } from "@/hoooks/use-navigation-guard-i18n-form";
 import { useAuthUserMinRole } from "@/context/auth-user-min-role-context";
+import dynamic from "next/dynamic";
+import { Skeleton } from "@/components/ui/skeleton";
+
+export function calculateMacroProportions(
+  items: {
+    fat: number;
+    protein: number;
+    carbohydrates: number;
+    salt: number;
+    quantity: number;
+  }[],
+): MacroChartElement[] {
+  const totalMacros = items.reduce(
+    (totals, ingredient) => {
+      totals.fat += (ingredient.fat * ingredient.quantity) / 100;
+      totals.protein += (ingredient.protein * ingredient.quantity) / 100;
+      totals.carbohydrates +=
+        (ingredient.carbohydrates * ingredient.quantity) / 100;
+      totals.salt += (ingredient.salt * ingredient.quantity) / 100;
+      totals.totalQuantity += ingredient.quantity;
+      return totals;
+    },
+    { fat: 0, protein: 0, carbohydrates: 0, salt: 0, totalQuantity: 0 },
+  );
+
+  return [
+    {
+      macro: "fat",
+      value: (totalMacros.fat / totalMacros.totalQuantity) * 100,
+    },
+    {
+      macro: "protein",
+      value: (totalMacros.protein / totalMacros.totalQuantity) * 100,
+    },
+    {
+      macro: "carbohydrates",
+      value: (totalMacros.carbohydrates / totalMacros.totalQuantity) * 100,
+    },
+    {
+      macro: "salt",
+      value: (totalMacros.salt / totalMacros.totalQuantity) * 100,
+    },
+  ];
+}
 
 export interface RecipeFormTexts extends SingleChildFormTexts, AITitleBodyForm {
   ingredientQuantitySchemaTexts: IngredientQuantitySchemaTexts;
@@ -102,6 +145,17 @@ export interface RecipeFormProps
   initialChildren?: Record<string, Option & { quantity: number }>;
   // initialIngredients?: RecipeSchemaType["ingredients"];
 }
+
+const DynamicIngredientPieChart = dynamic(
+  () => import("@/components/charts/ingredient-macros-pie-chart"),
+  {
+    ssr: false,
+    loading: () => (
+      <Skeleton className="mx-auto aspect-square  max-h-[350px] lg:max-h-[400px]" />
+    ),
+  },
+);
+
 export default function RecipeForm({
   recipeSchemaTexts,
   ingredientQuantitySchemaTexts,
@@ -606,7 +660,7 @@ export default function RecipeForm({
                           )}
                         </span>
                       </p>
-                      <IngredientMacrosPieChart
+                      <DynamicIngredientPieChart
                         innerRadius={85}
                         items={chartItems}
                         texts={ingredientPieChartTexts}

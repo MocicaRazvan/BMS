@@ -3,25 +3,11 @@
 import { Link, Locale } from "@/navigation";
 import React, { memo, useState } from "react";
 import { isDeepEqual } from "@/lib/utils";
-import {
-  CustomEntityModel,
-  PageableResponse,
-  PlanResponse,
-  TopUsersSummary,
-  UserDto,
-} from "@/types/dto";
+import { CustomEntityModel, TopUsersSummary, UserDto } from "@/types/dto";
 import useFetchStream from "@/hoooks/useFetchStream";
 import { BaseError } from "@/types/responses";
 import LoadingSpinner from "@/components/common/loading-spinner";
-import {
-  ChartConfig,
-  ChartContainer,
-  ChartLegend,
-  ChartLegendContent,
-  ChartTooltip,
-  ChartTooltipContent,
-} from "@/components/ui/chart";
-import { Pie, PieChart } from "recharts";
+
 import {
   Card,
   CardContent,
@@ -33,52 +19,33 @@ import { useFormatter } from "next-intl";
 import { Switch } from "@/components/ui/switch";
 import { motion } from "framer-motion";
 import TopChartWrapper, {
-  createChartConfig,
-  TopChartMeanRelative,
   TopChartWrapperTexts,
   TopRankBadge,
 } from "@/components/charts/top-chart-wrapper";
 import OverflowTextTooltip from "@/components/common/overflow-text-tooltip";
+import dynamic from "next/dynamic";
+import { Skeleton } from "@/components/ui/skeleton";
 
-const createChartData = <T extends string | number | symbol>(
-  plansMessages: PageableResponse<CustomEntityModel<PlanResponse>>[],
-  keySelector: (plan: PlanResponse) => T,
-) =>
-  Object.values(
-    plansMessages.reduce(
-      (acc, { content: { content } }) => {
-        const key = keySelector(content);
-        if (!acc[key]) {
-          acc[key] = {
-            type: key,
-            value: 1,
-            fill: `var(--color-${String(key)})`,
-          };
-        } else {
-          acc[key].value += 1;
-        }
-        return acc;
-      },
-      {} as Record<
-        T,
-        {
-          type: T;
-          value: number;
-          fill: string;
-        }
-      >,
+const DynamicUserPieChart = dynamic(
+  () =>
+    import("@/components/charts/user-pie-chart").then(
+      (mod) => mod.UserPieChart,
     ),
-  );
-
-const typePieChartConfig: ChartConfig = createChartConfig(
-  ["VEGAN", "VEGETARIAN", "OMNIVORE"],
-  0,
-  false,
+  {
+    ssr: false,
+    loading: () => <Skeleton className="h-[300px] mx-auto aspect-square" />,
+  },
 );
-const objectivePieChartConfig: ChartConfig = createChartConfig(
-  ["GAIN_MASS", "LOSE_WEIGHT", "MAINTAIN_WEIGHT"],
-  0,
-  false,
+
+const DynamicTopChartMeanRelative = dynamic(
+  () =>
+    import("@/components/charts/top-chart-mean-relative").then(
+      (mod) => mod.TopChartMeanRelative,
+    ),
+  {
+    ssr: false,
+    loading: () => <Skeleton className="h-[300px] mx-auto aspect-square" />,
+  },
 );
 
 export interface TopUsersTexts {
@@ -103,21 +70,47 @@ const TopUsers = memo(
     },
   }: Props) => {
     return (
-      <TopChartWrapper<TopUsersSummary>
-        texts={topChartWrapperTexts}
-        path="/orders/admin/topUsers"
-        locale={locale}
-        processMessage={(ts) => (
-          <div key={ts.userId + "topUsers"}>
-            <UserCard
-              topSummary={ts}
-              texts={userCardTexts}
-              amountTexts={userAmountPerOderChartTexts}
-            />
-          </div>
-        )}
-        title={title}
-      />
+      <>
+        <div className="hidden">
+          <DynamicUserPieChart
+            topSum={{
+              userId: 1,
+              avgGroupTotal: 0,
+              maxGroupTotal: 0,
+              plansNumber: 0,
+              ordersNumber: 0,
+              rank: 0,
+              totalAmount: 0,
+              minGroupTotal: 0,
+              planValues: [],
+            }}
+            type="type"
+          />
+          <DynamicTopChartMeanRelative
+            chartKey="amountPerOrderDummyPreloadUsers"
+            chartLabel={userAmountPerOderChartTexts.amountPerOrder}
+            barData={0}
+            maxBar={0}
+            referenceValue={0}
+            referenceLabel={userAmountPerOderChartTexts.meanAmountPerOrder}
+          />
+        </div>
+        <TopChartWrapper<TopUsersSummary>
+          texts={topChartWrapperTexts}
+          path="/orders/admin/topUsers"
+          locale={locale}
+          processMessage={(ts) => (
+            <div key={ts.userId + "topUsers"}>
+              <UserCard
+                topSummary={ts}
+                texts={userCardTexts}
+                amountTexts={userAmountPerOderChartTexts}
+              />
+            </div>
+          )}
+          title={title}
+        />
+      </>
     );
   },
   isDeepEqual,
@@ -264,7 +257,7 @@ const UserCard = memo(
                   <p className="text-sm">{type}</p>
                 </div>
               </div>
-              <UserPieChart topSum={topSummary} type={pieType} />
+              <DynamicUserPieChart topSum={topSummary} type={pieType} />
             </div>
           </div>
         </CardContent>
@@ -275,75 +268,6 @@ const UserCard = memo(
 );
 
 UserCard.displayName = "UserCard";
-
-const UserPieChart = memo(
-  ({
-    topSum,
-    type,
-  }: {
-    topSum: TopUsersSummary;
-    type: "type" | "objective";
-  }) => {
-    const {
-      messages: plansMessages,
-      error: planError,
-      refetch: refetchUser,
-      isFinished: isPlanFinished,
-    } = useFetchStream<
-      PageableResponse<CustomEntityModel<PlanResponse>>,
-      BaseError
-    >({
-      path: `/plans/byIds`,
-      method: "PATCH",
-      authToken: true,
-      arrayQueryParam: {
-        ids: topSum.planValues.map((plan) => plan.toString()),
-      },
-      body: {
-        page: 0,
-        size: topSum.planValues.length,
-      },
-    });
-
-    if (!isPlanFinished || !plansMessages.length) {
-      return <LoadingSpinner sectionClassName="min-h-[300px] w-full h-full" />;
-    }
-    const chartConfig =
-      type === "type" ? typePieChartConfig : objectivePieChartConfig;
-
-    const chartData = createChartData(plansMessages, (plan) =>
-      type === "type" ? plan.type : plan.objective,
-    );
-
-    return (
-      <ChartContainer
-        config={chartConfig}
-        className="h-[300px] mx-auto aspect-square [&_.recharts-pie-label-text]:fill-foreground my-0 p-0 "
-      >
-        <PieChart>
-          <Pie
-            data={chartData}
-            outerRadius={70}
-            dataKey="value"
-            stroke="0"
-            nameKey="type"
-            label={true}
-            labelLine={true}
-          />
-          <ChartTooltip content={<ChartTooltipContent />} />
-          <ChartLegend
-            content={
-              <ChartLegendContent className="flex-wrap min-h-[90px] items-start" />
-            }
-          />
-        </PieChart>
-      </ChartContainer>
-    );
-  },
-  isDeepEqual,
-);
-
-UserPieChart.displayName = "UserPieChart";
 
 export interface UserAmountPerOderChartTexts {
   amountPerOrder: string;
@@ -362,7 +286,7 @@ const UserAmountPerOderChart = memo(
     meanAmountPerOrder: number;
     maxAmountPerOrder: number;
   }) => (
-    <TopChartMeanRelative
+    <DynamicTopChartMeanRelative
       chartKey="amountPerOrder"
       chartLabel={texts.amountPerOrder}
       barData={topSum.totalAmount}

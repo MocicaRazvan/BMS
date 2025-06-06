@@ -4,28 +4,64 @@ import { Role } from "@/types/fetch-utils";
 import useList from "@/hoooks/useList";
 import { PostResponse, ResponseWithUserDtoEntity } from "@/types/dto";
 import { SortingOption } from "@/components/list/grid-list";
+import ArchiveQueueCards, {
+  ArchiveQueueCardsTexts,
+} from "@/components/common/archive-queue-card";
+import { useLocale } from "next-intl";
+import { Locale } from "@/navigation";
+import { AuthUserMinRoleProvider } from "@/context/auth-user-min-role-context";
+import ArchiveQueueUpdateProvider, {
+  ArchiveQueueUpdateTexts,
+} from "@/context/archive-queue-update-context";
+import dynamic from "next/dynamic";
+import { Skeleton } from "@/components/ui/skeleton";
+import React, { useEffect } from "react";
 
 interface Props {
   options: SortingOption[];
+  archivePostsTexts: ArchiveQueueCardsTexts;
+  queueTexts: ArchiveQueueUpdateTexts;
 }
 const minRole: Role = "ROLE_ADMIN";
-export default function TestPage({ options }: Props) {
-  const { messages } = useList<ResponseWithUserDtoEntity<PostResponse>>({
-    path: "/posts/tags/withUser",
-    sortingOptions: options,
-  });
+
+const DynamicRatioPieChart = dynamic(
+  () =>
+    import("@/components/charts/plans-ratio-pie-chart").then(
+      (mod) => mod.RatioPieChart,
+    ),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="w-full py-16">
+        ,
+        <Skeleton className="aspect-auto h-[450px] w-full" />
+      </div>
+    ),
+  },
+);
+
+export default function TestPage({}: Props) {
+  const [show, setShow] = React.useState(false);
+  useEffect(() => {
+    import("./test-actions").then((r) => {
+      const sw = r.default;
+    });
+  }, []);
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShow(true);
+    }, 2200);
+    return () => clearTimeout(timer);
+  }, []);
   return (
     <div className="flex flex-col items-center justify-center mt-20">
-      {messages.length > 0 ? (
-        messages.map((message) => (
-          <div key={message.content.model.content.id} className="mb-4">
-            <h2 className="text-xl font-bold">
-              {message.content.model.content.title}
-            </h2>
-          </div>
-        ))
+      {show ? (
+        <DynamicRatioPieChart
+          innerLabel={"planCardTexts.ratioLabel"}
+          chartData={[{ ratio: 0, fill: "var(--color-plan)" }]}
+        />
       ) : (
-        <p>No posts available.</p>
+        <div>Loading...</div>
       )}
     </div>
   );

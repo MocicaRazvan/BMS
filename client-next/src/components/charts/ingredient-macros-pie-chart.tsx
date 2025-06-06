@@ -32,48 +32,6 @@ export interface IngredientPieChartTexts {
   saltLabel: string;
 }
 
-export function calculateMacroProportions(
-  items: {
-    fat: number;
-    protein: number;
-    carbohydrates: number;
-    salt: number;
-    quantity: number;
-  }[],
-): MacroChartElement[] {
-  const totalMacros = items.reduce(
-    (totals, ingredient) => {
-      totals.fat += (ingredient.fat * ingredient.quantity) / 100;
-      totals.protein += (ingredient.protein * ingredient.quantity) / 100;
-      totals.carbohydrates +=
-        (ingredient.carbohydrates * ingredient.quantity) / 100;
-      totals.salt += (ingredient.salt * ingredient.quantity) / 100;
-      totals.totalQuantity += ingredient.quantity;
-      return totals;
-    },
-    { fat: 0, protein: 0, carbohydrates: 0, salt: 0, totalQuantity: 0 },
-  );
-
-  return [
-    {
-      macro: "fat",
-      value: (totalMacros.fat / totalMacros.totalQuantity) * 100,
-    },
-    {
-      macro: "protein",
-      value: (totalMacros.protein / totalMacros.totalQuantity) * 100,
-    },
-    {
-      macro: "carbohydrates",
-      value: (totalMacros.carbohydrates / totalMacros.totalQuantity) * 100,
-    },
-    {
-      macro: "salt",
-      value: (totalMacros.salt / totalMacros.totalQuantity) * 100,
-    },
-  ];
-}
-
 const getChartConfig = ({
   macroLabel,
   fatLabel,
@@ -134,7 +92,7 @@ export const IngredientMacrosPieChart = memo(
     return (
       <ChartContainer
         config={chartConfig}
-        className="mx-auto aspect-square  max-h-[350px] lg:max-h-[400px] "
+        className="mx-auto aspect-square  max-h-[350px] lg:max-h-[400px]"
         {...props}
       >
         <PieChart>

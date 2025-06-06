@@ -5,7 +5,7 @@ import {
   DateRangePickerTexts,
 } from "@/components/ui/date-range-picker";
 import { Locale } from "@/navigation";
-import React, { ReactNode, Suspense, useMemo, useState } from "react";
+import React, { ReactNode, useMemo, useState } from "react";
 import useFetchStream from "@/hoooks/useFetchStream";
 import { format, subMonths } from "date-fns";
 import { ro } from "date-fns/locale";
@@ -20,18 +20,11 @@ import {
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import LoadingSpinner from "@/components/common/loading-spinner";
-import Lottie from "react-lottie-player";
-import noResultsLottie from "../../../public/lottie/noResults.json";
 import { RankSummary } from "@/types/dto";
 import { Badge } from "@/components/ui/badge";
-import { Bar, BarChart, ReferenceLine, XAxis, YAxis } from "recharts";
-import {
-  ChartConfig,
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-} from "@/components/ui/chart";
-import { v4 as uuid } from "uuid";
+import { ChartConfig } from "@/components/ui/chart";
+import dynamic from "next/dynamic";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export interface TopChartWrapperTexts {
   dateRangePickerTexts: DateRangePickerTexts;
@@ -47,6 +40,16 @@ interface Props<T> {
   processMessage: (message: T) => ReactNode;
   title: string;
 }
+
+const DynamicNoResultsLottie = dynamic(
+  () => import("@/components/lottie/no-results-lottie"),
+  {
+    ssr: false,
+    loading: () => (
+      <Skeleton className="w-full h-full md:w-1/3 md:h-1/3 mx-auto" />
+    ),
+  },
+);
 
 const now = new Date();
 const oneMonthAgo = subMonths(now, 1);
@@ -143,14 +146,11 @@ const TopChartWrapper = <T extends RankSummary>({
         <div className="block w-full h-full">
           <h2 className="text-4xl tracking-tighter font-bold w-full max-w-3xl max-h-[550px] mx-auto">
             <p className="text-center">{noResults}</p>
-            <Suspense fallback={<div className="md:w-1/3 md:h-1/3 mx-auto" />}>
-              <Lottie
-                animationData={noResultsLottie}
-                loop
-                className="md:w-1/3 md:h-1/3 mx-auto"
-                play
-              />
-            </Suspense>
+            <DynamicNoResultsLottie
+              loop
+              className="md:w-1/3 md:h-1/3 mx-auto"
+              play
+            />
           </h2>
         </div>
       ) : (
@@ -179,74 +179,6 @@ export function TopRankBadge({
       {` #`}
       {rank}
     </Badge>
-  );
-}
-interface TopChartMeanRelativeProps {
-  chartKey: string;
-  chartLabel: string;
-  barData: number;
-  maxBar: number;
-  maxOffset?: number;
-  referenceValue: number;
-  referenceLabel: string;
-  chartColorNumber?: number;
-}
-export function TopChartMeanRelative({
-  chartKey,
-  chartLabel,
-  barData,
-  maxBar,
-  maxOffset = 10,
-  referenceValue,
-  referenceLabel,
-  chartColorNumber = 6,
-}: TopChartMeanRelativeProps) {
-  const stackId = uuid();
-  if (maxBar - referenceValue < maxOffset) {
-    maxOffset += Math.min(maxBar / 25, 80);
-  }
-  return (
-    <ChartContainer
-      config={{
-        [chartKey]: {
-          label: chartLabel,
-          color: `hsl(var(--chart-${chartColorNumber}))`,
-        },
-      }}
-      className="h-[300px] mx-auto aspect-square"
-    >
-      <BarChart
-        data={[
-          {
-            name: chartLabel,
-            [chartKey]: barData.toFixed(2),
-          },
-        ]}
-      >
-        <XAxis dataKey="name" />
-        <YAxis domain={[0, Math.floor(maxBar + maxOffset)]} />
-        <ChartTooltip content={<ChartTooltipContent hideLabel={true} />} />
-        <Bar
-          dataKey={chartKey}
-          fill={`var(--color-${chartKey})`}
-          radius={4}
-          stackId={stackId}
-        />
-        <ReferenceLine
-          y={referenceValue}
-          style={{ stroke: "hsl(var(--primary))" }}
-          strokeDasharray="3 3"
-          fill={"hsl(var(--primary))"}
-          label={{
-            position: "middle",
-            value: referenceLabel + referenceValue.toFixed(2),
-            fill: "hsl(var(--primary))",
-            fontSize: 12,
-            dy: -10,
-          }}
-        />
-      </BarChart>
-    </ChartContainer>
   );
 }
 

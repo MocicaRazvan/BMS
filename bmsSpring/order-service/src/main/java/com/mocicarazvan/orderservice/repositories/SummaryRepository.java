@@ -334,19 +334,24 @@ public interface SummaryRepository extends Repository<Order, Long> {
                 ranked_counts AS (
                     SELECT elem AS plan_id,
                            cnt AS count,
-                           1.0 * cnt / NULLIF(SUM(cnt) OVER(), 0) AS ratio,
                            DENSE_RANK() OVER (ORDER BY cnt DESC) AS rank
                     FROM elem_counts
                 ),
                 top_counts AS (
                     SELECT * FROM ranked_counts
                     WHERE rank <= :top
-                )
+                ),
+                 final_counts AS (
+                     SELECT *,
+                            SUM(count) OVER () AS total_top_cnt
+                     FROM top_counts
+                 )
                 SELECT *,
+                       1.0 * count / NULLIF(total_top_cnt, 0) AS ratio,
                        MAX(count) OVER () AS max_group_count,
                        AVG(count) OVER () AS avg_group_count,
                        MIN(count) OVER () AS min_group_count
-                FROM top_counts
+                FROM final_counts
             """)
     Flux<TopPlansSummary> getTopPlansSummary(LocalDateTime startDate,
                                              LocalDateTime endDate,

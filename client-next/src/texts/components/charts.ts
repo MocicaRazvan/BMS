@@ -16,14 +16,12 @@ import { TopUsersTexts } from "@/components/charts/top-users";
 import { getCreationFilterTexts } from "@/texts/components/list";
 import { TopChartWrapperTexts } from "@/components/charts/top-chart-wrapper";
 import { TopPlansTexts } from "@/components/charts/top-plans";
-import {
-  PlanCharacteristicTexts,
-  PlanCharacteristicWrapperTexts,
-} from "@/components/charts/plan-charctersitic";
+import { PlanCharacteristicWrapperTexts } from "@/components/plans/plan-charctersitic-wrapper";
 import { TopTrainersTexts } from "@/components/charts/top-trainers";
 import { PredictionChartTexts } from "@/components/charts/prediction-chart";
 import { TopViewedPostsTexts } from "@/components/charts/top-viewed-posts";
 import { LinkedChartTexts } from "@/components/charts/linked-chart";
+import { PlanCharacteristicTexts } from "@/components/charts/plan-characteristic";
 
 export async function getIngredientPieChartTexts(): Promise<IngredientPieChartTexts> {
   const t = await getTranslations("components.charts.IngredientPieChartTexts");

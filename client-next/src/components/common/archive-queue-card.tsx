@@ -20,7 +20,6 @@ import { Check, RefreshCw, XIcon } from "lucide-react";
 import { Locale } from "@/navigation";
 import { parseISO } from "date-fns";
 import { cn, isDeepEqual } from "@/lib/utils";
-import { parseHumanReadable } from "cron-js-parser";
 import {
   Tooltip,
   TooltipContent,
@@ -47,8 +46,8 @@ import { toast } from "@/components/ui/use-toast";
 import { WithUser } from "@/lib/user";
 import FadeTextChange from "@/components/ui/fade-text-change";
 import { useArchiveQueueUpdateContext } from "@/context/archive-queue-update-context";
-import { convert } from "crontzconvert";
 import { useAuthUserMinRole } from "@/context/auth-user-min-role-context";
+import dynamic from "next/dynamic";
 
 export interface ArchiveQueueCardsTexts {
   title: Record<"delete" | "update", string>;
@@ -75,6 +74,14 @@ const aliveOptions = {
   "1200000": "20m",
 };
 type AliveOptionKey = keyof typeof aliveOptions;
+
+const DynamicCronDisplay = dynamic(
+  () => import("@/components/archive/cron-display"),
+  {
+    ssr: false,
+    loading: () => <Skeleton className="min-w-12 min-h-6" />,
+  },
+);
 
 const ArchiveQueueCards = memo(
   ({ prefix, locale, header, showHeader, ...rest }: Props) => {
@@ -464,24 +471,10 @@ const DashboardSuccessCard = memo(
             </div>
             <div className="flex items-end justify-between my-auto gap-2 mt-5 w-full">
               <div>
-                <p>
-                  {parseHumanReadable(
-                    convert(
-                      cronExpression,
-                      "UTC",
-                      Intl.DateTimeFormat().resolvedOptions().timeZone,
-                    ),
-                    {
-                      // placeholder bug in the library
-                      runOnWeekDay: {
-                        dayIndex: 0,
-                        weekIndex: 0,
-                        isLastWeek: false,
-                      },
-                    },
-                    locale,
-                  )}
-                </p>
+                <DynamicCronDisplay
+                  cronExpression={cronExpression}
+                  locale={locale}
+                />
                 <p>
                   {currentConsumers}{" "}
                   {consumerCount > 0 ? (

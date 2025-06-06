@@ -8,14 +8,7 @@ import {
   DateRangePicker,
   DateRangePickerTexts,
 } from "@/components/ui/date-range-picker";
-import {
-  CountTotalAmountRadioOptionsType,
-  DropDownMenuCountTotalAmountSelect,
-  TotalAmountCountOrders,
-  TotalAmountCountOrdersTexts,
-  TotalAmountOrdersSingleBarChart,
-  TrendLineButton,
-} from "@/components/charts/totalAmount-count-ordres";
+import { TotalAmountCountOrdersTexts } from "@/components/charts/totalAmount-count-ordres";
 import useFetchStream from "@/hoooks/useFetchStream";
 import { MonthlyOrderSummary } from "@/types/dto";
 import { ro } from "date-fns/locale";
@@ -25,11 +18,18 @@ import {
   PlanCharacteristicColors,
   PlanCharacteristicWrapper,
   PlanCharacteristicWrapperTexts,
-} from "@/components/charts/plan-charctersitic";
+} from "@/components/plans/plan-charctersitic-wrapper";
 import {
   PredictionChart,
   PredictionChartTexts,
 } from "@/components/charts/prediction-chart";
+import {
+  CountTotalAmountRadioOptionsType,
+  DropDownMenuCountTotalAmountSelect,
+  TrendLineButton,
+} from "@/components/charts/totalAmount-count-orders-inputs";
+import dynamic from "next/dynamic";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const now = new Date();
 const oneMonthAgo = subMonths(now, 1);
@@ -39,6 +39,36 @@ const dateFormat = "dd-MM-yyyy";
 const formattedNow = format(now, dateFormat);
 const formattedOneMonthAgo = format(oneMonthAgo, dateFormat);
 const formattedOneYearAgo = format(oneYearAgo, dateFormat);
+
+const DynamicTotalAmountCountOrders = dynamic(
+  () =>
+    import("@/components/charts/totalAmount-count-ordres").then(
+      (mod) => mod.TotalAmountCountOrders,
+    ),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="w-full py-16">
+        <Skeleton className="aspect-auto h-[450px] w-full" />
+      </div>
+    ),
+  },
+);
+
+const DynamicTotalAmountOrdersSingleBarChart = dynamic(
+  () =>
+    import("@/components/charts/totalAmount-count-ordres").then(
+      (mod) => mod.TotalAmountOrdersSingleBarChart,
+    ),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="w-full py-16">
+        <Skeleton className="aspect-auto h-[450px] w-full" />
+      </div>
+    ),
+  },
+);
 
 export interface MonthlySalesTexts {
   totalAmountCountOrdersTexts: TotalAmountCountOrdersTexts;
@@ -170,7 +200,7 @@ export default function MonthlySales({
             </div>
           )}
         </div>
-        <TotalAmountCountOrders
+        <DynamicTotalAmountCountOrders
           data={formattedData}
           dataAvailable={isFinished}
           {...totalAmountCountOrdersTexts}
@@ -213,7 +243,7 @@ export default function MonthlySales({
               </h2>
               <div className="w-80" />
             </div>
-            <TotalAmountOrdersSingleBarChart
+            <DynamicTotalAmountOrdersSingleBarChart
               data={formattedData}
               dataAvailable={isFinished}
               {...totalAmountCountOrdersTexts}
@@ -232,7 +262,7 @@ export default function MonthlySales({
           </h2>
           <div className="w-1 md:w-80" />
         </div>
-        <TotalAmountOrdersSingleBarChart
+        <DynamicTotalAmountOrdersSingleBarChart
           data={formattedData}
           dataAvailable={isFinished}
           {...totalAmountCountOrdersTexts}

@@ -6,17 +6,36 @@ import {
   DateRangePickerTexts,
 } from "@/components/ui/date-range-picker";
 import { useDayCalendar } from "@/context/day-calendar-context";
-import React, { Suspense, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { endOfMonth, format, startOfMonth } from "date-fns";
 import { dateFormat } from "@/hoooks/useDateRangeFilterParams";
 import { useLocale } from "next-intl";
 import useFetchStream from "@/hoooks/useFetchStream";
 import { DayCalendarTrackingStats } from "@/types/dto";
 import { ro } from "date-fns/locale";
-import DayCalendarStatsChart from "@/components/charts/day-calendar-stats-chart";
 import { motion } from "framer-motion";
-import Lottie from "react-lottie-player";
-import noResultsLottie from "../../../public/lottie/noResults.json";
+import dynamic from "next/dynamic";
+
+const DynamicNoResultsLottie = dynamic(
+  () => import("@/components/lottie/no-results-lottie"),
+  {
+    ssr: false,
+    loading: () => (
+      <Skeleton className="w-full h-full md:w-1/3 md:h-1/3 mx-auto" />
+    ),
+  },
+);
+
+const DynamicDayCalendarStatsChart = dynamic(
+  () =>
+    import("@/components/charts/day-calendar-stats-chart").then(
+      (mod) => mod.default,
+    ),
+  {
+    ssr: false,
+    loading: () => <Skeleton className="aspect-auto h-[350px] w-full" />,
+  },
+);
 
 const ChartSkeleton = () => (
   <motion.div
@@ -118,20 +137,17 @@ export default function DayCalendarStatsWrapper({
       </div>
       {isFinished ? (
         messages.length > 0 ? (
-          <DayCalendarStatsChart data={messages} />
+          <DynamicDayCalendarStatsChart data={messages} />
         ) : (
           <div className="flex w-full items-center justify-center h-[350px]">
-            <Suspense fallback={<div className="md:w-1/2 md:h-1/2 mx-auto" />}>
-              <div className="flex flex-col items-center justify-center">
-                <Lottie
-                  animationData={noResultsLottie}
-                  loop
-                  className="md:w-1/2 md:h-1/2 mx-auto"
-                  play
-                />
-                <h1 className="font-medium text-lg">{noDataText}</h1>
-              </div>
-            </Suspense>
+            <div className="flex flex-col items-center justify-center">
+              <DynamicNoResultsLottie
+                loop
+                className="md:w-1/2 md:h-1/2 mx-auto"
+                play
+              />
+              <h1 className="font-medium text-lg">{noDataText}</h1>
+            </div>
           </div>
         )
       ) : (

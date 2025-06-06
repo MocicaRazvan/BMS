@@ -3,7 +3,7 @@
 import RecipeForm, { RecipeFormProps } from "@/components/forms/recipe-form";
 import LoadingSpinner from "@/components/common/loading-spinner";
 import { checkOwner } from "@/lib/utils";
-import React from "react";
+import { isValidElement } from "react";
 import useClientNotFound from "@/hoooks/useClientNotFound";
 import { useGetRecipeWithNF } from "@/hoooks/recipes/useGetRecipeWithNF";
 import { useAuthUserMinRole } from "@/context/auth-user-min-role-context";
@@ -41,7 +41,7 @@ export default function DuplicateRecipePageContent({ id, ...props }: Props) {
 
   const ownerReturn = checkOwner(authUser, recipe, navigateToNotFound);
 
-  if (React.isValidElement(ownerReturn)) {
+  if (isValidElement(ownerReturn)) {
     return ownerReturn;
   }
 

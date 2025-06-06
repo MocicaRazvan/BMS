@@ -1,7 +1,7 @@
 "use client";
 
 import { ResponseWithUserDtoEntity, TitleBodyImagesUserDto } from "@/types/dto";
-import { ReactNode, Suspense, useMemo } from "react";
+import { ReactNode, useMemo } from "react";
 import { cn } from "@/lib/utils";
 
 import { SortDirection } from "@/types/fetch-utils";
@@ -22,12 +22,12 @@ import RadioSort, { RadioSortTexts } from "@/components/common/radio-sort";
 
 import { motion } from "framer-motion";
 import LoadingItemCard from "@/components/list/loading-item-card";
-import noResultsLottie from "@/../public/lottie/noResults.json";
-import Lottie from "react-lottie-player";
 import CreationFilter, {
   CreationFilterTexts,
 } from "@/components/list/creation-filter";
 import { ClassValue } from "clsx";
+import dynamic from "next/dynamic";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export interface SortingOption {
   property: string;
@@ -60,6 +60,16 @@ interface GridListProps<T extends TitleBodyImagesUserDto>
   extraCriteriaClassname?: ClassValue;
   forbiddenSortingOptions?: string[];
 }
+
+const DynamicNoResultsLottie = dynamic(
+  () => import("@/components/lottie/no-results-lottie"),
+  {
+    ssr: false,
+    loading: () => (
+      <Skeleton className="w-full h-full md:w-1/3 md:h-1/3 mx-auto" />
+    ),
+  },
+);
 
 export default function GridList<T extends TitleBodyImagesUserDto>({
   onItemClick,
@@ -163,16 +173,12 @@ export default function GridList<T extends TitleBodyImagesUserDto>({
             <div className="w-full items-center justify-center md:col-span-2 lg:col-span-3 text-center mt-10">
               <h2 className="text-4xl tracking-tighter font-bold ">
                 {noResults}
-                <Suspense
-                  fallback={<div className="md:w-1/3 md:h-1/3 mx-auto" />}
-                >
-                  <Lottie
-                    animationData={noResultsLottie}
-                    loop
-                    className="md:w-1/3 md:h-1/3 mx-auto"
-                    play
-                  />
-                </Suspense>
+
+                <DynamicNoResultsLottie
+                  loop
+                  className="md:w-1/3 md:h-1/3 mx-auto"
+                  play
+                />
               </h2>
             </div>
           )}

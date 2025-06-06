@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
+import { useMemo } from "react";
 import {
   Area,
   Bar,
@@ -24,22 +24,13 @@ import {
 } from "@/components/ui/chart";
 
 import { useLocale } from "next-intl";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
-import Lottie from "react-lottie-player";
-import emptyChart from "../../../public/lottie/emptyChart.json";
 import { motion } from "framer-motion";
 import * as ss from "simple-statistics";
 import { Skeleton } from "@/components/ui/skeleton";
 import useDownloadChartButton from "@/hoooks/charts/download-chart-button";
 import { v4 as uuidv4 } from "uuid";
 import { useDebounceWithFirstTrue } from "@/hoooks/useDebounceWithFirstTrue";
+import dynamic from "next/dynamic";
 
 export interface TotalAmountCountOrdersData {
   count: number;
@@ -47,7 +38,7 @@ export interface TotalAmountCountOrdersData {
   date: string;
 }
 
-interface DropDownTexts {
+export interface DropDownTexts {
   countLabel: string;
   totalAmountLabel: string;
   bothLabel: string;
@@ -78,6 +69,16 @@ interface Props extends TotalAmountCountOrdersTexts {
     showTotalAmount: boolean,
   ) => string;
 }
+
+const DynamicEmptyChartLottie = dynamic(
+  () => import("@/components/lottie/empty-chart-lottie"),
+  {
+    ssr: false,
+    loading: () => (
+      <Skeleton className="w-full h-full md:w-1/3 md:h-1/3 mx-auto" />
+    ),
+  },
+);
 
 export function TotalAmountCountOrders({
   data,
@@ -175,7 +176,7 @@ export function TotalAmountCountOrders({
     <div className="w-full py-16">
       <ChartContainer
         config={chartConfig}
-        className="aspect-auto h-[450px] w-full "
+        className="aspect-auto h-[450px] w-full"
       >
         {!debounceDataAvailable ? (
           <Skeleton className="w-full h-full" />
@@ -185,9 +186,8 @@ export function TotalAmountCountOrders({
             animate={{ scale: 1, opacity: 1 }}
             transition={{ duration: 0.5, delay: 0.5 }}
           >
-            <Lottie
+            <DynamicEmptyChartLottie
               loop
-              animationData={emptyChart}
               play
               className="md:w-1/3 md:h-1/3 mx-auto"
             />
@@ -374,94 +374,6 @@ export function TotalAmountCountOrders({
     </div>
   );
 }
-
-export const CountTotalAmountRadioOptions = [
-  "both",
-  "count",
-  "totalAmount",
-] as const;
-
-export type CountTotalAmountRadioOptionsType =
-  (typeof CountTotalAmountRadioOptions)[number];
-
-export interface DropDownMenuCountTotalAmountSelectProps extends DropDownTexts {
-  radioOption: CountTotalAmountRadioOptionsType;
-  onRadioOptionChange: (option: CountTotalAmountRadioOptionsType) => void;
-  showBoth?: boolean;
-}
-
-export function DropDownMenuCountTotalAmountSelect({
-  countLabel,
-  totalAmountLabel,
-  bothLabel,
-  radioOption,
-  onRadioOptionChange,
-  showBoth = true,
-}: DropDownMenuCountTotalAmountSelectProps) {
-  const label =
-    radioOption === "both"
-      ? bothLabel
-      : radioOption === "count"
-        ? countLabel
-        : totalAmountLabel;
-  useEffect(() => {
-    if (!showBoth && radioOption === "both") {
-      onRadioOptionChange("count");
-    }
-  }, [onRadioOptionChange, radioOption, showBoth]);
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="outline">{label}</Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-56">
-        <DropdownMenuRadioGroup
-          value={radioOption}
-          onValueChange={(e) =>
-            onRadioOptionChange(e as CountTotalAmountRadioOptionsType)
-          }
-        >
-          {showBoth && (
-            <DropdownMenuRadioItem value={CountTotalAmountRadioOptions[0]}>
-              {bothLabel}
-            </DropdownMenuRadioItem>
-          )}
-          <DropdownMenuRadioItem value={CountTotalAmountRadioOptions[1]}>
-            {countLabel}
-          </DropdownMenuRadioItem>
-          <DropdownMenuRadioItem value={CountTotalAmountRadioOptions[2]}>
-            {totalAmountLabel}
-          </DropdownMenuRadioItem>
-        </DropdownMenuRadioGroup>
-      </DropdownMenuContent>
-    </DropdownMenu>
-  );
-}
-
-export interface TrendLineButtonProps extends TotalAmountCountOrdersTexts {
-  showTrendLine: boolean;
-  onShowTrendLineChange: (showTrendLine: boolean) => void;
-  hide?: boolean;
-}
-
-export const TrendLineButton = ({
-  showTrendLine,
-  onShowTrendLineChange,
-  showTrendLineLabel,
-  hideTrendLineLabel,
-  hide,
-}: TrendLineButtonProps) => {
-  if (hide) return null;
-  return (
-    <Button
-      variant="outline"
-      className="min-w-[180px]"
-      onClick={() => onShowTrendLineChange(showTrendLine ? false : true)}
-    >
-      {showTrendLine ? hideTrendLineLabel : showTrendLineLabel}
-    </Button>
-  );
-};
 
 interface TotalAmountOrdersSingleBarChartProps
   extends TotalAmountCountOrdersTexts {

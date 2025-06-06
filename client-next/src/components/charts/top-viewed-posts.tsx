@@ -9,13 +9,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
-import React, { Suspense, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import useFetchStream from "@/hoooks/useFetchStream";
 import { PostCountSummaryResponse } from "@/types/dto";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import Lottie from "react-lottie-player";
-import noResultsLottie from "../../../public/lottie/noResults.json";
 import Loader from "@/components/ui/spinner";
 import { WithUser } from "@/lib/user";
 import { Link, Locale } from "@/navigation";
@@ -30,6 +28,8 @@ import { format, subMonths } from "date-fns";
 import { ro } from "date-fns/locale";
 import OverflowTextTooltip from "@/components/common/overflow-text-tooltip";
 import { useAuthUserMinRole } from "@/context/auth-user-min-role-context";
+import dynamic from "next/dynamic";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export interface TopViewedPostsTexts extends PostViewCardTexts {
   title: string;
@@ -42,7 +42,15 @@ interface Props {
   path: string;
   texts: TopViewedPostsTexts;
 }
-
+const DynamicNoResultsLottie = dynamic(
+  () => import("@/components/lottie/no-results-lottie"),
+  {
+    ssr: false,
+    loading: () => (
+      <Skeleton className="w-full h-full md:w-1/3 md:h-1/3 mx-auto" />
+    ),
+  },
+);
 const topOptions = Array.from({ length: 10 }, (_, i) => i + 1);
 const now = new Date();
 const oneMonthAgo = subMonths(now, 1);
@@ -142,14 +150,11 @@ export default function TopViewedPosts({ path, texts }: Props) {
         <div className="block w-full h-full">
           <h2 className="text-4xl tracking-tighter font-bold w-full max-w-3xl max-h-[550px] mx-auto">
             <p className="text-center">{texts.noResults}</p>
-            <Suspense fallback={<div className="md:w-1/3 md:h-1/3 mx-auto" />}>
-              <Lottie
-                animationData={noResultsLottie}
-                loop
-                className="md:w-1/3 md:h-1/3 mx-auto"
-                play
-              />
-            </Suspense>
+            <DynamicNoResultsLottie
+              loop
+              className="md:w-1/3 md:h-1/3 mx-auto"
+              play
+            />
           </h2>
         </div>
       )}

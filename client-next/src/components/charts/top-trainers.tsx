@@ -1,19 +1,15 @@
 "use client";
 
 import TopChartWrapper, {
-  createChartConfig,
-  TopChartMeanRelative,
   TopChartWrapperTexts,
   TopRankBadge,
 } from "@/components/charts/top-chart-wrapper";
 import { Link, Locale } from "@/navigation";
-import React, { memo, useMemo, useState } from "react";
+import React, { memo, useState } from "react";
 import {
   CustomEntityModel,
   DietType,
-  dietTypes,
   ObjectiveType,
-  planObjectives,
   TopTrainersSummary,
   UserDto,
 } from "@/types/dto";
@@ -31,14 +27,6 @@ import useFetchStream from "@/hoooks/useFetchStream";
 import { BaseError } from "@/types/responses";
 import LoadingSpinner from "@/components/common/loading-spinner";
 import {
-  ChartContainer,
-  ChartLegend,
-  ChartLegendContent,
-  ChartTooltip,
-  ChartTooltipContent,
-} from "@/components/ui/chart";
-import { Pie, PieChart } from "recharts";
-import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuRadioGroup,
@@ -47,6 +35,31 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import OverflowTextTooltip from "@/components/common/overflow-text-tooltip";
+import { BasePieChartProps } from "@/components/charts/top-trainers-pie-chart";
+import dynamic from "next/dynamic";
+import { Skeleton } from "@/components/ui/skeleton";
+
+const DynamicTopChartMeanRelative = dynamic(
+  () =>
+    import("@/components/charts/top-chart-mean-relative").then(
+      (mod) => mod.TopChartMeanRelative,
+    ),
+  {
+    ssr: false,
+    loading: () => <Skeleton className="h-[300px] mx-auto aspect-square" />,
+  },
+);
+
+const DynamicTopTrainersPieChart = dynamic(
+  () =>
+    import("@/components/charts/top-trainers-pie-chart").then(
+      (mod) => mod.TopTrainersPieChart,
+    ),
+  {
+    ssr: false,
+    loading: () => <Skeleton className="h-[300px] mx-auto aspect-square" />,
+  },
+);
 
 export interface TopTrainersTexts {
   trainerCardTexts: TrainerCardTexts;
@@ -61,17 +74,30 @@ interface Props {
 
 const TopTrainers = memo(({ texts, locale }: Props) => {
   return (
-    <TopChartWrapper<TopTrainersSummary>
-      texts={texts.topChartWrapperTexts}
-      path="/orders/admin/topTrainers"
-      locale={locale as Locale}
-      processMessage={(ts) => (
-        <div key={ts.userId + "topTrainers"}>
-          <TrainerCard topSummary={ts} texts={texts.trainerCardTexts} />
-        </div>
-      )}
-      title={texts.title}
-    />
+    <>
+      <div className="hidden">
+        <DynamicTopTrainersPieChart type="type" chartData={{}} />
+        <DynamicTopChartMeanRelative
+          chartKey="totalAmountDummyTopTrainers"
+          chartLabel={texts.trainerCardTexts.totalAmount}
+          barData={0}
+          maxBar={0}
+          referenceValue={0}
+          referenceLabel={texts.trainerCardTexts.totalAmountReference}
+        />
+      </div>
+      <TopChartWrapper<TopTrainersSummary>
+        texts={texts.topChartWrapperTexts}
+        path="/orders/admin/topTrainers"
+        locale={locale as Locale}
+        processMessage={(ts) => (
+          <div key={ts.userId + "topTrainers"}>
+            <TrainerCard topSummary={ts} texts={texts.trainerCardTexts} />
+          </div>
+        )}
+        title={texts.title}
+      />
+    </>
   );
 }, isDeepEqual);
 
@@ -189,7 +215,7 @@ const TrainerCard = memo(
             <div className="w-full h-full grid gap-4 grid-cols-1 md:grid-cols-2 place-items-center">
               <div className="grid ">
                 <p className="text-sm font-medium mb-2">{totalAmount}</p>
-                <TopChartMeanRelative
+                <DynamicTopChartMeanRelative
                   chartKey="totalAmount"
                   chartLabel={totalAmount}
                   barData={topSummary.totalAmount}
@@ -200,7 +226,7 @@ const TrainerCard = memo(
               </div>
               <div className="grid ">
                 <p className="text-sm font-medium mb-2">{countPlans}</p>
-                <TopChartMeanRelative
+                <DynamicTopChartMeanRelative
                   chartKey="planCount"
                   chartLabel={countPlans}
                   barData={topSummary.planCount}
@@ -246,73 +272,7 @@ const TrainerCard = memo(
 
 TrainerCard.displayName = "TrainerCard";
 
-interface BasePieChartProps<T extends "type" | "objective"> {
-  type: T;
-  offset?: number;
-}
-const createChartData = <T extends "type" | "objective">(
-  data: T extends "type"
-    ? Partial<Record<DietType, number>>
-    : Partial<Record<ObjectiveType, number>>,
-  type: T,
-) =>
-  Object.entries(data).map(([k, value]) => ({
-    [type]: k,
-    value: Number.isInteger(value) ? value : Math.round(value * 100) / 100,
-    fill: `var(--color-${k})`,
-  }));
-interface TopTrainersPieChartProps<T extends "type" | "objective">
-  extends BasePieChartProps<T> {
-  chartData: T extends "type"
-    ? Partial<Record<DietType, number>>
-    : Partial<Record<ObjectiveType, number>>;
-}
 type PieChartOptions = "count" | "amount" | "avg";
-const TopTrainersPieChart = memo(
-  <T extends "type" | "objective">({
-    type,
-    chartData,
-    offset = 0,
-  }: TopTrainersPieChartProps<T>) => {
-    const chartConfig = useMemo(
-      () =>
-        createChartConfig(
-          type === "type" ? dietTypes : planObjectives,
-          offset,
-          false,
-        ),
-      [type, offset],
-    );
-
-    return (
-      <ChartContainer
-        config={chartConfig}
-        className="min-h-[300px] h-full mx-auto aspect-square [&_.recharts-pie-label-text]:fill-foreground my-0 p-0"
-      >
-        <PieChart>
-          <Pie
-            data={createChartData(chartData, type)}
-            outerRadius={70}
-            dataKey="value"
-            stroke="0"
-            nameKey={type}
-            label={true}
-            labelLine={true}
-          />
-          <ChartTooltip content={<ChartTooltipContent />} />
-          <ChartLegend
-            content={
-              <ChartLegendContent className="flex-wrap min-h-16 items-start" />
-            }
-          />
-        </PieChart>
-      </ChartContainer>
-    );
-  },
-  isDeepEqual,
-);
-
-TopTrainersPieChart.displayName = "TopTrainersPieChart";
 
 interface DropDownMenuTopTrainersPieSelectTexts {
   countLabel: string;
@@ -400,7 +360,7 @@ const TopTrainersPieChartWrapper = memo(
             {...dropDownMenuTexts}
           />
         </div>
-        <TopTrainersPieChart
+        <DynamicTopTrainersPieChart
           type={type}
           chartData={chartData[radioOption]}
           offset={offset}
