@@ -49,7 +49,7 @@ export const DataTablePagination = memo(function DataTablePagination({
 }: DataTablePaginationProps) {
   const disableAll = pageInfo.totalPages === 0;
   return (
-    <div className="flex items-center justify-end px-2 mt-2 overflow-hidden">
+    <div className="flex items-center justify-end px-2 mt-2 overflow-hidden flex-wrap">
       <div
         className={cn(
           "flex items-center space-x-6 lg:space-x-8",
@@ -88,8 +88,8 @@ export const DataTablePagination = memo(function DataTablePagination({
           </div>
           <div
             className={cn(
-              "flex items-center justify-center text-sm font-medium",
-              !col && "w-[100px]",
+              "flex items-center justify-center text-sm font-medium text-center",
+              !col && "min-w-[100px]",
             )}
           >
             {page} {pageInfo.currentPage + 1} {of}{" "}

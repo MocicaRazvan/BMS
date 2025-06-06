@@ -2,7 +2,7 @@
 
 import { ColumnActionsTexts } from "@/texts/components/table";
 import { recipeColumnActions } from "@/lib/constants";
-import { DataTable, DataTableTexts } from "@/components/table/data-table";
+import { DataTableTexts } from "@/components/table/data-table";
 import { UseApprovedFilterTexts } from "@/components/list/useApprovedFilter";
 import useFilterDropdown, {
   RadioFieldFilterCriteriaCallback,
@@ -20,7 +20,7 @@ import {
   RecipeResponse,
   ResponseWithEntityCount,
 } from "@/types/dto";
-import React, { Suspense, useCallback, useMemo } from "react";
+import React, { useCallback, useMemo } from "react";
 import { ColumnDef } from "@tanstack/react-table";
 import { format, parseISO } from "date-fns";
 import { Badge } from "@/components/ui/badge";
@@ -34,7 +34,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { MoreHorizontal } from "lucide-react";
-import LoadingSpinner from "@/components/common/loading-spinner";
 import AlertDialogApproveRecipes from "@/components/dialogs/recipes/approve-recipe";
 import useClientNotFound from "@/hoooks/useClientNotFound";
 import OverflowTextTooltip from "@/components/common/overflow-text-tooltip";
@@ -49,6 +48,8 @@ import {
   RadioSortDropDownWithExtraDummy,
 } from "@/components/common/radio-sort";
 import { useAuthUserMinRole } from "@/context/auth-user-min-role-context";
+import dynamic from "next/dynamic";
+import DataTableDynamicSkeleton from "@/components/table/data-table-dynamic-skeleton";
 
 export interface RecipeTableColumnsTexts {
   id: string;
@@ -79,7 +80,16 @@ export interface RecipeTableTexts {
 interface Props extends ExtraTableProps, RecipeTableTexts, UseListProps {
   isSidebarOpen?: boolean;
 }
-
+const DynamicDataTable = dynamic(
+  () =>
+    import("@/components/table/data-table").then(
+      (mod) => mod.DataTable<ResponseWithEntityCount<RecipeResponse>>,
+    ),
+  {
+    ssr: false,
+    loading: () => <DataTableDynamicSkeleton />,
+  },
+);
 export default function RecipeTable({
   forWhom,
   dataTableTexts,
@@ -131,7 +141,6 @@ export default function RecipeTable({
     sort,
     setSort,
     sortValue,
-    setSortValue,
     items,
     isFinished,
     error,
@@ -171,12 +180,11 @@ export default function RecipeTable({
     () => ({
       setSort,
       sortingOptions,
-      setSortValue,
       sortValue,
       callback: resetCurrentPage,
       filterKey: "title",
     }),
-    [resetCurrentPage, setSort, setSortValue, sortValue, sortingOptions],
+    [resetCurrentPage, setSort, sortValue, sortingOptions],
   );
 
   const columns: ColumnDef<ResponseWithEntityCount<RecipeResponse>>[] = useMemo(
@@ -601,63 +609,60 @@ export default function RecipeTable({
 
   return (
     <div className="px-1 w-full space-y-8 lg:space-y-14 ">
-      <Suspense fallback={<LoadingSpinner />}>
-        <DataTable
-          sizeOptions={sizeOptions}
-          fileName="recipes"
-          isFinished={isFinished}
-          columns={finalCols}
-          data={data || []}
-          pageInfo={pageInfo}
-          setPageInfo={setPageInfo}
-          getRowId={getRowId}
-          {...dataTableTexts}
-          useRadioSort={false}
-          searchInputProps={{
-            value: filter.title || "",
-            searchInputTexts: { placeholder: search },
-            onChange: updateFilterValue,
-            onClear: clearFilterValue,
-          }}
-          radioSortProps={{
-            setSort,
-            sort,
-            sortingOptions,
-            setSortValue,
-            sortValue,
-            callback: resetCurrentPage,
-            filterKey: "title",
-          }}
-          extraCriteria={
-            <div className="flex items-start justify-center gap-8 flex-1 flex-wrap">
-              <div className="flex items-center justify-end gap-4 flex-1 flex-wrap">
-                {/*{dietTypeCriteriaCallback(resetCurrentPage)}*/}
-                {/*{approvedFieldCriteriaCallBack(resetCurrentPage)}*/}
-              </div>
+      <DynamicDataTable
+        sizeOptions={sizeOptions}
+        fileName="recipes"
+        isFinished={isFinished}
+        columns={finalCols}
+        data={data || []}
+        pageInfo={pageInfo}
+        setPageInfo={setPageInfo}
+        getRowId={getRowId}
+        {...dataTableTexts}
+        useRadioSort={false}
+        searchInputProps={{
+          value: filter.title || "",
+          searchInputTexts: { placeholder: search },
+          onChange: updateFilterValue,
+          onClear: clearFilterValue,
+        }}
+        radioSortProps={{
+          setSort,
+          sort,
+          sortingOptions,
+          sortValue,
+          callback: resetCurrentPage,
+          filterKey: "title",
+        }}
+        extraCriteria={
+          <div className="flex items-start justify-center gap-8 flex-1 flex-wrap">
+            <div className="flex items-center justify-end gap-4 flex-1 flex-wrap">
+              {/*{dietTypeCriteriaCallback(resetCurrentPage)}*/}
+              {/*{approvedFieldCriteriaCallBack(resetCurrentPage)}*/}
             </div>
-          }
-          chartProps={{
-            aggregatorConfig: {
-              "#": (_) => 1,
-              "#omnivore": (r) => (r.model.type === "OMNIVORE" ? 1 : 0),
-              "#vegan": (r) => (r.model.type === "VEGAN" ? 1 : 0),
-              "#vegetarian": (r) => (r.model.type === "VEGETARIAN" ? 1 : 0),
-              ["#" + recipeTableColumnsTexts.approved.header]: (r) =>
-                Number(r.model.approved),
-              [recipeTableColumnsTexts.count + " / 10"]: (r) => r.count / 10,
-            },
-            dateField: "model.createdAt",
-          }}
-          showChart={true}
-          // rangeDateFilter={
-          //   <CreationFilter
-          //     {...creationFilterTexts}
-          //     updateCreatedAtRange={updateCreatedAtRange}
-          //     updateUpdatedAtRange={updateUpdatedAtRange}
-          //   />
-          // }
-        />
-      </Suspense>
+          </div>
+        }
+        chartProps={{
+          aggregatorConfig: {
+            "#": (_) => 1,
+            "#omnivore": (r) => (r.model.type === "OMNIVORE" ? 1 : 0),
+            "#vegan": (r) => (r.model.type === "VEGAN" ? 1 : 0),
+            "#vegetarian": (r) => (r.model.type === "VEGETARIAN" ? 1 : 0),
+            ["#" + recipeTableColumnsTexts.approved.header]: (r) =>
+              Number(r.model.approved),
+            [recipeTableColumnsTexts.count + " / 10"]: (r) => r.count / 10,
+          },
+          dateField: "model.createdAt",
+        }}
+        showChart={true}
+        // rangeDateFilter={
+        //   <CreationFilter
+        //     {...creationFilterTexts}
+        //     updateCreatedAtRange={updateCreatedAtRange}
+        //     updateUpdatedAtRange={updateUpdatedAtRange}
+        //   />
+        // }
+      />
     </div>
   );
 }

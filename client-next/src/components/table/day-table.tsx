@@ -2,7 +2,7 @@
 
 import { ColumnActionsTexts } from "@/texts/components/table";
 import { dayColumnActions, getColorsByDayType } from "@/lib/constants";
-import { DataTable, DataTableTexts } from "@/components/table/data-table";
+import { DataTableTexts } from "@/components/table/data-table";
 import useFilterDropdown, {
   RadioFieldFilterCriteriaCallback,
   UseFilterDropdownTexts,
@@ -18,7 +18,7 @@ import {
   dayTypes,
   ResponseWithEntityCount,
 } from "@/types/dto";
-import React, { Suspense, useCallback, useMemo } from "react";
+import React, { useCallback, useMemo } from "react";
 import { ColumnDef } from "@tanstack/react-table";
 import { format, parseISO } from "date-fns";
 import {
@@ -32,7 +32,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { MoreHorizontal } from "lucide-react";
 import AlertDialogDeleteDay from "@/components/dialogs/days/delete-day";
-import LoadingSpinner from "@/components/common/loading-spinner";
 import OverflowTextTooltip from "@/components/common/overflow-text-tooltip";
 import { DayTypeBadgeTexts } from "@/components/days/day-type-badge";
 import CreationFilter, {
@@ -45,6 +44,8 @@ import {
   RadioSortDropDownWithExtraDummy,
 } from "@/components/common/radio-sort";
 import { useAuthUserMinRole } from "@/context/auth-user-min-role-context";
+import dynamic from "next/dynamic";
+import DataTableDynamicSkeleton from "@/components/table/data-table-dynamic-skeleton";
 
 export interface DayTableColumnsTexts {
   id: string;
@@ -73,6 +74,17 @@ export interface DayTableProps
     DayTableTexts {
   isSidebarOpen?: boolean;
 }
+
+const DynamicDataTable = dynamic(
+  () =>
+    import("@/components/table/data-table").then(
+      (mod) => mod.DataTable<ResponseWithEntityCount<DayResponse>>,
+    ),
+  {
+    ssr: false,
+    loading: () => <DataTableDynamicSkeleton />,
+  },
+);
 
 const typeColors = getColorsByDayType();
 
@@ -130,7 +142,6 @@ export default function DaysTable({
     sort,
     setSort,
     sortValue,
-    setSortValue,
     items,
     isFinished,
     error,
@@ -166,12 +177,11 @@ export default function DaysTable({
     () => ({
       setSort,
       sortingOptions,
-      setSortValue,
       sortValue,
       callback: resetCurrentPage,
       filterKey: "title",
     }),
-    [resetCurrentPage, setSort, setSortValue, sortValue, sortingOptions],
+    [resetCurrentPage, setSort, sortValue, sortingOptions],
   );
 
   const columns: ColumnDef<ResponseWithEntityCount<DayResponse>>[] = useMemo(
@@ -471,43 +481,40 @@ export default function DaysTable({
 
   return (
     <div className="px-1 pb-10 w-full  h-full space-y-8 lg:space-y-14">
-      <Suspense fallback={<LoadingSpinner />}>
-        <DataTable
-          sizeOptions={sizeOptions}
-          fileName={"days"}
-          isFinished={isFinished}
-          columns={finalCols}
-          data={data || []}
-          pageInfo={pageInfo}
-          setPageInfo={setPageInfo}
-          getRowId={getRowId}
-          {...dataTableTexts}
-          searchInputProps={{
-            value: filter.title || "",
-            searchInputTexts: { placeholder: search },
-            onChange: updateFilterValue,
-            onClear: clearFilterValue,
-          }}
-          useRadioSort={false}
-          radioSortProps={{
-            setSort,
-            sort,
-            sortingOptions,
-            setSortValue,
-            sortValue,
-            callback: resetCurrentPage,
-            filterKey: "title",
-          }}
-          chartProps={{
-            aggregatorConfig: {
-              "#": (_) => 1,
-              ...dayChartTypes,
-            },
-            dateField: "model.createdAt",
-          }}
-          showChart={true}
-        />
-      </Suspense>
+      <DynamicDataTable
+        sizeOptions={sizeOptions}
+        fileName={"days"}
+        isFinished={isFinished}
+        columns={finalCols}
+        data={data || []}
+        pageInfo={pageInfo}
+        setPageInfo={setPageInfo}
+        getRowId={getRowId}
+        {...dataTableTexts}
+        searchInputProps={{
+          value: filter.title || "",
+          searchInputTexts: { placeholder: search },
+          onChange: updateFilterValue,
+          onClear: clearFilterValue,
+        }}
+        useRadioSort={false}
+        radioSortProps={{
+          setSort,
+          sort,
+          sortingOptions,
+          sortValue,
+          callback: resetCurrentPage,
+          filterKey: "title",
+        }}
+        chartProps={{
+          aggregatorConfig: {
+            "#": (_) => 1,
+            ...dayChartTypes,
+          },
+          dateField: "model.createdAt",
+        }}
+        showChart={true}
+      />
     </div>
   );
 }

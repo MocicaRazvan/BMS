@@ -5,7 +5,6 @@ import {
   ColumnFiltersState,
   flexRender,
   getCoreRowModel,
-  Table as TableType,
   useReactTable,
   VisibilityState,
 } from "@tanstack/react-table";
@@ -62,10 +61,9 @@ import SelectedRows, {
 } from "@/components/table/selected-rows";
 import PulsatingButton from "@/components/magicui/pulsating-button";
 import {
-  LinkedChart,
+  LinkedChartComponent,
   LinkedChartProps,
   LinkedChartTexts,
-  MemoizedLinkedChart,
 } from "@/components/charts/linked-chart";
 import { ColumnResizer } from "@/components/table/column-resizer";
 import { useDraggable } from "react-use-draggable-scroll";
@@ -78,6 +76,7 @@ import useTableColResize, {
   createHeaderLeft,
 } from "@/hoooks/table/use-table-col-resize";
 import useTableRowSelection from "@/hoooks/table/use-table-row-selection";
+import dynamic from "next/dynamic";
 
 export interface TableFilter {
   key: string;
@@ -119,7 +118,18 @@ interface DataTableProps<TData extends Record<string, any>, TValue>
   stickyColumnIds?: string[];
 }
 
-export function DataTable<TData extends Record<string, any>, TValue>({
+const DynamicChart = dynamic(
+  () =>
+    import("@/components/charts/linked-chart").then(
+      (m) => m.MemoizedLinkedChart,
+    ),
+  {
+    ssr: false,
+    loading: () => <Skeleton className="w-full h-full" />,
+  },
+) as LinkedChartComponent;
+
+export function DataTable<TData extends Record<string, any>, TValue = any>({
   columns,
   data,
   pageInfo,
@@ -273,7 +283,7 @@ export function DataTable<TData extends Record<string, any>, TValue>({
 
   return (
     <div className="mb-2">
-      <div className="flex flex-col lg:flex-row items-start py-4 flex-wrap gap-10  ">
+      <div className="flex flex-col lg:flex-row items-start py-4 flex-wrap gap-10">
         <div className="flex-1 flex items-start flex-col lg:flex-row justify-start gap-4">
           <div className="order-0">
             <SearchInput {...searchInputProps} />
@@ -285,7 +295,7 @@ export function DataTable<TData extends Record<string, any>, TValue>({
           )}
           {extraCriteria && extraCriteria}
         </div>
-        <div className=" w-full lg:w-fit flex items-center justify-between gap-4 ml-auto">
+        <div className="w-full lg:w-fit flex items-center justify-between gap-4 ml-auto">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
@@ -484,7 +494,7 @@ export function DataTable<TData extends Record<string, any>, TValue>({
           )}
         >
           {chartData.data.length > 0 ? (
-            <MemoizedLinkedChart
+            <DynamicChart
               data={chartData.data}
               columns={columns}
               dateField="createdAt"

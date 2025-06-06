@@ -3,7 +3,7 @@ import { ExtraTableProps } from "@/types/tables";
 import useList, { UseListProps } from "@/hoooks/useList";
 import { Link, useRouter } from "@/navigation";
 import { CustomEntityModel, UserDto } from "@/types/dto";
-import React, { Suspense, useCallback, useMemo } from "react";
+import React, { useCallback, useMemo } from "react";
 import { ColumnDef } from "@tanstack/react-table";
 import {
   DropdownMenu,
@@ -15,8 +15,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { MoreHorizontal } from "lucide-react";
-import LoadingSpinner from "@/components/common/loading-spinner";
-import { DataTable, DataTableTexts } from "@/components/table/data-table";
+import { DataTableTexts } from "@/components/table/data-table";
 import useBinaryFilter, {
   RadioBinaryCriteriaWithCallback,
   UseBinaryTexts,
@@ -42,6 +41,8 @@ import {
   RadioSortDropDownWithExtraDummy,
 } from "@/components/common/radio-sort";
 import { useAuthUserMinRole } from "@/context/auth-user-min-role-context";
+import dynamic from "next/dynamic";
+import DataTableDynamicSkeleton from "@/components/table/data-table-dynamic-skeleton";
 
 export interface UserTableColumnsTexts {
   id: string;
@@ -70,6 +71,17 @@ export interface UserTableTexts {
 }
 
 type Props = ExtraTableProps & UseListProps & UserTableTexts;
+
+const DynamicDataTable = dynamic(
+  () =>
+    import("@/components/table/data-table").then(
+      (mod) => mod.DataTable<UserDto>,
+    ),
+  {
+    ssr: false,
+    loading: () => <DataTableDynamicSkeleton />,
+  },
+);
 
 export default function UsersTable({
   mainDashboard,
@@ -138,7 +150,6 @@ export default function UsersTable({
     sort,
     setSort,
     sortValue,
-    setSortValue,
     items,
     isFinished,
     error,
@@ -175,12 +186,11 @@ export default function UsersTable({
     () => ({
       setSort,
       sortingOptions,
-      setSortValue,
       sortValue,
       callback: resetCurrentPage,
       filterKey: "email",
     }),
-    [resetCurrentPage, setSort, setSortValue, sortValue, sortingOptions],
+    [resetCurrentPage, setSort, sortValue, sortingOptions],
   );
 
   const handleStartChat = useCallback(
@@ -590,63 +600,60 @@ export default function UsersTable({
 
   return (
     <div className="px-1 w-full space-y-8 lg:space-y-14">
-      <Suspense fallback={<LoadingSpinner />}>
-        <DataTable
-          sizeOptions={sizeOptions}
-          fileName={`users`}
-          isFinished={isFinished}
-          columns={columns}
-          data={data || []}
-          pageInfo={pageInfo}
-          setPageInfo={setPageInfo}
-          getRowId={getRowId}
-          {...dataTableTexts}
-          useRadioSort={false}
-          searchInputProps={{
-            value: filter.email || "",
-            searchInputTexts: { placeholder: search },
-            onChange: updateFilterValue,
-            onClear: clearFilterValue,
-          }}
-          radioSortProps={{
-            setSort,
-            sort,
-            sortingOptions,
-            setSortValue,
-            sortValue,
-            callback: resetCurrentPage,
-            filterKey: "email",
-          }}
-          extraCriteria={
-            <div className="flex items-start justify-center gap-8 flex-1 flex-wrap">
-              <div className="flex items-center justify-end gap-4 flex-1 flex-wrap">
-                {extraCriteria}
-              </div>
+      <DynamicDataTable
+        sizeOptions={sizeOptions}
+        fileName={`users`}
+        isFinished={isFinished}
+        columns={columns}
+        data={data || []}
+        pageInfo={pageInfo}
+        setPageInfo={setPageInfo}
+        getRowId={getRowId}
+        {...dataTableTexts}
+        useRadioSort={false}
+        searchInputProps={{
+          value: filter.email || "",
+          searchInputTexts: { placeholder: search },
+          onChange: updateFilterValue,
+          onClear: clearFilterValue,
+        }}
+        radioSortProps={{
+          setSort,
+          sort,
+          sortingOptions,
+          sortValue,
+          callback: resetCurrentPage,
+          filterKey: "email",
+        }}
+        extraCriteria={
+          <div className="flex items-start justify-center gap-8 flex-1 flex-wrap">
+            <div className="flex items-center justify-end gap-4 flex-1 flex-wrap">
+              {extraCriteria}
             </div>
-          }
-          chartProps={{
-            aggregatorConfig: {
-              "#": (_) => 1,
-              "#Trainer": (r) => (r.role === "ROLE_TRAINER" ? 1 : 0),
-              "#User": (r) => (r.role === "ROLE_USER" ? 1 : 0),
-              ["# " + userTableColumnsTexts.emailVerified.header]: (r) =>
-                Number(r.emailVerified),
-              "#Google": (r) => (r.provider === "GOOGLE" ? 1 : 0),
-              "#Github": (r) => (r.provider === "GITHUB" ? 1 : 0),
-              "#Local": (r) => (r.provider === "LOCAL" ? 1 : 0),
-            },
-            dateField: "createdAt",
-          }}
-          showChart={true}
-          // rangeDateFilter={
-          //   <CreationFilter
-          //     {...creationFilterTexts}
-          //     updateCreatedAtRange={updateCreatedAtRange}
-          //     updateUpdatedAtRange={updateUpdatedAtRange}
-          //   />
-          // }
-        />
-      </Suspense>
+          </div>
+        }
+        chartProps={{
+          aggregatorConfig: {
+            "#": (_) => 1,
+            "#Trainer": (r) => (r.role === "ROLE_TRAINER" ? 1 : 0),
+            "#User": (r) => (r.role === "ROLE_USER" ? 1 : 0),
+            ["# " + userTableColumnsTexts.emailVerified.header]: (r) =>
+              Number(r.emailVerified),
+            "#Google": (r) => (r.provider === "GOOGLE" ? 1 : 0),
+            "#Github": (r) => (r.provider === "GITHUB" ? 1 : 0),
+            "#Local": (r) => (r.provider === "LOCAL" ? 1 : 0),
+          },
+          dateField: "createdAt",
+        }}
+        showChart={true}
+        // rangeDateFilter={
+        //   <CreationFilter
+        //     {...creationFilterTexts}
+        //     updateCreatedAtRange={updateCreatedAtRange}
+        //     updateUpdatedAtRange={updateUpdatedAtRange}
+        //   />
+        // }
+      />
     </div>
   );
 }

@@ -33,7 +33,6 @@ export interface UseRadioSortArgs {
   sortingOptions: SortingOption[];
   sortValue: string;
   setSort: (value: SetStateAction<SortingOption[]>) => void;
-  setSortValue: (value: SetStateAction<string>) => void;
   callback?: () => void;
   useDefaultSort?: boolean;
   filterKey: string;
@@ -46,7 +45,6 @@ export interface RadioSortProps extends RadioSortTexts, UseRadioSortArgs {
 
 export const useRadioSort = ({
   useDefaultSort,
-  setSortValue,
   sortValue,
   sortingOptions,
   setSort,
@@ -71,7 +69,6 @@ export const useRadioSort = ({
         console.log("DEFAULT OPTION ", defaultOption);
         if (defaultOption) {
           setSort([defaultOption]);
-          setSortValue("createdAt-desc");
           setIsDefaultSort(true);
           callback?.();
         }
@@ -88,9 +85,8 @@ export const useRadioSort = ({
       sortQ[0].direction === "desc";
     if ((sortValue === "" || sortValue === "createdAt-desc") && sortIsDefault) {
       setIsDefaultSort(true);
-      setSortValue("createdAt-desc");
     }
-  }, [currentSearchParams, setSortValue, sortValue, sortingOptions.length]);
+  }, [currentSearchParams, sortValue, sortingOptions.length]);
 
   const handleValueChange = useCallback(
     (val: string | undefined) => {
@@ -99,7 +95,6 @@ export const useRadioSort = ({
       }
       if (val === sortValue || val === undefined) {
         setSort([]);
-        setSortValue("");
         callback?.();
         return;
       }
@@ -111,7 +106,6 @@ export const useRadioSort = ({
       );
       if (sortOption) {
         setSort([sortOption]);
-        setSortValue(val);
         callback?.();
       }
     },
@@ -119,7 +113,6 @@ export const useRadioSort = ({
       callback,
       isDefaultSort,
       setSort,
-      setSortValue,
       sortValue,
       JSON.stringify(sortingOptions),
     ],
@@ -436,7 +429,6 @@ export default function RadioSort({
   sortValue,
   sort,
   sortingOptions,
-  setSortValue,
   noSort,
   callback,
   useDefaultSort = true,
@@ -445,7 +437,6 @@ export default function RadioSort({
 }: RadioSortProps) {
   const { handleValueChange, isDefaultSort } = useRadioSort({
     useDefaultSort,
-    setSortValue,
     sortValue,
     sortingOptions,
     setSort,

@@ -16,10 +16,9 @@ import {
   IngredientNutritionalFactResponse,
   ResponseWithEntityCount,
 } from "@/types/dto";
-import React, { Suspense, useCallback, useMemo } from "react";
+import React, { useCallback, useMemo } from "react";
 import { ColumnDef } from "@tanstack/react-table";
-import { DataTable, DataTableTexts } from "@/components/table/data-table";
-import LoadingSpinner from "@/components/common/loading-spinner";
+import { DataTableTexts } from "@/components/table/data-table";
 import { getCalories } from "@/types/responses";
 import { Badge } from "@/components/ui/badge";
 import { ingredientColumnActions } from "@/lib/constants";
@@ -46,6 +45,8 @@ import {
   RadioSortDropDownWithExtraDummy,
 } from "@/components/common/radio-sort";
 import { useAuthUserMinRole } from "@/context/auth-user-min-role-context";
+import dynamic from "next/dynamic";
+import DataTableDynamicSkeleton from "@/components/table/data-table-dynamic-skeleton";
 
 export interface IngredientTableColumnTexts {
   id: string;
@@ -91,7 +92,19 @@ const typeColorMap = {
   OMNIVORE: "default",
   VEGETARIAN: "accent",
 };
-
+const DynamicDataTable = dynamic(
+  () =>
+    import("@/components/table/data-table").then(
+      (mod) =>
+        mod.DataTable<
+          ResponseWithEntityCount<IngredientNutritionalFactResponse>
+        >,
+    ),
+  {
+    ssr: false,
+    loading: () => <DataTableDynamicSkeleton />,
+  },
+);
 export default function IngredientsTable({
   forWhom,
   mainDashboard,
@@ -144,7 +157,6 @@ export default function IngredientsTable({
     sort,
     setSort,
     sortValue,
-    setSortValue,
     items,
     isFinished,
     error,
@@ -191,12 +203,11 @@ export default function IngredientsTable({
     () => ({
       setSort,
       sortingOptions,
-      setSortValue,
       sortValue,
       callback: resetCurrentPage,
       filterKey: "name",
     }),
-    [resetCurrentPage, setSort, setSortValue, sortValue, sortingOptions],
+    [resetCurrentPage, setSort, sortValue, sortingOptions],
   );
 
   const columns: ColumnDef<
@@ -658,54 +669,51 @@ export default function IngredientsTable({
 
   return (
     <div className="px-1 w-full space-y-8 lg:space-y-14 ">
-      <Suspense fallback={<LoadingSpinner />}>
-        <DataTable
-          sizeOptions={sizeOptions}
-          fileName="ingredients"
-          isFinished={isFinished}
-          columns={finalColumns}
-          data={data || []}
-          pageInfo={pageInfo}
-          setPageInfo={setPageInfo}
-          hidePDFColumnIds={[ingredientTableColumnTexts.calories]}
-          getRowId={getRowId}
-          {...dataTableTexts}
-          useRadioSort={false}
-          searchInputProps={{
-            value: filter.name || "",
-            searchInputTexts: { placeholder: search },
-            onChange: updateFilterValue,
-            onClear: clearFilterValue,
-          }}
-          radioSortProps={{
-            setSort,
-            sort,
-            sortingOptions,
-            setSortValue,
-            sortValue,
-            callback: resetCurrentPage,
-            filterKey: "name",
-          }}
-          extraCriteria={
-            <div className="flex items-start justify-center gap-8 flex-1 flex-wrap">
-              <div className="flex items-center justify-end gap-4 flex-1 flex-wrap">
-                {extraCriteria}
-                {/*{dietTypeCriteriaCallback(resetCurrentPage)}*/}
-                {/*{isAdmin &&*/}
-                {/*  forWhom === "admin" &&*/}
-                {/*  fieldCriteriaCallBack(resetCurrentPage)}*/}
-              </div>
+      <DynamicDataTable
+        sizeOptions={sizeOptions}
+        fileName="ingredients"
+        isFinished={isFinished}
+        columns={finalColumns}
+        data={data || []}
+        pageInfo={pageInfo}
+        setPageInfo={setPageInfo}
+        hidePDFColumnIds={[ingredientTableColumnTexts.calories]}
+        getRowId={getRowId}
+        {...dataTableTexts}
+        useRadioSort={false}
+        searchInputProps={{
+          value: filter.name || "",
+          searchInputTexts: { placeholder: search },
+          onChange: updateFilterValue,
+          onClear: clearFilterValue,
+        }}
+        radioSortProps={{
+          setSort,
+          sort,
+          sortingOptions,
+          sortValue,
+          callback: resetCurrentPage,
+          filterKey: "name",
+        }}
+        extraCriteria={
+          <div className="flex items-start justify-center gap-8 flex-1 flex-wrap">
+            <div className="flex items-center justify-end gap-4 flex-1 flex-wrap">
+              {extraCriteria}
+              {/*{dietTypeCriteriaCallback(resetCurrentPage)}*/}
+              {/*{isAdmin &&*/}
+              {/*  forWhom === "admin" &&*/}
+              {/*  fieldCriteriaCallBack(resetCurrentPage)}*/}
             </div>
-          }
-          // rangeDateFilter={
-          //   <CreationFilter
-          //     {...creationFilterTexts}
-          //     updateCreatedAtRange={updateCreatedAtRange}
-          //     updateUpdatedAtRange={updateUpdatedAtRange}
-          //   />
-          // }
-        />
-      </Suspense>
+          </div>
+        }
+        // rangeDateFilter={
+        //   <CreationFilter
+        //     {...creationFilterTexts}
+        //     updateCreatedAtRange={updateCreatedAtRange}
+        //     updateUpdatedAtRange={updateUpdatedAtRange}
+        //   />
+        // }
+      />
     </div>
   );
 }

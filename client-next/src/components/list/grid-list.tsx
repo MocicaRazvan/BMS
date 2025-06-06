@@ -98,7 +98,6 @@ export default function GridList<T extends TitleBodyImagesUserDto>({
     sort,
     setSort,
     sortValue,
-    setSortValue,
     items,
     isFinished,
     error,
@@ -141,7 +140,6 @@ export default function GridList<T extends TitleBodyImagesUserDto>({
               sort={sort}
               sortValue={sortValue}
               setSort={setSort}
-              setSortValue={setSortValue}
               {...radioSortTexts}
               callback={resetCurrentPage}
               filterKey="title"

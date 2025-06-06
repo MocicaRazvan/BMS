@@ -80,6 +80,13 @@ type Constrained<T> = T extends TitleBodyDto
     : never;
 
 const DEBOUNCE_DELAY = 500;
+
+function getCreatedAtOption(sortingOptions: SortingOption[]) {
+  return sortingOptions.find(
+    (o) => o.property === "createdAt" && o.direction === "desc",
+  );
+}
+
 export default function useList<T>({
   path,
   sortingOptions,
@@ -141,13 +148,6 @@ export default function useList<T>({
     defaultUpdatedAtUpperBound ?? undefined,
   );
 
-  const sortString = currentSearchParams.get("sort");
-  const sortQ = parseSortString(sortString, sortingOptions);
-  const [sort, setSort] = useState(sortQ);
-  const [sortValue, setSortValue] = useState(
-    sort.length > 0 ? `${sort[0].property}-${sort[0].direction}` : "",
-  );
-
   const [pageInfo, setPageInfo] = useState<PageInfo>({
     currentPage,
     totalPages: currentPage + 1,
@@ -159,6 +159,26 @@ export default function useList<T>({
     [filterKey]: filterValue,
   });
 
+  const sortString = currentSearchParams.get("sort");
+
+  const [sort, setSort] = useState(() => {
+    const parsed = parseSortString(sortString, sortingOptions);
+    const curFilter = filter[filterKey] || "";
+    if (defaultSort && curFilter === "" && parsed.length === 0) {
+      const createdAt = getCreatedAtOption(sortingOptions);
+      return createdAt ? [createdAt] : [];
+    }
+    return parsed;
+  });
+
+  const sortValue = useMemo(
+    () =>
+      sort.length > 0
+        ? sort.map((s) => `${s.property}-${s.direction}`).join(",")
+        : "",
+    [sort],
+  );
+
   const fetchArgs: UseFetchStreamProps = {
     path,
     method: "PATCH",
@@ -166,7 +186,7 @@ export default function useList<T>({
     body: {
       page: currentPage,
       size: pageSize,
-      sortingCriteria: makeSortFetchParams(sortQ),
+      sortingCriteria: makeSortFetchParams(sort),
     },
     useAbortController,
     queryParams: {
@@ -194,7 +214,6 @@ export default function useList<T>({
       currentPage: 0,
     }));
     setSort([]);
-    setSortValue("");
   }, []);
 
   const debouncedFilter = useDebounceWithCallBack(
@@ -315,10 +334,9 @@ export default function useList<T>({
         curFilter === "" &&
         Object.keys(curSortParams).length === 0
       ) {
-        const createdAt = sortingOptions.find(
-          (o) => o.property === "createdAt" && o.direction === "desc",
-        );
+        const createdAt = getCreatedAtOption(sortingOptions);
         if (createdAt) {
+          console.log("Setting defaultEffect sort to createdAt desc");
           setSort([createdAt]);
           updatedSearchParams.set(
             "sort",
@@ -424,7 +442,6 @@ export default function useList<T>({
     setSort,
     updateSortState,
     sortValue,
-    setSortValue,
     isFinished,
     error,
     messages,

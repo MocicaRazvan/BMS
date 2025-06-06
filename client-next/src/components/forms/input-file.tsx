@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/form";
 import React, { useCallback, useEffect, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
-import SortableList, { SortableItem } from "@/components/dnd/sortable-list";
+import { SortableItem } from "@/components/dnd/sortable-list";
 import { arrayMove } from "@dnd-kit/sortable";
 import { useDropzone } from "react-dropzone";
 import { cn } from "@/lib/utils";
@@ -32,8 +32,22 @@ import { ImageCropTexts } from "@/components/common/image-cropper";
 import { saveAs } from "file-saver";
 import JSZip from "jszip";
 import { useDebounce } from "react-use";
+import dynamic from "next/dynamic";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export type InputFieldName = "images" | "videos";
+
+const DynamicSortableList = dynamic(
+  () => import("@/components/dnd/sortable-list"),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="w-full max-w-[1200px] mx-auto mt-4 p-2 py-4">
+        <Skeleton className="size-full" />
+      </div>
+    ),
+  },
+);
 
 export interface FieldInputTexts {
   title: string;
@@ -423,7 +437,7 @@ export default function InputFile<T extends FieldValues>({
               ease: isListCollapsed ? "easeIn" : "easeOut",
             }}
           >
-            <SortableList
+            <DynamicSortableList
               items={fieldValue}
               moveItems={moveItems}
               deleteItem={deleteItem}

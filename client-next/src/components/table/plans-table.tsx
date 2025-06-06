@@ -2,7 +2,7 @@
 
 import { ColumnActionsTexts } from "@/texts/components/table";
 import { planColumnActions } from "@/lib/constants";
-import { DataTable, DataTableTexts } from "@/components/table/data-table";
+import { DataTableTexts } from "@/components/table/data-table";
 import { UseApprovedFilterTexts } from "@/components/list/useApprovedFilter";
 import useBinaryFilter, {
   RadioBinaryCriteriaWithCallback,
@@ -22,7 +22,7 @@ import {
   PlanResponse,
   ResponseWithEntityCount,
 } from "@/types/dto";
-import React, { Suspense, useCallback, useMemo } from "react";
+import React, { useCallback, useMemo } from "react";
 import { ColumnDef } from "@tanstack/react-table";
 import { Badge, BadgeVariants } from "@/components/ui/badge";
 import { format, parseISO } from "date-fns";
@@ -39,7 +39,6 @@ import { MoreHorizontal } from "lucide-react";
 import AlertDialogApprovePlan from "@/components/dialogs/plans/approve-plan";
 import ToggleDisplayPlan from "@/components/dialogs/plans/plan-toggle-display";
 import AlertDialogDeletePlan from "@/components/dialogs/plans/delete-plan";
-import LoadingSpinner from "@/components/common/loading-spinner";
 import { useFormatter } from "next-intl";
 import useClientNotFound from "@/hoooks/useClientNotFound";
 import OverflowTextTooltip from "@/components/common/overflow-text-tooltip";
@@ -53,6 +52,8 @@ import {
   RadioSortDropDownWithExtraDummy,
 } from "@/components/common/radio-sort";
 import { useAuthUserMinRole } from "@/context/auth-user-min-role-context";
+import dynamic from "next/dynamic";
+import DataTableDynamicSkeleton from "@/components/table/data-table-dynamic-skeleton";
 
 export interface PlanTableColumnsTexts {
   id: string;
@@ -102,6 +103,16 @@ const colorMap = {
   VEGETARIAN: "accent",
 } as const;
 
+const DynamicDataTable = dynamic(
+  () =>
+    import("@/components/table/data-table").then(
+      (mod) => mod.DataTable<ResponseWithEntityCount<PlanResponse>>,
+    ),
+  {
+    ssr: false,
+    loading: () => <DataTableDynamicSkeleton />,
+  },
+);
 export default function PlansTable({
   planTableColumnsTexts,
   dataTableTexts,
@@ -175,7 +186,6 @@ export default function PlansTable({
     sort,
     setSort,
     sortValue,
-    setSortValue,
     items,
     isFinished,
     error,
@@ -221,12 +231,11 @@ export default function PlansTable({
     () => ({
       setSort,
       sortingOptions,
-      setSortValue,
       sortValue,
       callback: resetCurrentPage,
       filterKey: "title",
     }),
-    [setSort, sortingOptions, setSortValue, sortValue, resetCurrentPage],
+    [setSort, sortingOptions, sortValue, resetCurrentPage],
   );
 
   const columns: ColumnDef<ResponseWithEntityCount<PlanResponse>>[] = useMemo(
@@ -747,62 +756,59 @@ export default function PlansTable({
 
   return (
     <div className="px-1 pb-10 w-full  h-full space-y-8 lg:space-y-14">
-      <Suspense fallback={<LoadingSpinner />}>
-        <DataTable
-          sizeOptions={sizeOptions}
-          fileName={`plans`}
-          isFinished={isFinished}
-          columns={finalCols}
-          data={data || []}
-          pageInfo={pageInfo}
-          setPageInfo={setPageInfo}
-          {...dataTableTexts}
-          getRowId={getRowId}
-          useRadioSort={false}
-          searchInputProps={{
-            value: filter.title || "",
-            searchInputTexts: { placeholder: search },
-            onChange: updateFilterValue,
-            onClear: clearFilterValue,
-          }}
-          radioSortProps={{
-            setSort,
-            sort,
-            sortingOptions,
-            setSortValue,
-            sortValue,
-            callback: resetCurrentPage,
-            filterKey: "title",
-          }}
-          extraCriteria={
-            <div className="flex items-start justify-center gap-8 flex-1 flex-wrap">
-              <div className="flex items-center justify-end gap-4 flex-1 flex-wrap">
-                {/*{dietTypeCriteriaCallback(resetCurrentPage)}*/}
-                {/*{objectiveTypeCriteriaCallback(resetCurrentPage)}*/}
-                {/*{displayCriteriaCallBack(resetCurrentPage)}*/}
-                {/*{approvedCriteriaCallBack(resetCurrentPage)}*/}
-              </div>
+      <DynamicDataTable
+        sizeOptions={sizeOptions}
+        fileName={`plans`}
+        isFinished={isFinished}
+        columns={finalCols}
+        data={data || []}
+        pageInfo={pageInfo}
+        setPageInfo={setPageInfo}
+        {...dataTableTexts}
+        getRowId={getRowId}
+        useRadioSort={false}
+        searchInputProps={{
+          value: filter.title || "",
+          searchInputTexts: { placeholder: search },
+          onChange: updateFilterValue,
+          onClear: clearFilterValue,
+        }}
+        radioSortProps={{
+          setSort,
+          sort,
+          sortingOptions,
+          sortValue,
+          callback: resetCurrentPage,
+          filterKey: "title",
+        }}
+        extraCriteria={
+          <div className="flex items-start justify-center gap-8 flex-1 flex-wrap">
+            <div className="flex items-center justify-end gap-4 flex-1 flex-wrap">
+              {/*{dietTypeCriteriaCallback(resetCurrentPage)}*/}
+              {/*{objectiveTypeCriteriaCallback(resetCurrentPage)}*/}
+              {/*{displayCriteriaCallBack(resetCurrentPage)}*/}
+              {/*{approvedCriteriaCallBack(resetCurrentPage)}*/}
             </div>
-          }
-          chartProps={{
-            aggregatorConfig: {
-              "#": (_) => 1,
-              "#omnivore": (r) => (r.model.type === "OMNIVORE" ? 1 : 0),
-              "#vegan": (r) => (r.model.type === "VEGAN" ? 1 : 0),
-              "#vegetarian": (r) => (r.model.type === "VEGETARIAN" ? 1 : 0),
-              ["#" + planTableColumnsTexts.approved.header]: (p) =>
-                Number(p.model.approved),
-              [planTableColumnsTexts.count + " / 100"]: (p) => p.count / 100,
-              [planTableColumnsTexts.count +
-              " * " +
-              planTableColumnsTexts.price +
-              " / 1000"]: (p) => (p.count * p.model.price) / 1000,
-            },
-            dateField: "model.createdAt",
-          }}
-          showChart={true}
-        />
-      </Suspense>
+          </div>
+        }
+        chartProps={{
+          aggregatorConfig: {
+            "#": (_) => 1,
+            "#omnivore": (r) => (r.model.type === "OMNIVORE" ? 1 : 0),
+            "#vegan": (r) => (r.model.type === "VEGAN" ? 1 : 0),
+            "#vegetarian": (r) => (r.model.type === "VEGETARIAN" ? 1 : 0),
+            ["#" + planTableColumnsTexts.approved.header]: (p) =>
+              Number(p.model.approved),
+            [planTableColumnsTexts.count + " / 100"]: (p) => p.count / 100,
+            [planTableColumnsTexts.count +
+            " * " +
+            planTableColumnsTexts.price +
+            " / 1000"]: (p) => (p.count * p.model.price) / 1000,
+          },
+          dateField: "model.createdAt",
+        }}
+        showChart={true}
+      />
     </div>
   );
 }

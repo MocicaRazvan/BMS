@@ -46,6 +46,7 @@ const baseConfig = {
   cacheMaxMemorySize: process.env.NODE_ENV === "production" ? 0 : undefined,
   experimental: {
     instrumentationHook: true,
+    optimizePackageImports: ["@radix-ui/react-icons"],
     serverComponentsExternalPackages: [
       // "@opentelemetry/instrumentation",
       // "langchain",

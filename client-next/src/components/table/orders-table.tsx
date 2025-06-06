@@ -1,11 +1,11 @@
 "use client";
-import { DataTable, DataTableTexts } from "@/components/table/data-table";
+import { DataTableTexts } from "@/components/table/data-table";
 import { ExtraTableProps } from "@/types/tables";
 import useList, { UseListProps } from "@/hoooks/useList";
 import { Link, useRouter } from "@/navigation";
 import { useFormatter } from "next-intl";
 import { CustomEntityModel, OrderDtoWithAddress } from "@/types/dto";
-import React, { Suspense, useCallback, useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { ColumnDef } from "@tanstack/react-table";
 import { ColumnActionsTexts } from "@/texts/components/table";
 import { orderColumnActions } from "@/lib/constants";
@@ -22,7 +22,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { MoreHorizontal } from "lucide-react";
-import LoadingSpinner from "@/components/common/loading-spinner";
 import useClientNotFound from "@/hoooks/useClientNotFound";
 import CreationFilter, {
   CreationFilterTexts,
@@ -34,6 +33,8 @@ import {
 } from "@/components/common/radio-sort";
 import OverflowTextTooltip from "@/components/common/overflow-text-tooltip";
 import { useAuthUserMinRole } from "@/context/auth-user-min-role-context";
+import dynamic from "next/dynamic";
+import DataTableDynamicSkeleton from "@/components/table/data-table-dynamic-skeleton";
 
 export interface OrderTableColumnsTexts {
   id: string;
@@ -55,6 +56,18 @@ export interface OrderTableTexts {
 export type OrdersTableProps = ExtraTableProps & OrderTableTexts & UseListProps;
 
 const fieldKeys = ["country", "city", "state"] as const;
+
+const DynamicDataTable = dynamic(
+  () =>
+    import("@/components/table/data-table").then(
+      (mod) => mod.DataTable<OrderDtoWithAddress>,
+    ),
+  {
+    ssr: false,
+    loading: () => <DataTableDynamicSkeleton />,
+  },
+);
+
 export default function OrdersTable({
   search,
   orderTableColumnsTexts,
@@ -140,7 +153,6 @@ export default function OrdersTable({
     sort,
     setSort,
     sortValue,
-    setSortValue,
     items,
     updateSortState,
     isFinished,
@@ -167,19 +179,11 @@ export default function OrdersTable({
     () => ({
       setSort,
       sortingOptions,
-      setSortValue,
       sortValue,
       callback: resetCurrentPage,
       filterKey: searchKey,
     }),
-    [
-      resetCurrentPage,
-      searchKey,
-      setSort,
-      setSortValue,
-      sortValue,
-      sortingOptions,
-    ],
+    [resetCurrentPage, searchKey, setSort, sortValue, sortingOptions],
   );
 
   const columns: ColumnDef<OrderDtoWithAddress>[] = useMemo(
@@ -389,73 +393,68 @@ export default function OrdersTable({
 
   return (
     <div className="px-1 pb-10 w-full  h-full space-y-8 lg:space-y-14">
-      <Suspense fallback={<LoadingSpinner />}>
-        <DataTable
-          sizeOptions={sizeOptions}
-          fileName={`orders`}
-          isFinished={isFinished}
-          columns={columns}
-          data={data || []}
-          pageInfo={pageInfo}
-          setPageInfo={setPageInfo}
-          getRowId={getRowId}
-          useRadioSort={false}
-          specialPDFColumns={[
-            {
-              key: "address",
-              handler: (value: object) => {
-                if ("country" in value && "city" in value && "state" in value) {
-                  return `${value["country"]} ${value["city"]} ${value["state"]}`;
-                }
-                return "";
-              },
+      <DynamicDataTable
+        sizeOptions={sizeOptions}
+        fileName={`orders`}
+        isFinished={isFinished}
+        columns={columns}
+        data={data || []}
+        pageInfo={pageInfo}
+        setPageInfo={setPageInfo}
+        getRowId={getRowId}
+        useRadioSort={false}
+        specialPDFColumns={[
+          {
+            key: "address",
+            handler: (value: object) => {
+              if ("country" in value && "city" in value && "state" in value) {
+                return `${value["country"]} ${value["city"]} ${value["state"]}`;
+              }
+              return "";
             },
-          ]}
-          {...dataTableTexts}
-          searchInputProps={{
-            value: filter[searchKey] || "",
-            searchInputTexts: {
-              placeholder: `${search} ${searchKeyLabel[searchKey]}...`,
-            },
-            onChange: updateFilterValue,
-            onClear: clearFilterValue,
-          }}
-          radioSortProps={{
-            setSort,
-            sort,
-            sortingOptions,
-            setSortValue,
-            sortValue,
-            callback: resetCurrentPage,
-            filterKey: searchKey,
-          }}
-          extraCriteria={
-            <div className="order-[2]">
-              {searchKeyCriteria(resetCurrentPage)}
-            </div>
-          }
-          chartProps={{
-            aggregatorConfig: {
-              [orderTableColumnsTexts.plans + " / 10"]: (p) =>
-                p.order.planIds.length / 10,
-              [orderTableColumnsTexts.plans +
-              " * " +
-              orderTableColumnsTexts.total +
-              " / 10"]: (p) => (p.order.planIds.length * p.order.total) / 100,
-            },
-            dateField: "order.createdAt",
-          }}
-          showChart={true}
-          // rangeDateFilter={
-          // <CreationFilter
-          //   {...creationFilterTexts}
-          //   updateCreatedAtRange={updateCreatedAtRange}
-          //   hideUpdatedAt={true}
-          // />
+          },
+        ]}
+        {...dataTableTexts}
+        searchInputProps={{
+          value: filter[searchKey] || "",
+          searchInputTexts: {
+            placeholder: `${search} ${searchKeyLabel[searchKey]}...`,
+          },
+          onChange: updateFilterValue,
+          onClear: clearFilterValue,
+        }}
+        radioSortProps={{
+          setSort,
+          sort,
+          sortingOptions,
+          sortValue,
+          callback: resetCurrentPage,
+          filterKey: searchKey,
+        }}
+        extraCriteria={
+          <div className="order-[2]">{searchKeyCriteria(resetCurrentPage)}</div>
+        }
+        chartProps={{
+          aggregatorConfig: {
+            [orderTableColumnsTexts.plans + " / 10"]: (p) =>
+              p.order.planIds.length / 10,
+            [orderTableColumnsTexts.plans +
+            " * " +
+            orderTableColumnsTexts.total +
+            " / 10"]: (p) => (p.order.planIds.length * p.order.total) / 100,
+          },
+          dateField: "order.createdAt",
+        }}
+        showChart={true}
+        // rangeDateFilter={
+        // <CreationFilter
+        //   {...creationFilterTexts}
+        //   updateCreatedAtRange={updateCreatedAtRange}
+        //   hideUpdatedAt={true}
+        // />
 
-          // }
-        />
-      </Suspense>
+        // }
+      />
     </div>
   );
 }

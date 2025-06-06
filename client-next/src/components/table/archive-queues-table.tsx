@@ -123,7 +123,7 @@ export interface ArchiveQueuesTableTexts {
   };
   downloadSelected: string;
 }
-interface ArchiveQueuesTableProps {
+export interface ArchiveQueuesTableProps {
   texts: ArchiveQueuesTableTexts;
 }
 
@@ -160,7 +160,9 @@ export default function ArchiveQueuesTable({ texts }: ArchiveQueuesTableProps) {
       {
         id: "id",
         accessorKey: "id",
-        header: () => <div className="text-left">{texts.columns.id}</div>,
+        header: () => (
+          <div className="font-bold text-lg text-left">{texts.columns.id}</div>
+        ),
         cell: ({ row }) => (
           <OverflowTextTooltip
             text={row.original.id}
@@ -426,7 +428,10 @@ function DataTable({
               Array.from({ length: 10 }).map((_, i) => (
                 <TableRow key={`loading-${i}`}>
                   {columns.map((_, j) => (
-                    <TableCell key={`loading-cell-${j}-row-${i}`}>
+                    <TableCell
+                      key={`loading-cell-${j}-row-${i}`}
+                      className="py-5"
+                    >
                       <Skeleton className="w-full h-[20px]" />
                     </TableCell>
                   ))}
@@ -440,7 +445,7 @@ function DataTable({
                   className="lg:hover:relative z-20  hover:bg-muted group"
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
+                    <TableCell key={cell.id} className="py-5">
                       <div className="group-hover:scale-[1.055] transition-transform duration-200 ease-in-out">
                         {flexRender(
                           cell.column.columnDef.cell,
@@ -600,7 +605,8 @@ const HeaderSortingButton = <T,>({
 }) => (
   <Button
     variant="ghost"
-    className="px-1.5 py-1"
+    className="px-1.5 py-1 text-lg"
+    size="lg"
     onClick={() => {
       const sortState = column.getIsSorted();
       if (sortState === "asc") {

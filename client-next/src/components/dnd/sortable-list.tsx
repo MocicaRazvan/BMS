@@ -105,8 +105,6 @@ export default function SortableList({
     setActiveItem(undefined);
   }, []);
 
-  console.log("items", items);
-
   return (
     <DndContext
       sensors={sensors}

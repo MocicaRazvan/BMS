@@ -15,14 +15,13 @@ import { CustomEntityModel, PostResponse } from "@/types/dto";
 
 import { ColumnDef } from "@tanstack/react-table";
 import { MoreHorizontal } from "lucide-react";
-import React, { Suspense, useCallback, useMemo } from "react";
+import { useCallback, useMemo } from "react";
 
 import { ExtraTableProps } from "@/types/tables";
 import { format, parseISO } from "date-fns";
 import { Link, useRouter } from "@/navigation";
-import { DataTable, DataTableTexts } from "@/components/table/data-table";
+import { DataTableTexts } from "@/components/table/data-table";
 import useList, { UseListProps } from "@/hoooks/useList";
-import LoadingSpinner from "@/components/common/loading-spinner";
 import useTagsExtraCriteria, {
   TagsExtraCriteriaWithCallback,
   UseTagsExtraCriteriaTexts,
@@ -47,6 +46,8 @@ import {
 } from "@/components/common/radio-sort";
 import AlertDialogDeletePost from "@/components/dialogs/posts/delete-post";
 import { useAuthUserMinRole } from "@/context/auth-user-min-role-context";
+import dynamic from "next/dynamic";
+import DataTableDynamicSkeleton from "@/components/table/data-table-dynamic-skeleton";
 
 export interface PostTableColumnsTexts {
   id: string;
@@ -73,6 +74,17 @@ export interface PostTableTexts {
 }
 
 type Props = ExtraTableProps & PostTableTexts & UseListProps;
+
+const DynamicDataTable = dynamic(
+  () =>
+    import("@/components/table/data-table").then(
+      (mod) => mod.DataTable<PostResponse>,
+    ),
+  {
+    ssr: false,
+    loading: () => <DataTableDynamicSkeleton />,
+  },
+);
 
 export default function PostsTable({
   forWhom,
@@ -112,7 +124,6 @@ export default function PostsTable({
     sort,
     setSort,
     sortValue,
-    setSortValue,
     items,
     isFinished,
     error,
@@ -141,12 +152,11 @@ export default function PostsTable({
     () => ({
       setSort,
       sortingOptions,
-      setSortValue,
       sortValue,
       callback: resetCurrentPage,
       filterKey: "title",
     }),
-    [setSort, sortingOptions, setSortValue, sortValue, resetCurrentPage],
+    [setSort, sortingOptions, sortValue, resetCurrentPage],
   );
 
   const data = useMemo(() => items.map((i) => i.content), [items]);
@@ -490,66 +500,62 @@ export default function PostsTable({
 
   return (
     <div className="px-1 pb-10 w-full  h-full space-y-8 lg:space-y-14">
-      <Suspense fallback={<LoadingSpinner />}>
-        <DataTable
-          sizeOptions={sizeOptions}
-          fileName={`posts-${authUser.email}`}
-          isFinished={isFinished}
-          columns={columns}
-          data={data || []}
-          pageInfo={pageInfo}
-          setPageInfo={setPageInfo}
-          getRowId={getRowId}
-          {...dataTableTexts}
-          useRadioSort={false}
-          searchInputProps={{
-            value: filter.title || "",
-            searchInputTexts: { placeholder: search },
-            onChange: updateFilterValue,
-            onClear: clearFilterValue,
-          }}
-          radioSortProps={{
-            setSort,
-            sort,
-            sortingOptions,
-            setSortValue,
-            sortValue,
-            callback: resetCurrentPage,
-            filterKey: "title",
-          }}
-          chartProps={{
-            aggregatorConfig: {
-              "#": (_) => 1,
-              [postTableColumnsTexts.userLikes]: (p) => p.userLikes.length,
-              [postTableColumnsTexts.userDislikes]: (p) =>
-                p.userDislikes.length,
-              ["#" + postTableColumnsTexts.approved.header]: (p) =>
-                Number(p.approved),
-            },
-            dateField: "createdAt",
-          }}
-          showChart={true}
-          extraCriteria={
-            <div className="flex items-start justify-center gap-8 flex-1 flex-wrap">
-              <div className="flex-1 flex-wrap">
-                <TagsExtraCriteriaWithCallback
-                  texts={useTagsExtraCriteriaTexts}
-                  setTags={setTags}
-                  tags={tags}
-                  callback={resetCurrentPage}
-                />
-              </div>
+      <DynamicDataTable
+        sizeOptions={sizeOptions}
+        fileName={`posts-${authUser.email}`}
+        isFinished={isFinished}
+        columns={columns}
+        data={data || []}
+        pageInfo={pageInfo}
+        setPageInfo={setPageInfo}
+        getRowId={getRowId}
+        {...dataTableTexts}
+        useRadioSort={false}
+        searchInputProps={{
+          value: filter.title || "",
+          searchInputTexts: { placeholder: search },
+          onChange: updateFilterValue,
+          onClear: clearFilterValue,
+        }}
+        radioSortProps={{
+          setSort,
+          sort,
+          sortingOptions,
+          sortValue,
+          callback: resetCurrentPage,
+          filterKey: "title",
+        }}
+        chartProps={{
+          aggregatorConfig: {
+            "#": (_) => 1,
+            [postTableColumnsTexts.userLikes]: (p) => p.userLikes.length,
+            [postTableColumnsTexts.userDislikes]: (p) => p.userDislikes.length,
+            ["#" + postTableColumnsTexts.approved.header]: (p) =>
+              Number(p.approved),
+          },
+          dateField: "createdAt",
+        }}
+        showChart={true}
+        extraCriteria={
+          <div className="flex items-start justify-center gap-8 flex-1 flex-wrap">
+            <div className="flex-1 flex-wrap">
+              <TagsExtraCriteriaWithCallback
+                texts={useTagsExtraCriteriaTexts}
+                setTags={setTags}
+                tags={tags}
+                callback={resetCurrentPage}
+              />
             </div>
-          }
-          // rangeDateFilter={
-          //   <CreationFilter
-          //     {...creationFilterTexts}
-          //     updateCreatedAtRange={updateCreatedAtRange}
-          //     updateUpdatedAtRange={updateUpdatedAtRange}
-          //   />
-          // }
-        />
-      </Suspense>
+          </div>
+        }
+        // rangeDateFilter={
+        //   <CreationFilter
+        //     {...creationFilterTexts}
+        //     updateCreatedAtRange={updateCreatedAtRange}
+        //     updateUpdatedAtRange={updateUpdatedAtRange}
+        //   />
+        // }
+      />
     </div>
   );
 }

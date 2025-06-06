@@ -7,9 +7,7 @@ import { ThemeSwitchTexts } from "@/texts/components/nav";
 import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
 import { ArchiveQueuePrefix } from "@/types/dto";
 import { ArchiveQueueCardsTexts } from "@/components/common/archive-queue-card";
-import ArchiveQueuesTable, {
-  ArchiveQueuesTableTexts,
-} from "@/components/table/archive-queues-table";
+import { ArchiveQueuesTableTexts } from "@/components/table/archive-queues-table";
 import SidebarContentLayout from "@/components/sidebar/sidebar-content-layout";
 import Heading from "@/components/common/heading";
 import { Suspense } from "react";
@@ -19,6 +17,7 @@ import ArchiveContent, {
   AugmentedArchiveQueuePrefix,
 } from "@/components/archive/archive-content";
 import { Separator } from "@/components/ui/separator";
+import ArchiveQueuesTableWrapper from "@/app/[locale]/admin/archiveQueues/table-wrapper";
 
 interface Props {
   params: { locale: Locale };
@@ -66,7 +65,7 @@ export default async function AdminArchiveQueues({
           <h2 className="text-lg md:text-xl tracking-tight font-semibold mt-8 mb-3">
             {texts.archiveTableTitle}
           </h2>
-          <ArchiveQueuesTable texts={texts.archiveQueueTableTexts} />
+          <ArchiveQueuesTableWrapper texts={texts.archiveQueueTableTexts} />
           <Separator className="my-10" />
           <div className="mt-10 h-full">
             <ArchiveContent

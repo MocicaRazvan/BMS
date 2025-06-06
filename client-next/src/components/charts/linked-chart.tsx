@@ -1,17 +1,17 @@
 "use client";
 import * as React from "react";
-import { useState, useMemo, useRef, memo } from "react";
+import { memo, useMemo, useRef, useState } from "react";
 
 import {
-  format as formatDate,
-  parse,
   addDays,
   addMonths,
-  addYears,
   addQuarters,
+  addYears,
+  format as formatDate,
+  parse,
 } from "date-fns";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Check, ChevronsUpDown, X } from "lucide-react";
+import { Check, ChevronsUpDown, MoreHorizontal, X } from "lucide-react";
 
 import {
   DropdownMenu,
@@ -25,29 +25,27 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 
-import { MoreHorizontal } from "lucide-react";
-
 import { ColumnDef, ColumnFiltersState, FilterFn } from "@tanstack/react-table";
 
 import {
   Area,
   Bar,
   CartesianGrid,
-  XAxis,
-  YAxis,
   ComposedChart,
   ReferenceArea,
   ResponsiveContainer,
+  XAxis,
+  YAxis,
 } from "recharts";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   ChartConfig,
   ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
   ChartLegend,
   ChartLegendContent,
+  ChartTooltip,
+  ChartTooltipContent,
 } from "@/components/ui/chart";
 import {
   Command,
@@ -464,7 +462,6 @@ function useChartInteraction<TData>({
   const [initialX, setInitialX] = useState<number | null>(null);
 
   const handleSelection = (start: number, end: number) => {
-    console.log("handleSelection", start, end);
     if (setColumnFilters) {
       setColumnFilters((prev) => {
         const updatedFilters = [
@@ -540,7 +537,7 @@ function useChartInteraction<TData>({
   };
 }
 
-export function LinkedChart<TData extends object>({
+export function LinkedChart<TData extends object = object>({
   data,
   columns,
   setColumnFilters,
@@ -837,10 +834,13 @@ export function LinkedChart<TData extends object>({
     </Card>
   );
 }
+
+export type LinkedChartComponent = typeof LinkedChart;
+
 export const MemoizedLinkedChart = memo(
   LinkedChart,
   isDeepEqual,
-) as typeof LinkedChart;
+) as LinkedChartComponent;
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
