@@ -188,8 +188,6 @@ export default function useList<T>({
     PageableResponse<T>[] | null
   >(null);
 
-  console.log("MESSAGES at path " + path, messages);
-
   const debounceCallback = useCallback(() => {
     setPageInfo((prev) => ({
       ...prev,
@@ -240,7 +238,9 @@ export default function useList<T>({
         aboveController: abortController,
         localAuthToken: true,
         batchCallback: (data) => {
-          setNextMessages((prev) => [...(prev || []), ...data]);
+          if (data.length > 0) {
+            setNextMessages((prev) => [...(prev || []), ...data]);
+          }
         },
         errorCallback: () => {
           setNextMessages(null);
@@ -257,10 +257,10 @@ export default function useList<T>({
       }
     };
   }, [
-    JSON.stringify(error),
+    error,
     JSON.stringify(fetchArgs),
     manualFetcher,
-    JSON.stringify(messages),
+    messages,
     pageInfo.currentPage,
     pageInfo.pageSize,
     preloadNext,
@@ -269,19 +269,34 @@ export default function useList<T>({
 
   useEffect(() => {
     if (messages && messages.length > 0 && messages[0].pageInfo) {
-      setPageInfo((prev) => ({
-        ...prev,
-        totalPages: messages[0].pageInfo.totalPages,
-        totalElements: messages[0].pageInfo.totalElements,
-      }));
+      const { totalPages, totalElements } = messages[0].pageInfo;
+
+      setPageInfo((prev) => {
+        if (
+          prev.totalPages === totalPages &&
+          prev.totalElements === totalElements
+        ) {
+          return prev;
+        }
+        return {
+          ...prev,
+          totalPages: messages[0].pageInfo.totalPages,
+          totalElements: messages[0].pageInfo.totalElements,
+        };
+      });
     } else {
-      setPageInfo((prev) => ({
-        ...prev,
-        totalPages: 0,
-        totalElements: 0,
-      }));
+      setPageInfo((prev) => {
+        if (prev.totalPages === 0 && prev.totalElements === 0) {
+          return prev;
+        }
+        return {
+          ...prev,
+          totalPages: 0,
+          totalElements: 0,
+        };
+      });
     }
-  }, [JSON.stringify(messages)]);
+  }, [messages]);
 
   useEffect(() => {
     if (navigate) {
@@ -346,8 +361,8 @@ export default function useList<T>({
     updateCreatedAtSearchParams,
     updateUpdatedAtSearchParams,
     defaultSort,
-    JSON.stringify(updateCreatedAtRange),
-    JSON.stringify(updateUpdatedAtRange),
+    updateCreatedAtRange,
+    updateUpdatedAtRange,
   ]);
 
   const resetCurrentPage = useCallback(() => {

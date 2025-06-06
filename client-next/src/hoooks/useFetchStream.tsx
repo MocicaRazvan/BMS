@@ -1,14 +1,13 @@
 "use client";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSession } from "next-auth/react";
-import { BaseError } from "@/types/responses";
+import { BaseError, isBaseError } from "@/types/responses";
 import { AcceptHeader } from "@/types/fetch-utils";
-import { wrapItemToString } from "@/lib/utils";
+import { isDeepEqual, stableStringify, wrapItemToString } from "@/lib/utils";
 import murmur from "murmurhash";
 import useCachedValue from "@/hoooks/use-cached-value";
 import { deduplicateFetchStream } from "@/lib/fetchers/deduplicateFetchStream";
 import { FetchStreamProps } from "@/lib/fetchers/fetchStream";
-import stringify from "safe-stable-stringify";
 import { useCacheInvalidator } from "@/providers/cache-provider";
 
 export interface UseFetchStreamProps {
@@ -49,9 +48,6 @@ export interface UseFetchStreamReturn<T, E> {
   isAbsoluteFinished: boolean;
   manualFetcher: ManualFetcher<T>;
   resetFinishes: () => void;
-}
-function stableStringify(obj: unknown): string {
-  return stringify(obj) || "__undefined";
 }
 
 function generateKey(
@@ -157,7 +153,7 @@ export function useFetchStream<T = unknown, E extends BaseError = BaseError>({
     ) => {
       if (!isMounted) return;
       try {
-        const fetchFunction = deduplicateFetchStream<T, E>({
+        const fetchFunction = await deduplicateFetchStream<T, E>({
           ...fetchProps,
           dedupKey: cacheKey,
         });
@@ -193,7 +189,7 @@ export function useFetchStream<T = unknown, E extends BaseError = BaseError>({
         console.log("Error fetching", err);
         if (err && err instanceof DOMException && err?.name === "AbortError") {
           return;
-        } else if (err instanceof Object && "message" in err) {
+        } else if (isBaseError(err)) {
           setError(err as E);
           resetValueAndCache();
         }
@@ -267,7 +263,7 @@ export function useFetchStream<T = unknown, E extends BaseError = BaseError>({
       //   acceptHeader,
       // );
       try {
-        const fetchFunction = deduplicateFetchStream<T, E>({
+        const fetchFunction = await deduplicateFetchStream<T, E>({
           ...updatedProps,
           token,
           dedupKey: key,
@@ -369,18 +365,45 @@ export function useFetchStream<T = unknown, E extends BaseError = BaseError>({
     let isMounted = true;
 
     //moves the async operations outside of React's render phase
-    const timeoutId = setTimeout(
-      () =>
-        fetcher(isMounted, abortController, fetchProps).finally(() => {
-          if (refetchClosure.current) {
-            refetchClosure.current = false;
-          }
-        }),
-      0,
-    );
+
+    // const timeoutId = setTimeout(
+    //   () =>
+    //     fetcher(isMounted, abortController, fetchProps)
+    //       .catch((e) => {
+    //         if (isBaseError(e)) {
+    //           setError((prev) => (isDeepEqual(prev, e) ? prev : (e as E)));
+    //           setIsFinished((prev) => prev || true);
+    //           setIsAbsoluteFinished((prev) => prev || true);
+    //         }
+    //       })
+    //       .finally(() => {
+    //         if (refetchClosure.current) {
+    //           refetchClosure.current = false;
+    //         }
+    //       }),
+    //   0,
+    // );
+
+    const doFetch = async () => {
+      if (!isMounted) return;
+      try {
+        await fetcher(isMounted, abortController, fetchProps);
+      } catch (e) {
+        if (isBaseError(e)) {
+          setError((prev) => (isDeepEqual(prev, e) ? prev : (e as E)));
+          setIsFinished((prev) => prev || true);
+          setIsAbsoluteFinished((prev) => prev || true);
+        }
+      } finally {
+        if (refetchClosure.current) {
+          refetchClosure.current = false;
+        }
+      }
+    };
+    Promise.resolve().then(doFetch);
     return () => {
       isMounted = false;
-      clearTimeout(timeoutId);
+      // clearTimeout(timeoutId);
       try {
         if (
           // useAbortController &&

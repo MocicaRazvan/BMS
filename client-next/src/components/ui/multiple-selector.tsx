@@ -95,7 +95,7 @@ export function useDebounce<T>(value: T, delay?: number): T {
     return () => {
       clearTimeout(timer);
     };
-  }, [value, delay]);
+  }, [JSON.stringify(value), delay]);
 
   return debouncedValue;
 }

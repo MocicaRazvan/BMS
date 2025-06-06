@@ -1,125 +1,141 @@
 "use client";
 import { BaseError } from "@/types/responses";
-import {
-  fetchStreamAsyncIterator,
-  FetchStreamBatchedProps,
-} from "@/lib/fetchers/fetchStreamBatchedFromCallback";
+import { FetchStreamBatchedProps } from "@/lib/fetchers/fetchStreamBatchedFromCallback";
 import TTLCache from "@isaacs/ttlcache";
+import { fetchStreamAsyncGenerator } from "@/lib/fetchers/fetchStreamAsyncGenerator";
 
-const globalMemoizedIterators = new TTLCache<string, () => AsyncGenerator<any>>(
-  {
-    ttl: 1.05 * 1000,
-    updateAgeOnGet: true,
-  },
-);
+const DEDUPLICATION_FACTOR = 1.05 as const;
 
-const NotAsyncGeneratorError = new Error(
-  "Async generator is not defined it should never happen",
-);
+const globalMemoizedIterators = new TTLCache<
+  string,
+  (() => AsyncGenerator<any>) | Promise<() => AsyncGenerator<any>>
+>({
+  ttl: DEDUPLICATION_FACTOR * 1000,
+  updateAgeOnGet: true,
+});
 
-function memoizeAsyncIterator<T>(
+async function memoizeAsyncIterator<T>(
   key: string,
   asyncIteratorFn: () => AsyncIterable<T>,
-): () => AsyncGenerator<T> {
-  if (!globalMemoizedIterators.has(key)) {
-    const cache: T[] = [];
-    const resolvers: ((value: T | undefined) => void)[] = [];
-    const iterator = asyncIteratorFn();
-    let aborted = false;
-
-    const sharedIterator = async function* (): AsyncGenerator<T> {
-      let index = 0;
-
-      while (index < cache.length) {
-        yield cache[index++];
-      }
-
-      while (!aborted) {
-        if (index < cache.length) {
-          yield cache[index++];
-        } else {
-          const promise = new Promise<T | undefined>((resolve) =>
-            resolvers.push(resolve),
-          );
-          const value = await promise;
-          // End of iteration, we send undefined in fetchStreamAsyncIterator in the end
-          if (value === undefined) break;
-          yield value;
-          index++;
-        }
-      }
-    };
-
-    const generatorWithAbort = () => {
-      const generator = sharedIterator();
-      return Object.assign(generator, {
-        abort: () => {
-          aborted = true;
-          if ("abort" in iterator && typeof iterator.abort === "function") {
-            iterator.abort();
-          }
-          console.log(
-            `memoizeAsyncIterator Aborting generator for key: ${key},`,
-          );
-          // globalMemoizedIterators.delete(key);
-          while (resolvers.length > 0) {
-            resolvers.shift()?.(undefined);
-          }
-        },
-      });
-    };
-
-    (async () => {
-      for await (const value of iterator) {
-        cache.push(value);
-        while (resolvers.length > 0) {
-          resolvers.shift()?.(value);
-        }
-      }
-      while (resolvers.length > 0) {
-        resolvers.shift()?.(undefined);
-      }
-    })();
-    console.log("memoizeAsyncIterator cache miss", key);
-    globalMemoizedIterators.set(key, generatorWithAbort);
+): Promise<() => AsyncGenerator<T>> {
+  const existingIterator = globalMemoizedIterators.get(key);
+  if (existingIterator) {
+    if (typeof existingIterator === "function") {
+      // console.log(`memoizeAsyncIterator cache hit function for key: ${key}`);
+      return existingIterator;
+    } else {
+      // console.log(
+      //   `memoizeAsyncIterator cache hit promise for key: ${key}, waiting for it to resolve`,
+      // );
+      return await existingIterator;
+    }
   }
-  const cachedIterator = globalMemoizedIterators.get(key);
-  if (!cachedIterator) throw NotAsyncGeneratorError;
-  return cachedIterator;
+
+  //dummy initialization to avoid TS error
+  let resolveFactory: (genFn: () => AsyncGenerator<T>) => void = (_) => {};
+  let rejectFactory: (err: any) => void = (_) => {};
+  const factoryPromise = new Promise<() => AsyncGenerator<T>>(
+    (resolve, reject) => {
+      resolveFactory = resolve;
+      rejectFactory = reject;
+    },
+  );
+  globalMemoizedIterators.set(key, factoryPromise);
+
+  (async () => {
+    try {
+      const cache: T[] = [];
+      const resolvers: ((value: T | undefined) => void)[] = [];
+      const iterator = asyncIteratorFn();
+      let aborted = false;
+
+      const sharedIterator = async function* (): AsyncGenerator<T> {
+        let index = 0;
+
+        while (index < cache.length) {
+          yield cache[index++];
+        }
+
+        while (!aborted) {
+          if (index < cache.length) {
+            yield cache[index++];
+          } else {
+            const promise = new Promise<T | undefined>((resolve) =>
+              resolvers.push(resolve),
+            );
+            const value = await promise;
+            // End of iteration, we send undefined in fetchStreamAsyncGenerator in the end
+            if (value === undefined) break;
+            yield value;
+            index++;
+          }
+        }
+      };
+
+      const generatorWithAbort = () => {
+        const generator = sharedIterator();
+        return Object.assign(generator, {
+          abort: () => {
+            aborted = true;
+            if ("abort" in iterator && typeof iterator.abort === "function") {
+              iterator.abort();
+            }
+            // console.log(
+            //   `memoizeAsyncIterator Aborting generator for key: ${key},`,
+            // );
+            // globalMemoizedIterators.delete(key);
+            while (resolvers.length > 0) {
+              resolvers.shift()?.(undefined);
+            }
+          },
+        });
+      };
+
+      (async () => {
+        for await (const value of iterator) {
+          cache.push(value);
+          while (resolvers.length > 0) {
+            resolvers.shift()?.(value);
+          }
+        }
+        while (resolvers.length > 0) {
+          resolvers.shift()?.(undefined);
+        }
+      })();
+
+      // ready state
+      globalMemoizedIterators.set(key, generatorWithAbort);
+
+      resolveFactory(generatorWithAbort);
+    } catch (err) {
+      globalMemoizedIterators.delete(key);
+      rejectFactory(err);
+    }
+  })();
+
+  // console.log("memoizeAsyncIterator cache miss", key);
+  return factoryPromise;
 }
 
-export const deduplicateFetchStream = <T, E extends BaseError = BaseError>(
+export const deduplicateFetchStream = async <
+  T,
+  E extends BaseError = BaseError,
+>(
   params: FetchStreamBatchedProps<T> & {
     dedupKey: string;
   },
 ) => {
   const asyncIteratorFn = () =>
-    fetchStreamAsyncIterator<T, E>({
+    fetchStreamAsyncGenerator<T, E>({
       ...params,
       onAbort: () => {
         params.onAbort?.();
-        // globalMemoizedIterators.delete(params.dedupKey);
       },
-      errorCallback: (_) => {
+      errorCallback: (err) => {
+        params.errorCallback?.(err);
         globalMemoizedIterators.delete(params.dedupKey);
       },
     });
 
-  return memoizeAsyncIterator(params.dedupKey, asyncIteratorFn)();
+  return (await memoizeAsyncIterator(params.dedupKey, asyncIteratorFn))();
 };
-
-//todo pt mine cand ma voi mai uita, sper sa nu
-// Yes, that's correct. In JavaScript, the garbage collector
-// ensures that the cache array persists as long as there are references to it through closure scope.
-// When the memoizeAsyncIterator function creates a new iterator:
-// The cache array is declared in the function's local scope
-// The sharedIterator generator function, the IIFE,
-// and generatorWithAbort all maintain references to this array via closure
-// As long as the iterator returned by generatorWithAbort exists
-// in the globalMemoizedIterators TTLCache (or is being used by a consumer),
-// the entire closure - including the cache array - is kept in memory
-//  Only when all references to the iterator are gone (when the key expires from the
-//  TTLCache after 1.05 seconds and no code is actively using the iterator)
-//  will the garbage collector be able to clean up the cache array.
-//  This closure-based caching pattern is memory-efficient because each unique dedupKey
-//  gets its own isolated cache that's automatically cleaned up when the iterator is no longer needed.

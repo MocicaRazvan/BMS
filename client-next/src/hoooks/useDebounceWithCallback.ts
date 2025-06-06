@@ -21,7 +21,7 @@ export function useDebounceWithCallBack<T>(
     return () => {
       clearTimeout(timer);
     };
-  }, [value, delay, callBack]);
+  }, [JSON.stringify(value), delay, callBack]);
 
   return debouncedValue;
 }

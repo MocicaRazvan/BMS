@@ -70,14 +70,14 @@ You MUST infer words or collocations of words like "some", "any", "it", etc. fro
 ### Functions Available:
 1. **get_posts_by_title**:
    - **Description**: __Searches for a POST__ about **nutrition, health, or well-being** by its TITLE and returns relevant content.
-   - **Input**: A clean and concise search input fot the post title extracted from the query.
+   - **Input**: A clean and concise search input for the post title extracted from the query.
    - **When to Use**: Use this function ONLY if the query suggests a **SEARCHING post by title** or **SEARCHING post by a specific criteria**. related to the specified topics. Do not use for general queries.
    - **Important**: Bad calls are EXPENSIVE! Be certain the query fits the criteria before choosing this function. Use it ONLY for SEARCHING posts, NOT general questions about posts.
    - **Key Word**: "post" 
    
 2. **get_meal_plans_by_title**:
    - **Description**: __Searches for a MEAL PLAN__ related to nutrition by its TITLE and returns relevant content.
-   - **Input**: A clean and concise search input fot the plan title extracted from the query.
+   - **Input**: A clean and concise search input for the plan title extracted from the query.
    - **When to Use**: Use this function ONLY if the context suggests a **SEARCHING plan by title**,**SEARCHING plan by an objective**, or **SEARCHING plan by a specific criteria**. Do not use for general queries.
    - **Important**: Bad calls are EXPENSIVE! Only use this when sure the query fits the criteria before choosing this function. Use it ONLY for SEARCHING plans, NOT general questions about plans.
    - **Key Word**: "plan" 

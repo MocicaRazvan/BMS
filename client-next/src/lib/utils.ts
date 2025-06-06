@@ -7,10 +7,11 @@ import { SortingOption } from "@/components/list/grid-list";
 import { Dispatch, ReactNode, SetStateAction } from "react";
 import { getTimezoneOffset, toZonedTime } from "date-fns-tz";
 import { formatDistanceToNow, isValid, parse } from "date-fns";
-import { enUS, ro, Locale as DateFnsLocale } from "date-fns/locale";
+import { enUS, Locale as DateFnsLocale, ro } from "date-fns/locale";
 import { Locale } from "@/navigation";
 import isEqual from "lodash.isequal";
 import { stripHtml } from "string-strip-html";
+import stringify from "safe-stable-stringify";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -379,3 +380,7 @@ export const parseToUnix = (value: any): number => {
 
 export const stripNonAlphaNumeric = (str: string): string =>
   str.replace(/[^a-zA-Z0-9]/g, "").trim();
+
+export function stableStringify(obj: unknown): string {
+  return stringify(obj) || "__undefined";
+}

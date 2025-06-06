@@ -12,6 +12,20 @@ export interface BaseError {
   path: string;
 }
 
+export const isBaseError = (error: unknown): error is BaseError =>
+  typeof error === "object" &&
+  error !== null &&
+  "message" in error &&
+  typeof (error as any).message === "string" &&
+  "timestamp" in error &&
+  typeof (error as any).timestamp === "string" &&
+  "error" in error &&
+  typeof (error as any).error === "string" &&
+  "status" in error &&
+  typeof (error as any).status === "number" &&
+  "path" in error &&
+  typeof (error as any).path === "string";
+
 export enum NutritionalConversionFactors {
   PROTEIN = 3.47,
   FAT = 8.37,

@@ -6,7 +6,7 @@ import { NEXT_CSRF_HEADER, NEXT_CSRF_HEADER_TOKEN } from "@/lib/constants";
 import { getCsrfToken } from "next-auth/react";
 import fetchFactory from "@/lib/fetchers/fetchWithRetry";
 
-const mutatingActions = ["POST", "PUT", "DELETE", "PATCH"];
+export const mutatingActions = ["POST", "PUT", "DELETE", "PATCH"];
 
 export interface FetchStreamProps<T> {
   path: string;
@@ -30,37 +30,23 @@ export interface FetchStreamProps<T> {
   extraOptions?: RequestInit;
 }
 
-export async function fetchStream<
-  T = unknown,
-  E extends BaseError = BaseError,
->({
-  path,
-  method = "GET",
-  body = null,
-  customHeaders = {},
-  queryParams = {},
-  token = "",
-  arrayQueryParam = {},
-  cache = "default",
-  aboveController,
-  successCallback,
-  errorCallback,
-  successArrayCallback,
-  acceptHeader = "application/x-ndjson",
-  batchSize: initialBatchSize = 6,
-  csrf,
-  updateOnEmpty = false,
-  nextRequestConfig,
-  onAbort,
-  extraOptions,
-}: FetchStreamProps<T>) {
+export async function generateFinalArgs(
+  initialBatchSize: number,
+  aboveController: AbortController | undefined,
+  customHeaders: HeadersInit,
+  acceptHeader: AcceptHeader,
+  token: string,
+  body: object | null,
+  csrf: string | undefined,
+  method: "POST" | "PUT" | "DELETE" | "PATCH" | "GET" | "HEAD",
+  queryParams: Record<string, string>,
+  arrayQueryParam: Record<string, string[]>,
+  cache: RequestCache,
+  nextRequestConfig: NextFetchRequestConfig | undefined,
+  extraOptions: RequestInit | undefined,
+  path: string,
+) {
   const batchSize = initialBatchSize > 0 ? initialBatchSize : 6;
-
-  let batchBuffer: T[] = [];
-  let batchIndex = 0;
-  let messages: T[] = [];
-  let error: E | null = null;
-  let isFinished = false;
 
   const abortController = aboveController || new AbortController();
 
@@ -125,6 +111,56 @@ export async function fetchStream<
   }
 
   const url = combinedQuery ? `${path}?${combinedQuery}` : path;
+  return { batchSize, abortController, fetchOptions, url };
+}
+
+export async function fetchStream<
+  T = unknown,
+  E extends BaseError = BaseError,
+>({
+  path,
+  method = "GET",
+  body = null,
+  customHeaders = {},
+  queryParams = {},
+  token = "",
+  arrayQueryParam = {},
+  cache = "default",
+  aboveController,
+  successCallback,
+  errorCallback,
+  successArrayCallback,
+  acceptHeader = "application/x-ndjson",
+  batchSize: initialBatchSize = 6,
+  csrf,
+  updateOnEmpty = false,
+  nextRequestConfig,
+  onAbort,
+  extraOptions,
+}: FetchStreamProps<T>) {
+  let batchBuffer: T[] = [];
+  let batchIndex = 0;
+  let messages: T[] = [];
+  let error: E | null = null;
+  let isFinished = false;
+
+  const { batchSize, abortController, fetchOptions, url } =
+    await generateFinalArgs(
+      initialBatchSize,
+      aboveController,
+      customHeaders,
+      acceptHeader,
+      token,
+      body,
+      csrf,
+      method,
+      queryParams,
+      arrayQueryParam,
+      cache,
+      nextRequestConfig,
+      extraOptions,
+      path,
+    );
 
   const handleBatchUpdate = () => {
     // console.log(

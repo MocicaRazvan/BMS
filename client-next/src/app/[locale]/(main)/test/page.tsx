@@ -1,11 +1,11 @@
 import { Locale } from "@/navigation";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/auth-options";
 import React from "react";
 
 import TestPageContent from "./page-content";
-import { getArchiveQueuesTableTexts } from "@/texts/components/table";
 import { unstable_setRequestLocale } from "next-intl/server";
+import { getApprovedPostsPageTexts } from "@/texts/pages";
+import { getSortingOptions } from "@/lib/constants";
+import { sortingPostsSortingOptionsKeys } from "@/texts/components/list";
 
 interface Props {
   params: {
@@ -15,7 +15,10 @@ interface Props {
 
 export default async function TestPage({ params }: Props) {
   unstable_setRequestLocale(params.locale);
-  const session = await getServerSession(authOptions);
-  const texts = await getArchiveQueuesTableTexts();
-  return <TestPageContent texts={texts} />;
+  const texts = await getApprovedPostsPageTexts();
+  const postOptions = getSortingOptions(
+    sortingPostsSortingOptionsKeys,
+    texts.sortingPostsSortingOptions,
+  );
+  return <TestPageContent options={postOptions} />;
 }

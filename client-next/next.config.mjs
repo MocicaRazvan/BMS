@@ -52,8 +52,6 @@ const baseConfig = {
       // "@langchain/core",
     ],
   },
-
-  // reactStrictMode: false
 };
 const finalConfig = (phase) => {
   const isDev = phase === PHASE_DEVELOPMENT_SERVER;

@@ -1,23 +1,32 @@
 "use client";
 
-import { ArchiveQueuesTableTexts } from "@/components/table/archive-queues-table";
-import { useEffect, useRef } from "react";
-import useGetUser from "@/hoooks/use-get-user";
 import { Role } from "@/types/fetch-utils";
+import useList from "@/hoooks/useList";
+import { PostResponse, ResponseWithUserDtoEntity } from "@/types/dto";
+import { SortingOption } from "@/components/list/grid-list";
 
 interface Props {
-  texts: ArchiveQueuesTableTexts;
+  options: SortingOption[];
 }
 const minRole: Role = "ROLE_ADMIN";
-export default function TestPage({ texts }: Props) {
-  const { authUser, status } = useGetUser(minRole);
-  const statusRef = useRef<string[]>([]);
-  useEffect(() => {
-    statusRef.current.push(status);
-  }, [status]);
+export default function TestPage({ options }: Props) {
+  const { messages } = useList<ResponseWithUserDtoEntity<PostResponse>>({
+    path: "/posts/tags/withUser",
+    sortingOptions: options,
+  });
   return (
     <div className="flex flex-col items-center justify-center mt-20">
-      {JSON.stringify(statusRef)} {minRole}
+      {messages.length > 0 ? (
+        messages.map((message) => (
+          <div key={message.content.model.content.id} className="mb-4">
+            <h2 className="text-xl font-bold">
+              {message.content.model.content.title}
+            </h2>
+          </div>
+        ))
+      ) : (
+        <p>No posts available.</p>
+      )}
     </div>
   );
 }
