@@ -260,7 +260,10 @@ export default function UserPageContent({
             <div className="hidden">
               <DynamicUpdateProfile
                 toastSuccess={toastSuccess}
-                authUser={userState}
+                authUser={{
+                  ...userState,
+                  image: "",
+                }}
                 {...updateProfileTexts}
                 successCallback={() => {}}
               />
