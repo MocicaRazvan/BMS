@@ -15,7 +15,6 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import UpdateProfile from "@/components/forms/update-profile";
 import { useCallback, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Loader2 } from "lucide-react";
@@ -28,6 +27,20 @@ import DaysCalendarCTA, {
   DaysCalendarCTATexts,
 } from "@/components/days-calendar/days-calendar-cta";
 import { useAuthUserMinRole } from "@/context/auth-user-min-role-context";
+import dynamic from "next/dynamic";
+import Loader from "@/components/ui/spinner";
+
+const DynamicUpdateProfile = dynamic(
+  () => import("@/components/forms/update-profile"),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="size-full flex items-center justify-center">
+        <Loader />
+      </div>
+    ),
+  },
+);
 
 export interface UserPageTexts {
   updateProfileTexts: UpdateProfileTexts;
@@ -243,36 +256,46 @@ export default function UserPageContent({
           </div>
         )}
         {isOwner && (
-          <Accordion type="single" collapsible className="w-full">
-            <AccordionItem value="item-1">
-              <AccordionTrigger>{editProfile}</AccordionTrigger>
-              <AccordionContent>
-                <UpdateProfile
-                  toastSuccess={toastSuccess}
-                  authUser={userState}
-                  {...updateProfileTexts}
-                  successCallback={({
-                    lastName,
-                    firstName,
-                    emailVerified,
-                    role,
-                    image,
-                  }) => {
-                    refetch();
-                    setUserState((prev) => ({
-                      ...prev,
-                      image,
+          <>
+            <div className="hidden">
+              <DynamicUpdateProfile
+                toastSuccess={toastSuccess}
+                authUser={userState}
+                {...updateProfileTexts}
+                successCallback={() => {}}
+              />
+            </div>
+            <Accordion type="single" collapsible className="w-full">
+              <AccordionItem value="item-1">
+                <AccordionTrigger>{editProfile}</AccordionTrigger>
+                <AccordionContent>
+                  <DynamicUpdateProfile
+                    toastSuccess={toastSuccess}
+                    authUser={userState}
+                    {...updateProfileTexts}
+                    successCallback={({
                       lastName,
                       firstName,
                       emailVerified,
                       role,
-                    }));
-                    router.refresh();
-                  }}
-                />
-              </AccordionContent>
-            </AccordionItem>
-          </Accordion>
+                      image,
+                    }) => {
+                      refetch();
+                      setUserState((prev) => ({
+                        ...prev,
+                        image,
+                        lastName,
+                        firstName,
+                        emailVerified,
+                        role,
+                      }));
+                      router.refresh();
+                    }}
+                  />
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
+          </>
         )}
         {isOwner && user.provider === "LOCAL" && !user.emailVerified && (
           <div className="mt-10 flex flex-col items-center justify-center gap-6 h-[50px]">
