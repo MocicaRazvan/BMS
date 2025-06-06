@@ -57,7 +57,7 @@ def healthz():
 @cache.cached(make_cache_key=make_cache_key, key_prefix="toxicity:isToxic")
 def toxicity():
     try:
-        data = request.get_json(silent=True)
+        data = request.get_json(silent=True) or {}
         text = data.get("text")
         if not text or not isinstance(text, str):
             return error_response("text is required")

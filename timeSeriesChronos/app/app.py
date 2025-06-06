@@ -56,7 +56,7 @@ def healthz():
 @cache.cached(make_cache_key=make_cache_key, key_prefix="timeseries:countAmount")
 def countAmount():
     try:
-        data = request.get_json(silent=True)
+        data = request.get_json(silent=True) or {}
         count_list = data.get("count_list")
         if count_list is None:
             return error_response("count_list is required")

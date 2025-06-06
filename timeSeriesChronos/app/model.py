@@ -26,10 +26,10 @@ def predict_series(context: List[List[float]], prediction_length: int) -> torch.
     with torch.no_grad():
         transformers.set_seed(0)
         torch_context = torch.tensor(context)
-        return get_pipline().predict_quantiles(torch_context, prediction_length, quantile_levels=[0.25, 0.5, 0.75])[0]
+        return get_pipeline().predict_quantiles(torch_context, prediction_length, quantile_levels=[0.25, 0.5, 0.75])[0]
 
 
-def get_pipline():
+def get_pipeline():
     global snapshot_dir
     device = "cuda" if torch.cuda.is_available() and CUDA_ENABLED else "cpu"
     logger.info(f"Device: {device}")

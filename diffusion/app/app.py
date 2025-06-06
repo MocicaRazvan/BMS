@@ -49,7 +49,7 @@ def generate_images():
     Request JSON should contain:
         - prompt (str): Text describing the image.
         - negative_prompt (str, optional): Text to avoid in the image.
-        - num_inference_steps (int, optional): Number of steps (default: 50).
+        - num_inference_steps (int, optional): Number of steps (default: 35).
         - guidance_scale (float, optional): Adherence to the prompt (default: 7.5).
         - num_images (int, optional): Number of images to generate (default: 1).
         - height (int, optional): Height of images (default: 512).
