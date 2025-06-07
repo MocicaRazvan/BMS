@@ -5,7 +5,7 @@ import {
   NEXT_CSRF_COOKIES,
   NEXT_CSRF_HEADER,
   NEXT_CSRF_HEADER_TOKEN,
-} from "@/lib/constants";
+} from "@/types/constants";
 
 export async function getCsrfNextAuth() {
   const allCookies = await cookies();

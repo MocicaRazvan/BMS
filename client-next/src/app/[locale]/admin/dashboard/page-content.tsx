@@ -2,12 +2,10 @@
 
 import { ArchiveQueueCardsTexts } from "@/components/common/archive-queue-card";
 import RelativeItem, {
-  relativeItems,
-  RelativeItems,
   RelativeItemsSummary,
   RelativeItemsSummaryTexts,
   RelativeItemTexts,
-} from "@/components/charts/relative-item";
+} from "@/components/charts/relative-item-wrapper";
 import { ThemeSwitchTexts } from "@/texts/components/nav";
 import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
@@ -28,6 +26,8 @@ import TopViewedPosts, {
   TopViewedPostsTexts,
 } from "@/components/charts/top-viewed-posts";
 import { useAuthUserMinRole } from "@/context/auth-user-min-role-context";
+import { RelativeItems } from "@/components/charts/relative-item-chart";
+import { relativeItems } from "@/types/constants";
 
 export interface AdminDashboardPageTexts {
   title: string;

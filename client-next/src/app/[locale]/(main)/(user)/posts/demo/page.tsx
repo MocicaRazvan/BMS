@@ -1,6 +1,6 @@
 import { unstable_setRequestLocale } from "next-intl/server";
 import { getApprovedPostsPageTexts } from "@/texts/pages";
-import { getSortingOptions } from "@/lib/constants";
+import { getSortingOptions } from "@/types/constants";
 import { sortingPostsSortingOptionsKeys } from "@/texts/components/list";
 import { LocaleProps } from "@/navigation";
 import DemoPostApprovedPageContent from "@/app/[locale]/(main)/(user)/posts/demo/page-content";

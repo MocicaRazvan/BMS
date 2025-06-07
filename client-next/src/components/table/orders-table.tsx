@@ -8,7 +8,7 @@ import { CustomEntityModel, OrderDtoWithAddress } from "@/types/dto";
 import React, { useCallback, useMemo, useState } from "react";
 import { ColumnDef } from "@tanstack/react-table";
 import { ColumnActionsTexts } from "@/texts/components/table";
-import { orderColumnActions } from "@/lib/constants";
+import { orderColumnActions } from "@/types/constants";
 import { format, parseISO } from "date-fns";
 import {
   DropdownMenu,

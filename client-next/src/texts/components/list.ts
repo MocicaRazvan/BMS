@@ -5,7 +5,7 @@ import { getDataTablePaginationTexts } from "@/texts/components/table";
 import { UseApprovedFilterTexts } from "@/components/list/useApprovedFilter";
 import { UseTagsExtraCriteriaTexts } from "@/components/list/useTagsExtraCriteria";
 import { getRadioSortTexts } from "@/texts/components/common";
-import { SortingOptionsTexts } from "@/lib/constants";
+import { SortingOptionsTexts } from "@/types/constants";
 import { UseFilterDropdownTexts } from "@/components/list/useFilterDropdown";
 import { UseBinaryTexts } from "@/components/list/useBinaryFilter";
 import { getDateRangePickerTexts } from "@/texts/components/ui";

@@ -20,7 +20,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import { Form } from "@/components/ui/form";
-import { tagsOptions } from "@/lib/constants";
+import { tagsOptions } from "@/types/constants";
 import { CustomEntityModel, PostBody, PostResponse } from "@/types/dto";
 import { fetchWithFiles } from "@/hoooks/fetchWithFiles";
 import { BaseError } from "@/types/responses";

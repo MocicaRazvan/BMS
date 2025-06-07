@@ -1,18 +1,6 @@
 "use client";
 
 import {
-  Bar,
-  BarChart,
-  Label,
-  LabelList,
-  Pie,
-  PieChart,
-  ResponsiveContainer,
-  XAxis,
-  YAxis,
-} from "recharts";
-
-import {
   Card,
   CardContent,
   CardDescription,
@@ -29,33 +17,42 @@ import {
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 import useFetchStream from "@/hoooks/useFetchStream";
-import React, { ComponentProps, useEffect, useMemo, useState } from "react";
-
+import { useEffect, useMemo, useState } from "react";
 import Loader from "@/components/ui/spinner";
-import {
-  ChartConfig,
-  ChartContainer,
-  ChartLegend,
-  ChartLegendContent,
-  ChartTooltip,
-  ChartTooltipContent,
-} from "@/components/ui/chart";
-import { motion } from "framer-motion";
+import { ChartConfig } from "@/components/ui/chart";
 import { useDebounce } from "@/components/ui/multiple-selector";
+import {
+  RelativeItemPieChartBaseProps,
+  RelativeItems,
+} from "@/components/charts/relative-item-chart";
+import dynamicWithPreload from "@/lib/dynamic-with-preload";
+import { Skeleton } from "@/components/ui/skeleton";
+import usePreloadDynamicComponents from "@/hoooks/use-prelod-dynamic-components";
+import { relativeItems } from "@/types/constants";
 
-export type RelativeItems =
-  | "posts"
-  | "orders"
-  | "recipes"
-  | "plans"
-  | "comments";
-export const relativeItems: RelativeItems[] = [
-  "posts",
-  "orders",
-  "recipes",
-  "plans",
-  "comments",
-];
+const DynamicRelativeItemBarChart = dynamicWithPreload(
+  () =>
+    import("@/components/charts/relative-item-chart").then(
+      async (mod) => mod.RelativeItemBarChart,
+    ),
+  {
+    loading: () => <Skeleton className="h-8" />,
+  },
+);
+
+const DynamicRelativeItemPieChart = dynamicWithPreload(
+  () =>
+    import("@/components/charts/relative-item-chart").then(
+      (mod) => mod.RelativeItemPieChart,
+    ),
+  {
+    loading: () => (
+      <div className="flex justify-center h-[255px]">
+        <Loader />
+      </div>
+    ),
+  },
+);
 
 export interface RelativeItemTexts {
   type: string;
@@ -154,7 +151,7 @@ export default function RelativeItem<M extends WithUserDto>({
       }));
       updateAboveCount?.(curMessage.length);
     }
-  }, [JSON.stringify(curMessage)]);
+  }, [curMessage]);
 
   useEffect(() => {
     if (prevMessage) {
@@ -163,7 +160,7 @@ export default function RelativeItem<M extends WithUserDto>({
         prev: prevMessage.length,
       }));
     }
-  }, [JSON.stringify(prevMessage)]);
+  }, [prevMessage]);
 
   useEffect(() => {
     if (curFinished && prevFinished) {
@@ -183,6 +180,8 @@ export default function RelativeItem<M extends WithUserDto>({
 
   const bothFinished = curFinished && prevFinished;
 
+  usePreloadDynamicComponents(DynamicRelativeItemBarChart);
+
   if (curError?.status || prevError?.status) {
     return null;
   }
@@ -195,7 +194,7 @@ export default function RelativeItem<M extends WithUserDto>({
       </CardHeader>
       <CardContent className="grid gap-4">
         {!bothFinished ? (
-          <Loader className="mx-auto " />
+          <Loader className="mx-auto" />
         ) : (
           <>
             <div className="grid auto-rows-min gap-2">
@@ -205,27 +204,14 @@ export default function RelativeItem<M extends WithUserDto>({
                   {`${type}/${month}`}
                 </span>
               </div>
-              <ResponsiveContainer width="100%" height={32}>
-                <BarChart
-                  layout="vertical"
-                  margin={{ left: 0, top: 0, right: 0, bottom: 0 }}
-                  data={[
-                    { date: `${currMonth}/${currYear}`, count: count.cur },
-                  ]}
-                >
-                  <XAxis type="number" domain={[0, maxCount]} hide />
-                  <YAxis dataKey="date" type="category" tickCount={1} hide />
-                  <Bar dataKey="count" fill={color.cur} radius={4} barSize={32}>
-                    <LabelList
-                      position="insideLeft"
-                      dataKey="date"
-                      offset={8}
-                      fontSize={12}
-                      fill={fill.cur}
-                    />
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
+              <DynamicRelativeItemBarChart
+                month={currMonth}
+                year={currYear}
+                count={count.cur}
+                maxCount={maxCount}
+                color={color.cur}
+                fill={fill.cur}
+              />
             </div>
             <div className="grid auto-rows-min gap-2">
               <div className="flex items-baseline gap-1 text-2xl font-bold tabular-nums leading-none">
@@ -234,32 +220,14 @@ export default function RelativeItem<M extends WithUserDto>({
                   {`${type}/${month}`}
                 </span>
               </div>
-              <ResponsiveContainer width="100%" height={32}>
-                <BarChart
-                  layout="vertical"
-                  margin={{ left: 0, top: 0, right: 0, bottom: 0 }}
-                  data={[
-                    { date: `${prevMonth}/${prevYear}`, count: count.prev },
-                  ]}
-                >
-                  <XAxis type="number" domain={[0, maxCount]} hide />
-                  <YAxis dataKey="date" type="category" tickCount={1} hide />
-                  <Bar
-                    dataKey="count"
-                    fill={color.prev}
-                    radius={4}
-                    barSize={32}
-                  >
-                    <LabelList
-                      position="insideLeft"
-                      dataKey="date"
-                      offset={8}
-                      fontSize={12}
-                      fill={fill.prev}
-                    />
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
+              <DynamicRelativeItemBarChart
+                month={prevMonth}
+                year={prevYear}
+                count={count.prev}
+                maxCount={maxCount}
+                color={color.prev}
+                fill={fill.prev}
+              />
             </div>
           </>
         )}
@@ -291,11 +259,9 @@ export interface RelativeItemsSummaryTexts {
   items: string;
   description: string;
 }
-interface RelativeItemsSummaryProps extends ComponentProps<"div"> {
+interface RelativeItemsSummaryProps extends RelativeItemPieChartBaseProps {
   items: Record<RelativeItems, number>;
   texts: Record<RelativeItems, string>;
-  strokeWith?: number;
-  innerRadius?: number;
   summaryTexts: RelativeItemsSummaryTexts;
   allFinished: boolean;
 }
@@ -321,6 +287,8 @@ export function RelativeItemsSummary({
   ...props
 }: RelativeItemsSummaryProps) {
   const debouncedFinish = useDebounce(allFinished, 250);
+
+  usePreloadDynamicComponents(DynamicRelativeItemPieChart, allFinished);
 
   const chartData = useMemo(
     () =>
@@ -348,66 +316,15 @@ export function RelativeItemsSummary({
         {!debouncedFinish ? (
           <Loader className="mx-auto" />
         ) : (
-          <ChartContainer
-            config={chartConfig}
-            className="mx-auto aspect-square"
+          <DynamicRelativeItemPieChart
+            chartConfig={chartConfig}
+            chartData={chartData}
+            itemsText={summaryTexts.items}
+            totalItems={totalItems}
+            strokeWith={strokeWith}
+            innerRadius={innerRadius}
             {...props}
-          >
-            <PieChart>
-              <ChartTooltip
-                cursor={false}
-                content={<ChartTooltipContent className="gap-2" />}
-              />
-              <Pie
-                data={chartData}
-                dataKey="value"
-                nameKey="item"
-                innerRadius={innerRadius}
-                strokeWidth={strokeWith}
-              >
-                <Label
-                  content={({ viewBox }) => {
-                    if (viewBox && "cx" in viewBox && "cy" in viewBox) {
-                      return (
-                        <motion.text
-                          x={viewBox.cx}
-                          y={viewBox.cy}
-                          textAnchor="middle"
-                          dominantBaseline="middle"
-                          initial={{ opacity: 0, scale: 0 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          transition={{ duration: 0.5 }}
-                        >
-                          <tspan
-                            x={viewBox.cx}
-                            y={viewBox.cy}
-                            className="fill-foreground text-2xl font-bold"
-                          >
-                            {totalItems.toLocaleString()}
-                          </tspan>
-                          <tspan
-                            x={viewBox.cx}
-                            y={(viewBox.cy || 0) + 24}
-                            className="fill-muted-foreground"
-                          >
-                            {summaryTexts.items}
-                          </tspan>
-                        </motion.text>
-                      );
-                    }
-                  }}
-                />
-              </Pie>
-              <ChartLegend
-                content={
-                  <ChartLegendContent
-                    nameKey={"item"}
-                    className="w-full flex flex-wrap items-center justify-center"
-                  />
-                }
-              />
-            </PieChart>
-          </ChartContainer>
+          />
         )}
       </CardContent>
     </Card>

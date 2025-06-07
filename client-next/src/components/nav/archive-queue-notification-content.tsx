@@ -3,7 +3,7 @@
 import { memo } from "react";
 import { useArchiveNotifications } from "@/context/archive-notifications-context";
 import { isDeepEqual } from "@/lib/utils";
-import { containerActionColors } from "@/lib/constants";
+import { containerActionColors } from "@/types/constants";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";

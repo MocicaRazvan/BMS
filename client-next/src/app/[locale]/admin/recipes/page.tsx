@@ -2,7 +2,7 @@ import { Locale } from "@/navigation";
 import RecipeTable, {
   RecipeTableTexts,
 } from "@/components/table/recipes-table";
-import { getSortingOptions, SortingOptionsTexts } from "@/lib/constants";
+import { getSortingOptions, SortingOptionsTexts } from "@/types/constants";
 import { ThemeSwitchTexts } from "@/texts/components/nav";
 import { unstable_setRequestLocale } from "next-intl/server";
 import { getAdminRecipesPageTexts } from "@/texts/pages";

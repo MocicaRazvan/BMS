@@ -1,7 +1,7 @@
 import { Locale } from "@/navigation";
 import { unstable_setRequestLocale } from "next-intl/server";
 import { PostTableTexts } from "@/components/table/posts-table";
-import { getSortingOptions, SortingOptionsTexts } from "@/lib/constants";
+import { getSortingOptions, SortingOptionsTexts } from "@/types/constants";
 import { ThemeSwitchTexts } from "@/texts/components/nav";
 import { getUserPostsAdminPageTexts } from "@/texts/pages";
 import { notFound } from "next/navigation";

@@ -2,6 +2,7 @@ import { Option } from "@/components/ui/multiple-selector";
 import { SortingOption } from "@/components/list/grid-list";
 import { ContainerAction, DayType } from "@/types/dto";
 import { Role } from "@/types/fetch-utils";
+import { RelativeItems } from "@/components/charts/relative-item-chart";
 
 export const MX_SPRING_MESSAGE = "does not have a valid MX record" as const;
 export const GOOGLE_STATE_COOKIE_NAME = "googleState";
@@ -242,3 +243,11 @@ export const HIERARCHY: Record<Role | "undefined", number> = {
   ROLE_TRAINER: 2,
   ROLE_ADMIN: 3,
 };
+
+export const relativeItems: RelativeItems[] = [
+  "posts",
+  "orders",
+  "recipes",
+  "plans",
+  "comments",
+] as const;

@@ -2,7 +2,7 @@
 import ndjsonStream from "can-ndjson-stream";
 import { BaseError } from "@/types/responses";
 import { AcceptHeader } from "@/types/fetch-utils";
-import { NEXT_CSRF_HEADER, NEXT_CSRF_HEADER_TOKEN } from "@/lib/constants";
+import { NEXT_CSRF_HEADER, NEXT_CSRF_HEADER_TOKEN } from "@/types/constants";
 import { getCsrfToken } from "next-auth/react";
 import fetchFactory from "@/lib/fetchers/fetchWithRetry";
 

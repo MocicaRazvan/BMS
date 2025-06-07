@@ -69,7 +69,7 @@ import { useTableSearchParams } from "tanstack-table-search-params";
 import { useSearchParams } from "next/navigation";
 import { usePathname } from "@/navigation";
 import { stripNonAlphaNumeric } from "@/lib/utils";
-import { containerActionColors } from "@/lib/constants";
+import { containerActionColors } from "@/types/constants";
 import { useAuthUserMinRole } from "@/context/auth-user-min-role-context";
 
 const fuzzyFilter: FilterFn<any> = (row, columnId, value, addMeta) => {

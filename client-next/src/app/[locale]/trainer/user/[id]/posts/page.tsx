@@ -4,7 +4,7 @@ import UserPostsPageContent, {
   UserPostsPageContentTexts,
 } from "@/app/[locale]/trainer/user/[id]/posts/page-content";
 import { getUserPostsPageTexts } from "@/texts/pages";
-import { getSortingOptions } from "@/lib/constants";
+import { getSortingOptions } from "@/types/constants";
 import { sortingPostsSortingOptionsKeys } from "@/texts/components/list";
 import { Suspense } from "react";
 import LoadingSpinner from "@/components/common/loading-spinner";

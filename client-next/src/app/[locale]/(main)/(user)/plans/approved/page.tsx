@@ -1,6 +1,6 @@
 import { unstable_setRequestLocale } from "next-intl/server";
 import { getApprovedPlansTexts } from "@/texts/pages";
-import { getSortingOptions } from "@/lib/constants";
+import { getSortingOptions } from "@/types/constants";
 import { sortingPlansSortingOptionsKeys } from "@/texts/components/list";
 import PlanApprovedPageContent from "@/app/[locale]/(main)/(user)/plans/approved/page-content";
 import { Metadata } from "next";

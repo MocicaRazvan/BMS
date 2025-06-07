@@ -16,6 +16,8 @@ import ArchiveQueueUpdateProvider, {
 import dynamic from "next/dynamic";
 import { Skeleton } from "@/components/ui/skeleton";
 import React, { useEffect } from "react";
+import dynamicWithPreload from "@/lib/dynamic-with-preload";
+import usePreloadDynamicComponents from "@/hoooks/use-prelod-dynamic-components";
 
 interface Props {
   options: SortingOption[];
@@ -24,16 +26,14 @@ interface Props {
 }
 const minRole: Role = "ROLE_ADMIN";
 
-const DynamicRatioPieChart = dynamic(
+const DynamicRatioPieChart = dynamicWithPreload(
   () =>
     import("@/components/charts/plans-ratio-pie-chart").then(
       (mod) => mod.RatioPieChart,
     ),
   {
-    ssr: false,
     loading: () => (
-      <div className="w-full py-16">
-        ,
+      <div className="w-80 mx-auto py-16">
         <Skeleton className="aspect-auto h-[450px] w-full" />
       </div>
     ),
@@ -42,11 +42,8 @@ const DynamicRatioPieChart = dynamic(
 
 export default function TestPage({}: Props) {
   const [show, setShow] = React.useState(false);
-  useEffect(() => {
-    import("./test-actions").then((r) => {
-      const sw = r.default;
-    });
-  }, []);
+  usePreloadDynamicComponents(DynamicRatioPieChart, true);
+
   useEffect(() => {
     const timer = setTimeout(() => {
       setShow(true);

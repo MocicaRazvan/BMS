@@ -27,13 +27,13 @@ import DaysCalendarCTA, {
   DaysCalendarCTATexts,
 } from "@/components/days-calendar/days-calendar-cta";
 import { useAuthUserMinRole } from "@/context/auth-user-min-role-context";
-import dynamic from "next/dynamic";
 import Loader from "@/components/ui/spinner";
+import dynamicWithPreload from "@/lib/dynamic-with-preload";
+import usePreloadDynamicComponents from "@/hoooks/use-prelod-dynamic-components";
 
-const DynamicUpdateProfile = dynamic(
+const DynamicUpdateProfile = dynamicWithPreload(
   () => import("@/components/forms/update-profile"),
   {
-    ssr: false,
     loading: () => (
       <div className="size-full flex items-center justify-center">
         <Loader />
@@ -171,6 +171,13 @@ export default function UserPageContent({
     [stompClient?.connected, authUser, router],
   );
 
+  usePreloadDynamicComponents(
+    DynamicUpdateProfile,
+    isFinished &&
+      messages.length > 0 &&
+      authUser.email === messages[0].content.email,
+  );
+
   if (!isFinished) return <LoadingSpinner />;
   if (isFinished && messages.length === 0 && error?.status)
     return navigateToNotFound();
@@ -256,49 +263,36 @@ export default function UserPageContent({
           </div>
         )}
         {isOwner && (
-          <>
-            <div className="hidden">
-              <DynamicUpdateProfile
-                toastSuccess={toastSuccess}
-                authUser={{
-                  ...userState,
-                  image: "",
-                }}
-                {...updateProfileTexts}
-                successCallback={() => {}}
-              />
-            </div>
-            <Accordion type="single" collapsible className="w-full">
-              <AccordionItem value="item-1">
-                <AccordionTrigger>{editProfile}</AccordionTrigger>
-                <AccordionContent>
-                  <DynamicUpdateProfile
-                    toastSuccess={toastSuccess}
-                    authUser={userState}
-                    {...updateProfileTexts}
-                    successCallback={({
+          <Accordion type="single" collapsible className="w-full">
+            <AccordionItem value="item-1">
+              <AccordionTrigger>{editProfile}</AccordionTrigger>
+              <AccordionContent>
+                <DynamicUpdateProfile
+                  toastSuccess={toastSuccess}
+                  authUser={userState}
+                  {...updateProfileTexts}
+                  successCallback={({
+                    lastName,
+                    firstName,
+                    emailVerified,
+                    role,
+                    image,
+                  }) => {
+                    refetch();
+                    setUserState((prev) => ({
+                      ...prev,
+                      image,
                       lastName,
                       firstName,
                       emailVerified,
                       role,
-                      image,
-                    }) => {
-                      refetch();
-                      setUserState((prev) => ({
-                        ...prev,
-                        image,
-                        lastName,
-                        firstName,
-                        emailVerified,
-                        role,
-                      }));
-                      router.refresh();
-                    }}
-                  />
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
-          </>
+                    }));
+                    router.refresh();
+                  }}
+                />
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
         )}
         {isOwner && user.provider === "LOCAL" && !user.emailVerified && (
           <div className="mt-10 flex flex-col items-center justify-center gap-6 h-[50px]">

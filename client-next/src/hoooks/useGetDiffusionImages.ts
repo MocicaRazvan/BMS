@@ -11,7 +11,7 @@ import {
 } from "react-hook-form";
 import { ImageType } from "@/types/forms";
 import { getCsrfToken } from "next-auth/react";
-import { NEXT_CSRF_HEADER } from "@/lib/constants";
+import { NEXT_CSRF_HEADER } from "@/types/constants";
 import fetchFactory from "@/lib/fetchers/fetchWithRetry";
 
 export type DiffusionCallback = (images: FieldInputItem[]) => void;

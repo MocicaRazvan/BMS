@@ -1,7 +1,7 @@
 "use client";
 
 import { ColumnActionsTexts } from "@/texts/components/table";
-import { dayColumnActions, getColorsByDayType } from "@/lib/constants";
+import { dayColumnActions, getColorsByDayType } from "@/types/constants";
 import { DataTableTexts } from "@/components/table/data-table";
 import useFilterDropdown, {
   RadioFieldFilterCriteriaCallback,

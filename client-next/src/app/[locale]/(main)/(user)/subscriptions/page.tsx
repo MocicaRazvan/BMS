@@ -1,7 +1,7 @@
 import SubscriptionsPageContent from "@/app/[locale]/(main)/(user)/subscriptions/page-content";
 import { unstable_setRequestLocale } from "next-intl/server";
 import { getSubscriptionsPageContentTexts } from "@/texts/pages";
-import { getSortingOptions } from "@/lib/constants";
+import { getSortingOptions } from "@/types/constants";
 import { sortingPlansSortingOptionsKeys } from "@/texts/components/list";
 import { Metadata } from "next";
 import { getIntlMetadata } from "@/texts/metadata";

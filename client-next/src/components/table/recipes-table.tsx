@@ -1,7 +1,7 @@
 "use client";
 
 import { ColumnActionsTexts } from "@/texts/components/table";
-import { recipeColumnActions } from "@/lib/constants";
+import { recipeColumnActions } from "@/types/constants";
 import { DataTableTexts } from "@/components/table/data-table";
 import { UseApprovedFilterTexts } from "@/components/list/useApprovedFilter";
 import useFilterDropdown, {

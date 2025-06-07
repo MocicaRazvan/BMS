@@ -12,7 +12,7 @@ import DayCalendarSingleDay, {
   DayCalendarSingleDayTexts,
 } from "@/components/days-calendar/day-calendar-single-day";
 import { Badge } from "@/components/ui/badge";
-import { getColorByDayType } from "@/lib/constants";
+import { getColorByDayType } from "@/types/constants";
 
 export interface DayCalendarEventTexts {
   toastDescription: string;

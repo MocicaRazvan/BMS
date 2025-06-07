@@ -19,7 +19,7 @@ import { useMemo } from "react";
 import chunk from "lodash/chunk";
 import { Separator } from "@/components/ui/separator";
 import { useMedia } from "react-use";
-import { getColorsByDayType } from "@/lib/constants";
+import { getColorsByDayType } from "@/types/constants";
 
 interface Props {
   data: DayCalendarTrackingStats[];

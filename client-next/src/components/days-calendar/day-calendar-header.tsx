@@ -7,7 +7,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useLocale } from "next-intl";
 import { Locale } from "@/navigation";
 import { dateFnsLocaleMapper } from "@/lib/utils";
-import { getColorsByDayType } from "@/lib/constants";
+import { getColorsByDayType } from "@/types/constants";
 
 export interface DayCalendarHeaderTexts {
   tracked: string;

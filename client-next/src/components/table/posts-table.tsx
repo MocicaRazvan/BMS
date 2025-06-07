@@ -32,7 +32,7 @@ import { ColumnActionsTexts } from "@/texts/components/table";
 import useBinaryFilter, {
   RadioBinaryCriteriaWithCallback,
 } from "@/components/list/useBinaryFilter";
-import { postColumnActions } from "@/lib/constants";
+import { postColumnActions } from "@/types/constants";
 import useClientNotFound from "@/hoooks/useClientNotFound";
 import OverflowTextTooltip from "@/components/common/overflow-text-tooltip";
 import CreationFilter, {

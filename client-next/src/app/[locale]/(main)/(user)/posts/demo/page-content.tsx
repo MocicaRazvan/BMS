@@ -10,7 +10,7 @@ import useTagsExtraCriteria, {
   TagsExtraCriteriaWithCallback,
   UseTagsExtraCriteriaTexts,
 } from "@/components/list/useTagsExtraCriteria";
-import { SortingOptionsTexts } from "@/lib/constants";
+import { SortingOptionsTexts } from "@/types/constants";
 import { useSearchParams } from "next/navigation";
 import React, { useState } from "react";
 import { Checkbox } from "@/components/ui/checkbox";

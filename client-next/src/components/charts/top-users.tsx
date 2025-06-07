@@ -23,27 +23,26 @@ import TopChartWrapper, {
   TopRankBadge,
 } from "@/components/charts/top-chart-wrapper";
 import OverflowTextTooltip from "@/components/common/overflow-text-tooltip";
-import dynamic from "next/dynamic";
 import { Skeleton } from "@/components/ui/skeleton";
+import dynamicWithPreload from "@/lib/dynamic-with-preload";
+import usePreloadDynamicComponents from "@/hoooks/use-prelod-dynamic-components";
 
-const DynamicUserPieChart = dynamic(
+const DynamicUserPieChart = dynamicWithPreload(
   () =>
     import("@/components/charts/user-pie-chart").then(
       (mod) => mod.UserPieChart,
     ),
   {
-    ssr: false,
     loading: () => <Skeleton className="h-[300px] mx-auto aspect-square" />,
   },
 );
 
-const DynamicTopChartMeanRelative = dynamic(
+const DynamicTopChartMeanRelative = dynamicWithPreload(
   () =>
     import("@/components/charts/top-chart-mean-relative").then(
       (mod) => mod.TopChartMeanRelative,
     ),
   {
-    ssr: false,
     loading: () => <Skeleton className="h-[300px] mx-auto aspect-square" />,
   },
 );
@@ -69,48 +68,26 @@ const TopUsers = memo(
       title,
     },
   }: Props) => {
+    usePreloadDynamicComponents([
+      DynamicUserPieChart,
+      DynamicTopChartMeanRelative,
+    ]);
     return (
-      <>
-        <div className="hidden">
-          <DynamicUserPieChart
-            topSum={{
-              userId: 1,
-              avgGroupTotal: 0,
-              maxGroupTotal: 0,
-              plansNumber: 0,
-              ordersNumber: 0,
-              rank: 0,
-              totalAmount: 0,
-              minGroupTotal: 0,
-              planValues: [],
-            }}
-            type="type"
-          />
-          <DynamicTopChartMeanRelative
-            chartKey="amountPerOrderDummyPreloadUsers"
-            chartLabel={userAmountPerOderChartTexts.amountPerOrder}
-            barData={0}
-            maxBar={0}
-            referenceValue={0}
-            referenceLabel={userAmountPerOderChartTexts.meanAmountPerOrder}
-          />
-        </div>
-        <TopChartWrapper<TopUsersSummary>
-          texts={topChartWrapperTexts}
-          path="/orders/admin/topUsers"
-          locale={locale}
-          processMessage={(ts) => (
-            <div key={ts.userId + "topUsers"}>
-              <UserCard
-                topSummary={ts}
-                texts={userCardTexts}
-                amountTexts={userAmountPerOderChartTexts}
-              />
-            </div>
-          )}
-          title={title}
-        />
-      </>
+      <TopChartWrapper<TopUsersSummary>
+        texts={topChartWrapperTexts}
+        path="/orders/admin/topUsers"
+        locale={locale}
+        processMessage={(ts) => (
+          <div key={ts.userId + "topUsers"}>
+            <UserCard
+              topSummary={ts}
+              texts={userCardTexts}
+              amountTexts={userAmountPerOderChartTexts}
+            />
+          </div>
+        )}
+        title={title}
+      />
     );
   },
   isDeepEqual,

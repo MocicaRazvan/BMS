@@ -32,7 +32,7 @@ import { fetchStream } from "@/lib/fetchers/fetchStream";
 import { toast } from "@/components/ui/use-toast";
 import { handleBaseError } from "@/lib/utils";
 import { useNavigationGuardI18nForm } from "@/hoooks/use-navigation-guard-i18n-form";
-import { MX_SPRING_MESSAGE } from "@/lib/constants";
+import { MX_SPRING_MESSAGE } from "@/types/constants";
 import { normalizeEmailWrapper } from "@/lib/email-normalizer-wrapper";
 import { AnimatePresence, motion } from "framer-motion";
 import { useAuthUserMinRole } from "@/context/auth-user-min-role-context";

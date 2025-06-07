@@ -10,7 +10,7 @@ import MultipleSelector, {
   Option,
   useDebounce,
 } from "@/components/ui/multiple-selector";
-import { tagsOptions } from "@/lib/constants";
+import { tagsOptions } from "@/types/constants";
 
 export interface UseTagsExtraCriteriaTexts {
   tagsEmpty: string;

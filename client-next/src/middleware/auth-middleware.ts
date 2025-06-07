@@ -2,7 +2,7 @@ import { Role } from "@/types/fetch-utils";
 import { locales } from "@/navigation";
 import { NextRequest } from "next/server";
 import { NextMiddlewareWithAuth, withAuth } from "next-auth/middleware";
-import { HIERARCHY } from "@/lib/constants";
+import { HIERARCHY } from "@/types/constants";
 
 const stripRE = new RegExp(`^\/(${locales.join("|")})(?=\/|$)`);
 const optionalStripLocale = (url: string): string => {

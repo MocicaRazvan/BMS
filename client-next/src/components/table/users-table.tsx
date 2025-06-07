@@ -26,7 +26,7 @@ import useFilterDropdown, {
 } from "@/components/list/useFilterDropdown";
 import { format, parseISO } from "date-fns";
 import { ColumnActionsTexts } from "@/texts/components/table";
-import { userColumnActions } from "@/lib/constants";
+import { userColumnActions } from "@/types/constants";
 import { useStompClient } from "react-stomp-hooks";
 import { AlertDialogMakeTrainer } from "@/components/dialogs/user/make-trainer-alert";
 import useClientNotFound from "@/hoooks/useClientNotFound";

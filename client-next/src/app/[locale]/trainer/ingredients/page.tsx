@@ -3,7 +3,7 @@ import { Locale } from "@/navigation";
 import IngredientsTable, {
   IngredientTableTexts,
 } from "@/components/table/ingredients-table";
-import { getSortingOptions, SortingOptionsTexts } from "@/lib/constants";
+import { getSortingOptions, SortingOptionsTexts } from "@/types/constants";
 import { getIngredientsPageTexts } from "@/texts/pages";
 import { getUserWithMinRole } from "@/lib/user";
 import { sortingIngredientsSortingOptionsKeys } from "@/texts/components/list";

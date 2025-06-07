@@ -1,6 +1,6 @@
 import { Locale } from "@/navigation";
 import DaysTable, { DayTableTexts } from "@/components/table/day-table";
-import { getSortingOptions, SortingOptionsTexts } from "@/lib/constants";
+import { getSortingOptions, SortingOptionsTexts } from "@/types/constants";
 import { unstable_setRequestLocale } from "next-intl/server";
 import { getUserDaysPageTexts } from "@/texts/pages";
 import { sortingDaysSortingOptionsKeys } from "@/texts/components/list";

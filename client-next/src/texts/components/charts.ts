@@ -2,10 +2,9 @@
 import { IngredientPieChartTexts } from "@/components/charts/ingredient-macros-pie-chart";
 import { getTranslations } from "next-intl/server";
 import {
-  RelativeItems,
   RelativeItemsSummaryTexts,
   RelativeItemTexts,
-} from "@/components/charts/relative-item";
+} from "@/components/charts/relative-item-wrapper";
 import { TotalAmountCountOrdersTexts } from "@/components/charts/totalAmount-count-ordres";
 import { GeographyChartTexts } from "@/components/charts/geography-chart";
 import { CountrySummaryType } from "@/types/dto";
@@ -22,6 +21,7 @@ import { PredictionChartTexts } from "@/components/charts/prediction-chart";
 import { TopViewedPostsTexts } from "@/components/charts/top-viewed-posts";
 import { LinkedChartTexts } from "@/components/charts/linked-chart";
 import { PlanCharacteristicTexts } from "@/components/charts/plan-characteristic";
+import { RelativeItems } from "@/components/charts/relative-item-chart";
 
 export async function getIngredientPieChartTexts(): Promise<IngredientPieChartTexts> {
   const t = await getTranslations("components.charts.IngredientPieChartTexts");

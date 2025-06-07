@@ -4,7 +4,7 @@ import GridList, {
   GridListTexts,
   SortingOption,
 } from "@/components/list/grid-list";
-import { SortingOptionsTexts } from "@/lib/constants";
+import { SortingOptionsTexts } from "@/types/constants";
 import useFilterDropdown, {
   DropDownFieldFilterCriteriaCallback,
   UseFilterDropdownTexts,

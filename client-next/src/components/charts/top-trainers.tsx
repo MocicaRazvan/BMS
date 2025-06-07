@@ -36,27 +36,26 @@ import {
 import { Button } from "@/components/ui/button";
 import OverflowTextTooltip from "@/components/common/overflow-text-tooltip";
 import { BasePieChartProps } from "@/components/charts/top-trainers-pie-chart";
-import dynamic from "next/dynamic";
 import { Skeleton } from "@/components/ui/skeleton";
+import dynamicWithPreload from "@/lib/dynamic-with-preload";
+import usePreloadDynamicComponents from "@/hoooks/use-prelod-dynamic-components";
 
-const DynamicTopChartMeanRelative = dynamic(
+const DynamicTopChartMeanRelative = dynamicWithPreload(
   () =>
     import("@/components/charts/top-chart-mean-relative").then(
       (mod) => mod.TopChartMeanRelative,
     ),
   {
-    ssr: false,
     loading: () => <Skeleton className="h-[300px] mx-auto aspect-square" />,
   },
 );
 
-const DynamicTopTrainersPieChart = dynamic(
+const DynamicTopTrainersPieChart = dynamicWithPreload(
   () =>
     import("@/components/charts/top-trainers-pie-chart").then(
       (mod) => mod.TopTrainersPieChart,
     ),
   {
-    ssr: false,
     loading: () => <Skeleton className="h-[300px] mx-auto aspect-square" />,
   },
 );
@@ -73,31 +72,22 @@ interface Props {
 }
 
 const TopTrainers = memo(({ texts, locale }: Props) => {
+  usePreloadDynamicComponents([
+    DynamicTopChartMeanRelative,
+    DynamicTopTrainersPieChart,
+  ]);
   return (
-    <>
-      <div className="hidden">
-        <DynamicTopTrainersPieChart type="type" chartData={{}} />
-        <DynamicTopChartMeanRelative
-          chartKey="totalAmountDummyTopTrainers"
-          chartLabel={texts.trainerCardTexts.totalAmount}
-          barData={0}
-          maxBar={0}
-          referenceValue={0}
-          referenceLabel={texts.trainerCardTexts.totalAmountReference}
-        />
-      </div>
-      <TopChartWrapper<TopTrainersSummary>
-        texts={texts.topChartWrapperTexts}
-        path="/orders/admin/topTrainers"
-        locale={locale as Locale}
-        processMessage={(ts) => (
-          <div key={ts.userId + "topTrainers"}>
-            <TrainerCard topSummary={ts} texts={texts.trainerCardTexts} />
-          </div>
-        )}
-        title={texts.title}
-      />
-    </>
+    <TopChartWrapper<TopTrainersSummary>
+      texts={texts.topChartWrapperTexts}
+      path="/orders/admin/topTrainers"
+      locale={locale as Locale}
+      processMessage={(ts) => (
+        <div key={ts.userId + "topTrainers"}>
+          <TrainerCard topSummary={ts} texts={texts.trainerCardTexts} />
+        </div>
+      )}
+      title={texts.title}
+    />
   );
 }, isDeepEqual);
 

@@ -1,7 +1,7 @@
 import { Locale } from "@/navigation";
 import { unstable_setRequestLocale } from "next-intl/server";
 import { sortingIngredientsSortingOptionsKeys } from "@/texts/components/list";
-import { getSortingOptions, SortingOptionsTexts } from "@/lib/constants";
+import { getSortingOptions, SortingOptionsTexts } from "@/types/constants";
 import { IngredientTableTexts } from "@/components/table/ingredients-table";
 import SidebarContentLayout from "@/components/sidebar/sidebar-content-layout";
 import { ThemeSwitchTexts } from "@/texts/components/nav";

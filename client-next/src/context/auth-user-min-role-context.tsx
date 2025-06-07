@@ -4,7 +4,7 @@ import { Session } from "next-auth";
 import { createContext, ReactNode, useContext, useEffect } from "react";
 import useClientNotFound from "@/hoooks/useClientNotFound";
 import { useSession } from "next-auth/react";
-import { HIERARCHY } from "@/lib/constants";
+import { HIERARCHY } from "@/types/constants";
 import { Skeleton } from "@/components/ui/skeleton";
 import { motion } from "framer-motion";
 import { Role } from "@/types/fetch-utils";

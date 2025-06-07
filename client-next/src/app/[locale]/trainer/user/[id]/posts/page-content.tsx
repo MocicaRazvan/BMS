@@ -1,7 +1,7 @@
 "use client";
 
 import PostsTable, { PostTableTexts } from "@/components/table/posts-table";
-import { SortingOptionsTexts } from "@/lib/constants";
+import { SortingOptionsTexts } from "@/types/constants";
 import { SortingOption } from "@/hoooks/useList";
 
 export interface UserPostsPageContentTexts {

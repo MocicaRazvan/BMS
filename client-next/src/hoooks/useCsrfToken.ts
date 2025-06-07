@@ -1,6 +1,6 @@
 "use client";
 import { useCallback, useEffect, useState } from "react";
-import { NEXT_CSRF_HEADER } from "@/lib/constants";
+import { NEXT_CSRF_HEADER } from "@/types/constants";
 import { getCsrfToken } from "next-auth/react";
 
 export interface CsrfToken {

@@ -21,7 +21,7 @@ import { ColumnDef } from "@tanstack/react-table";
 import { DataTableTexts } from "@/components/table/data-table";
 import { getCalories } from "@/types/responses";
 import { Badge } from "@/components/ui/badge";
-import { ingredientColumnActions } from "@/lib/constants";
+import { ingredientColumnActions } from "@/types/constants";
 import {
   DropdownMenu,
   DropdownMenuContent,

@@ -3,7 +3,7 @@ import {
   NEXT_CSRF_COOKIES,
   NEXT_CSRF_HEADER,
   NEXT_CSRF_HEADER_TOKEN,
-} from "@/lib/constants";
+} from "@/types/constants";
 
 const enableCsrfProtection = process.env.NEXT_CSRF
   ? process.env.NEXT_CSRF.toLowerCase() === "true"

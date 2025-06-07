@@ -32,7 +32,7 @@ import ButtonSubmit, {
 } from "@/components/forms/button-submit";
 import { CustomEntityModel, PostBody, PostResponse } from "@/types/dto";
 import useGetDiffusionImages from "@/hoooks/useGetDiffusionImages";
-import { tags } from "@/lib/constants";
+import { tags } from "@/types/constants";
 import { useToxicPrompt } from "@/components/forms/diffusion-images-form";
 import { AiIdeasField } from "@/types/ai-ideas-types";
 import { fetchWithFiles } from "@/hoooks/fetchWithFiles";

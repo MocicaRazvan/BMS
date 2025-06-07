@@ -27,8 +27,9 @@ import DietBadge from "@/components/common/diet-badge";
 import { WithUser } from "@/lib/user";
 import OverflowTextTooltip from "@/components/common/overflow-text-tooltip";
 import { useAuthUserMinRole } from "@/context/auth-user-min-role-context";
-import dynamic from "next/dynamic";
 import { Skeleton } from "@/components/ui/skeleton";
+import dynamicWithPreload from "@/lib/dynamic-with-preload";
+import usePreloadDynamicComponents from "@/hoooks/use-prelod-dynamic-components";
 
 export interface TopPlansTexts {
   topChartWrapperTexts: TopChartWrapperTexts;
@@ -42,24 +43,22 @@ interface Props {
   path: string;
 }
 
-const DynamicTopChartMeanRelative = dynamic(
+const DynamicTopChartMeanRelative = dynamicWithPreload(
   () =>
     import("@/components/charts/top-chart-mean-relative").then(
       (mod) => mod.TopChartMeanRelative,
     ),
   {
-    ssr: false,
     loading: () => <Skeleton className="h-[300px] mx-auto aspect-square" />,
   },
 );
 
-const DynamicRatioPieChart = dynamic(
+const DynamicRatioPieChart = dynamicWithPreload(
   () =>
     import("@/components/charts/plans-ratio-pie-chart").then(
       (mod) => mod.RatioPieChart,
     ),
   {
-    ssr: false,
     loading: () => <Skeleton className="h-[300px] mx-auto aspect-square" />,
   },
 );
@@ -70,40 +69,28 @@ export const TopPlans = memo(
     path,
     texts: { topChartWrapperTexts, title, planCardTexts },
   }: Props) => {
+    usePreloadDynamicComponents([
+      DynamicTopChartMeanRelative,
+      DynamicRatioPieChart,
+    ]);
     const { authUser } = useAuthUserMinRole();
 
     return (
-      <>
-        <div className="hidden">
-          <DynamicTopChartMeanRelative
-            chartKey="countDummyTopPlans"
-            chartLabel={planCardTexts.numberOfPurchases}
-            barData={0}
-            maxBar={0}
-            referenceValue={0}
-            referenceLabel={planCardTexts.meanNumberOfPurchases}
-          />
-          <DynamicRatioPieChart
-            innerLabel={planCardTexts.ratioLabel}
-            chartData={[{ ratio: 0, fill: "var(--color-plan)" }]}
-          />
-        </div>
-        <TopChartWrapper<TopPlansSummary>
-          texts={topChartWrapperTexts}
-          path={path}
-          locale={locale}
-          processMessage={(ts) => (
-            <div key={ts.planId}>
-              <PlanCard
-                topSummary={ts}
-                texts={planCardTexts}
-                authUser={authUser}
-              />
-            </div>
-          )}
-          title={title}
-        />
-      </>
+      <TopChartWrapper<TopPlansSummary>
+        texts={topChartWrapperTexts}
+        path={path}
+        locale={locale}
+        processMessage={(ts) => (
+          <div key={ts.planId}>
+            <PlanCard
+              topSummary={ts}
+              texts={planCardTexts}
+              authUser={authUser}
+            />
+          </div>
+        )}
+        title={title}
+      />
     );
   },
   isDeepEqual,

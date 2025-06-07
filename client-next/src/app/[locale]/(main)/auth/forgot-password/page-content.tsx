@@ -15,7 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { fetchStream } from "@/lib/fetchers/fetchStream";
 import { Session } from "next-auth";
-import { MX_SPRING_MESSAGE } from "@/lib/constants";
+import { MX_SPRING_MESSAGE } from "@/types/constants";
 import { normalizeEmailWrapper } from "@/lib/email-normalizer-wrapper";
 import EmailFormField, {
   EmailFromFieldTexts,

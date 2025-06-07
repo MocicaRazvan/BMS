@@ -1,6 +1,6 @@
 import { Issuer } from "openid-client";
 import { Provider } from "next-auth/providers/index";
-import { GOOGLE_STATE_COOKIE_NAME } from "@/lib/constants";
+import { GOOGLE_STATE_COOKIE_NAME } from "@/types/constants";
 
 const springUrl = process.env.NEXT_PUBLIC_SPRING!;
 const nextUrl = process.env.NEXTAUTH_URL!;

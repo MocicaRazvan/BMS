@@ -33,7 +33,7 @@ import {
   recipeTableColumns,
   userColumnActions,
   userTableColumns,
-} from "@/lib/constants";
+} from "@/types/constants";
 import {
   UserTableColumnsTexts,
   UserTableTexts,

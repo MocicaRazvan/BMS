@@ -10,7 +10,7 @@ import GridList, {
   GridListTexts,
   SortingOption,
 } from "@/components/list/grid-list";
-import { SortingOptionsTexts } from "@/lib/constants";
+import { SortingOptionsTexts } from "@/types/constants";
 import { dietTypes } from "@/types/forms";
 import Heading from "@/components/common/heading";
 import {

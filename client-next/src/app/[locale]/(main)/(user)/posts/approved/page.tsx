@@ -1,7 +1,7 @@
 import { unstable_setRequestLocale } from "next-intl/server";
 import PostApprovedPageContent from "@/app/[locale]/(main)/(user)/posts/approved/page-content";
 import { getApprovedPostsPageTexts } from "@/texts/pages";
-import { getSortingOptions } from "@/lib/constants";
+import { getSortingOptions } from "@/types/constants";
 import { sortingPostsSortingOptionsKeys } from "@/texts/components/list";
 import { Metadata } from "next";
 import { getIntlMetadata } from "@/texts/metadata";

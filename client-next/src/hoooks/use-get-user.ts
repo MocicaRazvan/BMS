@@ -4,7 +4,7 @@ import { useSession } from "next-auth/react";
 import useClientNotFound from "@/hoooks/useClientNotFound";
 import { useEffect } from "react";
 import { Role } from "@/types/fetch-utils";
-import { HIERARCHY } from "@/lib/constants";
+import { HIERARCHY } from "@/types/constants";
 
 export default function useGetUser(minRole: Role) {
   const { navigateToNotFound } = useClientNotFound();

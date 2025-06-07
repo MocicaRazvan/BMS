@@ -36,7 +36,7 @@ import {
   PasswordStrengthIndicatorTexts,
   usePasswordStrength,
 } from "@/components/forms/passowrd-strength-indicator";
-import { MX_SPRING_MESSAGE } from "@/lib/constants";
+import { MX_SPRING_MESSAGE } from "@/types/constants";
 import EmailFormField, {
   EmailFromFieldTexts,
 } from "@/components/forms/email-form-field";

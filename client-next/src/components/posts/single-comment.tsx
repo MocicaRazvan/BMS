@@ -39,13 +39,16 @@ import { getToxicity } from "@/actions/toxcity";
 import DOMPurify from "dompurify";
 import { EditorTexts } from "@/components/editor/editor";
 import { cleanText } from "@/lib/utils";
-import dynamic from "next/dynamic";
 import { Skeleton } from "@/components/ui/skeleton";
+import dynamicWithPreload from "@/lib/dynamic-with-preload";
+import usePreloadDynamicComponents from "@/hoooks/use-prelod-dynamic-components";
 
-const DynamicEditor = dynamic(() => import("@/components/editor/editor"), {
-  ssr: false,
-  loading: () => <Skeleton className="min-h-[calc(200px+6rem)] w-full " />,
-});
+const DynamicEditor = dynamicWithPreload(
+  () => import("@/components/editor/editor"),
+  {
+    loading: () => <Skeleton className="min-h-[calc(200px+6rem)] w-full " />,
+  },
+);
 
 export interface BaseSingleCommentProps {
   deleteCommentCallback: (commentId: number) => void;
@@ -97,6 +100,11 @@ export const SingleComment = memo<Props>(
     editCommentLabel,
     editorTexts,
   }) => {
+    usePreloadDynamicComponents(
+      DynamicEditor,
+      parseInt(authUser.id ?? "") === userId,
+    );
+
     const schema = useMemo(
       () => getCommentSchema(commentSchemaTexts),
       [commentSchemaTexts],
@@ -239,70 +247,60 @@ export const SingleComment = memo<Props>(
             <ProseText html={content.body} />
           </div>
           {parseInt(authUser.id ?? "") === userId && (
-            <>
-              <Accordion
-                type="single"
-                collapsible
-                className="w-full"
-                value={editMode}
-                onValueChange={setEditMode}
-              >
-                <AccordionItem value="item-edit">
-                  <AccordionTrigger>{editHeader}</AccordionTrigger>
-                  <AccordionContent className=" w-full flex items-center justify-center mx-auto ">
-                    <Form {...form}>
-                      <form
-                        onSubmit={form.handleSubmit(onSubmit)}
-                        className="space-y-8 w-full px-10 pt-1 lg:space-y-12"
-                      >
-                        {/*<TitleBodyForm<TitleBodyType>*/}
-                        {/*  control={form.control}*/}
-                        {/*  titleBodyTexts={{*/}
-                        {/*    ...titleBodyTexts,*/}
-                        {/*    body: editCommentLabel,*/}
-                        {/*  }}*/}
-                        {/*  hideTitle={true}*/}
-                        {/*/>*/}
+            <Accordion
+              type="single"
+              collapsible
+              className="w-full"
+              value={editMode}
+              onValueChange={setEditMode}
+            >
+              <AccordionItem value="item-edit">
+                <AccordionTrigger>{editHeader}</AccordionTrigger>
+                <AccordionContent className=" w-full flex items-center justify-center mx-auto ">
+                  <Form {...form}>
+                    <form
+                      onSubmit={form.handleSubmit(onSubmit)}
+                      className="space-y-8 w-full px-10 pt-1 lg:space-y-12"
+                    >
+                      {/*<TitleBodyForm<TitleBodyType>*/}
+                      {/*  control={form.control}*/}
+                      {/*  titleBodyTexts={{*/}
+                      {/*    ...titleBodyTexts,*/}
+                      {/*    body: editCommentLabel,*/}
+                      {/*  }}*/}
+                      {/*  hideTitle={true}*/}
+                      {/*/>*/}
 
-                        <FormField
-                          control={form.control}
-                          name={"body"}
-                          render={({ field }) => (
-                            <FormItem className="space-y-0">
-                              <FormLabel>{editCommentLabel}</FormLabel>
-                              <FormControl>
-                                <DynamicEditor
-                                  descritpion={field.value as string}
-                                  onChange={field.onChange}
-                                  placeholder={titleBodyTexts.bodyPlaceholder}
-                                  texts={editorTexts}
-                                  separatorClassname="h-6"
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <ErrorMessage message={errorText} show={!!errorMsg} />
-                        <ButtonSubmit
-                          isLoading={isLoading}
-                          disable={isLoading || isSameBody}
-                          buttonSubmitTexts={buttonSubmitTexts}
-                        />
-                      </form>
-                    </Form>
-                  </AccordionContent>
-                </AccordionItem>
-              </Accordion>
-              <div className="hidden">
-                <DynamicEditor
-                  descritpion={""}
-                  onChange={() => {}}
-                  placeholder={titleBodyTexts.bodyPlaceholder}
-                  texts={editorTexts}
-                />
-              </div>
-            </>
+                      <FormField
+                        control={form.control}
+                        name={"body"}
+                        render={({ field }) => (
+                          <FormItem className="space-y-0">
+                            <FormLabel>{editCommentLabel}</FormLabel>
+                            <FormControl>
+                              <DynamicEditor
+                                descritpion={field.value as string}
+                                onChange={field.onChange}
+                                placeholder={titleBodyTexts.bodyPlaceholder}
+                                texts={editorTexts}
+                                separatorClassname="h-6"
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <ErrorMessage message={errorText} show={!!errorMsg} />
+                      <ButtonSubmit
+                        isLoading={isLoading}
+                        disable={isLoading || isSameBody}
+                        buttonSubmitTexts={buttonSubmitTexts}
+                      />
+                    </form>
+                  </Form>
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
           )}
         </div>
       </div>
