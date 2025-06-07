@@ -7,14 +7,13 @@ export default function usePreloadDynamicComponents(
   condition = true,
 ) {
   useEffect(() => {
-    let isMounted = true;
     if (!condition) return;
     const preloadComponents = Array.isArray(components)
       ? components
       : [components];
 
     const preload = () => {
-      if (!isMounted || preloadComponents.length === 0) return;
+      if (preloadComponents.length === 0) return;
       preloadComponents.forEach((component) => {
         component.preload().catch((error) => {
           console.error("Error preloading component:", error);
@@ -22,9 +21,5 @@ export default function usePreloadDynamicComponents(
       });
     };
     preload();
-
-    return () => {
-      isMounted = false;
-    };
   }, [condition]);
 }
