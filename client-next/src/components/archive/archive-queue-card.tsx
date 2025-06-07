@@ -210,7 +210,7 @@ const DashboardCard = memo(
     }) => {
     if (error) {
       return (
-        <div className="h-full w-full ">
+        <div className="h-[230px] w-full ">
           <CardHeader>
             <CardTitle className="text-lg font-bold text-destructive text-center capitalize">
               {errorTitle}
@@ -234,14 +234,14 @@ const DashboardCard = memo(
     }
     if (!isFinished || !messages.length) {
       return (
-        <div className="min-h-[250px]">
+        <div className="h-[230px]">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-[15px] font-medium capitalize">
+            <CardTitle className="text-lg font-medium capitalize">
               {title}
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <Skeleton className="w-full h-full" />
+          <CardContent className="w-full h-[180px]">
+            <Skeleton className="size-full" />
           </CardContent>
         </div>
       );
@@ -406,9 +406,9 @@ const DashboardSuccessCard = memo(
     }, [batchUpdateMessagesCount, batchUpdateMessagesFinished]);
 
     return (
-      <div className="h-full w-full min-h-[250px]">
+      <div className="h-[230px] w-full">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-[15px] font-medium capitalize">
+          <CardTitle className="text-lg font-medium capitalize">
             {title}
           </CardTitle>
           <TooltipProvider>
@@ -448,7 +448,7 @@ const DashboardSuccessCard = memo(
             </Tooltip>
           </TooltipProvider>
         </CardHeader>
-        <CardContent className="w-full">
+        <CardContent className="w-full h-[180px] animate-in fade-in duration-250">
           <FadeTextChange
             text={formatIntl.number(messageCount)}
             className="text-2xl font-bold"

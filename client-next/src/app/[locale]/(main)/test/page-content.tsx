@@ -6,7 +6,7 @@ import { PostResponse, ResponseWithUserDtoEntity } from "@/types/dto";
 import { SortingOption } from "@/components/list/grid-list";
 import ArchiveQueueCards, {
   ArchiveQueueCardsTexts,
-} from "@/components/common/archive-queue-card";
+} from "@/components/archive/archive-queue-card";
 import { useLocale } from "next-intl";
 import { Locale } from "@/navigation";
 import { AuthUserMinRoleProvider } from "@/context/auth-user-min-role-context";
@@ -18,6 +18,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import React, { useEffect } from "react";
 import dynamicWithPreload from "@/lib/dynamic-with-preload";
 import usePreloadDynamicComponents from "@/hoooks/use-prelod-dynamic-components";
+import useFetchStream from "@/hoooks/useFetchStream";
+import { Button } from "@/components/ui/button";
 
 interface Props {
   options: SortingOption[];
@@ -41,25 +43,49 @@ const DynamicRatioPieChart = dynamicWithPreload(
 );
 
 export default function TestPage({}: Props) {
-  const [show, setShow] = React.useState(false);
-  usePreloadDynamicComponents(DynamicRatioPieChart, true);
-
+  const { messages, isFinished, refetch, manualFetcher } = useFetchStream({
+    path: "/posts/tags/withUser",
+    authToken: true,
+    queryParams: {
+      approved: "true",
+    },
+    method: "PATCH",
+    body: {
+      page: 0,
+      size: 10,
+    },
+  });
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setShow(true);
-    }, 2200);
-    return () => clearTimeout(timer);
-  }, []);
+    if (isFinished) {
+      console.log("useFetchStream Initial fetch done, cache has:", messages);
+    }
+  }, [isFinished, messages]);
+
   return (
-    <div className="flex flex-col items-center justify-center mt-20">
-      {show ? (
-        <DynamicRatioPieChart
-          innerLabel={"planCardTexts.ratioLabel"}
-          chartData={[{ ratio: 0, fill: "var(--color-plan)" }]}
-        />
-      ) : (
-        <div>Loading...</div>
-      )}
+    <div style={{ padding: 20 }}>
+      <p>
+        <strong>messages:</strong> [{messages.length}] <br />
+        <strong>isFinished:</strong> {String(isFinished)}
+      </p>
+      <Button
+        onClick={async () => {
+          console.log("useFetchStream Clicking refetch()");
+          refetch();
+          await manualFetcher({
+            localAuthToken: true,
+            fetchProps: {
+              path: "/posts/tags/withUser",
+              method: "PATCH",
+              queryParams: { approved: "true" },
+              arrayQueryParam: {},
+              customHeaders: {},
+              body: { page: 0, size: 10 },
+            },
+          });
+        }}
+      >
+        Refetch
+      </Button>
     </div>
   );
 }

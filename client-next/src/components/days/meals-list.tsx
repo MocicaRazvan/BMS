@@ -8,20 +8,62 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import {
-  MealRecipeList,
   MealRecipeProps,
+  OpenedRecipeItemState,
+  SetRecipeOpenType,
 } from "@/components/days/meal-recipes";
-import React, { memo } from "react";
+import { memo, useCallback, useState } from "react";
 import { Clock } from "lucide-react";
+import dynamicWithPreload from "@/lib/dynamic-with-preload";
+import { Skeleton } from "@/components/ui/skeleton";
+import usePreloadDynamicComponents from "@/hoooks/use-prelod-dynamic-components";
 
-export interface MealListProps extends Omit<MealRecipeProps, "recipeIds"> {
+const DynamicMealRecipeList = dynamicWithPreload(
+  () => import("@/components/days/meal-recipes").then((m) => m.MealRecipeList),
+  {
+    loading: () => <Skeleton className="size-full min-h-[40vh]" />,
+  },
+);
+
+export interface MealListProps
+  extends Omit<
+    MealRecipeProps,
+    "recipeIds" | "setRecipeOpen" | "openedRecipes"
+  > {
   meals: MealResponse[];
   recipeBasePath?: string;
 }
 
 const MealsList = memo(({ meals, authUser, ...rest }: MealListProps) => {
+  const [openedRecipes, setOpenedRecipes] = useState<OpenedRecipeItemState>(
+    () =>
+      meals.reduce((acc, meal) => {
+        meal.recipes.forEach((recipeId) => {
+          acc[recipeId] = {
+            triggered: false,
+          };
+        });
+        return acc;
+      }, {} as OpenedRecipeItemState),
+  );
+
+  const setRecipeOpen: SetRecipeOpenType = useCallback(
+    (rId, recipe, iqItems) => {
+      setOpenedRecipes((prev) => ({
+        ...prev,
+        [rId]: {
+          triggered: true,
+          recipe,
+          iqItems,
+        },
+      }));
+    },
+    [],
+  );
+
+  usePreloadDynamicComponents(DynamicMealRecipeList);
   return (
-    <Accordion type={"multiple"} className="w-full">
+    <Accordion type="multiple" className="w-full">
       {meals.map((meal, i) => (
         <AccordionItem
           key={meal.id + "_" + i}
@@ -35,7 +77,13 @@ const MealsList = memo(({ meals, authUser, ...rest }: MealListProps) => {
             </div>
           </AccordionTrigger>
           <AccordionContent>
-            <MealItem meal={meal} authUser={authUser} {...rest} />
+            <MealItem
+              meal={meal}
+              authUser={authUser}
+              setRecipeOpen={setRecipeOpen}
+              openedRecipes={openedRecipes}
+              {...rest}
+            />
           </AccordionContent>
         </AccordionItem>
       ))}
@@ -52,7 +100,11 @@ interface MealItemProps extends Omit<MealRecipeProps, "recipeIds"> {
 function MealItem({ meal, authUser, ...rest }: MealItemProps) {
   return (
     <div>
-      <MealRecipeList authUser={authUser} recipeIds={meal.recipes} {...rest} />
+      <DynamicMealRecipeList
+        authUser={authUser}
+        recipeIds={meal.recipes}
+        {...rest}
+      />
     </div>
   );
 }

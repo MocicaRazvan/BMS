@@ -3,7 +3,7 @@ import { ElementHeaderTexts } from "@/components/common/element-header";
 import { RadioSortTexts } from "@/components/common/radio-sort";
 import { NutritionalTableTexts } from "@/components/common/nutritional-table";
 import { getIngredientTableColumnTexts } from "@/texts/components/table";
-import { ArchiveQueueCardsTexts } from "@/components/common/archive-queue-card";
+import { ArchiveQueueCardsTexts } from "@/components/archive/archive-queue-card";
 import {
   ArchiveQueuePrefix,
   archiveQueuePrefixes,

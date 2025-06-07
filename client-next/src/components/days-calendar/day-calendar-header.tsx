@@ -16,7 +16,7 @@ export interface DayCalendarHeaderTexts {
 export default function DayCalendarHeaderDate({
   tracked,
 }: DayCalendarHeaderTexts) {
-  const { date, dayCalendars, setDate } = useDayCalendar();
+  const { date, dayCalendars, setDate, isFinished } = useDayCalendar();
   const locale = useLocale() as Locale;
   const monthDays = dayCalendars.filter((d) => isSameMonth(d.date, date));
   function handleDateBackward() {
@@ -48,9 +48,14 @@ export default function DayCalendarHeaderDate({
                 locale: dateFnsLocaleMapper?.[locale],
               })}
             </p>
-            <div className="whitespace-nowrap rounded-sm border px-1.5 py-0.5 text-xs">
-              {monthDays.length} {tracked}
-            </div>
+            {isFinished && (
+              <div
+                className="whitespace-nowrap rounded-sm border px-1.5 py-0.5 text-xs animate-in fade-in duration-300"
+                key={monthDays.length + date.toISOString()}
+              >
+                {monthDays.length} {tracked}
+              </div>
+            )}
           </div>
           <div className="flex items-center gap-2">
             <Button

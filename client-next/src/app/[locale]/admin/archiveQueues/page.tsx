@@ -6,7 +6,7 @@ import { getAdminArchiveQueuesPageTexts } from "@/texts/pages";
 import { ThemeSwitchTexts } from "@/texts/components/nav";
 import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
 import { ArchiveQueuePrefix } from "@/types/dto";
-import { ArchiveQueueCardsTexts } from "@/components/common/archive-queue-card";
+import { ArchiveQueueCardsTexts } from "@/components/archive/archive-queue-card";
 import { ArchiveQueuesTableTexts } from "@/components/table/archive-queues-table";
 import SidebarContentLayout from "@/components/sidebar/sidebar-content-layout";
 import Heading from "@/components/common/heading";

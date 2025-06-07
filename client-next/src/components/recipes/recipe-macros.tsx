@@ -58,7 +58,7 @@ export default function RecipeMacros({
   );
   if (!aggegatedNF) return null;
   return (
-    <div className="px-0 lg:px-16space-y-8">
+    <div className="px-0 lg:px-16 space-y-8">
       <NutritionalTable
         ing={
           {

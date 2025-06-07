@@ -128,6 +128,7 @@ export function useFetchStream<T = unknown, E extends BaseError = BaseError>({
   const { data: session, status: sessionStatus } = useSession();
   const [isAbsoluteFinished, setIsAbsoluteFinished] = useState(false);
   const [manualKeys, setManualKeys] = useState<string[]>([]);
+  // for some very rare edge cases, but it can be removed now with dedup
   const refetchClosure = useRef(false);
 
   const resetFinishes = useCallback(() => {
@@ -249,19 +250,6 @@ export function useFetchStream<T = unknown, E extends BaseError = BaseError>({
 
       setManualKeys((prev) => [...prev, key]);
 
-      // console.log(
-      //   "useFetchStream - manual",
-      //   path,
-      //   key,
-      //   fetchProps.path,
-      //   stableStringifyQueryParams,
-      //   stableStringifyArrayQueryParam,
-      //   stableStringifyBody,
-      //   stableStringifyCustomHeaders,
-      //   batchSize,
-      //   method,
-      //   acceptHeader,
-      // );
       try {
         const fetchFunction = await deduplicateFetchStream<T, E>({
           ...updatedProps,
@@ -329,6 +317,7 @@ export function useFetchStream<T = unknown, E extends BaseError = BaseError>({
     const localFinished = refetchClosure.current ? false : isCacheKeyNotEmpty();
     setIsFinished(localFinished);
     setIsAbsoluteFinished(false);
+
     const token = authToken && session?.user?.token ? session.user.token : "";
     const abortController = new AbortController();
 
@@ -347,44 +336,10 @@ export function useFetchStream<T = unknown, E extends BaseError = BaseError>({
       acceptHeader,
     };
 
-    // console.log(
-    //   "useFetchStream - localFinished",
-    //   path,
-    //   localFinished,
-    //   cacheKey,
-    //   fetchProps.path,
-    //   stableStringifyQueryParams,
-    //   stableStringifyArrayQueryParam,
-    //   stableStringifyBody,
-    //   stableStringifyCustomHeaders,
-    //   batchSize,
-    //   method,
-    //   acceptHeader,
-    //   refetchClosure.current,
-    // );
     let isMounted = true;
 
-    //moves the async operations outside of React's render phase
-
-    // const timeoutId = setTimeout(
-    //   () =>
-    //     fetcher(isMounted, abortController, fetchProps)
-    //       .catch((e) => {
-    //         if (isBaseError(e)) {
-    //           setError((prev) => (isDeepEqual(prev, e) ? prev : (e as E)));
-    //           setIsFinished((prev) => prev || true);
-    //           setIsAbsoluteFinished((prev) => prev || true);
-    //         }
-    //       })
-    //       .finally(() => {
-    //         if (refetchClosure.current) {
-    //           refetchClosure.current = false;
-    //         }
-    //       }),
-    //   0,
-    // );
-
     const doFetch = async () => {
+      // closure by reference, so it's fine to use isMounted here
       if (!isMounted) return;
       try {
         await fetcher(isMounted, abortController, fetchProps);
@@ -400,10 +355,12 @@ export function useFetchStream<T = unknown, E extends BaseError = BaseError>({
         }
       }
     };
+
+    //moves the async operations outside of React's render phase
     Promise.resolve().then(doFetch);
+
     return () => {
       isMounted = false;
-      // clearTimeout(timeoutId);
       try {
         if (
           // useAbortController &&

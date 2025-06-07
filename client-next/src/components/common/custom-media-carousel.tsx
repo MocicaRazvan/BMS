@@ -75,7 +75,7 @@ export default function CustomMediaCarousel({ media }: Props) {
     },
     [videoRefs],
   );
-  console.log("activeIndex", activeIndex);
+
   return (
     <div className="w-full flex justify-center items-center overflow-hidden">
       <Carousel

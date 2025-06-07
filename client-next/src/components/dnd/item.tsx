@@ -149,11 +149,11 @@ const Item = forwardRef<HTMLDivElement, Props>(
             )
           )}
           {index === 0 && multiple && type === "IMAGE" && (
-            <div className="absolute top-1 left-2 transition-all text-4xl">
+            <div className="absolute top-0.5 left-2 transition-all text-4xl">
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger className="bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/70 p-2 rounded-md">
-                    <p className="text-destructive ">{header}</p>
+                    <p className="text-destructive">{header}</p>
                   </TooltipTrigger>
                   <TooltipContent
                     className="bg-accent text-accent-foreground border w-1/3 mx-auto"

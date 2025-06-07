@@ -157,7 +157,7 @@ const SelectDisplay = ({
             className={
               "max-w-[100px] outline-none focus:outline-none focus-visible:ring-transparent focus-visible:ring-0 focus-visible:outline-none"
             }
-            type={"number"}
+            type="number"
             value={inputValue}
             onChange={(e) => {
               const value = parseInt(e.target.value, 10);

@@ -1,5 +1,5 @@
 "use client";
-import React, { memo, useCallback, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { cn, isDeepEqual } from "@/lib/utils";
 import CustomPaginationButtons from "@/components/ui/custom-pagination-buttons";
 import useGetRecipeWithIngredients from "@/hoooks/recipes/useGetRecipeWithIngredients";
@@ -11,7 +11,11 @@ import CustomImageCarousel from "@/components/common/custom-image-crousel";
 import CustomVideoCarousel from "@/components/common/custom-videos-crousel";
 import RecipeMacros from "@/components/recipes/recipe-macros";
 import { fetchStream } from "@/lib/fetchers/fetchStream";
-import { CustomEntityModel, RecipeResponse } from "@/types/dto";
+import {
+  CustomEntityModel,
+  IngredientNutritionalFactResponseWithCount,
+  RecipeResponse,
+} from "@/types/dto";
 import LikesDislikes from "@/components/common/likes-dislikes";
 import LoadingSpinner from "@/components/common/loading-spinner";
 import useClientNotFound from "@/hoooks/useClientNotFound";
@@ -20,6 +24,11 @@ import DietBadge from "@/components/common/diet-badge";
 import { AnswerFromBodyFormTexts } from "@/components/forms/answer-from-body-form";
 import ItemBodyQa from "@/components/common/item-body-qa";
 
+export type SetRecipeOpenType = (
+  recipeId: number,
+  recipe: RecipeResponse,
+  iqItems: IngredientNutritionalFactResponseWithCount[],
+) => void;
 export interface MealRecipeProps extends WithUser {
   recipeIds: number[];
   nutritionalTableTexts: NutritionalTableTexts;
@@ -29,7 +38,17 @@ export interface MealRecipeProps extends WithUser {
   disableLikes?: boolean;
   showIngredients: string;
   answerFromBodyFormTexts: AnswerFromBodyFormTexts;
+  setRecipeOpen: SetRecipeOpenType;
+  openedRecipes: OpenedRecipeItemState;
 }
+
+type OpenedRecipeItem = {
+  triggered: boolean;
+  recipe?: RecipeResponse;
+  iqItems?: IngredientNutritionalFactResponseWithCount[];
+};
+
+export type OpenedRecipeItemState = Record<number, OpenedRecipeItem>;
 
 export const MealRecipeList = memo(
   ({
@@ -42,6 +61,8 @@ export const MealRecipeList = memo(
     disableLikes = false,
     showIngredients,
     answerFromBodyFormTexts,
+    setRecipeOpen,
+    openedRecipes,
   }: MealRecipeProps) => {
     const [currentIndex, setCurrentIndex] = useState(0);
     return (
@@ -76,6 +97,8 @@ export const MealRecipeList = memo(
                 disableLikes={disableLikes}
                 showIngredients={showIngredients}
                 answerFromBodyFormTexts={answerFromBodyFormTexts}
+                setRecipeOpen={setRecipeOpen}
+                itemState={openedRecipes[recipeId] || { triggered: false }}
               />
             </motion.div>
           ))}
@@ -90,7 +113,10 @@ export const MealRecipeList = memo(
       </div>
     );
   },
-  (prevProps, nextProps) => isDeepEqual(prevProps, nextProps),
+  (
+    { setRecipeOpen: prevSetRecipeOpen, ...prevProps },
+    { setRecipeOpen, ...nextProps },
+  ) => isDeepEqual(prevProps, nextProps) && prevSetRecipeOpen === setRecipeOpen,
 );
 
 MealRecipeList.displayName = "RecipePlanList";
@@ -104,6 +130,8 @@ interface RecipePlanItemProps extends WithUser {
   disableLikes?: boolean;
   showIngredients: string;
   answerFromBodyFormTexts: AnswerFromBodyFormTexts;
+  setRecipeOpen: SetRecipeOpenType;
+  itemState: OpenedRecipeItem;
 }
 export const RecipePlanItem = memo(
   ({
@@ -116,24 +144,81 @@ export const RecipePlanItem = memo(
     disableLikes = false,
     showIngredients,
     answerFromBodyFormTexts,
+    setRecipeOpen,
+    itemState,
   }: RecipePlanItemProps) => {
+    const shouldNotTrigger =
+      itemState.triggered && itemState.recipe && !!itemState.iqItems;
+    const [IQMessagesState, setIQMessagesState] = useState<
+      IngredientNutritionalFactResponseWithCount[]
+    >([]);
+    const [recipeState, setRecipeState] = useState<RecipeResponse | null>(
+      itemState.recipe || null,
+    );
+
+    const wasTriggeredThisMount = useRef(false);
+    const isLiked = useMemo(
+      () => recipeState?.userLikes.includes(parseInt(authUser.id)),
+      [recipeState, authUser.id],
+    );
+    const isDisliked = useMemo(
+      () => recipeState?.userDislikes.includes(parseInt(authUser.id)),
+      [recipeState, authUser.id],
+    );
     const {
-      recipeState,
-      setRecipeState,
-      messages,
       recipeError,
       recipe,
-      user,
-      router,
       recipeIsFinished,
-      isLiked,
-      isDisliked,
       IQMessage,
       IQError,
       IQIsFinished,
-    } = useGetRecipeWithIngredients(recipeId, authUser, recipeBasePath);
+      recipeIsAbsoluteFinished,
+      IQIsAbsoluteFinished,
+    } = useGetRecipeWithIngredients(
+      recipeId,
+      authUser,
+      recipeBasePath,
+      undefined,
+      !shouldNotTrigger,
+    );
 
-    console.log(`Rendering RecipePlanItem for recipeId: ${recipeId}`);
+    useEffect(() => {
+      if (
+        recipeIsAbsoluteFinished &&
+        IQIsAbsoluteFinished &&
+        recipe &&
+        !wasTriggeredThisMount.current
+      ) {
+        // console.log("MealRecipes setting absolute finished", {
+        //   recipeId,
+        //   recipeIsFinished,
+        //   IQIsAbsoluteFinished,
+        // });
+        setRecipeOpen(recipeId, recipe, IQMessage);
+        setIQMessagesState(IQMessage);
+        setRecipeState(recipe);
+        wasTriggeredThisMount.current = true;
+      }
+    }, [
+      IQIsAbsoluteFinished,
+      IQMessage,
+      recipe,
+      recipeId,
+      recipeIsAbsoluteFinished,
+      recipeIsFinished,
+      recipeState,
+      setRecipeOpen,
+    ]);
+
+    useEffect(() => {
+      if (shouldNotTrigger && !wasTriggeredThisMount.current) {
+        // console.log("MealRecipes setting not triggered", { recipeId });
+        setRecipeState(itemState.recipe || null);
+        setIQMessagesState(itemState.iqItems || []);
+        wasTriggeredThisMount.current = true;
+      }
+    }, [shouldNotTrigger]);
+
     const { navigateToNotFound } = useClientNotFound();
 
     const react = useCallback(
@@ -144,7 +229,6 @@ export const RecipePlanItem = memo(
             method: "PATCH",
             token: authUser.token,
           });
-          console.log(resp);
           const resR = resp.messages[0]?.content;
           setRecipeState((prev) =>
             !prev
@@ -155,26 +239,36 @@ export const RecipePlanItem = memo(
                   userDislikes: resR.userDislikes,
                 },
           );
+          setRecipeOpen(recipeId, resR, IQMessagesState);
         } catch (error) {
           console.log(error);
         }
       },
-      [authUser.token, recipeId, setRecipeState],
+      [
+        IQMessagesState,
+        authUser.token,
+        recipeId,
+        setRecipeOpen,
+        setRecipeState,
+      ],
     );
 
-    if (!IQIsFinished) {
+    if (
+      (!IQIsFinished && !IQMessagesState.length) ||
+      (!recipeIsFinished && !recipeState)
+    ) {
       return (
-        <section className="w-full min-h-[30vh] flex items-center justify-center transition-all overflow-hidden my-2">
+        <section className="w-full min-h-[40vh] flex items-center justify-center transition-all overflow-hidden my-2">
           <LoadingSpinner />
         </section>
       );
     }
 
-    if (!recipe || !recipeState) return null;
-
     if (recipeError || IQError) {
       return navigateToNotFound();
     }
+
+    if (!recipeState || !IQMessagesState) return null;
 
     return (
       <div className="w-full px-5">
@@ -192,10 +286,10 @@ export const RecipePlanItem = memo(
               </div>
             </div>
           </div>
-          <div className=" flex items-center justify-center order-0 md:order-1 flex-1 ">
+          <div className=" flex items-center justify-center order-0 md:order-1 flex-1">
             <h1
               className={cn(
-                "text-3xl md:text-4xl tracking-tighter font-bold text-center  ",
+                "text-3xl md:text-4xl tracking-tighter font-bold text-center",
               )}
             >
               {recipeState.title}
@@ -226,21 +320,24 @@ export const RecipePlanItem = memo(
         )}
         <div className="mt-20">
           <RecipeMacros
-            ingredients={IQMessage}
+            ingredients={IQMessagesState}
             nutritionalTableTexts={nutritionalTableTexts}
             ingredientPieChartTexts={ingredientPieChartTexts}
           />
         </div>
-        {IQMessage.length > 0 && (
+        {IQMessagesState.length > 0 && (
           <RecipeIngredients
             showIngredients={showIngredients}
-            IQMessage={IQMessage}
+            IQMessage={IQMessagesState}
           />
         )}
       </div>
     );
   },
-  (prevProps, nextProps) => isDeepEqual(prevProps, nextProps),
+  (
+    { setRecipeOpen: prevSetRecipeOpen, ...prevProps },
+    { setRecipeOpen, ...nextProps },
+  ) => isDeepEqual(prevProps, nextProps) && prevSetRecipeOpen === setRecipeOpen,
 );
 
 RecipePlanItem.displayName = "RecipePlanItem";

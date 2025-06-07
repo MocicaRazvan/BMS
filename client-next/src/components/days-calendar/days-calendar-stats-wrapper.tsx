@@ -6,12 +6,12 @@ import {
   DateRangePickerTexts,
 } from "@/components/ui/date-range-picker";
 import { useDayCalendar } from "@/context/day-calendar-context";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { endOfMonth, format, startOfMonth } from "date-fns";
 import { dateFormat } from "@/hoooks/useDateRangeFilterParams";
 import { useLocale } from "next-intl";
 import useFetchStream from "@/hoooks/useFetchStream";
-import { DayCalendarTrackingStats } from "@/types/dto";
+import { DayCalendarResponse, DayCalendarTrackingStats } from "@/types/dto";
 import { ro } from "date-fns/locale";
 import { motion } from "framer-motion";
 import dynamic from "next/dynamic";
@@ -60,7 +60,7 @@ interface WrapperProps {
 export default function DayCalendarStatsWrapper({
   texts: { dateRangePickerTexts, noDataText, errorText, titleText },
 }: WrapperProps) {
-  const { date, dayCalendars } = useDayCalendar();
+  const { date, dayCalendars, isFinished: isDaysFinished } = useDayCalendar();
   const monthStartDate = useMemo(() => startOfMonth(date), [date]);
   const monthEndDate = useMemo(() => endOfMonth(date), [date]);
   const monthStart = useMemo(
@@ -78,6 +78,8 @@ export default function DayCalendarStatsWrapper({
     to: monthEnd,
   });
 
+  const prevDaysRefetch = useRef<DayCalendarResponse[]>(dayCalendars);
+
   useEffect(() => {
     setDateRange({
       from: monthStart,
@@ -91,15 +93,23 @@ export default function DayCalendarStatsWrapper({
       path: "/daysCalendar/trackingStats",
       authToken: true,
       queryParams: dateRange,
+      trigger: isDaysFinished,
     });
 
+  // todo fix
+  // can trigger more then once sometimes, but request dedup is handling it
   useEffect(() => {
-    if (isAbsoluteFinished) {
+    if (
+      isAbsoluteFinished &&
+      isDaysFinished &&
+      dayCalendars.map((d) => d.id).join(",") !==
+        prevDaysRefetch.current.map((d) => d.id).join(",")
+    ) {
       refetch();
+      prevDaysRefetch.current = dayCalendars;
     }
-  }, [JSON.stringify(dayCalendars)]);
+  }, [dayCalendars, isDaysFinished, isAbsoluteFinished, refetch]);
 
-  console.log("DayCalendarTrackingStats", messages);
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center mt-20">

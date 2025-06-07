@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ResponseWithUserDtoEntity, TitleBodyUserDto } from "@/types/dto";
 import { useParams } from "next/navigation";
 import useFetchStream from "@/hoooks/useFetchStream";
@@ -10,6 +10,7 @@ interface Args extends WithUser {
   basePath: string;
   itemId?: number | string;
   useAbortController?: boolean;
+  trigger?: boolean;
 }
 
 export function useGetTitleBodyUser<T extends TitleBodyUserDto>({
@@ -17,12 +18,13 @@ export function useGetTitleBodyUser<T extends TitleBodyUserDto>({
   basePath,
   itemId,
   useAbortController = false,
+  trigger = true,
 }: Args) {
   const [itemState, setItemState] = useState<T | null>(null);
   const { id } = useParams();
   const router = useRouter();
 
-  const { messages, error, isFinished } = useFetchStream<
+  const { messages, error, isFinished, isAbsoluteFinished } = useFetchStream<
     ResponseWithUserDtoEntity<T>,
     BaseError
   >({
@@ -30,9 +32,8 @@ export function useGetTitleBodyUser<T extends TitleBodyUserDto>({
     method: "GET",
     authToken: true,
     useAbortController,
+    trigger,
   });
-
-  console.log(messages);
 
   const item = messages[0]?.model?.content;
   const user = messages[0]?.user;
@@ -40,10 +41,16 @@ export function useGetTitleBodyUser<T extends TitleBodyUserDto>({
     if (messages.length > 0) {
       setItemState(messages[0]?.model?.content);
     }
-  }, [JSON.stringify(messages)]);
+  }, [messages]);
 
-  const isLiked = itemState?.userLikes.includes(parseInt(authUser.id));
-  const isDisliked = itemState?.userDislikes.includes(parseInt(authUser.id));
+  const isLiked = useMemo(
+    () => itemState?.userLikes.includes(parseInt(authUser.id)),
+    [itemState, authUser.id],
+  );
+  const isDisliked = useMemo(
+    () => itemState?.userDislikes.includes(parseInt(authUser.id)),
+    [itemState, authUser.id],
+  );
 
   return {
     itemState,
@@ -57,5 +64,6 @@ export function useGetTitleBodyUser<T extends TitleBodyUserDto>({
     isFinished,
     isLiked,
     isDisliked,
+    isAbsoluteFinished,
   };
 }

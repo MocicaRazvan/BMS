@@ -1,6 +1,6 @@
 "use client";
 
-import { ArchiveQueueCardsTexts } from "@/components/common/archive-queue-card";
+import { ArchiveQueueCardsTexts } from "@/components/archive/archive-queue-card";
 import RelativeItem, {
   RelativeItemsSummary,
   RelativeItemsSummaryTexts,

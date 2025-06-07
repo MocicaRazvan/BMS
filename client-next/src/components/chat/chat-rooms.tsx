@@ -203,7 +203,6 @@ export function ChatRoomItem({
     }
 
     hoverTimerRef.current = setTimeout(() => {
-      console.log("hoverTimer", hoverTimerRef.current);
       handleRoomHover(chatRoom);
       hoverTimerRef.current = null;
     }, MOUSE_HOVER_TIMEOUT);

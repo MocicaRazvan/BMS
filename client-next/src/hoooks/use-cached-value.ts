@@ -26,6 +26,7 @@ export default function useCachedValue<T>(cacheKey: string, batchSize: number) {
   const resetValueAndCache = useCallback(() => {
     setValue([]);
     removeFromCache();
+    prevKeyRef.current = null;
   }, [removeFromCache]);
 
   const resetValue = useCallback(() => {

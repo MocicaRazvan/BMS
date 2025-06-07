@@ -11,6 +11,7 @@ export default function useGetRecipeWithIngredients(
   authUser: NonNullable<Session["user"]>,
   recipeBasePath?: string,
   ingredientPath?: string,
+  trigger = true,
 ) {
   const {
     itemState: recipeState,
@@ -23,20 +24,24 @@ export default function useGetRecipeWithIngredients(
     isFinished: recipeIsFinished,
     isLiked,
     isDisliked,
+    isAbsoluteFinished: recipeIsAbsoluteFinished,
   } = useGetTitleBodyUser<RecipeResponse>({
     authUser,
     basePath: recipeBasePath || `/recipes/withUser`,
     itemId: recipeId,
+    trigger,
   });
 
   const {
     messages: IQMessage,
     error: IQError,
     isFinished: IQIsFinished,
+    isAbsoluteFinished: IQIsAbsoluteFinished,
   } = useFetchStream<IngredientNutritionalFactResponseWithCount>({
     path: ingredientPath || `/recipes/ingredients/${recipeId}`,
     method: "GET",
     authToken: true,
+    trigger,
     // useAbortController: false,
   });
 
@@ -56,5 +61,7 @@ export default function useGetRecipeWithIngredients(
     IQMessage,
     IQError,
     IQIsFinished,
+    IQIsAbsoluteFinished,
+    recipeIsAbsoluteFinished,
   };
 }

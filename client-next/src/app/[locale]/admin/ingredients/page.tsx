@@ -15,7 +15,7 @@ import { Metadata } from "next";
 import { getIntlMetadata } from "@/texts/metadata";
 import ArchiveQueueCards, {
   ArchiveQueueCardsTexts,
-} from "@/components/common/archive-queue-card";
+} from "@/components/archive/archive-queue-card";
 import { Separator } from "@/components/ui/separator";
 import { FindInSiteTexts } from "@/components/nav/find-in-site";
 

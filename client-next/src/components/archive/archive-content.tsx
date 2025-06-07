@@ -11,7 +11,7 @@ import { memo, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import ArchiveQueueCards, {
   ArchiveQueueCardsTexts,
-} from "@/components/common/archive-queue-card";
+} from "@/components/archive/archive-queue-card";
 import { Locale } from "@/navigation";
 import { isDeepEqual } from "@/lib/utils";
 

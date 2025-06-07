@@ -25,8 +25,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
+
 
 @Slf4j
 @Service
@@ -34,36 +33,37 @@ public class BatchNotifyWS implements BatchNotify {
 
     private final ReactiveRedisTemplate<String, Object> redisTemplate;
     private final ConcurrentMap<String, Long> queueMap;
-    private final ConcurrentMap<String, AtomicReference<ScheduledFuture<?>>> scheduledTasks;
+    private final ConcurrentMap<String, ScheduledFuture<?>> scheduledTasks;
     private final ConcurrentMap<String, Instant> lastReceived;
     private final SimpleAsyncTaskScheduler taskExecutor;
     private final SimpleRedisCache simpleRedisCache;
+    // no mutable state in this class, so no need for unique instances
+    private final PeriodicTrigger periodicTrigger;
 
     @Value("${spring.custom.batch.notify.timeout:15}")
     private int notifyTimeout;
 
-    @Value("${spring.custom.batch.update.period:3}")
-    private int updatePeriod;
-
 
     public BatchNotifyWS(ReactiveRedisTemplate<String, Object> redisTemplate, QueuesPropertiesConfig queuesPropertiesConfig,
                          @Qualifier("redisSimpleAsyncTaskScheduler") SimpleAsyncTaskScheduler taskExecutor,
-                         SimpleRedisCache simpleRedisCache) {
+                         SimpleRedisCache simpleRedisCache,
+                         @Value("${spring.custom.batch.update.period:3}") int updatePeriod
+    ) {
         this.redisTemplate = redisTemplate;
         this.taskExecutor = taskExecutor;
         this.queueMap = new ConcurrentHashMap<>(
                 queuesPropertiesConfig.getQueues().size()
         );
-        this.scheduledTasks = queuesPropertiesConfig.getQueues().stream().collect(
-                Collectors.toConcurrentMap(
-                        queue -> queue,
-                        _ -> new AtomicReference<>()
-                )
+        this.scheduledTasks = new ConcurrentHashMap<>(
+                queuesPropertiesConfig.getQueues().size()
         );
         this.lastReceived = new ConcurrentHashMap<>(
                 queuesPropertiesConfig.getQueues().size()
         );
         this.simpleRedisCache = simpleRedisCache;
+        periodicTrigger = new PeriodicTrigger(Duration.ofSeconds(updatePeriod));
+        periodicTrigger.setInitialDelay(Duration.ofSeconds(updatePeriod / 2));
+
     }
 
     @Override
@@ -80,17 +80,14 @@ public class BatchNotifyWS implements BatchNotify {
 
     private void startScheduledTaskIfNotStarted(String queueName) {
 //        log.info("Sending update global outside count is {}", globalCnt);
-        ScheduledFuture<?> queueFuture = scheduledTasks.computeIfAbsent(queueName,
-                _ -> new AtomicReference<>()
-        ).get();
-        if (queueFuture == null || queueFuture.isCancelled()) {
-            PeriodicTrigger trigger = new PeriodicTrigger(Duration.ofSeconds(updatePeriod));
-            trigger.setInitialDelay(Duration.ofSeconds(updatePeriod / 2));
-            ScheduledFuture<?> scheduledFuture = taskExecutor.schedule(() -> handleScheduledTask(queueName),
-                    trigger);
-            assert scheduledFuture != null;
-            scheduledTasks.put(queueName, new AtomicReference<>(scheduledFuture));
-        }
+        scheduledTasks.compute(queueName,
+                (qn, existingFuture) -> {
+                    if (existingFuture == null || existingFuture.isCancelled()) {
+                        return taskExecutor.schedule(() -> handleScheduledTask(qn), periodicTrigger);
+                    } else {
+                        return existingFuture;
+                    }
+                });
     }
 
     private void handleScheduledTask(String queueName) {
@@ -106,51 +103,45 @@ public class BatchNotifyWS implements BatchNotify {
     private void unscheduleQueue(String queueName) {
         Instant lastUpdateTime = lastReceived.get(queueName);
         if (lastUpdateTime != null && lastUpdateTime.isBefore(Instant.now().minusSeconds(notifyTimeout))) {
-            log.info("Last received is {}", lastReceived.get(queueName));
-            queueMap.put(queueName, 0L);
-            ScheduledFuture<?> scheduledFuture = scheduledTasks.get(queueName).get();
-            if (scheduledFuture != null && !scheduledFuture.isCancelled()) {
-                sendUpdateBatchToRedis(queueName, 0L, true);
-            }
+            log.info("Last received is {}", lastUpdateTime);
             stopScheduledTask(queueName);
+            Long pendingCount = queueMap.getOrDefault(queueName, 0L);
+            queueMap.put(queueName, 0L);
+            sendUpdateBatchToRedis(queueName, pendingCount, true);
             log.info("Stopped task for queue {}", queueName);
-
         }
     }
 
     private void sendUpdateBatchToRedis(String queueName, Long count, boolean finished) {
-        try {
-            Mono.zip(simpleRedisCache.evictCachedValue(queueName),
-                            redisTemplate.convertAndSend(BatchHandler.getChannelName(),
-                                    NotifyBatchUpdate.builder()
-                                            .numberProcessed(count)
-                                            .queueName(queueName)
-                                            .id(UUID.randomUUID().toString())
-                                            .timestamp(LocalDateTime.now())
-                                            .finished(finished)
-                                            .build()))
-                    .subscribe();
-        } catch (Exception e) {
-            throw new RuntimeException("Error sending message to redis", e);
-        }
-
-
+        Mono.zip(simpleRedisCache.evictCachedValue(queueName)
+                                .doOnError(e -> log.error("Error evicting cache for queue {}", queueName, e)),
+                        redisTemplate.convertAndSend(BatchHandler.getChannelName(),
+                                        NotifyBatchUpdate.builder()
+                                                .numberProcessed(count)
+                                                .queueName(queueName)
+                                                .id(UUID.randomUUID().toString())
+                                                .timestamp(LocalDateTime.now())
+                                                .finished(finished)
+                                                .build())
+                                .doOnError(e -> log.error("Error sending notification for queue {}", queueName, e))
+                )
+                .doOnError(e -> log.error("Error in batch‐update zip for {}", queueName, e))
+                .subscribe();
     }
 
 
     private void stopScheduledTask(String queueName) {
-        ScheduledFuture<?> scheduledFuture = scheduledTasks.get(queueName).get();
+        ScheduledFuture<?> scheduledFuture = scheduledTasks.remove(queueName);
         if (scheduledFuture != null && !scheduledFuture.isCancelled()) {
             scheduledFuture.cancel(true);
-            scheduledTasks.put(queueName, new AtomicReference<>());
         }
     }
 
     @PreDestroy
     public void shutdown() {
         scheduledTasks.values().forEach(task -> {
-            if (!task.get().isCancelled()) {
-                task.get().cancel(true);
+            if (task != null && !task.isCancelled()) {
+                task.cancel(true);
             }
         });
         scheduledTasks.clear();
