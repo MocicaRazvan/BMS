@@ -14,21 +14,12 @@ import { AiIdeasField } from "@/types/ai-ideas-types";
 import AIGeneratePop, {
   AIGeneratePopTexts,
   AIPopCallback,
-  AIPopCallbackArg,
 } from "@/components/forms/ai-generate-pop";
-import {
-  Dispatch,
-  HTMLProps,
-  ReactNode,
-  SetStateAction,
-  useMemo,
-  useState,
-} from "react";
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { motion, AnimatePresence } from "framer-motion";
+import { useMemo, useState } from "react";
 import DOMPurify from "dompurify";
-import removeMd from "remove-markdown";
+import { AIResponseTexts } from "@/components/forms/ai-response";
+import dynamic from "next/dynamic";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export interface TitleBodyTexts {
   title: string;
@@ -55,6 +46,14 @@ interface CustomFieldProps<TFieldValues extends TitleBodyDto> {
   bodyAIGeneratedPopTexts?: AIGeneratePopTexts;
   extraBodyContext?: number;
 }
+
+const DynamicAIResponse = dynamic(
+  () => import("@/components/forms/ai-response").then((m) => m.AIResponse),
+  {
+    ssr: false,
+    loading: () => <Skeleton className="w-full min-h-36" />,
+  },
+);
 
 export const TitleBodyForm = <TFieldValues extends TitleBodyDto>({
   control,
@@ -143,15 +142,16 @@ export const TitleBodyForm = <TFieldValues extends TitleBodyDto>({
                       </div>
                     )}
                   </div>
-                  <AIResponse
+                  <DynamicAIResponse
                     response={titleAI}
                     saveCallback={aiTitleCallBack}
                     setResponse={setTitleAI}
+                    removeMarkdown={true}
                     {...aiResponseTexts}
                     presentationCallback={(r) => (
                       <div className="w-full h-full space-y-2">
                         <Input
-                          value={removeMd(r)}
+                          value={r}
                           disabled={true}
                           className="flex-1 disabled:cursor-default disabled:bg-background disabled:opacity-100"
                         />
@@ -193,7 +193,7 @@ export const TitleBodyForm = <TFieldValues extends TitleBodyDto>({
             </div>
             <FormControl>
               <div className="h-full w-full space-y-1">
-                <AIResponse
+                <DynamicAIResponse
                   response={bodyAI}
                   saveCallback={aiDescriptionCallBack}
                   setResponse={setBodyAI}
@@ -246,78 +246,6 @@ export const purifyAIDescription = (descriptions: string) =>
       "svg",
     ],
   });
-
-export interface AIResponseTexts {
-  useButtonText: string;
-  discardButtonText: string;
-  warningText: string;
-}
-
-interface AIResponseProps extends AIResponseTexts {
-  response: string | undefined;
-  saveCallback: (resp: AIPopCallbackArg) => void;
-  setResponse: Dispatch<SetStateAction<string | undefined>>;
-  presentationCallback: (r: string) => ReactNode;
-  isLoading: boolean;
-  wrapperClassName?: HTMLProps<HTMLDivElement>["className"];
-  wrapperButtonsClassName?: HTMLProps<HTMLDivElement>["className"];
-}
-
-function AIResponse({
-  response,
-  saveCallback,
-  setResponse,
-  presentationCallback,
-  isLoading,
-  wrapperClassName = "",
-  wrapperButtonsClassName = "",
-  discardButtonText,
-  useButtonText,
-}: AIResponseProps) {
-  return (
-    <AnimatePresence>
-      {response && response.trim() !== "" && (
-        <motion.div
-          className={cn(
-            !response
-              ? "hidden"
-              : "flex items-start justify-between gap-10 mt-5 md:mt-7 " +
-                  wrapperClassName,
-          )}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-        >
-          {presentationCallback(response)}
-
-          <div
-            className={
-              "flex items-center justify-between gap-5 " +
-              wrapperButtonsClassName
-            }
-          >
-            <Button
-              type="button"
-              onClick={() => {
-                saveCallback({ answer: response });
-                setResponse(undefined);
-              }}
-              variant="success"
-            >
-              {useButtonText}
-            </Button>
-            {!isLoading && (
-              <Button type="button" onClick={() => setResponse(undefined)}>
-                {discardButtonText}
-              </Button>
-            )}
-          </div>
-        </motion.div>
-      )}
-    </AnimatePresence>
-  );
-}
-
 function useAIGenerateResponse() {
   const [response, setResponse] = useState<string | undefined>();
   const [isLoading, setIsLoading] = useState(false);

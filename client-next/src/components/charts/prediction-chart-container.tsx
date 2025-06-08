@@ -23,6 +23,7 @@ import {
 } from "recharts";
 import { isDeepEqual } from "@/lib/utils";
 import dynamic from "next/dynamic";
+
 export interface DataLabels {
   totalAmountLabel: string;
   countLabel: string;
@@ -117,7 +118,6 @@ const PredictionChartContainer = memo(
             >
               <DynamicEmptyChartLottie
                 loop
-                play
                 className="md:w-1/3 md:h-1/3 mx-auto"
               />
             </motion.div>

@@ -34,7 +34,12 @@ export const verifyCsrfToken = async (req: NextRequest): Promise<boolean> => {
     const rawToken = req.headers.get(NEXT_CSRF_HEADER);
 
     if (rawToken !== requestToken) {
-      console.error("Raw token does not match request token", req);
+      console.error(
+        "Raw token does not match request token",
+        parsedCsrfTokenAndHash,
+        rawToken,
+        requestToken,
+      );
       return logErrorAndReturn(req);
     }
 

@@ -2,7 +2,7 @@
 import { useEffect } from "react";
 import confetti from "canvas-confetti";
 
-import Lottie from "react-lottie-player";
+import Lottie from "lottie-light-react";
 import orderCompleted from "../../../../../../public/lottie/orderCompleted.json";
 import { motion } from "framer-motion";
 
@@ -49,7 +49,6 @@ export default function OrderCompletePageContent() {
       <Lottie
         loop={false}
         animationData={orderCompleted}
-        play
         className="md:w-1/3 md:h-1/3 mx-auto"
       />
     </motion.div>

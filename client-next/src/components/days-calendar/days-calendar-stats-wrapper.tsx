@@ -154,7 +154,6 @@ export default function DayCalendarStatsWrapper({
               <DynamicNoResultsLottie
                 loop
                 className="md:w-1/2 md:h-1/2 mx-auto"
-                play
               />
               <h1 className="font-medium text-lg">{noDataText}</h1>
             </div>

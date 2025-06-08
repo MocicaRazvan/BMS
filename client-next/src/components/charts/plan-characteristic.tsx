@@ -139,7 +139,6 @@ export function PlanCharacteristic({
           >
             <DynamicEmptyChartLottie
               loop
-              play
               className="md:w-1/3 md:h-1/3 mx-auto"
             />
           </motion.div>
@@ -263,7 +262,6 @@ export function PlanCharacteristicScatter({
           >
             <DynamicEmptyChartLottie
               loop
-              play
               className="md:w-1/3 md:h-1/3 mx-auto"
             />
           </motion.div>

@@ -1,13 +1,16 @@
 "use client";
-import { download, generateCsv, mkConfig } from "export-to-csv";
-import { useCallback, useMemo } from "react";
+import { useCallback, useState } from "react";
 import { useFormatter } from "next-intl";
 import { ColumnDef, Row, Table } from "@tanstack/react-table";
 import { fromStringOfDotToObjectValue } from "@/lib/utils";
 import { format, parseISO } from "date-fns";
-import jsPDF from "jspdf";
-import autoTable from "jspdf-autotable";
-import "@/lib/calibri-normal-font-jspdf";
+import fetchFactory from "@/lib/fetchers/fetchWithRetry";
+import { saveAs } from "file-saver";
+import { getCsrfNextAuthHeader } from "@/actions/get-csr-next-auth";
+
+const PDF_ROUTE = "/api/table/export-pdf" as const;
+const CSV_ROUTE = "/api/table/export-csv" as const;
+type ExportRoute = typeof PDF_ROUTE | typeof CSV_ROUTE;
 
 export interface UseExportTableArgs<T extends Record<string, any>, V> {
   lastLengthColumns?: string[];
@@ -32,18 +35,11 @@ export default function useExportTable<T extends Record<string, any>, V>({
   columns,
   specialPDFColumns = [],
 }: UseExportTableArgs<T, V>) {
+  const [isExporting, setIsExporting] = useState<Record<ExportRoute, boolean>>({
+    [PDF_ROUTE]: false,
+    [CSV_ROUTE]: false,
+  });
   const formatIntl = useFormatter();
-
-  const csvConfig = useMemo(
-    () =>
-      mkConfig({
-        fieldSeparator: ",",
-        filename: `${fileName}-${new Date().toISOString()}`,
-        decimalSeparator: ".",
-        showColumnHeaders: true,
-      }),
-    [fileName],
-  );
 
   const getExport = useCallback(
     (rows: Row<T>[]) => {
@@ -159,63 +155,61 @@ export default function useExportTable<T extends Record<string, any>, V>({
     ],
   );
 
-  const exportCsv = useCallback(
-    (rows: Row<T>[]) => {
+  const exportBase = useCallback(
+    async (rows: Row<T>[], route: string, extension: string) => {
+      setIsExporting((prev) => ({
+        ...prev,
+        [route]: true,
+      }));
       const { tableColumnHeaders, tableRows } = getExport(rows)();
-      const formattedRows = tableRows.map((row) =>
-        tableColumnHeaders.reduce(
-          (acc, cur, index) => {
-            acc[cur.id] = row[index];
-            // optimization
-            return acc;
-          },
-          {} as Record<string, string | number>,
-        ),
-      );
-      const finalConfig = {
-        ...csvConfig,
-        columnHeaders: tableColumnHeaders.map((h) => h.id),
-      };
-      if (formattedRows.length > 0) {
-        download(finalConfig)(generateCsv(finalConfig)(formattedRows));
+      const finalFileName = `${fileName}-${new Date().toISOString()}.${extension}`;
+      const csrf = await getCsrfNextAuthHeader();
+      try {
+        const res = await fetchFactory(fetch)(route, {
+          method: "POST",
+          credentials: "include",
+          headers: { "Content-Type": "application/json", ...csrf },
+          body: JSON.stringify({
+            tableColumnHeaders,
+            tableRows,
+            fileName: finalFileName,
+          }),
+        });
+        if (!res.ok) {
+          const body = await res.json();
+          console.log("Error exporting file:", body, route);
+          return;
+        }
+        const blob = await res.blob();
+        saveAs(blob, finalFileName, { autoBom: true });
+      } catch (error) {
+        console.log("Error exporting file:", error, route);
+      } finally {
+        setIsExporting((prev) => ({ ...prev, [route]: false }));
       }
     },
-    [csvConfig, getExport],
+    [fileName, getExport],
+  );
+
+  const exportCsv = useCallback(
+    (rows: Row<T>[]) => exportBase(rows, CSV_ROUTE, "csv"),
+    [exportBase],
   );
 
   const exportPdf = useCallback(
-    (rows: Row<T>[]) => {
-      const doc = new jsPDF({
-        orientation: "landscape",
-      });
-
-      const { tableColumnHeaders, tableRows } = getExport(rows)();
-      autoTable(doc, {
-        head: [tableColumnHeaders.map((h) => h.id)],
-        body: tableRows,
-        useCss: true,
-        theme: "striped",
-        headStyles: { fillColor: [22, 160, 133] },
-        bodyStyles: { fillColor: [244, 244, 244] },
-        alternateRowStyles: { fillColor: [255, 255, 255] },
-        startY: 20,
-        margin: { top: 20, bottom: 20 },
-        styles: {
-          fontSize: 10,
-          cellPadding: 4,
-          overflow: "linebreak",
-          minCellWidth: 20,
-          font: "calibri",
-          fontStyle: "normal",
-        },
-      });
-      doc.save(`${fileName}-${new Date().toISOString()}.pdf`);
-    },
-    [JSON.stringify(columns), fileName, getExport],
+    (rows: Row<T>[]) => exportBase(rows, PDF_ROUTE, "pdf"),
+    [exportBase],
   );
+
+  const isPdfExporting = isExporting[PDF_ROUTE];
+  const isCsvExporting = isExporting[CSV_ROUTE];
+  const isOneExporting = isPdfExporting || isCsvExporting;
 
   return {
     exportCsv,
     exportPdf,
+    isPdfExporting,
+    isCsvExporting,
+    isOneExporting,
   };
 }

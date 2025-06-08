@@ -1,6 +1,8 @@
 "use client";
-import { parseHumanReadable } from "cron-js-parser";
-import { convert } from "crontzconvert";
+import cronstrue from "cronstrue";
+import "cronstrue/locales/ro";
+import "cronstrue/locales/en";
+import convert from "cron-timezone-converter";
 import { Locale } from "@/navigation";
 
 export default function CronDisplay({
@@ -12,21 +14,18 @@ export default function CronDisplay({
 }) {
   return (
     <p>
-      {parseHumanReadable(
+      {cronstrue.toString(
         convert(
           cronExpression,
           "UTC",
           Intl.DateTimeFormat().resolvedOptions().timeZone,
+          true,
         ),
         {
-          // placeholder bug in the library
-          runOnWeekDay: {
-            dayIndex: 0,
-            weekIndex: 0,
-            isLastWeek: false,
-          },
+          locale,
+          use24HourTimeFormat: true,
+          verbose: true,
         },
-        locale,
       )}
     </p>
   );

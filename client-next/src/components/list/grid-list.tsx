@@ -177,7 +177,6 @@ export default function GridList<T extends TitleBodyImagesUserDto>({
                 <DynamicNoResultsLottie
                   loop
                   className="md:w-1/3 md:h-1/3 mx-auto"
-                  play
                 />
               </h2>
             </div>

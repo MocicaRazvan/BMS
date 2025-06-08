@@ -26,18 +26,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { ArrowDown, ArrowUpDown, Download } from "lucide-react";
+import { ArrowDown, ArrowUpDown } from "lucide-react";
 import { useMemo, useState } from "react";
 import useExportTable from "@/hoooks/table/use-export-table";
 import { ContainerAction, NotifyContainerAction } from "@/types/dto";
 import SearchInput from "@/components/forms/input-serach";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import {
   Table,
   TableBody,
@@ -64,13 +57,13 @@ import {
 } from "@radix-ui/react-icons";
 import { DataTablePaginationTexts } from "@/components/table/data-table-pagination";
 import { SelectedRowsTexts } from "@/components/table/selected-rows";
-import PulsatingButton from "@/components/magicui/pulsating-button";
 import { useTableSearchParams } from "tanstack-table-search-params";
 import { useSearchParams } from "next/navigation";
 import { usePathname } from "@/navigation";
 import { stripNonAlphaNumeric } from "@/lib/utils";
 import { containerActionColors } from "@/types/constants";
 import { useAuthUserMinRole } from "@/context/auth-user-min-role-context";
+import ExportTableDropDown from "@/components/table/export-table-dropdown";
 
 const fuzzyFilter: FilterFn<any> = (row, columnId, value, addMeta) => {
   const cleanedRowValue = stripNonAlphaNumeric(row.getValue(columnId) ?? "");
@@ -328,7 +321,7 @@ function DataTable({
             autoFocus={false}
           />
         </div>
-        <div className="flex items-center justify-end gap-2">
+        <div className="flex items-center justify-end gap-4">
           <Button
             variant="outline"
             onClick={() => {
@@ -338,69 +331,19 @@ function DataTable({
           >
             {texts.clearFilters}
           </Button>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="outline"
-                className="flex items-center justify-center"
-                size="icon"
-              >
-                <Download />
-              </Button>
-            </DropdownMenuTrigger>
-
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem
-                className="cursor-pointer py-2 "
-                onClick={() => exportCsv(table.getFilteredRowModel().rows)}
-              >
-                {"CSV"}
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                className="cursor-pointer py-2 "
-                onClick={() => exportPdf(table.getFilteredRowModel().rows)}
-              >
-                {"PDF"}
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-          <div>
-            {table.getFilteredSelectedRowModel().rows.length > 0 && (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <div>
-                    <PulsatingButton className="flex items-center justify-center py-2 px-1.5">
-                      <div className="flex items-center justify-center gap-2">
-                        {texts.downloadSelected}
-                        <Download className="h-5 w-5" />
-                      </div>
-                    </PulsatingButton>
-                  </div>
-                </DropdownMenuTrigger>
-
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem
-                    className="cursor-pointer py-2 "
-                    onClick={() =>
-                      exportCsv(table.getFilteredSelectedRowModel().rows)
-                    }
-                  >
-                    {"CSV"}
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem
-                    className="cursor-pointer py-2 "
-                    onClick={() =>
-                      exportPdf(table.getFilteredSelectedRowModel().rows)
-                    }
-                  >
-                    {"PDF"}
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            )}
-          </div>
+          <ExportTableDropDown
+            lastLengthColumns={[]}
+            dateColumns={[]}
+            currencyColumns={[]}
+            fileName={"archive-queue"}
+            hidePDFColumnIds={["select"]}
+            table={table}
+            columns={columns}
+            specialPDFColumns={[]}
+            downloadSelected={texts.downloadSelected}
+            persistedRows={table.getFilteredSelectedRowModel().rows}
+            selectedLength={table.getFilteredSelectedRowModel().rows.length}
+          />
         </div>
       </div>
       <div className="rounded-md border">

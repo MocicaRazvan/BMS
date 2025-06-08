@@ -36,8 +36,6 @@ import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
@@ -49,17 +47,13 @@ import RadioSort, {
   RadioSortProps,
   RadioSortTexts,
 } from "@/components/common/radio-sort";
-import { Download } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Skeleton } from "@/components/ui/skeleton";
-import useExportTable, {
-  UseExportTableArgs,
-} from "@/hoooks/table/use-export-table";
+import { UseExportTableArgs } from "@/hoooks/table/use-export-table";
 import { Checkbox } from "@/components/ui/checkbox";
 import SelectedRows, {
   SelectedRowsTexts,
 } from "@/components/table/selected-rows";
-import PulsatingButton from "@/components/magicui/pulsating-button";
 import {
   LinkedChartComponent,
   LinkedChartProps,
@@ -77,6 +71,7 @@ import useTableColResize, {
 } from "@/hoooks/table/use-table-col-resize";
 import useTableRowSelection from "@/hoooks/table/use-table-row-selection";
 import dynamic from "next/dynamic";
+import ExportTableDropDown from "@/components/table/export-table-dropdown";
 
 export interface TableFilter {
   key: string;
@@ -270,17 +265,6 @@ export function DataTable<TData extends Record<string, any>, TValue = any>({
     });
   }, [getRowId, updatePersistedRows, table]);
 
-  const { exportPdf, exportCsv } = useExportTable<TData, TValue>({
-    lastLengthColumns,
-    dateColumns,
-    currencyColumns,
-    fileName,
-    hidePDFColumnIds,
-    table,
-    columns: finalColumns,
-    specialPDFColumns,
-  });
-
   return (
     <div className="mb-2">
       <div className="flex flex-col lg:flex-row items-start py-4 flex-wrap gap-10">
@@ -296,34 +280,19 @@ export function DataTable<TData extends Record<string, any>, TValue = any>({
           {extraCriteria && extraCriteria}
         </div>
         <div className="w-full lg:w-fit flex items-center justify-between gap-4 ml-auto">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="outline"
-                className="flex items-center justify-center"
-                size="icon"
-              >
-                {/*{exportLabel}*/}
-                <Download />
-              </Button>
-            </DropdownMenuTrigger>
-
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem
-                className="cursor-pointer py-2 "
-                onClick={() => exportCsv(table.getFilteredRowModel().rows)}
-              >
-                {"CSV"}
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                className="cursor-pointer py-2 "
-                onClick={() => exportPdf(table.getFilteredRowModel().rows)}
-              >
-                {"PDF"}
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <ExportTableDropDown
+            lastLengthColumns={lastLengthColumns}
+            dateColumns={dateColumns}
+            currencyColumns={currencyColumns}
+            fileName={fileName}
+            hidePDFColumnIds={hidePDFColumnIds}
+            table={table}
+            columns={finalColumns}
+            specialPDFColumns={specialPDFColumns}
+            downloadSelected={downloadSelected}
+            persistedRows={persistedRows}
+            selectedLength={selectedLength}
+          />
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" className="ml-auto">
@@ -350,38 +319,6 @@ export function DataTable<TData extends Record<string, any>, TValue = any>({
                 })}
             </DropdownMenuContent>
           </DropdownMenu>
-          <div>
-            {selectedLength > 0 && (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <div>
-                    <PulsatingButton className="flex items-center justify-center py-2 px-1.5">
-                      <div className="flex items-center justify-center gap-2">
-                        {downloadSelected}
-                        <Download className="h-5 w-5" />
-                      </div>
-                    </PulsatingButton>
-                  </div>
-                </DropdownMenuTrigger>
-
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem
-                    className="cursor-pointer py-2 "
-                    onClick={() => exportCsv(persistedRows)}
-                  >
-                    {"CSV"}
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem
-                    className="cursor-pointer py-2 "
-                    onClick={() => exportPdf(persistedRows)}
-                  >
-                    {"PDF"}
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            )}
-          </div>
         </div>
       </div>
       {rangeDateFilter && <div className="w-full mb-4">{rangeDateFilter}</div>}
