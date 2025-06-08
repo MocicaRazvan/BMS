@@ -378,6 +378,27 @@
       },
       "EditorEmojiPickerTexts": {
         "searchPlaceholder": "Caută emoji"
+      },
+      "TextStyleGroup": {
+        "bold": "Aldin",
+        "italic": "Cursiv",
+        "underline": "Subliniat",
+        "strike": "Tăiat",
+        "bulletList": "Listă cu puncte",
+        "orderedList": "Listă ordonată",
+        "codeBlock": "Bloc de cod",
+        "blockQuote": "Citat bloc",
+        "horizontalRule": "Linie orizontală"
+      },
+      "TextAlignmentGroup": {
+        "alignLeft": "Stânga",
+        "alignCenter": "Centru",
+        "alignRight": "Dreapta",
+        "alignJustify": "Distribuit"
+      },
+      "UndoRedoGroup": {
+        "undo": "Anulează",
+        "redo": "Refă"
       }
     },
     "forms": {

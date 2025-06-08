@@ -379,6 +379,27 @@
       },
       "EditorEmojiPickerTexts": {
         "searchPlaceholder": "Search emoji"
+      },
+      "TextStyleGroup": {
+        "bold": "Bold",
+        "italic": "Italic",
+        "underline": "Underline",
+        "strike": "Strikethrough",
+        "bulletList": "Bullet List",
+        "orderedList": "Ordered List",
+        "codeBlock": "Code Block",
+        "blockQuote": "Block Quote",
+        "horizontalRule": ""
+      },
+      "TextAlignmentGroup": {
+        "alignLeft": "Left",
+        "alignCenter": "Center",
+        "alignRight": "Right",
+        "alignJustify": "Justify"
+      },
+      "UndoRedoGroup": {
+        "undo": "Undo",
+        "redo": "Redo"
       }
     },
     "forms": {

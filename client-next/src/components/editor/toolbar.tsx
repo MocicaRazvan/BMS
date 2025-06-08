@@ -1,26 +1,17 @@
 "use client";
 import React from "react";
 import { Editor } from "@tiptap/react";
-import {
-  Bold,
-  Code,
-  Italic,
-  List,
-  ListOrdered,
-  Minus,
-  Quote,
-  Redo,
-  Strikethrough,
-  Undo,
-} from "lucide-react";
-
-import { ToggleGroup } from "../ui/toggle-group";
-import { Toggle } from "./toggle";
 import { Toolbar } from "./base-toolbar";
 import { FormatType, FormatTypeTexts } from "./format-type";
 import EditorEmojiPicker, {
   EditorEmojiPickerTexts,
 } from "@/components/editor/editor-emoji-picker";
+import {
+  TextAlignmentGroup,
+  TextAlignmentsTexts,
+  TextStyleGroup,
+  UndoRedoGroup,
+} from "@/components/editor/editor-allignements";
 
 export interface EditorToolbarTexts {
   formatTypeTexts: FormatTypeTexts;
@@ -31,6 +22,7 @@ interface EditorToolbarProps extends EditorToolbarTexts {
   editor: Editor;
   sticky?: boolean;
   useEmojis?: boolean;
+  textAlignmentsTexts: TextAlignmentsTexts;
 }
 
 const EditorToolbar = ({
@@ -39,154 +31,60 @@ const EditorToolbar = ({
   editorEmojiPickerTexts,
   formatTypeTexts,
   useEmojis = true,
+  textAlignmentsTexts,
 }: EditorToolbarProps) => {
   return (
     <Toolbar
-      className="m-0 z-10 flex items-center md:justify-between px-0 md:px-2 py-2 md:flex-row flex-col justify-center "
+      className="m-0 z-10 flex items-center md:justify-between px-2 py-2 md:flex-row flex-col justify-center gap-1.5 md:gap-0"
       aria-label="Formatting options"
       sticky={sticky}
     >
-      <ToggleGroup className="flex flex-row items-center" type="multiple">
-        <Toggle
-          size="icon"
-          className="mr-1"
-          tooltip="Bold"
-          onPressedChange={() => editor.chain().focus().toggleBold().run()}
-          disabled={!editor.can().chain().focus().toggleBold().run()}
-          pressed={editor.isActive("bold")}
-        >
-          <Bold className="h-4 w-4" />
-        </Toggle>
-
-        <Toggle
-          size="icon"
-          className="mr-1"
-          tooltip="Italic"
-          onPressedChange={() => editor.chain().focus().toggleItalic().run()}
-          disabled={!editor.can().chain().focus().toggleItalic().run()}
-          pressed={editor.isActive("italic")}
-          value="italic"
-        >
-          <Italic className="h-4 w-4" />
-        </Toggle>
-
-        <Toggle
-          size="icon"
-          className="mr-1"
-          tooltip="Strike through"
-          onPressedChange={() => editor.chain().focus().toggleStrike().run()}
-          disabled={!editor.can().chain().focus().toggleStrike().run()}
-          pressed={editor.isActive("strike")}
-        >
-          <Strikethrough className="h-4 w-4" />
-        </Toggle>
-
-        <Toggle
-          size="icon"
-          className="mr-1"
-          tooltip="Bullet list"
-          onPressedChange={() =>
-            editor.chain().focus().toggleBulletList().run()
-          }
-          pressed={editor.isActive("bulletList")}
-        >
-          <List className="h-4 w-4" />
-        </Toggle>
-
-        <Toggle
-          size="icon"
-          className="mr-1"
-          tooltip="Numbered list"
-          onPressedChange={() =>
-            editor.chain().focus().toggleOrderedList().run()
-          }
-          pressed={editor.isActive("orderedList")}
-        >
-          <ListOrdered className="h-4 w-4" />
-        </Toggle>
-
-        <Toggle
-          size="icon"
-          className="mr-1"
-          tooltip="Code block"
-          onPressedChange={() => editor.chain().focus().toggleCodeBlock().run()}
-          pressed={editor.isActive("codeBlock")}
-        >
-          <Code className="h-4 w-4" />
-        </Toggle>
-
-        <Toggle
-          size="icon"
-          className="mr-1"
-          tooltip="Block quote"
-          onPressedChange={() =>
-            editor.chain().focus().toggleBlockquote().run()
-          }
-          pressed={editor.isActive("blockquote")}
-        >
-          <Quote className="h-4 w-4" />
-        </Toggle>
-
-        <Toggle
-          size="icon"
-          className="mr-1"
-          tooltip="Horizontal rule"
-          onPressedChange={() =>
-            editor.chain().focus().setHorizontalRule().run()
-          }
-        >
-          <Minus className="h-4 w-4" />
-        </Toggle>
-
-        {useEmojis && (
-          <EditorEmojiPicker
-            onEmojiSelect={(e) => {
-              editor
-                .chain()
-                .focus()
-                .insertContent([
-                  {
-                    type: "customSpan",
-                    attrs: {
-                      style:
-                        "font-size: 1.5rem; min-width: 1em; display: inline-block;",
+      <div className="flex items-center justify-start flex-wrap">
+        <TextStyleGroup
+          editor={editor}
+          texts={textAlignmentsTexts.textStyleGroupTexts}
+        />
+        <div className="flex flex-row items-center mr-2.5">
+          {useEmojis && (
+            <EditorEmojiPicker
+              onEmojiSelect={(e) => {
+                editor
+                  .chain()
+                  .focus()
+                  .insertContent([
+                    {
+                      type: "customSpan",
+                      attrs: {
+                        style:
+                          "font-size: 1.5rem; min-width: 1em; display: inline-block;",
+                      },
+                      content: [{ type: "text", text: `${e}` }],
                     },
-                    content: [{ type: "text", text: `${e}` }],
-                  },
-                  { type: "text", text: " " },
-                ])
-                .run();
-            }}
-            texts={editorEmojiPickerTexts}
-          />
-        )}
-        <div className="hidden md:block">
-          <FormatType editor={editor} texts={formatTypeTexts} />
+                    { type: "text", text: " " },
+                  ])
+                  .run();
+              }}
+              texts={editorEmojiPickerTexts}
+            />
+          )}
+          <div className="hidden md:block">
+            <FormatType editor={editor} texts={formatTypeTexts} />
+          </div>
         </div>
-      </ToggleGroup>
-
-      <ToggleGroup className="flex flex-row items-center" type="multiple">
+        <TextAlignmentGroup
+          editor={editor}
+          texts={textAlignmentsTexts.textAlignmentGroupTexts}
+        />
+      </div>
+      <div className="flex md:block items-center justify-between w-full md:w-fit">
         <div className="block md:hidden">
           <FormatType editor={editor} texts={formatTypeTexts} />
         </div>
-        <Toggle
-          size="icon"
-          className="mr-1"
-          onPressedChange={() => editor.chain().focus().undo().run()}
-          disabled={!editor.can().chain().focus().undo().run()}
-        >
-          <Undo className="h-4 w-4" />
-        </Toggle>
-
-        <Toggle
-          size="icon"
-          className="mr-1"
-          onPressedChange={() => editor.chain().focus().redo().run()}
-          disabled={!editor.can().chain().focus().redo().run()}
-        >
-          <Redo className="h-4 w-4" />
-        </Toggle>
-      </ToggleGroup>
+        <UndoRedoGroup
+          editor={editor}
+          texts={textAlignmentsTexts.undoRedoGroupTexts}
+        />
+      </div>
     </Toolbar>
   );
 };
