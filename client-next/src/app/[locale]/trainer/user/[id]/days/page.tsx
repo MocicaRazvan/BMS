@@ -12,8 +12,8 @@ import SidebarContentLayout from "@/components/sidebar/sidebar-content-layout";
 import { Suspense } from "react";
 import { Metadata } from "next";
 import { getIntlMetadata } from "@/texts/metadata";
-import { FindInSiteTexts } from "@/components/nav/find-in-site";
 import IsTheSameUserOrAdmin from "@/app/[locale]/trainer/user/is-the-same-user-or-admin";
+import { FindInSiteTexts } from "@/components/nav/find-in-site-content";
 
 interface Props {
   params: { locale: Locale; id: string };

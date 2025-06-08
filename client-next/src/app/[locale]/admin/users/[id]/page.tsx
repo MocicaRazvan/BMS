@@ -5,7 +5,8 @@ import { UserPageTexts } from "@/app/[locale]/(main)/(user)/users/single/[id]/pa
 import { ThemeSwitchTexts } from "@/texts/components/nav";
 import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
 import AdminUserPageContent from "@/app/[locale]/admin/users/[id]/page-content";
-import { FindInSiteTexts } from "@/components/nav/find-in-site";
+
+import { FindInSiteTexts } from "@/components/nav/find-in-site-content";
 
 interface Props {
   params: { locale: Locale; id: string };

@@ -10,7 +10,8 @@ import { sortingPostsSortingOptionsKeys } from "@/texts/components/list";
 import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
 import { Metadata } from "next";
 import { getIntlMetadata } from "@/texts/metadata";
-import { FindInSiteTexts } from "@/components/nav/find-in-site";
+
+import { FindInSiteTexts } from "@/components/nav/find-in-site-content";
 
 export interface UserPostsAdminPageTexts {
   postTableTexts: PostTableTexts;

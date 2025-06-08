@@ -10,7 +10,6 @@ import CustomVideoCarousel from "@/components/common/custom-videos-crousel";
 import { NutritionalTableTexts } from "@/components/common/nutritional-table";
 import { IngredientPieChartTexts } from "@/components/charts/ingredient-macros-pie-chart";
 import useGetRecipeWithIngredients from "@/hoooks/recipes/useGetRecipeWithIngredients";
-import RecipeMacros from "@/components/recipes/recipe-macros";
 import useClientNotFound from "@/hoooks/useClientNotFound";
 import LikesDislikes from "@/components/common/likes-dislikes";
 import DietBadge from "@/components/common/diet-badge";
@@ -18,6 +17,8 @@ import RecipeIngredients from "@/components/recipes/recipe-ingredients";
 import { AnswerFromBodyFormTexts } from "@/components/forms/answer-from-body-form";
 import ItemBodyQa from "@/components/common/item-body-qa";
 import { useAuthUserMinRole } from "@/context/auth-user-min-role-context";
+import dynamic from "next/dynamic";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export interface SingleRecipePageTexts {
   elementHeaderTexts: ElementHeaderTexts;
@@ -30,6 +31,19 @@ export interface SingleRecipePageTexts {
 interface Props extends SingleRecipePageTexts {
   id: string;
 }
+
+const DynamicRecipeMacros = dynamic(
+  () => import("@/components/recipes/recipe-macros"),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="h-[350px] lg:h-[400px]">
+        <Skeleton className="size-full rounded-xl" />
+      </div>
+    ),
+  },
+);
+
 export default function SingeRecipePageContent({
   id,
   elementHeaderTexts,
@@ -104,7 +118,7 @@ export default function SingeRecipePageContent({
                   {elementHeaderTexts.notApproved}
                 </p>
               )}
-            </div>{" "}
+            </div>
             <div className="flex items-center justify-center gap-4">
               <LikesDislikes
                 likes={recipeState.userDislikes}
@@ -148,7 +162,7 @@ export default function SingeRecipePageContent({
       )}
 
       <div className="mt-20">
-        <RecipeMacros
+        <DynamicRecipeMacros
           ingredients={IQMessage}
           nutritionalTableTexts={nutritionalTableTexts}
           ingredientPieChartTexts={ingredientPieChartTexts}

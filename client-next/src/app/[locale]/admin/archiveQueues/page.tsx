@@ -12,12 +12,12 @@ import SidebarContentLayout from "@/components/sidebar/sidebar-content-layout";
 import Heading from "@/components/common/heading";
 import { Suspense } from "react";
 import LoadingSpinner from "@/components/common/loading-spinner";
-import { FindInSiteTexts } from "@/components/nav/find-in-site";
 import ArchiveContent, {
   AugmentedArchiveQueuePrefix,
 } from "@/components/archive/archive-content";
 import { Separator } from "@/components/ui/separator";
 import ArchiveQueuesTableWrapper from "@/app/[locale]/admin/archiveQueues/table-wrapper";
+import { FindInSiteTexts } from "@/components/nav/find-in-site-content";
 
 interface Props {
   params: { locale: Locale };

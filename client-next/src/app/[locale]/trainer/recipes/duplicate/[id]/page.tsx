@@ -10,7 +10,8 @@ import LoadingSpinner from "@/components/common/loading-spinner";
 import SidebarContentLayout from "@/components/sidebar/sidebar-content-layout";
 import { getDuplicateRecipePageTexts } from "@/texts/pages";
 import DuplicateRecipePageContent from "@/app/[locale]/trainer/recipes/duplicate/[id]/page-content";
-import { FindInSiteTexts } from "@/components/nav/find-in-site";
+
+import { FindInSiteTexts } from "@/components/nav/find-in-site-content";
 
 interface Props {
   params: {

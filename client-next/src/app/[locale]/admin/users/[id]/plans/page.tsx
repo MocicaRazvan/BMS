@@ -11,7 +11,8 @@ import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
 import { Metadata } from "next";
 import { getIntlMetadata } from "@/texts/metadata";
 import { TopPlansTexts } from "@/components/charts/top-plans";
-import { FindInSiteTexts } from "@/components/nav/find-in-site";
+
+import { FindInSiteTexts } from "@/components/nav/find-in-site-content";
 
 export interface UserPlansAdminPageTexts {
   plansTableTexts: PlanTableTexts;

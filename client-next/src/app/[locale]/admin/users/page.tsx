@@ -20,7 +20,8 @@ import { Separator } from "@/components/ui/separator";
 import TopTrainers, {
   TopTrainersTexts,
 } from "@/components/charts/top-trainers";
-import { FindInSiteTexts } from "@/components/nav/find-in-site";
+
+import { FindInSiteTexts } from "@/components/nav/find-in-site-content";
 
 interface Props {
   params: { locale: Locale };

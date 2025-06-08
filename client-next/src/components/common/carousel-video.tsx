@@ -2,6 +2,19 @@
 
 import { useEffect, useLayoutEffect, useRef } from "react";
 import { useInView } from "framer-motion";
+import {
+  VideoPlayer,
+  VideoPlayerContent,
+  VideoPlayerControlBar,
+  VideoPlayerFullscreenButton,
+  VideoPlayerMuteButton,
+  VideoPlayerPlayButton,
+  VideoPlayerSeekBackwardButton,
+  VideoPlayerSeekForwardButton,
+  VideoPlayerTimeDisplay,
+  VideoPlayerTimeRange,
+  VideoPlayerVolumeRange,
+} from "@/components/ui/video-player";
 
 interface Props {
   item: {
@@ -52,12 +65,6 @@ export default function CarouselVideo({
     ) {
       videoRef.current.setAttribute("fetchPriority", "low");
     }
-
-    console.log(
-      "fetch priority",
-      index,
-      videoRef.current?.getAttribute("fetchPriority"),
-    );
   }, [activeIndex, index, isInView]);
 
   useLayoutEffect(() => {
@@ -69,13 +76,35 @@ export default function CarouselVideo({
 
   return (
     <div ref={ref} className="w-full h-full max-w-[1000px]">
-      <video
-        src={item.src}
-        controls
-        className="w-full max-w-[1000px] object-cover h-full "
-        preload="metadata"
-        ref={videoRef}
-      />
+      {/*<video*/}
+      {/*  src={item.src}*/}
+      {/*  controls*/}
+      {/*  className="w-full max-w-[1000px] object-cover h-full "*/}
+      {/*  preload="metadata"*/}
+      {/*  ref={videoRef}*/}
+      {/*/>*/}
+      <VideoPlayer className="w-full max-w-[1000px] object-cover h-full overflow-hidden">
+        <VideoPlayerContent
+          src={item.src}
+          autoPlay={false}
+          preload="metadata"
+          ref={videoRef}
+        />
+        <VideoPlayerControlBar
+          onMouseMove={(e) => {
+            e.stopPropagation();
+          }}
+        >
+          <VideoPlayerPlayButton />
+          <VideoPlayerSeekBackwardButton />
+          <VideoPlayerSeekForwardButton />
+          <VideoPlayerTimeRange />
+          <VideoPlayerTimeDisplay />
+          <VideoPlayerMuteButton />
+          <VideoPlayerVolumeRange />
+          <VideoPlayerFullscreenButton />
+        </VideoPlayerControlBar>
+      </VideoPlayer>
     </div>
   );
 }

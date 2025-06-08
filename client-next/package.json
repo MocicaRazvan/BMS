@@ -104,6 +104,7 @@
     "lodash.isequal": "^4.5.0",
     "lru-cache": "^11.0.2",
     "lucide-react": "^0.399.0",
+    "media-chrome": "^4.11.0",
     "murmurhash": "^2.0.1",
     "next": "14.2.28",
     "next-auth": "^4.24.7",

@@ -9,7 +9,8 @@ import { Locale } from "@/navigation";
 import { Metadata } from "next";
 import { getIntlMetadata } from "@/texts/metadata";
 import { unstable_setRequestLocale } from "next-intl/server";
-import { FindInSiteTexts } from "@/components/nav/find-in-site";
+
+import { FindInSiteTexts } from "@/components/nav/find-in-site-content";
 
 interface Props {
   params: { locale: Locale };

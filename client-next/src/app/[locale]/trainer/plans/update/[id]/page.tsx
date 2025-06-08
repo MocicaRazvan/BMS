@@ -10,7 +10,8 @@ import { PlanFormTexts } from "@/components/forms/plan-form";
 import { getUpdatePlanPageTexts } from "@/texts/pages";
 import LoadingSpinner from "@/components/common/loading-spinner";
 import SidebarContentLayout from "@/components/sidebar/sidebar-content-layout";
-import { FindInSiteTexts } from "@/components/nav/find-in-site";
+
+import { FindInSiteTexts } from "@/components/nav/find-in-site-content";
 
 interface Props {
   params: {

@@ -1,11 +1,11 @@
 "use client";
-import { memo, useCallback, useMemo, useState } from "react";
+import { memo, useState } from "react";
 import LikesDislikes from "@/components/common/likes-dislikes";
 import AlertDialogDeleteComment from "@/components/dialogs/comments/delete-comment";
 import { Trash2 } from "lucide-react";
 import { Link } from "@/navigation";
 import ProseText from "@/components/common/prose-text";
-import { CommentResponse, CustomEntityModel } from "@/types/dto";
+import { CommentResponse } from "@/types/dto";
 import { WithUser } from "@/lib/user";
 import {
   Accordion,
@@ -13,40 +13,20 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import {
-  CommentSchemaTexts,
-  CommentSchemaType,
-  getCommentSchema,
-} from "@/types/forms";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+import { CommentSchemaTexts, CommentSchemaType } from "@/types/forms";
+
 import { TitleBodyTexts } from "@/components/forms/title-body";
-import ErrorMessage from "@/components/forms/error-message";
-import ButtonSubmit, {
-  ButtonSubmitTexts,
-} from "@/components/forms/button-submit";
-import useLoadingErrorState from "@/hoooks/useLoadingErrorState";
-import { fetchStream } from "@/lib/fetchers/fetchStream";
-import { getToxicity } from "@/actions/toxcity";
-import DOMPurify from "dompurify";
+import { ButtonSubmitTexts } from "@/components/forms/button-submit";
 import { EditorTexts } from "@/components/editor/editor";
-import { cleanText } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 import dynamicWithPreload from "@/lib/dynamic-with-preload";
 import usePreloadDynamicComponents from "@/hoooks/use-prelod-dynamic-components";
+import { isDeepEqual } from "@/lib/utils";
 
-const DynamicEditor = dynamicWithPreload(
-  () => import("@/components/editor/editor"),
+const DynamicUpdateCommentForm = dynamicWithPreload(
+  () => import("@/components/forms/update-comment-form"),
   {
-    loading: () => <Skeleton className="min-h-[calc(200px+6rem)] w-full " />,
+    loading: () => <Skeleton className="min-h-[calc(400px+6rem)] w-full " />,
   },
 );
 
@@ -101,100 +81,11 @@ export const SingleComment = memo<Props>(
     editorTexts,
   }) => {
     usePreloadDynamicComponents(
-      DynamicEditor,
+      DynamicUpdateCommentForm,
       parseInt(authUser.id ?? "") === userId,
     );
 
-    const schema = useMemo(
-      () => getCommentSchema(commentSchemaTexts),
-      [commentSchemaTexts],
-    );
-    const form = useForm<CommentSchemaType>({
-      resolver: zodResolver(schema),
-      defaultValues: {
-        body: content.body,
-        title: content.title,
-      },
-    });
     const [editMode, setEditMode] = useState("");
-    const { isLoading, setIsLoading, router, errorMsg, setErrorMsg } =
-      useLoadingErrorState();
-
-    const watchBody = form.watch("body");
-    const isSameBody = useMemo(() => {
-      return cleanText(watchBody) === cleanText(content.body);
-    }, [watchBody, content.body]);
-
-    const onSubmit = useCallback(
-      async (data: CommentSchemaType) => {
-        setIsLoading(true);
-        const trimmedBody = data.body.trim();
-        const toxicRes = await getToxicity(
-          DOMPurify.sanitize(trimmedBody, {
-            ALLOWED_TAGS: [],
-            ALLOWED_ATTR: [],
-          }),
-        );
-        if (toxicRes.failure) {
-          if (toxicRes.reason.toLowerCase() === "toxicity") {
-            form.setError("body", {
-              message: toxicError,
-            });
-          } else {
-            form.setError("body", {
-              message: englishError,
-            });
-          }
-          setIsLoading(false);
-
-          return;
-        }
-        try {
-          const { messages, error, isFinished } = await fetchStream<
-            CustomEntityModel<CommentResponse>
-          >({
-            path: `/comments/update/${content.id}`,
-            method: "PUT",
-            body: {
-              ...data,
-              body: trimmedBody,
-            },
-            token: authUser.token,
-          });
-          if (error) {
-            if (error.message) {
-              setErrorMsg(error.message);
-            }
-            setErrorMsg(errorText);
-          } else {
-            if (messages[0]) {
-              updateCallback(
-                content.id,
-                {
-                  title: messages[0].content.title,
-                  body: messages[0].content.body,
-                },
-                messages[0].content.updatedAt,
-              );
-              console.log("messages", messages);
-              setEditMode("");
-            }
-          }
-        } catch (error) {
-          console.log(error);
-        } finally {
-          setIsLoading(false);
-        }
-      },
-      [
-        authUser.token,
-        content.id,
-        errorText,
-        setErrorMsg,
-        setIsLoading,
-        updateCallback,
-      ],
-    );
 
     return (
       <div key={content.id} className="w-full border rounded-lg px-4 py-6">
@@ -256,48 +147,24 @@ export const SingleComment = memo<Props>(
             >
               <AccordionItem value="item-edit">
                 <AccordionTrigger>{editHeader}</AccordionTrigger>
-                <AccordionContent className=" w-full flex items-center justify-center mx-auto ">
-                  <Form {...form}>
-                    <form
-                      onSubmit={form.handleSubmit(onSubmit)}
-                      className="space-y-8 w-full px-10 pt-1 lg:space-y-12"
-                    >
-                      {/*<TitleBodyForm<TitleBodyType>*/}
-                      {/*  control={form.control}*/}
-                      {/*  titleBodyTexts={{*/}
-                      {/*    ...titleBodyTexts,*/}
-                      {/*    body: editCommentLabel,*/}
-                      {/*  }}*/}
-                      {/*  hideTitle={true}*/}
-                      {/*/>*/}
-
-                      <FormField
-                        control={form.control}
-                        name={"body"}
-                        render={({ field }) => (
-                          <FormItem className="space-y-0">
-                            <FormLabel>{editCommentLabel}</FormLabel>
-                            <FormControl>
-                              <DynamicEditor
-                                descritpion={field.value as string}
-                                onChange={field.onChange}
-                                placeholder={titleBodyTexts.bodyPlaceholder}
-                                texts={editorTexts}
-                                separatorClassname="h-6"
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <ErrorMessage message={errorText} show={!!errorMsg} />
-                      <ButtonSubmit
-                        isLoading={isLoading}
-                        disable={isLoading || isSameBody}
-                        buttonSubmitTexts={buttonSubmitTexts}
-                      />
-                    </form>
-                  </Form>
+                <AccordionContent className="w-full flex items-center justify-center mx-auto ">
+                  <DynamicUpdateCommentForm
+                    titleBodyTexts={titleBodyTexts}
+                    commentSchemaTexts={commentSchemaTexts}
+                    buttonSubmitTexts={buttonSubmitTexts}
+                    editorTexts={editorTexts}
+                    content={content}
+                    edited={edited}
+                    editHeader={editHeader}
+                    deleteCommentDialog={deleteCommentDialog}
+                    editCommentLabel={editCommentLabel}
+                    updateCallback={updateCallback}
+                    englishError={englishError}
+                    toxicError={toxicError}
+                    errorText={errorText}
+                    setEditMode={setEditMode}
+                    authUser={authUser}
+                  />
                 </AccordionContent>
               </AccordionItem>
             </Accordion>
@@ -306,10 +173,24 @@ export const SingleComment = memo<Props>(
       </div>
     );
   },
-  (prevProps, nextProps) => {
-    // return    isDeepEqual(prevProps, nextProps);
-    return JSON.stringify(prevProps) === JSON.stringify(nextProps);
-  },
+  (
+    {
+      updateCallback: updatePrev,
+      deleteCommentCallback: deletePrev,
+      react: reactPrev,
+      ...restPrev
+    },
+    {
+      updateCallback: updateNext,
+      deleteCommentCallback: deleteNext,
+      react: reactNext,
+      ...restNext
+    },
+  ) =>
+    isDeepEqual(restPrev, restNext) &&
+    updatePrev === updateNext &&
+    deletePrev === deleteNext &&
+    reactPrev === reactNext,
 );
 
 SingleComment.displayName = "SingleComment";

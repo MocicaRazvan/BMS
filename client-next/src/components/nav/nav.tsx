@@ -14,15 +14,16 @@ import Logo from "@/components/logo/logo";
 import { LockKeyhole } from "lucide-react";
 import React, { useMemo } from "react";
 import { appendCreatedAtDesc } from "@/lib/utils";
-import FindInSite, {
-  FindInSiteTexts,
-  MetadataValue,
-} from "@/components/nav/find-in-site";
+import FindInSite from "@/components/nav/find-in-site";
 import { DaysCalendarCTATexts } from "@/components/days-calendar/days-calendar-cta";
 import { NavButtonGroup, NavItem } from "@/components/nav/nav-button";
 import { SheetClose } from "@/components/ui/sheet";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import ActiveLink from "@/components/nav/active-link";
+import {
+  FindInSiteTexts,
+  MetadataValue,
+} from "@/components/nav/find-in-site-content";
 
 export interface NavTexts {
   themeSwitchTexts: ThemeSwitchTexts;

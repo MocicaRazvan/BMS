@@ -10,7 +10,8 @@ import { Suspense } from "react";
 import LoadingSpinner from "@/components/common/loading-spinner";
 import { Metadata } from "next";
 import { getIntlMetadata } from "@/texts/metadata";
-import { FindInSiteTexts } from "@/components/nav/find-in-site";
+
+import { FindInSiteTexts } from "@/components/nav/find-in-site-content";
 
 interface Props {
   params: {

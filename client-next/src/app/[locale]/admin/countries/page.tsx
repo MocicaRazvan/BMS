@@ -1,7 +1,5 @@
 import { ThemeSwitchTexts } from "@/texts/components/nav";
-import GeographyChart, {
-  GeographyChartTexts,
-} from "@/components/charts/geography-chart";
+import GeographyChart from "@/components/charts/geography-chart";
 import { Locale } from "@/navigation";
 import { unstable_setRequestLocale } from "next-intl/server";
 import { getAdminCountriesTexts } from "@/texts/pages";
@@ -12,7 +10,9 @@ import SidebarContentLayout from "@/components/sidebar/sidebar-content-layout";
 import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
 import { Metadata } from "next";
 import { getIntlMetadata } from "@/texts/metadata";
-import { FindInSiteTexts } from "@/components/nav/find-in-site";
+
+import { FindInSiteTexts } from "@/components/nav/find-in-site-content";
+import { GeographyChartTexts } from "@/components/charts/geography-chart-content";
 
 export interface AdminCountriesTexts {
   title: string;

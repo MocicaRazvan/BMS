@@ -15,8 +15,8 @@ import { Suspense } from "react";
 import UsersPlansPageContent from "@/app/[locale]/trainer/user/[id]/plans/page-content";
 import { Separator } from "@/components/ui/separator";
 import TopPlans, { TopPlansTexts } from "@/components/charts/top-plans";
-import { FindInSiteTexts } from "@/components/nav/find-in-site";
 import IsTheSameUserOrAdmin from "@/app/[locale]/trainer/user/is-the-same-user-or-admin";
+import { FindInSiteTexts } from "@/components/nav/find-in-site-content";
 
 export interface UserPlansPageTexts {
   planTableTexts: PlanTableTexts;

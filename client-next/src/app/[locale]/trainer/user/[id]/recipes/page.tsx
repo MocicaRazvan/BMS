@@ -14,8 +14,8 @@ import { getIntlMetadata } from "@/texts/metadata";
 import { ThemeSwitchTexts } from "@/texts/components/nav";
 import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
 import SidebarContentLayout from "@/components/sidebar/sidebar-content-layout";
-import { FindInSiteTexts } from "@/components/nav/find-in-site";
 import IsTheSameUserOrAdmin from "@/app/[locale]/trainer/user/is-the-same-user-or-admin";
+import { FindInSiteTexts } from "@/components/nav/find-in-site-content";
 
 export interface UserRecipesPageTexts {
   recipesTableTexts: RecipeTableTexts;

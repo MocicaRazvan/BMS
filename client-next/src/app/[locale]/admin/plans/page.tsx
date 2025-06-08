@@ -17,8 +17,8 @@ import ArchiveQueueCards, {
 } from "@/components/archive/archive-queue-card";
 import { Separator } from "@/components/ui/separator";
 import TopPlans, { TopPlansTexts } from "@/components/charts/top-plans";
-import { FindInSiteTexts } from "@/components/nav/find-in-site";
 import { LocaleProps } from "@/navigation";
+import { FindInSiteTexts } from "@/components/nav/find-in-site-content";
 
 export interface AdminPlansPageTexts {
   planTableTexts: PlanTableTexts;

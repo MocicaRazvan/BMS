@@ -6,9 +6,9 @@ import {
   MappingListFunctionKeys,
   SidebarMenuTexts,
 } from "@/components/sidebar/menu-list";
-import { FindInSiteTexts } from "@/components/nav/find-in-site";
 import SidebarNotificationPop from "@/components/sidebar/sidebar-notification-pop";
 import SidebarFindInSite from "@/components/sidebar/sidebar-find-in-site";
+import { FindInSiteTexts } from "@/components/nav/find-in-site-content";
 
 export interface SidebarNavbarProps {
   title: string;

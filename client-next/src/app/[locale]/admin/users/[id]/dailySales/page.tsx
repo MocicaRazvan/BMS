@@ -7,7 +7,8 @@ import { getUserAdminDailySalesPageTexts } from "@/texts/pages";
 import UserAdminDailySalesPageContent from "@/app/[locale]/admin/users/[id]/dailySales/page-content";
 import { Metadata } from "next";
 import { getIntlMetadata } from "@/texts/metadata";
-import { FindInSiteTexts } from "@/components/nav/find-in-site";
+
+import { FindInSiteTexts } from "@/components/nav/find-in-site-content";
 
 interface Props {
   params: { locale: Locale; id: string };

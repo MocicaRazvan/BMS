@@ -6,7 +6,6 @@ import {
   RelativeItemTexts,
 } from "@/components/charts/relative-item-wrapper";
 import { TotalAmountCountOrdersTexts } from "@/components/charts/totalAmount-count-ordres";
-import { GeographyChartTexts } from "@/components/charts/geography-chart";
 import { CountrySummaryType } from "@/types/dto";
 import { MonthlySalesTexts } from "@/components/charts/monthly-sales";
 import { getDateRangePickerTexts } from "@/texts/components/ui";
@@ -22,6 +21,7 @@ import { TopViewedPostsTexts } from "@/components/charts/top-viewed-posts";
 import { LinkedChartTexts } from "@/components/charts/linked-chart";
 import { PlanCharacteristicTexts } from "@/components/charts/plan-characteristic";
 import { RelativeItems } from "@/components/charts/relative-item-chart";
+import { GeographyChartTexts } from "@/components/charts/geography-chart-content";
 
 export async function getIngredientPieChartTexts(): Promise<IngredientPieChartTexts> {
   const t = await getTranslations("components.charts.IngredientPieChartTexts");

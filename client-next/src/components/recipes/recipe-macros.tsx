@@ -23,7 +23,7 @@ export default function RecipeMacros({
   ingredientPieChartTexts,
   nutritionalTableTexts,
 }: Props) {
-  const aggegatedNF: NutritionalFactResponse | null = useMemo(
+  const aggregatedNF: NutritionalFactResponse | null = useMemo(
     () =>
       ingredients.length === 0
         ? null
@@ -56,13 +56,13 @@ export default function RecipeMacros({
           ),
     [ingredients],
   );
-  if (!aggegatedNF) return null;
+  if (!aggregatedNF) return null;
   return (
     <div className="px-0 lg:px-16 space-y-8">
       <NutritionalTable
         ing={
           {
-            nutritionalFact: aggegatedNF,
+            nutritionalFact: aggregatedNF,
           } as IngredientNutritionalFactResponse
         }
         {...nutritionalTableTexts}
@@ -75,19 +75,19 @@ export default function RecipeMacros({
           items={[
             {
               macro: "protein",
-              value: aggegatedNF.protein,
+              value: aggregatedNF.protein,
             },
             {
               macro: "fat",
-              value: aggegatedNF.fat,
+              value: aggregatedNF.fat,
             },
             {
               macro: "carbohydrates",
-              value: aggegatedNF.carbohydrates,
+              value: aggregatedNF.carbohydrates,
             },
             {
               macro: "salt",
-              value: aggegatedNF.salt,
+              value: aggregatedNF.salt,
             },
           ]}
           texts={ingredientPieChartTexts}

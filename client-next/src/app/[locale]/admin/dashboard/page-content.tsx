@@ -21,13 +21,13 @@ import { TopPlans, TopPlansTexts } from "@/components/charts/top-plans";
 import TopTrainers, {
   TopTrainersTexts,
 } from "@/components/charts/top-trainers";
-import { FindInSiteTexts } from "@/components/nav/find-in-site";
 import TopViewedPosts, {
   TopViewedPostsTexts,
 } from "@/components/charts/top-viewed-posts";
 import { useAuthUserMinRole } from "@/context/auth-user-min-role-context";
 import { RelativeItems } from "@/components/charts/relative-item-chart";
 import { relativeItems } from "@/types/constants";
+import { FindInSiteTexts } from "@/components/nav/find-in-site-content";
 
 export interface AdminDashboardPageTexts {
   title: string;

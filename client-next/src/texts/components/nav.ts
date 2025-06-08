@@ -15,7 +15,8 @@ import { NotificationPopTexts } from "@/components/nav/notification-pop";
 import { NavTexts } from "@/components/nav/nav";
 import { CartPopsTexts } from "@/components/nav/cart-pop";
 import { BoughtNotificationContentTexts } from "@/components/nav/bought-notification-content";
-import { FindInSiteTexts } from "@/components/nav/find-in-site";
+
+import { FindInSiteTexts } from "@/components/nav/find-in-site-content";
 
 export interface ThemeSwitchTexts {
   srButton: string;

@@ -132,16 +132,18 @@ export default function SortableList({
           ))}
         </div>
       </SortableContext>
-      <DragOverlay adjustScale style={{ transformOrigin: "0 0 " }}>
+      <DragOverlay adjustScale style={{ transformOrigin: "0 0" }}>
         {activeItem ? (
-          <Item
-            item={activeItem}
-            isDragging
-            type={type}
-            preview={true}
-            itemTexts={itemTexts}
-            imageCropTexts={imageCropTexts}
-          />
+          <div className="animate-in fade-in duration-300">
+            <Item
+              item={activeItem}
+              isDragging
+              type={type}
+              preview={true}
+              itemTexts={itemTexts}
+              imageCropTexts={imageCropTexts}
+            />
+          </div>
         ) : null}
       </DragOverlay>
     </DndContext>
