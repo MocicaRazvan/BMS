@@ -186,7 +186,7 @@ export default function FindInSiteContent({
         includeMatches: true,
         findAllMatches: true,
       }),
-    [metadataValues],
+    [JSON.stringify(metadataValues)],
   );
   useEffect(() => {
     const handleSearch = () => {
