@@ -250,6 +250,7 @@ export default function FindInSiteContent({
                 }`}
                 onClick={() => setOpen(false)}
                 onMouseEnter={() => setSelectedIndex(index)}
+                prefetch={false}
               >
                 <div
                   className={`font-medium ${
