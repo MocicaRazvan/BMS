@@ -377,7 +377,9 @@
         "paragraph": "Paragraf"
       },
       "EditorEmojiPickerTexts": {
-        "searchPlaceholder": "Caută emoji"
+        "searchPlaceholder": "Caută emoji...",
+        "selectText": "Selectează un emoji",
+        "noResultsText": "Niciun emoji găsit"
       },
       "TextStyleGroup": {
         "bold": "Aldin",

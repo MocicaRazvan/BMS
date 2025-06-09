@@ -21,6 +21,8 @@ export async function getEditorEmojiPickerTexts(): Promise<EditorEmojiPickerText
   const t = await getTranslations("components.editor.EditorEmojiPickerTexts");
   return {
     searchPlaceholder: t("searchPlaceholder"),
+    selectText: t("selectText"),
+    noResultsText: t("noResultsText"),
   };
 }
 

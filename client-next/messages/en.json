@@ -378,7 +378,9 @@
         "paragraph": "Paragraph"
       },
       "EditorEmojiPickerTexts": {
-        "searchPlaceholder": "Search emoji"
+        "searchPlaceholder": "Search emoji...",
+        "selectText": "Select emoji",
+        "noResultsText": "No results found"
       },
       "TextStyleGroup": {
         "bold": "Bold",
