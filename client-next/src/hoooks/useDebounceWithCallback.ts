@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 export function useDebounceWithCallBack<T>(
   value: T,
   delay?: number,
-  callBack?: () => void,
+  callBack?: (value: T) => void,
 ): T {
   const isFirstRun = useRef(true);
   const [debouncedValue, setDebouncedValue] = useState<T>(value);
@@ -14,7 +14,7 @@ export function useDebounceWithCallBack<T>(
       if (isFirstRun.current) {
         isFirstRun.current = false;
       } else {
-        callBack?.();
+        callBack?.(value);
       }
     }, delay || 500);
 

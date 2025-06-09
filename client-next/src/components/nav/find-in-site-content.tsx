@@ -7,12 +7,13 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Link } from "@/navigation";
+import { Link, useRouter } from "@/navigation";
 import { ArrowDown, ArrowUp } from "lucide-react";
 import React, {
   Dispatch,
   RefObject,
   SetStateAction,
+  useCallback,
   useEffect,
   useMemo,
 } from "react";
@@ -26,6 +27,9 @@ const CUTOFF = 0.35;
 const TITLE_WEIGHT = 0.7;
 const DESCRIPTION_WEIGHT = 0.4;
 const KEYWORDS_WEIGHT = 0.2;
+
+const DEBOUNCE_TIME = 100 as const;
+const DEBOUNCE_PREFETCH_TIME = 300 as const;
 
 export interface FindInSiteTexts {
   title: string;
@@ -48,7 +52,6 @@ export interface FindInSiteContentBaseProps {
   metadataValues: MetadataValue[];
 }
 
-const DEBOUNCE_TIME = 100 as const;
 const highlightMatchFuseMatch = (
   text: string,
   words: string[],
@@ -146,6 +149,22 @@ export default function FindInSiteContent({
   },
 }: FindInSiteContentProps) {
   const debouncedQuery = useDebounceWithCallBack(searchQuery, DEBOUNCE_TIME);
+
+  const router = useRouter();
+  const prefetchCurrent = useCallback(
+    (idx: number) => {
+      const hit = results[idx];
+      if (hit) {
+        router.prefetch(hit.path);
+      }
+    },
+    [results, router],
+  );
+  useDebounceWithCallBack(
+    selectedIndex,
+    DEBOUNCE_PREFETCH_TIME,
+    prefetchCurrent,
+  );
 
   const fuse = useMemo(
     () =>
