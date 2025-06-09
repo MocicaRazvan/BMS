@@ -9,8 +9,6 @@ import { getAdminRecipesPageTexts } from "@/texts/pages";
 import { sortingRecipesSortingOptionsKeys } from "@/texts/components/list";
 import SidebarContentLayout from "@/components/sidebar/sidebar-content-layout";
 import Heading from "@/components/common/heading";
-import { Suspense } from "react";
-import LoadingSpinner from "@/components/common/loading-spinner";
 import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
 import { Metadata } from "next";
 import { getIntlMetadata } from "@/texts/metadata";
@@ -73,36 +71,34 @@ export default async function AdminRecipesPage({ params: { locale } }: Props) {
     >
       <div className="w-full h-full bg-background">
         <Heading title={title} header={header} />
-        <Suspense fallback={<LoadingSpinner />}>
-          <div className="mt-10 h-full space-y-10">
-            <RecipeTable
-              path={`/recipes/filteredWithCount`}
-              forWhom="admin"
-              sortingOptions={recipesOptions}
-              {...recipeTableTexts}
-              sizeOptions={[10, 20, 30, 40]}
-              mainDashboard={true}
-              extraQueryParams={{
-                admin: "true",
-              }}
+        <div className="mt-10 h-full space-y-10">
+          <RecipeTable
+            path={`/recipes/filteredWithCount`}
+            forWhom="admin"
+            sortingOptions={recipesOptions}
+            {...recipeTableTexts}
+            sizeOptions={[10, 20, 30, 40]}
+            mainDashboard={true}
+            extraQueryParams={{
+              admin: "true",
+            }}
+          />
+          <Separator />
+          <div className="space-y-5">
+            <ArchiveQueueCards
+              prefix={"recipe"}
+              locale={locale}
+              showHeader={true}
+              {...archiveRecipesTexts}
             />
-            <Separator />
-            <div className="space-y-5">
-              <ArchiveQueueCards
-                prefix={"recipe"}
-                locale={locale}
-                showHeader={true}
-                {...archiveRecipesTexts}
-              />
-              <ArchiveQueueCards
-                prefix={"meal"}
-                locale={locale}
-                showHeader={false}
-                {...archiveMealsTexts}
-              />
-            </div>
+            <ArchiveQueueCards
+              prefix={"meal"}
+              locale={locale}
+              showHeader={false}
+              {...archiveMealsTexts}
+            />
           </div>
-        </Suspense>
+        </div>
       </div>
     </SidebarContentLayout>
   );

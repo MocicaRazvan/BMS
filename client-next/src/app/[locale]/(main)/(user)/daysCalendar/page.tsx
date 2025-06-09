@@ -6,11 +6,9 @@ import {
 } from "@/texts/components/day-calendar";
 import DayCalendarHeaderDate from "@/components/days-calendar/day-calendar-header";
 import DayCalendarBody from "@/components/days-calendar/day-calendar-body";
-import React, { Suspense } from "react";
 import { Separator } from "@/components/ui/separator";
 import { Metadata } from "next";
 import { getIntlMetadata } from "@/texts/metadata";
-import LoadingSpinner from "@/components/common/loading-spinner";
 
 export async function generateMetadata({
   params: { locale },
@@ -26,14 +24,10 @@ export default async function Page({ params: { locale } }: LocaleProps) {
     [getDayCalendarHeaderTexts(), getDayCalendarBodyMonthTexts()],
   );
   return (
-    <Suspense fallback={<LoadingSpinner />}>
-      <div className="py-2.5 mt-2">
-        <DayCalendarHeaderDate {...dayCalendarHeaderTexts} />
-        <Separator className="mt-6" />
-        <DayCalendarBody
-          dayCalendarBodyMonthTexts={dayCalendarBodyMonthTexts}
-        />
-      </div>
-    </Suspense>
+    <div className="py-2.5 mt-2">
+      <DayCalendarHeaderDate {...dayCalendarHeaderTexts} />
+      <Separator className="mt-6" />
+      <DayCalendarBody dayCalendarBodyMonthTexts={dayCalendarBodyMonthTexts} />
+    </div>
   );
 }

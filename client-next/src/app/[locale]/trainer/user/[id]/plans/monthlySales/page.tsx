@@ -9,9 +9,7 @@ import { Metadata } from "next";
 import { getIntlMetadata } from "@/texts/metadata";
 import { ThemeSwitchTexts } from "@/texts/components/nav";
 import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
-import LoadingSpinner from "@/components/common/loading-spinner";
 import SidebarContentLayout from "@/components/sidebar/sidebar-content-layout";
-import { Suspense } from "react";
 import IsTheSameUserOrAdmin from "@/app/[locale]/trainer/user/is-the-same-user-or-admin";
 import { FindInSiteTexts } from "@/components/nav/find-in-site-content";
 
@@ -58,22 +56,20 @@ export default async function UsersMonthlySalesPage({
       >
         <div className="w-full h-full bg-background">
           <Heading {...texts} />
-          <Suspense fallback={<LoadingSpinner />}>
-            <div className="mt-10 h-full">
-              <MonthlySales
-                path={`/orders/trainer/countAndAmount/${id}`}
-                predictionPath={`/orders/trainer/countAndAmount/prediction/${id}`}
-                {...texts.monthlySalesTexts}
-                characteristicProps={{
-                  plansPaths: {
-                    typePath: `/orders/trainer/countAndAmount/type/${id}`,
-                    objectivePath: `/orders/trainer/countAndAmount/objective/${id}`,
-                    scatterPath: `/orders/trainer/countAndAmount/objectiveType/${id}`,
-                  },
-                }}
-              />
-            </div>
-          </Suspense>
+          <div className="mt-10 h-full">
+            <MonthlySales
+              path={`/orders/trainer/countAndAmount/${id}`}
+              predictionPath={`/orders/trainer/countAndAmount/prediction/${id}`}
+              {...texts.monthlySalesTexts}
+              characteristicProps={{
+                plansPaths: {
+                  typePath: `/orders/trainer/countAndAmount/type/${id}`,
+                  objectivePath: `/orders/trainer/countAndAmount/objective/${id}`,
+                  scatterPath: `/orders/trainer/countAndAmount/objectiveType/${id}`,
+                },
+              }}
+            />
+          </div>
         </div>
       </SidebarContentLayout>
     </IsTheSameUserOrAdmin>

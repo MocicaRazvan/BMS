@@ -6,9 +6,7 @@ import SinglePostPageContent, {
 } from "@/app/[locale]/(main)/(user)/posts/single/[id]/page-content";
 import { unstable_setRequestLocale } from "next-intl/server";
 import { getAdminPostPageTexts } from "@/texts/pages";
-import LoadingSpinner from "@/components/common/loading-spinner";
 import SidebarContentLayout from "@/components/sidebar/sidebar-content-layout";
-import { Suspense } from "react";
 import { Metadata } from "next";
 import { getIntlMetadata } from "@/texts/metadata";
 import ScrollProgress from "@/components/common/scroll-progress";
@@ -50,11 +48,9 @@ export default async function AdminPostPage({ params: { locale, id } }: Props) {
     >
       <ScrollProgress />
       <div className="w-full bg-background ">
-        <Suspense fallback={<LoadingSpinner />}>
-          <div className="mt-5">
-            <SinglePostPageContent {...texts.singlePostPageTexts} />
-          </div>
-        </Suspense>
+        <div className="mt-5">
+          <SinglePostPageContent {...texts.singlePostPageTexts} />
+        </div>
       </div>
     </SidebarContentLayout>
   );

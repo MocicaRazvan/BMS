@@ -9,8 +9,6 @@ import { getIntlMetadata } from "@/texts/metadata";
 import { ThemeSwitchTexts } from "@/texts/components/nav";
 import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
 import SidebarContentLayout from "@/components/sidebar/sidebar-content-layout";
-import { Suspense } from "react";
-import LoadingSpinner from "@/components/common/loading-spinner";
 
 import { FindInSiteTexts } from "@/components/nav/find-in-site-content";
 
@@ -49,14 +47,12 @@ export default async function SingleIngredientPage({
       }}
     >
       <div className="w-full bg-background ">
-        <Suspense fallback={<LoadingSpinner />}>
-          <div className="mt-5">
-            <SingleIngredientPageContent
-              {...texts.singleIngredientPageTexts}
-              id={id}
-            />
-          </div>
-        </Suspense>
+        <div className="mt-5">
+          <SingleIngredientPageContent
+            {...texts.singleIngredientPageTexts}
+            id={id}
+          />
+        </div>
       </div>
     </SidebarContentLayout>
   );

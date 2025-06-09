@@ -6,8 +6,6 @@ import { getAdminPlansPageTexts } from "@/texts/pages";
 import { sortingPlansSortingOptionsKeys } from "@/texts/components/list";
 import SidebarContentLayout from "@/components/sidebar/sidebar-content-layout";
 import Heading from "@/components/common/heading";
-import LoadingSpinner from "@/components/common/loading-spinner";
-import { Suspense } from "react";
 import AdminPlansPageContent from "@/app/[locale]/admin/plans/page-content";
 import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
 import { Metadata } from "next";
@@ -76,44 +74,42 @@ export default async function AdminPlansPage({
     >
       <div className="w-full h-full bg-background">
         <Heading title={title} header={header} />
-        <Suspense fallback={<LoadingSpinner />}>
-          <div className="mt-10 h-full space-y-10">
-            <AdminPlansPageContent
-              path={"/plans/filteredWithCount"}
-              forWhom={"admin"}
-              {...planTableTexts}
-              sortingOptions={plansOptions}
-              sizeOptions={[10, 20, 30, 40]}
-              mainDashboard={true}
-              extraQueryParams={{
-                admin: "true",
-              }}
+        <div className="mt-10 h-full space-y-10">
+          <AdminPlansPageContent
+            path={"/plans/filteredWithCount"}
+            forWhom={"admin"}
+            {...planTableTexts}
+            sortingOptions={plansOptions}
+            sizeOptions={[10, 20, 30, 40]}
+            mainDashboard={true}
+            extraQueryParams={{
+              admin: "true",
+            }}
+          />
+          <Separator className="mt-2" />
+          <div className=" my-5 h-full w-full">
+            <TopPlans
+              texts={topPlansTexts}
+              locale={locale}
+              path="/orders/admin/topPlans"
             />
-            <Separator className="mt-2" />
-            <div className=" my-5 h-full w-full">
-              <TopPlans
-                texts={topPlansTexts}
-                locale={locale}
-                path="/orders/admin/topPlans"
-              />
-            </div>
-            <Separator />
-            <div className="space-y-5">
-              <ArchiveQueueCards
-                prefix={"plan"}
-                locale={locale}
-                showHeader={true}
-                {...archivePlansTexts}
-              />
-              <ArchiveQueueCards
-                prefix={"day"}
-                locale={locale}
-                showHeader={false}
-                {...archiveDayTexts}
-              />
-            </div>
           </div>
-        </Suspense>
+          <Separator />
+          <div className="space-y-5">
+            <ArchiveQueueCards
+              prefix={"plan"}
+              locale={locale}
+              showHeader={true}
+              {...archivePlansTexts}
+            />
+            <ArchiveQueueCards
+              prefix={"day"}
+              locale={locale}
+              showHeader={false}
+              {...archiveDayTexts}
+            />
+          </div>
+        </div>
       </div>
     </SidebarContentLayout>
   );

@@ -4,8 +4,6 @@ import { getAdminMonthlySalesTexts } from "@/texts/pages";
 import { unstable_setRequestLocale } from "next-intl/server";
 import SidebarContentLayout from "@/components/sidebar/sidebar-content-layout";
 import Heading from "@/components/common/heading";
-import LoadingSpinner from "@/components/common/loading-spinner";
-import { Suspense } from "react";
 import MonthlySales, {
   MonthlySalesTexts,
 } from "@/components/charts/monthly-sales";
@@ -56,44 +54,40 @@ export default async function AdminMonthlySales({ params: { locale } }: Props) {
     >
       <div className="w-full h-full bg-background">
         <Heading {...texts} />
-        <Suspense fallback={<LoadingSpinner />}>
-          <div className="mt-10 h-full">
-            <MonthlySales
-              path={"/orders/admin/countAndAmount"}
-              predictionPath={"/orders/admin/countAndAmount/prediction"}
-              {...texts.monthlySalesTexts}
-            />
-          </div>
-        </Suspense>
+        <div className="mt-10 h-full">
+          <MonthlySales
+            path={"/orders/admin/countAndAmount"}
+            predictionPath={"/orders/admin/countAndAmount/prediction"}
+            {...texts.monthlySalesTexts}
+          />
+        </div>
         <Separator className="my-10" />
         <h1 className="text-xl lg:text-2xl font-bold tracking-tight">
           {texts.plansTitle}
         </h1>
-        <Suspense fallback={<LoadingSpinner />}>
-          <div className="mt-10 h-full">
-            <MonthlySales
-              path={"/orders/admin/plans/countAndAmount"}
-              predictionPath={"/orders/admin/plans/countAndAmount/prediction"}
-              {...texts.plansMonthlySales}
-              hideTotalAmount={true}
-              countColorIndex={9}
-              totalAmountColorIndex={10}
-              characteristicProps={{
-                plansPaths: {
-                  typePath: "/orders/admin/countAndAmount/type",
-                  objectivePath: "/orders/admin/countAndAmount/objective",
-                  scatterPath: "/orders/admin/countAndAmount/objectiveType",
-                },
-                colors: {
-                  countColorIndex: 9,
-                  totalAmountColorIndex: 10,
-                  averageAmountColorIndex: 8,
-                  lineColorIndex: 2,
-                },
-              }}
-            />
-          </div>
-        </Suspense>
+        <div className="mt-10 h-full">
+          <MonthlySales
+            path={"/orders/admin/plans/countAndAmount"}
+            predictionPath={"/orders/admin/plans/countAndAmount/prediction"}
+            {...texts.plansMonthlySales}
+            hideTotalAmount={true}
+            countColorIndex={9}
+            totalAmountColorIndex={10}
+            characteristicProps={{
+              plansPaths: {
+                typePath: "/orders/admin/countAndAmount/type",
+                objectivePath: "/orders/admin/countAndAmount/objective",
+                scatterPath: "/orders/admin/countAndAmount/objectiveType",
+              },
+              colors: {
+                countColorIndex: 9,
+                totalAmountColorIndex: 10,
+                averageAmountColorIndex: 8,
+                lineColorIndex: 2,
+              },
+            }}
+          />
+        </div>
       </div>
     </SidebarContentLayout>
   );

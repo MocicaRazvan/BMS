@@ -1,13 +1,11 @@
 import { Locale } from "@/navigation";
 import { unstable_setRequestLocale } from "next-intl/server";
-import { Suspense } from "react";
 import { Metadata } from "next";
 import { getIntlMetadata } from "@/texts/metadata";
 import { ThemeSwitchTexts } from "@/texts/components/nav";
 import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
 import { PlanFormTexts } from "@/components/forms/plan-form";
 import { getDuplicatePlanPageTexts } from "@/texts/pages";
-import LoadingSpinner from "@/components/common/loading-spinner";
 import SidebarContentLayout from "@/components/sidebar/sidebar-content-layout";
 import DuplicatePlanPageContent from "@/app/[locale]/trainer/plans/duplicate/[id]/page-content";
 
@@ -56,13 +54,11 @@ export default async function DuplicatePlanPage({
       }}
     >
       <main className="flex items-center justify-center px-6 py-10">
-        <Suspense fallback={<LoadingSpinner />}>
-          <DuplicatePlanPageContent
-            id={id}
-            {...planFormTexts}
-            path={`/plans/createWithImages`}
-          />
-        </Suspense>
+        <DuplicatePlanPageContent
+          id={id}
+          {...planFormTexts}
+          path={`/plans/createWithImages`}
+        />
       </main>
     </SidebarContentLayout>
   );

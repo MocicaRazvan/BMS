@@ -10,7 +10,7 @@ export type PreloadComponentType<P = object> = ComponentType<P> & {
 
 export default function dynamicWithPreload<P extends object = object>(
   loader: () => LoaderComponent<P>,
-  options?: Omit<DynamicOptions<P>, "ssr">,
+  options?: Omit<DynamicOptions<P>, "ssr" | "loader">,
 ) {
   const NextJSDynamicComponent = dynamic(loader, {
     ...options,

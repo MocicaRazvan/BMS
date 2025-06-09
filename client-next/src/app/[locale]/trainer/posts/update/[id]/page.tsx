@@ -1,8 +1,6 @@
 import { Locale } from "@/navigation";
 import { unstable_setRequestLocale } from "next-intl/server";
 import { getPostFormTexts } from "@/texts/components/forms";
-import { Suspense } from "react";
-import LoadingSpinner from "@/components/common/loading-spinner";
 import UpdatePostPageContent from "@/app/[locale]/trainer/posts/update/[id]/page-content";
 import { Metadata } from "next";
 import { getIntlMetadata } from "@/texts/metadata";
@@ -69,23 +67,21 @@ export default async function UpdatePostPage({
       }}
     >
       <main className="flex items-center justify-center px-6 py-10">
-        <Suspense fallback={<LoadingSpinner />}>
-          <UpdatePostPageContent
-            postId={id}
-            postSchemaTexts={postSchemaTexts}
-            fieldTexts={fieldTexts}
-            titleBodyTexts={titleBodyTexts}
-            inputMultipleSelectorTexts={inputMultipleSelectorTexts}
-            buttonSubmitTexts={buttonSubmitTexts}
-            {...baseFormTexts}
-            path={`/posts/updateWithImages/${id}`}
-            loadedImages={loadedImages}
-            aiCheckBoxes={aiCheckBoxes}
-            bodyAIGeneratedPopTexts={bodyAIGeneratedPopTexts}
-            titleAIGeneratedPopTexts={titleAIGeneratedPopTexts}
-            diffusionImagesFormTexts={diffusionImagesFormTexts}
-          />
-        </Suspense>
+        <UpdatePostPageContent
+          postId={id}
+          postSchemaTexts={postSchemaTexts}
+          fieldTexts={fieldTexts}
+          titleBodyTexts={titleBodyTexts}
+          inputMultipleSelectorTexts={inputMultipleSelectorTexts}
+          buttonSubmitTexts={buttonSubmitTexts}
+          {...baseFormTexts}
+          path={`/posts/updateWithImages/${id}`}
+          loadedImages={loadedImages}
+          aiCheckBoxes={aiCheckBoxes}
+          bodyAIGeneratedPopTexts={bodyAIGeneratedPopTexts}
+          titleAIGeneratedPopTexts={titleAIGeneratedPopTexts}
+          diffusionImagesFormTexts={diffusionImagesFormTexts}
+        />
       </main>
     </SidebarContentLayout>
   );

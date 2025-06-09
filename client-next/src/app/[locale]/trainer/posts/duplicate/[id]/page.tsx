@@ -6,8 +6,6 @@ import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
 import { getPostFormTexts } from "@/texts/components/forms";
 import { getUserDuplicatePostPage } from "@/texts/pages";
 import SidebarContentLayout from "@/components/sidebar/sidebar-content-layout";
-import { Suspense } from "react";
-import LoadingSpinner from "@/components/common/loading-spinner";
 import { Metadata } from "next";
 import { getIntlMetadata } from "@/texts/metadata";
 
@@ -69,23 +67,21 @@ export default async function UserDuplicatePostPage({
       }}
     >
       <main className="flex items-center justify-center px-6 py-10">
-        <Suspense fallback={<LoadingSpinner />}>
-          <DuplicatePostPageContent
-            postId={id}
-            postSchemaTexts={postSchemaTexts}
-            fieldTexts={fieldTexts}
-            titleBodyTexts={titleBodyTexts}
-            inputMultipleSelectorTexts={inputMultipleSelectorTexts}
-            buttonSubmitTexts={buttonSubmitTexts}
-            {...baseFormTexts}
-            path={`/posts/createWithImages`}
-            loadedImages={loadedImages}
-            aiCheckBoxes={aiCheckBoxes}
-            bodyAIGeneratedPopTexts={bodyAIGeneratedPopTexts}
-            titleAIGeneratedPopTexts={titleAIGeneratedPopTexts}
-            diffusionImagesFormTexts={diffusionImagesFormTexts}
-          />
-        </Suspense>
+        <DuplicatePostPageContent
+          postId={id}
+          postSchemaTexts={postSchemaTexts}
+          fieldTexts={fieldTexts}
+          titleBodyTexts={titleBodyTexts}
+          inputMultipleSelectorTexts={inputMultipleSelectorTexts}
+          buttonSubmitTexts={buttonSubmitTexts}
+          {...baseFormTexts}
+          path={`/posts/createWithImages`}
+          loadedImages={loadedImages}
+          aiCheckBoxes={aiCheckBoxes}
+          bodyAIGeneratedPopTexts={bodyAIGeneratedPopTexts}
+          titleAIGeneratedPopTexts={titleAIGeneratedPopTexts}
+          diffusionImagesFormTexts={diffusionImagesFormTexts}
+        />
       </main>
     </SidebarContentLayout>
   );

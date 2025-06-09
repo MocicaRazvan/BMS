@@ -25,7 +25,6 @@ import { fetchStream } from "@/lib/fetchers/fetchStream";
 import { useRouter } from "@/navigation";
 import { Session } from "next-auth";
 import { signIn, useSession } from "next-auth/react";
-import { logError } from "@/app/[locale]/(main)/auth/signin/actions";
 import useClientNotFound from "@/hoooks/useClientNotFound";
 import {
   PasswordStrengthIndicator,
@@ -113,7 +112,6 @@ export default function ResetPasswordPage({
     } else {
       if (isFinished && messages[0]) {
         if (user) {
-          await logError("token", messages[0].token);
           await session.update({
             ...session,
             data: {
@@ -131,7 +129,6 @@ export default function ResetPasswordPage({
             });
             if (result?.error) {
               console.log("Authentication error:", result.error);
-              await logError("Authentication error", result.error);
               setErrorMsg(errorMessages);
             } else {
               console.log("Sign-in successful:", result);

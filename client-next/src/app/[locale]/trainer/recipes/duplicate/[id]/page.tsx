@@ -1,12 +1,10 @@
 import { Locale } from "@/navigation";
 import { unstable_setRequestLocale } from "next-intl/server";
 import { getRecipeFormTexts } from "@/texts/components/forms";
-import { Suspense } from "react";
 import { Metadata } from "next";
 import { getIntlMetadata } from "@/texts/metadata";
 import { ThemeSwitchTexts } from "@/texts/components/nav";
 import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
-import LoadingSpinner from "@/components/common/loading-spinner";
 import SidebarContentLayout from "@/components/sidebar/sidebar-content-layout";
 import { getDuplicateRecipePageTexts } from "@/texts/pages";
 import DuplicateRecipePageContent from "@/app/[locale]/trainer/recipes/duplicate/[id]/page-content";
@@ -55,13 +53,11 @@ export default async function DuplicateRecipePage({
       }}
     >
       <main className="flex items-center justify-center px-6 py-10">
-        <Suspense fallback={<LoadingSpinner />}>
-          <DuplicateRecipePageContent
-            id={id}
-            {...recipeFormTexts}
-            path={`/recipes/createWithVideos`}
-          />
-        </Suspense>
+        <DuplicateRecipePageContent
+          id={id}
+          {...recipeFormTexts}
+          path={`/recipes/createWithVideos`}
+        />
       </main>
     </SidebarContentLayout>
   );

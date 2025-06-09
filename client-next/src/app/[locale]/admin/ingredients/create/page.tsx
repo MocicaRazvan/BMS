@@ -5,8 +5,6 @@ import SidebarContentLayout from "@/components/sidebar/sidebar-content-layout";
 import AdminIngredientsCreatePageContent from "@/app/[locale]/admin/ingredients/create/page-content";
 import { IngredientFormTexts } from "@/components/forms/ingredient-form";
 import { getAdminIngredientsCreatePageTexts } from "@/texts/pages";
-import { Suspense } from "react";
-import LoadingSpinner from "@/components/common/loading-spinner";
 import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
 import { Metadata } from "next";
 import { getIntlMetadata } from "@/texts/metadata";
@@ -51,9 +49,7 @@ export default async function AdminIngredientsCreatePage({
         findInSiteTexts: texts.findInSiteTexts,
       }}
     >
-      <Suspense fallback={<LoadingSpinner />}>
-        <AdminIngredientsCreatePageContent texts={texts.ingredientForm} />
-      </Suspense>
+      <AdminIngredientsCreatePageContent texts={texts.ingredientForm} />
     </SidebarContentLayout>
   );
 }

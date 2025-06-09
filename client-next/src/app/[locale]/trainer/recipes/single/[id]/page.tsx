@@ -1,5 +1,3 @@
-import { Suspense } from "react";
-import LoadingSpinner from "@/components/common/loading-spinner";
 import SingeRecipePageContent, {
   SingleRecipePageTexts,
 } from "@/app/[locale]/trainer/recipes/single/[id]/page-content";
@@ -55,9 +53,7 @@ export default async function SingleRecipePage({
     >
       <ScrollProgress />
       <div className="w-full bg-background ">
-        <Suspense fallback={<LoadingSpinner />}>
-          <SingeRecipePageContent id={id} {...texts.singleRecipePageTexts} />
-        </Suspense>
+        <SingeRecipePageContent id={id} {...texts.singleRecipePageTexts} />
       </div>
     </SidebarContentLayout>
   );

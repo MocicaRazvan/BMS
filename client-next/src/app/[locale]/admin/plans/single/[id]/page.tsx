@@ -7,8 +7,6 @@ import SingleTrainerPlanPageContent, {
 import { unstable_setRequestLocale } from "next-intl/server";
 import { getAdminPlanPageTexts } from "@/texts/pages";
 import SidebarContentLayout from "@/components/sidebar/sidebar-content-layout";
-import { Suspense } from "react";
-import LoadingSpinner from "@/components/common/loading-spinner";
 import { Metadata } from "next";
 import { getIntlMetadata } from "@/texts/metadata";
 import ScrollProgress from "@/components/common/scroll-progress";
@@ -52,14 +50,12 @@ export default async function AdminPlanPage({ params: { locale, id } }: Props) {
     >
       <ScrollProgress />
       <div className="w-full bg-background ">
-        <Suspense fallback={<LoadingSpinner />}>
-          <div>
-            <SingleTrainerPlanPageContent
-              {...texts.singleTrainerPlanPageTexts}
-              id={id}
-            />
-          </div>
-        </Suspense>
+        <div>
+          <SingleTrainerPlanPageContent
+            {...texts.singleTrainerPlanPageTexts}
+            id={id}
+          />
+        </div>
       </div>
     </SidebarContentLayout>
   );

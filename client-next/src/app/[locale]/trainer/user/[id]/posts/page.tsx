@@ -6,8 +6,6 @@ import UserPostsPageContent, {
 import { getUserPostsPageTexts } from "@/texts/pages";
 import { getSortingOptions } from "@/types/constants";
 import { sortingPostsSortingOptionsKeys } from "@/texts/components/list";
-import { Suspense } from "react";
-import LoadingSpinner from "@/components/common/loading-spinner";
 import Heading from "@/components/common/heading";
 import { Metadata } from "next";
 import { getIntlMetadata } from "@/texts/metadata";
@@ -76,22 +74,20 @@ export default async function UsersPostsPage({
       >
         <div className="space-y-10 lg:space-y-16 w-full transition-all py-5 px-4 mx-auto">
           <Heading {...userPostsPageContentTexts} />
-          <Suspense fallback={<LoadingSpinner />}>
-            <div className="space-y-10 pb-5">
-              <UserPostsPageContent
-                id={id}
-                sortingOptions={postOptions}
-                {...userPostsPageContentTexts}
+          <div className="space-y-10 pb-5">
+            <UserPostsPageContent
+              id={id}
+              sortingOptions={postOptions}
+              {...userPostsPageContentTexts}
+            />
+            <Separator className="mt-2" />
+            <div className=" my-5 h-full w-full">
+              <TopViewedPosts
+                path={`/posts/viewStats/${id}`}
+                texts={topViewedPostsTexts}
               />
-              <Separator className="mt-2" />
-              <div className=" my-5 h-full w-full">
-                <TopViewedPosts
-                  path={`/posts/viewStats/${id}`}
-                  texts={topViewedPostsTexts}
-                />
-              </div>
             </div>
-          </Suspense>
+          </div>
         </div>
       </SidebarContentLayout>
     </IsTheSameUserOrAdmin>

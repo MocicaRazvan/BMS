@@ -6,8 +6,6 @@ import { getAdminPostsPageTexts } from "@/texts/pages";
 import SidebarContentLayout from "@/components/sidebar/sidebar-content-layout";
 import { ThemeSwitchTexts } from "@/texts/components/nav";
 import Heading from "@/components/common/heading";
-import { Suspense } from "react";
-import LoadingSpinner from "@/components/common/loading-spinner";
 import { sortingPostsSortingOptionsKeys } from "@/texts/components/list";
 import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
 import { Metadata } from "next";
@@ -76,41 +74,39 @@ export default async function AdminPostsPage({ params: { locale } }: Props) {
     >
       <div className="w-full h-full bg-background">
         <Heading title={title} header={header} />
-        <Suspense fallback={<LoadingSpinner />}>
-          <div className="mt-10 h-full space-y-10">
-            <PostsTable
-              path={`/posts/tags`}
-              forWhom="admin"
-              {...postTableTexts}
-              sortingOptions={postOptions}
-              sizeOptions={[10, 20, 30, 40]}
-              mainDashboard={true}
-              extraQueryParams={{
-                admin: "true",
-              }}
+        <div className="mt-10 h-full space-y-10">
+          <PostsTable
+            path={`/posts/tags`}
+            forWhom="admin"
+            {...postTableTexts}
+            sortingOptions={postOptions}
+            sizeOptions={[10, 20, 30, 40]}
+            mainDashboard={true}
+            extraQueryParams={{
+              admin: "true",
+            }}
+          />
+          <Separator />
+          <TopViewedPosts
+            path="/posts/admin/viewStats"
+            texts={topViewedPostsTexts}
+          />
+          <Separator />
+          <div className="space-y-5">
+            <ArchiveQueueCards
+              prefix={"post"}
+              locale={locale}
+              showHeader={true}
+              {...archivePostsTexts}
             />
-            <Separator />
-            <TopViewedPosts
-              path="/posts/admin/viewStats"
-              texts={topViewedPostsTexts}
+            <ArchiveQueueCards
+              prefix={"comment"}
+              locale={locale}
+              showHeader={false}
+              {...archiveCommentsTexts}
             />
-            <Separator />
-            <div className="space-y-5">
-              <ArchiveQueueCards
-                prefix={"post"}
-                locale={locale}
-                showHeader={true}
-                {...archivePostsTexts}
-              />
-              <ArchiveQueueCards
-                prefix={"comment"}
-                locale={locale}
-                showHeader={false}
-                {...archiveCommentsTexts}
-              />
-            </div>
           </div>
-        </Suspense>
+        </div>
       </div>
     </SidebarContentLayout>
   );

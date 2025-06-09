@@ -1,5 +1,3 @@
-import { Suspense } from "react";
-import LoadingSpinner from "@/components/common/loading-spinner";
 import DayForm, { DayFromTexts } from "@/components/forms/day-form";
 import { ThemeSwitchTexts } from "@/texts/components/nav";
 import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
@@ -47,9 +45,7 @@ export default async function CreateDayPage({ params: { locale } }: Props) {
       }}
     >
       <main className="flex items-center justify-center px-6 py-10">
-        <Suspense fallback={<LoadingSpinner />}>
-          <DayForm {...dayFormTexts} path={"/days/create/meals"} />
-        </Suspense>
+        <DayForm {...dayFormTexts} path={"/days/create/meals"} />
       </main>
     </SidebarContentLayout>
   );

@@ -4,8 +4,6 @@ import { unstable_setRequestLocale } from "next-intl/server";
 import { getAdminDailySalesTexts } from "@/texts/pages";
 import SidebarContentLayout from "@/components/sidebar/sidebar-content-layout";
 import Heading from "@/components/common/heading";
-import { Suspense } from "react";
-import LoadingSpinner from "@/components/common/loading-spinner";
 import DailySales, { DailySalesTexts } from "@/components/charts/daily-sales";
 import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
 import { Metadata } from "next";
@@ -51,28 +49,24 @@ export default async function AdminDailySales({ params: { locale } }: Props) {
     >
       <div className="w-full h-full bg-background">
         <Heading {...texts} />
-        <Suspense fallback={<LoadingSpinner />}>
-          <div className="mt-10 h-full">
-            <DailySales
-              path={"/orders/admin/countAndAmount/daily"}
-              {...texts.dailySalesTexts}
-            />
-          </div>
-        </Suspense>
+        <div className="mt-10 h-full">
+          <DailySales
+            path={"/orders/admin/countAndAmount/daily"}
+            {...texts.dailySalesTexts}
+          />
+        </div>
         <Separator className="my-10" />
         <h1 className="text-xl lg:text-2xl font-bold tracking-tight">
           {texts.plansTitle}
         </h1>
-        <Suspense fallback={<LoadingSpinner />}>
-          <div className="mt-10 h-full">
-            <DailySales
-              path={"/orders/admin/countAndAmount/daily"}
-              {...texts.plansDailySalesTexts}
-              hideTotalAmount={true}
-              countColorIndex={9}
-            />
-          </div>
-        </Suspense>
+        <div className="mt-10 h-full">
+          <DailySales
+            path={"/orders/admin/countAndAmount/daily"}
+            {...texts.plansDailySalesTexts}
+            hideTotalAmount={true}
+            countColorIndex={9}
+          />
+        </div>
       </div>
     </SidebarContentLayout>
   );

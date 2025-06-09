@@ -1,7 +1,5 @@
 import { Locale } from "@/navigation";
 import { unstable_setRequestLocale } from "next-intl/server";
-import { Suspense } from "react";
-import LoadingSpinner from "@/components/common/loading-spinner";
 import PlanForm, { PlanFormTexts } from "@/components/forms/plan-form";
 import { Metadata } from "next";
 import { getIntlMetadata } from "@/texts/metadata";
@@ -49,13 +47,11 @@ export default async function CreatePlanPage({ params: { locale } }: Props) {
       }}
     >
       <main className="flex items-center justify-center px-6 py-10">
-        <Suspense fallback={<LoadingSpinner />}>
-          <PlanForm
-            {...planFormTexts}
-            path={"/plans/createWithImages"}
-            type="create"
-          />
-        </Suspense>
+        <PlanForm
+          {...planFormTexts}
+          path={"/plans/createWithImages"}
+          type="create"
+        />
       </main>
     </SidebarContentLayout>
   );

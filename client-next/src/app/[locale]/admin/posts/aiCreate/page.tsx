@@ -5,9 +5,7 @@ import {
   getFindInSiteTexts,
   getThemeSwitchTexts,
 } from "@/texts/components/nav";
-import LoadingSpinner from "@/components/common/loading-spinner";
 import SidebarContentLayout from "@/components/sidebar/sidebar-content-layout";
-import { Suspense } from "react";
 import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
 import { getAdminAIPostsCreate } from "@/texts/pages";
 import AdminAIPostsCreateContent, {
@@ -51,11 +49,9 @@ export default async function AdminAIPostsCreate({
         findInSiteTexts,
       }}
     >
-      <Suspense fallback={<LoadingSpinner />}>
-        <div className="w-full flex items-center justify-center">
-          <AdminAIPostsCreateContent {...texts} />
-        </div>
-      </Suspense>
+      <div className="w-full flex items-center justify-center">
+        <AdminAIPostsCreateContent {...texts} />
+      </div>
     </SidebarContentLayout>
   );
 }

@@ -8,8 +8,6 @@ import { getIngredientsPageTexts } from "@/texts/pages";
 import { getUserWithMinRole } from "@/lib/user";
 import { sortingIngredientsSortingOptionsKeys } from "@/texts/components/list";
 import Heading from "@/components/common/heading";
-import LoadingSpinner from "@/components/common/loading-spinner";
-import { Suspense } from "react";
 import { Metadata } from "next";
 import { getIntlMetadata } from "@/texts/metadata";
 import { ThemeSwitchTexts } from "@/texts/components/nav";
@@ -62,17 +60,15 @@ export default async function IngredientsPage({ params: { locale } }: Props) {
     >
       <div className="space-y-10 lg:space-y-16 w-full py-5 px-4 mx-auto">
         <Heading {...ingredientsPageTexts} />
-        <Suspense fallback={<LoadingSpinner />}>
-          <div className="h-full w-full mt-10">
-            <IngredientsTable
-              path={"/ingredients/filtered"}
-              sortingOptions={ingredientOptions}
-              forWhom={"trainer"}
-              {...ingredientsPageTexts.ingredientTableTexts}
-              sizeOptions={[10, 15, 20, 50]}
-            />
-          </div>
-        </Suspense>
+        <div className="h-full w-full mt-10">
+          <IngredientsTable
+            path={"/ingredients/filtered"}
+            sortingOptions={ingredientOptions}
+            forWhom={"trainer"}
+            {...ingredientsPageTexts.ingredientTableTexts}
+            sizeOptions={[10, 15, 20, 50]}
+          />
+        </div>
       </div>
     </SidebarContentLayout>
   );

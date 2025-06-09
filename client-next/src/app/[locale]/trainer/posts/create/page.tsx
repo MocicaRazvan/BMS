@@ -1,8 +1,6 @@
 import { Locale } from "@/navigation";
 import { unstable_setRequestLocale } from "next-intl/server";
 import { getPostFormTexts } from "@/texts/components/forms";
-import { Suspense } from "react";
-import LoadingSpinner from "@/components/common/loading-spinner";
 import PostForm from "@/components/forms/post-form";
 import { Metadata } from "next";
 import { getIntlMetadata } from "@/texts/metadata";
@@ -66,22 +64,20 @@ export default async function CreatePostPage({ params: { locale } }: Props) {
       }}
     >
       <main className="flex items-center justify-center px-6 py-10">
-        <Suspense fallback={<LoadingSpinner />}>
-          <PostForm
-            postSchemaTexts={postSchemaTexts}
-            fieldTexts={fieldTexts}
-            titleBodyTexts={titleBodyTexts}
-            inputMultipleSelectorTexts={inputMultipleSelectorTexts}
-            buttonSubmitTexts={buttonSubmitTexts}
-            loadedImages={loadedImages}
-            {...baseFormTexts}
-            path={"/posts/createWithImages"}
-            titleAIGeneratedPopTexts={titleAIGeneratedPopTexts}
-            bodyAIGeneratedPopTexts={bodyAIGeneratedPopTexts}
-            aiCheckBoxes={aiCheckBoxes}
-            diffusionImagesFormTexts={diffusionImagesFormTexts}
-          />
-        </Suspense>
+        <PostForm
+          postSchemaTexts={postSchemaTexts}
+          fieldTexts={fieldTexts}
+          titleBodyTexts={titleBodyTexts}
+          inputMultipleSelectorTexts={inputMultipleSelectorTexts}
+          buttonSubmitTexts={buttonSubmitTexts}
+          loadedImages={loadedImages}
+          {...baseFormTexts}
+          path={"/posts/createWithImages"}
+          titleAIGeneratedPopTexts={titleAIGeneratedPopTexts}
+          bodyAIGeneratedPopTexts={bodyAIGeneratedPopTexts}
+          aiCheckBoxes={aiCheckBoxes}
+          diffusionImagesFormTexts={diffusionImagesFormTexts}
+        />
       </main>
     </SidebarContentLayout>
   );

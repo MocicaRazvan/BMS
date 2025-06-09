@@ -30,11 +30,9 @@ export default async function KanbanPage({ params: { locale } }: LocaleProps) {
   return (
     <div className="space-y-10  w-full transition-all py-5 px-4 max-w-[1350px] mx-auto ">
       <Heading {...texts} />
-      <Suspense fallback={<LoadingSpinner />}>
-        <div>
-          <KanbanBoardWrapper {...texts.kanbanBoardTexts} />
-        </div>
-      </Suspense>
+      <div>
+        <KanbanBoardWrapper {...texts.kanbanBoardTexts} />
+      </div>
     </div>
   );
 }

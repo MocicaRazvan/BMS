@@ -170,9 +170,6 @@ export default function KanbanBoard({
     [],
   );
 
-  console.log("GROUPED TASKS", groupedTasks);
-  console.log("GROUPED COLUMNS", columns);
-
   const columnIds = useMemo(
     () => columns.map((column) => column.id),
     [columns],

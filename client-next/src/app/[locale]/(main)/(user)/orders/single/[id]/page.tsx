@@ -1,7 +1,5 @@
 import { Locale } from "@/navigation";
 import { unstable_setRequestLocale } from "next-intl/server";
-import { Suspense } from "react";
-import LoadingSpinner from "@/components/common/loading-spinner";
 import SingleOrderPageContent from "@/app/[locale]/(main)/(user)/orders/single/[id]/page-content";
 import { getSingleOrderPageContentTexts } from "@/texts/pages";
 import { Metadata } from "next";
@@ -27,9 +25,5 @@ export default async function SingleOrder({ params: { locale, id } }: Props) {
 
   const [texts] = await Promise.all([getSingleOrderPageContentTexts()]);
 
-  return (
-    <Suspense fallback={<LoadingSpinner />}>
-      <SingleOrderPageContent id={id} {...texts} />
-    </Suspense>
-  );
+  return <SingleOrderPageContent id={id} {...texts} />;
 }

@@ -5,9 +5,7 @@ import { ThemeSwitchTexts } from "@/texts/components/nav";
 import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
 import { getAdminEmailPageTexts } from "@/texts/pages";
 import Heading from "@/components/common/heading";
-import LoadingSpinner from "@/components/common/loading-spinner";
 import SidebarContentLayout from "@/components/sidebar/sidebar-content-layout";
-import { Suspense } from "react";
 import { Metadata } from "next";
 import { getIntlMetadata } from "@/texts/metadata";
 
@@ -44,11 +42,9 @@ export default async function AdminEmailPage({ params: { locale } }: Props) {
     >
       <div className="w-full h-full bg-background">
         <Heading {...texts} />
-        <Suspense fallback={<LoadingSpinner />}>
-          <div className="mt-10 h-full w-full">
-            <AdminEmail {...texts.adminEmail} />
-          </div>
-        </Suspense>
+        <div className="mt-10 h-full w-full">
+          <AdminEmail {...texts.adminEmail} />
+        </div>
       </div>
     </SidebarContentLayout>
   );

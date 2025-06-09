@@ -9,9 +9,7 @@ import { Metadata } from "next";
 import { getIntlMetadata } from "@/texts/metadata";
 import { ThemeSwitchTexts } from "@/texts/components/nav";
 import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
-import LoadingSpinner from "@/components/common/loading-spinner";
 import SidebarContentLayout from "@/components/sidebar/sidebar-content-layout";
-import { Suspense } from "react";
 import UsersPlansPageContent from "@/app/[locale]/trainer/user/[id]/plans/page-content";
 import { Separator } from "@/components/ui/separator";
 import TopPlans, { TopPlansTexts } from "@/components/charts/top-plans";
@@ -65,25 +63,23 @@ export default async function UsersPlansPage({
       >
         <div className="space-y-10 lg:space-y-16 w-full transition-all py-5 px-4 mx-auto ">
           <Heading {...userPlansPageTexts} />
-          <Suspense fallback={<LoadingSpinner />}>
-            <div>
-              <UsersPlansPageContent
-                path={`/plans/trainer/filteredWithCount/${id}`}
-                forWhom={"trainer"}
-                {...userPlansPageTexts.planTableTexts}
-                sortingOptions={plansOptions}
-                sizeOptions={[10, 20, 30, 40]}
+          <div>
+            <UsersPlansPageContent
+              path={`/plans/trainer/filteredWithCount/${id}`}
+              forWhom={"trainer"}
+              {...userPlansPageTexts.planTableTexts}
+              sortingOptions={plansOptions}
+              sizeOptions={[10, 20, 30, 40]}
+            />
+            <Separator className="mt-2" />
+            <div className=" my-5 h-full w-full">
+              <TopPlans
+                texts={userPlansPageTexts.topPlansTexts}
+                locale={locale}
+                path={`/orders/trainer/topPlans/${id}`}
               />
-              <Separator className="mt-2" />
-              <div className=" my-5 h-full w-full">
-                <TopPlans
-                  texts={userPlansPageTexts.topPlansTexts}
-                  locale={locale}
-                  path={`/orders/trainer/topPlans/${id}`}
-                />
-              </div>
             </div>
-          </Suspense>
+          </div>
         </div>
       </SidebarContentLayout>
     </IsTheSameUserOrAdmin>

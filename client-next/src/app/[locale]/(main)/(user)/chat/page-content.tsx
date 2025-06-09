@@ -1,8 +1,7 @@
 "use client";
 
 import { useStompClient } from "react-stomp-hooks";
-import { Suspense, useEffect } from "react";
-import LoadingSpinner from "@/components/common/loading-spinner";
+import { useEffect } from "react";
 import ChatRooms, { ChatRoomsTexts } from "@/components/chat/chat-rooms";
 import { useAuthUserMinRole } from "@/context/auth-user-min-role-context";
 
@@ -46,9 +45,7 @@ export default function ChatPageMainPageContent({
         <p>{headingText}</p>
       </div>
       <div className="md:hidden h-full ">
-        <Suspense fallback={<LoadingSpinner />}>
-          <ChatRooms {...chatRoomsTexts} />
-        </Suspense>
+        <ChatRooms {...chatRoomsTexts} />
       </div>
     </section>
   );

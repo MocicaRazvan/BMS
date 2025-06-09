@@ -1,8 +1,6 @@
 import { Locale } from "@/navigation";
 import { unstable_setRequestLocale } from "next-intl/server";
-import { Suspense } from "react";
 import UpdateDayPageContent from "@/app/[locale]/trainer/days/update/[id]/page-content";
-import LoadingSpinner from "@/components/common/loading-spinner";
 import { DayFromTexts } from "@/components/forms/day-form";
 import { ThemeSwitchTexts } from "@/texts/components/nav";
 import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
@@ -51,13 +49,11 @@ export default async function UpdateDayPage({ params: { locale, id } }: Props) {
       }}
     >
       <main className="flex items-center justify-center px-6 py-10">
-        <Suspense fallback={<LoadingSpinner />}>
-          <UpdateDayPageContent
-            id={id}
-            {...dayFormTexts}
-            path={`/days/update/meals/${id}`}
-          />
-        </Suspense>
+        <UpdateDayPageContent
+          id={id}
+          {...dayFormTexts}
+          path={`/days/update/meals/${id}`}
+        />
       </main>
     </SidebarContentLayout>
   );

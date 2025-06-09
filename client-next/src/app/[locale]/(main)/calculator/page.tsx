@@ -1,8 +1,6 @@
 import { Metadata } from "next";
 import { getIntlMetadata } from "@/texts/metadata";
 import { Locale, LocaleProps } from "@/navigation";
-import { Suspense } from "react";
-import LoadingSpinner from "@/components/common/loading-spinner";
 import CalculatorPageContent from "@/app/[locale]/(main)/calculator/page-content";
 import {
   ActivitiesTexts,
@@ -54,12 +52,10 @@ export default async function CalculatorPage({
 
   const [texts] = await Promise.all([getCalculatorPageTexts()]);
   return (
-    <div className="space-y-10  w-full transition-all mt-5 p-10 max-w-[1350px] mx-auto ">
-      <Suspense fallback={<LoadingSpinner />}>
-        <div>
-          <CalculatorPageContent {...texts} />
-        </div>
-      </Suspense>
+    <div className="space-y-10 w-full transition-all mt-5 p-10 max-w-[1350px] mx-auto ">
+      <div>
+        <CalculatorPageContent {...texts} />
+      </div>
     </div>
   );
 }

@@ -6,8 +6,6 @@ import SingleIngredientPageContent, {
 } from "@/app/[locale]/trainer/ingredients/single/[id]/page-content";
 import { getAdminIngredientPageTexts } from "@/texts/pages";
 import SidebarContentLayout from "@/components/sidebar/sidebar-content-layout";
-import { Suspense } from "react";
-import LoadingSpinner from "@/components/common/loading-spinner";
 import { Metadata } from "next";
 import { getIntlMetadata } from "@/texts/metadata";
 import { unstable_setRequestLocale } from "next-intl/server";
@@ -49,14 +47,12 @@ export default async function AdminIngredientPage({
       }}
     >
       <div className="w-full bg-background ">
-        <Suspense fallback={<LoadingSpinner />}>
-          <div className="mt-5">
-            <SingleIngredientPageContent
-              {...texts.singleIngredientPageTexts}
-              id={id}
-            />
-          </div>
-        </Suspense>
+        <div className="mt-5">
+          <SingleIngredientPageContent
+            {...texts.singleIngredientPageTexts}
+            id={id}
+          />
+        </div>
       </div>
     </SidebarContentLayout>
   );

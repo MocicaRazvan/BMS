@@ -1,7 +1,5 @@
 import { Locale } from "@/navigation";
 import { unstable_setRequestLocale } from "next-intl/server";
-import { Suspense } from "react";
-import LoadingSpinner from "@/components/common/loading-spinner";
 import SingleDayTrainerPageContent from "@/app/[locale]/trainer/days/single/[id]/page-content";
 import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
 import { ThemeSwitchTexts } from "@/texts/components/nav";
@@ -52,11 +50,9 @@ export default async function SingleDayTrainerPage({
     >
       <ScrollProgress />
       <div className="w-full bg-background ">
-        <Suspense fallback={<LoadingSpinner />}>
-          <div className="mt-5">
-            <SingleDayTrainerPageContent id={id} {...texts} />
-          </div>
-        </Suspense>
+        <div className="mt-5">
+          <SingleDayTrainerPageContent id={id} {...texts} />
+        </div>
       </div>
     </SidebarContentLayout>
   );

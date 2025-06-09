@@ -1,8 +1,6 @@
 import { Locale } from "@/navigation";
 import { unstable_setRequestLocale } from "next-intl/server";
 import { getRecipeFormTexts } from "@/texts/components/forms";
-import LoadingSpinner from "@/components/common/loading-spinner";
-import { Suspense } from "react";
 import RecipeForm from "@/components/forms/recipe-form";
 import { Metadata } from "next";
 import { getIntlMetadata } from "@/texts/metadata";
@@ -50,13 +48,11 @@ export default async function CreateRecipePage({ params: { locale } }: Props) {
       }}
     >
       <main className="flex items-center justify-center px-6 py-10">
-        <Suspense fallback={<LoadingSpinner />}>
-          <RecipeForm
-            {...recipeFormTexts}
-            path={"/recipes/createWithVideos"}
-            type="create"
-          />
-        </Suspense>
+        <RecipeForm
+          {...recipeFormTexts}
+          path={"/recipes/createWithVideos"}
+          type="create"
+        />
       </main>
     </SidebarContentLayout>
   );

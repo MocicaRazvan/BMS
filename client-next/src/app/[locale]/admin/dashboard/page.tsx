@@ -5,8 +5,6 @@ import AdminDashboardPageContent from "@/app/[locale]/admin/dashboard/page-conte
 
 import { getAdminDashboardPageTexts } from "@/texts/pages";
 import Heading from "@/components/common/heading";
-import LoadingSpinner from "@/components/common/loading-spinner";
-import { Suspense } from "react";
 import { Metadata } from "next";
 import { getIntlMetadata } from "@/texts/metadata";
 
@@ -35,11 +33,9 @@ export default async function AdminDashboard({ params: { locale } }: Props) {
     >
       <div className="w-full h-full bg-background">
         <Heading {...texts} />
-        <Suspense fallback={<LoadingSpinner />}>
-          <div className="mt-10 h-full">
-            <AdminDashboardPageContent {...texts} locale={locale} />
-          </div>
-        </Suspense>
+        <div className="mt-10 h-full">
+          <AdminDashboardPageContent {...texts} locale={locale} />
+        </div>
       </div>
     </SidebarContentLayout>
   );

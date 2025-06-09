@@ -7,8 +7,6 @@ import { Locale } from "@/navigation";
 import { unstable_setRequestLocale } from "next-intl/server";
 import { getAdminRecipePageTexts } from "@/texts/pages";
 import SidebarContentLayout from "@/components/sidebar/sidebar-content-layout";
-import LoadingSpinner from "@/components/common/loading-spinner";
-import { Suspense } from "react";
 import { Metadata } from "next";
 import { getIntlMetadata } from "@/texts/metadata";
 import ScrollProgress from "@/components/common/scroll-progress";
@@ -52,11 +50,9 @@ export default async function AdminRecipePage({
     >
       <ScrollProgress />
       <div className="w-full bg-background ">
-        <Suspense fallback={<LoadingSpinner />}>
-          <div className="mt-5">
-            <SingeRecipePageContent {...texts.singleRecipePageTexts} id={id} />
-          </div>
-        </Suspense>
+        <div className="mt-5">
+          <SingeRecipePageContent {...texts.singleRecipePageTexts} id={id} />
+        </div>
       </div>
     </SidebarContentLayout>
   );

@@ -1,6 +1,4 @@
 import { Locale } from "@/navigation";
-import { Suspense } from "react";
-import LoadingSpinner from "@/components/common/loading-spinner";
 import SingleTrainerPlanPageContent, {
   SingleTrainerPlanPageTexts,
 } from "@/app/[locale]/trainer/plans/single/[id]/page-content";
@@ -55,12 +53,7 @@ export default async function SingleTrainerPlanPage({
     >
       <ScrollProgress />
       <div className="w-full bg-background ">
-        <Suspense fallback={<LoadingSpinner />}>
-          <SingleTrainerPlanPageContent
-            id={id}
-            {...singleTrainerPlanPageTexts}
-          />
-        </Suspense>
+        <SingleTrainerPlanPageContent id={id} {...singleTrainerPlanPageTexts} />
       </div>
     </SidebarContentLayout>
   );

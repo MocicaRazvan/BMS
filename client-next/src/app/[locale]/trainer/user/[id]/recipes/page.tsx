@@ -7,8 +7,6 @@ import { unstable_setRequestLocale } from "next-intl/server";
 import { getUserRecipesPageContentTexts } from "@/texts/pages";
 import { sortingRecipesSortingOptionsKeys } from "@/texts/components/list";
 import Heading from "@/components/common/heading";
-import { Suspense } from "react";
-import LoadingSpinner from "@/components/common/loading-spinner";
 import { Metadata } from "next";
 import { getIntlMetadata } from "@/texts/metadata";
 import { ThemeSwitchTexts } from "@/texts/components/nav";
@@ -68,17 +66,15 @@ export default async function UsersRecipesPage({
       >
         <div className="space-y-10 lg:space-y-16 w-full transition-all py-5 px-4 mx-auto ">
           <Heading {...userRecipesPageTexts} />
-          <Suspense fallback={<LoadingSpinner />}>
-            <div className="">
-              <RecipeTable
-                path={`/recipes/trainer/filteredWithCount/${id}`}
-                forWhom="trainer"
-                sortingOptions={recipesOptions}
-                {...userRecipesPageTexts.recipesTableTexts}
-                sizeOptions={[10, 20, 30, 40]}
-              />
-            </div>
-          </Suspense>
+          <div className="">
+            <RecipeTable
+              path={`/recipes/trainer/filteredWithCount/${id}`}
+              forWhom="trainer"
+              sortingOptions={recipesOptions}
+              {...userRecipesPageTexts.recipesTableTexts}
+              sizeOptions={[10, 20, 30, 40]}
+            />
+          </div>
         </div>
       </SidebarContentLayout>
     </IsTheSameUserOrAdmin>

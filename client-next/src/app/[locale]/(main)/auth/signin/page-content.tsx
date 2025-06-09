@@ -26,7 +26,6 @@ import { useMemo, useState } from "react";
 import { Loader2 } from "lucide-react";
 
 import { Link, Locale, useRouter } from "@/navigation";
-import { logError } from "@/app/[locale]/(main)/auth/signin/actions";
 import OauthProviders from "@/app/[locale]/(main)/auth/oauth-providers";
 import { normalizeEmailWrapper } from "@/lib/email-normalizer-wrapper";
 import EmailFormField, {
@@ -87,12 +86,9 @@ export default function SingIn({
         email: normalizeEmailWrapper(values.email),
         password: values.password,
       });
-      console.log("Sign-in result:", result);
-      await logError("Sign-in result", result);
       setIsLoading(false);
       if (result?.error) {
         console.log("Authentication error:", result.error);
-        await logError("Authentication error", result.error);
         setErrorMsg(errorMessages);
       } else {
         // router.push("/", {});

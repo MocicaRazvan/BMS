@@ -1,6 +1,5 @@
 import { Locale } from "@/navigation";
 import { unstable_setRequestLocale } from "next-intl/server";
-import { Suspense } from "react";
 import UpdatePlanPageContent from "@/app/[locale]/trainer/plans/update/[id]/page-content";
 import { Metadata } from "next";
 import { getIntlMetadata } from "@/texts/metadata";
@@ -8,7 +7,6 @@ import { ThemeSwitchTexts } from "@/texts/components/nav";
 import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
 import { PlanFormTexts } from "@/components/forms/plan-form";
 import { getUpdatePlanPageTexts } from "@/texts/pages";
-import LoadingSpinner from "@/components/common/loading-spinner";
 import SidebarContentLayout from "@/components/sidebar/sidebar-content-layout";
 
 import { FindInSiteTexts } from "@/components/nav/find-in-site-content";
@@ -56,13 +54,11 @@ export default async function UpdatePlanPage({
       }}
     >
       <main className="flex items-center justify-center px-6 py-10">
-        <Suspense fallback={<LoadingSpinner />}>
-          <UpdatePlanPageContent
-            id={id}
-            {...planFormTexts}
-            path={`/plans/updateWithImages/${id}`}
-          />
-        </Suspense>
+        <UpdatePlanPageContent
+          id={id}
+          {...planFormTexts}
+          path={`/plans/updateWithImages/${id}`}
+        />
       </main>
     </SidebarContentLayout>
   );

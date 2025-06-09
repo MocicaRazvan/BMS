@@ -6,8 +6,6 @@ import { KanbanBoardTexts } from "@/components/kanban/kanban-board";
 import Heading from "@/components/common/heading";
 import SidebarContentLayout from "@/components/sidebar/sidebar-content-layout";
 import { getAdminKanbanTexts } from "@/texts/pages";
-import LoadingSpinner from "@/components/common/loading-spinner";
-import { Suspense } from "react";
 import KanbanBoardWrapper from "@/components/kanban/kanban-board-wrapper";
 import { Metadata } from "next";
 import { getIntlMetadata } from "@/texts/metadata";
@@ -49,11 +47,9 @@ export default async function AdminKanban({ params: { locale } }: Props) {
     >
       <div className="w-full h-full bg-background">
         <Heading {...texts} />
-        <Suspense fallback={<LoadingSpinner />}>
-          <div className="mt-10 h-full ">
-            <KanbanBoardWrapper {...texts.kanbanBoardTexts} />
-          </div>
-        </Suspense>
+        <div className="mt-10 h-full ">
+          <KanbanBoardWrapper {...texts.kanbanBoardTexts} />
+        </div>
       </div>
     </SidebarContentLayout>
   );

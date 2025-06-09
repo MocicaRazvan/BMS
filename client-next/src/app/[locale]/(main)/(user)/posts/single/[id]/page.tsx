@@ -1,5 +1,3 @@
-import { Suspense } from "react";
-import LoadingSpinner from "@/components/common/loading-spinner";
 import { getSinglePostPageTexts } from "@/texts/pages";
 import SinglePostPageContent from "@/app/[locale]/(main)/(user)/posts/single/[id]/page-content";
 import { Locale } from "@/navigation";
@@ -27,13 +25,13 @@ export default async function SinglePostPage({ params: { locale } }: Props) {
   unstable_setRequestLocale(locale);
   const [singlePostPageTexts] = await Promise.all([getSinglePostPageTexts()]);
   return (
-    <Suspense fallback={<LoadingSpinner />}>
+    <>
       <ScrollProgress />
       <SinglePostPageContent
         {...singlePostPageTexts}
         showRecommendations={true}
         trackViews={true}
       />
-    </Suspense>
+    </>
   );
 }

@@ -92,7 +92,7 @@ export default function KanbanBoardWrapper({ ...props }: Props) {
       className="flex items-center justify-center size-full p-2"
       initial={{ opacity: 0, scale: 0.8 }}
       animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.2, delay: 2 }}
+      transition={{ duration: 0.2, delay: 1.5 }}
     >
       <LoadingSpinner sectionClassName="min-h-[calc(100vh-24rem)]" />
     </motion.div>

@@ -6,9 +6,7 @@ import SingleOrderPageContent, {
 } from "@/app/[locale]/(main)/(user)/orders/single/[id]/page-content";
 import { unstable_setRequestLocale } from "next-intl/server";
 import { getAdminOrderPageTexts } from "@/texts/pages";
-import LoadingSpinner from "@/components/common/loading-spinner";
 import SidebarContentLayout from "@/components/sidebar/sidebar-content-layout";
-import { Suspense } from "react";
 import { Metadata } from "next";
 import { getIntlMetadata } from "@/texts/metadata";
 
@@ -51,14 +49,12 @@ export default async function AdminOrderPage({
       }}
     >
       <div className="w-full bg-background ">
-        <Suspense fallback={<LoadingSpinner />}>
-          <div className="mt-5">
-            <SingleOrderPageContent
-              id={id}
-              {...texts.singleOrderPageContentTexts}
-            />
-          </div>
-        </Suspense>
+        <div className="mt-5">
+          <SingleOrderPageContent
+            id={id}
+            {...texts.singleOrderPageContentTexts}
+          />
+        </div>
       </div>
     </SidebarContentLayout>
   );
