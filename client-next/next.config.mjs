@@ -75,7 +75,7 @@ const baseConfig = {
       ],
       type: "asset/resource",
       generator: {
-        filename: "static/customdata/[name].[contenthash][ext]",
+        filename: "static/customdata/[name][contenthash][ext]",
       },
     });
     return config;
