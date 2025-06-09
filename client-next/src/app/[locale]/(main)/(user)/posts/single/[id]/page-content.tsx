@@ -27,10 +27,10 @@ import { AnswerFromBodyFormTexts } from "@/components/forms/answer-from-body-for
 import ItemBodyQa from "@/components/common/item-body-qa";
 import useTrackItemView from "@/hoooks/use-track-item-view";
 import useFetchStream from "@/hoooks/useFetchStream";
-import { readingTime } from "reading-time-estimator";
 import { useLocale } from "next-intl";
 import { Locale } from "@/navigation";
 import { useAuthUserMinRole } from "@/context/auth-user-min-role-context";
+import { estimateReadingTime } from "@/lib/reading-time/estimator";
 
 export interface SinglePostPageTexts {
   elementHeaderTexts: ElementHeaderTexts;
@@ -165,7 +165,7 @@ export default function SinglePostPageContent({
         {...elementHeaderTexts}
         extraContent={
           <p className="text-sm text-muted-foreground font-semibold">
-            {readingTime(postState?.body, 200, locale).text}
+            {estimateReadingTime(postState?.body, 200, locale).text}
           </p>
         }
       />

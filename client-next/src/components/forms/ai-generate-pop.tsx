@@ -12,7 +12,7 @@ import ButtonSubmit, {
 } from "@/components/forms/button-submit";
 import { AiIdeasField, TargetedFields } from "@/types/ai-ideas-types";
 import ShinyButton from "@/components/magicui/shiny-button";
-import { getToxicity } from "@/actions/toxcity";
+import { getToxicity } from "@/actions/forms/toxcity-action";
 import DOMPurify from "dompurify";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Loader2, Pen, StopCircle } from "lucide-react";

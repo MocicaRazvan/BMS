@@ -29,7 +29,7 @@ import { Link, useRouter } from "@/navigation";
 import { Loader2 } from "lucide-react";
 
 import { PasswordInput } from "@/components/ui/password-input";
-import { registerSubmit } from "@/actions/froms";
+import { registerSubmit } from "@/actions/forms/register-action";
 import OauthProviders from "@/app/[locale]/(main)/auth/oauth-providers";
 import {
   PasswordStrengthIndicator,

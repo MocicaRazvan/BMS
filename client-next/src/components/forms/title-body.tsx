@@ -19,7 +19,6 @@ import { useMemo, useState } from "react";
 import DOMPurify from "dompurify";
 import { AIResponseTexts } from "@/components/forms/ai-response";
 import dynamic from "next/dynamic";
-import { Skeleton } from "@/components/ui/skeleton";
 
 export interface TitleBodyTexts {
   title: string;
@@ -51,7 +50,7 @@ const DynamicAIResponse = dynamic(
   () => import("@/components/forms/ai-response").then((m) => m.AIResponse),
   {
     ssr: false,
-    loading: () => <Skeleton className="w-full min-h-36" />,
+    loading: () => null,
   },
 );
 

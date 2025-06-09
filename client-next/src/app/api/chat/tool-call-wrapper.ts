@@ -8,7 +8,6 @@ import {
 import { z } from "zod";
 import { getRedisCache } from "@/lib/langchain/redis-cache";
 import { normalizeText } from "@/lib/utils";
-import Promise from "lie";
 import { v4 as uuidv4 } from "uuid";
 import { emitError } from "@/logger";
 import { getFixingParser } from "@/lib/langchain/fixing-parser";

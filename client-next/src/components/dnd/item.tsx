@@ -27,6 +27,7 @@ import {
   VideoPlayerContent,
   VideoPlayerControlBar,
   VideoPlayerFullscreenButton,
+  VideoPlayerLoadingIndicator,
   VideoPlayerMuteButton,
   VideoPlayerPlayButton,
   VideoPlayerSeekBackwardButton,
@@ -173,6 +174,7 @@ const ItemVideoContent = ({ item, isDragging }: BaseItemProps) => {
         autoPlay={false}
         className="size-full object-cover"
       />
+      <VideoPlayerLoadingIndicator />
       <VideoPlayerControlBar
         onMouseMove={(e) => {
           e.stopPropagation();

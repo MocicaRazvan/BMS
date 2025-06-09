@@ -1,7 +1,7 @@
 "use client";
 
 import { CountryOrderSummary, CountrySummaryType } from "@/types/dto";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import useFetchStream from "@/hoooks/useFetchStream";
 import { scaleSequential } from "d3-scale";
 import { interpolateBlues } from "d3-scale-chromatic";
@@ -19,11 +19,14 @@ import { useGenerateImage } from "recharts-to-png";
 import FileSaver from "file-saver";
 import useDateRangeFilterParams from "@/hoooks/useDateRangeFilterParams";
 import {
+  GeoDataType,
   GeographyChartTexts,
   LegendItem,
 } from "@/components/charts/geography-chart-content";
 import dynamic from "next/dynamic";
 import { Skeleton } from "@/components/ui/skeleton";
+import fetchFactory from "@/lib/fetchers/fetchWithRetry";
+import geoDataUrl from "@/../src/app/api/charts/geoData/geoData.json?url";
 
 const LEGEND_STEPS = 9;
 
@@ -41,6 +44,28 @@ const DynamicGeographyChart = dynamic(
 interface Props extends GeographyChartTexts {}
 export default function GeographyChart(props: Props) {
   const locale = useLocale();
+  const [geoData, setGeoData] = useState<GeoDataType>();
+
+  useEffect(() => {
+    let isMounted = true;
+    (async () => {
+      if (!isMounted) return;
+      const res = await fetchFactory(fetch)(geoDataUrl, {
+        cache: "default",
+      });
+      if (!res.ok) {
+        console.error("Failed to fetch geo data", await res.text());
+        return;
+      }
+
+      const data: GeoDataType = await res.json();
+      setGeoData(data);
+    })();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const [radioOption, setRadioOption] = useState<CountrySummaryType>(
     CountrySummaryType.COUNT,
@@ -61,13 +86,16 @@ export default function GeographyChart(props: Props) {
     },
   });
 
-  const max = useMemo(
-    () =>
-      // messages.reduce((acc, curr) => Math.max(acc, curr.value), 0),
-      messages.length ? messages[0].maxGroupTotal : 0,
-    [JSON.stringify(messages)],
+  // const max = useMemo(
+  //   () =>
+  //     // messages.reduce((acc, curr) => Math.max(acc, curr.value), 0),
+  //     messages.length ? messages[0].maxGroupTotal : 0,
+  //   [messages],
+  // );
+  const domain = useMemo(
+    () => [0, messages.length ? Math.round(messages[0].maxGroupTotal) : 0],
+    [messages],
   );
-  const domain = useMemo(() => [0, Math.round(max)], [max]);
 
   const colorScale = scaleSequential(interpolateBlues).domain(domain);
 
@@ -83,7 +111,7 @@ export default function GeographyChart(props: Props) {
         color: colorScale(startValue),
       };
     }).filter(({ startValue, endValue }) => startValue < endValue);
-  }, [domain, colorScale, JSON.stringify(messages)]);
+  }, [domain, colorScale]);
 
   const { theme } = useTheme();
 
@@ -148,6 +176,7 @@ export default function GeographyChart(props: Props) {
           handleDivDownload={handleDivDownload}
           domain={domain}
           messages={messages}
+          geoData={geoData}
         />
       </div>
     </div>

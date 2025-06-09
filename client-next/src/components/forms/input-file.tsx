@@ -29,11 +29,12 @@ import { UploadIcon } from "@radix-ui/react-icons";
 import DotPattern from "@/components/magicui/dot-pattern";
 import ProgressText from "@/components/common/progres-text";
 import { ImageCropTexts } from "@/components/common/image-cropper";
-import { saveAs } from "file-saver";
-import JSZip from "jszip";
 import { useDebounce } from "react-use";
 import dynamic from "next/dynamic";
 import { Skeleton } from "@/components/ui/skeleton";
+import fetchFactory from "@/lib/fetchers/fetchWithRetry";
+import { getCsrfNextAuthHeader } from "@/actions/get-csr-next-auth";
+import Loader from "@/components/ui/spinner";
 
 export type InputFieldName = "images" | "videos";
 
@@ -100,6 +101,32 @@ const variantTwo = {
   },
 };
 
+const fetchZip = async (items: FieldInputItem[], fileName: string) => {
+  const formData = new FormData();
+  items.forEach((i) => {
+    formData.append("files", i.file);
+  });
+  formData.append("fileName", fileName);
+  try {
+    const res = await fetchFactory(fetch)("/api/compress/zip", {
+      method: "POST",
+      body: formData,
+      headers: {
+        ...(await getCsrfNextAuthHeader()),
+      },
+    });
+    if (!res.ok) {
+      const body = await res.json();
+      console.error("Error fetching zip file", body);
+      return null;
+    }
+    return res.blob();
+  } catch (error) {
+    console.error("Error fetching zip file", error);
+    return null;
+  }
+};
+
 export default function InputFile<T extends FieldValues>({
   control,
   fieldName,
@@ -130,6 +157,7 @@ export default function InputFile<T extends FieldValues>({
   const [isListCollapsed, setIsListCollapsed] = useState(true);
   const [isLoadingInitial, setIsLoadingInitial] = useState(true);
   const [isDeleteAllPressed, setIsDeleteAllPressed] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
   useDebounce(
     () => {
       if (isDeleteAllPressed) {
@@ -241,20 +269,27 @@ export default function InputFile<T extends FieldValues>({
     [fieldName, fieldValue, setValue],
   );
 
-  const downloadAllFiles = useCallback(() => {
-    const zip = new JSZip();
-    fieldValue.forEach((item: FieldInputItem) => {
-      zip.file(item.file.name, item.file);
-    });
-    const now = new Date();
-    zip
-      .generateAsync({
-        type: "blob",
-        compression: "STORE",
-      })
-      .then((content) => {
-        saveAs(content, `${fieldName}_${now.toISOString()}.zip`);
-      });
+  const downloadAllFiles = useCallback(async () => {
+    setIsExporting(true);
+    try {
+      const baseFieldName = `${fieldName}_${new Date().toISOString()}`;
+      const [saveAs, content] = await Promise.all([
+        import("file-saver").then((m) => m.default),
+        import("zip-slim")
+          .then((m) => m.zip)
+          .then((zipper) =>
+            zipper(
+              fieldValue.map((v: FieldInputItem) => v.file),
+              false,
+            ),
+          ),
+      ]);
+      saveAs(content, `${baseFieldName}.zip`);
+    } catch (error) {
+      console.error("Error downloading files:", error);
+    } finally {
+      setIsExporting(false);
+    }
   }, [fieldName, fieldValue]);
 
   useEffect(() => {
@@ -283,8 +318,14 @@ export default function InputFile<T extends FieldValues>({
                   variant="outline"
                   onClick={downloadAllFiles}
                   type="button"
+                  disabled={isLoadingInitial || isExporting}
+                  className="w-14"
                 >
-                  <DownloadIcon />
+                  {!isExporting ? (
+                    <DownloadIcon />
+                  ) : (
+                    <Loader className="size-5" />
+                  )}
                 </Button>
               )}
               {multiple && fieldValue.length > 0 && (

@@ -1,4 +1,5 @@
 import createNextIntlPlugin from "next-intl/plugin";
+import path from "path";
 import { PHASE_DEVELOPMENT_SERVER } from "next/constants.js";
 
 import generated from "@next/bundle-analyzer";
@@ -51,6 +52,33 @@ const baseConfig = {
       // "langchain",
       // "@langchain/core",
     ],
+  },
+  // async headers() {
+  //   return [
+  //     {
+  //       source: "/_next/static/customdata/:all*",
+  //       headers: [
+  //         {
+  //           key: "Cache-Control",
+  //           value: "public, max-age=31536000, immutable",
+  //         },
+  //       ],
+  //     },
+  //   ];
+  // },
+  webpack(config) {
+    config.module.rules.push({
+      test: /geoData\.json$/i,
+      resourceQuery: /url/,
+      include: [
+        path.resolve(process.cwd(), "src/app/api/charts/geoData/geoData.json"),
+      ],
+      type: "asset/resource",
+      generator: {
+        filename: "static/customdata/[name].[contenthash][ext]",
+      },
+    });
+    return config;
   },
 };
 const finalConfig = (phase) => {

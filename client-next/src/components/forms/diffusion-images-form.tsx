@@ -31,13 +31,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { getToxicity } from "@/actions/toxcity";
+import { getToxicity } from "@/actions/forms/toxcity-action";
 import DOMPurify from "dompurify";
 import ButtonSubmit, {
   ButtonSubmitTexts,
 } from "@/components/forms/button-submit";
 import { cn } from "@/lib/utils";
-import { useNavigationGuardI18nForm } from "@/hoooks/use-navigation-guard-i18n-form";
 
 export type DiffusionImagesFormCallback = (
   images: DiffusionSchemaType,

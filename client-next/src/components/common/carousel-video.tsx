@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useLayoutEffect, useRef } from "react";
+import React, { useEffect, useLayoutEffect, useRef } from "react";
 import { useInView } from "framer-motion";
 import {
   VideoPlayer,
   VideoPlayerContent,
   VideoPlayerControlBar,
   VideoPlayerFullscreenButton,
+  VideoPlayerLoadingIndicator,
   VideoPlayerMuteButton,
   VideoPlayerPlayButton,
   VideoPlayerSeekBackwardButton,
@@ -90,6 +91,7 @@ export default function CarouselVideo({
           preload="metadata"
           ref={videoRef}
         />
+        <VideoPlayerLoadingIndicator />
         <VideoPlayerControlBar
           onMouseMove={(e) => {
             e.stopPropagation();

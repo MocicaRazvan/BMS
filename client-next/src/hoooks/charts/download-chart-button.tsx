@@ -1,7 +1,6 @@
 "use client";
 import { useCurrentPng } from "recharts-to-png";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import FileSaver from "file-saver";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { DownloadIcon } from "lucide-react";
 import { useTheme } from "next-themes";
@@ -12,6 +11,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { getUseDownloadChartButtonTexts } from "@/texts/components/charts";
+import Loader from "@/components/ui/spinner";
 
 export interface DateString {
   date: string;
@@ -28,7 +28,8 @@ export default function useDownloadChartButton<T extends DateString>({
     getUseDownloadChartButtonTexts().then((t) => setText(t.downloadChart));
   }, []);
   const { theme } = useTheme();
-  const [getPng, { ref, isLoading }] = useCurrentPng({
+  const [isLoading, setIsLoading] = useState(false);
+  const [getPng, { ref }] = useCurrentPng({
     backgroundColor: theme === "dark" ? "#1A202C" : "#f0f0f0",
     windowWidth: 1920,
     windowHeight: 1080,
@@ -76,18 +77,23 @@ export default function useDownloadChartButton<T extends DateString>({
 
   const handleDownload = useCallback(
     async (name: string) => {
-      const png = await getPng();
+      setIsLoading(true);
+      const [png, saveAs] = await Promise.all([
+        getPng(),
+        import("file-saver").then((m) => m.default),
+      ]);
 
       const dateToAppend =
         minDate === maxDate ? minDate : `${minDate}_${maxDate}`;
       const now = new Date().toISOString();
 
       if (png) {
-        FileSaver.saveAs(
+        saveAs(
           png,
           `${name.toLowerCase().trim().replace(/\s+/g, "_")}-${dateToAppend}-${now}.png`,
         );
       }
+      setIsLoading(false);
     },
     [getPng, maxDate, minDate],
   );
@@ -100,14 +106,10 @@ export default function useDownloadChartButton<T extends DateString>({
             onClick={() => handleDownload(fileName)}
             disabled={isLoading}
             type="button"
-            className="min-w-[65px]"
+            className="min-w-14"
             variant="outline"
           >
-            {isLoading ? (
-              <span className=" text-primary/60 animate-spin font-bold text-lg w-full h-full " />
-            ) : (
-              <DownloadIcon size={24} />
-            )}
+            {isLoading ? <Loader className="size-5" /> : <DownloadIcon />}
           </Button>
         </TooltipTrigger>
         <TooltipContent>

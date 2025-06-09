@@ -1,6 +1,7 @@
 package com.mocicarazvan.archiveservice.config.h2;
 
 
+import jakarta.annotation.PreDestroy;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.h2.tools.Server;
@@ -20,7 +21,7 @@ public class H2Tcp implements InitializingBean, DisposableBean {
     private Server tcpServer;
 
     @Override
-    public void afterPropertiesSet() throws Exception {
+    public void afterPropertiesSet() {
         try {
             String hostname = InetAddress.getLocalHost().getHostName();
             String localIp = InetAddress.getLocalHost().getHostAddress();
@@ -50,8 +51,19 @@ public class H2Tcp implements InitializingBean, DisposableBean {
 
     }
 
+
+    // sometimes the server hangs
+    @PreDestroy
+    public void preDestroy() {
+        destroyTcpServer();
+    }
+
     @Override
-    public void destroy() throws Exception {
+    public void destroy() {
+        destroyTcpServer();
+    }
+
+    public void destroyTcpServer() {
         if (tcpServer != null && tcpServer.isRunning(true)) {
             log.info("Shutting down embedded H2 TCP server");
             tcpServer.stop();

@@ -14,7 +14,6 @@ import { SortingOptionsTexts } from "@/types/constants";
 import { useSearchParams } from "next/navigation";
 import React, { useState } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
-import { readingTime } from "reading-time-estimator";
 import { ThumbsUp } from "lucide-react";
 import {
   Select,
@@ -24,6 +23,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
+import { estimateReadingTime } from "@/lib/reading-time/estimator";
+
 export interface ApprovedPostsTexts {
   gridListTexts: GridListTexts;
   sortingPostsSortingOptions: SortingOptionsTexts;
@@ -175,7 +176,7 @@ export default function DemoPostApprovedPageContent({
               <ThumbsUp className="text-success" size={20} />
             </div>
             <p className="text-sm text-muted-foreground font-semibold">
-              {readingTime(p.model.content.body, 200, locale).text}
+              {estimateReadingTime(p.model.content.body, 200, locale).text}
             </p>
           </div>
         )}

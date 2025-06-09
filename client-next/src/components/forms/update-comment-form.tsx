@@ -25,7 +25,7 @@ import { TitleBodyTexts } from "@/components/forms/title-body";
 import { CommentResponse, CustomEntityModel } from "@/types/dto";
 import useLoadingErrorState from "@/hoooks/useLoadingErrorState";
 import { cleanText } from "@/lib/utils";
-import { getToxicity } from "@/actions/toxcity";
+import { getToxicity } from "@/actions/forms/toxcity-action";
 import DOMPurify from "dompurify";
 import { fetchStream } from "@/lib/fetchers/fetchStream";
 import { WithUser } from "@/lib/user";

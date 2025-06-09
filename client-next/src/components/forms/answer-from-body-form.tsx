@@ -8,7 +8,7 @@ import {
 } from "@/types/forms";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { getToxicity } from "@/actions/toxcity";
+import { getToxicity } from "@/actions/forms/toxcity-action";
 import DOMPurify from "dompurify";
 import { getAnswerFromBody } from "@/actions/texts/answer-from-body";
 import useLoadingErrorState from "@/hoooks/useLoadingErrorState";

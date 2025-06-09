@@ -92,7 +92,7 @@ export default function ExportTableDropDown<
         <DropdownMenuTrigger asChild>
           <Button
             variant="outline"
-            className="flex items-center justify-center"
+            className="flex items-center justify-center w-14"
             size="icon"
           >
             <Download />

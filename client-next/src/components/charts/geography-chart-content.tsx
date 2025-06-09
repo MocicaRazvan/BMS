@@ -20,13 +20,41 @@ import CreationFilter, {
 } from "@/components/list/creation-filter";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ResponsiveChoropleth } from "@nivo/geo";
-import { geoData } from "../../../public/geoData";
 import { cn } from "@/lib/utils";
 import getCountryISO2 from "country-iso-3-to-2";
 import { DropDownMenuGeographySelect } from "@/components/charts/geography-chart";
 import { useLocale } from "next-intl";
 import { CountryOrderSummary, CountrySummaryType } from "@/types/dto";
 import useDateRangeFilterParams from "@/hoooks/useDateRangeFilterParams";
+
+export interface GeoDataType {
+  type: string;
+  features: (
+    | {
+        type: string;
+        properties: {
+          name: string;
+        };
+        geometry: {
+          type: string;
+          coordinates: number[][][];
+        };
+        id: string;
+      }
+    | {
+        type: string;
+        properties: {
+          name: string;
+        };
+        geometry: {
+          type: string;
+          coordinates: number[][][][];
+        };
+        id: string;
+      }
+  )[];
+}
+
 export interface GeographyChartTexts {
   zoomInLabel: string;
   zoomOutLabel: string;
@@ -66,6 +94,7 @@ interface Props extends GeographyChartTexts {
   handleDivDownload: () => Promise<void>;
   domain: number[];
   messages: CountryOrderSummary[];
+  geoData: GeoDataType | undefined;
 }
 export function GeographyChartContent({
   isFinished,
@@ -84,6 +113,7 @@ export function GeographyChartContent({
   handleDivDownload,
   domain,
   messages,
+  geoData,
 }: Props) {
   const locale = useLocale();
   const regionNames = new Intl.DisplayNames([locale], { type: "region" });
@@ -118,7 +148,11 @@ export function GeographyChartContent({
               <motion.div
                 initial={{ opacity: 0, scale: 0.5 }}
                 animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.4, delay: 0.5 }}
+                transition={{
+                  duration: 0.4,
+                  delay: 0.5,
+                  ease: "easeInOut",
+                }}
                 className="absolute  bottom-4 lg:bottom-10  right-0 lg:right-10
               shadow z-10 flex flex-row lg:flex-col bg-background
               p-2 rounded backdrop-blur supports-[backdrop-filter]:bg-background/60
@@ -127,7 +161,7 @@ export function GeographyChartContent({
                 {legendItems.map((item, index) => (
                   <div key={index} className=" flex items-center mb-1">
                     <span
-                      className=" w-4 h-4"
+                      className="w-4 h-4 rounded-sm"
                       style={{ backgroundColor: item.color }}
                     ></span>
                     <p className=" ml-2">
@@ -192,8 +226,12 @@ export function GeographyChartContent({
               {!isFinished ? (
                 // <Loader className={"mx-auto h-full "} />
                 <Skeleton className="mx-auto h-full" />
+              ) : !geoData ? (
+                <div className="mx-auto h-full animate-in fade-in duration-500 delay-300">
+                  <Skeleton className="size-full" />
+                </div>
               ) : (
-                <>
+                <div className="size-full animate-in fade-in duration-300">
                   <ScaleWrapper setScale={setScale} />
                   <ResponsiveChoropleth
                     data={messages}
@@ -271,7 +309,7 @@ export function GeographyChartContent({
                       },
                     }}
                   />
-                </>
+                </div>
               )}
             </div>
           </TransformComponent>

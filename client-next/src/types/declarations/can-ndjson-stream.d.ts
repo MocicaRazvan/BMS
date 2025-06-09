@@ -1,6 +1,6 @@
 declare module "can-ndjson-stream" {
   export default function ndjsonStream<T, E>(
-    data: unknown
+    data: unknown,
   ): {
     getReader: () => {
       read: () => Promise<{ done: boolean; value: T | E }>;
@@ -8,4 +8,3 @@ declare module "can-ndjson-stream" {
     cancel: () => void;
   };
 }
-// Path: can-ndjson-stream.d.ts

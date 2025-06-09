@@ -5,7 +5,6 @@ import { ColumnDef, Row, Table } from "@tanstack/react-table";
 import { fromStringOfDotToObjectValue } from "@/lib/utils";
 import { format, parseISO } from "date-fns";
 import fetchFactory from "@/lib/fetchers/fetchWithRetry";
-import { saveAs } from "file-saver";
 import { getCsrfNextAuthHeader } from "@/actions/get-csr-next-auth";
 
 const PDF_ROUTE = "/api/table/export-pdf" as const;
@@ -165,23 +164,26 @@ export default function useExportTable<T extends Record<string, any>, V>({
       const finalFileName = `${fileName}-${new Date().toISOString()}.${extension}`;
       const csrf = await getCsrfNextAuthHeader();
       try {
-        const res = await fetchFactory(fetch)(route, {
-          method: "POST",
-          credentials: "include",
-          headers: { "Content-Type": "application/json", ...csrf },
-          body: JSON.stringify({
-            tableColumnHeaders,
-            tableRows,
-            fileName: finalFileName,
+        const [res, saveAs] = await Promise.all([
+          fetchFactory(fetch)(route, {
+            method: "POST",
+            credentials: "include",
+            headers: { "Content-Type": "application/json", ...csrf },
+            body: JSON.stringify({
+              tableColumnHeaders,
+              tableRows,
+              fileName: finalFileName,
+            }),
           }),
-        });
+          import("file-saver").then((m) => m.default),
+        ]);
         if (!res.ok) {
           const body = await res.json();
           console.log("Error exporting file:", body, route);
           return;
         }
         const blob = await res.blob();
-        saveAs(blob, finalFileName, { autoBom: true });
+        saveAs(blob, finalFileName);
       } catch (error) {
         console.log("Error exporting file:", error, route);
       } finally {

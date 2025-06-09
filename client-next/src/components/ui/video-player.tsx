@@ -3,6 +3,8 @@ import { cn } from "@/lib/utils";
 import {
   MediaControlBar,
   MediaController,
+  MediaFullscreenButton,
+  MediaLoadingIndicator,
   MediaMuteButton,
   MediaPlayButton,
   MediaSeekBackwardButton,
@@ -10,9 +12,10 @@ import {
   MediaTimeDisplay,
   MediaTimeRange,
   MediaVolumeRange,
-  MediaFullscreenButton,
 } from "media-chrome/react";
-import { CSSProperties, ComponentProps, forwardRef } from "react";
+import { ComponentProps, CSSProperties, forwardRef, useState } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
+
 export type VideoPlayerProps = ComponentProps<typeof MediaController>;
 const variables = {
   "--media-primary-color": "hsl(var(--primary))",
@@ -133,17 +136,41 @@ export const VideoPlayerFullscreenButton = ({
   />
 );
 
+export type VideoPlayerLoadingIndicatorProps = ComponentProps<
+  typeof MediaLoadingIndicator
+>;
+export const VideoPlayerLoadingIndicator = (
+  props: VideoPlayerLoadingIndicatorProps,
+) => (
+  <MediaLoadingIndicator
+    loadingDelay={750}
+    noAutohide
+    slot="centered-chrome"
+    {...props}
+  />
+);
+
 export const VideoPlayerContent = forwardRef<
   HTMLVideoElement,
   ComponentProps<"video">
->(({ className, ...props }, ref) => (
-  <video
-    ref={ref}
-    className={cn("mt-0 mb-0", className)}
-    slot="media"
-    crossOrigin="anonymous"
-    {...props}
-  />
-));
+>(({ className, onLoad, ...props }, ref) => {
+  const [isReady, setIsReady] = useState(false);
+  return (
+    <>
+      {!isReady && <Skeleton className={className} />}
+      <video
+        ref={ref}
+        className={cn("mt-0 mb-0", className, !isReady && "hidden")}
+        slot="media"
+        crossOrigin="anonymous"
+        {...props}
+        onLoadedData={(e) => {
+          setIsReady(true);
+          onLoad?.(e);
+        }}
+      />
+    </>
+  );
+});
 
 VideoPlayerContent.displayName = "VideoPlayerContent";

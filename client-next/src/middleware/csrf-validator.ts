@@ -81,7 +81,7 @@ export async function apiMiddleware(
   // console.log(`Runtime: ${process.env.NEXT_RUNTIME || "nodejs"}`);
 
   const lowerCasePath = request.nextUrl.pathname.toLowerCase();
-  console.log("apiMiddleware" + lowerCasePath);
+
   if (exemptedApiPaths.some((path) => lowerCasePath.startsWith(path))) {
     return NextResponse.next();
   }

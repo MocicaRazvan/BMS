@@ -15,8 +15,8 @@ import Heading from "@/components/common/heading";
 import { useSearchParams } from "next/navigation";
 import React, { useState } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
-import { readingTime } from "reading-time-estimator";
 import { ThumbsUp } from "lucide-react";
+import { estimateReadingTime } from "@/lib/reading-time/estimator";
 
 export interface ApprovedPostsTexts {
   gridListTexts: GridListTexts;
@@ -121,7 +121,7 @@ export default function PostApprovedPageContent({
               <ThumbsUp className="text-success" size={20} />
             </div>
             <p className="text-sm text-muted-foreground font-semibold">
-              {readingTime(p.model.content.body, 200, locale).text}
+              {estimateReadingTime(p.model.content.body, 200, locale).text}
             </p>
           </div>
         )}

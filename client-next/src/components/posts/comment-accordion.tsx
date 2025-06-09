@@ -29,7 +29,7 @@ import {
 import { CommentFormTexts } from "@/texts/components/forms";
 import ErrorMessage from "@/components/forms/error-message";
 import ButtonSubmit from "@/components/forms/button-submit";
-import { getToxicity } from "@/actions/toxcity";
+import { getToxicity } from "@/actions/forms/toxcity-action";
 import { fetchStream } from "@/lib/fetchers/fetchStream";
 import { EditorTexts } from "@/components/editor/editor";
 import { Skeleton } from "@/components/ui/skeleton";
