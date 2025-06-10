@@ -359,7 +359,6 @@ function ChatMessage({ message: { role, content } }: ChatMessageProps) {
         <ReactMarkdown
           components={{
             a: ({ node, ref, ...props }) => {
-              // todo see if its internal link else open in new tab
               const isInternalLink =
                 props.href?.startsWith(appUrl) ||
                 props.href?.startsWith(appUrlNoPort);
@@ -376,6 +375,7 @@ function ChatMessage({ message: { role, content } }: ChatMessageProps) {
                   className="text-primary hover:underline font-semibold text-opacity-90"
                   target={isInternalLink ? "_self" : "_blank"}
                   rel={!isInternalLink ? "noopener noreferrer" : undefined}
+                  prefetch={false}
                 >
                   {props.children}
                 </Link>

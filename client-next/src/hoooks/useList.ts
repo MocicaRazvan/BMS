@@ -236,7 +236,7 @@ export default function useList<T>({
       preloadNext &&
       messages &&
       messages.length > 0 &&
-      messages[0].pageInfo &&
+      messages[0].pageInfo.totalPages > 1 &&
       !error
     ) {
       const maxPage = messages[0].pageInfo.totalPages;
