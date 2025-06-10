@@ -59,7 +59,7 @@ import { DataTablePaginationTexts } from "@/components/table/data-table-paginati
 import { SelectedRowsTexts } from "@/components/table/selected-rows";
 import { useTableSearchParams } from "tanstack-table-search-params";
 import { useSearchParams } from "next/navigation";
-import { usePathname } from "@/navigation";
+import { usePathname } from "@/navigation/navigation";
 import { stripNonAlphaNumeric } from "@/lib/utils";
 import { containerActionColors } from "@/types/constants";
 import { useAuthUserMinRole } from "@/context/auth-user-min-role-context";

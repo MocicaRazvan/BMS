@@ -1,4 +1,4 @@
-import { Locale } from "@/navigation";
+import { Locale } from "@/navigation/navigation";
 import { unstable_setRequestLocale } from "next-intl/server";
 import PlanForm, { PlanFormTexts } from "@/components/forms/plan-form";
 import { Metadata } from "next";

@@ -1,5 +1,5 @@
 import { getTranslations, unstable_setRequestLocale } from "next-intl/server";
-import { LocaleProps } from "@/navigation";
+import { LocaleProps } from "@/navigation/navigation";
 import ConfirmEmailPage from "@/app/[locale]/(main)/auth/confirm-email/page-content";
 import { Metadata } from "next";
 import { getIntlMetadata } from "@/texts/metadata";

@@ -1,5 +1,5 @@
 "use client";
-import { Locale, useRouter } from "@/navigation";
+import { Locale } from "@/navigation/navigation";
 import GridList, {
   GridListTexts,
   SortingOption,
@@ -42,7 +42,6 @@ export default function PostApprovedPageContent({
   likedLabel,
   locale,
 }: Props) {
-  const router = useRouter();
   const { extraUpdateSearchParams, extraArrayQueryParam, tags, setTags } =
     useTagsExtraCriteria();
   const searchParams = useSearchParams();
@@ -55,13 +54,11 @@ export default function PostApprovedPageContent({
       <Heading title={title} header={header} />
 
       <GridList<PostResponse>
-        onItemClick={({
+        itemLinkCallback={({
           model: {
             content: { id },
           },
-        }) => {
-          router.push(`/posts/single/${id}`);
-        }}
+        }) => `/posts/single/${id}`}
         sizeOptions={[6, 12, 18]}
         path="/posts/tags/withUser"
         sortingOptions={options}

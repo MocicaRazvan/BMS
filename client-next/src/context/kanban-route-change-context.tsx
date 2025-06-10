@@ -9,7 +9,7 @@ import {
   useEffect,
   useState,
 } from "react";
-import { usePathname } from "@/navigation";
+import { usePathname } from "@/navigation/navigation";
 
 interface Props {
   children: ReactNode;

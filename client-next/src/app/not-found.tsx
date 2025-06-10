@@ -1,4 +1,4 @@
-import { redirect } from "@/navigation";
+import { redirect } from "@/navigation/navigation";
 
 export const dynamic = "force-dynamic";
 

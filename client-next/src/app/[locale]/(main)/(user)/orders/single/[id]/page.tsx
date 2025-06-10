@@ -1,4 +1,4 @@
-import { Locale } from "@/navigation";
+import { Locale } from "@/navigation/navigation";
 import { unstable_setRequestLocale } from "next-intl/server";
 import SingleOrderPageContent from "@/app/[locale]/(main)/(user)/orders/single/[id]/page-content";
 import { getSingleOrderPageContentTexts } from "@/texts/pages";

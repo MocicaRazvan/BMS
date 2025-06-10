@@ -26,7 +26,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@radix-ui/react-collapsible";
-import { Link } from "@/navigation";
+import { Link } from "@/navigation/navigation";
 import { useSidebarToggle } from "@/context/sidebar-toggle";
 
 type Submenu = {

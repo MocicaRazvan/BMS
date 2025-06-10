@@ -29,7 +29,7 @@ import {
 import { BaseError } from "@/types/responses";
 import { WithUser } from "@/lib/user";
 import { useDebounce } from "@/components/ui/multiple-selector";
-import { useRouter } from "@/navigation";
+import { useRouter } from "@/navigation/client-navigation";
 import { fetchStream } from "@/lib/fetchers/fetchStream";
 import { useStompClient, useSubscription } from "react-stomp-hooks";
 import { useParams, useSearchParams } from "next/navigation";

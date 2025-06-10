@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
 import { Inter as FontSans } from "next/font/google";
-import { Locale } from "@/navigation";
+import { Locale } from "@/navigation/navigation";
 import { ThemeProvider } from "@/providers/theme-provider";
 import { NextAuthSessionProvider } from "@/providers/session-provider";
 import { Toaster } from "@/components/ui/toaster";
@@ -26,6 +26,7 @@ import { UmamiAnalytics } from "@/lib/umami-analytics";
 import ArchiveNotificationsProvider from "@/context/archive-notifications-context";
 import { ReactNode } from "react";
 import { AbstractIntlMessages, NextIntlClientProvider } from "next-intl";
+import NextTopLoader from "nextjs-toploader";
 
 const fontSans = FontSans({
   subsets: ["latin"],
@@ -82,11 +83,9 @@ export default async function BaseLayout({
     <html lang={locale} suppressHydrationWarning>
       <UmamiAnalytics />
       <body
-        className={cn(
-          "bg-background font-sans antialiased ",
-          fontSans.variable,
-        )}
+        className={cn("bg-background font-sans antialiased", fontSans.variable)}
       >
+        <NextTopLoader showSpinner={false} height={2} crawlSpeed={150} />
         <NextIntlClientProvider
           messages={null as unknown as AbstractIntlMessages}
         >

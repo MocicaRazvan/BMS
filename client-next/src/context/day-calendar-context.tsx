@@ -21,7 +21,8 @@ import {
 } from "date-fns";
 import { CustomEntityModel, DayCalendarResponse } from "@/types/dto";
 import useFetchStream, { UseFetchStreamProps } from "@/hoooks/useFetchStream";
-import { usePathname, useRouter } from "@/navigation";
+import { usePathname } from "@/navigation/navigation";
+import { useRouter } from "@/navigation/client-navigation";
 import { useSearchParams } from "next/navigation";
 import { useAuthUserMinRole } from "@/context/auth-user-min-role-context";
 

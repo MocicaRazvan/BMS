@@ -1,7 +1,7 @@
 import { getTranslations, unstable_setRequestLocale } from "next-intl/server";
 
 import { getEmailSchemaTexts } from "@/types/forms";
-import { LocaleProps } from "@/navigation";
+import { LocaleProps } from "@/navigation/navigation";
 import ForgotPasswordPage from "@/app/[locale]/(main)/auth/forgot-password/page-content";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/auth-options";

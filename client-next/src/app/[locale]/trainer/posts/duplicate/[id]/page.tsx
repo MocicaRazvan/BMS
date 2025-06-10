@@ -1,4 +1,4 @@
-import { Locale } from "@/navigation";
+import { Locale } from "@/navigation/navigation";
 import { unstable_setRequestLocale } from "next-intl/server";
 import DuplicatePostPageContent from "@/app/[locale]/trainer/posts/duplicate/[id]/page-content";
 import { ThemeSwitchTexts } from "@/texts/components/nav";

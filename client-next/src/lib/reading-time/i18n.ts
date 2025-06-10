@@ -1,4 +1,4 @@
-import { Locale } from "@/navigation";
+import { Locale } from "@/navigation/navigation";
 
 export interface ReadingTimeText {
   default: string;

@@ -1,4 +1,4 @@
-import { Locale } from "@/navigation";
+import { Locale } from "@/navigation/navigation";
 import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
 import { ThemeSwitchTexts } from "@/texts/components/nav";
 import { DailySalesTexts } from "@/components/charts/daily-sales";

@@ -7,7 +7,8 @@ import {
   useMemo,
   useState,
 } from "react";
-import { usePathname, useRouter } from "@/navigation";
+import { usePathname } from "@/navigation/navigation";
+import { useRouter } from "@/navigation/client-navigation";
 import { useSearchParams } from "next/navigation";
 import {
   makeSortFetchParams,

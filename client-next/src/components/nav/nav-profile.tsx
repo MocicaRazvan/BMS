@@ -8,7 +8,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
-import { useRouter } from "@/navigation";
+import { Link } from "@/navigation/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import noImg from "../../../public/noImage.jpg";
@@ -21,7 +21,6 @@ interface Props extends WithUser {
 }
 
 export default function NavProfile({ authUser, dayCalendarCTATexts }: Props) {
-  const router = useRouter();
   return (
     <DropdownMenu modal={false}>
       <DropdownMenuTrigger asChild>
@@ -35,37 +34,36 @@ export default function NavProfile({ authUser, dayCalendarCTATexts }: Props) {
           </p>
         )}
       </DropdownMenuTrigger>
-      <DropdownMenuContent
-        className="cursor-pointer mt-3 z-10"
-        onClick={() => router.push(`/users/single/${authUser?.id}`)}
-      >
+      <DropdownMenuContent className="cursor-pointer mt-3 z-10">
         <DropdownMenuItem className="hover:!bg-background">
           <div className="flex flex-col items-center justify-center hover:bg-background">
-            <div className="flex items-center justify-center w-full gap-3 cursor-pointer">
-              <Avatar className="w-14 h-14 rounded-full">
-                <AvatarImage
-                  src={authUser?.image || noImg}
-                  alt={authUser?.email}
-                />
-              </Avatar>
-              <p className="text-lg font-bold max-w-[350px] truncate">
-                {authUser.email}
-              </p>
-              {authUser.role !== "ROLE_USER" && (
-                <Badge
-                  variant={
-                    authUser?.role === "ROLE_ADMIN"
-                      ? "destructive"
-                      : authUser?.role === "ROLE_TRAINER"
-                        ? "default"
-                        : "secondary"
-                  }
-                  className="text-sm "
-                >
-                  {authUser?.role.split("_")[1] || authUser?.role}
-                </Badge>
-              )}
-            </div>
+            <Link href={`/users/single/${authUser?.id}`} className="group">
+              <div className="flex items-center justify-center w-full gap-3 cursor-pointer">
+                <Avatar className="w-14 h-14 rounded-full">
+                  <AvatarImage
+                    src={authUser?.image || noImg}
+                    alt={authUser?.email}
+                  />
+                </Avatar>
+                <p className="text-lg font-bold max-w-[350px] truncate hover:underline group-hover:underline">
+                  {authUser.email}
+                </p>
+                {authUser.role !== "ROLE_USER" && (
+                  <Badge
+                    variant={
+                      authUser?.role === "ROLE_ADMIN"
+                        ? "destructive"
+                        : authUser?.role === "ROLE_TRAINER"
+                          ? "default"
+                          : "secondary"
+                    }
+                    className="text-sm "
+                  >
+                    {authUser?.role.split("_")[1] || authUser?.role}
+                  </Badge>
+                )}
+              </div>
+            </Link>
             <div className="mb-7 flex items-center justify-center">
               <DaysCalendarCTA
                 {...dayCalendarCTATexts}
@@ -74,7 +72,6 @@ export default function NavProfile({ authUser, dayCalendarCTATexts }: Props) {
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
-                  router.push("/daysCalendar");
                 }}
               />
             </div>
@@ -82,14 +79,10 @@ export default function NavProfile({ authUser, dayCalendarCTATexts }: Props) {
               <Button
                 size="lg"
                 onMouseOver={(e) => e.stopPropagation()}
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  router.push("/auth/signout");
-                }}
+                asChild
                 variant="destructive"
               >
-                {"SignOut"}
+                <Link href="/auth/signout">{"SignOut"}</Link>
               </Button>
             </div>
           </div>

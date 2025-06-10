@@ -1,5 +1,5 @@
 import { Copyright, MailIcon, PhoneIcon } from "lucide-react";
-import { Link } from "@/navigation";
+import { Link } from "@/navigation/navigation";
 import Logo from "@/components/logo/logo";
 import { getFooterTexts } from "@/texts/components/footer";
 

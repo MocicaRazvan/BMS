@@ -1,4 +1,4 @@
-import { Locale } from "@/navigation";
+import { Locale } from "@/navigation/navigation";
 import { unstable_setRequestLocale } from "next-intl/server";
 import SidebarContentLayout from "@/components/sidebar/sidebar-content-layout";
 import AdminDashboardPageContent from "@/app/[locale]/admin/dashboard/page-content";

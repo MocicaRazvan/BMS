@@ -18,7 +18,6 @@ import {
   PlanResponse,
   ResponseWithUserDtoEntity,
 } from "@/types/dto";
-import { useRouter } from "@/navigation";
 import { useCallback, useState } from "react";
 import { useFormatter } from "next-intl";
 import { AddToCartBtnTexts } from "@/components/plans/add-to-cart-btn";
@@ -64,7 +63,6 @@ export default function PlanApprovedPageContent({
 }: Props) {
   const { authUser } = useAuthUserMinRole();
 
-  const router = useRouter();
   const formatIntl = useFormatter();
   const { getSubscriptionPlanIds } = usePlansSubscription();
   const currentSearchParams = useSearchParams();
@@ -124,13 +122,11 @@ export default function PlanApprovedPageContent({
     <section className="w-full min-h-[calc(100vh-4rem)] transition-all py-5 px-4 max-w-[1300px] mx-auto ">
       <Heading title={title} header={header} />
       <GridList<PlanResponse>
-        onItemClick={({
+        itemLinkCallback={({
           model: {
             content: { id },
           },
-        }) => {
-          router.push(`/plans/single/${id}`);
-        }}
+        }) => `/plans/single/${id}`}
         sizeOptions={[6, 12, 18]}
         path="/plans/filtered/withUser"
         sortingOptions={options}

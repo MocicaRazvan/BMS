@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import { Beef, Newspaper, User2 } from "lucide-react";
-import { Link } from "@/navigation";
+import { Link } from "@/navigation/navigation";
 import { MagicCard } from "@/components/magicui/magic-card";
 import AnimatedShinyText from "@/components/magicui/animated-shiny-text";
 

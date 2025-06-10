@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
 import { unstable_setRequestLocale } from "next-intl/server";
-import { Locale } from "@/navigation";
+import { Locale } from "@/navigation/navigation";
 // import { getServerSession } from "next-auth";
 // import { authOptions } from "@/app/api/auth/[...nextauth]/auth-options";
 import DayCalendarProvider from "@/context/day-calendar-context";

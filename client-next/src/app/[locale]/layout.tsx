@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import "../globals.css";
-import { Locale, locales } from "@/navigation";
+import { Locale, locales } from "@/navigation/navigation";
 import { unstable_setRequestLocale } from "next-intl/server";
 import { getIntlMetadata } from "@/texts/metadata";
 import { ReactNode } from "react";

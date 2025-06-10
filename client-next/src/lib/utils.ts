@@ -8,7 +8,7 @@ import { Dispatch, ReactNode, SetStateAction } from "react";
 import { getTimezoneOffset, toZonedTime } from "date-fns-tz";
 import { formatDistanceToNow, isValid, parse } from "date-fns";
 import { enUS, Locale as DateFnsLocale, ro } from "date-fns/locale";
-import { Locale } from "@/navigation";
+import { Locale } from "@/navigation/navigation";
 import isEqual from "lodash.isequal";
 import { stripHtml } from "string-strip-html";
 import stringify from "safe-stable-stringify";

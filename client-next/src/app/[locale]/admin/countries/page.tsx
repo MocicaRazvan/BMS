@@ -1,11 +1,9 @@
 import { ThemeSwitchTexts } from "@/texts/components/nav";
 import GeographyChart from "@/components/charts/geography-chart";
-import { Locale } from "@/navigation";
+import { Locale } from "@/navigation/navigation";
 import { unstable_setRequestLocale } from "next-intl/server";
 import { getAdminCountriesTexts } from "@/texts/pages";
 import Heading from "@/components/common/heading";
-import LoadingSpinner from "@/components/common/loading-spinner";
-import { Suspense } from "react";
 import SidebarContentLayout from "@/components/sidebar/sidebar-content-layout";
 import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
 import { Metadata } from "next";
@@ -48,11 +46,9 @@ export default async function AdminCountries({ params: { locale } }: Props) {
     >
       <div className="w-full h-full bg-background">
         <Heading {...texts} />
-        <Suspense fallback={<LoadingSpinner />}>
-          <div className="mt-10 h-full pb-5">
-            <GeographyChart {...texts.geographyChartTexts} />
-          </div>
-        </Suspense>
+        <div className="mt-10 h-full pb-5">
+          <GeographyChart {...texts.geographyChartTexts} />
+        </div>
       </div>
     </SidebarContentLayout>
   );

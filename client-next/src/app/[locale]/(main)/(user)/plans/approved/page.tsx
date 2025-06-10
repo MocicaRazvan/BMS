@@ -5,7 +5,7 @@ import { sortingPlansSortingOptionsKeys } from "@/texts/components/list";
 import PlanApprovedPageContent from "@/app/[locale]/(main)/(user)/plans/approved/page-content";
 import { Metadata } from "next";
 import { getIntlMetadata } from "@/texts/metadata";
-import { LocaleProps } from "@/navigation";
+import { LocaleProps } from "@/navigation/navigation";
 
 export async function generateMetadata({
   params: { locale },

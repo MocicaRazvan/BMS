@@ -2,7 +2,7 @@
 import { DataTableTexts } from "@/components/table/data-table";
 import { ExtraTableProps } from "@/types/tables";
 import useList, { UseListProps } from "@/hoooks/useList";
-import { Link, useRouter } from "@/navigation";
+import { Link } from "@/navigation/navigation";
 import { useFormatter } from "next-intl";
 import { CustomEntityModel, OrderDtoWithAddress } from "@/types/dto";
 import React, { useCallback, useMemo, useState } from "react";
@@ -86,7 +86,6 @@ export default function OrdersTable({
 }: OrdersTableProps) {
   const { authUser } = useAuthUserMinRole();
 
-  const router = useRouter();
   const isAdmin = authUser?.role === "ROLE_ADMIN";
   const formatIntl = useFormatter();
   const [searchKey, setSearchKey] =
@@ -320,18 +319,16 @@ export default function OrdersTable({
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuLabel className="mb-3">{label}</DropdownMenuLabel>
-                <DropdownMenuItem
-                  className="cursor-pointer"
-                  onClick={() =>
-                    router.push(
-                      //todo make for trainer_ also
+                <DropdownMenuItem className="cursor-pointer" asChild>
+                  <Link
+                    href={
                       forWhom === "admin"
                         ? `/admin/orders/single/${row.original.order.id}`
-                        : `/orders/single/${row.original.order.id}`,
-                    )
-                  }
-                >
-                  {view}
+                        : `/orders/single/${row.original.order.id}`
+                    }
+                  >
+                    {view}
+                  </Link>
                 </DropdownMenuItem>
                 {isAdmin && forWhom === "admin" && (
                   <>
@@ -375,7 +372,6 @@ export default function OrdersTable({
       orderTableColumnsTexts.id,
       orderTableColumnsTexts.plans,
       orderTableColumnsTexts.total,
-      router,
       radioArgs,
       updateCreatedAtRange,
       resetCurrentPage,

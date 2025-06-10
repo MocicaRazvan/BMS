@@ -1,4 +1,4 @@
-import { Locale } from "@/navigation";
+import { Locale } from "@/navigation/navigation";
 import { unstable_setRequestLocale } from "next-intl/server";
 import ChatRooms from "@/components/chat/chat-rooms";
 import { getUser } from "@/lib/user";

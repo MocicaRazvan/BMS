@@ -4,7 +4,7 @@ import React, { memo, useCallback, useEffect, useRef, useState } from "react";
 import { Command } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { useRouter } from "@/navigation";
+import { useRouter } from "@/navigation/client-navigation";
 import { isDeepEqual } from "@/lib/utils";
 import {
   FindInSiteContentBaseProps,

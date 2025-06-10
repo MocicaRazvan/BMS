@@ -3,7 +3,7 @@ import { ResponseWithUserDtoEntity, TitleBodyUserDto } from "@/types/dto";
 import { useParams } from "next/navigation";
 import useFetchStream from "@/hoooks/useFetchStream";
 import { BaseError } from "@/types/responses";
-import { useRouter } from "@/navigation";
+import { useRouter } from "@/navigation/client-navigation";
 import { WithUser } from "@/lib/user";
 
 interface Args extends WithUser {

@@ -1,7 +1,7 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { signOut } from "next-auth/react";
-import { Locale, useRouter } from "@/navigation";
+import { Locale } from "@/navigation/navigation";
 
 interface SignOutText {
   questionText: string;
@@ -17,8 +17,6 @@ export default function SignOut({
   buttonSignIn,
   locale,
 }: Props) {
-  const router = useRouter();
-
   return (
     <main className="w-full min-h-[calc(100vh-4rem)] flex items-center justify-center transition-all">
       <div className="border p-10 rounded-xl flex justify-center items-center flex-col gap-10">
@@ -33,11 +31,7 @@ export default function SignOut({
             if (window && window?.localStorage) {
               window.localStorage.clear();
             }
-            signOut({ redirect: true, callbackUrl: "/auth/signin" }).then(
-              () => {
-                router.push("/auth/signin");
-              },
-            );
+            signOut({ redirect: true, callbackUrl: "/auth/signin" });
           }}
         >
           {buttonSignOut}

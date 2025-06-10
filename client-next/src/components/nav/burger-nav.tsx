@@ -12,7 +12,7 @@ import { Home, LogOut, Menu } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Session } from "next-auth";
 import { isDeepEqual } from "@/lib/utils";
-import { Link, usePathname } from "@/navigation";
+import { Link, usePathname } from "@/navigation/navigation";
 import { NavTexts } from "@/components/nav/nav";
 import { NavButtonGroup, NavItem } from "@/components/nav/nav-button";
 import ActiveLink from "@/components/nav/active-link";

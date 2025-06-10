@@ -1,7 +1,7 @@
 import { ReactNode } from "react";
 import { getUserWithMinRole } from "@/lib/user";
 import { unstable_setRequestLocale } from "next-intl/server";
-import { Locale } from "@/navigation";
+import { Locale } from "@/navigation/navigation";
 import { getSidebarLayoutTexts } from "@/texts/components/sidebar";
 import { SidebarToggleProvider } from "@/context/sidebar-toggle";
 import {

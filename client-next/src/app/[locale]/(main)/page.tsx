@@ -1,4 +1,4 @@
-import { Locale } from "@/navigation";
+import { Locale } from "@/navigation/navigation";
 import { unstable_setRequestLocale } from "next-intl/server";
 import { HomeHeaderTexts } from "@/components/home/home-header";
 import { getHomeTexts } from "@/texts/pages";

@@ -2,7 +2,7 @@
 
 import { RegisterType } from "@/types/forms";
 import { BaseError } from "@/types/responses";
-import { redirect } from "@/navigation";
+import { redirect } from "@/navigation/navigation";
 import { emitInfo } from "@/logger";
 import { getCsrfNextAuthHeader } from "@/actions/get-csr-next-auth";
 import fetchFactory from "@/lib/fetchers/fetchWithRetry";

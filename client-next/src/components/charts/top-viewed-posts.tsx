@@ -16,7 +16,7 @@ import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Loader from "@/components/ui/spinner";
 import { WithUser } from "@/lib/user";
-import { Link, Locale } from "@/navigation";
+import { Link, Locale } from "@/navigation/navigation";
 import { TopRankBadge } from "@/components/charts/top-chart-wrapper";
 import { useFormatter, useLocale } from "next-intl";
 import {

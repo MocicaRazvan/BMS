@@ -9,7 +9,7 @@ import {
 import { Role } from "@/types/fetch-utils";
 import { shouldRenderLink } from "@/components/nav/links";
 import { SheetClose } from "@/components/ui/sheet";
-import { Link } from "@/navigation";
+import { Link } from "@/navigation/navigation";
 
 interface Props extends LinksProps {
   title: string;

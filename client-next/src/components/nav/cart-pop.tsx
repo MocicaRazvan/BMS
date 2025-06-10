@@ -16,7 +16,8 @@ import { ScrollArea } from "../ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { useToast } from "../ui/use-toast";
 import { ToastAction } from "../ui/toast";
-import { Link, useRouter } from "@/navigation";
+import { Link } from "@/navigation/navigation";
+import { useRouter } from "@/navigation/client-navigation";
 import { WithUser } from "@/lib/user";
 import { useFormatter } from "next-intl";
 import {

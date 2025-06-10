@@ -1,5 +1,5 @@
 import { unstable_setRequestLocale } from "next-intl/server";
-import { Locale } from "@/navigation";
+import { Locale } from "@/navigation/navigation";
 import IngredientsTable, {
   IngredientTableTexts,
 } from "@/components/table/ingredients-table";

@@ -13,7 +13,7 @@ import { checkOwnerOrAdmin, isSuccessCheckReturn } from "@/lib/utils";
 import LoadingSpinner from "@/components/common/loading-spinner";
 import React, { useEffect, useState } from "react";
 import { fetchStream } from "@/lib/fetchers/fetchStream";
-import { Link } from "@/navigation";
+import { Link } from "@/navigation/navigation";
 import { Button } from "@/components/ui/button";
 
 import { Card } from "@/components/ui/card";

@@ -12,7 +12,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import ArchiveQueueCards, {
   ArchiveQueueCardsTexts,
 } from "@/components/archive/archive-queue-card";
-import { Locale } from "@/navigation";
+import { Locale } from "@/navigation/navigation";
 import { isDeepEqual } from "@/lib/utils";
 
 const augmentedArchiveQueuePrefixes = ["all" as const, ...archiveQueuePrefixes];

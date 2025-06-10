@@ -1,7 +1,7 @@
 import { RecipeTableTexts } from "@/components/table/recipes-table";
 import { getSortingOptions, SortingOptionsTexts } from "@/types/constants";
 import { ThemeSwitchTexts } from "@/texts/components/nav";
-import { Locale } from "@/navigation";
+import { Locale } from "@/navigation/navigation";
 import { unstable_setRequestLocale } from "next-intl/server";
 import { getUserRecipesAdminPageTexts } from "@/texts/pages";
 import { sortingRecipesSortingOptionsKeys } from "@/texts/components/list";

@@ -1,5 +1,5 @@
 import { ComponentProps, FC, ReactNode } from "react";
-import { Link } from "@/navigation";
+import { Link } from "@/navigation/navigation";
 import { cn } from "@/lib/utils";
 
 interface ActiveLinkProps extends ComponentProps<typeof Link> {

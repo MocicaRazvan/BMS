@@ -1,4 +1,4 @@
-import { Locale } from "@/navigation";
+import { Locale } from "@/navigation/navigation";
 import { ThemeSwitchTexts } from "@/texts/components/nav";
 import { unstable_setRequestLocale } from "next-intl/server";
 import { getAdminDailySalesTexts } from "@/texts/pages";

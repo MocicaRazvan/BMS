@@ -1,4 +1,4 @@
-import { Locale } from "@/navigation";
+import { Locale } from "@/navigation/navigation";
 import { unstable_setRequestLocale } from "next-intl/server";
 import { getPostFormTexts } from "@/texts/components/forms";
 import UpdatePostPageContent from "@/app/[locale]/trainer/posts/update/[id]/page-content";

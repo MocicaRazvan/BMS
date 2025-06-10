@@ -1,7 +1,7 @@
 import { PlanReposeWithSimilarity } from "@/types/dto";
 import PlanType from "@/components/plans/plan-type";
 import { useFormatter } from "next-intl";
-import { Link } from "@/navigation";
+import { Link } from "@/navigation/navigation";
 
 export interface PlanItemRendererTexts {
   objective: string;

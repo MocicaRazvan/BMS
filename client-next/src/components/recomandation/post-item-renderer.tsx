@@ -1,5 +1,5 @@
 import { PostReposeWithSimilarity } from "@/types/dto";
-import { Link } from "@/navigation";
+import { Link } from "@/navigation/navigation";
 
 export interface PostItemRendererTexts {
   likes: string;

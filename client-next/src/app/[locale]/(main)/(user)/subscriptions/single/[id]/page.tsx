@@ -1,4 +1,4 @@
-import { Locale } from "@/navigation";
+import { Locale } from "@/navigation/navigation";
 import SingleSubscriptionPageContent from "@/app/[locale]/(main)/(user)/subscriptions/single/[id]/page-content";
 import { unstable_setRequestLocale } from "next-intl/server";
 import { getSingleSubscriptionTexts } from "@/texts/pages";

@@ -1,4 +1,4 @@
-import { Locale } from "@/navigation";
+import { Locale } from "@/navigation/navigation";
 import { unstable_setRequestLocale } from "next-intl/server";
 import UserPageContent from "@/app/[locale]/(main)/(user)/users/single/[id]/page-content";
 import { getUserPageTexts } from "@/texts/pages";

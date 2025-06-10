@@ -1,5 +1,5 @@
 import OrderCompletePageContent from "@/app/[locale]/(main)/(user)/orderComplete/page-content";
-import { Link, LocaleProps } from "@/navigation";
+import { Link, LocaleProps } from "@/navigation/navigation";
 import { Button } from "@/components/ui/button";
 import { unstable_setRequestLocale } from "next-intl/server";
 import { getOrderCompletePageTexts } from "@/texts/pages";

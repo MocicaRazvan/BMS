@@ -11,7 +11,7 @@ import { getAdminAIPostsCreate } from "@/texts/pages";
 import AdminAIPostsCreateContent, {
   AdminAIPostsCreateContentTexts,
 } from "@/app/[locale]/admin/posts/aiCreate/page-content";
-import { LocaleProps } from "@/navigation";
+import { LocaleProps } from "@/navigation/navigation";
 import { FindInSiteTexts } from "@/components/nav/find-in-site-content";
 
 export async function generateMetadata({

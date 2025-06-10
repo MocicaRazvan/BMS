@@ -1,6 +1,6 @@
 import { OrderTableTexts } from "@/components/table/orders-table";
 import { getSortingOptions, SortingOptionsTexts } from "@/types/constants";
-import { LocaleProps } from "@/navigation";
+import { LocaleProps } from "@/navigation/navigation";
 import { unstable_setRequestLocale } from "next-intl/server";
 import { getUserOrdersPageTexts } from "@/texts/pages";
 import { sortingOrdersSortingOptionsKeys } from "@/texts/components/list";

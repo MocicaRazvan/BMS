@@ -1,4 +1,4 @@
-import { Locale } from "@/navigation";
+import { Locale } from "@/navigation/navigation";
 import { unstable_setRequestLocale } from "next-intl/server";
 import UpdateDayPageContent from "@/app/[locale]/trainer/days/update/[id]/page-content";
 import { DayFromTexts } from "@/components/forms/day-form";

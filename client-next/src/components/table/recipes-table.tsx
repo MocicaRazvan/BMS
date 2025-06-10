@@ -14,7 +14,7 @@ import useBinaryFilter, {
   RadioBinaryCriteriaWithCallback,
 } from "@/components/list/useBinaryFilter";
 import { dietTypes } from "@/types/forms";
-import { Link, useRouter } from "@/navigation";
+import { Link } from "@/navigation/navigation";
 import {
   CustomEntityModel,
   RecipeResponse,
@@ -132,7 +132,6 @@ export default function RecipeTable({
 
   const { navigateToNotFound } = useClientNotFound();
 
-  const router = useRouter();
   const isAdmin = authUser?.role === "ROLE_ADMIN";
 
   const {
@@ -454,17 +453,16 @@ export default function RecipeTable({
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuLabel className="mb-3">{label}</DropdownMenuLabel>
-                <DropdownMenuItem
-                  className="cursor-pointer"
-                  onClick={() =>
-                    router.push(
+                <DropdownMenuItem className="cursor-pointer">
+                  <Link
+                    href={
                       forWhom === "trainer"
                         ? `/trainer/recipes/single/${row.original.model.id}`
-                        : `/admin/recipes/single/${row.original.model.id}`,
-                    )
-                  }
-                >
-                  {view}
+                        : `/admin/recipes/single/${row.original.model.id}`
+                    }
+                  >
+                    {view}
+                  </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 {!(forWhom === "trainer") && (
@@ -588,7 +586,6 @@ export default function RecipeTable({
       authUser,
       refetch,
       isAdmin,
-      router,
     ],
   );
 

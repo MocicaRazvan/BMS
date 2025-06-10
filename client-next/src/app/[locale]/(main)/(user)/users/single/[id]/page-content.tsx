@@ -15,11 +15,12 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Loader2 } from "lucide-react";
 import { fetchStream } from "@/lib/fetchers/fetchStream";
-import { useRouter } from "@/navigation";
+import { Link } from "@/navigation/navigation";
+import { useRouter } from "@/navigation/client-navigation";
 import { UpdateProfileTexts } from "@/texts/components/forms";
 import { useStompClient } from "react-stomp-hooks";
 import useClientNotFound from "@/hoooks/useClientNotFound";
@@ -170,6 +171,13 @@ export default function UserPageContent({
     },
     [stompClient?.connected, authUser, router],
   );
+
+  useEffect(() => {
+    const isOwner = authUser?.email === messages[0]?.content?.email;
+    if (!isOwner) {
+      router.prefetch("/chat");
+    }
+  }, [messages.length, router]);
 
   usePreloadDynamicComponents(
     DynamicUpdateProfile,
@@ -322,11 +330,8 @@ export default function UserPageContent({
         )}
         {isOwner && user.provider === "LOCAL" && (
           <div className="w-full flex items-center justify-center">
-            <Button
-              size="lg"
-              onClick={() => router.push("/auth/forgot-password")}
-            >
-              {changePassword}
+            <Button size="lg" asChild>
+              <Link href="/auth/forgot-password">{changePassword}</Link>
             </Button>
           </div>
         )}

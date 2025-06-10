@@ -17,7 +17,7 @@ import { Button } from "@/components/ui/button";
 import { fetchStream } from "@/lib/fetchers/fetchStream";
 import { motion } from "framer-motion";
 import { Check, RefreshCw, XIcon } from "lucide-react";
-import { Locale } from "@/navigation";
+import { Locale } from "@/navigation/navigation";
 import { parseISO } from "date-fns";
 import { cn, isDeepEqual } from "@/lib/utils";
 import {

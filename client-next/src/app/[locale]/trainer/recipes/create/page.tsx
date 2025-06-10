@@ -1,4 +1,4 @@
-import { Locale } from "@/navigation";
+import { Locale } from "@/navigation/navigation";
 import { unstable_setRequestLocale } from "next-intl/server";
 import { getRecipeFormTexts } from "@/texts/components/forms";
 import RecipeForm from "@/components/forms/recipe-form";

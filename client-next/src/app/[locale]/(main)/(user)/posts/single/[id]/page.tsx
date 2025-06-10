@@ -1,6 +1,6 @@
 import { getSinglePostPageTexts } from "@/texts/pages";
 import SinglePostPageContent from "@/app/[locale]/(main)/(user)/posts/single/[id]/page-content";
-import { Locale } from "@/navigation";
+import { Locale } from "@/navigation/navigation";
 import { unstable_setRequestLocale } from "next-intl/server";
 import { Metadata } from "next";
 import { getIntlMetadata } from "@/texts/metadata";

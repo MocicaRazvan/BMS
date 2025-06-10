@@ -32,7 +32,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { MoreHorizontal } from "lucide-react";
-import { useRouter } from "@/navigation";
+import { Link } from "@/navigation/navigation";
 import { ColumnActionsTexts } from "@/texts/components/table";
 import ToggleDisplayIngredient from "@/components/dialogs/ingredients/ingredient-toggle-display";
 import AlertDialogDeleteIngredient from "@/components/dialogs/ingredients/delete-ingredient";
@@ -125,7 +125,6 @@ export default function IngredientsTable({
 }: IngredientTableProps) {
   const { authUser } = useAuthUserMinRole();
 
-  const router = useRouter();
   const isAdmin = authUser?.role === "ROLE_ADMIN";
   const {
     field,
@@ -522,39 +521,30 @@ export default function IngredientsTable({
                     <DropdownMenuLabel className="mb-3">
                       {label}
                     </DropdownMenuLabel>
-                    <DropdownMenuItem
-                      className="cursor-pointer"
-                      onClick={() =>
-                        router.push(
-                          `/admin/ingredients/single/${ing.ingredient.id}`,
-                        )
-                      }
-                    >
-                      {viewIngredient}
+                    <DropdownMenuItem className="cursor-pointer" asChild>
+                      <Link
+                        href={`/admin/ingredients/single/${ing.ingredient.id}`}
+                      >
+                        {viewIngredient}
+                      </Link>
                     </DropdownMenuItem>
                     {isAdmin && (
                       <>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem
-                          className="cursor-pointer"
-                          onClick={() =>
-                            router.push(
-                              `/admin/ingredients/update/${ing.ingredient.id}`,
-                            )
-                          }
-                        >
-                          {updateIngredient}
+                        <DropdownMenuItem className="cursor-pointer" asChild>
+                          <Link
+                            href={`/admin/ingredients/update/${ing.ingredient.id}`}
+                          >
+                            {updateIngredient}
+                          </Link>
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem
-                          className="cursor-pointer"
-                          onClick={() =>
-                            router.push(
-                              `/admin/ingredients/duplicate/${ing.ingredient.id}`,
-                            )
-                          }
-                        >
-                          {duplicate}
+                        <DropdownMenuItem className="cursor-pointer" asChild>
+                          <Link
+                            href={`/admin/ingredients/duplicate/${ing.ingredient.id}`}
+                          >
+                            {duplicate}
+                          </Link>
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
@@ -594,16 +584,12 @@ export default function IngredientsTable({
         : {
             id: "actions",
             cell: ({ row }) => (
-              <Button
-                variant="default"
-                size={"sm"}
-                onClick={() =>
-                  router.push(
-                    `/trainer/ingredients/single/${row.original.model.ingredient.id}`,
-                  )
-                }
-              >
-                {ingredientTableColumnTexts.actions.viewIngredient}
+              <Button variant="default" size="sm" asChild>
+                <Link
+                  href={`/trainer/ingredients/single/${row.original.model.ingredient.id}`}
+                >
+                  {ingredientTableColumnTexts.actions.viewIngredient}
+                </Link>
               </Button>
             ),
           },
@@ -635,7 +621,6 @@ export default function IngredientsTable({
       isAdmin,
       refetch,
       authUser,
-      router,
     ],
   );
 

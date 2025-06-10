@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 import { getIntlMetadata } from "@/texts/metadata";
-import { Locale, LocaleProps } from "@/navigation";
+import { Locale, LocaleProps } from "@/navigation/navigation";
 import CalculatorPageContent from "@/app/[locale]/(main)/calculator/page-content";
 import {
   ActivitiesTexts,

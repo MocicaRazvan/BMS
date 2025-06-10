@@ -14,7 +14,7 @@ import useFilterDropdown, {
 } from "@/components/list/useFilterDropdown";
 import { ExtraTableProps } from "@/types/tables";
 import useList, { UseListProps } from "@/hoooks/useList";
-import { Link, useRouter } from "@/navigation";
+import { Link } from "@/navigation/navigation";
 import { dietTypes } from "@/types/forms";
 import {
   CustomEntityModel,
@@ -135,7 +135,6 @@ export default function PlansTable({
 }: PlanTableProps) {
   const { authUser } = useAuthUserMinRole();
 
-  const router = useRouter();
   const isAdmin = authUser?.role === "ROLE_ADMIN";
   const formatIntl = useFormatter();
   const { navigateToNotFound } = useClientNotFound();
@@ -576,17 +575,16 @@ export default function PlansTable({
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuLabel className="mb-3">{label}</DropdownMenuLabel>
-                <DropdownMenuItem
-                  className="cursor-pointer"
-                  onClick={() =>
-                    router.push(
+                <DropdownMenuItem className="cursor-pointer" asChild>
+                  <Link
+                    href={
                       forWhom === "trainer"
                         ? `/trainer/plans/single/${row.original.model.id}`
-                        : `/admin/plans/single/${row.original.model.id}`,
-                    )
-                  }
-                >
-                  {view}
+                        : `/admin/plans/single/${row.original.model.id}`
+                    }
+                  >
+                    {view}
+                  </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 {!(forWhom === "trainer") && (
@@ -736,7 +734,6 @@ export default function PlansTable({
       authUser,
       refetch,
       isAdmin,
-      router,
     ],
   );
   const finalCols = useMemo(

@@ -2,7 +2,7 @@ import { unstable_setRequestLocale } from "next-intl/server";
 import { getTermsOfServiceTexts, terms } from "@/texts/pages";
 import { Metadata } from "next";
 import { getIntlMetadata } from "@/texts/metadata";
-import { LocaleProps } from "@/navigation";
+import { LocaleProps } from "@/navigation/navigation";
 
 export interface TermsOfServiceTexts {
   title: string;

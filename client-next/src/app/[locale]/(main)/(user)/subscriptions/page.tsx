@@ -5,7 +5,7 @@ import { getSortingOptions } from "@/types/constants";
 import { sortingPlansSortingOptionsKeys } from "@/texts/components/list";
 import { Metadata } from "next";
 import { getIntlMetadata } from "@/texts/metadata";
-import { LocaleProps } from "@/navigation";
+import { LocaleProps } from "@/navigation/navigation";
 
 export async function generateMetadata({
   params: { locale },

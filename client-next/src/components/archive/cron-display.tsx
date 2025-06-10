@@ -3,7 +3,7 @@ import cronstrue from "cronstrue";
 import "cronstrue/locales/ro";
 import "cronstrue/locales/en";
 import convert from "cron-timezone-converter";
-import { Locale } from "@/navigation";
+import { Locale } from "@/navigation/navigation";
 
 export default function CronDisplay({
   cronExpression,

@@ -1,7 +1,7 @@
 import SingeRecipePageContent, {
   SingleRecipePageTexts,
 } from "@/app/[locale]/trainer/recipes/single/[id]/page-content";
-import { Locale } from "@/navigation";
+import { Locale } from "@/navigation/navigation";
 import { unstable_setRequestLocale } from "next-intl/server";
 import { getTrainerSingleRecipePageTexts } from "@/texts/pages";
 import { Metadata } from "next";

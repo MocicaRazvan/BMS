@@ -1,4 +1,4 @@
-import { LocaleProps, redirect } from "@/navigation";
+import { LocaleProps, redirect } from "@/navigation/navigation";
 import { RedirectType } from "next/navigation";
 import { unstable_setRequestLocale } from "next-intl/server";
 

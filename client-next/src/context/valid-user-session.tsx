@@ -2,7 +2,7 @@
 
 import { signOut, useSession } from "next-auth/react";
 import { ReactNode, useEffect } from "react";
-import { useRouter } from "@/navigation";
+import { useRouter } from "@/navigation/client-navigation";
 import { fetchStream } from "@/lib/fetchers/fetchStream";
 
 export default function ValidUserSessionContext({

@@ -1,6 +1,6 @@
 import { getCartPopsTexts, getNavTexts } from "@/texts/components/nav";
 import Nav from "@/components/nav/nav";
-import { Locale } from "@/navigation";
+import { Locale } from "@/navigation/navigation";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/auth-options";
 import { getMetadataValues } from "@/texts/metadata";

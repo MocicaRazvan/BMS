@@ -4,7 +4,7 @@ import {
   DateRangePicker,
   DateRangePickerTexts,
 } from "@/components/ui/date-range-picker";
-import { Locale } from "@/navigation";
+import { Locale } from "@/navigation/navigation";
 import React, { ReactNode, useMemo, useState } from "react";
 import useFetchStream from "@/hoooks/useFetchStream";
 import { format, subMonths } from "date-fns";

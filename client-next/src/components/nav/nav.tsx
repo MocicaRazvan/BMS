@@ -1,7 +1,7 @@
 "use client";
 
 import { useSession } from "next-auth/react";
-import { Link, usePathname } from "@/navigation";
+import { Link, usePathname } from "@/navigation/navigation";
 import { ModeToggle } from "@/components/nav/theme-switch";
 import { LocaleSwitcher } from "@/components/i18n/LocaleSwitcher";
 import { ThemeSwitchTexts } from "@/texts/components/nav";
@@ -24,6 +24,7 @@ import {
   FindInSiteTexts,
   MetadataValue,
 } from "@/components/nav/find-in-site-content";
+import { useMedia } from "react-use";
 
 export interface NavTexts {
   themeSwitchTexts: ThemeSwitchTexts;
@@ -72,6 +73,7 @@ export default function Nav({
   const isTrainer = authUser?.role === "ROLE_TRAINER";
   const isAdmin = authUser?.role === "ROLE_ADMIN";
   const isAdminOrTrainer = isAdmin || isTrainer;
+  const isLGXL = useMedia("(min-width: 1485px)", false);
 
   const baseLinks: NavItem[] = useMemo(
     () => [
@@ -267,7 +269,12 @@ export default function Nav({
           )}
         </div>
         <div className="mx-auto  md:mr-1 flex items-center justify-center gap-6 md:gap-3 mt-2 sm:mt-0">
-          <FindInSite texts={findInSiteTexts} metadataValues={metadataValues} />
+          {isLGXL && (
+            <FindInSite
+              texts={findInSiteTexts}
+              metadataValues={metadataValues}
+            />
+          )}
           {authUser && (
             <>
               <NavProfile
@@ -306,10 +313,12 @@ export default function Nav({
         />
         <div className="flex items-center justify-center gap-5 ">
           <div className="mx-auto  md:mr-1 flex items-center justify-center gap-6 md:gap-3 mt-2 sm:mt-0">
-            <FindInSite
-              texts={findInSiteTexts}
-              metadataValues={metadataValues}
-            />
+            {!isLGXL && (
+              <FindInSite
+                texts={findInSiteTexts}
+                metadataValues={metadataValues}
+              />
+            )}
           </div>
           {authUser && (
             <>

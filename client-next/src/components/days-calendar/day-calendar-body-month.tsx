@@ -18,7 +18,7 @@ import CalendarDayForm, {
   CalendarDayFormTexts,
 } from "@/components/forms/calendar-day-form";
 import { Button } from "@/components/ui/button";
-import { Locale } from "@/navigation";
+import { Locale } from "@/navigation/navigation";
 import { useLocale } from "next-intl";
 import DayCalendarStatsWrapper, {
   DayCalendarStatsWrapperTexts,

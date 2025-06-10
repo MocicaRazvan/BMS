@@ -14,7 +14,7 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { Link, usePathname } from "@/navigation";
+import { Link, usePathname } from "@/navigation/navigation";
 import { ClassValue } from "clsx";
 import { v4 as uuidv4 } from "uuid";
 

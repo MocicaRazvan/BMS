@@ -2,7 +2,7 @@
 
 import { useMemo, useRef } from "react";
 import { ChatRoomResponseJoined, JoinedConversationUser } from "@/types/dto";
-import { useRouter } from "@/navigation";
+import { Link } from "@/navigation/navigation";
 import { cn, truncate } from "@/lib/utils";
 import SearchInput from "@/components/forms/input-serach";
 import {
@@ -53,7 +53,6 @@ export default function ChatRooms({
     pageInfo,
     setPageInfo,
   } = useCurRooms();
-  const router = useRouter();
   if (isFinished && error) {
     return (
       <div className="w-full h-full p-20 flex items-center justify-center">
@@ -64,13 +63,10 @@ export default function ChatRooms({
   return (
     <div className="flex flex-col items-center justify-between gap-10 flex-1 h-full">
       <div className="pt-2 border-b">
-        <Button
-          variant="link"
-          onClick={() => {
-            router.push("/chat");
-          }}
-        >
-          <h1 className="text-xl font-bold">{headerText}</h1>
+        <Button variant="link" asChild>
+          <Link href="/chat">
+            <h1 className="text-xl font-bold">{headerText}</h1>
+          </Link>
         </Button>
       </div>
 

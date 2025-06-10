@@ -1,5 +1,5 @@
 import { ReactNode } from "react";
-import { Locale } from "@/navigation";
+import { Locale } from "@/navigation/navigation";
 import { unstable_setRequestLocale } from "next-intl/server";
 
 export default function AuthLayout({

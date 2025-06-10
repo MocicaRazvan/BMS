@@ -7,7 +7,8 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Link, useRouter } from "@/navigation";
+import { Link } from "@/navigation/navigation";
+import { useRouter } from "@/navigation/client-navigation";
 import { ArrowDown, ArrowUp } from "lucide-react";
 import React, {
   Dispatch,
@@ -22,6 +23,7 @@ import { useDebounceWithCallBack } from "@/hoooks/useDebounceWithCallback";
 import { IntlMetadata } from "@/texts/metadata";
 import { Role } from "@/types/fetch-utils";
 import { cn } from "@/lib/utils";
+import { PrefetchKind } from "next/dist/client/components/router-reducer/router-reducer-types";
 
 const CUTOFF = 0.35;
 const TITLE_WEIGHT = 0.7;
@@ -155,7 +157,9 @@ export default function FindInSiteContent({
     (idx: number) => {
       const hit = results[idx];
       if (hit) {
-        router.prefetch(hit.path);
+        router.prefetch(hit.path, {
+          kind: PrefetchKind.FULL,
+        });
       }
     },
     [results, router],

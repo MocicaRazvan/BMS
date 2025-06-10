@@ -1,7 +1,7 @@
 "use client";
 import { ReactNode, useEffect } from "react";
 import { useAuthUserMinRole } from "@/context/auth-user-min-role-context";
-import { useRouter } from "@/navigation";
+import { useRouter } from "@/navigation/client-navigation";
 import { wrapItemToString } from "@/lib/utils";
 
 export default function IsTheSameUserOrAdmin({

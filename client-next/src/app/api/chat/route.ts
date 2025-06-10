@@ -26,7 +26,7 @@ import { getMultiQueryRetriever } from "@/lib/langchain/langhcain-multi-query-re
 import { LLMChain } from "langchain/chains";
 import { getToolsForInput } from "@/app/api/chat/tool-call-wrapper";
 import { generateToolsForUser } from "@/app/api/chat/get-item-tool";
-import { Locale } from "@/navigation";
+import { Locale } from "@/navigation/navigation";
 import { PrivilegedRetriever } from "@/lib/langchain/privileged-documents-retriever";
 import { emitInfo } from "@/logger";
 import { getOllamaArgs } from "@/lib/langchain/ollama-utils";

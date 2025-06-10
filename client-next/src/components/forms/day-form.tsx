@@ -60,7 +60,6 @@ import { determineMostRestrictiveDiet, handleBaseError } from "@/lib/utils";
 import ErrorMessage from "@/components/forms/error-message";
 import { fetchStream } from "@/lib/fetchers/fetchStream";
 import { toast } from "@/components/ui/use-toast";
-import { useRouter } from "@/navigation";
 import { AiIdeasField } from "@/types/ai-ideas-types";
 import useBaseAICallbackTitleBody from "@/hoooks/useBaseAICallbackTitleBody";
 import { useNavigationGuardI18nForm } from "@/hoooks/use-navigation-guard-i18n-form";
@@ -128,8 +127,6 @@ export default function DayForm({
 }: DayFormProps) {
   const { authUser } = useAuthUserMinRole();
 
-  const router = useRouter();
-
   const initialCurrentMeals = useMemo(
     () =>
       initialData
@@ -188,7 +185,7 @@ export default function DayForm({
     return values.length > 0 && values.includes(true);
   }, [isMealCompletedButNotSubmitted]);
 
-  const { isLoading, setIsLoading, errorMsg, setErrorMsg } =
+  const { isLoading, setIsLoading, errorMsg, setErrorMsg, router } =
     useLoadingErrorState();
 
   const form = useForm<DaySchemaType>({

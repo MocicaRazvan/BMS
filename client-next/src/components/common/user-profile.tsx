@@ -2,7 +2,7 @@ import { Card, CardContent } from "../ui/card";
 import { Session } from "next-auth";
 import { Avatar, AvatarImage } from "../ui/avatar";
 import { Badge } from "../ui/badge";
-import { Link } from "@/navigation";
+import { Link } from "@/navigation/navigation";
 
 interface Props {
   user: Session["user"];

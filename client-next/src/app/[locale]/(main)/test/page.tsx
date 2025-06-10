@@ -1,4 +1,4 @@
-import { Locale } from "@/navigation";
+import { Locale } from "@/navigation/navigation";
 import React, { Suspense } from "react";
 
 import TestPageContent from "./page-content";

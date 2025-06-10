@@ -3,7 +3,7 @@ import { memo, useState } from "react";
 import LikesDislikes from "@/components/common/likes-dislikes";
 import AlertDialogDeleteComment from "@/components/dialogs/comments/delete-comment";
 import { Trash2 } from "lucide-react";
-import { Link } from "@/navigation";
+import { Link } from "@/navigation/navigation";
 import ProseText from "@/components/common/prose-text";
 import { CommentResponse } from "@/types/dto";
 import { WithUser } from "@/lib/user";

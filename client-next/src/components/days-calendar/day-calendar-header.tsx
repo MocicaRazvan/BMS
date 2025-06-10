@@ -5,7 +5,7 @@ import { addMonths, format, isSameMonth, subMonths } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useLocale } from "next-intl";
-import { Locale } from "@/navigation";
+import { Locale } from "@/navigation/navigation";
 import { dateFnsLocaleMapper } from "@/lib/utils";
 import { getColorsByDayType } from "@/types/constants";
 

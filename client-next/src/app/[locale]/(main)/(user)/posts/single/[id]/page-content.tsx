@@ -28,7 +28,7 @@ import ItemBodyQa from "@/components/common/item-body-qa";
 import useTrackItemView from "@/hoooks/use-track-item-view";
 import useFetchStream from "@/hoooks/useFetchStream";
 import { useLocale } from "next-intl";
-import { Locale } from "@/navigation";
+import { Locale } from "@/navigation/navigation";
 import { useAuthUserMinRole } from "@/context/auth-user-min-role-context";
 import { estimateReadingTime } from "@/lib/reading-time/estimator";
 

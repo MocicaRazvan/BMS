@@ -1,5 +1,5 @@
 import { getTranslations } from "next-intl/server";
-import { Locale, locales } from "@/navigation";
+import { Locale, locales } from "@/navigation/navigation";
 import { Role } from "@/types/fetch-utils";
 import { Session } from "next-auth";
 

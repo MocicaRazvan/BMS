@@ -5,13 +5,14 @@ import {
 import { CheckCheck, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { fromDistanceToNowUtc } from "@/lib/utils";
-import { Locale, useRouter } from "@/navigation";
+import { Locale } from "@/navigation/navigation";
 import { Client } from "@stomp/stompjs";
 import { useStompClient } from "react-stomp-hooks";
 import { parseISO } from "date-fns";
 import isEqual from "lodash.isequal";
 import { useLocale } from "next-intl";
-import { memo, ReactNode } from "react";
+import { memo, ReactNode, useEffect, useRef } from "react";
+import { useRouter } from "@/navigation/client-navigation";
 
 export interface ApproveNotificationContentTexts {
   title: ReactNode;
@@ -35,6 +36,17 @@ function ApproveNotificationContent<
   const router = useRouter();
   const locale = useLocale();
   const stompClient = useStompClient();
+  const wasPrefetched = useRef(false);
+
+  useEffect(() => {
+    if (items.length === 0 || wasPrefetched.current) return;
+    const oneLink = items.find((item) => item?.extraLink);
+    if (oneLink?.extraLink) {
+      router.prefetch(oneLink.extraLink);
+      wasPrefetched.current = true;
+    }
+  }, [items.length, router]);
+
   return items.map((item, i) => {
     // const content = JSON.parse(item?.content);
     return (

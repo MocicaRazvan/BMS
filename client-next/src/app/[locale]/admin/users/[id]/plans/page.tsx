@@ -1,7 +1,7 @@
 import { PlanTableTexts } from "@/components/table/plans-table";
 import { getSortingOptions, SortingOptionsTexts } from "@/types/constants";
 import { ThemeSwitchTexts } from "@/texts/components/nav";
-import { Locale } from "@/navigation";
+import { Locale } from "@/navigation/navigation";
 import { unstable_setRequestLocale } from "next-intl/server";
 import { getUserPlansAdminPageTexts } from "@/texts/pages";
 import { sortingPlansSortingOptionsKeys } from "@/texts/components/list";

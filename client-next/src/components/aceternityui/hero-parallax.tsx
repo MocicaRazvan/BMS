@@ -8,7 +8,7 @@ import {
   MotionValue,
 } from "framer-motion";
 import Image, { StaticImageData } from "next/image";
-import { Link } from "@/navigation";
+import { Link } from "@/navigation/navigation";
 import { isDeepEqual } from "@/lib/utils";
 import { BlurInOut } from "@/components/common/blur-text";
 

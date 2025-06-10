@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { locales } from "@/navigation";
+import { locales } from "@/navigation/navigation";
 import createMiddleware from "next-intl/middleware";
 
 const intlMiddleware = createMiddleware({

@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { Link } from "@/navigation";
+import { Link } from "@/navigation/navigation";
 
 const Success = () => {
   const [queryParams, setQueryParams] = useState("");

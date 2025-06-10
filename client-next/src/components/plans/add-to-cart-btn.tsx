@@ -6,7 +6,8 @@ import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
 import { ToastAction } from "@/components/ui/toast";
 import { PlusSquareIcon } from "lucide-react";
-import { useRouter } from "@/navigation";
+import { Link } from "@/navigation/navigation";
+import { useRouter } from "@/navigation/client-navigation";
 import { PlanResponse } from "@/types/dto";
 import { usePlansSubscription } from "@/context/subscriptions-context";
 import PulsatingButton from "@/components/magicui/pulsating-button";
@@ -70,17 +71,18 @@ export default function AddToCartBtn({
             </div>
           </BtnComponent>
         ) : (
-          <PulsatingButton onClick={() => router.push("/cart")}>
+          <PulsatingButton
+            onClick={() => router.push("/cart")}
+            onMouseEnter={() => {
+              router.prefetch("/cart");
+            }}
+          >
             {finishOrder}
           </PulsatingButton>
         )
       ) : (
-        <Button
-          variant={"secondary"}
-          className="capitalize"
-          onClick={() => router.push(`/subscriptions/single/${plan.id}`)}
-        >
-          {alreadyBought}
+        <Button variant="secondary" className="capitalize" asChild>
+          <Link href={`/subscriptions/single/${plan.id}`}>{alreadyBought}</Link>
         </Button>
       )}
     </div>

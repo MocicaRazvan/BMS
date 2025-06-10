@@ -14,7 +14,7 @@ import { fetchStream } from "@/lib/fetchers/fetchStream";
 import { useStompClient, useSubscription } from "react-stomp-hooks";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import noImg from "../../../public/noImage.jpg";
-import { Link, Locale } from "@/navigation";
+import { Link, Locale } from "@/navigation/navigation";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, RefreshCw } from "lucide-react";
 import Loader from "@/components/ui/spinner";

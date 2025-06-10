@@ -1,7 +1,7 @@
 import { getTranslations, unstable_setRequestLocale } from "next-intl/server";
 import { getSignInSchemaTexts } from "@/types/forms";
 import SingIn from "./page-content";
-import { LocaleProps } from "@/navigation";
+import { LocaleProps } from "@/navigation/navigation";
 import { getIntlMetadata } from "@/texts/metadata";
 import { Metadata } from "next";
 import { getEmailFromFieldTexts } from "@/texts/components/forms";

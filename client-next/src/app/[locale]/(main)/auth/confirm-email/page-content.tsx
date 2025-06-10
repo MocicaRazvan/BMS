@@ -2,7 +2,7 @@
 import Loader from "@/components/ui/spinner";
 import { useSearchParams } from "next/navigation";
 import useFetchStream from "@/hoooks/useFetchStream";
-import { useRouter } from "@/navigation";
+import { useRouter } from "@/navigation/client-navigation";
 import useClientNotFound from "@/hoooks/useClientNotFound";
 
 export interface ConfirmEmailPageText {

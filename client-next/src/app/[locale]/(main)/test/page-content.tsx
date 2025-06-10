@@ -12,7 +12,7 @@ const minRole: Role = "ROLE_ADMIN";
 export default function TestPage({ editorTexts }: Props) {
   return (
     <div style={{ padding: 20 }}>
-      <Editor descritpion={""} onChange={() => {}} texts={editorTexts} />
+      {/*<Editor descritpion={""} onChange={() => {}} texts={editorTexts} />*/}
     </div>
   );
 }

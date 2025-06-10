@@ -1,5 +1,6 @@
 import { BoughtNotificationResponse } from "@/types/dto";
-import { Locale, useRouter } from "@/navigation";
+import { Locale } from "@/navigation/navigation";
+import { useRouter } from "@/navigation/client-navigation";
 import { useLocale } from "next-intl";
 import { useStompClient } from "react-stomp-hooks";
 import { Button } from "@/components/ui/button";
@@ -7,6 +8,7 @@ import { BadgeEuro } from "lucide-react";
 import { parseISO } from "date-fns";
 import { BoughtPayloadStomp } from "@/context/bought-notification-context";
 import { fromDistanceToNowUtc } from "@/lib/utils";
+import { useEffect, useRef } from "react";
 
 export interface BoughtNotificationContentTexts {
   title: string;
@@ -27,6 +29,17 @@ export default function BoughtNotificationContent({
   const router = useRouter();
   const locale = useLocale();
   const stompClient = useStompClient();
+  const wasPrefetched = useRef(false);
+
+  useEffect(() => {
+    if (wasPrefetched.current || items.length === 0) return;
+    const oneLink = items.find((item) => item?.extraLink);
+    if (oneLink?.reference?.appId) {
+      router.prefetch(`/trainer/plans/single/${oneLink.reference.appId}`);
+      wasPrefetched.current = true;
+    }
+  }, [items.length, router]);
+
   return items.map((item, i) => {
     const content = JSON.parse(item?.content);
     return (

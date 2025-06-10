@@ -1,6 +1,6 @@
 "use client";
 
-import { Link, useRouter } from "@/navigation";
+import { Link } from "@/navigation/navigation";
 import { useToast } from "@/components/ui/use-toast";
 import { useCartForUser } from "@/context/cart-context";
 import { Button } from "@/components/ui/button";
@@ -51,7 +51,6 @@ export default function CartPageContent({
   const [checkoutSchemaTexts, setCheckoutSchemaTexts] =
     useState<CheckoutSchemaTexts | null>(null);
 
-  const router = useRouter();
   const { toast } = useToast();
   const {
     usersCart,
@@ -81,11 +80,8 @@ export default function CartPageContent({
           {emptyCart}
         </h1>
         <div className="w-full mx-auto flex items-center justify-center mt-10">
-          <Button
-            className="text-lg"
-            onClick={() => router.push("/plans/approved")}
-          >
-            {seeThePlans}
+          <Button className="text-lg" asChild>
+            <Link href="/plans/approved">{seeThePlans}</Link>
           </Button>
         </div>
       </section>

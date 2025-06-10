@@ -25,7 +25,7 @@ import {
   RegisterType,
 } from "@/types/forms";
 import { useMemo, useState } from "react";
-import { Link, useRouter } from "@/navigation";
+import { Link } from "@/navigation/navigation";
 import { Loader2 } from "lucide-react";
 
 import { PasswordInput } from "@/components/ui/password-input";
@@ -40,6 +40,7 @@ import { MX_SPRING_MESSAGE } from "@/types/constants";
 import EmailFormField, {
   EmailFromFieldTexts,
 } from "@/components/forms/email-form-field";
+import { useRouter } from "@/navigation/client-navigation";
 
 interface SignUpPageText {
   emailExistsError: string;

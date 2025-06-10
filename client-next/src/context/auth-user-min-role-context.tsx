@@ -8,7 +8,7 @@ import { HIERARCHY } from "@/types/constants";
 import { Skeleton } from "@/components/ui/skeleton";
 import { motion } from "framer-motion";
 import { Role } from "@/types/fetch-utils";
-import { useRouter } from "@/navigation";
+import { useRouter } from "@/navigation/client-navigation";
 
 export interface AuthUserMinRoleContextType {
   authUser: NonNullable<Session["user"]>;

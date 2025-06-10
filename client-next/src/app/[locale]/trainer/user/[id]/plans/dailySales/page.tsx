@@ -1,5 +1,5 @@
 import DailySales, { DailySalesTexts } from "@/components/charts/daily-sales";
-import { Locale } from "@/navigation";
+import { Locale } from "@/navigation/navigation";
 import { unstable_setRequestLocale } from "next-intl/server";
 import { getUserDailySalesPageTexts } from "@/texts/pages";
 import Heading from "@/components/common/heading";

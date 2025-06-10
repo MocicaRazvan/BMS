@@ -1,7 +1,7 @@
 import MonthlySales, {
   MonthlySalesTexts,
 } from "@/components/charts/monthly-sales";
-import { Locale } from "@/navigation";
+import { Locale } from "@/navigation/navigation";
 import { unstable_setRequestLocale } from "next-intl/server";
 import { getUserMonthlySalesPageTexts } from "@/texts/pages";
 import Heading from "@/components/common/heading";

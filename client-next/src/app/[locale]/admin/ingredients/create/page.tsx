@@ -1,4 +1,4 @@
-import { Locale } from "@/navigation";
+import { Locale } from "@/navigation/navigation";
 import { unstable_setRequestLocale } from "next-intl/server";
 import { getThemeSwitchTexts } from "@/texts/components/nav";
 import SidebarContentLayout from "@/components/sidebar/sidebar-content-layout";

@@ -1,7 +1,7 @@
 "use server";
 
 import { getMetadataValues } from "@/texts/metadata";
-import { Locale } from "@/navigation";
+import { Locale } from "@/navigation/navigation";
 import { Session } from "next-auth";
 
 export async function getMetadataAction(

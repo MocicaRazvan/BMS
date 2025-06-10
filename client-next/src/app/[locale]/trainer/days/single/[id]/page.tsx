@@ -1,4 +1,4 @@
-import { Locale } from "@/navigation";
+import { Locale } from "@/navigation/navigation";
 import { unstable_setRequestLocale } from "next-intl/server";
 import SingleDayTrainerPageContent from "@/app/[locale]/trainer/days/single/[id]/page-content";
 import { SidebarMenuTexts } from "@/components/sidebar/menu-list";

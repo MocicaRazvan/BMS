@@ -10,7 +10,6 @@ import useFilterDropdown, {
   UseFilterDropdownTexts,
 } from "@/components/list/useFilterDropdown";
 import { dietTypes } from "@/types/forms";
-import { useRouter } from "@/navigation";
 import { useCallback } from "react";
 import {
   planObjectives,
@@ -26,7 +25,6 @@ import {
 import DaysCalendarCTA, {
   DaysCalendarCTATexts,
 } from "@/components/days-calendar/days-calendar-cta";
-import { useAuthUserMinRole } from "@/context/auth-user-min-role-context";
 
 export interface SubscriptionsPageContentTexts {
   gridListTexts: GridListTexts;
@@ -51,9 +49,6 @@ export default function SubscriptionsPageContent({
   objectiveDropDownTexts,
   dayCalendarCTATexts,
 }: Props) {
-  const { authUser } = useAuthUserMinRole();
-
-  const router = useRouter();
   const formatIntl = useFormatter();
 
   const {
@@ -102,13 +97,11 @@ export default function SubscriptionsPageContent({
       <Heading title={title} header={header} />
       <DaysCalendarCTA {...dayCalendarCTATexts} />
       <GridList<PlanResponse>
-        onItemClick={({
+        itemLinkCallback={({
           model: {
             content: { id },
           },
-        }) => {
-          router.push(`/subscriptions/single/${id}`);
-        }}
+        }) => `/subscriptions/single/${id}`}
         sizeOptions={[6, 12, 18]}
         path="/orders/subscriptions/filtered/withUser"
         sortingOptions={options}

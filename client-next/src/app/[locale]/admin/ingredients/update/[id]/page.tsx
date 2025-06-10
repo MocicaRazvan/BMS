@@ -1,4 +1,4 @@
-import { Locale } from "@/navigation";
+import { Locale } from "@/navigation/navigation";
 import { unstable_setRequestLocale } from "next-intl/server";
 import LoadingSpinner from "@/components/common/loading-spinner";
 import { ThemeSwitchTexts } from "@/texts/components/nav";

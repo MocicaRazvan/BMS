@@ -1,6 +1,6 @@
 import { PlanTableTexts } from "@/components/table/plans-table";
 import { getSortingOptions, SortingOptionsTexts } from "@/types/constants";
-import { Locale } from "@/navigation";
+import { Locale } from "@/navigation/navigation";
 import { unstable_setRequestLocale } from "next-intl/server";
 import { getUserPlansPageTexts } from "@/texts/pages";
 import { sortingPlansSortingOptionsKeys } from "@/texts/components/list";

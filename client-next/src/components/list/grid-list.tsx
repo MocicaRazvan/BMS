@@ -52,13 +52,14 @@ interface GridListProps<T extends TitleBodyImagesUserDto>
       PartialFetchStreamProps<T>,
       "onAbort" | "successCallback" | "successArrayCallback"
     > {
-  onItemClick: (item: ResponseWithUserDtoEntity<T>) => void;
+  onItemClick?: (item: ResponseWithUserDtoEntity<T>) => void;
   passExtraContent?: (item: ResponseWithUserDtoEntity<T>) => ReactNode;
   passExtraHeader?: (item: ResponseWithUserDtoEntity<T>) => ReactNode;
   passExtraImageOverlay?: (item: ResponseWithUserDtoEntity<T>) => ReactNode;
   extraCriteriaWithCallBack?: (callback: () => void) => ReactNode;
   extraCriteriaClassname?: ClassValue;
   forbiddenSortingOptions?: string[];
+  itemLinkCallback?: (item: ResponseWithUserDtoEntity<T>) => string;
 }
 
 const DynamicNoResultsLottie = dynamic(
@@ -93,6 +94,7 @@ export default function GridList<T extends TitleBodyImagesUserDto>({
   creationFilterTexts,
   extraCriteriaClassname,
   forbiddenSortingOptions = ["userDislikesLength"],
+  itemLinkCallback,
   ...rest
 }: GridListProps<T>) {
   const finalSortingOptions = useMemo(
@@ -203,11 +205,14 @@ export default function GridList<T extends TitleBodyImagesUserDto>({
             >
               <ItemCard
                 item={item}
-                onClick={() => onItemClick(item)}
+                onClick={() => {
+                  onItemClick?.(item);
+                }}
                 generateExtraContent={passExtraContent}
                 generateExtraHeader={passExtraHeader}
                 texts={itemCardTexts}
                 generateImageOverlay={passExtraImageOverlay}
+                itemHref={itemLinkCallback ? itemLinkCallback(item) : undefined}
               />
             </motion.div>
           ))}

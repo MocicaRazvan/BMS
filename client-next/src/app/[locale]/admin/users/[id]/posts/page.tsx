@@ -1,4 +1,4 @@
-import { Locale } from "@/navigation";
+import { Locale } from "@/navigation/navigation";
 import { unstable_setRequestLocale } from "next-intl/server";
 import { PostTableTexts } from "@/components/table/posts-table";
 import { getSortingOptions, SortingOptionsTexts } from "@/types/constants";

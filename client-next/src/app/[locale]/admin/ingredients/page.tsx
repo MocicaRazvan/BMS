@@ -1,4 +1,4 @@
-import { Locale } from "@/navigation";
+import { Locale } from "@/navigation/navigation";
 import { unstable_setRequestLocale } from "next-intl/server";
 import { sortingIngredientsSortingOptionsKeys } from "@/texts/components/list";
 import { getSortingOptions, SortingOptionsTexts } from "@/types/constants";

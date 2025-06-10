@@ -1,5 +1,5 @@
 import { Role } from "@/types/fetch-utils";
-import { locales } from "@/navigation";
+import { locales } from "@/navigation/navigation";
 import { NextRequest } from "next/server";
 import { NextMiddlewareWithAuth, withAuth } from "next-auth/middleware";
 import { HIERARCHY } from "@/types/constants";

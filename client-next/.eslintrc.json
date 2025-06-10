@@ -23,17 +23,30 @@
       "error",
       {
         "name": "next/link",
-        "message": "Please import from `@/navigation` instead."
+        "message": "Please import from `@/navigation/navigation` instead."
       },
       {
         "name": "next/navigation",
         "importNames": [
           "redirect",
           "permanentRedirect",
-          "useRouter",
           "usePathname"
         ],
-        "message": "Please import from `@/navigation` instead."
+        "message": "Please import from `@/navigation/navigation` instead."
+      },
+      {
+        "name": "next/navigation",
+        "importNames": [
+          "useRouter"
+        ],
+        "message": "Please import from `@/navigation/navigation-client` instead."
+      },
+      {
+        "name": "@/navigation/navigation",
+        "importNames": [
+          "useRouter"
+        ],
+        "message": "Please import from `@/navigation/navigation-client` instead."
       }
     ]
   }

@@ -1,5 +1,5 @@
 import readingTime from "reading-time";
-import { Locale } from "@/navigation";
+import { Locale } from "@/navigation/navigation";
 import { getTextFromMinutes } from "@/lib/reading-time/i18n";
 
 export function estimateReadingTime(

@@ -12,7 +12,7 @@ import { useSidebarToggle } from "@/context/sidebar-toggle";
 import useClientNotFound from "@/hoooks/useClientNotFound";
 import { Separator } from "@/components/ui/separator";
 import TopPlans from "@/components/charts/top-plans";
-import { Locale } from "@/navigation";
+import { Locale } from "@/navigation/navigation";
 import { useAuthUserMinRole } from "@/context/auth-user-min-role-context";
 
 interface Props extends UserPlansAdminPageTexts, UseListProps {

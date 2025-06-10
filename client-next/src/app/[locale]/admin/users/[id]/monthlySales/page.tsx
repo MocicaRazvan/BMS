@@ -1,7 +1,7 @@
 import { ThemeSwitchTexts } from "@/texts/components/nav";
 import { MonthlySalesTexts } from "@/components/charts/monthly-sales";
 import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
-import { Locale } from "@/navigation";
+import { Locale } from "@/navigation/navigation";
 import { unstable_setRequestLocale } from "next-intl/server";
 import { getUserAdminMonthlySalesPageTexts } from "@/texts/pages";
 import UserAdminMonthlySalesPageContent from "@/app/[locale]/admin/users/[id]/monthlySales/page-content";

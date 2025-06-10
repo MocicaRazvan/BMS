@@ -1,4 +1,4 @@
-import { Locale } from "@/navigation";
+import { Locale } from "@/navigation/navigation";
 import { unstable_setRequestLocale } from "next-intl/server";
 import AdminEmail, { AdminEmailTexts } from "@/components/forms/admin-email";
 import { ThemeSwitchTexts } from "@/texts/components/nav";

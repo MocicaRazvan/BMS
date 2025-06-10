@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { Message, useChat } from "ai/react";
 import ReactMarkdown from "react-markdown";
-import { Link } from "@/navigation";
+import { Link } from "@/navigation/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import ShineBorder from "@/components/magicui/shine-border";

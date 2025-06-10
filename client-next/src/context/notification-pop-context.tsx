@@ -22,7 +22,7 @@ import {
   useBoughtNotification,
 } from "@/context/bought-notification-context";
 import { useStompClient } from "react-stomp-hooks";
-import { usePathname } from "@/navigation";
+import { usePathname } from "@/navigation/navigation";
 import {
   getApprovedNotificationTextsByItems,
   getBoughtNotificationTextsByItems,

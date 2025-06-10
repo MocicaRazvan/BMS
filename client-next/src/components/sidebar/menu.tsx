@@ -11,7 +11,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Link, usePathname, useRouter } from "@/navigation";
+import { Link, usePathname } from "@/navigation/navigation";
 import {
   mappingFunctions,
   MappingListFunctionKeys,
@@ -28,7 +28,6 @@ interface MenuProps extends WithUser {
 
 export function Menu({ isOpen, texts, mappingKey, authUser }: MenuProps) {
   const pathname = usePathname();
-  const router = useRouter();
   const menuList = mappingFunctions[mappingKey](authUser, pathname, texts);
 
   return (
@@ -112,23 +111,23 @@ export function Menu({ isOpen, texts, mappingKey, authUser }: MenuProps) {
               <Tooltip delayDuration={100}>
                 <TooltipTrigger asChild>
                   <Button
-                    onClick={() => {
-                      router.push(`/${mappingKey}/account/signout`);
-                    }}
                     variant="outline"
                     className="w-5/6 justify-center h-10 mt-5"
+                    asChild
                   >
-                    <span className={cn(!isOpen ? "" : "mr-4")}>
-                      <LogOut size={18} />
-                    </span>
-                    {/*<p*/}
-                    {/*  className={cn(*/}
-                    {/*    "whitespace-nowrap",*/}
-                    {/*    !isOpen ? "opacity-0 hidden" : "opacity-100",*/}
-                    {/*  )}*/}
-                    {/*>*/}
-                    {/*  Sign out*/}
-                    {/*</p>*/}
+                    <Link href={`/${mappingKey}/account/signout`}>
+                      <span className={cn(!isOpen ? "" : "mr-4")}>
+                        <LogOut size={18} />
+                      </span>
+                      {/*<p*/}
+                      {/*  className={cn(*/}
+                      {/*    "whitespace-nowrap",*/}
+                      {/*    !isOpen ? "opacity-0 hidden" : "opacity-100",*/}
+                      {/*  )}*/}
+                      {/*>*/}
+                      {/*  Sign out*/}
+                      {/*</p>*/}
+                    </Link>
                   </Button>
                 </TooltipTrigger>
                 {!isOpen && (

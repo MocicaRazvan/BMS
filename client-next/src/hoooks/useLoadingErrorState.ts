@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useRouter } from "@/navigation";
+import { useRouter } from "@/navigation/client-navigation";
 
 export default function useLoadingErrorState() {
   const [isLoading, setIsLoading] = useState(false);

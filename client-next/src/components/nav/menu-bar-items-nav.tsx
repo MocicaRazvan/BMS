@@ -10,7 +10,7 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
-import { Link, usePathname } from "@/navigation";
+import { Link, usePathname } from "@/navigation/navigation";
 
 interface MenuBarItemsNavProps {
   links: ComponentMenuLink[];

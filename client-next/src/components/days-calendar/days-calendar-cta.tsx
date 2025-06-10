@@ -1,5 +1,5 @@
 import { Notebook } from "lucide-react";
-import { Link } from "@/navigation";
+import { Link } from "@/navigation/navigation";
 import { cn } from "@/lib/utils";
 import { MouseEventHandler } from "react";
 

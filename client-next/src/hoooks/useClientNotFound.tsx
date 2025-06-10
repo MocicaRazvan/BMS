@@ -1,4 +1,4 @@
-import { useRouter } from "@/navigation";
+import { useRouter } from "@/navigation/client-navigation";
 import { ReactNode, useCallback } from "react";
 import LoadingSpinner from "@/components/common/loading-spinner";
 

@@ -3,7 +3,7 @@ import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
 import SingeRecipePageContent, {
   SingleRecipePageTexts,
 } from "@/app/[locale]/trainer/recipes/single/[id]/page-content";
-import { Locale } from "@/navigation";
+import { Locale } from "@/navigation/navigation";
 import { unstable_setRequestLocale } from "next-intl/server";
 import { getAdminRecipePageTexts } from "@/texts/pages";
 import SidebarContentLayout from "@/components/sidebar/sidebar-content-layout";

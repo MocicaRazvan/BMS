@@ -1,7 +1,7 @@
 import { getTranslations, unstable_setRequestLocale } from "next-intl/server";
 
 import NotFoundLottie from "@/app/[locale]/(main)/not-found/not-found-lottie";
-import { Locale } from "@/navigation";
+import { Locale } from "@/navigation/navigation";
 
 interface Props {
   params: { locale: Locale };

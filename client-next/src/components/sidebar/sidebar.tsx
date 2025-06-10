@@ -1,7 +1,7 @@
 "use client";
 import { useSidebarToggle } from "@/context/sidebar-toggle";
 import { cn } from "@/lib/utils";
-import { Link } from "@/navigation";
+import { Link } from "@/navigation/navigation";
 import { Button } from "@/components/ui/button";
 import SidebarToggle from "@/components/sidebar/sidebar-toggle";
 import { Menu } from "@/components/sidebar/menu";

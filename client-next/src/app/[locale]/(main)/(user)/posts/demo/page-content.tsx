@@ -1,5 +1,5 @@
 "use client";
-import { Locale, useRouter } from "@/navigation";
+import { Locale } from "@/navigation/navigation";
 import GridList, {
   GridListTexts,
   SortingOption,
@@ -54,7 +54,6 @@ export default function DemoPostApprovedPageContent({
 }: Props) {
   const [batchSize, setBatchSize] = useState(1);
   const [delaySize, setDelaySize] = useState(0);
-  const router = useRouter();
   const { extraUpdateSearchParams, extraArrayQueryParam, tags, setTags } =
     useTagsExtraCriteria();
   const searchParams = useSearchParams();
@@ -108,13 +107,11 @@ export default function DemoPostApprovedPageContent({
       <Separator className="my-5" />
 
       <GridList<PostResponse>
-        onItemClick={({
+        itemLinkCallback={({
           model: {
             content: { id },
           },
-        }) => {
-          router.push(`/posts/single/${id}`);
-        }}
+        }) => `/posts/single/${id}`}
         sizeOptions={[6, 12, 18]}
         batchSize={batchSize}
         path="/posts/demo/withUser"

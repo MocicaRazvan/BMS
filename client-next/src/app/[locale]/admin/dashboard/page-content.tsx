@@ -11,7 +11,7 @@ import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
 import { ArchiveQueuePrefix } from "@/types/dto";
-import { Locale } from "@/navigation";
+import { Locale } from "@/navigation/navigation";
 import ArchiveContent, {
   AugmentedArchiveQueuePrefix,
 } from "@/components/archive/archive-content";

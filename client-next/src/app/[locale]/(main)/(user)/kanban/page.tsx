@@ -1,4 +1,4 @@
-import { LocaleProps } from "@/navigation";
+import { LocaleProps } from "@/navigation/navigation";
 import { KanbanBoardTexts } from "@/components/kanban/kanban-board";
 import { getKanbanPageTexts } from "@/texts/pages";
 import { unstable_setRequestLocale } from "next-intl/server";

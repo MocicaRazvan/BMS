@@ -19,7 +19,7 @@ import { useCallback, useMemo } from "react";
 
 import { ExtraTableProps } from "@/types/tables";
 import { format, parseISO } from "date-fns";
-import { Link, useRouter } from "@/navigation";
+import { Link } from "@/navigation/navigation";
 import { DataTableTexts } from "@/components/table/data-table";
 import useList, { UseListProps } from "@/hoooks/useList";
 import useTagsExtraCriteria, {
@@ -115,7 +115,6 @@ export default function PostsTable({
 
   const { navigateToNotFound } = useClientNotFound();
 
-  const router = useRouter();
   const isAdmin = authUser?.role === "ROLE_ADMIN";
 
   const {
@@ -359,17 +358,16 @@ export default function PostsTable({
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuLabel className="mb-3">{label}</DropdownMenuLabel>
-                <DropdownMenuItem
-                  className="cursor-pointer"
-                  onClick={() =>
-                    router.push(
+                <DropdownMenuItem className="cursor-pointer" asChild>
+                  <Link
+                    href={
                       forWhom === "trainer"
                         ? `/trainer/posts/single/${row.original.id}`
-                        : `/admin/posts/single/${row.original.id}`,
-                    )
-                  }
-                >
-                  {view}
+                        : `/admin/posts/single/${row.original.id}`
+                    }
+                  >
+                    {view}
+                  </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 {!(forWhom === "trainer") && (
@@ -485,7 +483,6 @@ export default function PostsTable({
       authUser,
       refetch,
       isAdmin,
-      router,
     ],
   );
 

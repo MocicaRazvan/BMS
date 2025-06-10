@@ -1,4 +1,4 @@
-import { LocaleProps, redirect } from "@/navigation";
+import { LocaleProps, redirect } from "@/navigation/navigation";
 import { unstable_setRequestLocale } from "next-intl/server";
 import SignOut from "@/app/[locale]/(main)/auth/signout/page-content";
 import { Metadata } from "next";

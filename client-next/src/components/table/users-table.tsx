@@ -1,7 +1,8 @@
 "use client";
 import { ExtraTableProps } from "@/types/tables";
 import useList, { UseListProps } from "@/hoooks/useList";
-import { Link, useRouter } from "@/navigation";
+import { Link } from "@/navigation/navigation";
+import { useRouter } from "@/navigation/client-navigation";
 import { CustomEntityModel, UserDto } from "@/types/dto";
 import React, { useCallback, useMemo } from "react";
 import { ColumnDef } from "@tanstack/react-table";
@@ -444,17 +445,16 @@ export default function UsersTable({
                   {copyEmail}
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  className="cursor-pointer"
-                  onClick={() =>
-                    router.push(
+                <DropdownMenuItem className="cursor-pointer" asChild>
+                  <Link
+                    href={
                       forWhom === "admin"
                         ? `/admin/users/${user.id}`
-                        : `/users/single/${user.id}`,
-                    )
-                  }
-                >
-                  {viewUser}
+                        : `/users/single/${user.id}`
+                    }
+                  >
+                    {viewUser}
+                  </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild className="cursor-pointer">
@@ -547,6 +547,7 @@ export default function UsersTable({
                         variant="outline"
                         className="border-success text-success w-full"
                         onClick={() => handleStartChat(user)}
+                        onMouseEnter={() => router.prefetch("/chat")}
                       >
                         {startChat}
                       </Button>
@@ -583,12 +584,12 @@ export default function UsersTable({
       roleItems,
       creationFilterTexts,
       updateCreatedAtRange,
+      forWhom,
       isAdmin,
       refetch,
       authUser,
-      router,
-      forWhom,
       handleStartChat,
+      router,
     ],
   );
 

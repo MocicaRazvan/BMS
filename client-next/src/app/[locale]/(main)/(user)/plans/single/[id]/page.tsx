@@ -1,4 +1,4 @@
-import { Locale } from "@/navigation";
+import { Locale } from "@/navigation/navigation";
 import { getUserPlanPageContentTexts } from "@/texts/pages";
 import { unstable_setRequestLocale } from "next-intl/server";
 import UserPlanPageContent from "@/app/[locale]/(main)/(user)/plans/single/[id]/page-content";

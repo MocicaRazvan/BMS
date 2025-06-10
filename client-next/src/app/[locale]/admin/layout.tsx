@@ -1,4 +1,4 @@
-import { Locale } from "@/navigation";
+import { Locale } from "@/navigation/navigation";
 import { ReactNode } from "react";
 import { unstable_setRequestLocale } from "next-intl/server";
 import SidebarPanelLayout from "@/components/sidebar/sidebar-panel-layout";

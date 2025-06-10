@@ -8,7 +8,7 @@ import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
 import { WithUser } from "@/lib/user";
-import { Link } from "@/navigation";
+import { Link } from "@/navigation/navigation";
 
 export const ArchiveQueueNotificationContent = memo(
   ({ authUser }: WithUser) => {

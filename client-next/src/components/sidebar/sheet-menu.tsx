@@ -9,7 +9,7 @@ import {
   SheetHeader,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { Link } from "@/navigation";
+import { Link } from "@/navigation/navigation";
 import { Menu } from "@/components/sidebar/menu";
 import {
   MappingListFunctionKeys,

@@ -1,4 +1,4 @@
-import { Locale } from "@/navigation";
+import { Locale } from "@/navigation/navigation";
 import { OrderTableTexts } from "@/components/table/orders-table";
 import { getSortingOptions, SortingOptionsTexts } from "@/types/constants";
 import { ThemeSwitchTexts } from "@/texts/components/nav";

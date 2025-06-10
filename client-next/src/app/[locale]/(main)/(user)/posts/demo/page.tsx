@@ -2,7 +2,7 @@ import { unstable_setRequestLocale } from "next-intl/server";
 import { getApprovedPostsPageTexts } from "@/texts/pages";
 import { getSortingOptions } from "@/types/constants";
 import { sortingPostsSortingOptionsKeys } from "@/texts/components/list";
-import { LocaleProps } from "@/navigation";
+import { LocaleProps } from "@/navigation/navigation";
 import DemoPostApprovedPageContent from "@/app/[locale]/(main)/(user)/posts/demo/page-content";
 
 export default async function DemoPagePosts({

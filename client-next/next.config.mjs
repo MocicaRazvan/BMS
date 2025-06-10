@@ -91,12 +91,16 @@ const finalConfig = (phase) => {
       : envPrefix === "local"
         ? undefined
         : envPrefix;
+  const enableCompression =
+    isDev ||
+    String(process.env.ENABLE_COMPRESSION).trim().toLowerCase() === "true";
   /**
    * @type {import('next').NextConfig}
    */
   const nextConfig = {
     ...baseConfig,
     assetPrefix,
+    compress: enableCompression,
   };
   /**
    * @type {import('next').NextConfig}

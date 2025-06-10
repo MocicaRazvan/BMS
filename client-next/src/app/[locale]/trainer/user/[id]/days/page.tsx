@@ -1,4 +1,4 @@
-import { Locale } from "@/navigation";
+import { Locale } from "@/navigation/navigation";
 import DaysTable, { DayTableTexts } from "@/components/table/day-table";
 import { getSortingOptions, SortingOptionsTexts } from "@/types/constants";
 import { unstable_setRequestLocale } from "next-intl/server";

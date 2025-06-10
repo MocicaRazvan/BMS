@@ -9,7 +9,7 @@ import useFilterDropdown, {
 } from "@/components/list/useFilterDropdown";
 import { ExtraTableProps } from "@/types/tables";
 import useList, { UseListProps } from "@/hoooks/useList";
-import { Link, useRouter } from "@/navigation";
+import { Link } from "@/navigation/navigation";
 import useClientNotFound from "@/hoooks/useClientNotFound";
 import {
   CustomEntityModel,
@@ -119,7 +119,6 @@ export default function DaysTable({
 }: DayTableProps) {
   const { authUser } = useAuthUserMinRole();
 
-  const router = useRouter();
   const { navigateToNotFound } = useClientNotFound();
 
   const {
@@ -391,13 +390,10 @@ export default function DaysTable({
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuLabel className="mb-3">{label}</DropdownMenuLabel>
-                <DropdownMenuItem
-                  className="cursor-pointer"
-                  onClick={() =>
-                    router.push(`/trainer/days/single/${row.original.model.id}`)
-                  }
-                >
-                  {view}
+                <DropdownMenuItem asChild className="cursor-pointer">
+                  <Link href={`/trainer/days/single/${row.original.model.id}`}>
+                    {view}
+                  </Link>
                 </DropdownMenuItem>
                 {forWhom === "trainer" &&
                   parseInt(authUser.id) === row.original.model.userId && (
@@ -460,7 +456,6 @@ export default function DaysTable({
       authUser.id,
       authUser.token,
       refetch,
-      router,
     ],
   );
 

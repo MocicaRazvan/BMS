@@ -5,7 +5,7 @@ import { ReactNode, useMemo } from "react";
 import { ResponseWithUserDtoEntity, TitleBodyImagesUserDto } from "@/types/dto";
 import { format, parseISO } from "date-fns";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
-import { Link } from "@/navigation";
+import { Link } from "@/navigation/navigation";
 import CustomImage from "@/components/common/custom-image";
 import { OverflowLengthTextTooltip } from "@/components/common/overflow-text-tooltip";
 
@@ -15,24 +15,26 @@ export interface ItemCardTexts {
 
 interface Props<T extends TitleBodyImagesUserDto> {
   item: ResponseWithUserDtoEntity<T>;
-  onClick?: () => void;
   generateExtraContent?: (item: ResponseWithUserDtoEntity<T>) => ReactNode;
   generateExtraHeader?: (item: ResponseWithUserDtoEntity<T>) => ReactNode;
   generateImageOverlay?: (item: ResponseWithUserDtoEntity<T>) => ReactNode;
   texts: ItemCardTexts;
   eagerImage?: boolean;
   maxTitleLength?: number;
+  itemHref?: string;
+  onClick?: () => void;
 }
 
 export default function ItemCard<T extends TitleBodyImagesUserDto>({
   item,
-  onClick,
   generateExtraContent,
   generateExtraHeader,
   generateImageOverlay,
   eagerImage = true,
   texts: { author },
   maxTitleLength = 75,
+  itemHref,
+  onClick,
 }: Props<T>) {
   const body = useMemo(
     () =>
@@ -40,32 +42,42 @@ export default function ItemCard<T extends TitleBodyImagesUserDto>({
         .documentElement.textContent,
     [item.model.content.body],
   );
-
+  const ImageComp = (
+    <CustomImage
+      thumblinator
+      alt="Header"
+      className={cn(
+        "rounded-lg object-cover w-full",
+        itemHref && "cursor-pointer",
+      )}
+      height="250"
+      // loader={imageLoader}
+      src={item.model.content.images?.[0] || noImg}
+      style={{
+        aspectRatio: "400/250",
+        objectFit: "cover",
+      }}
+      width="400"
+      loading={eagerImage ? "eager" : undefined}
+    />
+  );
   return (
     <div
       className={cn(
         "flex flex-col items-start gap-2 border rounded-xl p-4 w-full  hover:shadow-lg transition-all duration-300 shadow-foreground hover:shadow-foreground/40 hover:scale-[1.025]",
       )}
     >
-      <div className="relative w-full h-[250px] bg-background">
-        <CustomImage
-          thumblinator
-          alt="Header"
-          className={cn(
-            "rounded-lg object-cover w-full",
-            onClick && "cursor-pointer",
-          )}
-          height="250"
-          // loader={imageLoader}
-          src={item.model.content.images?.[0] || noImg}
-          style={{
-            aspectRatio: "400/250",
-            objectFit: "cover",
-          }}
-          onClick={() => onClick && onClick()}
-          width="400"
-          loading={eagerImage ? "eager" : undefined}
-        />
+      <div
+        className="relative w-full h-[250px] bg-background"
+        onClick={onClick}
+      >
+        {itemHref ? (
+          <Link href={itemHref} passHref>
+            {ImageComp}
+          </Link>
+        ) : (
+          ImageComp
+        )}
         {generateImageOverlay && generateImageOverlay(item)}
       </div>
       <div className="flex flex-col gap-3 mt-1 w-full">

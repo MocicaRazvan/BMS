@@ -1,4 +1,4 @@
-import { LocaleProps } from "@/navigation";
+import { LocaleProps } from "@/navigation/navigation";
 import { unstable_setRequestLocale } from "next-intl/server";
 import {
   getDayCalendarBodyMonthTexts,

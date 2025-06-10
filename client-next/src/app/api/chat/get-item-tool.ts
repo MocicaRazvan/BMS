@@ -5,7 +5,7 @@ import {
   ResponseWithUserDtoEntity,
   TitleBodyUserDto,
 } from "@/types/dto";
-import { Locale } from "@/navigation";
+import { Locale } from "@/navigation/navigation";
 import { tool } from "@langchain/core/tools";
 import { z } from "zod";
 import { getCsrfNextAuthHeader } from "@/actions/get-csr-next-auth";

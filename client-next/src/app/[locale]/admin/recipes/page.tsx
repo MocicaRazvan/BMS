@@ -1,4 +1,4 @@
-import { Locale } from "@/navigation";
+import { Locale } from "@/navigation/navigation";
 import RecipeTable, {
   RecipeTableTexts,
 } from "@/components/table/recipes-table";

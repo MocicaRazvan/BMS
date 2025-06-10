@@ -672,6 +672,7 @@ services:
         NODE_ENV: production
         CACHE_HANDLER_REDIS_URL: redis://redis:6379/10
         NEXT_AUTH_SECRET: ${NEXTAUTH_SECRET}
+        ENABLE_COMPRESSION: "true"
     environment:
       NEXTAUTH_URL: http://localhost:3000
       NEXTAUTH_URL_INTERNAL: http://next-js:3000
@@ -700,6 +701,7 @@ services:
       NODE_ENV: production
       CACHE_HANDLER_REDIS_URL: redis://redis:6379/10
       OLLAMA_NUM_CTX: 2048
+      ENABLE_COMPRESSION: "true"
     ports:
       - "3000:3000"
       - "9464:9464"

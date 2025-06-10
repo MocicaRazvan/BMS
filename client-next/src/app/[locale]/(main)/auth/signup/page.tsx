@@ -1,6 +1,6 @@
 import { getTranslations, unstable_setRequestLocale } from "next-intl/server";
 import { getRegistrationSchemaTexts } from "@/types/forms";
-import { LocaleProps } from "@/navigation";
+import { LocaleProps } from "@/navigation/navigation";
 import SignUp from "@/app/[locale]/(main)/auth/signup/page-content";
 import { Metadata } from "next";
 import { getIntlMetadata } from "@/texts/metadata";

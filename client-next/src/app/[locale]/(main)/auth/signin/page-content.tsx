@@ -22,10 +22,9 @@ import {
 import { getSignInSchema, SignInSchemaTexts, SignInType } from "@/types/forms";
 import { signIn } from "next-auth/react";
 import { useMemo, useState } from "react";
-
 import { Loader2 } from "lucide-react";
-
-import { Link, Locale, useRouter } from "@/navigation";
+import { Link, Locale } from "@/navigation/navigation";
+import { useRouter } from "@/navigation/client-navigation";
 import OauthProviders from "@/app/[locale]/(main)/auth/oauth-providers";
 import { normalizeEmailWrapper } from "@/lib/email-normalizer-wrapper";
 import EmailFormField, {
