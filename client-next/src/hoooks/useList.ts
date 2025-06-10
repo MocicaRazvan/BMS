@@ -243,6 +243,7 @@ export default function useList<T>({
       messages &&
       messages.length > 0 &&
       messages[0].pageInfo.totalPages > 1 &&
+      messages[0].pageInfo.pageSize === pageInfo.pageSize &&
       !error
     ) {
       const maxPage = messages[0].pageInfo.totalPages;
