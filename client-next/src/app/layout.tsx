@@ -49,7 +49,7 @@ export const metadata: Metadata = {
       {
         media: "(prefers-color-scheme: dark)",
         url: "/images/logo-light.svg",
-        href: "/images/logo-light-dark.svg",
+        href: "/images/logo-light.svg",
       },
     ],
   },
