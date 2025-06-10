@@ -203,8 +203,14 @@ export default function useList<T>({
     ...props,
   };
 
-  const { messages, error, isFinished, refetch, manualFetcher } =
-    useFetchStream<PageableResponse<T>>(fetchArgs);
+  const {
+    messages,
+    error,
+    isFinished,
+    refetch,
+    manualFetcher,
+    isAbsoluteFinished,
+  } = useFetchStream<PageableResponse<T>>(fetchArgs);
   const [nextMessages, setNextMessages] = useState<
     PageableResponse<T>[] | null
   >(null);
@@ -232,7 +238,7 @@ export default function useList<T>({
     let isMounted = true;
     const abortController = new AbortController();
     if (
-      isFinished &&
+      isAbsoluteFinished &&
       preloadNext &&
       messages &&
       messages.length > 0 &&
@@ -284,7 +290,7 @@ export default function useList<T>({
     pageInfo.currentPage,
     pageInfo.pageSize,
     preloadNext,
-    isFinished,
+    isAbsoluteFinished,
   ]);
 
   useEffect(() => {
