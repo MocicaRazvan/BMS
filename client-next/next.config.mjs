@@ -1,4 +1,6 @@
 import createNextIntlPlugin from "next-intl/plugin";
+import CompressionPlugin from "compression-webpack-plugin";
+import * as zlib from "node:zlib";
 import path from "path";
 import { PHASE_DEVELOPMENT_SERVER } from "next/constants.js";
 
@@ -66,7 +68,36 @@ const baseConfig = {
   //     },
   //   ];
   // },
-  webpack(config) {
+  webpack(config, { dev, isServer }) {
+    if (!dev && !isServer) {
+      console.log("Adding compression plugins to webpack config");
+      config.plugins.push(
+        new CompressionPlugin({
+          filename: "[path][base].gz",
+          algorithm: "gzip",
+          test: /\.(js|css|html|svg|json)$/,
+          threshold: 10240,
+          minRatio: 0.8,
+          deleteOriginalAssets: false,
+          compressionOptions: {
+            level: 9,
+          },
+        }),
+        new CompressionPlugin({
+          filename: "[path][base].br",
+          algorithm: "brotliCompress",
+          test: /\.(js|css|html|svg|json)$/,
+          compressionOptions: {
+            params: {
+              [zlib.constants.BROTLI_PARAM_QUALITY]: 11,
+            },
+          },
+          threshold: 10240,
+          minRatio: 0.8,
+          deleteOriginalAssets: false,
+        }),
+      );
+    }
     config.module.rules.push({
       test: /geoData\.json$/i,
       resourceQuery: /url/,
@@ -75,7 +106,7 @@ const baseConfig = {
       ],
       type: "asset/resource",
       generator: {
-        filename: "static/customdata/[name][contenthash][ext]",
+        filename: "static/customdata/[name]-[contenthash][ext]",
       },
     });
     return config;
