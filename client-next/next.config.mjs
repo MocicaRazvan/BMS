@@ -1,6 +1,6 @@
 import createNextIntlPlugin from "next-intl/plugin";
 import CompressionPlugin from "compression-webpack-plugin";
-import * as zlib from "node:zlib";
+import { constants } from "node:zlib";
 import path from "path";
 import { PHASE_DEVELOPMENT_SERVER } from "next/constants.js";
 
@@ -76,7 +76,7 @@ const baseConfig = {
           test: /\.(js|css|html|svg|json)$/,
           compressionOptions: {
             params: {
-              [zlib.constants.BROTLI_PARAM_QUALITY]: 11,
+              [constants.BROTLI_PARAM_QUALITY]: 11,
             },
           },
           threshold: 10240,
