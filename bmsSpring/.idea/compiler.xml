@@ -11,6 +11,7 @@
         <module name="template-module" />
         <module name="user-service" />
         <module name="file-service" />
+        <module name="next-static-server" />
         <module name="redis-cache" />
         <module name="config-server" />
         <module name="ingredient-service" />
@@ -31,6 +32,7 @@
     <bytecodeTargetLevel>
       <module name="redis-cache.main" target="21" />
       <module name="redis-cache.test" target="21" />
+      <module name="static-server" target="21" />
     </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">
@@ -44,6 +46,7 @@
       <module name="gateway-service" options="-parameters" />
       <module name="ingredient-service" options="-parameters" />
       <module name="kanban-service" options="-parameters" />
+      <module name="next-static-server" options="-parameters" />
       <module name="ollama-search" options="-parameters" />
       <module name="order-service" options="-parameters" />
       <module name="plan-service" options="-parameters" />
@@ -51,6 +54,9 @@
       <module name="recipe-service" options="-parameters" />
       <module name="redis-cache" options="-parameters" />
       <module name="service-registry" options="-parameters" />
+      <module name="static-server" options="-parameters" />
+      <module name="static-server.main" options="-parameters" />
+      <module name="static-server.test" options="-parameters" />
       <module name="template-module" options="-parameters" />
       <module name="user-service" options="-parameters" />
       <module name="websocket-service" options="-parameters" />

@@ -708,6 +708,77 @@ services:
     networks:
       - bms
     restart: unless-stopped
+
+  next-static-server:
+    container_name: next-static-server
+    build:
+      context: .
+      dockerfile: ./bmsSpring/next-static-server/Dockerfile
+
+      args:
+        NEXTAUTH_URL: http://localhost:3000
+        NEXTAUTH_URL_INTERNAL: http://next-js:3000
+        NEXT_PUBLIC_SPRING: http://host.docker.internal:8080
+        NEXT_PUBLIC_SPRING_CLIENT: http://localhost:8080
+        NEXT_PUBLIC_SPRING_CLIENT_WEBSOCKET: ws://localhost:8080
+        OLLAMA_MODEL: gemma3:1b
+        OLLAMA_BASE_URL: http://ollama:11434
+        OLLAMA_EMBEDDING: bge-m3
+        OLLAMA_TEMPERATURE: 0.7
+        OLLAMA_CHAT_COUNT: 20
+        NEXT_ZIPKIN_URL: http://zipkin:9411/api/v2/spans
+        NEXT_SERVICE_NAME: next-js-bms
+        NEXT_OTEL_VERBOSE: 1
+        NEXT_TRACING_PROBABILITY: 0.05
+        POSTGRES_HOST: postgres-vectors
+        POSTGRES_PORT: 5432
+        NEXT_PUBLIC_NEXTAUTH_URL: http://localhost:3000
+        ASSETS_PREFIX_URL: local
+        NODE_ENV: production
+        CACHE_HANDLER_REDIS_URL: redis://redis:6379/10
+        NEXT_AUTH_SECRET: ${NEXTAUTH_SECRET}
+        ENABLE_COMPRESSION: "true"
+    environment:
+      NEXTAUTH_URL: http://localhost:3000
+      NEXTAUTH_URL_INTERNAL: http://next-js:3000
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET}
+      NEXT_SERVICE_NAME: ${NEXT_SERVICE_NAME}
+      NEXT_ZIPKIN_URL: http://zipkin:9411/api/v2/spans
+      NEXT_OTEL_VERBOSE: ${NEXT_OTEL_VERBOSE}
+      NEXT_TRACING_PROBABILITY: ${NEXT_TRACING_PROBABILITY}
+      GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET}
+      GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      NODE_TLS_REJECT_UNAUTHORIZED: 0
+      OLLAMA_MODEL: gemma3:1b
+      OLLAMA_BASE_URL: http://ollama:11434
+      OLLAMA_EMBEDDING: bge-m3
+      LANGCHAIN_CACHE_REDIS_DB: ${LANGCHAIN_CACHE_REDIS_DB}
+      LANGCHAIN_CACHE_REDIS_HOST: redis
+      LANGCHAIN_CACHE_REDIS_PORT: 6379
+      LANGCHAIN_CACHE_REDIS_TTL: 300
+      POSTGRES_HOST: postgres-vectors
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: myuser
+      POSTGRES_PASSWORD: mypassword
+      POSTGRES_DB: scrape_documents
+      NODE_ENV: production
+      CACHE_HANDLER_REDIS_URL: redis://redis:6379/10
+      OLLAMA_NUM_CTX: 2048
+      ENABLE_COMPRESSION: "true"
+      SPRING_CONFIG_IMPORT: configserver:http://host.docker.internal:8888
+      #      EUREKA_CLIENT_SERVICE_URL_DEFAULT_ZONE: http://host.docker.internal:8761/eureka/
+      ZIPKIN_URL: http://zipkin:9411/api/v2/spans
+      EUREKA_CLIENT_ENABLED: false
+      MANAGEMENT_TRACING_SAMPLING_PROBABILITY: 0
+      APP_STATIC_PATH: file:data/static/
+
+    ports:
+      - "8094:8094"
+    networks:
+      - bms
+    restart: unless-stopped
   #    depends_on:
   #      - nginx-gateway
   #      - ollama

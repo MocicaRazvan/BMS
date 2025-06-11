@@ -2,7 +2,44 @@
 <module type="JAVA_MODULE" version="4">
   <component name="NewModuleRootManager" inherit-compiler-output="true">
     <exclude-output />
-    <content url="file://$MODULE_DIR$" />
+    <content url="file://$MODULE_DIR$">
+      <excludeFolder url="file://$MODULE_DIR$/.idea/dataSources" />
+      <excludeFolder url="file://$MODULE_DIR$/bmsSpring/.idea/dataSources" />
+      <excludeFolder url="file://$MODULE_DIR$/bmsSpring/.idea/httpRequests" />
+      <excludeFolder url="file://$MODULE_DIR$/bmsSpring/.idea/inspectionProfiles" />
+      <excludeFolder url="file://$MODULE_DIR$/bmsSpring/archive" />
+      <excludeFolder url="file://$MODULE_DIR$/bmsSpring/archive-service/target" />
+      <excludeFolder url="file://$MODULE_DIR$/bmsSpring/cart-service/target" />
+      <excludeFolder url="file://$MODULE_DIR$/bmsSpring/comment-service/target" />
+      <excludeFolder url="file://$MODULE_DIR$/bmsSpring/config-server/target" />
+      <excludeFolder url="file://$MODULE_DIR$/bmsSpring/day-service/target" />
+      <excludeFolder url="file://$MODULE_DIR$/bmsSpring/file-service/target" />
+      <excludeFolder url="file://$MODULE_DIR$/bmsSpring/gateway-service/target" />
+      <excludeFolder url="file://$MODULE_DIR$/bmsSpring/ingredient-service/target" />
+      <excludeFolder url="file://$MODULE_DIR$/bmsSpring/kanban-service/target" />
+      <excludeFolder url="file://$MODULE_DIR$/bmsSpring/next-static-server/src/main/resources/static" />
+      <excludeFolder url="file://$MODULE_DIR$/bmsSpring/next-static-server/target" />
+      <excludeFolder url="file://$MODULE_DIR$/bmsSpring/ollama-search/target" />
+      <excludeFolder url="file://$MODULE_DIR$/bmsSpring/order-service/target" />
+      <excludeFolder url="file://$MODULE_DIR$/bmsSpring/plan-service/target" />
+      <excludeFolder url="file://$MODULE_DIR$/bmsSpring/post-service/target" />
+      <excludeFolder url="file://$MODULE_DIR$/bmsSpring/recipe-service/target" />
+      <excludeFolder url="file://$MODULE_DIR$/bmsSpring/redis-cache/target" />
+      <excludeFolder url="file://$MODULE_DIR$/bmsSpring/service-registry/target" />
+      <excludeFolder url="file://$MODULE_DIR$/bmsSpring/template-module/target" />
+      <excludeFolder url="file://$MODULE_DIR$/bmsSpring/user-service/target" />
+      <excludeFolder url="file://$MODULE_DIR$/bmsSpring/websocket-service/target" />
+      <excludeFolder url="file://$MODULE_DIR$/db" />
+      <excludeFolder url="file://$MODULE_DIR$/diffusion/.idea" />
+      <excludeFolder url="file://$MODULE_DIR$/nginx/certs" />
+      <excludeFolder url="file://$MODULE_DIR$/scrape/output" />
+      <excludeFolder url="file://$MODULE_DIR$/seed" />
+      <excludeFolder url="file://$MODULE_DIR$/timeSeriesChronos/.idea" />
+      <excludeFolder url="file://$MODULE_DIR$/timeSeriesChronos/.venv" />
+      <excludeFolder url="file://$MODULE_DIR$/timeSeriesChronos/cache_dir" />
+      <excludeFolder url="file://$MODULE_DIR$/toxicPrediction/.idea" />
+      <excludeFolder url="file://$MODULE_DIR$/toxicPrediction/.venv" />
+    </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>

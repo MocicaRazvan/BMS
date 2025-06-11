@@ -40,7 +40,7 @@ public class Config {
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH", "HEAD"));
         configuration.addAllowedHeader("*");
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Cache-Control", "Content-Type", "Accept", "X-Requested-With", "Origin", "Range", "X-Bypass-Cache",
-                "X-Forwarded-For", "X-Forwarded-Host", "X-Forwarded-Port", "X-Forwarded-Prefix", "X-Forwarded-Proto", "X-Forwarded-Scheme", "X-Forwarded-Uri",
+                "X-Forwarded-For", "X-Forwarded-Host", "X-Forwarded-Port", "X-Forwarded-Prefix", "X-Forwarded-Proto", "X-Forwarded-Scheme", "X-Forwarded-Uri", "Accept-Ranges", "Accept-Encoding",
                 NextCsrfValidator.NEXT_CSRF_HEADER, NextCsrfValidator.NEXT_CSRF_HEADER_TOKEN));
         configuration.setExposedHeaders(Arrays.asList("Access-Control-Allow-Origin", "Authorization", "Content-Type", "Content-Range", "Content-Length", "Content-Disposition", "Accept-Ranges", "Cache-Control", "X-Bypass-Cache"));
         configuration.setAllowCredentials(true);
@@ -167,6 +167,8 @@ public class Config {
                                 .stripPrefix(1)
                                 .dedupeResponseHeader("Access-Control-Allow-Origin", "RETAIN_UNIQUE"))
                         .uri(externalServicesConfig.getTimeSeries()))
+                .route("next-static-server", r -> r.path("/_next/static/**")
+                        .uri("lb://next-static-server"))
 
 
                 .route("user-openapi", r -> r.path("/user-service/v3/api-docs")
@@ -310,6 +312,8 @@ public class Config {
                                 .stripPrefix(1)
                                 .dedupeResponseHeader("Access-Control-Allow-Origin", "RETAIN_UNIQUE"))
                         .uri(externalServicesConfig.getTimeSeries()))
+                .route("next-static-server", r -> r.path("/_next/static/**")
+                        .uri("http://next-static-server:8094"))
 
 
                 .route("user-openapi", r -> r.path("/user-service/v3/api-docs")

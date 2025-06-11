@@ -27,11 +27,14 @@
         <option value="$PROJECT_DIR$/ollama-search/pom.xml" />
         <option value="$PROJECT_DIR$/archive-service/pom.xml" />
         <option value="$PROJECT_DIR$/cart-service/pom.xml" />
+        <option value="$PROJECT_DIR$/static-server/pom.xml" />
+        <option value="$PROJECT_DIR$/next-static-server/pom.xml" />
       </list>
     </option>
     <option name="ignoredFiles">
       <set>
         <option value="$PROJECT_DIR$/demo/pom.xml" />
+        <option value="$PROJECT_DIR$/static-server/pom.xml" />
       </set>
     </option>
   </component>

@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/bmsSpring.iml" filepath="$PROJECT_DIR$/.idea/bmsSpring.iml" />
+      <module fileurl="file://$PROJECT_DIR$/websocket-service/websocket-service.iml" filepath="$PROJECT_DIR$/websocket-service/websocket-service.iml" />
     </modules>
   </component>
 </project>
