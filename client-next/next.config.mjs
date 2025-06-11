@@ -55,19 +55,6 @@ const baseConfig = {
       // "@langchain/core",
     ],
   },
-  // async headers() {
-  //   return [
-  //     {
-  //       source: "/_next/static/customdata/:all*",
-  //       headers: [
-  //         {
-  //           key: "Cache-Control",
-  //           value: "public, max-age=31536000, immutable",
-  //         },
-  //       ],
-  //     },
-  //   ];
-  // },
   webpack(config, { dev, isServer }) {
     if (!dev && !isServer) {
       console.log("Adding compression plugins to webpack config");
