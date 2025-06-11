@@ -2,7 +2,7 @@
 
 import { ColumnActionsTexts } from "@/texts/components/table";
 import { planColumnActions } from "@/types/constants";
-import { DataTableTexts } from "@/components/table/data-table";
+import { DataTable, DataTableTexts } from "@/components/table/data-table";
 import { UseApprovedFilterTexts } from "@/components/list/useApprovedFilter";
 import useBinaryFilter, {
   RadioBinaryCriteriaWithCallback,
@@ -52,8 +52,6 @@ import {
   RadioSortDropDownWithExtraDummy,
 } from "@/components/common/radio-sort";
 import { useAuthUserMinRole } from "@/context/auth-user-min-role-context";
-import dynamic from "next/dynamic";
-import DataTableDynamicSkeleton from "@/components/table/data-table-dynamic-skeleton";
 
 export interface PlanTableColumnsTexts {
   id: string;
@@ -103,16 +101,6 @@ const colorMap = {
   VEGETARIAN: "accent",
 } as const;
 
-const DynamicDataTable = dynamic(
-  () =>
-    import("@/components/table/data-table").then(
-      (mod) => mod.DataTable<ResponseWithEntityCount<PlanResponse>>,
-    ),
-  {
-    ssr: false,
-    loading: () => <DataTableDynamicSkeleton />,
-  },
-);
 export default function PlansTable({
   planTableColumnsTexts,
   dataTableTexts,
@@ -753,7 +741,7 @@ export default function PlansTable({
 
   return (
     <div className="px-1 pb-10 w-full  h-full space-y-8 lg:space-y-14">
-      <DynamicDataTable
+      <DataTable
         sizeOptions={sizeOptions}
         fileName={`plans`}
         isFinished={isFinished}

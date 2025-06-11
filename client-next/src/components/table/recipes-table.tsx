@@ -2,7 +2,7 @@
 
 import { ColumnActionsTexts } from "@/texts/components/table";
 import { recipeColumnActions } from "@/types/constants";
-import { DataTableTexts } from "@/components/table/data-table";
+import { DataTable, DataTableTexts } from "@/components/table/data-table";
 import { UseApprovedFilterTexts } from "@/components/list/useApprovedFilter";
 import useFilterDropdown, {
   RadioFieldFilterCriteriaCallback,
@@ -48,8 +48,6 @@ import {
   RadioSortDropDownWithExtraDummy,
 } from "@/components/common/radio-sort";
 import { useAuthUserMinRole } from "@/context/auth-user-min-role-context";
-import dynamic from "next/dynamic";
-import DataTableDynamicSkeleton from "@/components/table/data-table-dynamic-skeleton";
 
 export interface RecipeTableColumnsTexts {
   id: string;
@@ -80,16 +78,7 @@ export interface RecipeTableTexts {
 interface Props extends ExtraTableProps, RecipeTableTexts, UseListProps {
   isSidebarOpen?: boolean;
 }
-const DynamicDataTable = dynamic(
-  () =>
-    import("@/components/table/data-table").then(
-      (mod) => mod.DataTable<ResponseWithEntityCount<RecipeResponse>>,
-    ),
-  {
-    ssr: false,
-    loading: () => <DataTableDynamicSkeleton />,
-  },
-);
+
 export default function RecipeTable({
   forWhom,
   dataTableTexts,
@@ -606,7 +595,7 @@ export default function RecipeTable({
 
   return (
     <div className="px-1 w-full space-y-8 lg:space-y-14 ">
-      <DynamicDataTable
+      <DataTable
         sizeOptions={sizeOptions}
         fileName="recipes"
         isFinished={isFinished}

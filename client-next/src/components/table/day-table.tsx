@@ -2,7 +2,7 @@
 
 import { ColumnActionsTexts } from "@/texts/components/table";
 import { dayColumnActions, getColorsByDayType } from "@/types/constants";
-import { DataTableTexts } from "@/components/table/data-table";
+import { DataTable, DataTableTexts } from "@/components/table/data-table";
 import useFilterDropdown, {
   RadioFieldFilterCriteriaCallback,
   UseFilterDropdownTexts,
@@ -44,8 +44,6 @@ import {
   RadioSortDropDownWithExtraDummy,
 } from "@/components/common/radio-sort";
 import { useAuthUserMinRole } from "@/context/auth-user-min-role-context";
-import dynamic from "next/dynamic";
-import DataTableDynamicSkeleton from "@/components/table/data-table-dynamic-skeleton";
 
 export interface DayTableColumnsTexts {
   id: string;
@@ -74,17 +72,6 @@ export interface DayTableProps
     DayTableTexts {
   isSidebarOpen?: boolean;
 }
-
-const DynamicDataTable = dynamic(
-  () =>
-    import("@/components/table/data-table").then(
-      (mod) => mod.DataTable<ResponseWithEntityCount<DayResponse>>,
-    ),
-  {
-    ssr: false,
-    loading: () => <DataTableDynamicSkeleton />,
-  },
-);
 
 const typeColors = getColorsByDayType();
 
@@ -476,7 +463,7 @@ export default function DaysTable({
 
   return (
     <div className="px-1 pb-10 w-full  h-full space-y-8 lg:space-y-14">
-      <DynamicDataTable
+      <DataTable
         sizeOptions={sizeOptions}
         fileName={"days"}
         isFinished={isFinished}

@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { MoreHorizontal } from "lucide-react";
-import { DataTableTexts } from "@/components/table/data-table";
+import { DataTable, DataTableTexts } from "@/components/table/data-table";
 import useBinaryFilter, {
   RadioBinaryCriteriaWithCallback,
   UseBinaryTexts,
@@ -42,8 +42,6 @@ import {
   RadioSortDropDownWithExtraDummy,
 } from "@/components/common/radio-sort";
 import { useAuthUserMinRole } from "@/context/auth-user-min-role-context";
-import dynamic from "next/dynamic";
-import DataTableDynamicSkeleton from "@/components/table/data-table-dynamic-skeleton";
 
 export interface UserTableColumnsTexts {
   id: string;
@@ -72,17 +70,6 @@ export interface UserTableTexts {
 }
 
 type Props = ExtraTableProps & UseListProps & UserTableTexts;
-
-const DynamicDataTable = dynamic(
-  () =>
-    import("@/components/table/data-table").then(
-      (mod) => mod.DataTable<UserDto>,
-    ),
-  {
-    ssr: false,
-    loading: () => <DataTableDynamicSkeleton />,
-  },
-);
 
 export default function UsersTable({
   mainDashboard,
@@ -601,7 +588,7 @@ export default function UsersTable({
 
   return (
     <div className="px-1 w-full space-y-8 lg:space-y-14">
-      <DynamicDataTable
+      <DataTable
         sizeOptions={sizeOptions}
         fileName={`users`}
         isFinished={isFinished}

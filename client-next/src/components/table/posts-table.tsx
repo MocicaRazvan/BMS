@@ -20,7 +20,7 @@ import { useCallback, useMemo } from "react";
 import { ExtraTableProps } from "@/types/tables";
 import { format, parseISO } from "date-fns";
 import { Link } from "@/navigation/navigation";
-import { DataTableTexts } from "@/components/table/data-table";
+import { DataTable, DataTableTexts } from "@/components/table/data-table";
 import useList, { UseListProps } from "@/hoooks/useList";
 import useTagsExtraCriteria, {
   TagsExtraCriteriaWithCallback,
@@ -46,8 +46,6 @@ import {
 } from "@/components/common/radio-sort";
 import AlertDialogDeletePost from "@/components/dialogs/posts/delete-post";
 import { useAuthUserMinRole } from "@/context/auth-user-min-role-context";
-import dynamic from "next/dynamic";
-import DataTableDynamicSkeleton from "@/components/table/data-table-dynamic-skeleton";
 
 export interface PostTableColumnsTexts {
   id: string;
@@ -74,17 +72,6 @@ export interface PostTableTexts {
 }
 
 type Props = ExtraTableProps & PostTableTexts & UseListProps;
-
-const DynamicDataTable = dynamic(
-  () =>
-    import("@/components/table/data-table").then(
-      (mod) => mod.DataTable<PostResponse>,
-    ),
-  {
-    ssr: false,
-    loading: () => <DataTableDynamicSkeleton />,
-  },
-);
 
 export default function PostsTable({
   forWhom,
@@ -497,7 +484,7 @@ export default function PostsTable({
 
   return (
     <div className="px-1 pb-10 w-full  h-full space-y-8 lg:space-y-14">
-      <DynamicDataTable
+      <DataTable
         sizeOptions={sizeOptions}
         fileName={`posts-${authUser.email}`}
         isFinished={isFinished}

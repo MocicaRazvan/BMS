@@ -3,13 +3,15 @@ import { useCallback, useState } from "react";
 import { useFormatter } from "next-intl";
 import { ColumnDef, Row, Table } from "@tanstack/react-table";
 import { fromStringOfDotToObjectValue } from "@/lib/utils";
-import { format, parseISO } from "date-fns";
 import fetchFactory from "@/lib/fetchers/fetchWithRetry";
 import { getCsrfNextAuthHeader } from "@/actions/get-csr-next-auth";
 
-const PDF_ROUTE = "/api/table/export-pdf" as const;
-const CSV_ROUTE = "/api/table/export-csv" as const;
-type ExportRoute = typeof PDF_ROUTE | typeof CSV_ROUTE;
+enum ROUTES {
+  CSV = "/api/table/export-csv",
+  PDF = "/api/table/export-pdf",
+}
+
+type ExportRoute = (typeof ROUTES)[keyof typeof ROUTES];
 
 export interface UseExportTableArgs<T extends Record<string, any>, V> {
   lastLengthColumns?: string[];
@@ -35,13 +37,18 @@ export default function useExportTable<T extends Record<string, any>, V>({
   specialPDFColumns = [],
 }: UseExportTableArgs<T, V>) {
   const [isExporting, setIsExporting] = useState<Record<ExportRoute, boolean>>({
-    [PDF_ROUTE]: false,
-    [CSV_ROUTE]: false,
+    [ROUTES.PDF]: false,
+    [ROUTES.CSV]: false,
   });
   const formatIntl = useFormatter();
 
   const getExport = useCallback(
-    (rows: Row<T>[]) => {
+    async (rows: Row<T>[]) => {
+      const [format, parseISO] = await Promise.all([
+        import("date-fns/format").then((m) => m.format),
+        import("date-fns/parseISO").then((m) => m.parseISO),
+      ]);
+
       const tableColumnHeaders = columns
         .filter((c) =>
           table
@@ -52,7 +59,6 @@ export default function useExportTable<T extends Record<string, any>, V>({
         )
         .reduce(
           (acc, cur) => {
-            console.log("cur", cur);
             const obj = {
               id: "",
               accessorKey: "",
@@ -138,10 +144,10 @@ export default function useExportTable<T extends Record<string, any>, V>({
           return value as string | number;
         }),
       );
-      return () => ({
+      return {
         tableColumnHeaders,
         tableRows,
-      });
+      };
     },
     [
       JSON.stringify(columns),
@@ -160,9 +166,11 @@ export default function useExportTable<T extends Record<string, any>, V>({
         ...prev,
         [route]: true,
       }));
-      const { tableColumnHeaders, tableRows } = getExport(rows)();
+      const [{ tableColumnHeaders, tableRows }, csrf] = await Promise.all([
+        getExport(rows),
+        getCsrfNextAuthHeader(),
+      ]);
       const finalFileName = `${fileName}-${new Date().toISOString()}.${extension}`;
-      const csrf = await getCsrfNextAuthHeader();
       try {
         const [res, saveAs] = await Promise.all([
           fetchFactory(fetch)(route, {
@@ -194,17 +202,17 @@ export default function useExportTable<T extends Record<string, any>, V>({
   );
 
   const exportCsv = useCallback(
-    (rows: Row<T>[]) => exportBase(rows, CSV_ROUTE, "csv"),
+    (rows: Row<T>[]) => exportBase(rows, ROUTES.CSV, "csv"),
     [exportBase],
   );
 
   const exportPdf = useCallback(
-    (rows: Row<T>[]) => exportBase(rows, PDF_ROUTE, "pdf"),
+    (rows: Row<T>[]) => exportBase(rows, ROUTES.PDF, "pdf"),
     [exportBase],
   );
 
-  const isPdfExporting = isExporting[PDF_ROUTE];
-  const isCsvExporting = isExporting[CSV_ROUTE];
+  const isCsvExporting = isExporting[ROUTES.CSV];
+  const isPdfExporting = isExporting[ROUTES.PDF];
   const isOneExporting = isPdfExporting || isCsvExporting;
 
   return {

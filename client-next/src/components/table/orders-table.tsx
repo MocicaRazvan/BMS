@@ -1,5 +1,5 @@
 "use client";
-import { DataTableTexts } from "@/components/table/data-table";
+import { DataTable, DataTableTexts } from "@/components/table/data-table";
 import { ExtraTableProps } from "@/types/tables";
 import useList, { UseListProps } from "@/hoooks/useList";
 import { Link } from "@/navigation/navigation";
@@ -33,9 +33,6 @@ import {
 } from "@/components/common/radio-sort";
 import OverflowTextTooltip from "@/components/common/overflow-text-tooltip";
 import { useAuthUserMinRole } from "@/context/auth-user-min-role-context";
-import dynamic from "next/dynamic";
-import DataTableDynamicSkeleton from "@/components/table/data-table-dynamic-skeleton";
-
 export interface OrderTableColumnsTexts {
   id: string;
   date: string;
@@ -56,17 +53,6 @@ export interface OrderTableTexts {
 export type OrdersTableProps = ExtraTableProps & OrderTableTexts & UseListProps;
 
 const fieldKeys = ["country", "city", "state"] as const;
-
-const DynamicDataTable = dynamic(
-  () =>
-    import("@/components/table/data-table").then(
-      (mod) => mod.DataTable<OrderDtoWithAddress>,
-    ),
-  {
-    ssr: false,
-    loading: () => <DataTableDynamicSkeleton />,
-  },
-);
 
 export default function OrdersTable({
   search,
@@ -389,7 +375,7 @@ export default function OrdersTable({
 
   return (
     <div className="px-1 pb-10 w-full  h-full space-y-8 lg:space-y-14">
-      <DynamicDataTable
+      <DataTable
         sizeOptions={sizeOptions}
         fileName={`orders`}
         isFinished={isFinished}

@@ -18,7 +18,7 @@ import {
 } from "@/types/dto";
 import React, { useCallback, useMemo } from "react";
 import { ColumnDef } from "@tanstack/react-table";
-import { DataTableTexts } from "@/components/table/data-table";
+import { DataTable, DataTableTexts } from "@/components/table/data-table";
 import { getCalories } from "@/types/responses";
 import { Badge } from "@/components/ui/badge";
 import { ingredientColumnActions } from "@/types/constants";
@@ -45,8 +45,6 @@ import {
   RadioSortDropDownWithExtraDummy,
 } from "@/components/common/radio-sort";
 import { useAuthUserMinRole } from "@/context/auth-user-min-role-context";
-import dynamic from "next/dynamic";
-import DataTableDynamicSkeleton from "@/components/table/data-table-dynamic-skeleton";
 
 export interface IngredientTableColumnTexts {
   id: string;
@@ -92,19 +90,7 @@ const typeColorMap = {
   OMNIVORE: "default",
   VEGETARIAN: "accent",
 };
-const DynamicDataTable = dynamic(
-  () =>
-    import("@/components/table/data-table").then(
-      (mod) =>
-        mod.DataTable<
-          ResponseWithEntityCount<IngredientNutritionalFactResponse>
-        >,
-    ),
-  {
-    ssr: false,
-    loading: () => <DataTableDynamicSkeleton />,
-  },
-);
+
 export default function IngredientsTable({
   forWhom,
   mainDashboard,
@@ -654,7 +640,7 @@ export default function IngredientsTable({
 
   return (
     <div className="px-1 w-full space-y-8 lg:space-y-14 ">
-      <DynamicDataTable
+      <DataTable
         sizeOptions={sizeOptions}
         fileName="ingredients"
         isFinished={isFinished}
