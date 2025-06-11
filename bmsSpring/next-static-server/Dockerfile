@@ -12,7 +12,7 @@ RUN mvn package -DskipTests -Dmaven.compiler.source=22 -Dmaven.compiler.target=2
 
 
 
-# build nextjs
+# Build Nextjs
 FROM node:20-alpine AS nextjsbase
 
 
@@ -66,33 +66,6 @@ ENV CACHE_HANDLER_REDIS_URL=${CACHE_HANDLER_REDIS_URL}
 
 RUN npm run ci:build
 
-FROM nextjsbase AS nextjsfinal
-WORKDIR /app
-
-ENV NODE_ENV=production
-ENV NEXT_TELEMETRY_DISABLED=1
-
-RUN apk add --no-cache curl netcat-openbsd
-
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nextjs
-
-COPY --from=nextjsbuilder /app/public ./public
-# FOR LANGCHAIN DOC LOADER
-COPY --from=nextjsbuilder /app/src ./src
-COPY --from=nextjsbuilder /app/scrape ./scrape
-
-
-RUN mkdir .next
-RUN chown nextjs:nodejs .next
-
-
-COPY --from=nextjsbuilder --chown=nextjs:nodejs /app/.next/standalone ./
-COPY --from=nextjsbuilder --chown=nextjs:nodejs /app/.next/static ./.next/static
-
-
-
-
 # ---------------------- RUNTIME IMAGE ----------------------
 FROM alpine/java:22.0.2-jre AS runtime
 WORKDIR /app
@@ -101,7 +74,7 @@ RUN apk add --no-cache curl netcat-openbsd
 
 
 COPY --from=build /app/target/next-static-server-0.0.1-SNAPSHOT.jar .
-COPY --from=nextjsfinal /app/.next/static  ./data/static
+COPY --from=nextjsbuilder /app/.next/static  ./data/static
 
 
 ENTRYPOINT ["java", "--enable-preview", "-jar", "next-static-server-0.0.1-SNAPSHOT.jar"]
