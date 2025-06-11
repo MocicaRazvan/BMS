@@ -33,6 +33,8 @@
       <module name="redis-cache.main" target="21" />
       <module name="redis-cache.test" target="21" />
       <module name="static-server" target="21" />
+      <module name="static-server.main" target="21" />
+      <module name="static-server.test" target="21" />
     </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">
