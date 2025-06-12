@@ -12,8 +12,14 @@ on:
 jobs:
   build-and-push-nextjs:
     uses: ./.github/workflows/next-js.yml
+    secrets:
+      DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
 
   build-and-push-next-static-server:
     needs: build-and-push-nextjs
     uses: ./.github/workflows/next-static-server.yml
+    secrets:
+      DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
 
