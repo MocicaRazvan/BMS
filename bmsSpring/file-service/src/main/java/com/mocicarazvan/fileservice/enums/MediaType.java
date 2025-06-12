@@ -42,4 +42,14 @@ public enum MediaType {
         };
     }
 
+    public String getContentTypeValueMedia() {
+        return switch (this) {
+            case PNG -> "png";
+            case JPG, JPEG -> "jpeg";
+            case MP4 -> "mp4";
+            case ALL -> "**";
+        };
+    }
+
+
 }

@@ -121,7 +121,7 @@ public class MediaServiceImpl implements MediaService {
                                     response.getHeaders().setLastModified(timestamp);
 
 
-                                    String mediaType = model.isWebpOutputEnabled() ? ".webp" : MediaType.fromValue(attch).getValue();
+                                    String mediaType = model.isWebpOutputEnabled() ? ".webp" : MediaType.fromValue(attch).getContentTypeValueMedia();
 
                                     response.getHeaders().setContentDisposition(
                                             ContentDisposition.attachment()
@@ -201,7 +201,7 @@ public class MediaServiceImpl implements MediaService {
                                                     .filename(gridId + fileAttch)
                                                     .build()
                                     );
-                                    response.getHeaders().set(HttpHeaders.CONTENT_TYPE, "image/" + mediaType.getValue());
+                                    response.getHeaders().set(HttpHeaders.CONTENT_TYPE, "image/" + mediaType.getContentTypeValueMedia());
                                 }
                             }
 
