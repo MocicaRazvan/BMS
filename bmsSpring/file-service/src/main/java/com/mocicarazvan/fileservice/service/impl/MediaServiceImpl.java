@@ -176,7 +176,6 @@ public class MediaServiceImpl implements MediaService {
                             CacheHeaderUtils.setCachingHeaders(response, gridFSFile, gridId, fileType, httpRanges);
 
 
-                            response.getHeaders().set(HttpHeaders.ACCEPT_RANGES, "bytes");
                             String fileAttch = !mediaType.equals(MediaType.ALL) ? "." + mediaType.getValue() : "";
 
                             if (fileType.equals(FileType.VIDEO)) {
@@ -186,6 +185,8 @@ public class MediaServiceImpl implements MediaService {
                                                 .build()
                                 );
                                 response.getHeaders().set(HttpHeaders.CONTENT_TYPE, "video/mp4");
+                                response.getHeaders().set(HttpHeaders.ACCEPT_RANGES, "bytes");
+
                             } else if (fileType.equals(FileType.IMAGE)) {
                                 response.getHeaders().setContentDisposition(
                                         ContentDisposition.attachment()
