@@ -119,9 +119,10 @@ export function PlanCharacteristic({
     data,
   });
 
-  const max = useMemo(() => {
-    return Math.max(...data.map((item) => item[dataKey]));
-  }, [JSON.stringify(data), dataKey]);
+  const max = useMemo(
+    () => Math.max(...data.map((item) => item[dataKey])),
+    [data, dataKey],
+  );
 
   return (
     <div className="w-full h-full">
@@ -225,7 +226,7 @@ export function PlanCharacteristicScatter({
   dataKey,
   chartName,
 }: ScatterProps) {
-  const stackId = uuidv4();
+  // const stackId = uuidv4();
   const chartConfig = {
     count: {
       label: countLabel,

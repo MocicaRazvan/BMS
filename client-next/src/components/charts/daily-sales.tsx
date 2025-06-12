@@ -77,9 +77,7 @@ export default function DailySales({
     path,
     authToken: true,
     method: "GET",
-    queryParams: {
-      ...dateRange,
-    },
+    queryParams: dateRange,
   });
 
   const formattedData: TotalAmountCountOrdersData[] = useMemo(

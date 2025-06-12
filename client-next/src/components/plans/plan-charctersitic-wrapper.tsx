@@ -229,12 +229,12 @@ export function PlanCharacteristicWrapperCompose({
 
   const formattedTypeData = useMemo(
     () => mapToDate(typeMessages),
-    [JSON.stringify(typeMessages)],
+    [typeMessages],
   );
 
   const formattedObjectiveData = useMemo(
     () => mapToDate(objectiveMessages),
-    [JSON.stringify(objectiveMessages)],
+    [objectiveMessages],
   );
   return (
     <div className="w-full h-full">
@@ -307,7 +307,7 @@ export function PlanCharacteristicWrapperScatter({
     });
   const formattedScatterData = useMemo(
     () => mapToDate(scatterMessages),
-    [JSON.stringify(scatterMessages)],
+    [scatterMessages],
   );
 
   return (
