@@ -712,8 +712,8 @@ services:
   next-static-server:
     container_name: next-static-server
     build:
-      context: .
-      dockerfile: ./bmsSpring/next-static-server/Dockerfile
+      context: ./bmsSpring/next-static-server
+      dockerfile: Dockerfile
 
       args:
         NEXTAUTH_URL: http://localhost:3000

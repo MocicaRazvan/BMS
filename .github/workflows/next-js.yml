@@ -2,11 +2,12 @@ name: NextJS Docker Image
 
 on:
   workflow_dispatch: { }
-  push:
-    branches:
-      - main
-    paths:
-      - 'client-next/**'
+  workflow_call: { }
+#  push:
+#    branches:
+#      - main
+#    paths:
+#      - 'client-next/**'
 jobs:
   build-and-push-next-js:
     uses: ./.github/workflows/build-and-push.yml

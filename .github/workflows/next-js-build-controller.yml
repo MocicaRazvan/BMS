@@ -1,0 +1,19 @@
+name: NextJS Build Controller
+on:
+  workflow_dispatch: { }
+  push:
+    branches:
+      - main
+    paths:
+      - 'client-next/**'
+      - 'bmsSpring/next-static-server/**'
+
+
+jobs:
+  build-and-push-nextjs:
+    uses: ./.github/workflows/next-js.yml
+
+  build-and-push-next-static-server:
+    needs: build-and-push-nextjs
+    uses: ./.github/workflows/next-static-server.yml
+

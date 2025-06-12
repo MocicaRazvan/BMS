@@ -1,12 +1,13 @@
 name: Next Static Server Docker Image
 on:
   workflow_dispatch: { }
-  push:
-    branches:
-      - main
-    paths:
-      - 'client-next/**'
-      - 'bmsSpring/next-static-server/**'
+  workflow_call: { }
+#  push:
+#    branches:
+#      - main
+#    paths:
+#      - 'client-next/**'
+#      - 'bmsSpring/next-static-server/**'
 jobs:
   test-next-static-server:
     uses: ./.github/workflows/test-run.yml
@@ -17,27 +18,8 @@ jobs:
     uses: ./.github/workflows/build-and-push.yml
     with:
       image-name: next-static-server-bms
-      context: .
+      context: ./bmsSpring/next-static-server
       dockerfile: ./bmsSpring/next-static-server/Dockerfile
-      build-args: |
-        NEXT_PUBLIC_SPRING=${{vars.NEXT_PUBLIC_SPRING}}
-        NEXT_PUBLIC_SPRING_CLIENT=${{vars.NEXT_PUBLIC_SPRING_CLIENT}}
-        NEXT_PUBLIC_SPRING_CLIENT_WEBSOCKET=${{vars.NEXT_PUBLIC_SPRING_CLIENT_WEBSOCKET}}
-        NEXTAUTH_URL=${{vars.NEXTAUTH_URL}}
-        NEXTAUTH_URL_INTERNAL=${{vars.NEXTAUTH_URL_INTERNAL}}
-        OLLAMA_MODEL=${{vars.OLLAMA_MODEL}}
-        OLLAMA_BASE_URL=${{vars.OLLAMA_BASE_URL}}
-        OLLAMA_EMBEDDING=${{vars.OLLAMA_EMBEDDING}}
-        OLLAMA_TEMPERATURE=${{vars.OLLAMA_TEMPERATURE}}
-        OLLAMA_CHAT_COUNT=${{vars.OLLAMA_CHAT_COUNT}}
-        NEXT_ZIPKIN_URL=${{vars.NEXT_ZIPKIN_URL}}
-        NEXT_SERVICE_NAME=${{vars.NEXT_SERVICE_NAME}}
-        NEXT_OTEL_VERBOSE=${{vars.NEXT_OTEL_VERBOSE}}
-        NEXT_TRACING_PROBABILITY=${{vars.NEXT_TRACING_PROBABILITY}}
-        POSTGRES_HOST=${{vars.POSTGRES_HOST}}
-        POSTGRES_PORT=${{vars.POSTGRES_PORT}}
-        NEXT_PUBLIC_NEXTAUTH_URL=${{vars.NEXTAUTH_URL}}
-        CACHE_HANDLER_REDIS_URL=${{vars.CACHE_HANDLER_REDIS_URL}}
     secrets:
       DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}

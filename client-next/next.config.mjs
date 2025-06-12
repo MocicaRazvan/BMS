@@ -119,6 +119,23 @@ const finalConfig = (phase) => {
     ...baseConfig,
     assetPrefix,
     compress: enableCompression,
+    ...(!isDev
+      ? {
+          headers: async () => {
+            return [
+              {
+                source: "/:path*{/}?",
+                headers: [
+                  {
+                    key: "X-Accel-Buffering",
+                    value: "no",
+                  },
+                ],
+              },
+            ];
+          },
+        }
+      : {}),
   };
   /**
    * @type {import('next').NextConfig}
