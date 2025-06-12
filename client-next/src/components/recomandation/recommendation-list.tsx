@@ -51,7 +51,7 @@ export default function RecommendationList<
     .filter((m) => m.id !== itemId);
 
   return (
-    <div className="space-y-10 overflow-hidden ">
+    <div className="space-y-10 overflow-hidden">
       <h3 className="font-semibold tracking-tighter text-lg md:text-[26px]">
         {texts.title}
       </h3>

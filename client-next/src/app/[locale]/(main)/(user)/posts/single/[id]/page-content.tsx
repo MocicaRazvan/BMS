@@ -1,6 +1,6 @@
 "use client";
 
-import React, { Suspense, useCallback } from "react";
+import React, { useCallback } from "react";
 import { fetchStream } from "@/lib/fetchers/fetchStream";
 import { CustomEntityModel, PostResponse } from "@/types/dto";
 import LoadingSpinner from "@/components/common/loading-spinner";
@@ -14,7 +14,6 @@ import ElementHeader, {
 } from "@/components/common/element-header";
 import CustomImageCarousel from "@/components/common/custom-image-crousel";
 import AuthorProfile from "@/components/common/author-profile";
-import Loader from "@/components/ui/spinner";
 import { PostCommentsTexts } from "@/texts/components/posts";
 import PostComments from "@/components/posts/post-comments";
 import { useGetTitleBodyUser } from "@/hoooks/useGetTitleBodyUser";
@@ -189,13 +188,11 @@ export default function SinglePostPageContent({
         <AuthorProfile author={user} />
       </div>
       {postState.approved && (
-        <Suspense fallback={<Loader className="w-full h-full" />}>
-          <PostComments
-            postId={item.id}
-            {...postCommentsTexts}
-            authUser={authUser}
-          />
-        </Suspense>
+        <PostComments
+          postId={item.id}
+          {...postCommentsTexts}
+          authUser={authUser}
+        />
       )}
       {showRecommendations && (
         <>

@@ -233,7 +233,7 @@ export default function GridList<T extends TitleBodyImagesUserDto>({
               </motion.div>
             )}
         </div>
-        <div className={cn("mt-6", items.length === 0 && "hidden")}>
+        <div className={cn("mt-10", items.length === 0 && "hidden")}>
           <DataTablePagination
             pageInfo={pageInfo}
             setPageInfo={setPageInfo}

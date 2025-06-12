@@ -85,7 +85,7 @@ export default function PostComments({
         setComments((prev) => [...prev, ...messages.map((m) => m.content)]);
       }
     }
-  }, [JSON.stringify(messages)]);
+  }, [messages]);
 
   const isMore = pageSize * (page + 1) < totalComments;
 
@@ -162,7 +162,7 @@ export default function PostComments({
   );
 
   return (
-    <div className=" mb-40 flex items-center justify-center flex-col gap-4 transition-all max-w-3xl w-full  mx-auto mt-20">
+    <div className="mb-40 flex items-center justify-center flex-col gap-4 transition-all max-w-4xl w-full mx-auto mt-20">
       <div className="mb-10 w-full">
         <CommentAccordion
           postId={postId}
