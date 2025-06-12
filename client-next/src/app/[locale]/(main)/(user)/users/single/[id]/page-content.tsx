@@ -5,7 +5,7 @@ import { CustomEntityModel, UserDto } from "@/types/dto";
 import { BaseError } from "@/types/responses";
 import LoadingSpinner from "@/components/common/loading-spinner";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
-import noImg from "@/../public/noImage.jpg";
+import noImg from "../../../../../../../assests/noImage.jpg";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { AlertDialogMakeTrainer } from "@/components/dialogs/user/make-trainer-alert";

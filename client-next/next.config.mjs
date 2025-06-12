@@ -3,7 +3,6 @@ import CompressionPlugin from "compression-webpack-plugin";
 import { constants } from "node:zlib";
 import path from "path";
 import { PHASE_DEVELOPMENT_SERVER } from "next/constants.js";
-
 import generated from "@next/bundle-analyzer";
 
 const withNextIntl = createNextIntlPlugin();
@@ -16,6 +15,9 @@ const baseConfig = {
   // reactStrictMode: false,
   output: "standalone",
   images: {
+    minimumCacheTTL: 2678400,
+    contentDispositionType: "inline",
+    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
     remotePatterns: [
       {
         hostname: "localhost",

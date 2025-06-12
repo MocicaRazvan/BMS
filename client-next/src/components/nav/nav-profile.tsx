@@ -11,7 +11,7 @@ import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { Link } from "@/navigation/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import noImg from "../../../public/noImage.jpg";
+import noImg from "../../assests/noImage.jpg";
 import DaysCalendarCTA, {
   DaysCalendarCTATexts,
 } from "@/components/days-calendar/days-calendar-cta";

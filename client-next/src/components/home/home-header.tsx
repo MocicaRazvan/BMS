@@ -1,13 +1,13 @@
 "use client";
 
 import Image from "next/image";
-import picture1 from "@/../public/images/Picture1.jpg";
-import picture2 from "@/../public/images/Picture2.jpg";
-import picture3 from "@/../public/images/Picture3.jpg";
-import picture4 from "@/../public/images/Picture4.jpg";
-import picture5 from "@/../public/images/Picture5.jpg";
-import picture6 from "@/../public/images/Picture6.jpg";
-import picture7 from "@/../public/images/Picture7.jpg";
+import picture1 from "@/assests/images/header/Picture1.jpg";
+import picture2 from "@/assests/images/header/Picture2.jpg";
+import picture3 from "@/assests/images/header/Picture3.jpg";
+import picture4 from "@/assests/images/header/Picture4.jpg";
+import picture5 from "@/assests/images/header/Picture5.jpg";
+import picture6 from "@/assests/images/header/Picture6.jpg";
+import picture7 from "@/assests/images/header/Picture7.jpg";
 import {
   AnimatePresence,
   motion,

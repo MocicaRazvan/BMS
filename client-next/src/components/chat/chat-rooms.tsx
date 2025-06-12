@@ -23,7 +23,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Trash2 } from "lucide-react";
 import { useCurRooms } from "@/context/cur-rooms-context";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
-import noImg from "../../../public/noImage.jpg";
+import noImg from "../../assests/noImage.jpg";
 import { DeleteDialogTexts } from "@/texts/components/dialog";
 import useReceiveTyping from "@/hoooks/chat/use-receive-typing";
 

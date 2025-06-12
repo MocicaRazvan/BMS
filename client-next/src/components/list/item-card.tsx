@@ -1,6 +1,6 @@
 "use client";
 import { cn, truncate } from "@/lib/utils";
-import noImg from "../../../public/noImage.jpg";
+import noImg from "../../assests/noImage.jpg";
 import { ReactNode, useMemo } from "react";
 import { ResponseWithUserDtoEntity, TitleBodyImagesUserDto } from "@/types/dto";
 import { format, parseISO } from "date-fns";

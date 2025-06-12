@@ -13,10 +13,10 @@ import {
   HomeTestimonialsTexts,
   TypeTestimonials,
 } from "@/components/home/home-testimonials";
-import person1 from "@/../public/images/people/person1.jpg";
-import person2 from "@/../public/images/people/person2.jpg";
-import person3 from "@/../public/images/people/person3.jpg";
-import person4 from "@/../public/images/people/person4.jpg";
+import person1 from "@/assests/images/people/person1.jpg";
+import person2 from "@/assests/images/people/person2.jpg";
+import person3 from "@/assests/images/people/person3.jpg";
+import person4 from "@/assests/images/people/person4.jpg";
 import Logo from "@/components/logo/logo";
 import LogoWall from "@/components/reactbits/logo-wall";
 import HomeAboutWrapper from "@/components/home/home-about-wrapper";

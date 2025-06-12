@@ -2,7 +2,7 @@ import { UserDto } from "@/types/dto";
 import { HTMLAttributes } from "react";
 import { Link } from "@/navigation/navigation";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
-import noImg from "../../../public/noImage.jpg";
+import noImg from "../../assests/noImage.jpg";
 
 interface Props extends HTMLAttributes<HTMLDivElement> {
   author: UserDto;
