@@ -25,7 +25,7 @@ const fetchFilesObjectURL = async (urls: string[]) => {
       method: "GET",
       headers: {
         "X-Bypass-Cache": "1",
-        Accept: "image/png,image/jpeg",
+        Accept: "image/png,image/jpeg,video/mp4",
       },
     });
     const mimeType =
