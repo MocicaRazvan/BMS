@@ -1,7 +1,7 @@
 import archiver from "archiver";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { PassThrough, Readable } from "node:stream";
+import { PassThrough } from "node:stream";
 
 const FormDataSchema = z.object({
   fileName: z.string().min(1, "Field name is required"),
