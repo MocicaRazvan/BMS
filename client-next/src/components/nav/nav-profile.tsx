@@ -69,10 +69,6 @@ export default function NavProfile({ authUser, dayCalendarCTATexts }: Props) {
                 {...dayCalendarCTATexts}
                 className="w-fit text-[16px]"
                 size={20}
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                }}
               />
             </div>
             <div>
