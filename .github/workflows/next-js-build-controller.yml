@@ -51,6 +51,7 @@ jobs:
       image-name: next-static-server-bms
       context: ./bmsSpring/next-static-server
       dockerfile: ./bmsSpring/next-static-server/Dockerfile
+      pull: true
     secrets:
       DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}

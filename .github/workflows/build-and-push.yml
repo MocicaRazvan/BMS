@@ -24,6 +24,11 @@ on:
         required: false
         type: string
         default: ""
+      pull:
+        description: 'Whether to pull the base image before building'
+        required: false
+        type: boolean
+        default: false
     secrets:
       DOCKERHUB_PASSWORD:
         description: 'Docker Hub password'
@@ -75,3 +80,4 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: ${{ inputs.build-args || '' }}
+          pull: ${{ inputs.pull }}
