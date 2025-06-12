@@ -216,20 +216,22 @@ export default function GridList<T extends TitleBodyImagesUserDto>({
               />
             </motion.div>
           ))}
-          {!isFinished && items.length > 0 && (
-            <motion.div
-              className="w-full flex flex-col items-center justify-center"
-              initial={{ opacity: 0, y: 50, scale: 0.5 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              transition={{
-                duration: 0.25,
-                delay: 1,
-              }}
-            >
-              <Loader className="w-full" />
-              <p className="font-bold">{gettingMore}</p>
-            </motion.div>
-          )}
+          {!isFinished &&
+            items.length > 0 &&
+            items.length < pageInfo.pageSize && (
+              <motion.div
+                className="w-full flex flex-col items-center justify-center"
+                initial={{ opacity: 0, y: 50, scale: 0.5 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                transition={{
+                  duration: 0.25,
+                  delay: 0.75,
+                }}
+              >
+                <Loader className="w-full" />
+                <p className="font-bold">{gettingMore}</p>
+              </motion.div>
+            )}
         </div>
         <div className={cn("mt-6", items.length === 0 && "hidden")}>
           <DataTablePagination
