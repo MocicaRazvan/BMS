@@ -12,7 +12,9 @@ export default function OauthProviders() {
     <div className="my-10 flex flex-col gap-5 items-center justify-center w-full">
       <div className="flex items-center my-5 w-full gap-4">
         <hr className="flex-grow" />
-        <h2 className="text-lg font-bold tracking-tighter">Try A Provider</h2>
+        <h2 className="text-lg font-bold tracking-tighter">
+          {"Try A Provider"}
+        </h2>
         <hr className="flex-grow" />
       </div>
       <Button
@@ -25,7 +27,7 @@ export default function OauthProviders() {
           src={theme === "dark" ? githubWhiteIcon : githubIcon}
           alt={"Google logo"}
         />
-        <p className="text-lg font-bold">Use Github</p>
+        <p className="text-lg font-bold">{"Use Github"}</p>
       </Button>
       <Button
         variant="outline"
@@ -34,7 +36,7 @@ export default function OauthProviders() {
         onClick={() => signIn("custom-google-provider")}
       >
         <Image src={googleIcon} alt={"Github logo"} width={50} height={50} />
-        <p className="text-lg font-bold">Use Google</p>
+        <p className="text-lg font-bold">{"Use Google"}</p>
       </Button>
     </div>
   );

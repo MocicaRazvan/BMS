@@ -1,4 +1,4 @@
-
+# syntax = docker/dockerfile:1.3
 ARG NEXTJS_IMAGE_TAG=latest
 
 # Base image for Maven build
@@ -17,7 +17,7 @@ RUN mvn package -DskipTests -Dmaven.compiler.source=22 -Dmaven.compiler.target=2
 
 
 # ---------------------- NEXTJS IMAGE ----------------------
-FROM  razvanmocica/next-js-bms:${NEXTJS_IMAGE_TAG} AS nextjs
+FROM --pull razvanmocica/next-js-bms:${NEXTJS_IMAGE_TAG} AS nextjs
 
 # ---------------------- RUNTIME IMAGE ----------------------
 FROM alpine/java:22.0.2-jre AS runtime
