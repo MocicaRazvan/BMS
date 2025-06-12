@@ -102,7 +102,7 @@ public class MediaServiceImpl implements MediaService {
                 Mono.defer(() -> imageRedisRepository.getImage(gridId, width, height, quality, webpOutputEnabled).flatMap(
                                 model -> {
                                     byte[] cachedImage = model.getImageData();
-                                    String attch = model.isWebpOutputEnabled() ? "webp" : model.getAttachment();
+                                    String attch = model.isWebpOutputEnabled() ? ".webp" : model.getAttachment();
                                     long timestamp = model.getTimestamp();
 
 
@@ -188,14 +188,19 @@ public class MediaServiceImpl implements MediaService {
                                 response.getHeaders().set(HttpHeaders.ACCEPT_RANGES, "bytes");
 
                             } else if (fileType.equals(FileType.IMAGE)) {
-                                response.getHeaders().setContentDisposition(
-                                        ContentDisposition.attachment()
-                                                .filename(gridId + fileAttch)
-                                                .build()
-                                );
                                 if (webpOutputEnabled) {
                                     response.getHeaders().set(HttpHeaders.CONTENT_TYPE, "image/webp");
+                                    response.getHeaders().setContentDisposition(
+                                            ContentDisposition.attachment()
+                                                    .filename(gridId + ".webp")
+                                                    .build()
+                                    );
                                 } else {
+                                    response.getHeaders().setContentDisposition(
+                                            ContentDisposition.attachment()
+                                                    .filename(gridId + fileAttch)
+                                                    .build()
+                                    );
                                     response.getHeaders().set(HttpHeaders.CONTENT_TYPE, "image/" + mediaType.getValue());
                                 }
                             }
