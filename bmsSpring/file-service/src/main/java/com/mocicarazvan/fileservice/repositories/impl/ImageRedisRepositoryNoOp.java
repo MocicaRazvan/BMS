@@ -24,22 +24,22 @@ public class ImageRedisRepositoryNoOp implements ImageRedisRepository {
     }
 
     @Override
-    public Mono<Void> saveImage(String gridId, Integer width, Integer height, Double quality, byte[] imageData, String attch) {
+    public Mono<Void> saveImage(String gridId, Integer width, Integer height, Double quality, Boolean webpOutputEnabled, byte[] imageData, String attch) {
         return Mono.empty();
     }
 
     @Override
-    public Mono<CachedImageRedisModel> getImage(String gridId, Integer width, Integer height, Double quality) {
+    public Mono<CachedImageRedisModel> getImage(String gridId, Integer width, Integer height, Double quality, Boolean webpOutputEnable) {
         return Mono.empty();
     }
 
     @Override
-    public Mono<Void> deleteImage(String gridId, Integer width, Integer height, Double quality) {
+    public Mono<Void> deleteImage(String gridId, Integer width, Integer height, Double quality, Boolean webpOutputEnable) {
         return Mono.empty();
     }
 
     @Override
-    public String generateCacheKey(String gridId, Integer width, Integer height, Double quality) {
+    public String generateCacheKey(String gridId, Integer width, Integer height, Double quality, Boolean webpOutputEnable) {
         return "";
     }
 

@@ -12,7 +12,7 @@ import java.io.InputStream;
 public interface BytesService {
     Flux<DataBuffer> getVideoByRange(ReactiveGridFsResource file, long start, long end);
 
-    Flux<DataBuffer> convertWithThumblinator(Integer width, Integer height, Double quality, Flux<DataBuffer> downloadStream, MediaType mediaType, ServerHttpResponse response);
+    Flux<DataBuffer> convertWithThumblinator(Integer width, Integer height, Double quality, Flux<DataBuffer> downloadStream, MediaType mediaType, Boolean webpOutputEnabled, ServerHttpResponse response);
 
     Mono<DataBuffer> getImageFallback(ServerHttpResponse response, InputStream imageInputStream);
 }

@@ -112,7 +112,11 @@ public class BytesServiceImpl implements BytesService {
 
 
     @Override
-    public Flux<DataBuffer> convertWithThumblinator(Integer width, Integer height, Double quality, Flux<DataBuffer> downloadStream, MediaType mediaType, ServerHttpResponse response) {
+    public Flux<DataBuffer> convertWithThumblinator(Integer width, Integer height, Double quality, Flux<DataBuffer> downloadStream, MediaType mediaType,
+                                                    Boolean webpOutputEnabled,
+                                                    ServerHttpResponse response
+
+    ) {
         return DataBufferUtils.join(downloadStream)
                 .publishOn(Schedulers.boundedElastic())
                 .flatMapMany(dataBuffer -> {
@@ -153,7 +157,9 @@ public class BytesServiceImpl implements BytesService {
                                 return getImageFallback(response, inputStream);
                             }
 
-                            String formatName = mediaFormatName != null ? mediaFormatName : reader.getFormatName();
+                            String formatName = webpOutputEnabled ?
+                                    "webp"
+                                    : mediaFormatName != null ? mediaFormatName : reader.getFormatName();
                             if (mediaType == MediaType.ALL) {
                                 response.getHeaders().set(HttpHeaders.CONTENT_TYPE, "image/" + formatName.toLowerCase());
                             }

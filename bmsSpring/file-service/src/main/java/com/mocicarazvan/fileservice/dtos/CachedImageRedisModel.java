@@ -15,6 +15,7 @@ import java.io.Serializable;
 public class CachedImageRedisModel implements Serializable {
     private byte[] imageData;
     private String attachment;
+    private boolean webpOutputEnabled;
 
     @Builder.Default
     private long timestamp = System.currentTimeMillis();

@@ -19,7 +19,7 @@ public interface MediaService {
     Mono<FileUploadResponse> uploadFiles(Flux<FilePart> files, MetadataDto metadataDto);
 
 
-    Mono<ServerHttpResponse> getResponseForFile(String gridId, Integer width, Integer height, Double quality, ServerWebExchange exchange, boolean shouldCheckCache);
+    Mono<ServerHttpResponse> getResponseForFile(String gridId, Integer width, Integer height, Double quality, Boolean webpOutputEnabled, ServerWebExchange exchange, boolean shouldCheckCache);
 
     Mono<ReactiveGridFsResource> getFile(String gridId);
 

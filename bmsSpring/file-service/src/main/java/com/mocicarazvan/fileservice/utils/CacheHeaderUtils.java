@@ -31,7 +31,9 @@ public class CacheHeaderUtils {
             .noStore();
 
 
-    public static String buildETag(String gridId, Integer width, Integer height, Double quality, long timestamp) {
+    public static String buildETag(String gridId, Integer width, Integer height, Double quality,
+                                   Boolean webpOutputEnabled,
+                                   long timestamp) {
         StringBuilder builder = new StringBuilder("\"" + gridId);
 
         if (width != null) {
@@ -42,6 +44,9 @@ public class CacheHeaderUtils {
         }
         if (quality != null) {
             builder.append("-q").append(quality);
+        }
+        if (webpOutputEnabled != null && webpOutputEnabled) {
+            builder.append("-webp");
         }
 
         builder.append("-").append(timestamp).append("\"");

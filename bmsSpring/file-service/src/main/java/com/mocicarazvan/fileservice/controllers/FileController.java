@@ -46,10 +46,15 @@ public class FileController {
                                                    @RequestParam(required = false) Integer width,
                                                    @RequestParam(required = false) Integer height,
                                                    @RequestParam(required = false) Double quality,
+                                                   @RequestParam(required = false, defaultValue = "false") Boolean webpOutputEnabled,
                                                    ServerWebExchange exchange) {
         boolean shouldCheckCache = (width != null || height != null || quality != null);
+        Boolean finalWebpOutputEnabled = exchange.getRequest().getHeaders().getAccept().
+                stream().anyMatch(mediaType -> mediaType.
+                        isCompatibleWith(MediaType.valueOf("image/webp"))
+                ) || webpOutputEnabled;
         return
-                mediaService.getResponseForFile(gridId, width, height, quality, exchange, shouldCheckCache).doOnError(e -> log.error("Error getting file", e))
+                mediaService.getResponseForFile(gridId, width, height, quality, finalWebpOutputEnabled, exchange, shouldCheckCache).doOnError(e -> log.error("Error getting file", e))
                         .flatMap(response -> Mono.just(new ResponseEntity<>(response.getStatusCode() != null ? response.getStatusCode() : HttpStatus.NOT_FOUND)));
     }
 

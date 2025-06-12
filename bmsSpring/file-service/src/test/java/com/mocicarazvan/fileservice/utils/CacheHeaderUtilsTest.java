@@ -24,13 +24,13 @@ class CacheHeaderUtilsTest {
 
     @Test
     void buildETagGeneratesCorrectETagWithAllParameters() {
-        String etag = CacheHeaderUtils.buildETag("grid123", 1920, 1080, 0.8, timestamp);
-        assertEquals("\"grid123-w1920-h1080-q0.8-1672531200000\"", etag);
+        String etag = CacheHeaderUtils.buildETag("grid123", 1920, 1080, 0.8, true, timestamp);
+        assertEquals("\"grid123-w1920-h1080-q0.8-webp-1672531200000\"", etag);
     }
 
     @Test
     void buildETagGeneratesCorrectETagWithNullWidthAndHeight() {
-        String etag = CacheHeaderUtils.buildETag("grid123", null, null, 0.8, timestamp);
+        String etag = CacheHeaderUtils.buildETag("grid123", null, null, 0.8, null, timestamp);
         assertEquals("\"grid123-q0.8-1672531200000\"", etag);
     }
 

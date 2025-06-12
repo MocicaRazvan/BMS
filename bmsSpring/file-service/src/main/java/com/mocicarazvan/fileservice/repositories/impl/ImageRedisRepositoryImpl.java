@@ -43,11 +43,12 @@ public class ImageRedisRepositoryImpl implements ImageRedisRepository {
 
 
     @Override
-    public Mono<Void> saveImage(String gridId, Integer width, Integer height, Double quality, byte[] imageData, String attch) {
-        String key = generateCacheKey(gridId, width, height, quality);
+    public Mono<Void> saveImage(String gridId, Integer width, Integer height, Double quality, Boolean webOutputEnabled, byte[] imageData, String attch) {
+        String key = generateCacheKey(gridId, width, height, quality, webOutputEnabled);
         CachedImageRedisModel cachedImageRedisModel = CachedImageRedisModel.builder()
                 .imageData(imageData)
                 .attachment(attch)
+                .webpOutputEnabled(webOutputEnabled)
                 .build();
         return
                 reactiveRedisTemplate.opsForValue()
@@ -58,9 +59,9 @@ public class ImageRedisRepositoryImpl implements ImageRedisRepository {
     }
 
     @Override
-    public Mono<CachedImageRedisModel> getImage(String gridId, Integer width, Integer height, Double quality) {
+    public Mono<CachedImageRedisModel> getImage(String gridId, Integer width, Integer height, Double quality, Boolean webpOutputEnabled) {
 //        log.info("Generated cache key: {}", generateCacheKey(gridId, width, height, quality));
-        String key = generateCacheKey(gridId, width, height, quality);
+        String key = generateCacheKey(gridId, width, height, quality, webpOutputEnabled);
         return reactiveRedisTemplate.opsForValue()
                 .get(key)
                 .cast(CachedImageRedisModel.class);
@@ -68,8 +69,8 @@ public class ImageRedisRepositoryImpl implements ImageRedisRepository {
     }
 
     @Override
-    public Mono<Void> deleteImage(String gridId, Integer width, Integer height, Double quality) {
-        String key = generateCacheKey(gridId, width, height, quality);
+    public Mono<Void> deleteImage(String gridId, Integer width, Integer height, Double quality, Boolean webpOutputEnabled) {
+        String key = generateCacheKey(gridId, width, height, quality, webpOutputEnabled);
         return reactiveRedisTemplate.opsForValue()
                 .delete(key)
                 .then();
@@ -92,11 +93,12 @@ public class ImageRedisRepositoryImpl implements ImageRedisRepository {
 
 
     @Override
-    public String generateCacheKey(String gridId, Integer width, Integer height, Double quality) {
-        return String.format("image:%s:width=%d:height=%d:quality=%.1f", gridId,
+    public String generateCacheKey(String gridId, Integer width, Integer height, Double quality, Boolean webpOutputEnabled) {
+        return String.format("image:%s:width=%d:height=%d:quality=%.1f:webpOutputEnabled=%s", gridId,
                 width != null ? width : 0,
                 height != null ? height : 0,
-                quality != null ? quality : -1.0);
+                quality != null ? quality : -1.0,
+                webpOutputEnabled != null ? webpOutputEnabled : false);
     }
 
 

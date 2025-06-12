@@ -97,19 +97,19 @@ public class MediaServiceImpl implements MediaService {
     }
 
     @Override
-    public Mono<ServerHttpResponse> getResponseForFile(String gridId, Integer width, Integer height, Double quality, ServerWebExchange exchange, boolean shouldCheckCache) {
+    public Mono<ServerHttpResponse> getResponseForFile(String gridId, Integer width, Integer height, Double quality, Boolean webpOutputEnabled, ServerWebExchange exchange, boolean shouldCheckCache) {
         return shouldCheckCache ?
-                Mono.defer(() -> imageRedisRepository.getImage(gridId, width, height, quality).flatMap(
+                Mono.defer(() -> imageRedisRepository.getImage(gridId, width, height, quality, webpOutputEnabled).flatMap(
                                 model -> {
                                     byte[] cachedImage = model.getImageData();
-                                    String attch = model.getAttachment();
+                                    String attch = model.isWebpOutputEnabled() ? "webp" : model.getAttachment();
                                     long timestamp = model.getTimestamp();
 
 
                                     ServerHttpResponse response = exchange.getResponse();
 
 
-                                    String etag = CacheHeaderUtils.buildETag(gridId, width, height, quality, timestamp);
+                                    String etag = CacheHeaderUtils.buildETag(gridId, width, height, quality, webpOutputEnabled, timestamp);
 
                                     String clientETag = exchange.getRequest().getHeaders().getFirst(HttpHeaders.IF_NONE_MATCH);
                                     if (CacheHeaderUtils.etagEquals(etag, clientETag)) {
@@ -121,7 +121,7 @@ public class MediaServiceImpl implements MediaService {
                                     response.getHeaders().setLastModified(timestamp);
 
 
-                                    String mediaType = MediaType.fromValue(attch).getValue();
+                                    String mediaType = model.isWebpOutputEnabled() ? ".webp" : MediaType.fromValue(attch).getValue();
 
                                     response.getHeaders().setContentDisposition(
                                             ContentDisposition.attachment()
@@ -141,12 +141,12 @@ public class MediaServiceImpl implements MediaService {
                                             });
                                 }
                         ))
-                        .switchIfEmpty(Mono.defer(() -> fetchFileAndProcessFromGridFS(gridId, width, height, quality, exchange))) :
-                Mono.defer(() -> fetchFileAndProcessFromGridFS(gridId, width, height, quality, exchange));
+                        .switchIfEmpty(Mono.defer(() -> fetchFileAndProcessFromGridFS(gridId, width, height, quality, webpOutputEnabled, exchange))) :
+                Mono.defer(() -> fetchFileAndProcessFromGridFS(gridId, width, height, quality, webpOutputEnabled, exchange));
     }
 
 
-    public Mono<ServerHttpResponse> fetchFileAndProcessFromGridFS(String gridId, Integer width, Integer height, Double quality, ServerWebExchange exchange) {
+    public Mono<ServerHttpResponse> fetchFileAndProcessFromGridFS(String gridId, Integer width, Integer height, Double quality, Boolean webpOutputEnabled, ServerWebExchange exchange) {
         return getFile(gridId)
                 .subscribeOn(Schedulers.boundedElastic())
                 .flatMap(file -> file.getGridFSFile()
@@ -161,7 +161,7 @@ public class MediaServiceImpl implements MediaService {
 
 
                             List<HttpRange> httpRanges = request.getHeaders().getRange();
-                            String etag = CacheHeaderUtils.buildETag(gridId, width, height, quality, gridFSFile.getUploadDate().getTime());
+                            String etag = CacheHeaderUtils.buildETag(gridId, width, height, quality, webpOutputEnabled, gridFSFile.getUploadDate().getTime());
                             String clientETag = request.getHeaders().getFirst(HttpHeaders.IF_NONE_MATCH);
                             if (httpRanges.isEmpty() && CacheHeaderUtils.etagEquals(etag, clientETag)) {
                                 response.setStatusCode(HttpStatus.NOT_MODIFIED);
@@ -193,7 +193,11 @@ public class MediaServiceImpl implements MediaService {
                                                 .filename(gridId + fileAttch)
                                                 .build()
                                 );
-                                response.getHeaders().set(HttpHeaders.CONTENT_TYPE, "image/" + mediaType.getValue());
+                                if (webpOutputEnabled) {
+                                    response.getHeaders().set(HttpHeaders.CONTENT_TYPE, "image/webp");
+                                } else {
+                                    response.getHeaders().set(HttpHeaders.CONTENT_TYPE, "image/" + mediaType.getValue());
+                                }
                             }
 
 
@@ -204,13 +208,13 @@ public class MediaServiceImpl implements MediaService {
                             if (fileType.equals(FileType.IMAGE) && (width != null || height != null || quality != null)) {
 //                                log.info("file name: {}", file.getFilename());
                                 downloadStream =
-                                        bytesService.convertWithThumblinator(width, height, quality, downloadStream, mediaType, response
+                                        bytesService.convertWithThumblinator(width, height, quality, downloadStream, mediaType, webpOutputEnabled, response
                                                 )
                                                 .flatMap(dataBuffer -> {
                                                     response.getHeaders().setContentLength(dataBuffer.readableByteCount());
                                                     ByteBuffer byteBuffer = ByteBuffer.allocate(dataBuffer.readableByteCount());
                                                     dataBuffer.toByteBuffer(byteBuffer);
-                                                    return imageRedisRepository.saveImage(gridId, width, height, quality, byteBuffer.array(), fileAttch)
+                                                    return imageRedisRepository.saveImage(gridId, width, height, quality, webpOutputEnabled, byteBuffer.array(), fileAttch)
                                                             .thenReturn(dataBuffer);
                                                 });
                             } else if (fileType.equals(FileType.VIDEO) && !httpRanges.isEmpty()) {
