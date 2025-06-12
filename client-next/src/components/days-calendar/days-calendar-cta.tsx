@@ -7,14 +7,15 @@ export interface DaysCalendarCTATexts {
   header: string;
   className?: string;
   size?: number;
-  onClick?: MouseEventHandler<HTMLAnchorElement>;
 }
 export default function DaysCalendarCTA({
   header,
   className,
   size = 24,
   onClick,
-}: DaysCalendarCTATexts) {
+}: DaysCalendarCTATexts & {
+  onClick?: MouseEventHandler<HTMLAnchorElement>;
+}) {
   return (
     <Link
       onClick={onClick}

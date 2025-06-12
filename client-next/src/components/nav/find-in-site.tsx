@@ -1,8 +1,8 @@
 "use client";
 
-import React, { memo, useCallback, useEffect, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { Command } from "lucide-react";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "@/navigation/client-navigation";
 import { isDeepEqual } from "@/lib/utils";
@@ -19,6 +19,7 @@ const DynamicFindInSiteContent = dynamic(
     ssr: false,
     loading: () => (
       <DialogContent className="sm:max-w-[550px] p-0 rounded-xl z-[110] min-h-96">
+        <DialogTitle className="sr-only">{"Find in Site"}</DialogTitle>
         <Skeleton className="size-full" />
       </DialogContent>
     ),

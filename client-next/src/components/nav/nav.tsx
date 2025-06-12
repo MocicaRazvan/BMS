@@ -12,7 +12,7 @@ import NotificationPop from "@/components/nav/notification-pop";
 import CartPop, { CartPopsTexts } from "@/components/nav/cart-pop";
 import Logo from "@/components/logo/logo";
 import { LockKeyhole } from "lucide-react";
-import React, { useMemo } from "react";
+import { memo, useMemo } from "react";
 import { appendCreatedAtDesc } from "@/lib/utils";
 import FindInSite from "@/components/nav/find-in-site";
 import { DaysCalendarCTATexts } from "@/components/days-calendar/days-calendar-cta";
@@ -25,6 +25,7 @@ import {
   MetadataValue,
 } from "@/components/nav/find-in-site-content";
 import { useMedia } from "react-use";
+import { WithUser } from "@/lib/user";
 
 export interface NavTexts {
   themeSwitchTexts: ThemeSwitchTexts;
@@ -49,8 +50,12 @@ export interface NavTexts {
   dayCalendarCTATexts: DaysCalendarCTATexts;
 }
 
-interface NavProps extends NavTexts {
+interface ItemsTexts {
+  dayCalendarCTATexts: DaysCalendarCTATexts;
   cartPopTexts: CartPopsTexts;
+}
+
+interface NavProps extends NavTexts, ItemsTexts {
   metadataValues: MetadataValue[];
 }
 
@@ -67,13 +72,11 @@ export default function Nav({
 }: NavProps) {
   const session = useSession();
   const authUser = session?.data?.user;
-  const globalPathname = usePathname();
 
   const isUser = authUser?.role === "ROLE_USER";
   const isTrainer = authUser?.role === "ROLE_TRAINER";
   const isAdmin = authUser?.role === "ROLE_ADMIN";
   const isAdminOrTrainer = isAdmin || isTrainer;
-  const isLGXL = useMedia("(min-width: 1485px)", false);
 
   const baseLinks: NavItem[] = useMemo(
     () => [
@@ -258,33 +261,22 @@ export default function Nav({
                 <Logo width={40} height={40} />
               </Link>
               <div className="ms-6">
-                <ActiveLink
-                  href={"/calculator"}
-                  isActive={globalPathname === "/calculator"}
-                >
-                  {links.calculator}
-                </ActiveLink>
+                <NoUserNav calculatorTexts={links.calculator} />
               </div>
             </>
           )}
         </div>
         <div className="mx-auto  md:mr-1 flex items-center justify-center gap-6 md:gap-3 mt-2 sm:mt-0">
-          {isLGXL && (
-            <FindInSite
-              texts={findInSiteTexts}
-              metadataValues={metadataValues}
-            />
-          )}
-          {authUser && (
-            <>
-              <NavProfile
-                authUser={authUser}
-                dayCalendarCTATexts={dayCalendarCTATexts}
-              />
-              <NotificationPop authUser={authUser} />
-              <CartPop authUser={authUser} cartPopTexts={cartPopTexts} />
-            </>
-          )}
+          <ScreenAwareFind
+            texts={findInSiteTexts}
+            metadataValues={metadataValues}
+            small={false}
+          />
+          <UserNavItems
+            authUser={authUser}
+            dayCalendarCTATexts={dayCalendarCTATexts}
+            cartPopTexts={cartPopTexts}
+          />
           {!authUser && (
             <Link
               href={"/auth/signin"}
@@ -313,27 +305,59 @@ export default function Nav({
         />
         <div className="flex items-center justify-center gap-5 ">
           <div className="mx-auto  md:mr-1 flex items-center justify-center gap-6 md:gap-3 mt-2 sm:mt-0">
-            {!isLGXL && (
-              <FindInSite
-                texts={findInSiteTexts}
-                metadataValues={metadataValues}
-              />
-            )}
+            <ScreenAwareFind
+              texts={findInSiteTexts}
+              metadataValues={metadataValues}
+              small={true}
+            />
           </div>
-          {authUser && (
-            <>
-              <NavProfile
-                authUser={authUser}
-                dayCalendarCTATexts={dayCalendarCTATexts}
-              />
-              <NotificationPop authUser={authUser} />
-              <CartPop authUser={authUser} cartPopTexts={cartPopTexts} />
-            </>
-          )}
+          <UserNavItems
+            authUser={authUser}
+            dayCalendarCTATexts={dayCalendarCTATexts}
+            cartPopTexts={cartPopTexts}
+          />
           <LocaleSwitcher />
           <ModeToggle {...themeSwitchTexts} />
         </div>
       </div>
     </nav>
+  );
+}
+
+const UserNavItems = memo((props: ItemsTexts & Partial<WithUser>) => {
+  if (!props.authUser) return null;
+  return (
+    <>
+      <NavProfile
+        authUser={props.authUser}
+        dayCalendarCTATexts={props.dayCalendarCTATexts}
+      />
+      <NotificationPop authUser={props.authUser} />
+      <CartPop authUser={props.authUser} cartPopTexts={props.cartPopTexts} />
+    </>
+  );
+});
+
+UserNavItems.displayName = "UserNavItems";
+
+function ScreenAwareFind(props: {
+  texts: FindInSiteTexts;
+  metadataValues: MetadataValue[];
+  small: boolean;
+}) {
+  const lgxl = useMedia("(min-width: 1485px)", false);
+  const render = props.small ? !lgxl : lgxl;
+  if (!render) return null;
+  return (
+    <FindInSite texts={props.texts} metadataValues={props.metadataValues} />
+  );
+}
+
+function NoUserNav({ calculatorTexts }: { calculatorTexts: string }) {
+  const pathname = usePathname();
+  return (
+    <ActiveLink href={"/calculator"} isActive={pathname === "/calculator"}>
+      {calculatorTexts}
+    </ActiveLink>
   );
 }
