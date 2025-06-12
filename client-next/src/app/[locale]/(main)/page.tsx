@@ -3,7 +3,7 @@ import { unstable_setRequestLocale } from "next-intl/server";
 import { HomeHeaderTexts } from "@/components/home/home-header";
 import { getHomeTexts } from "@/texts/pages";
 import HomeCards, { HomeCardsText } from "@/components/home/home-cards";
-import HomeAbout, { HomeAboutTexts } from "@/components/home/home-about";
+import { HomeAboutTexts } from "@/components/home/home-about";
 import HomeTimeline, {
   HomeTimelineTexts,
 } from "@/components/home/home-timeline";
@@ -22,6 +22,7 @@ import LogoWall from "@/components/reactbits/logo-wall";
 import HomeAboutWrapper from "@/components/home/home-about-wrapper";
 import HomeMap, { HomeMapTexts } from "@/components/home/home-map";
 import WorldWrapper from "@/components/aceternityui/world-wrapper";
+import ScrollProgress from "@/components/common/scroll-progress";
 
 interface Props {
   params: { locale: Locale };
@@ -71,6 +72,7 @@ export default async function Home({ params: { locale } }: Props) {
 
   return (
     <main className="  w-full  space-y-5">
+      <ScrollProgress />
       {/*<HomeHeader {...homeHeaderTexts} />*/}
       <HomeHero {...homeHeroTexts} />
       <HomeCards {...homeCardsTexts} />

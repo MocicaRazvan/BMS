@@ -1,7 +1,6 @@
 "use client";
 
-import React, { memo, useEffect, useState } from "react";
-import { isDeepEqual } from "@/lib/utils";
+import { memo, useEffect, useState } from "react";
 import { motion } from "framer-motion";
 
 interface Props {
@@ -83,7 +82,6 @@ const ScrollProgress = memo(
       />
     );
   },
-  isDeepEqual,
 );
 
 ScrollProgress.displayName = "ScrollProgress";

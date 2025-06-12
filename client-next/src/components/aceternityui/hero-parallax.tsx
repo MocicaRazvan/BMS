@@ -1,5 +1,5 @@
 "use client";
-import React, { memo, ReactNode } from "react";
+import { memo, ReactNode, useRef } from "react";
 import {
   motion,
   useScroll,
@@ -34,7 +34,7 @@ const HeroParallax = memo(
     const firstRow = products.slice(0, 5);
     const secondRow = products.slice(5, 10);
     const thirdRow = products.slice(10, 15);
-    const ref = React.useRef(null);
+    const ref = useRef(null);
     const { scrollYProgress } = useScroll({
       target: ref,
       offset: ["start start", "end start"],
@@ -112,7 +112,7 @@ const HeroParallax = memo(
       </div>
     );
   },
-  (p, n) => isDeepEqual(p, n),
+  isDeepEqual,
 );
 
 HeroParallax.displayName = "HeroParallax";
@@ -163,6 +163,9 @@ export const ProductCard = ({
 }) => {
   return (
     <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.3, ease: "easeOut" }}
       style={{
         x: translate,
       }}

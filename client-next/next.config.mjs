@@ -130,6 +130,10 @@ const finalConfig = (phase) => {
                     key: "X-Accel-Buffering",
                     value: "no",
                   },
+                  {
+                    key: "X-Content-Type-Options",
+                    value: "nosniff",
+                  },
                 ],
               },
             ];
