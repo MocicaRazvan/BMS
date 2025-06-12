@@ -1,7 +1,7 @@
 name: Next Static Server Docker Image
 on:
   workflow_dispatch: { }
-  workflow_call: {
+  workflow_call:
     secrets:
       DOCKERHUB_PASSWORD:
         description: 'Docker Hub password'
@@ -9,7 +9,6 @@ on:
       DOCKERHUB_USERNAME:
         description: 'Docker Hub username'
         required: true
-  }
 #  push:
 #    branches:
 #      - main
