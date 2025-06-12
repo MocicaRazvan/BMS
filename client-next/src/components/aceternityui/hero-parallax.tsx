@@ -165,7 +165,9 @@ export const ProductCard = ({
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      transition={{ duration: 0.35, ease: "easeOut", delay: 0.3 }}
+      transition={{
+        opacity: { duration: 0.35, ease: "easeOut", delay: 0.3 },
+      }}
       style={{
         x: translate,
       }}

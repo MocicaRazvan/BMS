@@ -143,10 +143,10 @@ export function TotalAmountCountOrders({
 
     return data.map((d, idx) => ({
       date: d.date,
-      countLine: countLine(idx),
-      totalAmountLine: totalAmountLine(idx),
+      countLine: Math.max(0, countLine(idx)),
+      totalAmountLine: Math.max(0, totalAmountLine(idx)),
     }));
-  }, [JSON.stringify(data), regressionKey, showTrendLine]);
+  }, [data, regressionKey, showTrendLine]);
 
   const max = useMemo(
     () =>

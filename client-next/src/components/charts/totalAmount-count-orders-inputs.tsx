@@ -93,7 +93,7 @@ export const TrendLineButton = ({
     <Button
       variant="outline"
       className="min-w-[180px]"
-      onClick={() => onShowTrendLineChange(showTrendLine ? false : true)}
+      onClick={() => onShowTrendLineChange(!showTrendLine)}
     >
       {showTrendLine ? hideTrendLineLabel : showTrendLineLabel}
     </Button>

@@ -89,7 +89,7 @@ export default function DailySales({
         totalAmount: Math.floor(i.totalAmount),
         date: format(new Date(i.year, i.month - 1, i.day), dateFormat),
       })),
-    [JSON.stringify(messages)],
+    [messages],
   );
 
   const dateRangePicker = useMemo(

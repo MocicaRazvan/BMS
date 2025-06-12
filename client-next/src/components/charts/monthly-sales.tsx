@@ -134,7 +134,7 @@ export default function MonthlySales({
         totalAmount: Math.floor(i.totalAmount),
         date: format(new Date(i.year, i.month - 1), "MM-yyyy"),
       })),
-    [JSON.stringify(messages)],
+    [messages],
   );
 
   useEffect(() => {
