@@ -30,6 +30,7 @@ import { useLocale } from "next-intl";
 import { Locale } from "@/navigation/navigation";
 import { useAuthUserMinRole } from "@/context/auth-user-min-role-context";
 import { estimateReadingTime } from "@/lib/reading-time/estimator";
+import PageContainer from "@/components/common/page-container";
 
 export interface SinglePostPageTexts {
   elementHeaderTexts: ElementHeaderTexts;
@@ -132,7 +133,7 @@ export default function SinglePostPageContent({
   if (!isFinished || !postState) {
     console.log("loading main");
     return (
-      <section className="w-full min-h-[calc(100vh-4rem)] flex items-center justify-center transition-all">
+      <section className="w-full min-h-[calc(100vh-4rem)] flex items-center justify-center">
         <LoadingSpinner />
       </section>
     );
@@ -155,7 +156,7 @@ export default function SinglePostPageContent({
   const { isOwnerOrAdmin, isAdmin, isOwner } = privilegeReturn;
 
   return (
-    <section className="w-full mx-auto max-w-[1500px] min-h-[calc(100vh-4rem)] flex-col items-center justify-center transition-all px-1 md:px-6 py-10 relative ">
+    <PageContainer>
       <ElementHeader
         elementState={postState}
         react={react}
@@ -226,6 +227,6 @@ export default function SinglePostPageContent({
       {/*    )}*/}
       {/*  </div>*/}
       {/*)}*/}
-    </section>
+    </PageContainer>
   );
 }

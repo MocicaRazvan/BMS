@@ -23,6 +23,7 @@ import PlanRecommendationList, {
 } from "@/components/recomandation/plan-recommendation-list";
 import { Separator } from "@/components/ui/separator";
 import { useAuthUserMinRole } from "@/context/auth-user-min-role-context";
+import PageContainer from "@/components/common/page-container";
 
 export interface UserPlanPageContentTexts {
   elementHeaderTexts: ElementHeaderTexts;
@@ -71,7 +72,7 @@ export default function UserPlanPageContent({
   if (!isFinished || !planState) {
     console.log("loading main");
     return (
-      <section className="w-full min-h-[calc(100vh-4rem)] flex items-center justify-center transition-all">
+      <section className="w-full min-h-[calc(100vh-4rem)] flex items-center justify-center">
         <LoadingSpinner />
       </section>
     );
@@ -94,7 +95,7 @@ export default function UserPlanPageContent({
   const { isOwnerOrAdmin, isAdmin, isOwner } = privilegeReturn;
 
   return (
-    <section className="w-full mx-auto max-w-[1500px] min-h-[calc(100vh-4rem)] flex-col items-center justify-center transition-all px-1 md:px-6  relative ">
+    <PageContainer>
       <div
         className="sticky top-[4rem] z-10 shadow-sm p-4 w-[200px] rounded-xl
       bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 overflow-hidden
@@ -158,6 +159,6 @@ export default function UserPlanPageContent({
           pulse
         />
       </div>
-    </section>
+    </PageContainer>
   );
 }

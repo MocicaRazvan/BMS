@@ -22,6 +22,7 @@ import NutritionalTable, {
 } from "@/components/common/nutritional-table";
 import useClientNotFound from "@/hoooks/useClientNotFound";
 import { useAuthUserMinRole } from "@/context/auth-user-min-role-context";
+import PageContainer from "@/components/common/page-container";
 
 const tableColsKeys: (keyof NutritionalFactResponse &
   keyof IngredientTableColumnTexts)[] = [
@@ -103,7 +104,7 @@ export default function SingleIngredientPageContent({
   };
 
   return (
-    <section className="w-full min-h-[calc(100vh-6rem)] pb-14 flex items-center justify-center transition-all mt-4">
+    <PageContainer className="pb-14 flex items-center justify-center">
       <div className=" w-full mx-2 md:mx-0 md:w-2/3  border rounded-xl px-6 py-8 space-y-8 lg:space-y-16 ">
         <div className="w-full flex items-center justify-center  mb-12 gap-10 ">
           <h1 className="text-2xl lg:text-4xl tracking-tighter font-bold text-center ">
@@ -144,6 +145,6 @@ export default function SingleIngredientPageContent({
           )}
         </div>
       </div>
-    </section>
+    </PageContainer>
   );
 }

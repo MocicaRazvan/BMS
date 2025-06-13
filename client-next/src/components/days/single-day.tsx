@@ -101,7 +101,7 @@ const SingleDay = ({
   //todo test good
   if (!isFinished) {
     return (
-      <section className="w-full min-h-[30vh] flex items-center justify-center transition-all overflow-hidden my-2">
+      <section className="w-full min-h-[30vh] flex items-center justify-center overflow-hidden my-2">
         <LoadingSpinner />
       </section>
     );
@@ -118,7 +118,7 @@ const SingleDay = ({
   const isDisliked = dayState.userDislikes.includes(Number(authUser.id));
 
   return (
-    <section className="w-full mx-auto max-w-[1500px] flex-col items-center justify-center transition-all px-1 md:px-6 py-10 relative ">
+    <section className="w-full mx-auto max-w-[1500px] flex-col items-center justify-center px-1 md:px-6 py-10 relative ">
       <div className="w-3/4 mx-auto flex flex-col md:flex-row items-center justify-between gap-10 md:gap-20 mb-2 ">
         <div className="order-1 flex items-center justify-center gap-3">
           <div className="flex items-center justify-center gap-4 flex-1">

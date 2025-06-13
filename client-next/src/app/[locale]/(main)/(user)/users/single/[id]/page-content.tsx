@@ -31,6 +31,7 @@ import { useAuthUserMinRole } from "@/context/auth-user-min-role-context";
 import Loader from "@/components/ui/spinner";
 import dynamicWithPreload from "@/lib/dynamic-with-preload";
 import usePreloadDynamicComponents from "@/hoooks/use-prelod-dynamic-components";
+import PageContainer from "@/components/common/page-container";
 
 const DynamicUpdateProfile = dynamicWithPreload(
   () => import("@/components/forms/update-profile"),
@@ -196,7 +197,7 @@ export default function UserPageContent({
   const isAuthAdmin = authUser.role === "ROLE_ADMIN";
 
   return (
-    <section className="w-full min-h-[calc(100vh-4rem)] pb-14 flex items-center justify-center transition-all mt-4">
+    <PageContainer className="flex items-center justify-center">
       <div className=" w-full mx-2 md:mx-0 md:w-2/3  border rounded-xl px-6 py-8 space-y-8 lg:space-y-12">
         <h1 className="text-2xl lg:text-4xl tracking-tighter font-bold text-center mb-12">
           {isOwner ? ownerTitle : visitorTitle}
@@ -336,6 +337,6 @@ export default function UserPageContent({
           </div>
         )}
       </div>
-    </section>
+    </PageContainer>
   );
 }

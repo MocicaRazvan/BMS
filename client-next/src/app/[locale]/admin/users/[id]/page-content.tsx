@@ -3,8 +3,6 @@
 import { AdminUserPageTexts } from "@/app/[locale]/admin/users/[id]/page";
 import SidebarContentLayout from "@/components/sidebar/sidebar-content-layout";
 import Heading from "@/components/common/heading";
-import { Suspense } from "react";
-import LoadingSpinner from "@/components/common/loading-spinner";
 import UserPageContent from "@/app/[locale]/(main)/(user)/users/single/[id]/page-content";
 import useGetUser from "@/hoooks/useGetUser";
 import useClientNotFound from "@/hoooks/useClientNotFound";
@@ -31,11 +29,9 @@ export default function AdminUserPageContent({ id, ...texts }: Props) {
     >
       <div className="w-full bg-background ">
         <Heading {...texts} title={`${texts.title} ${user?.email || ""}`} />
-        <Suspense fallback={<LoadingSpinner />}>
-          <div className="mt-12">
-            <UserPageContent id={id} {...texts.userPageTexts} />
-          </div>
-        </Suspense>
+        <div className="mt-12">
+          <UserPageContent id={id} {...texts.userPageTexts} />
+        </div>
       </div>
     </SidebarContentLayout>
   );

@@ -20,6 +20,7 @@ import { fetchStream } from "@/lib/fetchers/fetchStream";
 import { AnswerFromBodyFormTexts } from "@/components/forms/answer-from-body-form";
 import ItemBodyQa from "@/components/common/item-body-qa";
 import { useAuthUserMinRole } from "@/context/auth-user-min-role-context";
+import PageContainer from "@/components/common/page-container";
 
 export interface SingleTrainerPlanPageTexts {
   elementHeaderTexts: ElementHeaderTexts;
@@ -103,7 +104,7 @@ export default function SingleTrainerPlanPageContent({
   if (!isFinished || !planState) {
     console.log("loading main");
     return (
-      <section className="w-full min-h-[calc(100vh-4rem)] flex items-center justify-center transition-all">
+      <section className="w-full min-h-[calc(100vh-4rem)] flex items-center justify-center">
         <LoadingSpinner />
       </section>
     );
@@ -122,12 +123,11 @@ export default function SingleTrainerPlanPageContent({
   const { isOwnerOrAdmin, isAdmin, isOwner } = ownerReturn;
 
   return (
-    <section className="w-full mx-auto max-w-[1500px] min-h-[calc(100vh-4rem)] flex-col items-center justify-center transition-all px-1 md:px-6 py-10 relative ">
+    <PageContainer>
       <div
         className="sticky top-[4rem] z-10 shadow-sm p-4 w-[130px] rounded-xl
       bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 overflow-hidden
-       shadow-foreground/30 transition-all hover:scale-105
-      "
+       shadow-foreground/30 transition-all hover:scale-105"
       >
         <div className="flex justify-center items-center w-full gap-2">
           <span>{price} </span>
@@ -191,7 +191,7 @@ export default function SingleTrainerPlanPageContent({
         />
         <AuthorProfile author={user} />
       </div>
-      <div className={"mt-20"}>
+      <div className="mt-20">
         <DaysList
           authUser={authUser}
           dayIds={planState.days}
@@ -199,6 +199,6 @@ export default function SingleTrainerPlanPageContent({
           {...daysListTexts}
         />
       </div>
-    </section>
+    </PageContainer>
   );
 }

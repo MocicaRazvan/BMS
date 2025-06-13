@@ -19,6 +19,7 @@ import ItemBodyQa from "@/components/common/item-body-qa";
 import { useAuthUserMinRole } from "@/context/auth-user-min-role-context";
 import dynamic from "next/dynamic";
 import { Skeleton } from "@/components/ui/skeleton";
+import PageContainer from "@/components/common/page-container";
 
 export interface SingleRecipePageTexts {
   elementHeaderTexts: ElementHeaderTexts;
@@ -106,7 +107,7 @@ export default function SingeRecipePageContent({
   }
 
   return (
-    <section className="w-full mx-auto max-w-[1500px] min-h-[calc(100vh-4rem)] flex-col items-center justify-center transition-all px-1 md:px-6 py-10 relative ">
+    <PageContainer>
       <div className="w-3/4 mx-auto flex flex-col md:flex-row items-center justify-between gap-10 md:gap-20 mb-2 ">
         <div className="order-1 flex items-center justify-center gap-3">
           <div className="flex flex-row md:flex-col items-center justify-center gap-4 flex-1">
@@ -174,6 +175,6 @@ export default function SingeRecipePageContent({
           IQMessage={IQMessage}
         />
       )}
-    </section>
+    </PageContainer>
   );
 }

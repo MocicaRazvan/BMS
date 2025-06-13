@@ -31,6 +31,7 @@ import AddDayToCalendar, {
   AddDayToCalendarTexts,
 } from "@/components/forms/add-day-to-calendar";
 import useFetchStream from "@/hoooks/useFetchStream";
+import PageContainer from "@/components/common/page-container";
 
 export interface SingleSubscriptionTexts {
   elementHeaderTexts: ElementHeaderTexts;
@@ -120,14 +121,14 @@ export default function SingleSubscriptionPageContent({
   }
   if (!isFinished || !planState) {
     return (
-      <section className="w-full min-h-[calc(100vh-4rem)] flex items-center justify-center transition-all">
+      <section className="w-full min-h-[calc(100vh-4rem)] flex items-center justify-center">
         <LoadingSpinner />
       </section>
     );
   }
 
   return (
-    <section className="w-full mx-auto max-w-[1500px] min-h-[calc(100vh-4rem)] flex-col items-center justify-center transition-all px-1 md:px-6 py-10 relative ">
+    <PageContainer>
       <div className="w-3/4 mx-auto flex flex-col md:flex-row items-center justify-between gap-10 md:gap-20 mb-2 ">
         <div className="order-1 flex items-center justify-center gap-3">
           <div className="flex flex-row md:flex-col items-center justify-center gap-4 flex-1">
@@ -200,6 +201,6 @@ export default function SingleSubscriptionPageContent({
           {...planRecommendationListTexts}
         />
       </div>
-    </section>
+    </PageContainer>
   );
 }

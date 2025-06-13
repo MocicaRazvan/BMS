@@ -24,6 +24,7 @@ import useClientNotFound from "@/hoooks/useClientNotFound";
 import { motion } from "framer-motion";
 import CustomImage from "@/components/common/custom-image";
 import { useAuthUserMinRole } from "@/context/auth-user-min-role-context";
+import PageContainer from "@/components/common/page-container";
 
 export interface SingleOrderPageContentTexts {
   title: string;
@@ -91,7 +92,7 @@ export default function SingleOrderPageContent({
 
   if (!orderFinished || !plansIsFinished)
     return (
-      <section className="w-full min-h-[calc(100vh-4rem)] flex items-center justify-center transition-all">
+      <section className="w-full min-h-[calc(100vh-4rem)] flex items-center justify-center">
         <LoadingSpinner />
       </section>
     );
@@ -115,7 +116,7 @@ export default function SingleOrderPageContent({
   }
 
   return (
-    <section className="w-full  min-h-[calc(100vh-4rem)] flex-col items-center justify-center transition-all px-6 py-10 relative pb-14 max-w-[1000px] mx-auto ">
+    <PageContainer className="max-w-[1000px]">
       <div className="flex w-full items-end justify-center gap-5 my-10">
         <h1 className="font-bold tracking-tighter text-3xl md:text-5xl  text-center">
           {title}
@@ -210,6 +211,6 @@ export default function SingleOrderPageContent({
           </div>
         </div>
       </div>
-    </section>
+    </PageContainer>
   );
 }
