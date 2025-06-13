@@ -11,7 +11,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { memo, ReactNode } from "react";
+import { forwardRef, memo, ReactNode } from "react";
 import { getAlertDialogDeleteTexts } from "@/texts/components/dialog";
 import { fetchStream } from "@/lib/fetchers/fetchStream";
 import { toast } from "@/components/ui/use-toast";
@@ -27,75 +27,83 @@ interface Props {
 }
 
 const AlertDialogDeleteIngredient = memo(
-  ({ ingredientNutritionalFactResponse, token, callBack, anchor }: Props) => {
-    const locale = useLocale();
+  forwardRef<HTMLDivElement, Props>(
+    ({ ingredientNutritionalFactResponse, token, callBack, anchor }, ref) => {
+      const locale = useLocale();
 
-    const dialogDeleteTexts = useClientLRUStore({
-      setter: () =>
-        getAlertDialogDeleteTexts(
-          ingredientNutritionalFactResponse.ingredient.name,
-        ),
-      args: [
-        `alertDialogDeleteTexts-${ingredientNutritionalFactResponse.ingredient.name}-ingredients`,
-        locale,
-      ],
-    });
+      const dialogDeleteTexts = useClientLRUStore({
+        setter: () =>
+          getAlertDialogDeleteTexts(
+            ingredientNutritionalFactResponse.ingredient.name,
+          ),
+        args: [
+          `alertDialogDeleteTexts-${ingredientNutritionalFactResponse.ingredient.name}-ingredients`,
+          locale,
+        ],
+      });
 
-    const deleteModel = async () => {
-      try {
-        const resp = await fetchStream({
-          path: `/ingredients/delete/${ingredientNutritionalFactResponse.ingredient.id}`,
-          method: "DELETE",
-          token,
-        });
-        if (resp.error) {
-          console.log(resp.error);
-        } else {
-          toast({
-            title: ingredientNutritionalFactResponse.ingredient.name,
-            description: "Deleted",
-            variant: "destructive",
+      const deleteModel = async () => {
+        try {
+          const resp = await fetchStream({
+            path: `/ingredients/delete/${ingredientNutritionalFactResponse.ingredient.id}`,
+            method: "DELETE",
+            token,
           });
-          callBack?.();
+          if (resp.error) {
+            console.log(resp.error);
+          } else {
+            toast({
+              title: ingredientNutritionalFactResponse.ingredient.name,
+              description: "Deleted",
+              variant: "destructive",
+            });
+            callBack?.();
+          }
+        } catch (error) {
+          console.log(error);
         }
-      } catch (error) {
-        console.log(error);
-      }
-    };
+      };
 
-    if (!dialogDeleteTexts) return;
+      if (!dialogDeleteTexts) return;
 
-    return (
-      <AlertDialog>
-        <AlertDialogTrigger asChild>
-          {anchor ? (
-            anchor
-          ) : (
-            <Button
-              variant="outline"
-              className="border-destructive text-destructive w-full"
-            >
-              {dialogDeleteTexts.anchor}
-            </Button>
-          )}
-        </AlertDialogTrigger>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{dialogDeleteTexts.title}</AlertDialogTitle>
-            <AlertDialogDescription>
-              {dialogDeleteTexts.description}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>{dialogDeleteTexts.cancel}</AlertDialogCancel>
-            <AlertDialogAction asChild onClick={deleteModel}>
-              <Button variant="destructive">{dialogDeleteTexts.confirm}</Button>
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    );
-  },
+      return (
+        <div ref={ref}>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              {anchor ? (
+                anchor
+              ) : (
+                <Button
+                  variant="outline"
+                  className="border-destructive text-destructive w-full"
+                >
+                  {dialogDeleteTexts.anchor}
+                </Button>
+              )}
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>{dialogDeleteTexts.title}</AlertDialogTitle>
+                <AlertDialogDescription>
+                  {dialogDeleteTexts.description}
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>
+                  {dialogDeleteTexts.cancel}
+                </AlertDialogCancel>
+                <AlertDialogAction asChild onClick={deleteModel}>
+                  <Button variant="destructive">
+                    {dialogDeleteTexts.confirm}
+                  </Button>
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
+      );
+    },
+  ),
   (
     { callBack: prevCallBack, ...prevProps },
     { callBack: nextCallBack, ...nextProps },

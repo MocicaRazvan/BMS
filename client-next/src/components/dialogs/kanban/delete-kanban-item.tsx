@@ -79,7 +79,9 @@ export default function DeleteKanbanItem({
       >
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
-          <DialogDescription>{description}</DialogDescription>
+          <DialogDescription asChild>
+            <div>{description}</div>
+          </DialogDescription>
         </DialogHeader>
 
         <ErrorMessage message={errorMsg} show={!!errorMsg} />

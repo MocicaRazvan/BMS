@@ -69,7 +69,7 @@ const HeroParallax = memo(
     return (
       <div
         ref={ref}
-        className="h-[2150px] py-40 lg:pb-36  overflow-hidden  antialiased relative flex flex-col self-auto [perspective:1000px] [transform-style:preserve-3d] !transform-gpu"
+        className="h-[2150px] py-40 lg:pb-36 overflow-hidden antialiased relative flex flex-col self-auto [perspective:1000px] [transform-style:preserve-3d] !transform-gpu"
       >
         <Header {...texts} />
         <motion.div
@@ -79,7 +79,6 @@ const HeroParallax = memo(
             translateY,
             opacity,
           }}
-          className=""
         >
           <motion.div className="flex flex-row-reverse space-x-reverse space-x-20 mb-20">
             {firstRow.map((product) => (

@@ -71,7 +71,7 @@ export default async function Home({ params: { locale } }: Props) {
   });
 
   return (
-    <main className="  w-full  space-y-5">
+    <main className="w-full space-y-5">
       <ScrollProgress />
       {/*<HomeHeader {...homeHeaderTexts} />*/}
       <HomeHero {...homeHeroTexts} />

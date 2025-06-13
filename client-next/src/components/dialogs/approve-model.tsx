@@ -103,8 +103,8 @@ const AlertDialogApprove = memo(
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>{dialogApproveTexts.title}</AlertDialogTitle>
-            <AlertDialogDescription>
-              {dialogApproveTexts.description}
+            <AlertDialogDescription asChild>
+              <div>{dialogApproveTexts.description}</div>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

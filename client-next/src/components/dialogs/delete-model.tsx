@@ -87,8 +87,8 @@ const AlertDialogDelete = memo(
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>{dialogDeleteTexts.title}</AlertDialogTitle>
-            <AlertDialogDescription>
-              {dialogDeleteTexts.description}
+            <AlertDialogDescription asChild>
+              <div>{dialogDeleteTexts.description}</div>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

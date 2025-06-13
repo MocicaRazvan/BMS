@@ -47,12 +47,12 @@ export default function KanbanBoardWrapper({ ...props }: Props) {
         ...content,
         dndId: createDndIdColumn(content.id),
       })),
-    [JSON.stringify(messages)],
+    [messages],
   );
 
   useEffect(() => {
     setColumnsIds(messages.map(({ content: { id } }) => id));
-  }, [JSON.stringify(messages)]);
+  }, [messages]);
 
   useEffect(() => {
     columnsIds.forEach((cId) => {
@@ -78,7 +78,7 @@ export default function KanbanBoardWrapper({ ...props }: Props) {
         )
         .catch((e) => console.log("WRAPPER ERROR USE", e));
     });
-  }, [JSON.stringify(columnsIds)]);
+  }, [columnsIds]);
 
   return isAbsoluteFinished ? (
     <KanbanBoard

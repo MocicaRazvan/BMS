@@ -14,17 +14,26 @@ import LoadingSpinner from "@/components/common/loading-spinner";
 import React, { useEffect, useState } from "react";
 import { fetchStream } from "@/lib/fetchers/fetchStream";
 import { Link } from "@/navigation/navigation";
-import { Button } from "@/components/ui/button";
 
 import { Card } from "@/components/ui/card";
 
 import { useFormatter } from "next-intl";
 import { format } from "date-fns";
 import useClientNotFound from "@/hoooks/useClientNotFound";
-import { motion } from "framer-motion";
 import CustomImage from "@/components/common/custom-image";
 import { useAuthUserMinRole } from "@/context/auth-user-min-role-context";
 import PageContainer from "@/components/common/page-container";
+import dynamic from "next/dynamic";
+
+const DynamicInvoiceLink = dynamic(
+  () => import("@/components/orders/invoice-link"),
+  {
+    ssr: false,
+    loading: () => (
+      <div aria-label="Loading invoice link" className="sr-only" />
+    ),
+  },
+);
 
 export interface SingleOrderPageContentTexts {
   title: string;
@@ -86,7 +95,7 @@ export default function SingleOrderPageContent({
         },
       }).catch(() => navigateToNotFound());
     }
-  }, [authUser.token, JSON.stringify(ordersAddress)]);
+  }, [authUser.token, ordersAddress]);
 
   if (!isMounted) return null;
 
@@ -118,10 +127,10 @@ export default function SingleOrderPageContent({
   return (
     <PageContainer className="max-w-[1000px]">
       <div className="flex w-full items-end justify-center gap-5 my-10">
-        <h1 className="font-bold tracking-tighter text-3xl md:text-5xl  text-center">
+        <h1 className="font-bold tracking-tighter text-3xl md:text-4xl  text-center">
           {title}
         </h1>
-        <span className="font-semibold tracking-tighter text-3xl md:text-5xl">
+        <span className="font-semibold tracking-tighter text-3xl md:text-4xl">
           {format(
             new Date(ordersAddress[0].content.order.createdAt),
             "dd/MM/yyyy HH:mm",
@@ -193,17 +202,10 @@ export default function SingleOrderPageContent({
                     </div>
                   </div>
                   {invoice && (
-                    <Button asChild>
-                      <motion.a
-                        initial={{ scale: 0, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        transition={{ duration: 0.5 }}
-                        href={invoice.url}
-                        target={"_blank"}
-                      >
-                        {seeInvoice}
-                      </motion.a>
-                    </Button>
+                    <DynamicInvoiceLink
+                      invoiceUrl={invoice.url}
+                      seeInvoice={seeInvoice}
+                    />
                   )}
                 </div>
               </div>

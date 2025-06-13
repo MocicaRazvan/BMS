@@ -1,5 +1,6 @@
 import { AlertDialogDelete } from "@/components/dialogs/delete-model";
 import { RecipeResponse } from "@/types/dto";
+import { forwardRef } from "react";
 
 interface Props {
   recipe: RecipeResponse;
@@ -8,19 +9,20 @@ interface Props {
   title: string;
 }
 
-export default function AlertDialogDeleteRecipe({
-  recipe,
-  token,
-  callBack,
-  title,
-}: Props) {
-  return (
-    <AlertDialogDelete
-      callBack={callBack}
-      model={recipe}
-      token={token}
-      path="recipes"
-      title={title}
-    />
-  );
-}
+const AlertDialogDeleteRecipe = forwardRef<HTMLDivElement, Props>(
+  ({ recipe, token, callBack, title }, ref) => {
+    return (
+      <div ref={ref}>
+        <AlertDialogDelete
+          callBack={callBack}
+          model={recipe}
+          token={token}
+          path="recipes"
+          title={title}
+        />
+      </div>
+    );
+  },
+);
+AlertDialogDeleteRecipe.displayName = "AlertDialogDeleteRecipe";
+export default AlertDialogDeleteRecipe;

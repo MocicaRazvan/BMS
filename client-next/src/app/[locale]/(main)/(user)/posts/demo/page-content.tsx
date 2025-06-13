@@ -14,7 +14,6 @@ import { SortingOptionsTexts } from "@/types/constants";
 import { useSearchParams } from "next/navigation";
 import React, { useState } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ThumbsUp } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -23,7 +22,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import { estimateReadingTime } from "@/lib/reading-time/estimator";
+import { PostExtraHeader } from "@/app/[locale]/(main)/(user)/posts/approved/page-content";
 
 export interface ApprovedPostsTexts {
   gridListTexts: GridListTexts;
@@ -166,17 +165,7 @@ export default function DemoPostApprovedPageContent({
             </div>
           </div>
         )}
-        passExtraHeader={(p) => (
-          <div className="flex items-center gap-3.5 justify-start max-w-[300px]">
-            <div className="flex items-start justify-center gap-0.5 font-semibold text-success">
-              <span className="mt-0.5">{p.model.content.userLikes.length}</span>
-              <ThumbsUp className="text-success" size={20} />
-            </div>
-            <p className="text-sm text-muted-foreground font-semibold">
-              {estimateReadingTime(p.model.content.body, 200, locale).text}
-            </p>
-          </div>
-        )}
+        passExtraHeader={(p) => <PostExtraHeader post={p.model.content} />}
       />
     </section>
   );

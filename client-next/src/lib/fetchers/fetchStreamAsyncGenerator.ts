@@ -7,6 +7,7 @@ import {
   FetchStreamProps,
   generateFinalArgs,
 } from "@/lib/fetchers/fetchStream";
+
 export type FetchStreamAsyncGenerator<T> = Omit<
   FetchStreamProps<T>,
   "successCallback" | "successArrayCallback"
@@ -240,7 +241,7 @@ export function fetchStreamAsyncGenerator<
     },
     abort() {
       try {
-        console.log("Aborting fetchStreamAsyncIterator for path", path);
+        // console.log("Aborting fetchStreamAsyncIterator for path", path);
         callAbortController();
         onAbort?.();
       } catch (e) {

@@ -14,7 +14,7 @@ import { fetchStream } from "@/lib/fetchers/fetchStream";
 import { UserDto } from "@/types/dto";
 import { WithUser } from "@/lib/user";
 import { toast } from "@/components/ui/use-toast";
-import { ReactNode, useCallback, useEffect, useState } from "react";
+import { forwardRef, ReactNode, useCallback, useEffect, useState } from "react";
 import { getAlertDialogMakeTrainerTexts } from "@/texts/components/dialog";
 
 interface Props extends WithUser {
@@ -33,78 +33,80 @@ export interface AlertDialogMakeTrainerTexts {
   confirm: string;
 }
 
-export function AlertDialogMakeTrainer({
-  user,
-  authUser,
-  successCallback,
-  buttonProps,
-  anchorText,
-}: Props) {
-  const [texts, setTexts] = useState<AlertDialogMakeTrainerTexts | null>(null);
+const AlertDialogMakeTrainer = forwardRef<HTMLDivElement, Props>(
+  ({ user, authUser, successCallback, buttonProps, anchorText }, ref) => {
+    const [texts, setTexts] = useState<AlertDialogMakeTrainerTexts | null>(
+      null,
+    );
 
-  useEffect(() => {
-    getAlertDialogMakeTrainerTexts(user.email).then(setTexts);
-  }, [user.email]);
+    useEffect(() => {
+      getAlertDialogMakeTrainerTexts(user.email).then(setTexts);
+    }, [user.email]);
 
-  const makeTrainer = useCallback(async () => {
-    if (!texts) return;
-    try {
-      const resp = await fetchStream({
-        path: `/users/admin/${user.id}`,
-        method: "PATCH",
-        token: authUser.token,
-      });
-
-      if (resp.error) {
-        console.log(resp.error);
-        toast({
-          title: user.email,
-          description: "Error",
-          variant: "destructive",
+    const makeTrainer = useCallback(async () => {
+      if (!texts) return;
+      try {
+        const resp = await fetchStream({
+          path: `/users/admin/${user.id}`,
+          method: "PATCH",
+          token: authUser.token,
         });
-      } else {
-        successCallback();
-        toast({
-          title: user.email,
-          description: texts.toast,
-          variant: "success",
-        });
+
+        if (resp.error) {
+          console.log(resp.error);
+          toast({
+            title: user.email,
+            description: "Error",
+            variant: "destructive",
+          });
+        } else {
+          successCallback();
+          toast({
+            title: user.email,
+            description: texts.toast,
+            variant: "success",
+          });
+        }
+      } catch (error) {
+        console.log(error);
       }
-    } catch (error) {
-      console.log(error);
-    }
-  }, [authUser.token, successCallback, texts, user.email, user.id]);
+    }, [authUser.token, successCallback, texts, user.email, user.id]);
 
-  return (
-    <AlertDialog>
-      <AlertDialogTrigger asChild>
-        <Button
-          variant="destructive"
-          size="lg"
-          className="font-bold text-lg w-full"
-          {...buttonProps}
-        >
-          {texts?.anchor || anchorText}
-        </Button>
-      </AlertDialogTrigger>
-      <AlertDialogContent>
-        {texts && (
-          <>
-            <AlertDialogHeader>
-              <AlertDialogTitle>{texts.title}</AlertDialogTitle>
-              <AlertDialogDescription>
-                {texts.description}
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>{texts.cancel}</AlertDialogCancel>
-              <AlertDialogAction asChild onClick={makeTrainer}>
-                <Button variant="destructive">{texts.confirm}</Button>
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </>
-        )}
-      </AlertDialogContent>
-    </AlertDialog>
-  );
-}
+    return (
+      <div ref={ref}>
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button
+              variant="destructive"
+              size="lg"
+              className="font-bold text-lg w-full"
+              {...buttonProps}
+            >
+              {texts?.anchor || anchorText}
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            {texts && (
+              <>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>{texts.title}</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    {texts.description}
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>{texts.cancel}</AlertDialogCancel>
+                  <AlertDialogAction asChild onClick={makeTrainer}>
+                    <Button variant="destructive">{texts.confirm}</Button>
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </>
+            )}
+          </AlertDialogContent>
+        </AlertDialog>
+      </div>
+    );
+  },
+);
+AlertDialogMakeTrainer.displayName = "AlertDialogMakeTrainer";
+export { AlertDialogMakeTrainer };

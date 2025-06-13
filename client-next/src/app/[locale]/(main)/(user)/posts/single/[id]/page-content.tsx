@@ -29,8 +29,8 @@ import useFetchStream from "@/hoooks/useFetchStream";
 import { useLocale } from "next-intl";
 import { Locale } from "@/navigation/navigation";
 import { useAuthUserMinRole } from "@/context/auth-user-min-role-context";
-import { estimateReadingTime } from "@/lib/reading-time/estimator";
 import PageContainer from "@/components/common/page-container";
+import useEstimateReadingTimeText from "@/hoooks/posts/use-estimate-reading-time-text";
 
 export interface SinglePostPageTexts {
   elementHeaderTexts: ElementHeaderTexts;
@@ -87,6 +87,8 @@ export default function SinglePostPageContent({
     authToken: true,
   });
 
+  const estimatedReadingTime = useEstimateReadingTimeText(postState?.body);
+
   useTrackItemView(
     `/posts/viewCount/${id}`,
     3000,
@@ -109,7 +111,7 @@ export default function SinglePostPageContent({
           method: "PATCH",
           token: authUser.token,
         });
-        console.log(resp);
+
         const newPost = resp.messages[0]?.content;
         setPostState((prev) =>
           !prev
@@ -131,7 +133,6 @@ export default function SinglePostPageContent({
   }
 
   if (!isFinished || !postState) {
-    console.log("loading main");
     return (
       <section className="w-full min-h-[calc(100vh-4rem)] flex items-center justify-center">
         <LoadingSpinner />
@@ -165,7 +166,7 @@ export default function SinglePostPageContent({
         {...elementHeaderTexts}
         extraContent={
           <p className="text-sm text-muted-foreground font-semibold">
-            {estimateReadingTime(postState?.body, 200, locale).text}
+            {estimatedReadingTime}
           </p>
         }
       />

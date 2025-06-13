@@ -9,19 +9,24 @@ const Table = React.forwardRef<
     wrapperStyle?: React.CSSProperties;
     wrapperRef?: React.Ref<HTMLDivElement>;
   }
->(({ wrapperClassName, className, wrapperStyle, ...props }, ref) => (
-  <div
-    className={cn("relative w-full overflow-auto", wrapperClassName)}
-    style={wrapperStyle}
-    ref={props.wrapperRef}
-  >
-    <table
-      ref={ref}
-      className={cn("w-full caption-bottom text-sm", className)}
-      {...props}
-    />
-  </div>
-));
+>(
+  (
+    { wrapperClassName, className, wrapperStyle, wrapperRef, ...props },
+    ref,
+  ) => (
+    <div
+      className={cn("relative w-full overflow-auto", wrapperClassName)}
+      style={wrapperStyle}
+      ref={wrapperRef}
+    >
+      <table
+        ref={ref}
+        className={cn("w-full caption-bottom text-sm", className)}
+        {...props}
+      />
+    </div>
+  ),
+);
 Table.displayName = "Table";
 
 const TableHeader = React.forwardRef<

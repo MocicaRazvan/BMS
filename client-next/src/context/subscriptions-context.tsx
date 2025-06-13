@@ -68,7 +68,7 @@ export const SubscriptionProvider = ({ children }: Props) => {
   const [state, dispatch] = useReducer(subscriptionReducer, initialState);
 
   useEffect(() => {
-    if (authUser && authUser?.token) {
+    if (authUser?.token) {
       fetchStream<UserSubscriptionDto>({
         path: "/orders/subscriptions",
         token: authUser.token,
@@ -77,16 +77,13 @@ export const SubscriptionProvider = ({ children }: Props) => {
         //   dispatch({ type: "ADD", payload: data.planId });
         // },
         successArrayCallback: (data) => {
-          console.log("Subscription fetch success", data);
           dispatch({ type: "ADD_ARRAY", payload: data.map((d) => d.planId) });
         },
       }).catch((e) => {
         console.error("Subscription fetch error", e);
       });
     }
-  }, [JSON.stringify(authUser)]);
-
-  console.log("Subscriptions", state);
+  }, [authUser?.token]);
 
   return (
     <SubscriptionContext.Provider value={{ subscriptions: state, dispatch }}>

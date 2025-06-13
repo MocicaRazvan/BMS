@@ -11,9 +11,7 @@ import LoadingSpinner from "@/components/common/loading-spinner";
 import CustomImageCarousel from "@/components/common/custom-image-crousel";
 import ProseText from "@/components/common/prose-text";
 import AuthorProfile from "@/components/common/author-profile";
-import AddToCartBtn, {
-  AddToCartBtnTexts,
-} from "@/components/plans/add-to-cart-btn";
+import { AddToCartBtnTexts } from "@/components/plans/add-to-cart-btn";
 import useClientNotFound from "@/hoooks/useClientNotFound";
 import React from "react";
 import { usePlansSubscription } from "@/context/subscriptions-context";
@@ -24,6 +22,15 @@ import PlanRecommendationList, {
 import { Separator } from "@/components/ui/separator";
 import { useAuthUserMinRole } from "@/context/auth-user-min-role-context";
 import PageContainer from "@/components/common/page-container";
+import dynamic from "next/dynamic";
+
+const DynamicAddToCartBtn = dynamic(
+  () => import("@/components/plans/animated-add-to-cart-btn"),
+  {
+    ssr: false,
+    loading: () => null,
+  },
+);
 
 export interface UserPlanPageContentTexts {
   elementHeaderTexts: ElementHeaderTexts;
@@ -70,7 +77,6 @@ export default function UserPlanPageContent({
   }
 
   if (!isFinished || !planState) {
-    console.log("loading main");
     return (
       <section className="w-full min-h-[calc(100vh-4rem)] flex items-center justify-center">
         <LoadingSpinner />
@@ -151,14 +157,11 @@ export default function UserPlanPageContent({
           {...planRecommendationListTexts}
         />
       </div>
-      <div className="sticky bottom-0 mt-4  w-fit mx-auto  bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/70 p-2 rounded-md">
-        <AddToCartBtn
-          authUser={authUser}
-          plan={plan}
-          {...addToCartBtnTexts}
-          pulse
-        />
-      </div>
+      <DynamicAddToCartBtn
+        plan={plan}
+        authUser={authUser}
+        addToCartBtnTexts={addToCartBtnTexts}
+      />
     </PageContainer>
   );
 }

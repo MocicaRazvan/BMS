@@ -90,7 +90,9 @@ const ToggleDisplayDialog = memo(
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>{texts.title}</AlertDialogTitle>
-            <AlertDialogDescription>{texts.description}</AlertDialogDescription>
+            <AlertDialogDescription asChild>
+              <div>{texts.description}</div>
+            </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>{texts.cancel}</AlertDialogCancel>

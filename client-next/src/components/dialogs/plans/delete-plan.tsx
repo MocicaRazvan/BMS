@@ -1,5 +1,6 @@
 import { AlertDialogDelete } from "@/components/dialogs/delete-model";
 import { PlanResponse } from "@/types/dto";
+import { forwardRef } from "react";
 
 interface Props {
   plan: PlanResponse;
@@ -8,19 +9,21 @@ interface Props {
   title: string;
 }
 
-export default function AlertDialogDeletePlan({
-  plan,
-  token,
-  callBack,
-  title,
-}: Props) {
-  return (
-    <AlertDialogDelete
-      callBack={callBack}
-      model={plan}
-      token={token}
-      path="plans"
-      title={title}
-    />
-  );
-}
+const AlertDialogDeletePlan = forwardRef<HTMLDivElement, Props>(
+  ({ plan, token, callBack, title }, ref) => {
+    return (
+      <div ref={ref}>
+        <AlertDialogDelete
+          callBack={callBack}
+          model={plan}
+          token={token}
+          path="plans"
+          title={title}
+        />
+      </div>
+    );
+  },
+);
+
+AlertDialogDeletePlan.displayName = "AlertDialogDeletePlan";
+export default AlertDialogDeletePlan;

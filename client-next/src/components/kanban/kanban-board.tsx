@@ -50,8 +50,6 @@ export interface KanbanColumn extends KanbanColumnResponse {
   dndId: string;
 }
 
-let counter = 0;
-
 export type GroupedKanbanTasks = Record<number, KanbanTask[]>;
 
 export interface KanbanBoardTexts {
@@ -96,7 +94,7 @@ export default function KanbanBoard({
       }
       console.log("REINDEX FUNCTION CALL1", rs);
     },
-    [authUser.token, JSON.stringify(columns), JSON.stringify(groupedTasks)],
+    [authUser.token, columns, groupedTasks],
   );
 
   const { reindexState, setReindexState } = useKanbanRouteChange(handleUpdate);
@@ -105,9 +103,6 @@ export default function KanbanBoard({
   const [activeTask, setActiveTask] = useState<KanbanTask | null>(null);
 
   const [isDndActive, setIsDndActive] = useState(false);
-
-  console.log("counting re-renders", (counter += 1));
-  console.log("REINDEX STATE", reindexState);
 
   useEffect(() => {
     setColumns(initialColumns);
@@ -130,8 +125,6 @@ export default function KanbanBoard({
     }),
   );
 
-  console.log(columns);
-
   const setColumnsOrdered = useCallback(
     (updater: (prev: typeof columns) => typeof columns) => {
       setColumns((prev) =>
@@ -143,7 +136,7 @@ export default function KanbanBoard({
 
       setReindexState((prev) => ({ ...prev, column: new Date().getTime() }));
     },
-    [],
+    [setReindexState],
   );
 
   const setGroupedTasksOrdered = useCallback(
@@ -167,7 +160,7 @@ export default function KanbanBoard({
 
       setReindexState((prev) => ({ ...prev, task: new Date().getTime() }));
     },
-    [],
+    [setReindexState],
   );
 
   const columnIds = useMemo(

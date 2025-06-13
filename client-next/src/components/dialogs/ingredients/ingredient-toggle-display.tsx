@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactNode } from "react";
+import { forwardRef, ReactNode } from "react";
 import { WithUser } from "@/lib/user";
 import { IngredientNutritionalFactResponse } from "@/types/dto";
 import { BaseDialogTexts } from "@/components/dialogs/delete-model";
@@ -15,17 +15,19 @@ interface Props extends WithUser {
   callBack: () => void;
 }
 
-export default function ToggleDisplayIngredient({
-  callBack,
-  model,
-  authUser,
-}: Props) {
-  return (
-    <ToggleDisplayDialog
-      model={model.ingredient}
-      path={`/ingredients/alterDisplay/${model.ingredient.id}`}
-      callBack={callBack}
-      authUser={authUser}
-    />
-  );
-}
+const ToggleDisplayIngredient = forwardRef<HTMLDivElement, Props>(
+  ({ callBack, model, authUser }, ref) => {
+    return (
+      <div ref={ref}>
+        <ToggleDisplayDialog
+          model={model.ingredient}
+          path={`/ingredients/alterDisplay/${model.ingredient.id}`}
+          callBack={callBack}
+          authUser={authUser}
+        />
+      </div>
+    );
+  },
+);
+ToggleDisplayIngredient.displayName = "ToggleDisplayIngredient";
+export default ToggleDisplayIngredient;
