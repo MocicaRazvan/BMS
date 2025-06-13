@@ -8,18 +8,7 @@ const blurColors = {
 } as const;
 
 function hslToBlurredDataURL(hsl: string): string {
-  const svg = `
-    <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10">
-      <defs>
-        <filter id="blur">
-          <feGaussianBlur stdDeviation="4.25" />
-          <feComponentTransfer>
-            <feFuncA type="linear" slope="0.85" />
-          </feComponentTransfer>
-        </filter>
-      </defs>
-      <rect width="10" height="10" fill="${hsl}" filter="url(#blur)" />
-    </svg>`;
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10"><defs><filter id="blur"><feGaussianBlur stdDeviation="4.25"/><feComponentTransfer><feFuncA type="linear" slope="0.85"/></feComponentTransfer></filter></defs><rect width="10" height="10" fill="${hsl}" filter="url(#blur)"/></svg>`;
 
   return `data:image/svg+xml;base64,${window.btoa(svg)}`;
 }
