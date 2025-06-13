@@ -19,7 +19,7 @@ public interface MediaService {
     Mono<FileUploadResponse> uploadFiles(Flux<FilePart> files, MetadataDto metadataDto);
 
 
-    Mono<ServerHttpResponse> getResponseForFile(String gridId, Integer width, Integer height, Double quality, Boolean webpOutputEnabled, ServerWebExchange exchange, boolean shouldCheckCache);
+    Mono<ServerHttpResponse> getResponseForFile(String gridId, Integer width, Integer height, Double quality, ServerWebExchange exchange);
 
     Mono<ReactiveGridFsResource> getFile(String gridId);
 
@@ -31,7 +31,7 @@ public interface MediaService {
 
     Mono<ToBeDeletedCounts> countToBeDeleted();
 
-    Mono<Void> deleteFileWithCacheInvalidate(GridIdsDto ids);
+    Mono<Void> markFilesToBeDeleted(GridIdsDto ids);
 
     Flux<ToBeDeletedCounts> hardDeleteFiles();
 }

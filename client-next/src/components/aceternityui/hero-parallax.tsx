@@ -2,10 +2,10 @@
 import { memo, ReactNode, useRef } from "react";
 import {
   motion,
-  useScroll,
-  useTransform,
-  useSpring,
   MotionValue,
+  useScroll,
+  useSpring,
+  useTransform,
 } from "framer-motion";
 import Image, { StaticImageData } from "next/image";
 import { Link } from "@/navigation/navigation";
@@ -166,7 +166,7 @@ export const ProductCard = ({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{
-        opacity: { duration: 0.35, ease: "easeOut", delay: 0.3 },
+        opacity: { duration: 0.37, ease: "easeOut", delay: 0.32 },
       }}
       style={{
         x: translate,

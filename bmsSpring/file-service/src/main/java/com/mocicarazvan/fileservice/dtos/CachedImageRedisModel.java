@@ -1,6 +1,7 @@
 package com.mocicarazvan.fileservice.dtos;
 
 
+import com.mocicarazvan.fileservice.repositories.ImageRedisRepository;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -15,7 +16,7 @@ import java.io.Serializable;
 public class CachedImageRedisModel implements Serializable {
     private byte[] imageData;
     private String attachment;
-    private boolean webpOutputEnabled;
+    private ImageRedisRepository.ImageRedisRepositoryImageCharacteristics imageCharacteristics;
 
     @Builder.Default
     private long timestamp = System.currentTimeMillis();

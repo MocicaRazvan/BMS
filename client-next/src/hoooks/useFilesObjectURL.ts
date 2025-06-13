@@ -40,28 +40,10 @@ const fetchFilesObjectURL = async (urls: string[]) => {
       }
     }
 
-    let blob: Blob;
-    if (res.body) {
-      const reader = res.body.getReader();
-      const chunks: Uint8Array[] = [];
-      let done = false;
-
-      while (!done) {
-        const { value, done: doneReading } = await reader.read();
-        if (value) {
-          chunks.push(value);
-        }
-        done = doneReading;
-      }
-
-      blob = new Blob(chunks, { type: mimeType });
-      console.log("Chunks", url);
-    } else {
-      blob = await res.blob();
-    }
+    const buffer = await res.arrayBuffer();
 
     return {
-      blob,
+      buffer,
       mimeType,
       url,
       filename,
@@ -162,10 +144,10 @@ export default function useFilesObjectURL<T extends FieldValues>({
             const ext = fs.mimeType?.split("/").pop();
             const fallbackName = urlPart && ext ? `${urlPart}.${ext}` : "file";
 
-            const file = new File([fs.blob], fs.filename || fallbackName, {
+            const file = new File([fs.buffer], fs.filename || fallbackName, {
               type: fs.mimeType,
             });
-            const objectURL = URL.createObjectURL(fs.blob);
+            const objectURL = URL.createObjectURL(file);
             setChunkProgressValue((prev) => ((prev + 1) / files.length) * 100);
             return {
               id: uuidv4(),

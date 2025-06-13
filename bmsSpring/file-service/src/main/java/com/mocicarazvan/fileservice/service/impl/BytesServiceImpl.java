@@ -1,6 +1,6 @@
 package com.mocicarazvan.fileservice.service.impl;
 
-import com.mocicarazvan.fileservice.enums.MediaType;
+import com.mocicarazvan.fileservice.enums.CustomMediaType;
 import com.mocicarazvan.fileservice.service.BytesService;
 import lombok.extern.slf4j.Slf4j;
 import net.coobird.thumbnailator.Thumbnails;
@@ -112,7 +112,7 @@ public class BytesServiceImpl implements BytesService {
 
 
     @Override
-    public Flux<DataBuffer> convertWithThumblinator(Integer width, Integer height, Double quality, Flux<DataBuffer> downloadStream, MediaType mediaType,
+    public Flux<DataBuffer> convertWithThumblinator(Integer width, Integer height, Double quality, Flux<DataBuffer> downloadStream, CustomMediaType customMediaType,
                                                     Boolean webpOutputEnabled,
                                                     ServerHttpResponse response
 
@@ -122,7 +122,7 @@ public class BytesServiceImpl implements BytesService {
                 .flatMapMany(dataBuffer -> {
                     try (InputStream inputStream = dataBuffer.asInputStream(true)) {
 
-                        boolean isKnownFormat = mediaType == MediaType.PNG || mediaType == MediaType.JPEG || mediaType == MediaType.JPG;
+                        boolean isKnownFormat = customMediaType == CustomMediaType.PNG || customMediaType == CustomMediaType.JPEG || customMediaType == CustomMediaType.JPG;
 
 
                         ImageReader reader = null;
@@ -130,7 +130,7 @@ public class BytesServiceImpl implements BytesService {
                         String mediaFormatName = null;
                         try {
                             if (isKnownFormat) {
-                                mediaFormatName = mediaType.getValue().toLowerCase();
+                                mediaFormatName = customMediaType.getValue().toLowerCase();
                                 Iterator<ImageReader> imageReaders = ImageIO.getImageReadersByFormatName(mediaFormatName);
                                 if (!imageReaders.hasNext()) {
                                     return getImageFallback(response, inputStream);
@@ -160,7 +160,7 @@ public class BytesServiceImpl implements BytesService {
                             String formatName = webpOutputEnabled ?
                                     "webp"
                                     : mediaFormatName != null ? mediaFormatName : reader.getFormatName();
-                            if (mediaType == MediaType.ALL) {
+                            if (customMediaType == CustomMediaType.ALL) {
                                 response.getHeaders().set(HttpHeaders.CONTENT_TYPE, "image/" + formatName.toLowerCase());
                             }
                             return Mono.fromCallable(() -> processWithThumblinator(width, height, quality, response, image, formatName))

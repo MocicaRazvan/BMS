@@ -1,14 +1,8 @@
 "use client";
 import Image, { ImageProps } from "next/image";
-import {
-  ComponentProps,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
-import { Skeleton } from "@/components/ui/skeleton";
-import { cn } from "@/lib/utils";
+import { ComponentProps, useMemo } from "react";
+
+import useGetCustomImageBlur from "@/hoooks/images/use-get-custom-image-blur";
 
 const springUrl = process.env.NEXT_PUBLIC_SPRING!;
 const springClientUrl = process.env.NEXT_PUBLIC_SPRING_CLIENT!;
@@ -22,44 +16,21 @@ export default function CustomImage({
   thumblinator?: boolean;
   alt?: string;
 }) {
-  const imgRef = useRef<HTMLImageElement | null>(null);
-  const [isLoaded, setIsLoaded] = useState(false);
-
+  const { blurData } = useGetCustomImageBlur();
   const loader = useMemo(
     () => (isLoaderCompatible(thumblinator, src) ? imageLoader : rest.loader),
     [rest.loader, src, thumblinator],
   );
 
-  useLayoutEffect(() => {
-    if (imgRef.current?.complete) {
-      setIsLoaded(true);
-    }
-  }, []);
-
   return (
-    <div
-      className={cn(
-        "relative w-full h-full",
-        rest.width && "w-[${width}px]",
-        rest.height && "h-[${height}px]",
-      )}
-    >
-      <Skeleton
-        className={`w-full h-full absolute top-0 left-0 ${isLoaded ? "hidden" : "block"}`}
-      />
-      <Image
-        ref={imgRef}
-        alt={alt}
-        {...rest}
-        src={src}
-        onLoad={() => setIsLoaded(true)}
-        className={cn(
-          `transition-opacity duration-500 ease-in-out ${isLoaded ? "opacity-100" : "opacity-0"}`,
-          rest.className,
-        )}
-        loader={loader}
-      />
-    </div>
+    <Image
+      alt={alt}
+      {...rest}
+      src={src}
+      placeholder="blur"
+      blurDataURL={blurData}
+      loader={loader}
+    />
   );
 }
 

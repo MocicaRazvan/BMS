@@ -2,6 +2,7 @@ package com.mocicarazvan.fileservice.utils;
 
 import com.mocicarazvan.fileservice.enums.FileType;
 import com.mongodb.client.gridfs.model.GridFSFile;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpRange;
 import org.springframework.http.server.reactive.ServerHttpResponse;
@@ -34,7 +35,9 @@ public class CacheHeaderUtils {
     public static String buildETag(String gridId, Integer width, Integer height, Double quality,
                                    Boolean webpOutputEnabled,
                                    long timestamp) {
-        StringBuilder builder = new StringBuilder("\"" + gridId);
+        String finalGridId = gridId == null || gridId.isEmpty() ? RandomStringUtils.randomAlphanumeric(10)
+                : gridId;
+        StringBuilder builder = new StringBuilder("\"" + finalGridId);
 
         if (width != null) {
             builder.append("-w").append(width);
@@ -54,7 +57,12 @@ public class CacheHeaderUtils {
         return builder.toString();
     }
 
-    public static void setCachingHeaders(ServerHttpResponse response, GridFSFile gridFSFile, String gridId, FileType fileType, List<HttpRange> rangeList) {
+    public static String buildETag(String gridId,
+                                   long timestamp) {
+        return buildETag(gridId, null, null, null, null, timestamp);
+    }
+
+    public static void setCachingHeaders(ServerHttpResponse response, GridFSFile gridFSFile, FileType fileType, List<HttpRange> rangeList) {
 
         if (response.isCommitted()) {
             return;
@@ -64,8 +72,7 @@ public class CacheHeaderUtils {
             return;
         }
 
-        String etag = "\"" + gridId + "-" + gridFSFile.getUploadDate().getTime() + "\"";
-        response.getHeaders().setETag(etag);
+
         response.getHeaders().setLastModified(gridFSFile.getUploadDate().getTime());
 
         if (fileType == FileType.VIDEO) {
@@ -75,8 +82,9 @@ public class CacheHeaderUtils {
         }
     }
 
-    public static void setCachingHeaders(ServerHttpResponse response, GridFSFile gridFSFile, String gridId, FileType fileType) {
-        setCachingHeaders(response, gridFSFile, gridId, fileType, null);
+
+    public static void setCachingHeaders(ServerHttpResponse response, GridFSFile gridFSFile, FileType fileType) {
+        setCachingHeaders(response, gridFSFile, fileType, null);
     }
 
     public static void clearCacheHeaders(ServerHttpResponse response) {

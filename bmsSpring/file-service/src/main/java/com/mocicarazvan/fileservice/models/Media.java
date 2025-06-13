@@ -1,7 +1,7 @@
 package com.mocicarazvan.fileservice.models;
 
 
-import com.mocicarazvan.fileservice.enums.MediaType;
+import com.mocicarazvan.fileservice.enums.CustomMediaType;
 import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
@@ -28,7 +28,7 @@ public class Media extends Auditable {
 
 
     public String getMediaType() {
-        return mediaType != null ? mediaType : MediaType.fromFileName(fileName).getValue();
+        return mediaType != null ? mediaType : CustomMediaType.fromFileName(fileName).getValue();
     }
 
 

@@ -4,7 +4,7 @@ package com.mocicarazvan.fileservice.enums;
 import lombok.Getter;
 
 @Getter
-public enum MediaType {
+public enum CustomMediaType {
 
     PNG("png"),
     JPG("jpg"),
@@ -14,19 +14,19 @@ public enum MediaType {
 
     private final String value;
 
-    MediaType(String value) {
+    CustomMediaType(String value) {
         this.value = value;
     }
 
-    public static MediaType fromFileName(String fileName) {
+    public static CustomMediaType fromFileName(String fileName) {
         if (fileName == null || fileName.isBlank()) {
             return ALL;
         }
 
-        return MediaType.fromValue(fileName.substring(fileName.lastIndexOf('.') + 1));
+        return CustomMediaType.fromValue(fileName.substring(fileName.lastIndexOf('.') + 1));
     }
 
-    public static MediaType fromValue(String value) {
+    public static CustomMediaType fromValue(String value) {
         if (value == null || value.isBlank()) {
             return ALL;
         }

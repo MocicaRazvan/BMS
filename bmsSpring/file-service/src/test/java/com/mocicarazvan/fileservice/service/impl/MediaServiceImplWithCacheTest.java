@@ -33,7 +33,7 @@ import static org.mockito.Mockito.*;
 
 @Slf4j
 @ExtendWith(MockitoExtension.class)
-class MediaServiceImplTest {
+class MediaServiceImplWithCacheTest {
 
     @Mock
     ReactiveGridFsTemplate gridFsTemplate;
@@ -57,7 +57,7 @@ class MediaServiceImplTest {
     ProgressWebSocketHandler progressWebSocketHandler;
 
     @InjectMocks
-    MediaServiceImpl mediaService;
+    MediaServiceImplWithCache mediaService;
 
     @BeforeEach
     void setUp() {
@@ -113,7 +113,7 @@ class MediaServiceImplTest {
         when(extendedMediaRepository.markToBeDeletedByGridFsIds(ids)).thenReturn(Mono.empty());
         when(imageRedisRepository.deleteAllImagesByGridIds(ids)).thenReturn(Mono.empty());
 
-        StepVerifier.create(mediaService.deleteFileWithCacheInvalidate(new GridIdsDto(ids)))
+        StepVerifier.create(mediaService.markFilesToBeDeleted(new GridIdsDto(ids)))
                 .verifyComplete();
 
     }
@@ -170,11 +170,6 @@ class MediaServiceImplTest {
     void deleteFiles_allInvalidIds_completesSuccessfully() {
         String invalidId = "notAnObjectId";
 
-        when(gridFsTemplate.delete(any(Query.class))).thenReturn(Mono.empty());
-        when(mediaRepository.findAllByGridFsIdIn(of(invalidId))).thenReturn(Flux.empty());
-        when(mediaMetadataRepository.deleteAllByMediaIdIn(of())).thenReturn(Mono.empty());
-        when(mediaRepository.deleteAllByGridFsIdIn(of(invalidId))).thenReturn(Mono.empty());
-
         StepVerifier.create(mediaService.deleteFiles(of(invalidId)))
                 .verifyComplete();
 
@@ -184,11 +179,6 @@ class MediaServiceImplTest {
     @Test
     void deleteFiles_emptyList_completesAndDeletesNothing() {
         List<String> empty = of();
-
-        when(gridFsTemplate.delete(any(Query.class))).thenReturn(Mono.empty());
-        when(mediaRepository.findAllByGridFsIdIn(empty)).thenReturn(Flux.empty());
-        when(mediaMetadataRepository.deleteAllByMediaIdIn(empty)).thenReturn(Mono.empty());
-        when(mediaRepository.deleteAllByGridFsIdIn(empty)).thenReturn(Mono.empty());
 
         StepVerifier.create(mediaService.deleteFiles(empty))
                 .verifyComplete();
@@ -206,13 +196,13 @@ class MediaServiceImplTest {
     }
 
     @Test
-    void deleteFileWithCacheInvalidate_noIds_completesWithoutError() {
+    void markFilesToBeDeleted_noIds_completesWithoutError() {
         List<String> empty = of();
 
         when(extendedMediaRepository.markToBeDeletedByGridFsIds(empty)).thenReturn(Mono.empty());
         when(imageRedisRepository.deleteAllImagesByGridIds(empty)).thenReturn(Mono.empty());
 
-        StepVerifier.create(mediaService.deleteFileWithCacheInvalidate(new GridIdsDto(empty)))
+        StepVerifier.create(mediaService.markFilesToBeDeleted(new GridIdsDto(empty)))
                 .verifyComplete();
 
     }

@@ -7,25 +7,23 @@ import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.data.redis.connection.DataType;
 import org.springframework.data.redis.core.ReactiveRedisTemplate;
 import org.springframework.data.redis.core.ScanOptions;
-import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.Duration;
 import java.util.List;
 
-@Repository
+//@Repository
 @RequiredArgsConstructor
 @Slf4j
-@ConditionalOnProperty(
-        name = "spring.redis.image.cache.enabled",
-        havingValue = "true",
-        matchIfMissing = true
-)
+//@ConditionalOnProperty(
+//        name = "spring.redis.image.cache.enabled",
+//        havingValue = "true",
+//        matchIfMissing = true
+//)
 public class ImageRedisRepositoryImpl implements ImageRedisRepository {
 
     private final ReactiveRedisTemplate<String, Object> reactiveRedisTemplate;
@@ -43,12 +41,12 @@ public class ImageRedisRepositoryImpl implements ImageRedisRepository {
 
 
     @Override
-    public Mono<Void> saveImage(String gridId, Integer width, Integer height, Double quality, Boolean webOutputEnabled, byte[] imageData, String attch) {
-        String key = generateCacheKey(gridId, width, height, quality, webOutputEnabled);
+    public Mono<Void> saveImage(String gridId, ImageRedisRepositoryImageCharacteristics characteristics, byte[] imageData, String attch) {
+        String key = generateCacheKey(gridId, characteristics);
         CachedImageRedisModel cachedImageRedisModel = CachedImageRedisModel.builder()
                 .imageData(imageData)
                 .attachment(attch)
-                .webpOutputEnabled(webOutputEnabled)
+                .imageCharacteristics(characteristics)
                 .build();
         return
                 reactiveRedisTemplate.opsForValue()
@@ -59,9 +57,9 @@ public class ImageRedisRepositoryImpl implements ImageRedisRepository {
     }
 
     @Override
-    public Mono<CachedImageRedisModel> getImage(String gridId, Integer width, Integer height, Double quality, Boolean webpOutputEnabled) {
+    public Mono<CachedImageRedisModel> getImage(String gridId, ImageRedisRepositoryImageCharacteristics characteristics) {
 //        log.info("Generated cache key: {}", generateCacheKey(gridId, width, height, quality));
-        String key = generateCacheKey(gridId, width, height, quality, webpOutputEnabled);
+        String key = generateCacheKey(gridId, characteristics);
         return reactiveRedisTemplate.opsForValue()
                 .get(key)
                 .cast(CachedImageRedisModel.class);
@@ -69,8 +67,8 @@ public class ImageRedisRepositoryImpl implements ImageRedisRepository {
     }
 
     @Override
-    public Mono<Void> deleteImage(String gridId, Integer width, Integer height, Double quality, Boolean webpOutputEnabled) {
-        String key = generateCacheKey(gridId, width, height, quality, webpOutputEnabled);
+    public Mono<Void> deleteImage(String gridId, ImageRedisRepositoryImageCharacteristics characteristics) {
+        String key = generateCacheKey(gridId, characteristics);
         return reactiveRedisTemplate.opsForValue()
                 .delete(key)
                 .then();
@@ -91,14 +89,23 @@ public class ImageRedisRepositoryImpl implements ImageRedisRepository {
                 .then();
     }
 
+    @Override
+    public boolean shouldCheckCache(ImageRedisRepositoryImageCharacteristics characteristics) {
+        return characteristics.getWidth() != null ||
+                characteristics.getHeight() != null ||
+                characteristics.getQuality() != null ||
+                characteristics.getIsWebpOutputEnabled() != null;
+
+    }
+
 
     @Override
-    public String generateCacheKey(String gridId, Integer width, Integer height, Double quality, Boolean webpOutputEnabled) {
+    public String generateCacheKey(String gridId, ImageRedisRepositoryImageCharacteristics characteristics) {
         return String.format("image:%s:width=%d:height=%d:quality=%.1f:webpOutputEnabled=%s", gridId,
-                width != null ? width : 0,
-                height != null ? height : 0,
-                quality != null ? quality : -1.0,
-                webpOutputEnabled != null ? webpOutputEnabled : false);
+                characteristics.getWidth() != null ? characteristics.getWidth() : 0,
+                characteristics.getHeight() != null ? characteristics.getHeight() : 0,
+                characteristics.getQuality() != null ? characteristics.getQuality() : -1.0,
+                characteristics.getIsWebpOutputEnabled() != null ? characteristics.getIsWebpOutputEnabled() : false);
     }
 
 
