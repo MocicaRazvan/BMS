@@ -41,6 +41,7 @@ export async function POST(request: NextRequest) {
       headers: {
         "Content-Type": "application/pdf",
         "Content-Disposition": `attachment; filename="${fileName}"`,
+        "Content-Length": String(pdfBuffer.length),
       },
     });
   } catch (error) {

@@ -277,14 +277,7 @@ export default function Nav({
             dayCalendarCTATexts={dayCalendarCTATexts}
             cartPopTexts={cartPopTexts}
           />
-          {!authUser && (
-            <Link
-              href={"/auth/signin"}
-              className="font-bold hover:underline hover:scale-110 transition-all"
-            >
-              {"Sign In"}
-            </Link>
-          )}
+          {!authUser && <SignInLink />}
           <LocaleSwitcher />
           <ModeToggle {...themeSwitchTexts} />
         </div>
@@ -354,10 +347,25 @@ function ScreenAwareFind(props: {
 }
 
 function NoUserNav({ calculatorTexts }: { calculatorTexts: string }) {
+  const session = useSession();
   const pathname = usePathname();
+  if (session.status === "loading") return null;
   return (
-    <ActiveLink href={"/calculator"} isActive={pathname === "/calculator"}>
+    <ActiveLink href="/calculator" isActive={pathname === "/calculator"}>
       {calculatorTexts}
     </ActiveLink>
+  );
+}
+function SignInLink() {
+  const session = useSession();
+  if (session.status === "loading" || session.status === "authenticated")
+    return null;
+  return (
+    <Link
+      href="/auth/signin"
+      className="font-bold hover:underline hover:scale-110 transition-all"
+    >
+      {"Sign In"}
+    </Link>
   );
 }

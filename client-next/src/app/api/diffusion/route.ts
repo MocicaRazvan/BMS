@@ -37,10 +37,19 @@ export async function POST(req: NextRequest) {
       });
     }
 
+    const headers = new Headers();
+    const contentType = response.headers.get("content-type");
+    const contentLength = response.headers.get("content-length");
+    const disposition = response.headers.get("content-disposition");
+    const cacheControl = response.headers.get("cache-control");
+
+    if (contentType) headers.set("Content-Type", contentType);
+    if (contentLength) headers.set("Content-Length", contentLength);
+    if (disposition) headers.set("Content-Disposition", disposition);
+    if (cacheControl) headers.set("Cache-Control", cacheControl);
+
     return new NextResponse(response.body, {
-      headers: {
-        "Content-Type": "application/zip",
-      },
+      headers,
       status: 200,
     });
   } catch (error) {

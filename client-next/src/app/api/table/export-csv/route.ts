@@ -39,6 +39,7 @@ export async function POST(request: NextRequest) {
       headers: {
         "Content-Type": "text/csv; charset=utf-8",
         "Content-Disposition": `attachment; filename="${fileName}"`,
+        "Content-Length": String(csvBuffer.length),
       },
     });
   } catch (error) {

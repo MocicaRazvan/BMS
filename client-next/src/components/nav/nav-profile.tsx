@@ -78,7 +78,7 @@ export default function NavProfile({ authUser, dayCalendarCTATexts }: Props) {
                 asChild
                 variant="destructive"
               >
-                <Link href="/auth/signout">{"SignOut"}</Link>
+                <Link href="/auth/signout">{"Sign Out"}</Link>
               </Button>
             </div>
           </div>
