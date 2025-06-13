@@ -90,9 +90,7 @@ const baseConfig = {
     config.module.rules.push({
       test: /geoData\.json$/i,
       resourceQuery: /url/,
-      include: [
-        path.resolve(process.cwd(), "src/app/api/charts/geoData/geoData.json"),
-      ],
+      include: [path.resolve(process.cwd(), "src/assets/data/geoData.json")],
       type: "asset/resource",
       generator: {
         filename: "static/customdata/[name]-[contenthash][ext]",

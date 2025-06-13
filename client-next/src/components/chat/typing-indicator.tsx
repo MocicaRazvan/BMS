@@ -2,7 +2,7 @@
 import { motion } from "framer-motion";
 import { UserDto } from "@/types/dto";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
-import noImg from "../../assests/noImage.jpg";
+import noImg from "@/assets/noImage.jpg";
 
 interface Props {
   user: UserDto;

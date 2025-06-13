@@ -102,8 +102,8 @@ export default function CartPageContent({
               <CustomImage
                 thumblinator
                 src={plan.images[0]}
-                width={150}
-                height={150}
+                width={144}
+                height={144}
                 className="rounded-lg overflow-hidden w-36 h-36 object-cover"
                 alt={plan.title}
               />

@@ -26,7 +26,7 @@ import {
 import dynamic from "next/dynamic";
 import { Skeleton } from "@/components/ui/skeleton";
 import fetchFactory from "@/lib/fetchers/fetchWithRetry";
-import geoDataUrl from "@/../src/app/api/charts/geoData/geoData.json?url";
+import geoDataUrl from "@/assets/data/geoData.json?url";
 
 const LEGEND_STEPS = 9;
 

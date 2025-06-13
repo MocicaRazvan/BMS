@@ -1,8 +1,14 @@
 "use client";
 import Image, { ImageProps } from "next/image";
-import { ComponentProps, useMemo } from "react";
-
-import useGetCustomImageBlur from "@/hoooks/images/use-get-custom-image-blur";
+import {
+  ComponentProps,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/lib/utils";
 
 const springUrl = process.env.NEXT_PUBLIC_SPRING!;
 const springClientUrl = process.env.NEXT_PUBLIC_SPRING_CLIENT!;
@@ -16,26 +22,46 @@ export default function CustomImage({
   thumblinator?: boolean;
   alt?: string;
 }) {
-  const { blurData } = useGetCustomImageBlur();
+  const imgRef = useRef<HTMLImageElement | null>(null);
+  const [isLoaded, setIsLoaded] = useState(false);
+
   const loader = useMemo(
     () => (isLoaderCompatible(thumblinator, src) ? imageLoader : rest.loader),
     [rest.loader, src, thumblinator],
   );
 
+  useLayoutEffect(() => {
+    if (imgRef.current?.complete) {
+      setIsLoaded(true);
+    }
+  }, []);
+
   return (
-    <Image
-      alt={alt}
-      {...rest}
-      src={src}
-      placeholder="blur"
-      blurDataURL={blurData}
-      loader={loader}
-    />
+    <div
+      className={cn(
+        "relative w-full h-full",
+        rest.width && `w-[${rest.width}px]`,
+        rest.height && `h-[${rest.height}px]`,
+      )}
+    >
+      <Skeleton
+        className={`w-full h-full absolute top-0 left-0 ${isLoaded ? "hidden" : "block"}`}
+      />
+      <Image
+        ref={imgRef}
+        alt={alt}
+        {...rest}
+        src={src}
+        onLoad={() => setIsLoaded(true)}
+        className={cn(
+          `transition-opacity duration-300 ease-in-out ${isLoaded ? "opacity-100" : "opacity-0"}`,
+          rest.className,
+        )}
+        loader={loader}
+      />
+    </div>
   );
 }
-
-const convertToInt = (value: number | `${number}`) =>
-  typeof value !== "number" ? Math.floor(parseFloat(value)) : Math.floor(value);
 
 export const imageLoader: ImageProps["loader"] = ({ src, width, quality }) => {
   const finalSrc =
