@@ -7,6 +7,7 @@ import com.mocicarazvan.fileservice.dtos.ToBeDeletedCounts;
 import com.mocicarazvan.fileservice.enums.CustomMediaType;
 import com.mocicarazvan.fileservice.enums.FileType;
 import com.mocicarazvan.fileservice.exceptions.FileNotFound;
+import com.mocicarazvan.fileservice.exceptions.NoFilesUploadedException;
 import com.mocicarazvan.fileservice.models.Media;
 import com.mocicarazvan.fileservice.models.MediaMetadata;
 import com.mocicarazvan.fileservice.repositories.ExtendedMediaRepository;
@@ -40,7 +41,7 @@ import reactor.util.function.Tuple2;
 import reactor.util.function.Tuples;
 
 import java.net.URI;
-import java.util.Comparator;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -66,22 +67,36 @@ public class MediaServiceImpl implements MediaService {
 
     @Override
     public Mono<FileUploadResponse> uploadFiles(Flux<FilePart> files, MetadataDto metadataDto) {
+        String finalClientId = metadataDto.getClientId() != null ? metadataDto.getClientId() : "default";
         return files.index()
+                .switchIfEmpty(Flux.error(new NoFilesUploadedException()))
 //                .subscribeOn(Schedulers.parallel())
                 .flatMap(indexedFilePart -> saveFileWithIndex(indexedFilePart.getT1(), indexedFilePart.getT2(), metadataDto)
                                 .doOnNext(tuple -> {
 //                            log.error("Sending progress update " + tuple.getT1());
-                                    progressWebSocketHandler.sendProgressUpdate(metadataDto.getClientId() != null ? metadataDto.getClientId() : "default", metadataDto.getFileType(), tuple.getT1());
+                                    progressWebSocketHandler.sendProgressUpdate(finalClientId, metadataDto.getFileType(), tuple.getT1());
                                 })
                 )
-                .collectSortedList(Comparator.comparing(Tuple2::getT1))
+                .collect(
+                        ArrayList<String>::new,
+                        (list, tuple) -> {
+                            int idx = tuple.getT1().intValue();
+                            if (list.size() <= idx) {
+                                // ensure the list is large enough
+                                while (list.size() <= idx) {
+                                    list.add("");
+                                }
+                            }
+                            list.set(idx, tuple.getT2());
+                        }
+                )
                 .map(urls -> FileUploadResponse.builder()
-                        .files(urls.stream().map(Tuple2::getT2).toList())
+                        .files(urls)
                         .fileType(metadataDto.getFileType())
                         .build())
                 .doOnNext(_ ->
                         progressWebSocketHandler.sendCompletionMessage(
-                                metadataDto.getClientId() != null ? metadataDto.getClientId() : "default",
+                                finalClientId,
                                 metadataDto.getFileType()
                         )
                 );
@@ -329,9 +344,9 @@ public class MediaServiceImpl implements MediaService {
         return mediaRepository.findAllByToBeDeletedIsTrue()
                 .map(Media::getGridFsId)
                 .buffer(batchSize)
-                .concatMap(batch -> deleteFiles(batch)
-                        .then(countToBeDeleted())
-                );
+                .flatMapSequential(batch -> deleteFiles(batch)
+                                .then(countToBeDeleted())
+                        , 2);
     }
 
     protected String generateFileUrl(String id, FileType fileType) {

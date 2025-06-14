@@ -1,14 +1,12 @@
 package com.mocicarazvan.fileservice.controllers;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mocicarazvan.fileservice.dtos.FileUploadResponse;
 import com.mocicarazvan.fileservice.dtos.GridIdsDto;
 import com.mocicarazvan.fileservice.dtos.MetadataDto;
 import com.mocicarazvan.fileservice.dtos.ToBeDeletedCounts;
 import com.mocicarazvan.fileservice.service.MediaService;
 import com.mongodb.client.gridfs.model.GridFSFile;
-import lombok.RequiredArgsConstructor;
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -22,22 +20,24 @@ import reactor.core.publisher.Mono;
 
 @RestController
 @RequestMapping("/files")
-@RequiredArgsConstructor
 @Slf4j
 public class FileController {
     private final MediaService mediaService;
-    private final ObjectMapper objectMapper;
+
+    public FileController(MediaService mediaService) {
+        this.mediaService = mediaService;
+    }
 
 
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public Mono<ResponseEntity<FileUploadResponse>> uploadFiles(
             @RequestPart("files") Flux<FilePart> files,
-            @RequestPart("metadata") String metadata
-    ) throws JsonProcessingException {
-        MetadataDto parsedMetadata = objectMapper.readValue(metadata, MetadataDto.class);
-        return mediaService
-                .uploadFiles(files, parsedMetadata)
-                .map(response -> ResponseEntity.ok().body(response));
+            @Valid @RequestPart("metadata") MetadataDto metadata
+    ) {
+        return
+                mediaService
+                        .uploadFiles(files, metadata)
+                        .map(response -> ResponseEntity.ok().body(response));
     }
 
 
