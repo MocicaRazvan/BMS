@@ -14,11 +14,11 @@ const withBundleAnalyzer = generated({
 const baseConfig = {
   // reactStrictMode: false,
   output: "standalone",
+  poweredByHeader: false,
   images: {
     minimumCacheTTL: 2678400,
     contentDispositionType: "inline",
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
-    poweredByHeader: false,
     remotePatterns: [
       {
         hostname: "localhost",
