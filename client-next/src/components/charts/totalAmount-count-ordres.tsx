@@ -25,7 +25,7 @@ import {
 
 import { useLocale } from "next-intl";
 import { motion } from "framer-motion";
-import * as ss from "simple-statistics";
+import regression from "regression";
 import { Skeleton } from "@/components/ui/skeleton";
 import useDownloadChartButton from "@/hoooks/charts/download-chart-button";
 import { v4 as uuidv4 } from "uuid";
@@ -136,15 +136,13 @@ export function TotalAmountCountOrders({
         totalAmount: [],
       },
     );
-    const countRegression = ss.linearRegression(points.count);
-    const totalAmountRegression = ss.linearRegression(points.totalAmount);
-    const countLine = ss.linearRegressionLine(countRegression);
-    const totalAmountLine = ss.linearRegressionLine(totalAmountRegression);
+    const countRegression = regression.linear(points.count);
+    const totalAmountRegression = regression.linear(points.totalAmount);
 
     return data.map((d, idx) => ({
       date: d.date,
-      countLine: Math.max(0, countLine(idx)),
-      totalAmountLine: Math.max(0, totalAmountLine(idx)),
+      countLine: Math.max(0, countRegression.predict(idx)[1]),
+      totalAmountLine: Math.max(0, totalAmountRegression.predict(idx)[1]),
     }));
   }, [data, regressionKey, showTrendLine]);
 
@@ -192,7 +190,13 @@ export function TotalAmountCountOrders({
             />
           </motion.div>
         ) : data.length === 1 ? (
-          <BarChart data={data} ref={barChartRef}>
+          <BarChart
+            data={data}
+            ref={barChartRef}
+            margin={{
+              top: 15,
+            }}
+          >
             <CartesianGrid vertical={false} />
             <XAxis
               dataKey="date"
@@ -231,7 +235,13 @@ export function TotalAmountCountOrders({
             <ChartLegend content={<ChartLegendContent />} />
           </BarChart>
         ) : (
-          <ComposedChart data={data} ref={composedChartRef}>
+          <ComposedChart
+            data={data}
+            ref={composedChartRef}
+            margin={{
+              top: 15,
+            }}
+          >
             <defs>
               <linearGradient
                 id={`fillCount-${stackId}`}
@@ -428,7 +438,13 @@ export function TotalAmountOrdersSingleBarChart({
         {!debounceDataAvailable ? (
           <Skeleton className={"w-full h-full"} />
         ) : (
-          <BarChart data={data} ref={downloadChartRef}>
+          <BarChart
+            data={data}
+            ref={downloadChartRef}
+            margin={{
+              top: 15,
+            }}
+          >
             <CartesianGrid vertical={false} />
             <XAxis
               dataKey="date"

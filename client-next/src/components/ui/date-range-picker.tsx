@@ -1,9 +1,8 @@
 /* eslint-disable max-lines */
 "use client";
-import { ReactElement } from "react";
-
 import {
   type FC,
+  ReactElement,
   useCallback,
   useEffect,
   useMemo,
@@ -143,18 +142,15 @@ export const DateRangePicker: FC<
   triggerClassName,
   none: { false: noneFalseText, true: noneTrueText },
 }): ReactElement => {
+  const defaultInitialRangeRef = useRef<DateRange>({
+    from: getDateAdjustedForTimezone(initialDateFrom),
+    to: initialDateTo
+      ? getDateAdjustedForTimezone(initialDateTo)
+      : getDateAdjustedForTimezone(initialDateFrom),
+  });
+
   const [none, setNone] = useState(defaultNone);
   const prevNone = useRef(defaultNone);
-  const PRESETS = useMemo(
-    () =>
-      BASE_PRESETS.filter(
-        (preset) => !hiddenPresets?.includes(preset.name),
-      ).map((preset) => ({
-        ...preset,
-        label: presets[preset.name],
-      })),
-    [hiddenPresets, presets],
-  );
 
   const toggleNone = useCallback(() => {
     setNone((prev) => {
@@ -165,12 +161,85 @@ export const DateRangePicker: FC<
 
   const [isOpen, setIsOpen] = useState(false);
 
-  const [range, setRange] = useState<DateRange>({
-    from: getDateAdjustedForTimezone(initialDateFrom),
-    to: initialDateTo
-      ? getDateAdjustedForTimezone(initialDateTo)
-      : getDateAdjustedForTimezone(initialDateFrom),
-  });
+  const [range, setRange] = useState<DateRange>(defaultInitialRangeRef.current);
+
+  const PRESETS = useMemo(
+    () =>
+      BASE_PRESETS.filter(
+        (preset) => !hiddenPresets?.includes(preset.name),
+      ).map((preset) => ({
+        ...preset,
+        label: presets[preset.name],
+      })),
+    [hiddenPresets, presets],
+  );
+  const getPresetRange = useCallback(
+    (presetName: string): DateRange => {
+      const preset = PRESETS.find(({ name }) => name === presetName);
+      if (!preset) throw new Error(`Unknown date range preset: ${presetName}`);
+      const from = new Date();
+      const to = new Date();
+      const first = from.getDate() - from.getDay();
+
+      switch (preset.name) {
+        case "today":
+          from.setHours(0, 0, 0, 0);
+          to.setHours(23, 59, 59, 999);
+          break;
+        case "yesterday":
+          from.setDate(from.getDate() - 1);
+          from.setHours(0, 0, 0, 0);
+          to.setDate(to.getDate() - 1);
+          to.setHours(23, 59, 59, 999);
+          break;
+        case "last7":
+          from.setDate(from.getDate() - 6);
+          from.setHours(0, 0, 0, 0);
+          to.setHours(23, 59, 59, 999);
+          break;
+        case "last14":
+          from.setDate(from.getDate() - 13);
+          from.setHours(0, 0, 0, 0);
+          to.setHours(23, 59, 59, 999);
+          break;
+        case "last30":
+          from.setDate(from.getDate() - 29);
+          from.setHours(0, 0, 0, 0);
+          to.setHours(23, 59, 59, 999);
+          break;
+        case "thisWeek":
+          from.setDate(first);
+          from.setHours(0, 0, 0, 0);
+          to.setHours(23, 59, 59, 999);
+          break;
+        case "lastWeek":
+          from.setDate(from.getDate() - 7 - from.getDay());
+          to.setDate(to.getDate() - to.getDay() - 1);
+          from.setHours(0, 0, 0, 0);
+          to.setHours(23, 59, 59, 999);
+          break;
+        case "thisMonth":
+          from.setDate(1);
+          from.setHours(0, 0, 0, 0);
+          to.setHours(23, 59, 59, 999);
+          break;
+        case "lastMonth":
+          from.setMonth(from.getMonth() - 1);
+          from.setDate(1);
+          from.setHours(0, 0, 0, 0);
+          to.setDate(0);
+          to.setHours(23, 59, 59, 999);
+          break;
+        case "pastYear":
+          from.setFullYear(from.getFullYear() - 1);
+          from.setHours(0, 0, 0, 0);
+          break;
+      }
+
+      return { from, to };
+    },
+    [PRESETS],
+  );
 
   const isJustFromCurrentDate = useMemo(
     () =>
@@ -214,71 +283,6 @@ export const DateRangePicker: FC<
       window.removeEventListener("resize", handleResize);
     };
   }, []);
-
-  const getPresetRange = (presetName: string): DateRange => {
-    const preset = PRESETS.find(({ name }) => name === presetName);
-    if (!preset) throw new Error(`Unknown date range preset: ${presetName}`);
-    const from = new Date();
-    const to = new Date();
-    const first = from.getDate() - from.getDay();
-
-    switch (preset.name) {
-      case "today":
-        from.setHours(0, 0, 0, 0);
-        to.setHours(23, 59, 59, 999);
-        break;
-      case "yesterday":
-        from.setDate(from.getDate() - 1);
-        from.setHours(0, 0, 0, 0);
-        to.setDate(to.getDate() - 1);
-        to.setHours(23, 59, 59, 999);
-        break;
-      case "last7":
-        from.setDate(from.getDate() - 6);
-        from.setHours(0, 0, 0, 0);
-        to.setHours(23, 59, 59, 999);
-        break;
-      case "last14":
-        from.setDate(from.getDate() - 13);
-        from.setHours(0, 0, 0, 0);
-        to.setHours(23, 59, 59, 999);
-        break;
-      case "last30":
-        from.setDate(from.getDate() - 29);
-        from.setHours(0, 0, 0, 0);
-        to.setHours(23, 59, 59, 999);
-        break;
-      case "thisWeek":
-        from.setDate(first);
-        from.setHours(0, 0, 0, 0);
-        to.setHours(23, 59, 59, 999);
-        break;
-      case "lastWeek":
-        from.setDate(from.getDate() - 7 - from.getDay());
-        to.setDate(to.getDate() - to.getDay() - 1);
-        from.setHours(0, 0, 0, 0);
-        to.setHours(23, 59, 59, 999);
-        break;
-      case "thisMonth":
-        from.setDate(1);
-        from.setHours(0, 0, 0, 0);
-        to.setHours(23, 59, 59, 999);
-        break;
-      case "lastMonth":
-        from.setMonth(from.getMonth() - 1);
-        from.setDate(1);
-        from.setHours(0, 0, 0, 0);
-        to.setDate(0);
-        to.setHours(23, 59, 59, 999);
-        break;
-      case "pastYear":
-        from.setFullYear(from.getFullYear() - 1);
-        from.setHours(0, 0, 0, 0);
-        break;
-    }
-
-    return { from, to };
-  };
 
   const setPreset = (preset: string): void => {
     const range = getPresetRange(preset);
@@ -331,36 +335,38 @@ export const DateRangePicker: FC<
   };
 
   const resetValues = (): void => {
-    setRange({
-      from:
-        typeof initialDateFrom === "string"
-          ? getDateAdjustedForTimezone(initialDateFrom)
-          : initialDateFrom,
-      to: initialDateTo
-        ? typeof initialDateTo === "string"
-          ? getDateAdjustedForTimezone(initialDateTo)
-          : initialDateTo
-        : typeof initialDateFrom === "string"
-          ? getDateAdjustedForTimezone(initialDateFrom)
-          : initialDateFrom,
-    });
-    setRangeCompare(
-      initialCompareFrom
-        ? {
-            from:
-              typeof initialCompareFrom === "string"
-                ? getDateAdjustedForTimezone(initialCompareFrom)
-                : initialCompareFrom,
-            to: initialCompareTo
-              ? typeof initialCompareTo === "string"
-                ? getDateAdjustedForTimezone(initialCompareTo)
-                : initialCompareTo
-              : typeof initialCompareFrom === "string"
-                ? getDateAdjustedForTimezone(initialCompareFrom)
-                : initialCompareFrom,
-          }
-        : undefined,
-    );
+    setRange(defaultInitialRangeRef.current);
+
+    // setRange({
+    //   from:
+    //     typeof initialDateFrom === "string"
+    //       ? getDateAdjustedForTimezone(initialDateFrom)
+    //       : initialDateFrom,
+    //   to: initialDateTo
+    //     ? typeof initialDateTo === "string"
+    //       ? getDateAdjustedForTimezone(initialDateTo)
+    //       : initialDateTo
+    //     : typeof initialDateFrom === "string"
+    //       ? getDateAdjustedForTimezone(initialDateFrom)
+    //       : initialDateFrom,
+    // });
+    // setRangeCompare(
+    //   initialCompareFrom
+    //     ? {
+    //         from:
+    //           typeof initialCompareFrom === "string"
+    //             ? getDateAdjustedForTimezone(initialCompareFrom)
+    //             : initialCompareFrom,
+    //         to: initialCompareTo
+    //           ? typeof initialCompareTo === "string"
+    //             ? getDateAdjustedForTimezone(initialCompareTo)
+    //             : initialCompareTo
+    //           : typeof initialCompareFrom === "string"
+    //             ? getDateAdjustedForTimezone(initialCompareFrom)
+    //             : initialCompareFrom,
+    //       }
+    //     : undefined,
+    // );
   };
 
   useEffect(() => {
@@ -471,7 +477,13 @@ export const DateRangePicker: FC<
           </div>
         </Button>
       </PopoverTrigger>
-      <PopoverContent align={align} className="w-auto">
+      <PopoverContent
+        align={align}
+        className="w-auto"
+        onOpenAutoFocus={(e) => {
+          e.preventDefault();
+        }}
+      >
         <div className="flex py-2">
           <div className="flex">
             <div className="flex flex-col">
@@ -705,6 +717,8 @@ export const DateRangePicker: FC<
                 ) {
                   onUpdate?.({ range, rangeCompare }, none);
                 }
+
+                defaultInitialRangeRef.current = range;
               }}
             >
               {update}
