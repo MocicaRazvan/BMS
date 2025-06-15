@@ -11,13 +11,12 @@ on:
       - 'bmsSpring/config-server.Dockerfile.dockerignore'
       - '.github/workflows/config-server.yml'
 jobs:
-  test-config-service:
+  test-config-server:
     uses: ./.github/workflows/test-run.yml
     with:
-      app-path: config-service
-      local-modules: template-module
+      app-path: config-server
   build-and-push-config-server:
-    needs: [ test-config-service ]
+    needs: [ test-config-server ]
     uses: ./.github/workflows/build-and-push.yml
     with:
       image-name: config-server-bms
