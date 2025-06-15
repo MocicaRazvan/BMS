@@ -31,7 +31,7 @@ WORKDIR /app
 
 COPY --from=builder /usr/local/lib/python3.10/site-packages /usr/local/lib/python3.10/site-packages
 COPY --from=builder /usr/local/bin/gunicorn /usr/local/bin/gunicorn
-COPY ./app .
+COPY --chown=appuser:appgroup ./app .
 
 RUN mkdir -p /home/appuser/hf-cache /home/appuser/model-cache \
  && chown -R appuser:appgroup /home/appuser/hf-cache \
@@ -45,8 +45,6 @@ ENV PORT=5000
 ENV WORKER_PROCESSES=1
 ENV PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 ENV PROMETHEUS_MULTIPROC_DIR=/tmp
-
-RUN chown -R appuser:appgroup /app
 
 EXPOSE ${PORT}
 
