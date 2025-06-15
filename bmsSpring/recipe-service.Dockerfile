@@ -37,7 +37,10 @@ RUN mvn -q -f recipe-service/pom.xml clean package -DskipTests -Dmaven.compiler.
 FROM alpine/java:22.0.2-jre AS runtime
 WORKDIR /app
 
-RUN addgroup -S appgroup \
+RUN apk add --no-cache \
+      curl \
+      netcat-openbsd \
+ && addgroup -S appgroup \
  && adduser -S -G appgroup \
       -h /home/appuser \
       -s /sbin/nologin \
@@ -45,9 +48,10 @@ RUN addgroup -S appgroup \
 
 ENV HOME=/home/appuser
 
-COPY --from=recipe-service /app/recipe-service/target/recipe-service-0.0.1-SNAPSHOT.jar .
-
-RUN chown -R appuser:appgroup /app
+COPY --from=recipe-service \
+     --chown=appuser:appgroup \
+     /app/recipe-service/target/recipe-service-0.0.1-SNAPSHOT.jar \
+     recipe-service-0.0.1-SNAPSHOT.jar
 
 USER appuser:appgroup
 

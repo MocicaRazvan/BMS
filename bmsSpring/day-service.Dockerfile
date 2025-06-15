@@ -38,7 +38,10 @@ RUN mvn -q -f day-service/pom.xml clean package -DskipTests -Dmaven.compiler.sho
 FROM alpine/java:22.0.2-jre AS runtime
 WORKDIR /app
 
-RUN addgroup -S appgroup \
+RUN apk add --no-cache \
+      curl \
+      netcat-openbsd \
+ && addgroup -S appgroup \
  && adduser -S -G appgroup \
       -h /home/appuser \
       -s /sbin/nologin \
@@ -47,9 +50,10 @@ RUN addgroup -S appgroup \
 ENV HOME=/home/appuser
 
 
-COPY --from=day-service /app/day-service/target/day-service-0.0.1-SNAPSHOT.jar .
-
-RUN chown -R appuser:appgroup /app
+COPY --from=day-service \
+     --chown=appuser:appgroup \
+     /app/day-service/target/day-service-0.0.1-SNAPSHOT.jar \
+     day-service-0.0.1-SNAPSHOT.jar
 
 USER appuser:appgroup
 

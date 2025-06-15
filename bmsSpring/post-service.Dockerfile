@@ -37,17 +37,22 @@ RUN mvn -q -f post-service/pom.xml clean package -DskipTests -Dmaven.compiler.sh
 FROM alpine/java:22.0.2-jre AS runtime
 WORKDIR /app
 
-RUN addgroup -S appgroup \
+RUN apk add --no-cache \
+      curl \
+      netcat-openbsd \
+ && addgroup -S appgroup \
  && adduser -S -G appgroup \
       -h /home/appuser \
       -s /sbin/nologin \
       -D appuser
 
+
 ENV HOME=/home/appuser
 
-COPY --from=post-service /app/post-service/target/post-service-0.0.1-SNAPSHOT.jar .
-
-RUN chown -R appuser:appgroup /app
+COPY --from=post-service \
+     --chown=appuser:appgroup \
+     /app/post-service/target/post-service-0.0.1-SNAPSHOT.jar \
+     post-service-0.0.1-SNAPSHOT.jar
 
 USER appuser:appgroup
 

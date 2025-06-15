@@ -20,18 +20,27 @@ FROM razvanmocica/next-js-bms:latest AS nextjs
 FROM alpine/java:22.0.2-jre AS runtime
 WORKDIR /app
 
-RUN addgroup -S appgroup \
- && adduser -S -G appgroup \
+RUN apk add --no-cache \
+      curl \
+      netcat-openbsd \
+ && addgroup -S appgroup \
+ && adduser  -S -G appgroup \
       -h /home/appuser \
       -s /sbin/nologin \
       -D appuser
 
+
 ENV HOME=/home/appuser
 
-COPY --from=build /app/target/next-static-server-0.0.1-SNAPSHOT.jar .
-COPY --from=nextjs /app/.next/static  ./data/static
+COPY --from=build \
+     --chown=appuser:appgroup \
+     /app/target/next-static-server-0.0.1-SNAPSHOT.jar \
+     next-static-server-0.0.1-SNAPSHOT.jar
 
-RUN chown -R appuser:appgroup /app
+COPY --from=nextjs \
+     --chown=appuser:appgroup \
+     /app/.next/static \
+     data/static
 
 USER appuser:appgroup
 

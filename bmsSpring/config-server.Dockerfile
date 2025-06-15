@@ -15,7 +15,10 @@ RUN mvn -q package -DskipTests -Dmaven.compiler.source=22 -Dmaven.compiler.targe
 FROM alpine/java:22.0.2-jre AS runtime
 WORKDIR /app
 
-RUN addgroup -S appgroup \
+RUN apk add --no-cache \
+      curl \
+      netcat-openbsd \
+ && addgroup -S appgroup \
  && adduser -S -G appgroup \
       -h /home/appuser \
       -s /sbin/nologin \
@@ -23,9 +26,9 @@ RUN addgroup -S appgroup \
 
 ENV HOME=/home/appuser
 
-COPY --from=build /app/target/config-server-0.0.1-SNAPSHOT.jar .
-
-RUN chown -R appuser:appgroup /app
+COPY --from=build --chown=appuser:appgroup \
+     /app/target/config-server-0.0.1-SNAPSHOT.jar \
+     config-server-0.0.1-SNAPSHOT.jar
 
 USER appuser:appgroup
 

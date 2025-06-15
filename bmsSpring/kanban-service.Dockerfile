@@ -29,7 +29,10 @@ RUN mvn -q -f kanban-service/pom.xml clean package -DskipTests -Dmaven.compiler.
 FROM alpine/java:22.0.2-jre AS runtime
 WORKDIR /app
 
-RUN addgroup -S appgroup \
+RUN apk add --no-cache \
+      curl \
+      netcat-openbsd \
+ && addgroup -S appgroup \
  && adduser -S -G appgroup \
       -h /home/appuser \
       -s /sbin/nologin \
@@ -37,8 +40,10 @@ RUN addgroup -S appgroup \
 
 ENV HOME=/home/appuser
 
-COPY --from=kanban-service /app/kanban-service/target/kanban-service-0.0.1-SNAPSHOT.jar .
-
+COPY --from=kanban-service \
+     --chown=appuser:appgroup \
+     /app/kanban-service/target/kanban-service-0.0.1-SNAPSHOT.jar \
+     kanban-service-0.0.1-SNAPSHOT.jar
 RUN chown -R appuser:appgroup /app
 
 USER appuser:appgroup

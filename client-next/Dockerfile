@@ -54,32 +54,27 @@ RUN npm run ci:build
 FROM base AS runner
 WORKDIR /app
 
-ENV NODE_ENV=production
-ENV NEXT_TELEMETRY_DISABLED=1
+ENV NODE_ENV=production \
+    NEXT_TELEMETRY_DISABLED=1 \
+    PORT=3000
 
-RUN apk add --no-cache curl netcat-openbsd
-
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nextjs
-
-COPY --from=builder /app/public ./public
-# FOR LANGCHAIN DOC LOADER
-COPY --from=builder /app/src ./src
-COPY --from=builder /app/scrape ./scrape
+RUN apk add --no-cache curl netcat-openbsd \
+ && addgroup -S -g 1001 nodejs \
+ && adduser  -S -u 1001 -G nodejs nextjs \
+ && mkdir -p public src scrape .next .next/static \
+ && chown -R nextjs:nodejs .next
 
 
-RUN mkdir .next
-RUN chown nextjs:nodejs .next
+COPY --from=builder --chown=nextjs:nodejs \
+     /app/public/.       ./public/ \
+     /app/src/.          ./src/ \
+     /app/scrape/.       ./scrape/ \
+     /app/.next/standalone/.  ./        \
+     /app/.next/static/.      ./.next/static/
 
-
-COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
 USER nextjs
 
 EXPOSE 3000 9464
-
-ENV PORT=3000
-
 
 CMD ["node", "server.js"]

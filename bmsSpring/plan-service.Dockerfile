@@ -37,7 +37,10 @@ RUN mvn -q -f plan-service/pom.xml clean package -DskipTests -Dmaven.compiler.sh
 FROM alpine/java:22.0.2-jre AS runtime
 WORKDIR /app
 
-RUN addgroup -S appgroup \
+RUN apk add --no-cache \
+      curl \
+      netcat-openbsd \
+ && addgroup -S appgroup \
  && adduser -S -G appgroup \
       -h /home/appuser \
       -s /sbin/nologin \
@@ -45,9 +48,10 @@ RUN addgroup -S appgroup \
 
 ENV HOME=/home/appuser
 
-COPY --from=plan-service /app/plan-service/target/plan-service-0.0.1-SNAPSHOT.jar .
-
-RUN chown -R appuser:appgroup /app
+COPY --from=plan-service \
+     --chown=appuser:appgroup \
+     /app/plan-service/target/plan-service-0.0.1-SNAPSHOT.jar \
+     plan-service-0.0.1-SNAPSHOT.jar
 
 USER appuser:appgroup
 

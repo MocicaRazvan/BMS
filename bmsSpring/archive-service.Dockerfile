@@ -15,24 +15,22 @@ RUN mvn -q package -DskipTests -Dmaven.compiler.source=22 -Dmaven.compiler.targe
 FROM alpine/java:22.0.2-jre AS runtime
 WORKDIR /app
 
-RUN addgroup -g 1000 -S appgroup \
+RUN apk add --no-cache \
+      curl \
+      netcat-openbsd \
+ && addgroup -g 1000 -S appgroup \
  && adduser  -u 1000 -S -G appgroup \
-      -h /home/appuser \
-      -s /sbin/nologin \
-      -D appuser
-
-ENV HOME=/home/appuser
-
-RUN mkdir -p archive/data \
- && chown 1000:1000 archive/data \
+      -h /home/appuser -s /sbin/nologin -D appuser \
+ && mkdir -p archive/data \
  && chmod 770 archive/data \
  && chmod g+s archive/data
 
+ENV HOME=/home/appuser
 VOLUME ["/app/archive/data"]
 
-COPY --from=build /app/target/archive-service-0.0.1-SNAPSHOT.jar .
-
-RUN chown -R appuser:appgroup /app
+COPY --from=build --chown=appuser:appgroup \
+     /app/target/archive-service-0.0.1-SNAPSHOT.jar \
+     archive-service-0.0.1-SNAPSHOT.jar
 
 USER appuser:appgroup
 
