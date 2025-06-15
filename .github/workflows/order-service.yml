@@ -9,6 +9,9 @@ on:
       - 'bmsSpring/order-service/**'
       - 'bmsSpring/template-module/**'
       - 'bmsSpring/redis-cache/**'
+      - 'bmsSpring/order-service.Dockerfile'
+      - 'bmsSpring/order-service.Dockerfile.dockerignore'
+      - '.github/workflows/order-service.yml'
 jobs:
   test-template-module:
     uses: ./.github/workflows/test-run.yml
@@ -29,7 +32,8 @@ jobs:
     with:
       image-name: order-service-bms
       context: ./bmsSpring
-      dockerfile: ./bmsSpring/order-service/Dockerfile
+      #      dockerfile: ./bmsSpring/order-service/Dockerfile
+      dockerfile: ./bmsSpring/order-service.Dockerfile
     secrets:
       DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}

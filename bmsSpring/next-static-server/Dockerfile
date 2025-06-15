@@ -20,11 +20,19 @@ FROM razvanmocica/next-js-bms:latest AS nextjs
 FROM alpine/java:22.0.2-jre AS runtime
 WORKDIR /app
 
-RUN apk add --no-cache curl netcat-openbsd
+RUN addgroup -S appgroup \
+ && adduser -S -G appgroup \
+      -h /home/appuser \
+      -s /sbin/nologin \
+      -D appuser
 
+ENV HOME=/home/appuser
 
 COPY --from=build /app/target/next-static-server-0.0.1-SNAPSHOT.jar .
 COPY --from=nextjs /app/.next/static  ./data/static
 
+RUN chown -R appuser:appgroup /app
+
+USER appuser:appgroup
 
 ENTRYPOINT ["java", "--enable-preview", "-jar", "next-static-server-0.0.1-SNAPSHOT.jar"]

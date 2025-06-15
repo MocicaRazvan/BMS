@@ -232,11 +232,11 @@ services:
         condition: service_healthy
 
   user-service:
-    container_name: user-service-container-bms
-    image: razvanmocica/user-service-bms
-    #    build:
-    #      context: ./bmsSpring
-    #      dockerfile: user-service/Dockerfile
+    #    container_name: user-service-container-bms
+    #    image: razvanmocica/user-service-bms
+    build:
+      context: ./bmsSpring
+      dockerfile: user-service.Dockerfile
     environment:
       #      SPRING_PROFILES_ACTIVE: docker
       SPRING_PROFILES_ACTIVE: server
@@ -919,7 +919,7 @@ services:
     ports:
       - "5000:5000"
     volumes:
-      - diffusion_fs:/app/models
+      - diffusion_fs:/home/appuser/model-cache
     networks:
       - bms
     runtime: nvidia
@@ -945,7 +945,7 @@ services:
     ports:
       - "5001:5001"
     volumes:
-      - timeseries_fs:/app/cache_dir
+      - timeseries_fs:/home/appuser/model-cache
     networks:
       - bms
     depends_on:
@@ -965,7 +965,7 @@ services:
     ports:
       - "5002:5002"
     volumes:
-      - toxic_fs:/root/.cache/huggingface
+      - toxic_fs:/home/appuser/hf-cache
     networks:
       - bms
     depends_on:

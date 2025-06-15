@@ -1,0 +1,5 @@
+**
+
+!/config-server
+/config-server/target
+!pom.xml

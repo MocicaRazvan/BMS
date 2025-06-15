@@ -10,6 +10,9 @@ on:
       - 'bmsSpring/template-module/**'
       - 'bmsSpring/redis-cache/**'
       - 'bmsSpring/ollama-search/**'
+      - 'bmsSpring/recipe-service.Dockerfile'
+      - 'bmsSpring/recipe-service.Dockerfile.dockerignore'
+      - '.github/workflows/recipe-service.yml'
 jobs:
   test-template-module:
     uses: ./.github/workflows/test-run.yml
@@ -34,7 +37,8 @@ jobs:
     with:
       image-name: recipe-service-bms
       context: ./bmsSpring
-      dockerfile: ./bmsSpring/recipe-service/Dockerfile
+      #      dockerfile: ./bmsSpring/recipe-service/Dockerfile
+      dockerfile: ./bmsSpring/recipe-service.Dockerfile
     secrets:
       DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}

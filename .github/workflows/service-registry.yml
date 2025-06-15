@@ -7,6 +7,9 @@ on:
       - main
     paths:
       - 'bmsSpring/service-registry/**'
+      - 'bmsSpring/service-registry.Dockerfile'
+      - 'bmsSpring/service-registry.Dockerfile.dockerignore'
+      - '.github/workflows/service-registry.yml'
 jobs:
   test-service-registry:
     uses: ./.github/workflows/test-run.yml
@@ -17,8 +20,10 @@ jobs:
     uses: ./.github/workflows/build-and-push.yml
     with:
       image-name: service-registry-bms
-      context: ./bmsSpring/service-registry
-      dockerfile: ./bmsSpring/service-registry/Dockerfile
+        #      context: ./bmsSpring/service-registry
+      #      dockerfile: ./bmsSpring/service-registry/Dockerfile
+      context: ./bmsSpring
+      dockerfile: ./bmsSpring/service-registry.Dockerfile
     secrets:
       DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}

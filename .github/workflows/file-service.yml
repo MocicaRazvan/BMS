@@ -7,6 +7,9 @@ on:
       - main
     paths:
       - 'bmsSpring/file-service/**'
+      - 'bmsSpring/file-service.Dockerfile'
+      - 'bmsSpring/file-service.Dockerfile.dockerignore'
+      - '.github/workflows/file-service.yml'
 jobs:
   test-file-service:
     uses: ./.github/workflows/test-run.yml
@@ -17,8 +20,10 @@ jobs:
     uses: ./.github/workflows/build-and-push.yml
     with:
       image-name: file-service-bms
-      context: ./bmsSpring/file-service
-      dockerfile: ./bmsSpring/file-service/Dockerfile
+      #      context: ./bmsSpring/file-service
+      #      dockerfile: ./bmsSpring/file-service/Dockerfile
+      context: ./bmsSpring
+      dockerfile: ./bmsSpring/file-service.Dockerfile
     secrets:
       DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}

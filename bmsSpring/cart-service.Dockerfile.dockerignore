@@ -1,0 +1,7 @@
+**
+
+!/template-module
+/template-module/target
+!/cart-service
+/cart-service/target
+!pom.xml

@@ -1,0 +1,9 @@
+**
+
+!/template-module
+/template-module/target
+!/redis-cache
+/redis-cache/target
+!/kanban-service
+/kanban-service/target
+!pom.xml

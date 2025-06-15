@@ -29,10 +29,18 @@ RUN mvn -f kanban-service/pom.xml clean package -DskipTests -Dmaven.compiler.sho
 FROM alpine/java:22.0.2-jre AS runtime
 WORKDIR /app
 
-RUN apk add --no-cache curl netcat-openbsd
+RUN addgroup -S appgroup \
+ && adduser -S -G appgroup \
+      -h /home/appuser \
+      -s /sbin/nologin \
+      -D appuser
 
+ENV HOME=/home/appuser
 
 COPY --from=kanban-service /app/kanban-service/target/kanban-service-0.0.1-SNAPSHOT.jar .
 
+RUN chown -R appuser:appgroup /app
+
+USER appuser:appgroup
 
 ENTRYPOINT ["java", "--enable-preview", "-Dreactor.schedulers.defaultBoundedElasticOnVirtualThreads=true","-jar", "kanban-service-0.0.1-SNAPSHOT.jar"]

@@ -24,7 +24,7 @@ APP_VERSION = cc.get("app.version")
 FLASK_DEBUG = cc.get("flask.debug", "False").lower() == "true"
 LOKI_URL = cc.get("loki.url", "")
 MODEL_ID = cc.get("model.id")
-LOCAL_CACHE_DIR = cc.get("local.cache.dir", "cache_dir")
+LOCAL_CACHE_DIR = "/home/appuser/model-cache"
 
 # cuda settings
 CUDA_ENABLED = os.getenv("CUDA_ENABLED",cc.get("cuda.enabled", "True")).lower() == "true"

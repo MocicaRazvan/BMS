@@ -7,6 +7,9 @@ on:
       - main
     paths:
       - 'bmsSpring/websocket-service/**'
+      - 'bmsSpring/websocket-service.Dockerfile'
+      - 'bmsSpring/websocket-service.Dockerfile.dockerignore'
+      - '.github/workflows/websocket-service.yml'
 jobs:
   test-websocket-service:
     uses: ./.github/workflows/test-run.yml
@@ -17,8 +20,10 @@ jobs:
     uses: ./.github/workflows/build-and-push.yml
     with:
       image-name: websocket-service-bms
-      context: ./bmsSpring/websocket-service
-      dockerfile: ./bmsSpring/websocket-service/Dockerfile
+        #      context: ./bmsSpring/websocket-service
+      #      dockerfile: ./bmsSpring/websocket-service/Dockerfile
+      context: ./bmsSpring
+      dockerfile: ./bmsSpring/websocket-service.Dockerfile
     secrets:
       DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}

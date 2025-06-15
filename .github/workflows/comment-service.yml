@@ -9,6 +9,9 @@ on:
       - 'bmsSpring/comment-service/**'
       - 'bmsSpring/template-module/**'
       - 'bmsSpring/redis-cache/**'
+      - 'bmsSpring/comment-service.Dockerfile'
+      - 'bmsSpring/comment-service.Dockerfile.dockerignore'
+      - '.github/workflows/comment-service.yml'
 jobs:
   test-template-module:
     uses: ./.github/workflows/test-run.yml
@@ -29,7 +32,8 @@ jobs:
     with:
       image-name: comment-service-bms
       context: ./bmsSpring
-      dockerfile: ./bmsSpring/comment-service/Dockerfile
+      #        dockerfile: ./bmsSpring/comment-service/Dockerfile
+      dockerfile: ./bmsSpring/comment-service.Dockerfile
     secrets:
       DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}

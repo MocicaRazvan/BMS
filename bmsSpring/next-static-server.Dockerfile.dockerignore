@@ -1,0 +1,6 @@
+**
+
+!/next-static-server
+/next-static-server/src/main/resources/static
+/next-static-server/target
+!pom.xml

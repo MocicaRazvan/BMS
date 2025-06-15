@@ -1,0 +1,9 @@
+**
+
+!/template-module
+/template-module/target
+!/redis-cache
+/redis-cache/target
+!/order-service
+/order-service/target
+!pom.xml

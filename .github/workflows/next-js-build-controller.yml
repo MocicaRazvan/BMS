@@ -7,6 +7,11 @@ on:
     paths:
       - 'client-next/**'
       - 'bmsSpring/next-static-server/**'
+      - 'client-next/Dockerfile'
+      - 'client-next/.dockerignore'
+      - 'bmsSpring/next-static-server.Dockerfile'
+      - 'bmsSpring/next-static-server.Dockerfile.dockerignore'
+      - '.github/workflows/next-js-build-controller.yml'
 
 
 jobs:
@@ -49,8 +54,10 @@ jobs:
     uses: ./.github/workflows/build-and-push.yml
     with:
       image-name: next-static-server-bms
-      context: ./bmsSpring/next-static-server
-      dockerfile: ./bmsSpring/next-static-server/Dockerfile
+        #      context: ./bmsSpring/next-static-server
+      #      dockerfile: ./bmsSpring/next-static-server/Dockerfile
+      context: ./bmsSpring
+      dockerfile: ./bmsSpring/next-static-server.Dockerfile
       pull: true
     secrets:
       DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}

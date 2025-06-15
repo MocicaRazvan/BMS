@@ -1,0 +1,9 @@
+**
+
+!/template-module
+/template-module/target
+!/redis-cache
+/redis-cache/target
+!/comment-service
+/comment-service/target
+!pom.xml

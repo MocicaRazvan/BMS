@@ -1,0 +1,11 @@
+**
+
+!/template-module
+/template-module/target
+!/redis-cache
+/redis-cache/target
+!/ollama-search
+/ollama-search/target
+!/recipe-service
+/recipe-service/target
+!pom.xml

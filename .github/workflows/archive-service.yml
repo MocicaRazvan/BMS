@@ -7,6 +7,9 @@ on:
       - main
     paths:
       - 'bmsSpring/archive-service/**'
+      - 'bmsSpring/archive-service.Dockerfile'
+      - 'bmsSpring/archive-service.Dockerfile.dockerignore'
+      - '.github/workflows/archive-service.yml'
 jobs:
   test-archive-service:
     uses: ./.github/workflows/test-run.yml
@@ -17,8 +20,10 @@ jobs:
     uses: ./.github/workflows/build-and-push.yml
     with:
       image-name: archive-service-bms
-      context: ./bmsSpring/archive-service
-      dockerfile: ./bmsSpring/archive-service/Dockerfile
+      #      context: ./bmsSpring/archive-service
+      #      dockerfile: ./bmsSpring/archive-service/Dockerfile
+      context: ./bmsSpring
+      dockerfile: ./bmsSpring/archive-service.Dockerfile
     secrets:
       DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}

@@ -10,6 +10,9 @@ on:
       - 'bmsSpring/template-module/**'
       - 'bmsSpring/redis-cache/**'
       - 'bmsSpring/ollama-search/**'
+      - 'bmsSpring/user-service.Dockerfile'
+      - 'bmsSpring/user-service.Dockerfile.dockerignore'
+      - '.github/workflows/user-service.yml'
 jobs:
   test-template-module:
     uses: ./.github/workflows/test-run.yml
@@ -34,7 +37,8 @@ jobs:
     with:
       image-name: user-service-bms
       context: ./bmsSpring
-      dockerfile: ./bmsSpring/user-service/Dockerfile
+      #      dockerfile: ./bmsSpring/user-service/Dockerfile
+      dockerfile: ./bmsSpring/user-service.Dockerfile
     secrets:
       DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}

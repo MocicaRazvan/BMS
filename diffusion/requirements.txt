@@ -71,3 +71,4 @@ opentelemetry-semantic-conventions==0.50b0
 opentelemetry-util-http==0.50b0
 xformers==0.0.29.post3
 config-client==1.4.0
+hf-xet==1.0.4

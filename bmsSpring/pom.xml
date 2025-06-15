@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.mocicarazvan</groupId>
+    <artifactId>bmsSpring</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    <name>Parent Spring Module</name>
+
+    <modules>
+        <module>archive-service</module>
+        <module>cart-service</module>
+        <module>comment-service</module>
+        <module>config-server</module>
+        <module>day-service</module>
+        <module>file-service</module>
+        <module>gateway-service</module>
+        <module>ingredient-service</module>
+        <module>kanban-service</module>
+        <module>next-static-server</module>
+        <module>ollama-search</module>
+        <module>order-service</module>
+        <module>plan-service</module>
+        <module>post-service</module>
+        <module>recipe-service</module>
+        <module>redis-cache</module>
+        <module>service-registry</module>
+        <module>template-module</module>
+        <module>user-service</module>
+        <module>websocket-service</module>
+    </modules>
+    <build>
+        
+    </build>
+</project>

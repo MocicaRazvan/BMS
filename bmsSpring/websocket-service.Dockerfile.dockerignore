@@ -1,0 +1,5 @@
+**
+
+!/websocket-service
+/websocket-service/target
+!pom.xml

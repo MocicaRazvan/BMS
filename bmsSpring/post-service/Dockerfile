@@ -37,10 +37,18 @@ RUN mvn -f post-service/pom.xml clean package -DskipTests -Dmaven.compiler.showW
 FROM alpine/java:22.0.2-jre AS runtime
 WORKDIR /app
 
-RUN apk add --no-cache curl netcat-openbsd
+RUN addgroup -S appgroup \
+ && adduser -S -G appgroup \
+      -h /home/appuser \
+      -s /sbin/nologin \
+      -D appuser
 
+ENV HOME=/home/appuser
 
 COPY --from=post-service /app/post-service/target/post-service-0.0.1-SNAPSHOT.jar .
 
+RUN chown -R appuser:appgroup /app
+
+USER appuser:appgroup
 
 ENTRYPOINT ["java", "--enable-preview","-Dreactor.schedulers.defaultBoundedElasticOnVirtualThreads=true", "-jar", "post-service-0.0.1-SNAPSHOT.jar"]

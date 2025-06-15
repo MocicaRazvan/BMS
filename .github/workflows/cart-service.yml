@@ -8,6 +8,9 @@ on:
     paths:
       - 'bmsSpring/cart-service/**'
       - 'bmsSpring/template-module/**'
+      - 'bmsSpring/cart-service.Dockerfile'
+      - 'bmsSpring/cart-service.Dockerfile.dockerignore'
+      - '.github/workflows/cart-service.yml'
 jobs:
   test-template-module:
     uses: ./.github/workflows/test-run.yml
@@ -24,7 +27,8 @@ jobs:
     with:
       image-name: cart-service-bms
       context: ./bmsSpring
-      dockerfile: ./bmsSpring/cart-service/Dockerfile
+      #        dockerfile: ./bmsSpring/cart-service/Dockerfile
+      dockerfile: ./bmsSpring/cart-service.Dockerfile
     secrets:
       DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
