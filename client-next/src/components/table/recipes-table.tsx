@@ -442,7 +442,7 @@ export default function RecipeTable({
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuLabel className="mb-3">{label}</DropdownMenuLabel>
-                <DropdownMenuItem className="cursor-pointer">
+                <DropdownMenuItem className="cursor-pointer" asChild>
                   <Link
                     href={
                       forWhom === "trainer"

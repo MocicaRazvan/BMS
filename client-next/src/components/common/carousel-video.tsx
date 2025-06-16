@@ -88,8 +88,9 @@ export default function CarouselVideo({
         <VideoPlayerContent
           src={item.src}
           autoPlay={false}
-          preload="metadata"
+          preload={index === 0 ? "auto" : "metadata"}
           ref={videoRef}
+          loaderClassName="size-full"
         />
         <VideoPlayerLoadingIndicator />
         <VideoPlayerControlBar

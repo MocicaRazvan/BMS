@@ -14,7 +14,8 @@ import {
   MediaVolumeRange,
 } from "media-chrome/react";
 import { ComponentProps, CSSProperties, forwardRef, useState } from "react";
-import { Skeleton } from "@/components/ui/skeleton";
+import { ClassValue } from "clsx";
+import Loader from "@/components/ui/spinner";
 
 export type VideoPlayerProps = ComponentProps<typeof MediaController>;
 const variables = {
@@ -152,21 +153,30 @@ export const VideoPlayerLoadingIndicator = (
 
 export const VideoPlayerContent = forwardRef<
   HTMLVideoElement,
-  ComponentProps<"video">
->(({ className, onLoad, ...props }, ref) => {
+  ComponentProps<"video"> & { loaderClassName?: ClassValue }
+>(({ className, onCanPlay, loaderClassName, ...props }, ref) => {
   const [isReady, setIsReady] = useState(false);
   return (
     <>
-      {!isReady && <Skeleton className={className} />}
+      {!isReady && (
+        <div
+          className={cn(
+            "flex items-center justify-center w-full h-full bg-muted",
+            loaderClassName,
+          )}
+        >
+          <Loader className="my-0" />
+        </div>
+      )}
       <video
         ref={ref}
         className={cn("mt-0 mb-0", className, !isReady && "hidden")}
         slot="media"
         crossOrigin="anonymous"
         {...props}
-        onLoadedData={(e) => {
+        onCanPlay={(e) => {
           setIsReady(true);
-          onLoad?.(e);
+          onCanPlay?.(e);
         }}
       />
     </>

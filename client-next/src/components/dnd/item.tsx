@@ -173,6 +173,7 @@ const ItemVideoContent = ({ item, isDragging }: BaseItemProps) => {
         preload="auto"
         autoPlay={false}
         className="size-full object-cover"
+        loaderClassName="size-full object-cover"
       />
       <VideoPlayerLoadingIndicator />
       <VideoPlayerControlBar
