@@ -88,7 +88,7 @@ export default function DayCalendarStatsChart({ data }: Props) {
                 domain={[0, globalMax]}
                 axisLine={false}
                 tickLine={false}
-                tickFormatter={axisFormatter}
+                tickFormatter={(t) => axisFormatter(t, false)}
               />
               <ChartTooltip
                 cursor={false}

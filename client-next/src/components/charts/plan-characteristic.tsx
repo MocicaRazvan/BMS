@@ -165,7 +165,7 @@ export function PlanCharacteristic({
             />
             <YAxis
               domain={[0, Math.round(max + max / 10)]}
-              tickFormatter={axisFormatter}
+              tickFormatter={(t) => axisFormatter(t, dataKey !== "count")}
             />
             <ChartTooltip
               cursor={false}
@@ -239,8 +239,6 @@ export function PlanCharacteristicScatter({
   dataKey,
   chartName,
 }: ScatterProps) {
-  // const stackId = uuidv4();
-  const axisFormatter = useAxisNumberFormatter();
   const chartConfig = {
     count: {
       label: countLabel,
@@ -291,12 +289,7 @@ export function PlanCharacteristicScatter({
           >
             <CartesianGrid />
             <XAxis type="category" dataKey="objective" name={objectiveLabel} />
-            <YAxis
-              type="category"
-              dataKey="type"
-              name={typeLabel}
-              tickFormatter={axisFormatter}
-            />
+            <YAxis type="category" dataKey="type" name={typeLabel} />
             <ZAxis
               type="number"
               dataKey={dataKey}

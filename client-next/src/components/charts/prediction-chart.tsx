@@ -84,7 +84,7 @@ export function PredictionChart({
         ],
         date: format(new Date(m.year, m.month - 1), "MM-yyyy"),
       })),
-    [JSON.stringify(messages)],
+    [messages],
   );
   const maxedQuantile = useMemo(
     () =>
@@ -103,7 +103,7 @@ export function PredictionChart({
           totalAmount: 0,
         },
       ),
-    [JSON.stringify(messages)],
+    [messages],
   );
   if (error?.status) {
     return navigateToNotFound();

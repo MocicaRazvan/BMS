@@ -23,7 +23,6 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart";
 
-import { useLocale } from "next-intl";
 import { motion } from "framer-motion";
 import regression from "regression";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -212,7 +211,7 @@ export function TotalAmountCountOrders({
               tickLine={false}
               axisLine={false}
               tickMargin={8}
-              tickFormatter={axisFormatter}
+              tickFormatter={(t) => axisFormatter(t, showTotalAmount)}
               interval={"preserveStartEnd"}
               domain={[0, "dataMax"]}
               allowDecimals={false}
@@ -297,7 +296,7 @@ export function TotalAmountCountOrders({
               tickLine={false}
               axisLine={false}
               tickMargin={8}
-              tickFormatter={axisFormatter}
+              tickFormatter={(t) => axisFormatter(t, showTotalAmount)}
               interval="preserveStartEnd"
               domain={[
                 0,
@@ -411,7 +410,6 @@ export function TotalAmountOrdersSingleBarChart({
   totalAmountColorIndex = 6,
 }: TotalAmountOrdersSingleBarChartProps) {
   const stackId = uuidv4();
-  const locale = useLocale();
   const axisFormatter = useAxisNumberFormatter();
   const label = fieldKey === "count" ? countLabel : totalAmountLabel;
   const avgLabel =
@@ -465,7 +463,9 @@ export function TotalAmountOrdersSingleBarChart({
               axisLine={false}
               tickMargin={8}
               tickCount={8}
-              tickFormatter={axisFormatter}
+              tickFormatter={(t) =>
+                axisFormatter(t, fieldKey === "totalAmount")
+              }
               domain={[0, "dataMax"]}
               allowDecimals={false}
             />

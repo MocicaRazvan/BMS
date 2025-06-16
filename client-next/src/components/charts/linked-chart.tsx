@@ -785,7 +785,7 @@ export function LinkedChart<TData extends object = object>({
                   axisLine={false}
                   style={{ fontSize: "10px", userSelect: "none" }}
                   width={50}
-                  tickFormatter={axisFormatter}
+                  tickFormatter={(t) => axisFormatter(t)}
                 />
                 <ChartTooltip
                   cursor={false}

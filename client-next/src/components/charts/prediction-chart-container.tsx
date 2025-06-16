@@ -141,7 +141,7 @@ const PredictionChartContainer = memo(
                 tickLine={false}
                 axisLine={false}
                 tickMargin={8}
-                tickFormatter={axisFormatter}
+                tickFormatter={(t) => axisFormatter(t, dataKey !== "count")}
                 interval="preserveStartEnd"
                 domain={[0, Math.floor(1.1 * maxedQuantile[dataKey])]}
                 allowDecimals={false}

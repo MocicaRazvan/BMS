@@ -56,7 +56,7 @@ export function TopChartMeanRelative({
         <XAxis dataKey="name" />
         <YAxis
           domain={[0, Math.floor(maxBar + maxOffset)]}
-          tickFormatter={axisFormatter}
+          tickFormatter={(t) => axisFormatter(t)}
         />
         <ChartTooltip content={<ChartTooltipContent hideLabel={true} />} />
         <Bar
