@@ -128,7 +128,7 @@ export default function MonthlySales({
     () =>
       messages.map((i) => ({
         count: i.count,
-        count10: 10 * i.count,
+        count100: 100 * i.count,
         totalAmount: Math.floor(i.totalAmount),
         date: format(new Date(i.year, i.month - 1), "MM-yyyy"),
       })),
@@ -209,11 +209,11 @@ export default function MonthlySales({
           showTrendLine={showTrendLine}
           chartName={totalCountAmountChartName}
           mapCountLabel={(showCount, showTotalAmount) =>
-            showTotalAmount ? "count10" : "count"
+            showTotalAmount ? "count100" : "count"
           }
           extraChartConfig={{
-            count10: {
-              label: "10*" + totalAmountCountOrdersTexts.countLabel,
+            count100: {
+              label: "100*" + totalAmountCountOrdersTexts.countLabel,
               color: `hsl(var(--chart-${countColorIndex}))`,
             },
           }}

@@ -240,6 +240,7 @@ export function TotalAmountCountOrders({
             ref={composedChartRef}
             margin={{
               top: 15,
+              right: 10,
             }}
           >
             <defs>
