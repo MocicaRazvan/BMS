@@ -40,7 +40,7 @@ const titlePrompt = ChatPromptTemplate.fromMessages([
   [
     "user",
     "Here is the __context__: {context}.\n" +
-      "Additionally, the user has provided this input: {input}. Based on this, output a single short title as a text with NO explanations, the item type: {item}.",
+      "Additionally, the user has provided this input: {input}. Based on this, output ONLY a single short title as plain text. Do NOT include explanations, notes, or additional content - only the title for the item type: {item}.",
   ],
 ]);
 const descriptionPrompt = ChatPromptTemplate.fromMessages([
