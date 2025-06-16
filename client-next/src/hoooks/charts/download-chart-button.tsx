@@ -34,7 +34,7 @@ export default function useDownloadChartButton<T extends DateString>({
     initialHeight: 1080,
     initialWidth: 1920,
   });
-  const [getPng, { ref }] = useCurrentPng({
+  const [getPng, { ref, isLoading: isPngLoading }] = useCurrentPng({
     backgroundColor: theme === "dark" ? "#1A202C" : "#f0f0f0",
     windowWidth: width,
     windowHeight: height,
@@ -103,18 +103,20 @@ export default function useDownloadChartButton<T extends DateString>({
     [getPng, maxDate, minDate],
   );
 
+  const isFinalLoading = isLoading || isPngLoading;
+
   const DownloadChartButton = ({ fileName }: { fileName: string }) => (
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger asChild={true}>
           <Button
             onClick={() => handleDownload(fileName)}
-            disabled={isLoading}
+            disabled={isFinalLoading}
             type="button"
             className="min-w-14"
             variant="outline"
           >
-            {isLoading ? <Loader className="size-5" /> : <DownloadIcon />}
+            {isFinalLoading ? <Loader className="size-5" /> : <DownloadIcon />}
           </Button>
         </TooltipTrigger>
         <TooltipContent>
