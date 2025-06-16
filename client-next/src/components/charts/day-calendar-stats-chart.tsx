@@ -20,6 +20,7 @@ import chunk from "lodash/chunk";
 import { Separator } from "@/components/ui/separator";
 import { useMedia } from "react-use";
 import { getColorsByDayType } from "@/types/constants";
+import useAxisNumberFormatter from "@/hoooks/charts/use-axis-number-formatter";
 
 interface Props {
   data: DayCalendarTrackingStats[];
@@ -34,6 +35,7 @@ const chartConfig = dayTypes.reduce((acc, cur) => {
 }, {} as ChartConfig);
 
 export default function DayCalendarStatsChart({ data }: Props) {
+  const axisFormatter = useAxisNumberFormatter();
   const isSmall = useMedia("(max-width: 850px)", false);
   const chunkSize = isSmall ? 1 : 3;
   const { chartData, chunkedData, globalMax } = useMemo(() => {
@@ -72,6 +74,7 @@ export default function DayCalendarStatsChart({ data }: Props) {
               data={curData}
               margin={{
                 top: 30,
+                bottom: 10,
               }}
             >
               <CartesianGrid vertical={false} />
@@ -85,6 +88,7 @@ export default function DayCalendarStatsChart({ data }: Props) {
                 domain={[0, globalMax]}
                 axisLine={false}
                 tickLine={false}
+                tickFormatter={axisFormatter}
               />
               <ChartTooltip
                 cursor={false}

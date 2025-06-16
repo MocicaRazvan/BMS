@@ -23,6 +23,7 @@ import {
 } from "recharts";
 import { isDeepEqual } from "@/lib/utils";
 import dynamic from "next/dynamic";
+import useAxisNumberFormatter from "@/hoooks/charts/use-axis-number-formatter";
 
 export interface DataLabels {
   totalAmountLabel: string;
@@ -101,6 +102,7 @@ const PredictionChartContainer = memo(
       },
     } satisfies ChartConfig;
     const debounceDataAvailable = useDebounceWithFirstTrue(dataAvailable, 225);
+    const axisFormatter = useAxisNumberFormatter();
 
     return (
       <div className="w-full py-16">
@@ -139,7 +141,7 @@ const PredictionChartContainer = memo(
                 tickLine={false}
                 axisLine={false}
                 tickMargin={8}
-                tickFormatter={(tick) => (Number.isInteger(tick) ? tick : "")}
+                tickFormatter={axisFormatter}
                 interval="preserveStartEnd"
                 domain={[0, Math.floor(1.1 * maxedQuantile[dataKey])]}
                 allowDecimals={false}

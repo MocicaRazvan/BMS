@@ -60,6 +60,7 @@ import {
   isDeepEqual,
   parseToUnix,
 } from "@/lib/utils";
+import useAxisNumberFormatter from "@/hoooks/charts/use-axis-number-formatter";
 
 export interface GroupedData {
   dateLabel: string;
@@ -638,6 +639,7 @@ export function LinkedChart<TData extends object = object>({
     [selectedChartType],
   );
   const chartRef = useRef<HTMLDivElement>(null);
+  const axisFormatter = useAxisNumberFormatter();
   return (
     <Card className="w-full h-full">
       <CardHeader className="flex-col items-stretch space-y-0 border-b p-0 sm:flex-row hidden sm:flex">
@@ -783,6 +785,7 @@ export function LinkedChart<TData extends object = object>({
                   axisLine={false}
                   style={{ fontSize: "10px", userSelect: "none" }}
                   width={50}
+                  tickFormatter={axisFormatter}
                 />
                 <ChartTooltip
                   cursor={false}

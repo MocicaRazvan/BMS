@@ -65,7 +65,7 @@ export default async function AdminMonthlySales({ params: { locale } }: Props) {
         <h1 className="text-xl lg:text-2xl font-bold tracking-tight">
           {texts.plansTitle}
         </h1>
-        <div className="mt-10 h-full">
+        <div className="mt-10 mb-14 h-full">
           <MonthlySales
             path={"/orders/admin/plans/countAndAmount"}
             predictionPath={"/orders/admin/plans/countAndAmount/prediction"}

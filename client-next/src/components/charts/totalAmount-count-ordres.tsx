@@ -31,6 +31,7 @@ import useDownloadChartButton from "@/hoooks/charts/download-chart-button";
 import { v4 as uuidv4 } from "uuid";
 import { useDebounceWithFirstTrue } from "@/hoooks/useDebounceWithFirstTrue";
 import dynamic from "next/dynamic";
+import useAxisNumberFormatter from "@/hoooks/charts/use-axis-number-formatter";
 
 export interface TotalAmountCountOrdersData {
   count: number;
@@ -97,6 +98,7 @@ export function TotalAmountCountOrders({
   totalAmountColorIndex = 6,
 }: Props) {
   const stackId = uuidv4();
+  const axisFormatter = useAxisNumberFormatter();
   const chartConfig = {
     count: {
       label: countLabel,
@@ -195,6 +197,7 @@ export function TotalAmountCountOrders({
             ref={barChartRef}
             margin={{
               top: 15,
+              bottom: 10,
             }}
           >
             <CartesianGrid vertical={false} />
@@ -209,7 +212,7 @@ export function TotalAmountCountOrders({
               tickLine={false}
               axisLine={false}
               tickMargin={8}
-              tickFormatter={(tick) => (Number.isInteger(tick) ? tick : "")}
+              tickFormatter={axisFormatter}
               interval={"preserveStartEnd"}
               domain={[0, "dataMax"]}
               allowDecimals={false}
@@ -241,6 +244,7 @@ export function TotalAmountCountOrders({
             margin={{
               top: 15,
               right: 10,
+              bottom: 10,
             }}
           >
             <defs>
@@ -293,7 +297,7 @@ export function TotalAmountCountOrders({
               tickLine={false}
               axisLine={false}
               tickMargin={8}
-              tickFormatter={(tick) => (Number.isInteger(tick) ? tick : "")}
+              tickFormatter={axisFormatter}
               interval="preserveStartEnd"
               domain={[
                 0,
@@ -408,6 +412,7 @@ export function TotalAmountOrdersSingleBarChart({
 }: TotalAmountOrdersSingleBarChartProps) {
   const stackId = uuidv4();
   const locale = useLocale();
+  const axisFormatter = useAxisNumberFormatter();
   const label = fieldKey === "count" ? countLabel : totalAmountLabel;
   const avgLabel =
     fieldKey === "count" ? averageCountLabel : averageTotalAmountLabel;
@@ -444,6 +449,7 @@ export function TotalAmountOrdersSingleBarChart({
             ref={downloadChartRef}
             margin={{
               top: 15,
+              bottom: 10,
             }}
           >
             <CartesianGrid vertical={false} />
@@ -459,6 +465,7 @@ export function TotalAmountOrdersSingleBarChart({
               axisLine={false}
               tickMargin={8}
               tickCount={8}
+              tickFormatter={axisFormatter}
               domain={[0, "dataMax"]}
               allowDecimals={false}
             />
@@ -488,8 +495,8 @@ export function TotalAmountOrdersSingleBarChart({
               />
               <Label
                 position="bottom"
-                value={Math.round(meanValue).toLocaleString(locale)}
-                className="text-lg md:text-xl "
+                value={axisFormatter(Math.round(meanValue))}
+                className="text-lg md:text-xl"
                 fill="hsl(var(--foreground))"
                 offset={10}
                 startOffset={100}

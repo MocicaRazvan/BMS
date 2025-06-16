@@ -56,7 +56,7 @@ export default async function UsersMonthlySalesPage({
       >
         <div className="w-full h-full bg-background">
           <Heading {...texts} />
-          <div className="mt-10 h-full">
+          <div className="mt-10 mb-14 h-full">
             <MonthlySales
               path={`/orders/trainer/countAndAmount/${id}`}
               predictionPath={`/orders/trainer/countAndAmount/prediction/${id}`}

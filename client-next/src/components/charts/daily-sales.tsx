@@ -115,7 +115,7 @@ export default function DailySales({
   }
 
   return (
-    <div className="w-full h-ful space-y-10 pt-10 md:space-y-14">
+    <div className="w-full h-full space-y-10 pt-10 md:space-y-14">
       <div>
         <div className="flex flex-col md:flex-row gap-5 md:gap-2 items-center justify-between w-full flex-wrap">
           {dateRangePicker}

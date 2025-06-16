@@ -7,6 +7,7 @@ import {
 } from "@/components/ui/chart";
 import { Bar, BarChart, ReferenceLine, XAxis, YAxis } from "recharts";
 import React from "react";
+import useAxisNumberFormatter from "@/hoooks/charts/use-axis-number-formatter";
 
 interface TopChartMeanRelativeProps {
   chartKey: string;
@@ -29,6 +30,7 @@ export function TopChartMeanRelative({
   referenceLabel,
   chartColorNumber = 6,
 }: TopChartMeanRelativeProps) {
+  const axisFormatter = useAxisNumberFormatter();
   const stackId = uuid();
   if (maxBar - referenceValue < maxOffset) {
     maxOffset += Math.min(maxBar / 25, 80);
@@ -52,7 +54,10 @@ export function TopChartMeanRelative({
         ]}
       >
         <XAxis dataKey="name" />
-        <YAxis domain={[0, Math.floor(maxBar + maxOffset)]} />
+        <YAxis
+          domain={[0, Math.floor(maxBar + maxOffset)]}
+          tickFormatter={axisFormatter}
+        />
         <ChartTooltip content={<ChartTooltipContent hideLabel={true} />} />
         <Bar
           dataKey={chartKey}
@@ -67,7 +72,7 @@ export function TopChartMeanRelative({
           fill={"hsl(var(--primary))"}
           label={{
             position: "middle",
-            value: referenceLabel + referenceValue.toFixed(2),
+            value: axisFormatter(referenceLabel + referenceValue.toFixed(2)),
             fill: "hsl(var(--primary))",
             fontSize: 12,
             dy: -10,

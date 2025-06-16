@@ -37,6 +37,7 @@ import {
 import { formatChartValue } from "@/lib/utils";
 import { useDebounceWithFirstTrue } from "@/hoooks/useDebounceWithFirstTrue";
 import dynamic from "next/dynamic";
+import useAxisNumberFormatter from "@/hoooks/charts/use-axis-number-formatter";
 
 const DynamicEmptyChartLottie = dynamic(
   () => import("@/components/lottie/empty-chart-lottie"),
@@ -98,6 +99,7 @@ export function PlanCharacteristic({
   averageAmountLabel,
 }: Props) {
   const stackId = uuidv4();
+  const axisFormatter = useAxisNumberFormatter();
   const chartConfig = {
     count: {
       label: countLabel,
@@ -144,7 +146,15 @@ export function PlanCharacteristic({
             />
           </motion.div>
         ) : (
-          <ComposedChart accessibilityLayer data={data} ref={downloadChartRef}>
+          <ComposedChart
+            accessibilityLayer
+            data={data}
+            ref={downloadChartRef}
+            margin={{
+              bottom: 10,
+              top: 7,
+            }}
+          >
             <CartesianGrid vertical={false} />
             <XAxis
               dataKey={characteristic}
@@ -153,7 +163,10 @@ export function PlanCharacteristic({
               axisLine={false}
               // tickFormatter={(value) => value.slice(0, 3)}
             />
-            <YAxis domain={[0, Math.round(max + max / 10)]} />
+            <YAxis
+              domain={[0, Math.round(max + max / 10)]}
+              tickFormatter={axisFormatter}
+            />
             <ChartTooltip
               cursor={false}
               content={<ChartTooltipContent indicator="dot" />}
@@ -227,6 +240,7 @@ export function PlanCharacteristicScatter({
   chartName,
 }: ScatterProps) {
   // const stackId = uuidv4();
+  const axisFormatter = useAxisNumberFormatter();
   const chartConfig = {
     count: {
       label: countLabel,
@@ -272,11 +286,17 @@ export function PlanCharacteristicScatter({
             ref={downloadChartRef}
             margin={{
               left: 35,
+              bottom: 10,
             }}
           >
             <CartesianGrid />
             <XAxis type="category" dataKey="objective" name={objectiveLabel} />
-            <YAxis type="category" dataKey="type" name={typeLabel} />
+            <YAxis
+              type="category"
+              dataKey="type"
+              name={typeLabel}
+              tickFormatter={axisFormatter}
+            />
             <ZAxis
               type="number"
               dataKey={dataKey}

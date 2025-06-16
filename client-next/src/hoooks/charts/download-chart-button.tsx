@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/tooltip";
 import { getUseDownloadChartButtonTexts } from "@/texts/components/charts";
 import Loader from "@/components/ui/spinner";
+import { useWindowSize } from "react-use";
 
 export interface DateString {
   date: string;
@@ -29,10 +30,14 @@ export default function useDownloadChartButton<T extends DateString>({
   }, []);
   const { theme } = useTheme();
   const [isLoading, setIsLoading] = useState(false);
+  const { width, height } = useWindowSize({
+    initialHeight: 1080,
+    initialWidth: 1920,
+  });
   const [getPng, { ref }] = useCurrentPng({
     backgroundColor: theme === "dark" ? "#1A202C" : "#f0f0f0",
-    windowWidth: 1920,
-    windowHeight: 1080,
+    windowWidth: width,
+    windowHeight: height,
   });
 
   const { minDate, maxDate } = useMemo(
@@ -72,7 +77,7 @@ export default function useDownloadChartButton<T extends DateString>({
               })(),
             },
           ),
-    [JSON.stringify(data)],
+    [data],
   );
 
   const handleDownload = useCallback(
