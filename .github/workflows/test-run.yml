@@ -29,6 +29,14 @@ jobs:
         run: mvn --version
       - name: Check Docker version
         run: docker --version
+      - name: Install Parent POM
+        if: ${{ inputs.local-modules != '' }}
+        shell: powershell
+        run: |
+          Write-Host "Installing parent POM..."
+          Push-Location "bmsSpring"
+          mvn clean install -N -B -q -e
+          Pop-Location
       - name: Install Modules
         if: ${{ inputs.local-modules != '' }}
         shell: powershell
@@ -37,7 +45,7 @@ jobs:
           foreach ($module in $modules) {
                   Write-Host "Installing $module..."
                   Push-Location "bmsSpring/$module"
-                  mvn clean install -DskipTests 
+                  mvn clean install -DskipTests -B -q -e
                   Pop-Location
           }
       - name: Run Service Tests

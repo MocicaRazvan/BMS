@@ -86,8 +86,7 @@
             <artifactId>loki-logback-appender</artifactId>
         </dependency>
     </dependencies>
-
-
+    
     <build>
         <plugins>
             <plugin>
