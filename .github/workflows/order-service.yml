@@ -11,6 +11,13 @@ on:
       - 'bmsSpring/redis-cache/**'
       - 'bmsSpring/order-service.Dockerfile'
       - 'bmsSpring/order-service.Dockerfile.dockerignore'
+      - 'bmsSpring/base-docker/template-module.Dockerfile'
+      - 'bmsSpring/base-docker/redis-module.Dockerfile'
+      - 'bmsSpring/base-docker/ollama-module.Dockerfile'
+      - 'bmsSpring/base-docker/parent-module.Dockerfile'
+      - 'bmsSpring/base-docker/with-tro-builder.Dockerfile'
+      - 'bmsSpring/base-docker/runtime.Dockerfile'
+      - 'bmsSpring/pom.xml'
       - '.github/workflows/order-service.yml'
 jobs:
   test-template-module:

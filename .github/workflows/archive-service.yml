@@ -9,6 +9,9 @@ on:
       - 'bmsSpring/archive-service/**'
       - 'bmsSpring/archive-service.Dockerfile'
       - 'bmsSpring/archive-service.Dockerfile.dockerignore'
+      - 'bmsSpring/base-docker/independent-build.Dockerfile'
+      - 'bmsSpring/base-docker/independent-deps.Dockerfile'
+      - 'bmsSpring/pom.xml'
       - '.github/workflows/archive-service.yml'
 jobs:
   test-archive-service:

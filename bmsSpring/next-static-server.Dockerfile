@@ -1,18 +1,9 @@
-# Base image for Maven build
-FROM jelastic/maven:3.9.9-openjdk-22.0.2-almalinux-9 AS build
-WORKDIR /app
+# syntax = devthefuture/dockerfile-x
+ARG MODULE_NAME=next-static-server
 
-COPY /next-static-server/pom.xml .
+INCLUDE ./base-docker/independent-deps.Dockerfile
 
-RUN mvn dependency:go-offline -q -B
-
-COPY /next-static-server/src ./src
-
-RUN mvn -q package -DskipTests -Dmaven.compiler.source=22 -Dmaven.compiler.target=22 -Dmaven.compiler.compilerArgs=--enable-preview
-
-
-
-
+INCLUDE ./base-docker/independent-build.Dockerfile
 # ---------------------- NEXTJS IMAGE ----------------------
 FROM razvanmocica/next-js-bms:latest AS nextjs
 
@@ -34,8 +25,8 @@ ENV HOME=/home/appuser
 
 COPY --from=build \
      --chown=appuser:appgroup \
-     /app/target/next-static-server-0.0.1-SNAPSHOT.jar \
-     next-static-server-0.0.1-SNAPSHOT.jar
+    /app/submodule/target/app.jar \
+     app.jar
 
 COPY --from=nextjs \
      --chown=appuser:appgroup \
@@ -44,4 +35,4 @@ COPY --from=nextjs \
 
 USER appuser:appgroup
 
-ENTRYPOINT ["java", "--enable-preview", "-jar", "next-static-server-0.0.1-SNAPSHOT.jar"]
+ENTRYPOINT ["java", "--enable-preview", "-jar", "app.jar"]

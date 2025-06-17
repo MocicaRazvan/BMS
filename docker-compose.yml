@@ -710,10 +710,10 @@ services:
     restart: unless-stopped
 
   next-static-server:
-    container_name: next-static-server
+    container_name: next-static-server-bms
     build:
-      context: ./bmsSpring/next-static-server
-      dockerfile: Dockerfile
+      context: ./bmsSpring
+      dockerfile: next-static-server.Dockerfile
 
       args:
         NEXTAUTH_URL: http://localhost:3000

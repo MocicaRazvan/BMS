@@ -9,6 +9,10 @@ on:
       - 'bmsSpring/websocket-service/**'
       - 'bmsSpring/websocket-service.Dockerfile'
       - 'bmsSpring/websocket-service.Dockerfile.dockerignore'
+      - 'bmsSpring/base-docker/independent-build.Dockerfile'
+      - 'bmsSpring/base-docker/independent-deps.Dockerfile'
+      - 'bmsSpring/base-docker/runtime.Dockerfile'
+      - 'bmsSpring/pom.xml'
       - '.github/workflows/websocket-service.yml'
 jobs:
   test-websocket-service:
@@ -20,7 +24,7 @@ jobs:
     uses: ./.github/workflows/build-and-push.yml
     with:
       image-name: websocket-service-bms
-        #      context: ./bmsSpring/websocket-service
+      #      context: ./bmsSpring/websocket-service
       #      dockerfile: ./bmsSpring/websocket-service/Dockerfile
       context: ./bmsSpring
       dockerfile: ./bmsSpring/websocket-service.Dockerfile

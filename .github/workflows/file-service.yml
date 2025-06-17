@@ -9,6 +9,10 @@ on:
       - 'bmsSpring/file-service/**'
       - 'bmsSpring/file-service.Dockerfile'
       - 'bmsSpring/file-service.Dockerfile.dockerignore'
+      - 'bmsSpring/base-docker/independent-build.Dockerfile'
+      - 'bmsSpring/base-docker/independent-deps.Dockerfile'
+      - 'bmsSpring/base-docker/runtime.Dockerfile'
+      - 'bmsSpring/pom.xml'
       - '.github/workflows/file-service.yml'
 jobs:
   test-file-service:
