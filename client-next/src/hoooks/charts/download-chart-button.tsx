@@ -1,5 +1,4 @@
 "use client";
-import { useCurrentPng } from "recharts-to-png";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { DownloadIcon } from "lucide-react";
@@ -13,6 +12,7 @@ import {
 import { getUseDownloadChartButtonTexts } from "@/texts/components/charts";
 import Loader from "@/components/ui/spinner";
 import { useWindowSize } from "react-use";
+import { useCurrentPngDynamic } from "@/lib/recharts/recharts-to-img";
 
 export interface DateString {
   date: string;
@@ -34,7 +34,7 @@ export default function useDownloadChartButton<T extends DateString>({
     initialHeight: 1080,
     initialWidth: 1920,
   });
-  const [getPng, { ref, isLoading: isPngLoading }] = useCurrentPng({
+  const [getPng, { ref, isLoading: isPngLoading }] = useCurrentPngDynamic({
     backgroundColor: theme === "dark" ? "#1A202C" : "#f0f0f0",
     windowWidth: width,
     windowHeight: height,

@@ -15,7 +15,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useLocale } from "next-intl";
 import { useTheme } from "next-themes";
-import { useGenerateImage } from "recharts-to-png";
 import useDateRangeFilterParams from "@/hoooks/useDateRangeFilterParams";
 import {
   GeoDataType,
@@ -27,6 +26,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import fetchFactory from "@/lib/fetchers/fetchWithRetry";
 import geoDataUrl from "@/assets/data/geoData.json?url";
 import { useWindowSize } from "react-use";
+import { useGenerateImageDynamic } from "@/lib/recharts/recharts-to-img";
 
 const LEGEND_STEPS = 9;
 
@@ -120,7 +120,7 @@ export default function GeographyChart(props: Props) {
     initialWidth: 1920,
   });
   const [getDivJpeg, { ref, isLoading: isChartLoading }] =
-    useGenerateImage<HTMLDivElement>({
+    useGenerateImageDynamic<HTMLDivElement>({
       quality: 1,
       type: "image/jpeg",
       options: {
@@ -131,7 +131,7 @@ export default function GeographyChart(props: Props) {
         scrollY: 0,
         scrollX: 0,
         scale: 1,
-        width: 0.9 * width,
+        width: 0.875 * width,
         height: 0.95 * height,
         // width: 1440,
         // height: 1045,
@@ -156,14 +156,7 @@ export default function GeographyChart(props: Props) {
       saveAs(
         jpeg,
         `${props.selectLabels[radioOption].trim().replace(/\s+/g, "_")}_${new Date()
-          .toLocaleString(locale, {
-            day: "2-digit",
-            month: "2-digit",
-            year: "numeric",
-            hour: "2-digit",
-            minute: "2-digit",
-            second: "2-digit",
-          })
+          .toISOString()
           .replace(/[\s,.]+/g, "_")}_geographyChart.jpeg`,
       );
     }
