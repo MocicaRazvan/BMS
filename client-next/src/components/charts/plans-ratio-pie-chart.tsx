@@ -34,6 +34,7 @@ export function RatioPieChart({
       className="mx-auto aspect-square h-[300px]"
     >
       <RadialBarChart
+        accessibilityLayer
         data={chartData}
         startAngle={0}
         endAngle={endAngle}

@@ -733,6 +733,7 @@ export function LinkedChart<TData extends object = object>({
 
             <ResponsiveContainer width="100%" height="100%">
               <ComposedChart
+                accessibilityLayer
                 data={groupedData}
                 margin={{
                   top: 10,

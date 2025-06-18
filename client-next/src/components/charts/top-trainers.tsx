@@ -5,7 +5,7 @@ import TopChartWrapper, {
   TopRankBadge,
 } from "@/components/charts/top-chart-wrapper";
 import { Link, Locale } from "@/navigation/navigation";
-import React, { memo, useState } from "react";
+import { memo, useState } from "react";
 import {
   CustomEntityModel,
   DietType,

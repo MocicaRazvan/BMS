@@ -192,6 +192,7 @@ export function TotalAmountCountOrders({
           </motion.div>
         ) : data.length === 1 ? (
           <BarChart
+            accessibilityLayer
             data={data}
             ref={barChartRef}
             margin={{
@@ -238,6 +239,7 @@ export function TotalAmountCountOrders({
           </BarChart>
         ) : (
           <ComposedChart
+            accessibilityLayer
             data={data}
             ref={composedChartRef}
             margin={{
@@ -443,6 +445,7 @@ export function TotalAmountOrdersSingleBarChart({
           <Skeleton className={"w-full h-full"} />
         ) : (
           <BarChart
+            accessibilityLayer
             data={data}
             ref={downloadChartRef}
             margin={{

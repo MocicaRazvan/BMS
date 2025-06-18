@@ -5,7 +5,7 @@ import TopChartWrapper, {
   TopRankBadge,
 } from "@/components/charts/top-chart-wrapper";
 import { Link, Locale } from "@/navigation/navigation";
-import React, { memo } from "react";
+import { memo } from "react";
 import { isDeepEqual } from "@/lib/utils";
 import {
   PlanResponse,

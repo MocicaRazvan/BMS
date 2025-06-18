@@ -16,7 +16,6 @@ import {
 import { useLocale } from "next-intl";
 import { useTheme } from "next-themes";
 import { useGenerateImage } from "recharts-to-png";
-import FileSaver from "file-saver";
 import useDateRangeFilterParams from "@/hoooks/useDateRangeFilterParams";
 import {
   GeoDataType,
@@ -27,6 +26,7 @@ import dynamic from "next/dynamic";
 import { Skeleton } from "@/components/ui/skeleton";
 import fetchFactory from "@/lib/fetchers/fetchWithRetry";
 import geoDataUrl from "@/assets/data/geoData.json?url";
+import { useWindowSize } from "react-use";
 
 const LEGEND_STEPS = 9;
 
@@ -114,35 +114,46 @@ export default function GeographyChart(props: Props) {
   }, [domain, colorScale]);
 
   const { theme } = useTheme();
-
-  const [getDivJpeg, { ref, isLoading }] = useGenerateImage<HTMLDivElement>({
-    quality: 1,
-    type: "image/jpeg",
-    options: {
-      ignoreElements: (element) =>
-        ["BUTTON", "LABEL"].includes(element.tagName),
-      windowWidth: 1920,
-      windowHeight: 1080,
-      scrollY: 0,
-      scrollX: 0,
-      scale: 1,
-      width: 1440,
-      height: 1045,
-      backgroundColor: theme === "dark" ? "#1A202C" : "#f0f0f0",
-      x: 0,
-      y: 0,
-      logging: false,
-      imageTimeout: 20000,
-      useCORS: false,
-      allowTaint: false,
-      foreignObjectRendering: false,
-    },
+  const [isLocalLoading, setIsLocalLoading] = useState(false);
+  const { width, height } = useWindowSize({
+    initialHeight: 1080,
+    initialWidth: 1920,
   });
+  const [getDivJpeg, { ref, isLoading: isChartLoading }] =
+    useGenerateImage<HTMLDivElement>({
+      quality: 1,
+      type: "image/jpeg",
+      options: {
+        ignoreElements: (element) =>
+          ["BUTTON", "LABEL"].includes(element.tagName),
+        windowWidth: width,
+        windowHeight: height,
+        scrollY: 0,
+        scrollX: 0,
+        scale: 1,
+        width: 0.9 * width,
+        height: 0.95 * height,
+        // width: 1440,
+        // height: 1045,
+        backgroundColor: theme === "dark" ? "#1A202C" : "#f0f0f0",
+        x: 0,
+        y: 0,
+        logging: false,
+        imageTimeout: 20000,
+        useCORS: false,
+        allowTaint: false,
+        foreignObjectRendering: false,
+      },
+    });
   const handleDivDownload = useCallback(async () => {
-    const jpeg = await getDivJpeg();
+    setIsLocalLoading(true);
+    const [jpeg, saveAs] = await Promise.all([
+      getDivJpeg(),
+      import("file-saver").then((m) => m.default),
+    ]);
 
     if (jpeg) {
-      FileSaver.saveAs(
+      saveAs(
         jpeg,
         `${props.selectLabels[radioOption].trim().replace(/\s+/g, "_")}_${new Date()
           .toLocaleString(locale, {
@@ -156,6 +167,8 @@ export default function GeographyChart(props: Props) {
           .replace(/[\s,.]+/g, "_")}_geographyChart.jpeg`,
       );
     }
+
+    setIsLocalLoading(false);
   }, [getDivJpeg, locale, radioOption, props.selectLabels]);
   return (
     <div
@@ -163,11 +176,11 @@ export default function GeographyChart(props: Props) {
       backdrop-blur supports-[backdrop-filter]:bg-accent-foreground/25 dark:supports-[backdrop-filter]:bg-accent/35
      p-4 rounded overflow-hidden border-2"
     >
-      <div className="h-[100vh] w-full mx-auto relative ">
+      <div className="h-[100vh] w-full mx-auto relative">
         <DynamicGeographyChart
           {...props}
           isFinished={isFinished}
-          isLoading={isLoading}
+          isLoading={isLocalLoading || isChartLoading}
           outerRef={ref}
           legendItems={legendItems}
           radioOption={radioOption}

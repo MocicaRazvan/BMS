@@ -106,7 +106,7 @@ const UserPieChart = memo(
         config={chartConfig}
         className="h-[300px] mx-auto aspect-square [&_.recharts-pie-label-text]:fill-foreground my-0 p-0"
       >
-        <PieChart>
+        <PieChart accessibilityLayer>
           <Pie
             data={chartData}
             outerRadius={70}

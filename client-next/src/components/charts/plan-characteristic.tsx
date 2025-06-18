@@ -161,16 +161,15 @@ export function PlanCharacteristic({
               tickLine={false}
               tickMargin={10}
               axisLine={false}
-              // tickFormatter={(value) => value.slice(0, 3)}
+              tickFormatter={(t) =>
+                typeof t === "string" ? t.replace("_", " ") : t
+              }
             />
             <YAxis
               domain={[0, Math.round(max + max / 10)]}
               tickFormatter={(t) => axisFormatter(t, dataKey !== "count")}
             />
-            <ChartTooltip
-              cursor={false}
-              content={<ChartTooltipContent indicator="dot" />}
-            />
+
             <Bar
               dataKey={dataKey}
               fill={`var(--color-${dataKey})`}
@@ -200,7 +199,8 @@ export function PlanCharacteristic({
               key={dataKey + stackId}
               content={
                 <ChartLegendContent
-                  hiddenKeys={allKeys.filter((key) => key !== dataKey)}
+                  retainUniqueKeys={true}
+                  // hiddenKeys={allKeys.filter((key) => key !== dataKey)}
                 />
               }
             />
@@ -241,15 +241,15 @@ export function PlanCharacteristicScatter({
 }: ScatterProps) {
   const chartConfig = {
     count: {
-      label: countLabel,
+      label: countLabel.replace("_", " "),
       color: `hsl(var(--chart-${countColorIndex}))`,
     },
     totalAmount: {
-      label: totalAmountLabel,
+      label: totalAmountLabel.replace("_", " "),
       color: `hsl(var(--chart-${totalAmountColorIndex}))`,
     },
     averageAmount: {
-      label: averageAmountLabel,
+      label: averageAmountLabel.replace("_", " "),
       color: `hsl(var(--chart-${averageAmountColorIndex}))`,
     },
   } satisfies ChartConfig;
@@ -288,19 +288,37 @@ export function PlanCharacteristicScatter({
             }}
           >
             <CartesianGrid />
-            <XAxis type="category" dataKey="objective" name={objectiveLabel} />
-            <YAxis type="category" dataKey="type" name={typeLabel} />
+            <XAxis
+              type="category"
+              dataKey="objective"
+              name={objectiveLabel}
+              tickFormatter={(t) =>
+                typeof t === "string" ? t.replace("_", " ") : t
+              }
+              tickLine={false}
+            />
+            <YAxis
+              type="category"
+              dataKey="type"
+              name={typeLabel}
+              tickLine={false}
+            />
             <ZAxis
               type="number"
               dataKey={dataKey}
-              name="totalAmount"
+              name={dataKey}
               domain={["auto", "auto"]}
               range={[250, 2250]}
               scale="sqrt"
             />
             <ChartTooltip
               cursor={false}
-              content={<ChartTooltipContent indicator="dot" />}
+              content={
+                <ChartTooltipContent
+                  indicator="dot"
+                  valueFormatter={(v) => v.replace("_", " ")}
+                />
+              }
             />
             <Scatter
               name={dataKey}

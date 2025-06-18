@@ -50,6 +50,7 @@ export function RelativeItemBarChart({
     <div className="h-8">
       <ResponsiveContainer width="100%" height="100%">
         <BarChart
+          accessibilityLayer
           layout="vertical"
           margin={{ left: 0, top: 0, right: 0, bottom: 0 }}
           data={[{ date: `${month}/${year}`, count: count }]}
@@ -102,7 +103,7 @@ export function RelativeItemPieChart({
       className="mx-auto aspect-square h-[255px]"
       {...props}
     >
-      <PieChart>
+      <PieChart accessibilityLayer>
         <ChartTooltip
           cursor={false}
           content={<ChartTooltipContent className="gap-2" />}

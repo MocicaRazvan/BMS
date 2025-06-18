@@ -114,6 +114,8 @@ const ChartTooltipContent = React.forwardRef<
       hiddenKeys?: string[];
       hideValue?: boolean;
       ItemLabelWrapper?: React.ComponentType<{ children: React.ReactNode }>;
+      valueFormatter?: (v: string) => string;
+      retainUniqueKeys?: boolean;
     }
 >(
   (
@@ -134,6 +136,8 @@ const ChartTooltipContent = React.forwardRef<
       hiddenKeys = [],
       hideValue = false,
       ItemLabelWrapper,
+      valueFormatter,
+      retainUniqueKeys = false,
     },
     ref,
   ) => {
@@ -259,7 +263,9 @@ const ChartTooltipContent = React.forwardRef<
                         </div>
                         {item.value && !hideValue && (
                           <span className="font-mono font-medium tabular-nums text-foreground ms-2">
-                            {item.value.toLocaleString()}
+                            {valueFormatter
+                              ? valueFormatter(item.value.toLocaleString())
+                              : item.value.toLocaleString()}
                           </span>
                         )}
                       </div>
@@ -284,6 +290,7 @@ const ChartLegendContent = React.forwardRef<
       hideIcon?: boolean;
       nameKey?: string;
       hiddenKeys?: string[];
+      retainUniqueKeys?: boolean;
     } & HTMLMotionProps<"div">
 >(
   (
@@ -294,13 +301,18 @@ const ChartLegendContent = React.forwardRef<
       verticalAlign = "bottom",
       nameKey,
       hiddenKeys = [],
+      retainUniqueKeys = false,
       ...props
     },
     ref,
   ) => {
     const { config } = useChart();
+    const finalPayload = React.useMemo(
+      () => getUniquePayload(retainUniqueKeys, payload, nameKey),
+      [payload, nameKey, retainUniqueKeys],
+    );
 
-    if (!payload?.length) {
+    if (!finalPayload?.length) {
       return null;
     }
 
@@ -317,7 +329,7 @@ const ChartLegendContent = React.forwardRef<
         transition={{ duration: 0.5 }}
         {...props}
       >
-        {payload
+        {finalPayload
           .filter(
             (item) =>
               !hiddenKeys.includes(`${nameKey || item.dataKey || "value"}`),
@@ -351,6 +363,24 @@ const ChartLegendContent = React.forwardRef<
   },
 );
 ChartLegendContent.displayName = "ChartLegend";
+
+const getUniquePayload = (
+  retainUniqueKeys: boolean,
+  payload: Pick<RechartsPrimitive.LegendProps, "payload">["payload"],
+  nameKey?: string,
+) =>
+  retainUniqueKeys
+    ? payload?.reduce(
+        (acc, item) => {
+          const key = `${nameKey || item.dataKey || "value"}`;
+          if (!acc.some((i) => i.dataKey === key)) {
+            acc.push(item);
+          }
+          return acc;
+        },
+        [] as typeof payload,
+      )
+    : payload;
 
 // Helper to extract item config from a payload.
 function getPayloadConfigFromPayload(

@@ -46,6 +46,7 @@ export function TopChartMeanRelative({
       className="h-[300px] mx-auto aspect-square"
     >
       <BarChart
+        accessibilityLayer
         data={[
           {
             name: chartLabel,

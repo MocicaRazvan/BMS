@@ -8,7 +8,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import React, { ComponentProps, memo, useMemo } from "react";
+import { ComponentProps, memo, useMemo } from "react";
 import { Label, Pie, PieChart } from "recharts";
 import { motion } from "framer-motion";
 import { isDeepEqual } from "@/lib/utils";
@@ -95,7 +95,7 @@ export const IngredientMacrosPieChart = memo(
         className="mx-auto aspect-square  max-h-[350px] lg:max-h-[400px]"
         {...props}
       >
-        <PieChart>
+        <PieChart accessibilityLayer>
           <ChartTooltip
             cursor={false}
             content={<ChartTooltipContent className="gap-2" />}

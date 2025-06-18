@@ -1,5 +1,5 @@
 "use client";
-import {
+import React, {
   Dispatch,
   RefObject,
   SetStateAction,
@@ -26,6 +26,7 @@ import { DropDownMenuGeographySelect } from "@/components/charts/geography-chart
 import { useLocale } from "next-intl";
 import { CountryOrderSummary, CountrySummaryType } from "@/types/dto";
 import useDateRangeFilterParams from "@/hoooks/useDateRangeFilterParams";
+import Loader from "@/components/ui/spinner";
 
 export interface GeoDataType {
   type: string;
@@ -208,11 +209,7 @@ export function GeographyChartContent({
                 className="w-14"
                 variant="outline"
               >
-                {isLoading ? (
-                  <span className=" text-primary/60 animate-spin font-bold text-lg w-full h-full " />
-                ) : (
-                  <DownloadIcon size={24} />
-                )}
+                {isLoading ? <Loader className="size-5" /> : <DownloadIcon />}
               </Button>
             </div>
             {/*{scale}*/}

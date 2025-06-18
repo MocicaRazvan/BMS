@@ -1,5 +1,5 @@
 "use client";
-import React, { memo, useMemo } from "react";
+import { memo, useMemo } from "react";
 import { createChartConfig } from "@/components/charts/top-chart-wrapper";
 import {
   DietType,
@@ -62,7 +62,7 @@ const TopTrainersPieChart = memo(
         config={chartConfig}
         className="min-h-[300px] h-full mx-auto aspect-square [&_.recharts-pie-label-text]:fill-foreground my-0 p-0"
       >
-        <PieChart>
+        <PieChart accessibilityLayer>
           <Pie
             data={createChartData(chartData, type)}
             outerRadius={70}
