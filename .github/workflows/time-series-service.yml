@@ -6,14 +6,18 @@ on:
     branches:
       - main
     paths:
-      - 'timeSeriesChronos/**'
+      - 'bmsFlask/timeSeriesChronos/**'
+      - 'bmsFlask/time-series.Dockerfile'
+      - 'bmsFlask/time-series.Dockerfile.dockerignore'
+      - 'bmsFlask/base-docker/build.Dockerfile'
+      - '.github/workflows/time-series-service.yml'
 jobs:
   build-and-push-time-series-chronos-service:
     uses: ./.github/workflows/build-and-push.yml
     with:
       image-name: time-series-chronos-service-bms
-      context: ./timeSeriesChronos
-      dockerfile: ./timeSeriesChronos/Dockerfile
+      context: ./bmsFlask
+      dockerfile: ./bmsFlask/time-series.Dockerfile
     secrets:
       DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}

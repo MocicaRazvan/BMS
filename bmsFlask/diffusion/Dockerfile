@@ -13,6 +13,7 @@ COPY requirements.txt .
 RUN pip install  -r requirements.txt
 
 FROM python:3.10-slim AS runtime
+
 RUN apt-get update \
  && apt-get install -y curl netcat-openbsd \
  && rm -rf /var/lib/apt/lists/* \
@@ -39,13 +40,11 @@ RUN mkdir -p /home/appuser/hf-cache /home/appuser/model-cache \
 
 ENV HF_HOME=/home/appuser/hf-cache
 
-
 ENV PYTHONUNBUFFERED=1
-ENV PORT=5001
+ENV PORT=5000
 ENV WORKER_PROCESSES=1
 ENV PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 ENV PROMETHEUS_MULTIPROC_DIR=/tmp
-
 
 EXPOSE ${PORT}
 

@@ -1,0 +1,4 @@
+../db
+
+!toxicPrediction/app
+!toxicPrediction/requirements.txt

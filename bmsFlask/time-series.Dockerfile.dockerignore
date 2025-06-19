@@ -1,0 +1,4 @@
+../db
+
+!timeSeriesChronos/app
+!timeSeriesChronos/requirements.txt

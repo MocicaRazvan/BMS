@@ -6,14 +6,18 @@ on:
     branches:
       - main
     paths:
-      - 'diffusion/**'
+      - 'bmsFlask/diffusion/**'
+      - 'bmsFlask/diffusion.Dockerfile'
+      - 'bmsFlask/diffusion.Dockerfile.dockerignore'
+      - 'bmsFlask/base-docker/build.Dockerfile'
+      - '.github/workflows/diffusion-service.yml'
 jobs:
   build-and-push-diffusion-service:
     uses: ./.github/workflows/build-and-push.yml
     with:
       image-name: diffusion-service-bms
-      context: ./diffusion
-      dockerfile: ./diffusion/Dockerfile
+      context: ./bmsFlask
+      dockerfile: ./bmsFlask/diffusion.Dockerfile
     secrets:
       DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}

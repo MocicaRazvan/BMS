@@ -900,8 +900,8 @@ services:
   
   diffusion:
     build:
-      context: ./diffusion
-      dockerfile: Dockerfile
+      context: bmsFlask
+      dockerfile: diffusion.Dockerfile
     container_name: diffusion-container-bms
     deploy:
       resources:
@@ -926,8 +926,8 @@ services:
 
   time-series:
     build:
-      context: ./timeSeriesChronos
-      dockerfile: Dockerfile
+      context: bmsFlask
+      dockerfile: time-series.Dockerfile
     container_name: time-series-container-bms
     deploy:
       resources:
@@ -954,8 +954,8 @@ services:
 
   toxic-prediction:
     build:
-      context: ./toxicPrediction
-      dockerfile: Dockerfile
+      context: bmsFlask
+      dockerfile: toxic-prediction.Dockerfile
     container_name: toxic-prediction-container-bms
     environment:
       - PYTHON_PROFILES_ACTIVE=docker

@@ -30,15 +30,15 @@
       <excludeFolder url="file://$MODULE_DIR$/bmsSpring/user-service/target" />
       <excludeFolder url="file://$MODULE_DIR$/bmsSpring/websocket-service/target" />
       <excludeFolder url="file://$MODULE_DIR$/db" />
-      <excludeFolder url="file://$MODULE_DIR$/diffusion/.idea" />
       <excludeFolder url="file://$MODULE_DIR$/nginx/certs" />
       <excludeFolder url="file://$MODULE_DIR$/scrape/output" />
       <excludeFolder url="file://$MODULE_DIR$/seed" />
-      <excludeFolder url="file://$MODULE_DIR$/timeSeriesChronos/.idea" />
-      <excludeFolder url="file://$MODULE_DIR$/timeSeriesChronos/.venv" />
-      <excludeFolder url="file://$MODULE_DIR$/timeSeriesChronos/cache_dir" />
-      <excludeFolder url="file://$MODULE_DIR$/toxicPrediction/.idea" />
-      <excludeFolder url="file://$MODULE_DIR$/toxicPrediction/.venv" />
+      <excludeFolder url="file://$MODULE_DIR$/bmsFlask/diffusion/.idea" />
+      <excludeFolder url="file://$MODULE_DIR$/bmsFlask/timeSeriesChronos/.idea" />
+      <excludeFolder url="file://$MODULE_DIR$/bmsFlask/timeSeriesChronos/.venv" />
+      <excludeFolder url="file://$MODULE_DIR$/bmsFlask/timeSeriesChronos/cache_dir" />
+      <excludeFolder url="file://$MODULE_DIR$/bmsFlask/toxicPrediction/.idea" />
+      <excludeFolder url="file://$MODULE_DIR$/bmsFlask/toxicPrediction/.venv" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

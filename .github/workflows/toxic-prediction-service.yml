@@ -6,14 +6,18 @@ on:
     branches:
       - main
     paths:
-      - 'toxicPrediction/**'
+      - 'bmsFlask/toxicPrediction/**'
+      - 'bmsFlask/toxic-prediction.Dockerfile'
+      - 'bmsFlask/toxic-prediction.Dockerfile.dockerignore'
+      - 'bmsFlask/base-docker/build.Dockerfile'
+      - '.github/workflows/toxic-prediction-service.yml'
 jobs:
   build-and-push-toxic-service:
     uses: ./.github/workflows/build-and-push.yml
     with:
       image-name: toxic-prediction-service-bms
-      context: ./toxicPrediction
-      dockerfile: ./toxicPrediction/Dockerfile
+      context: ./bmsFlask
+      dockerfile: ./bmsFlask/toxic-prediction.Dockerfile
     secrets:
       DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
