@@ -270,7 +270,7 @@ export function DataTable<TData extends Record<string, any>, TValue = any>({
       <div className="flex flex-col lg:flex-row items-start py-4 flex-wrap gap-10">
         <div className="flex-1 flex items-start flex-col lg:flex-row justify-start gap-4">
           <div className="order-0">
-            <MemoizedSearchInput {...searchInputProps} />
+            <SearchInput {...searchInputProps} />
           </div>
           {useRadioSort && (
             <div className="order-10">
@@ -452,7 +452,6 @@ export function DataTable<TData extends Record<string, any>, TValue = any>({
     </div>
   );
 }
-const MemoizedSearchInput = memo(SearchInput);
 
 interface DataTableBodyProp<TData extends Record<string, any>> {
   table: ReturnType<typeof useReactTable<TData>>;
