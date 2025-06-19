@@ -9,7 +9,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
-import { useMemo, useState } from "react";
+import { memo, useMemo, useState } from "react";
 import useFetchStream from "@/hoooks/useFetchStream";
 import { PostCountSummaryResponse } from "@/types/dto";
 import { motion } from "framer-motion";
@@ -57,7 +57,8 @@ const oneMonthAgo = subMonths(now, 1);
 const dateFormat = "dd-MM-yyyy";
 const formattedNow = format(now, dateFormat);
 const formattedOneMonthAgo = format(oneMonthAgo, dateFormat);
-export default function TopViewedPosts({ path, texts }: Props) {
+function TopViewedPosts({ path, texts }: Props) {
+  console.log("rendering TopViewedPosts");
   const { authUser } = useAuthUserMinRole();
 
   const locale = useLocale() as Locale;
@@ -178,6 +179,10 @@ export default function TopViewedPosts({ path, texts }: Props) {
     </motion.div>
   );
 }
+
+const MemoizedTopViewPosts = memo(TopViewedPosts);
+MemoizedTopViewPosts.displayName = "TopViewedPosts";
+export default MemoizedTopViewPosts;
 
 const MotionCard = motion(Card);
 

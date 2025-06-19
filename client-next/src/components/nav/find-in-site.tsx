@@ -1,11 +1,10 @@
 "use client";
 
-import { memo, useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Command } from "lucide-react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "@/navigation/client-navigation";
-import { isDeepEqual } from "@/lib/utils";
 import {
   FindInSiteContentBaseProps,
   SearchMatches,
@@ -26,7 +25,7 @@ const DynamicFindInSiteContent = dynamic(
   },
 );
 
-const FindInSite = memo((props: FindInSiteContentBaseProps) => {
+const FindInSite = (props: FindInSiteContentBaseProps) => {
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [results, setResults] = useState<
@@ -117,7 +116,7 @@ const FindInSite = memo((props: FindInSiteContentBaseProps) => {
       </Dialog>
     </>
   );
-}, isDeepEqual);
+};
 
 FindInSite.displayName = "FindInSite";
 

@@ -1,9 +1,9 @@
-import { memo, useState } from "react";
+import { useState } from "react";
 
 import { KanbanTask } from "@/components/kanban/kanban-board";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { cn, isDeepEqual } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { Card } from "@/components/ui/card";
 import { KanbanTaskType } from "@/types/dto";
 import { Badge, BadgeVariants } from "@/components/ui/badge";
@@ -47,6 +47,7 @@ function KanbanTaskCard({
   deleteKanbanItemTexts,
   types,
 }: Props) {
+  console.log("rendering KanbanTaskCard", task.dndId);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const {
@@ -120,10 +121,4 @@ function KanbanTaskCard({
     </Card>
   );
 }
-export default memo(
-  KanbanTaskCard,
-  (prevProps, nextProps) =>
-    prevProps.deleteTask === nextProps.deleteTask &&
-    prevProps.updateTask === prevProps.updateTask &&
-    isDeepEqual(prevProps.task, nextProps.task),
-);
+export default KanbanTaskCard;

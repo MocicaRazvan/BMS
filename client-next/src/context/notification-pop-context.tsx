@@ -29,7 +29,6 @@ import {
   getChatMessageNotificationTextsForReceiver,
   getNotificationPopTexts,
 } from "@/texts/components/nav";
-import isEqual from "lodash.isequal";
 import {
   ApprovedNotificationType,
   ApprovePlanNotificationResponse,
@@ -50,6 +49,7 @@ import { useLocale } from "next-intl";
 import { WithUser } from "@/lib/user";
 import { useArchiveNotifications } from "@/context/archive-notifications-context";
 import { useSession } from "next-auth/react";
+import { isDeepEqual } from "@/lib/utils";
 
 interface NotificationPopProviderProps {
   children: ReactNode;
@@ -296,7 +296,7 @@ export function NotificationPopProvider({
     if (
       chatMessageNotificationTexts === null ||
       previousChatMsgGroupedBySender.current === null ||
-      !isEqual(
+      !isDeepEqual(
         chatNotificationsGroupedBySender.notifications,
         previousChatMsgGroupedBySender.current,
       )
@@ -317,7 +317,7 @@ export function NotificationPopProvider({
     if (
       postMessageNotificationsTexts === null ||
       previousPostNotifications.current === null ||
-      !isEqual(
+      !isDeepEqual(
         getPostNotificationState().notifications,
         previousPostNotifications.current,
       )
@@ -343,7 +343,7 @@ export function NotificationPopProvider({
     if (
       recipeMessageNotificationsTexts === null ||
       previousRecipeNotifications.current === null ||
-      !isEqual(
+      !isDeepEqual(
         getRecipeNotificationState().notifications,
         previousRecipeNotifications.current,
       )
@@ -367,7 +367,7 @@ export function NotificationPopProvider({
     if (
       planMessageNotificationsTexts === null ||
       previousPlanNotifications.current === null ||
-      !isEqual(
+      !isDeepEqual(
         getPlanNotificationState().notifications,
         previousPlanNotifications.current,
       )
@@ -391,7 +391,7 @@ export function NotificationPopProvider({
     if (
       boughtNotificationTexts === null ||
       previousBoughtNotifications.current === null ||
-      !isEqual(
+      !isDeepEqual(
         getBoughtNotificationState().notifications,
         previousBoughtNotifications.current,
       )

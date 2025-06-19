@@ -6,7 +6,6 @@ import TopChartWrapper, {
 } from "@/components/charts/top-chart-wrapper";
 import { Link, Locale } from "@/navigation/navigation";
 import { memo } from "react";
-import { isDeepEqual } from "@/lib/utils";
 import {
   PlanResponse,
   ResponseWithUserDtoEntity,
@@ -93,7 +92,6 @@ export const TopPlans = memo(
       />
     );
   },
-  isDeepEqual,
 );
 TopPlans.displayName = "TopPlans";
 export default TopPlans;
@@ -117,7 +115,7 @@ interface PlanCardProps extends WithUser {
   texts: PlanCardTexts;
 }
 
-const PlanCard = memo(({ topSummary, texts, authUser }: PlanCardProps) => {
+const PlanCard = ({ topSummary, texts, authUser }: PlanCardProps) => {
   const {
     messages: plans,
     error,
@@ -220,5 +218,5 @@ const PlanCard = memo(({ topSummary, texts, authUser }: PlanCardProps) => {
       </CardHeader>
     </MotionCard>
   );
-}, isDeepEqual);
+};
 PlanCard.displayName = "PlanCard";

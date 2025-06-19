@@ -19,7 +19,7 @@ import { motion } from "framer-motion";
 import { Check, RefreshCw, XIcon } from "lucide-react";
 import { Locale } from "@/navigation/navigation";
 import { parseISO } from "date-fns";
-import { cn, isDeepEqual } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import {
   Tooltip,
   TooltipContent,
@@ -110,13 +110,6 @@ const ArchiveQueueCards = memo(
       queueName: updateQueueName,
     });
 
-    // console.log(
-    //   "ARCHIVE QUEUE DATA",
-    //   "/archive/queue/" + deleteQueueName,
-    //   "/archive/queue/" + updateQueueName,
-    //   deleteQueue,
-    //   updateQueue,
-    // );
     return (
       <div className="w-full h-full space-y-5 md:space-y-10 pb-5">
         {showHeader && (
@@ -156,7 +149,6 @@ const ArchiveQueueCards = memo(
       </div>
     );
   },
-  isDeepEqual,
 );
 
 ArchiveQueueCards.displayName = "ArchiveQueueCards";
@@ -181,354 +173,342 @@ const MotionCardWrapper = ({ children }: { children: ReactNode }) => (
   </MotionCard>
 );
 
-const DashboardCard = memo(
-  ({
-    messages,
-    error,
-    isFinished,
-    refetch,
-    queueName,
-    toggleRefresh,
-    locale,
-    description,
-    errorDescription,
-    errorTitle,
+const DashboardCard = ({
+  messages,
+  error,
+  isFinished,
+  refetch,
+  queueName,
+  toggleRefresh,
+  locale,
+  description,
+  errorDescription,
+  errorTitle,
+  title,
+  refreshButtonText,
+  badgeText,
+  lastRefresh,
+  currentConsumers,
+  managePopTexts,
+  authUser,
+}: UseFetchStreamReturn<QueueInformation, BaseError> &
+  Omit<ArchiveQueueCardsTexts, "header" | "title"> &
+  WithUser & {
+    queueName: ArchiveQueue;
+    toggleRefresh: ToggleRefresh;
+    locale: Locale;
+    title: string;
+  }) => {
+  if (error) {
+    return (
+      <div className="h-[230px] w-full ">
+        <CardHeader>
+          <CardTitle className="text-lg font-bold text-destructive text-center capitalize">
+            {errorTitle}
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="w-full flex-1  flex flex-col items-center justify-between">
+          <p className="text-lg text-destructive text-center">
+            {errorDescription}
+          </p>
+          <div className="flex items-end justify-end w-full mt-2">
+            <RefreshButton
+              queueName={queueName}
+              toggleRefresh={toggleRefresh}
+              refetch={refetch}
+              text={refreshButtonText}
+            />
+          </div>
+        </CardContent>
+      </div>
+    );
+  }
+  if (!isFinished || !messages.length) {
+    return (
+      <div className="h-[230px]">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-lg font-medium capitalize">
+            {title}
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="w-full h-[180px]">
+          <Skeleton className="size-full" />
+        </CardContent>
+      </div>
+    );
+  }
+  const { messageCount, timestamp, cronExpression, consumerCount } =
+    messages[0];
+  return (
+    <DashboardSuccessCard
+      queueInformation={{
+        name: queueName,
+        cronExpression,
+        consumerCount,
+        messageCount,
+        timestamp,
+      }}
+      refetch={refetch}
+      queueName={queueName}
+      toggleRefresh={toggleRefresh}
+      locale={locale}
+      title={title}
+      badgeText={badgeText}
+      currentConsumers={currentConsumers}
+      description={description}
+      lastRefresh={lastRefresh}
+      managePopTexts={managePopTexts}
+      refreshButtonText={refreshButtonText}
+      authUser={authUser}
+    />
+  );
+};
+DashboardCard.displayName = "DashboardCard";
+
+const DashboardSuccessCard = ({
+  refetch,
+  queueName,
+  toggleRefresh,
+  locale,
+  description,
+  title,
+  refreshButtonText,
+  badgeText,
+  lastRefresh,
+  currentConsumers,
+  managePopTexts,
+  queueInformation: {
+    name: pName,
+    cronExpression: pCronExpression,
+    consumerCount: pConsumerCount,
+    messageCount: pMessageCount,
+    timestamp: pTimestamp,
+  },
+  authUser,
+}: Omit<
+  ArchiveQueueCardsTexts,
+  "header" | "title" | "errorTitle" | "errorDescription"
+> &
+  WithUser & {
+    queueName: ArchiveQueue;
+    toggleRefresh: ToggleRefresh;
+    locale: Locale;
+    title: string;
+    queueInformation: QueueInformation;
+    refetch: () => void;
+  }) => {
+  const formatIntl = useFormatter();
+  const { getAction, getBatchUpdates } = useArchiveQueueUpdateContext();
+  const [alive, setAlive] = useState<AliveOptionKey>("60000");
+  const [triggerLoading, setTriggerLoading] = useState<boolean>(false);
+  const [stopLoading, setStopLoading] = useState<boolean>(false);
+  const [popOpen, setPopOpen] = useState<boolean>(false);
+
+  const [
+    { messageCount, consumerCount, cronExpression, timestamp, name },
+    setQueueInfo,
+  ] = useState<QueueInformation>({
+    name: pName,
+    cronExpression: pCronExpression,
+    consumerCount: pConsumerCount,
+    messageCount: pMessageCount,
+    timestamp: pTimestamp,
+  });
+  const action = getAction(queueName);
+  const {
+    count: batchUpdateMessagesCount,
+    finished: batchUpdateMessagesFinished,
+  } = getBatchUpdates(queueName);
+
+  useEffect(() => {
+    if (action === ContainerAction.START_CRON) {
+      refetch();
+    }
+  }, [action]);
+  const toggleBooleanState = useCallback(
+    (
+      state: boolean,
+      setState: (value: boolean) => void,
+      wantedState: boolean,
+    ) => {
+      if (state !== wantedState) {
+        setState(wantedState);
+      }
+    },
+    [],
+  );
+
+  useEffect(() => {
+    if (action === ContainerAction.STOP && consumerCount > 0) {
+      setQueueInfo((prev) => ({
+        ...prev,
+        consumerCount: 0,
+        timestamp: new Date().toISOString(),
+      }));
+      toggleBooleanState(popOpen, setPopOpen, false);
+      toggleBooleanState(stopLoading, setStopLoading, false);
+      // toast({
+      //   title,
+      //   description: managePopTexts.consumerStoppedDescription,
+      // });
+    } else if (action === ContainerAction.START_MANUAL && consumerCount === 0) {
+      setQueueInfo((prev) => ({
+        ...prev,
+        consumerCount: 1,
+        timestamp: new Date().toISOString(),
+      }));
+      toggleBooleanState(popOpen, setPopOpen, false);
+      toggleBooleanState(triggerLoading, setTriggerLoading, false);
+      toast({
+        title,
+        description: managePopTexts.toastSchedule + aliveOptions[alive],
+      });
+    }
+  }, [
+    action,
+    consumerCount,
+    alive,
+    toggleBooleanState,
+    popOpen,
+    stopLoading,
+    managePopTexts.consumerStoppedDescription,
+    managePopTexts.toastSchedule,
+    triggerLoading,
     title,
-    refreshButtonText,
-    badgeText,
-    lastRefresh,
-    currentConsumers,
-    managePopTexts,
-    authUser,
-  }: UseFetchStreamReturn<QueueInformation, BaseError> &
-    Omit<ArchiveQueueCardsTexts, "header" | "title"> &
-    WithUser & {
-      queueName: ArchiveQueue;
-      toggleRefresh: ToggleRefresh;
-      locale: Locale;
-      title: string;
-    }) => {
-    if (error) {
-      return (
-        <div className="h-[230px] w-full ">
-          <CardHeader>
-            <CardTitle className="text-lg font-bold text-destructive text-center capitalize">
-              {errorTitle}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="w-full flex-1  flex flex-col items-center justify-between">
-            <p className="text-lg text-destructive text-center">
-              {errorDescription}
+  ]);
+
+  useEffect(() => {
+    if (batchUpdateMessagesFinished) {
+      // refetch();
+    } else if (batchUpdateMessagesCount > 0) {
+      setQueueInfo((p) => ({
+        ...p,
+        messageCount: Math.abs(p.messageCount - batchUpdateMessagesCount),
+        timestamp: new Date().toISOString(),
+      }));
+    }
+  }, [batchUpdateMessagesCount, batchUpdateMessagesFinished]);
+
+  return (
+    <div className="h-[230px] w-full">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardTitle className="text-lg font-medium capitalize">
+          {title}
+        </CardTitle>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild={true}>
+              <Badge
+                className="text-[15px]"
+                variant={
+                  messageCount > 1000
+                    ? "destructive"
+                    : messageCount > 100
+                      ? "secondary"
+                      : "default"
+                }
+              >
+                {messageCount > 1000
+                  ? badgeText.high
+                  : messageCount > 100
+                    ? badgeText.medium
+                    : badgeText.low}
+              </Badge>
+            </TooltipTrigger>
+            <TooltipContent>
+              <div className="flex items-center justify-start">
+                <p className="font-medium">{badgeText.low}</p>
+                <p>{`: <= 100`}</p>
+              </div>
+              <div className="flex items-center justify-start">
+                <p className="font-medium">{badgeText.medium}</p>
+                <p>{`: > 100, <=1000`}</p>
+              </div>
+              <div className="flex items-center justify-start">
+                <p className="font-medium">{badgeText.high}</p>
+                <p>{`: > 1000`}</p>
+              </div>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      </CardHeader>
+      <CardContent className="w-full h-[180px] animate-in fade-in duration-250">
+        <FadeTextChange
+          text={formatIntl.number(messageCount)}
+          className="text-2xl font-bold"
+        />
+        <p className="text-sm text-muted-foreground my-0.5">{description}</p>
+        <div className="w-full h-full text text-muted-foreground space-y-2 ">
+          <div className="flex items-center justify-items-start gap-1 w-full mt-4">
+            <p>{lastRefresh}</p>
+            <p className="ml-0.5 font-semibold text-foreground text-sm ">
+              {formatIntl.dateTime(new Date(parseISO(timestamp + "Z")), {
+                hour: "numeric",
+                hour12: false,
+                minute: "numeric",
+                second: "numeric",
+                year: "2-digit",
+                month: "2-digit",
+                day: "2-digit",
+              })}
             </p>
-            <div className="flex items-end justify-end w-full mt-2">
+          </div>
+          <div className="flex items-end justify-between my-auto gap-2 mt-5 w-full">
+            <div>
+              <DynamicCronDisplay
+                cronExpression={cronExpression}
+                locale={locale}
+              />
+              <p>
+                {currentConsumers}{" "}
+                {consumerCount > 0 ? (
+                  <Check
+                    size={24}
+                    className="text-success inline font-semibold"
+                  />
+                ) : (
+                  <XIcon
+                    size={24}
+                    className="text-destructive inline font-semibold"
+                  />
+                )}
+              </p>
+            </div>
+            <div className="flex items-center justify-end gap-2">
               <RefreshButton
                 queueName={queueName}
                 toggleRefresh={toggleRefresh}
                 refetch={refetch}
                 text={refreshButtonText}
               />
-            </div>
-          </CardContent>
-        </div>
-      );
-    }
-    if (!isFinished || !messages.length) {
-      return (
-        <div className="h-[230px]">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-lg font-medium capitalize">
-              {title}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="w-full h-[180px]">
-            <Skeleton className="size-full" />
-          </CardContent>
-        </div>
-      );
-    }
-    const { messageCount, timestamp, cronExpression, consumerCount } =
-      messages[0];
-    return (
-      <DashboardSuccessCard
-        queueInformation={{
-          name: queueName,
-          cronExpression,
-          consumerCount,
-          messageCount,
-          timestamp,
-        }}
-        refetch={refetch}
-        queueName={queueName}
-        toggleRefresh={toggleRefresh}
-        locale={locale}
-        title={title}
-        badgeText={badgeText}
-        currentConsumers={currentConsumers}
-        description={description}
-        lastRefresh={lastRefresh}
-        managePopTexts={managePopTexts}
-        refreshButtonText={refreshButtonText}
-        authUser={authUser}
-      />
-    );
-  },
-  ({ refetch: rp, ...p }, { refetch: rn, ...n }) => isDeepEqual(p, n),
-);
-
-DashboardCard.displayName = "DashboardCard";
-
-const DashboardSuccessCard = memo(
-  ({
-    refetch,
-    queueName,
-    toggleRefresh,
-    locale,
-    description,
-    title,
-    refreshButtonText,
-    badgeText,
-    lastRefresh,
-    currentConsumers,
-    managePopTexts,
-    queueInformation: {
-      name: pName,
-      cronExpression: pCronExpression,
-      consumerCount: pConsumerCount,
-      messageCount: pMessageCount,
-      timestamp: pTimestamp,
-    },
-    authUser,
-  }: Omit<
-    ArchiveQueueCardsTexts,
-    "header" | "title" | "errorTitle" | "errorDescription"
-  > &
-    WithUser & {
-      queueName: ArchiveQueue;
-      toggleRefresh: ToggleRefresh;
-      locale: Locale;
-      title: string;
-      queueInformation: QueueInformation;
-      refetch: () => void;
-    }) => {
-    const formatIntl = useFormatter();
-    const { getAction, getBatchUpdates } = useArchiveQueueUpdateContext();
-    const [alive, setAlive] = useState<AliveOptionKey>("60000");
-    const [triggerLoading, setTriggerLoading] = useState<boolean>(false);
-    const [stopLoading, setStopLoading] = useState<boolean>(false);
-    const [popOpen, setPopOpen] = useState<boolean>(false);
-
-    const [
-      { messageCount, consumerCount, cronExpression, timestamp, name },
-      setQueueInfo,
-    ] = useState<QueueInformation>({
-      name: pName,
-      cronExpression: pCronExpression,
-      consumerCount: pConsumerCount,
-      messageCount: pMessageCount,
-      timestamp: pTimestamp,
-    });
-    const action = getAction(queueName);
-    const {
-      count: batchUpdateMessagesCount,
-      finished: batchUpdateMessagesFinished,
-    } = getBatchUpdates(queueName);
-
-    useEffect(() => {
-      if (action === ContainerAction.START_CRON) {
-        refetch();
-      }
-    }, [action]);
-    const toggleBooleanState = useCallback(
-      (
-        state: boolean,
-        setState: (value: boolean) => void,
-        wantedState: boolean,
-      ) => {
-        if (state !== wantedState) {
-          setState(wantedState);
-        }
-      },
-      [],
-    );
-
-    useEffect(() => {
-      if (action === ContainerAction.STOP && consumerCount > 0) {
-        setQueueInfo((prev) => ({
-          ...prev,
-          consumerCount: 0,
-          timestamp: new Date().toISOString(),
-        }));
-        toggleBooleanState(popOpen, setPopOpen, false);
-        toggleBooleanState(stopLoading, setStopLoading, false);
-        // toast({
-        //   title,
-        //   description: managePopTexts.consumerStoppedDescription,
-        // });
-      } else if (
-        action === ContainerAction.START_MANUAL &&
-        consumerCount === 0
-      ) {
-        setQueueInfo((prev) => ({
-          ...prev,
-          consumerCount: 1,
-          timestamp: new Date().toISOString(),
-        }));
-        toggleBooleanState(popOpen, setPopOpen, false);
-        toggleBooleanState(triggerLoading, setTriggerLoading, false);
-        toast({
-          title,
-          description: managePopTexts.toastSchedule + aliveOptions[alive],
-        });
-      }
-    }, [
-      action,
-      consumerCount,
-      alive,
-      toggleBooleanState,
-      popOpen,
-      stopLoading,
-      managePopTexts.consumerStoppedDescription,
-      managePopTexts.toastSchedule,
-      triggerLoading,
-      title,
-    ]);
-
-    useEffect(() => {
-      if (batchUpdateMessagesFinished) {
-        // refetch();
-      } else if (batchUpdateMessagesCount > 0) {
-        setQueueInfo((p) => ({
-          ...p,
-          messageCount: Math.abs(p.messageCount - batchUpdateMessagesCount),
-          timestamp: new Date().toISOString(),
-        }));
-      }
-    }, [batchUpdateMessagesCount, batchUpdateMessagesFinished]);
-
-    return (
-      <div className="h-[230px] w-full">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-lg font-medium capitalize">
-            {title}
-          </CardTitle>
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild={true}>
-                <Badge
-                  className="text-[15px]"
-                  variant={
-                    messageCount > 1000
-                      ? "destructive"
-                      : messageCount > 100
-                        ? "secondary"
-                        : "default"
-                  }
-                >
-                  {messageCount > 1000
-                    ? badgeText.high
-                    : messageCount > 100
-                      ? badgeText.medium
-                      : badgeText.low}
-                </Badge>
-              </TooltipTrigger>
-              <TooltipContent>
-                <div className="flex items-center justify-start">
-                  <p className="font-medium">{badgeText.low}</p>
-                  <p>{`: <= 100`}</p>
-                </div>
-                <div className="flex items-center justify-start">
-                  <p className="font-medium">{badgeText.medium}</p>
-                  <p>{`: > 100, <=1000`}</p>
-                </div>
-                <div className="flex items-center justify-start">
-                  <p className="font-medium">{badgeText.high}</p>
-                  <p>{`: > 1000`}</p>
-                </div>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        </CardHeader>
-        <CardContent className="w-full h-[180px] animate-in fade-in duration-250">
-          <FadeTextChange
-            text={formatIntl.number(messageCount)}
-            className="text-2xl font-bold"
-          />
-          <p className="text-sm text-muted-foreground my-0.5">{description}</p>
-          <div className="w-full h-full text text-muted-foreground space-y-2 ">
-            <div className="flex items-center justify-items-start gap-1 w-full mt-4">
-              <p>{lastRefresh}</p>
-              <p className="ml-0.5 font-semibold text-foreground text-sm ">
-                {formatIntl.dateTime(new Date(parseISO(timestamp + "Z")), {
-                  hour: "numeric",
-                  hour12: false,
-                  minute: "numeric",
-                  second: "numeric",
-                  year: "2-digit",
-                  month: "2-digit",
-                  day: "2-digit",
-                })}
-              </p>
-            </div>
-            <div className="flex items-end justify-between my-auto gap-2 mt-5 w-full">
-              <div>
-                <DynamicCronDisplay
-                  cronExpression={cronExpression}
-                  locale={locale}
-                />
-                <p>
-                  {currentConsumers}{" "}
-                  {consumerCount > 0 ? (
-                    <Check
-                      size={24}
-                      className="text-success inline font-semibold"
-                    />
-                  ) : (
-                    <XIcon
-                      size={24}
-                      className="text-destructive inline font-semibold"
-                    />
-                  )}
-                </p>
-              </div>
-              <div className="flex items-center justify-end gap-2">
-                <RefreshButton
-                  queueName={queueName}
-                  toggleRefresh={toggleRefresh}
-                  refetch={refetch}
-                  text={refreshButtonText}
-                />
-                <ManagePop
-                  queueInformation={{
-                    name,
-                    cronExpression,
-                    consumerCount,
-                    messageCount,
-                    timestamp,
-                  }}
-                  alive={alive}
-                  setAlive={setAlive}
-                  errorMessage="error"
-                  refetch={refetch}
-                  {...managePopTexts}
-                  authUser={authUser}
-                  triggerLoading={triggerLoading}
-                  stopLoading={stopLoading}
-                  popOpen={popOpen}
-                  setPopOpen={setPopOpen}
-                  setTriggerLoading={setTriggerLoading}
-                  setStopLoading={setStopLoading}
-                />
-              </div>
+              <ManagePop
+                queueInformation={{
+                  name,
+                  cronExpression,
+                  consumerCount,
+                  messageCount,
+                  timestamp,
+                }}
+                alive={alive}
+                setAlive={setAlive}
+                errorMessage="error"
+                refetch={refetch}
+                {...managePopTexts}
+                authUser={authUser}
+                triggerLoading={triggerLoading}
+                stopLoading={stopLoading}
+                popOpen={popOpen}
+                setPopOpen={setPopOpen}
+                setTriggerLoading={setTriggerLoading}
+                setStopLoading={setStopLoading}
+              />
             </div>
           </div>
-        </CardContent>
-      </div>
-    );
-  },
-  ({ refetch: rp, ...p }, { refetch: rn, ...n }) => isDeepEqual(p, n),
-);
-
-DashboardSuccessCard.displayName = "DashboardSuccessCard";
+        </div>
+      </CardContent>
+    </div>
+  );
+};
 
 interface RefreshButtonProps {
   queueName: ArchiveQueue;

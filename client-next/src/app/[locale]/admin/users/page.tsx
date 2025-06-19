@@ -4,8 +4,6 @@ import UsersTable, { UserTableTexts } from "@/components/table/users-table";
 import { getAdminUsersPageTexts } from "@/texts/pages";
 import SidebarContentLayout from "@/components/sidebar/sidebar-content-layout";
 import Heading from "@/components/common/heading";
-import { Suspense } from "react";
-import LoadingSpinner from "@/components/common/loading-spinner";
 import { ThemeSwitchTexts } from "@/texts/components/nav";
 import { getSortingOptions, SortingOptionsTexts } from "@/types/constants";
 import { sortingUsersSortingOptionsKeys } from "@/texts/components/list";
@@ -79,36 +77,34 @@ export default async function AdminUsersPage({ params: { locale } }: Props) {
     >
       <div className="w-full bg-background">
         <Heading title={title} header={header} />
-        <Suspense fallback={<LoadingSpinner />}>
-          <div className="mt-10 h-full space-y-10">
-            <UsersTable
-              path={"/users"}
-              forWhom={"admin"}
-              sortingOptions={userOptions}
-              {...userTableTexts}
-              sizeOptions={[10, 20, 30, 40]}
-              extraQueryParams={{
-                admin: "true",
-              }}
-            />
+        <div className="mt-10 h-full space-y-10">
+          <UsersTable
+            path={"/users"}
+            forWhom={"admin"}
+            sortingOptions={userOptions}
+            {...userTableTexts}
+            sizeOptions={[10, 20, 30, 40]}
+            extraQueryParams={{
+              admin: "true",
+            }}
+          />
 
-            <Separator />
-            <div className="my-5 h-full w-full">
-              <TopUsers texts={topUsersTexts} locale={locale} />
-            </div>
-            <Separator />
-            <div className="my-5 h-full w-full">
-              <TopTrainers texts={topTrainersTexts} locale={locale} />
-            </div>
-            <Separator />
-            <ArchiveQueueCards
-              prefix={"user"}
-              locale={locale}
-              showHeader={true}
-              {...archiveUsersTexts}
-            />
+          <Separator />
+          <div className="my-5 h-full w-full">
+            <TopUsers texts={topUsersTexts} locale={locale} />
           </div>
-        </Suspense>
+          <Separator />
+          <div className="my-5 h-full w-full">
+            <TopTrainers texts={topTrainersTexts} locale={locale} />
+          </div>
+          <Separator />
+          <ArchiveQueueCards
+            prefix={"user"}
+            locale={locale}
+            showHeader={true}
+            {...archiveUsersTexts}
+          />
+        </div>
       </div>
     </SidebarContentLayout>
   );

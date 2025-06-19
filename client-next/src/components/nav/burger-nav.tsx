@@ -1,6 +1,6 @@
 "use client";
 
-import React, { memo, useState } from "react";
+import { useState } from "react";
 import {
   Sheet,
   SheetClose,
@@ -11,7 +11,6 @@ import { Button } from "@/components/ui/button";
 import { Home, LogOut, Menu } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Session } from "next-auth";
-import { isDeepEqual } from "@/lib/utils";
 import { Link, usePathname } from "@/navigation/navigation";
 import { NavTexts } from "@/components/nav/nav";
 import { NavButtonGroup, NavItem } from "@/components/nav/nav-button";
@@ -23,10 +22,10 @@ interface Props {
   linkItems: NavItem[];
 }
 
-const BurgerNav = memo<Props>(({ authUser, texts, linkItems }: Props) => {
+const BurgerNav = ({ authUser, texts, linkItems }: Props) => {
   const [sheetOpen, setSheetOpen] = useState(false);
   const globalPathname = usePathname();
-
+  console.log("rendering BurgerNav");
   return (
     <Sheet open={sheetOpen} onOpenChange={setSheetOpen} modal={true}>
       <SheetTrigger asChild>
@@ -104,8 +103,6 @@ const BurgerNav = memo<Props>(({ authUser, texts, linkItems }: Props) => {
       </SheetContent>
     </Sheet>
   );
-}, isDeepEqual);
-
-BurgerNav.displayName = "BurgerNav";
+};
 
 export { BurgerNav };

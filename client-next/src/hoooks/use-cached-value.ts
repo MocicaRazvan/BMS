@@ -44,12 +44,6 @@ export default function useCachedValue<T>(cacheKey: string, batchSize: number) {
     (data: T[], batchIndex: number) => {
       replaceBatchInCacheWithCallback(data, batchIndex, () => {
         const updatedCache = getFromCache();
-        // console.log(
-        //   ` useCachedValue Updated cache after replaceBatch: ${cacheKey} at ${batchIndex}
-        //   updatedCache: ${JSON.stringify(updatedCache) ?? "undefined"}
-        //     data: ${JSON.stringify(data) ?? "undefined"}
-        //   `,
-        // );
         if (updatedCache) {
           setValue((_) => [...updatedCache]);
         }
@@ -62,12 +56,6 @@ export default function useCachedValue<T>(cacheKey: string, batchSize: number) {
     (data: T[], batchIndex: number) => {
       const isBatchTheSame = isSameBatchInCache(data, batchIndex, batchSize);
       if (isBatchTheSame) {
-        // console.log(
-        //   `useCachedValue Batch is the same, skipping update  ${cacheKey} at ${batchIndex} data: ${
-        //     JSON.stringify(data) ?? "undefined"
-        //   }
-        //   `,
-        // );
         return;
       }
 
@@ -77,13 +65,13 @@ export default function useCachedValue<T>(cacheKey: string, batchSize: number) {
   );
 
   // to sync more requests on the same root, from key checking till cache value it can be not synced for all
-  //todo some atomic lock would be nice
+  // with dedup this is pointless
   const finalSyncValueWithCache = useCallback(() => {
     setValue((prev) => {
       const cachedValue = getFromCache();
       if (
         cachedValue &&
-        cachedValue.length !== prev.length && // usually if it fails its here
+        cachedValue.length !== prev.length &&
         !isDeepEqual(cachedValue, prev)
       ) {
         return [...cachedValue];

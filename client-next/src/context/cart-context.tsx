@@ -341,7 +341,6 @@ export const CartProvider = ({ children }: Props) => {
     if (authUserId !== "") {
       loadInitialCart(authUser)
         .then((cart) => {
-          console.log("INITIAL CART", cart);
           if (cart) {
             // todo verifica daca state userid e ''
             dispatch({

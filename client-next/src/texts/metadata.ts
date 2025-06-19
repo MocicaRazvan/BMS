@@ -2,6 +2,7 @@ import { getTranslations } from "next-intl/server";
 import { Locale, locales } from "@/navigation/navigation";
 import { Role } from "@/types/fetch-utils";
 import { Session } from "next-auth";
+import { appendCreatedAtDesc } from "@/lib/utils";
 
 const languages = locales.reduce<Record<Locale, string>>(
   (acc, l) => ({ ...acc, [l]: `/${l}` }),
@@ -78,22 +79,22 @@ const metadataValues = (id: string): MetadataValues[] => [
   },
   {
     key: "user.Orders",
-    path: "/orders",
+    path: appendCreatedAtDesc("/orders"),
     role: "ROLE_USER",
   },
   {
     key: "user.ApprovedPlans",
-    path: "/plans/approved",
+    path: appendCreatedAtDesc("/plans/approved"),
     role: "ROLE_USER",
   },
   {
     key: "user.ApprovedPosts",
-    path: "/posts/approved",
+    path: appendCreatedAtDesc("/posts/approved"),
     role: "ROLE_USER",
   },
   {
     key: "user.Subscriptions",
-    path: "/subscriptions",
+    path: appendCreatedAtDesc("/subscriptions"),
     role: "ROLE_USER",
   },
   {
@@ -149,7 +150,7 @@ const metadataValues = (id: string): MetadataValues[] => [
   },
   {
     key: "admin.Ingredients",
-    path: "/admin/ingredients",
+    path: appendCreatedAtDesc("/admin/ingredients"),
     role: "ROLE_ADMIN",
   },
   // {
@@ -164,12 +165,12 @@ const metadataValues = (id: string): MetadataValues[] => [
   },
   {
     key: "admin.Orders",
-    path: "/admin/orders",
+    path: appendCreatedAtDesc("/admin/orders"),
     role: "ROLE_ADMIN",
   },
   {
     key: "admin.Plans",
-    path: "/admin/plans",
+    path: appendCreatedAtDesc("/admin/plans"),
     role: "ROLE_ADMIN",
   },
   {
@@ -179,17 +180,17 @@ const metadataValues = (id: string): MetadataValues[] => [
   },
   {
     key: "admin.Posts",
-    path: "/admin/posts",
+    path: appendCreatedAtDesc("/admin/posts"),
     role: "ROLE_ADMIN",
   },
   {
     key: "admin.Recipes",
-    path: "/admin/recipes",
+    path: appendCreatedAtDesc("/admin/recipes"),
     role: "ROLE_ADMIN",
   },
   {
     key: "admin.Users",
-    path: "/admin/users",
+    path: appendCreatedAtDesc("/admin/users"),
     role: "ROLE_ADMIN",
   },
   {
@@ -199,7 +200,7 @@ const metadataValues = (id: string): MetadataValues[] => [
   },
   {
     key: "trainer.Ingredients",
-    path: "/trainer/ingredients",
+    path: appendCreatedAtDesc("/trainer/ingredients"),
     role: "ROLE_TRAINER",
   },
   // {
@@ -224,7 +225,7 @@ const metadataValues = (id: string): MetadataValues[] => [
   },
   {
     key: "trainer.TrainerDays",
-    path: "/trainer/user/" + id + "/days",
+    path: appendCreatedAtDesc("/trainer/user/" + id + "/days"),
     role: "ROLE_TRAINER",
   },
   {
@@ -239,17 +240,17 @@ const metadataValues = (id: string): MetadataValues[] => [
   },
   {
     key: "trainer.TrainerPlans",
-    path: "/trainer/user/" + id + "/plans",
+    path: appendCreatedAtDesc("/trainer/user/" + id + "/plans"),
     role: "ROLE_TRAINER",
   },
   {
     key: "trainer.TrainerPosts",
-    path: "/trainer/user/" + id + "/posts",
+    path: appendCreatedAtDesc("/trainer/user/" + id + "/posts"),
     role: "ROLE_TRAINER",
   },
   {
     key: "trainer.TrainerRecipes",
-    path: "/trainer/user/" + id + "/recipes",
+    path: appendCreatedAtDesc("/trainer/user/" + id + "/recipes"),
     role: "ROLE_TRAINER",
   },
   {

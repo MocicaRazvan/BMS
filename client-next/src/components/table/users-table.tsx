@@ -532,8 +532,10 @@ export default function UsersTable({
                     <DropdownMenuItem asChild>
                       <Button
                         variant="outline"
-                        className="border-success text-success w-full"
-                        onClick={() => handleStartChat(user)}
+                        className="w-full cursor-pointer"
+                        onClick={(e) => {
+                          handleStartChat(user);
+                        }}
                         onMouseEnter={() => router.prefetch("/chat")}
                       >
                         {startChat}

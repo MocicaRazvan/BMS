@@ -246,12 +246,12 @@ export function ChatRoomItem({
           <div className="flex-1">
             <div className="flex items-center justify-start">
               {otherUser.conversationUser.email.length < 30 ? (
-                <p className=" font-bold">{otherUser.conversationUser.email}</p>
+                <p className="font-bold">{otherUser.conversationUser.email}</p>
               ) : (
                 <TooltipProvider delayDuration={1000} skipDelayDuration={500}>
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <p className=" font-bold">
+                      <p className="font-bold">
                         {truncate(otherUser.conversationUser.email, 30)}
                       </p>
                     </TooltipTrigger>

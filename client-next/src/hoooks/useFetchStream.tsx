@@ -9,6 +9,7 @@ import useCachedValue from "@/hoooks/use-cached-value";
 import { deduplicateFetchStream } from "@/lib/fetchers/deduplicateFetchStream";
 import { FetchStreamProps } from "@/lib/fetchers/fetchStream";
 import { useCacheInvalidator } from "@/providers/cache-provider";
+import { useDeepCompareMemo } from "@/hoooks/use-deep-memo";
 
 export interface UseFetchStreamProps {
   path: string;
@@ -83,10 +84,22 @@ export function useFetchStream<T = unknown, E extends BaseError = BaseError>({
   focusDelay = 300,
   trigger = true,
 }: UseFetchStreamProps): UseFetchStreamReturn<T, E> {
-  const stableStringifyQueryParams = stableStringify(queryParams);
-  const stableStringifyArrayQueryParam = stableStringify(arrayQueryParam);
-  const stableStringifyBody = stableStringify(body);
-  const stableStringifyCustomHeaders = stableStringify(customHeaders);
+  const stableStringifyQueryParams = useDeepCompareMemo(
+    () => stableStringify(queryParams),
+    [queryParams],
+  );
+  const stableStringifyArrayQueryParam = useDeepCompareMemo(
+    () => stableStringify(arrayQueryParam),
+    [arrayQueryParam],
+  );
+  const stableStringifyBody = useDeepCompareMemo(
+    () => stableStringify(body),
+    [body],
+  );
+  const stableStringifyCustomHeaders = useDeepCompareMemo(
+    () => stableStringify(customHeaders),
+    [customHeaders],
+  );
 
   const cacheKey = useMemo(
     () =>

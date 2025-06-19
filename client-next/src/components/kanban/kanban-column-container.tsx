@@ -1,14 +1,14 @@
 "use client";
 
 import { KanbanColumn, KanbanTask } from "@/components/kanban/kanban-board";
-import { memo, useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { SortableContext, useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { Input } from "@/components/ui/input";
 import KanbanTaskCard, {
   KanbanTaskCardTexts,
 } from "@/components/kanban/kanban-task-card";
-import { cn, isDeepEqual } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import DialogKanbanTask, {
   DialogKanbanTaskTexts,
 } from "@/components/dialogs/kanban/dialog-kanban-task";
@@ -192,6 +192,4 @@ function KanbanColumnContainer({
   );
 }
 
-export default memo(KanbanColumnContainer, (prevProps, nextProps) =>
-  isDeepEqual(prevProps, nextProps),
-);
+export default KanbanColumnContainer;

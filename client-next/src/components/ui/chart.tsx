@@ -327,7 +327,9 @@ const ChartLegendContent = React.forwardRef<
         initial={{ opacity: 0, scale: 0 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.5 }}
-        {...props}
+        //{
+        // ...props
+        // }
       >
         {finalPayload
           .filter(

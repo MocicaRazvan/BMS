@@ -152,7 +152,7 @@ export function PlanCharacteristic({
             ref={downloadChartRef}
             margin={{
               bottom: 10,
-              top: 7,
+              top: 24,
             }}
           >
             <CartesianGrid vertical={false} />

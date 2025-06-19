@@ -8,8 +8,8 @@ import {
 } from "@/types/dto";
 import useFetchStream from "@/hoooks/useFetchStream";
 import { Skeleton } from "@/components/ui/skeleton";
-import { cn, fromDistanceToNowUtc, isDeepEqual } from "@/lib/utils";
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { cn, fromDistanceToNowUtc } from "@/lib/utils";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { fetchStream } from "@/lib/fetchers/fetchStream";
 import { useStompClient, useSubscription } from "react-stomp-hooks";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
@@ -154,312 +154,304 @@ interface ConversationContentProps extends ConversationContentTexts {
 const pageSize = 10;
 const SCROLL_BOTTOM_THRESHOLD = 135;
 
-const ConversationContent = memo(
-  ({
-    initialMessages,
-    curRoom,
+const ConversationContent = ({
+  initialMessages,
+  curRoom,
+  otherUser,
+  curUser,
+  initialTotalElements,
+  isAbsoluteFinished,
+  chatMessageFormTexts,
+  sameChatText,
+  typingText,
+  refetch,
+}: ConversationContentProps) => {
+  const { authUser } = useCurRooms();
+  const [chatMessages, setChatMessages] = useState<ChatMessageResponse[]>(
+    initialMessages.toReversed(),
+  );
+  const { onValueChange } = useSendTyping({
     otherUser,
     curUser,
-    initialTotalElements,
-    isAbsoluteFinished,
-    chatMessageFormTexts,
-    sameChatText,
-    typingText,
-    refetch,
-  }: ConversationContentProps) => {
-    const { authUser, resetCurEmail } = useCurRooms();
-    const [chatMessages, setChatMessages] = useState<ChatMessageResponse[]>(
-      initialMessages.toReversed(),
-    );
-    const { onValueChange } = useSendTyping({
-      otherUser,
-      curUser,
-      curRoom,
-    });
-    const { removeTimeoutAndTypingRoom, typingRooms } = useReceiveTyping({
-      curUser,
-    });
-    const isOtherTyping = useMemo(
-      () => typingRooms[curRoom.id],
-      [typingRooms, curRoom.id],
-    );
+    curRoom,
+  });
+  const { removeTimeoutAndTypingRoom, typingRooms } = useReceiveTyping({
+    curUser,
+  });
+  const isOtherTyping = useMemo(
+    () => typingRooms[curRoom.id],
+    [typingRooms, curRoom.id],
+  );
 
-    useEffect(() => {
-      resetCurEmail();
-    }, []);
+  useEffect(() => {
+    setChatMessages(initialMessages.toReversed());
+  }, [initialMessages]);
 
-    useEffect(() => {
-      setChatMessages(initialMessages.toReversed());
-    }, [JSON.stringify(initialMessages)]);
+  const [totalMessages, setTotalMessages] =
+    useState<number>(initialTotalElements);
 
-    const [totalMessages, setTotalMessages] =
-      useState<number>(initialTotalElements);
+  useEffect(() => {
+    setTotalMessages(initialTotalElements);
+  }, [initialTotalElements]);
 
-    useEffect(() => {
-      setTotalMessages(initialTotalElements);
-    }, [initialTotalElements]);
+  const [scrollPosition, setScrollPosition] = useState<boolean>(false);
 
-    const [scrollPosition, setScrollPosition] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
-    const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [hasMore, setHasMore] = useState<boolean>(
+    initialMessages.length < initialTotalElements,
+  );
 
-    const [hasMore, setHasMore] = useState<boolean>(
-      initialMessages.length < initialTotalElements,
-    );
+  useEffect(() => {
+    setHasMore(chatMessages.length < totalMessages);
+  }, [chatMessages.length, totalMessages]);
 
-    useEffect(() => {
-      setHasMore(chatMessages.length < totalMessages);
-    }, [chatMessages.length, totalMessages]);
+  const chatContainerRef = useRef<HTMLDivElement>(null);
 
-    const chatContainerRef = useRef<HTMLDivElement>(null);
-
-    const areInTheSameChat = useMemo(
-      () =>
-        otherUser.conversationUser?.connectedChatRoom?.id &&
-        curUser.conversationUser?.connectedChatRoom?.id &&
-        otherUser.conversationUser?.connectedChatRoom?.id ===
-          curUser.conversationUser?.connectedChatRoom?.id,
-      [
+  const areInTheSameChat = useMemo(
+    () =>
+      otherUser.conversationUser?.connectedChatRoom?.id &&
+      curUser.conversationUser?.connectedChatRoom?.id &&
+      otherUser.conversationUser?.connectedChatRoom?.id ===
         curUser.conversationUser?.connectedChatRoom?.id,
-        otherUser.conversationUser?.connectedChatRoom?.id,
-      ],
-    );
+    [
+      curUser.conversationUser?.connectedChatRoom?.id,
+      otherUser.conversationUser?.connectedChatRoom?.id,
+    ],
+  );
 
-    const handleLoadMore = useCallback(async () => {
-      if (isLoading || chatMessages.length >= totalMessages) return;
+  const handleLoadMore = useCallback(async () => {
+    if (isLoading || chatMessages.length >= totalMessages) return;
 
-      setIsLoading(true);
-      setScrollPosition(false);
-      const { messages, error, isFinished } = await fetchStream<
-        PageableResponse<ChatMessageResponse[]>
-      >({
-        path: "/ws-http/messages/" + curRoom.id,
-        acceptHeader: "application/json",
-        token: authUser.token,
-        method: "GET",
-        queryParams: {
-          offset: chatMessages.length.toString(),
-          limit:
-            totalMessages - chatMessages.length >= pageSize
-              ? pageSize.toString()
-              : ((totalMessages - chatMessages.length) % pageSize).toString(),
-        },
-      });
-      try {
-        if (error) {
-          console.error("Error fetching messages:", error);
-          return;
-        }
-        if (isFinished && messages.length > 0) {
-          setTotalMessages(messages[0].pageInfo.totalElements);
-          setChatMessages((prev) => [
-            ...messages[0].content.toReversed(),
-            ...prev,
-          ]);
-          setHasMore(
-            chatMessages.length + messages[0].content.length < totalMessages,
-          );
-        }
-      } catch (e) {
-        console.log("error", e);
-      } finally {
-        setIsLoading(false);
+    setIsLoading(true);
+    setScrollPosition(false);
+    const { messages, error, isFinished } = await fetchStream<
+      PageableResponse<ChatMessageResponse[]>
+    >({
+      path: "/ws-http/messages/" + curRoom.id,
+      acceptHeader: "application/json",
+      token: authUser.token,
+      method: "GET",
+      queryParams: {
+        offset: chatMessages.length.toString(),
+        limit:
+          totalMessages - chatMessages.length >= pageSize
+            ? pageSize.toString()
+            : ((totalMessages - chatMessages.length) % pageSize).toString(),
+      },
+    });
+    try {
+      if (error) {
+        console.error("Error fetching messages:", error);
+        return;
       }
-    }, [
-      authUser.token,
-      chatMessages.length,
-      curRoom.id,
-      isLoading,
-      totalMessages,
-    ]);
+      if (isFinished && messages.length > 0) {
+        setTotalMessages(messages[0].pageInfo.totalElements);
+        setChatMessages((prev) => [
+          ...messages[0].content.toReversed(),
+          ...prev,
+        ]);
+        setHasMore(
+          chatMessages.length + messages[0].content.length < totalMessages,
+        );
+      }
+    } catch (e) {
+      console.log("error", e);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [
+    authUser.token,
+    chatMessages.length,
+    curRoom.id,
+    isLoading,
+    totalMessages,
+  ]);
 
-    useSubscription(
-      `/topic/messages-${curUser.conversationUser.email}`,
-      (message) => {
-        const newMessage = JSON.parse(message.body) as ChatMessageResponse;
+  useSubscription(
+    `/topic/messages-${curUser.conversationUser.email}`,
+    (message) => {
+      const newMessage = JSON.parse(message.body) as ChatMessageResponse;
+      setTotalMessages((prev) => ++prev);
+      // setChatMessages((prev) => updateMessages(prev, newMessage));
+      setChatMessages((prev) => [...prev, newMessage]);
+      setScrollPosition(true);
+      removeTimeoutAndTypingRoom(newMessage.chatRoom.id);
+    },
+  );
+
+  useSubscription(
+    `/topic/messages-${otherUser.conversationUser.email}`,
+    (message) => {
+      const newMessage = JSON.parse(message.body) as ChatMessageResponse;
+      if (
+        newMessage.receiver.email === otherUser.conversationUser.email &&
+        newMessage.sender.email === curUser.conversationUser.email
+      ) {
         setTotalMessages((prev) => ++prev);
         // setChatMessages((prev) => updateMessages(prev, newMessage));
         setChatMessages((prev) => [...prev, newMessage]);
         setScrollPosition(true);
-        removeTimeoutAndTypingRoom(newMessage.chatRoom.id);
-      },
-    );
-
-    useSubscription(
-      `/topic/messages-${otherUser.conversationUser.email}`,
-      (message) => {
-        const newMessage = JSON.parse(message.body) as ChatMessageResponse;
-        if (
-          newMessage.receiver.email === otherUser.conversationUser.email &&
-          newMessage.sender.email === curUser.conversationUser.email
-        ) {
-          setTotalMessages((prev) => ++prev);
-          // setChatMessages((prev) => updateMessages(prev, newMessage));
-          setChatMessages((prev) => [...prev, newMessage]);
-          setScrollPosition(true);
-        }
-      },
-    );
-
-    useEffect(() => {
-      if (isOtherTyping && chatContainerRef.current) {
-        setScrollPosition(true);
       }
-    }, [isOtherTyping]);
+    },
+  );
 
-    useEffect(() => {
-      if (scrollPosition && chatContainerRef.current) {
-        const isNearBottom =
-          Math.abs(chatContainerRef.current.scrollTop) <
-          SCROLL_BOTTOM_THRESHOLD;
-        if (isNearBottom) {
-          chatContainerRef.current.scrollTop =
-            chatContainerRef.current.scrollHeight;
-        }
-        setScrollPosition(false);
+  useEffect(() => {
+    if (isOtherTyping && chatContainerRef.current) {
+      setScrollPosition(true);
+    }
+  }, [isOtherTyping]);
+
+  useEffect(() => {
+    if (scrollPosition && chatContainerRef.current) {
+      const isNearBottom =
+        Math.abs(chatContainerRef.current.scrollTop) < SCROLL_BOTTOM_THRESHOLD;
+      if (isNearBottom) {
+        chatContainerRef.current.scrollTop =
+          chatContainerRef.current.scrollHeight;
       }
-    }, [scrollPosition]);
+      setScrollPosition(false);
+    }
+  }, [scrollPosition]);
 
-    return (
-      <div className="w-full h-full flex flex-col scroll-smooth">
-        <header className="border-b px-4 py-3 relative ">
-          <AnimatePresence mode="wait">
-            {!isAbsoluteFinished && (
-              <motion.div
-                className="absolute -bottom-11 left-0 right-0 z-[10] flex items-center justify-center "
-                key="loading-isAbsoluteFinished"
-                initial={{ opacity: 0, scale: 0 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0.5, scale: 0 }}
-                transition={{ delay: 0.7, duration: 0.35 }}
-              >
-                <Loader className="p-0 m-0" />
-              </motion.div>
-            )}
-          </AnimatePresence>
-          <div className="flex-col md:flex-row flex items-center justify-between gap-3">
-            <div className="flex items-center  justify-start md:justify-center gap-3">
-              <Link href="/chat">
-                <Button variant="ghost" size="sm">
-                  <ArrowLeft className="w-5 h-5" />
-                </Button>
-              </Link>
-              <Avatar className="w-12 h-12">
-                <AvatarImage
-                  src={otherUser.reactiveUser.image || noImg}
-                  alt={otherUser.reactiveUser.email?.substring(0, 2)}
-                />
-              </Avatar>
-              <div>
-                <h2 className="font-medium">
-                  {otherUser.conversationUser.email}
-                </h2>
-                <p
-                  className={cn(
-                    "text-xs font-medium",
-                    otherUser.conversationUser.connectedStatus === "ONLINE"
-                      ? "text-success"
-                      : "text-destructive",
-                  )}
-                >
-                  {otherUser.conversationUser.connectedStatus}
-                </p>
-              </div>
-            </div>
-            <div>
-              {isOtherTyping && (
-                <p className=" font-medium text-success">{typingText}</p>
-              )}
-            </div>
-            <div className="flex items-center justify-end gap-2">
-              <AnimatePresence mode="wait">
-                {areInTheSameChat && (
-                  <motion.div
-                    initial={{ opacity: 0.5, scale: 0 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0.5, scale: 0 }}
-                    transition={{
-                      duration: 0.35,
-                      ease: "easeInOut",
-                      delay: 0.5,
-                    }}
-                    className="w-full py-1.5 px-2 mx-auto border-border/40 bg-primary/95 backdrop-blur supports-[backdrop-filter]:bg-primary/20 rounded flex-1
-                  flex items-center justify-end"
-                    key="same-chat"
-                  >
-                    <p className="text-center text-sm font-bold ">
-                      {sameChatText}
-                    </p>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-              <Button variant="ghost" size="sm" onClick={refetch}>
-                <RefreshCw className="w-5 h-5" />
+  return (
+    <div className="w-full h-full flex flex-col scroll-smooth">
+      <header className="border-b px-4 py-3 relative ">
+        <AnimatePresence mode="wait">
+          {!isAbsoluteFinished && (
+            <motion.div
+              className="absolute -bottom-11 left-0 right-0 z-[10] flex items-center justify-center "
+              key="loading-isAbsoluteFinished"
+              initial={{ opacity: 0, scale: 0 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0.5, scale: 0 }}
+              transition={{ delay: 0.7, duration: 0.35 }}
+            >
+              <Loader className="p-0 m-0" />
+            </motion.div>
+          )}
+        </AnimatePresence>
+        <div className="flex-col md:flex-row flex items-center justify-between gap-3">
+          <div className="flex items-center  justify-start md:justify-center gap-3">
+            <Link href="/chat">
+              <Button variant="ghost" size="sm">
+                <ArrowLeft className="w-5 h-5" />
               </Button>
+            </Link>
+            <Avatar className="w-12 h-12">
+              <AvatarImage
+                src={otherUser.reactiveUser.image || noImg}
+                alt={otherUser.reactiveUser.email?.substring(0, 2)}
+              />
+            </Avatar>
+            <div>
+              <Link
+                className="font-bold hover:underline text-lg"
+                href={`/users/single/${otherUser.reactiveUser.id}`}
+              >
+                {otherUser.conversationUser.email}
+              </Link>
+              <p
+                className={cn(
+                  "text-xs font-medium",
+                  otherUser.conversationUser.connectedStatus === "ONLINE"
+                    ? "text-success"
+                    : "text-destructive",
+                )}
+              >
+                {otherUser.conversationUser.connectedStatus}
+              </p>
             </div>
           </div>
-        </header>
-        <div
-          className="w-full flex-1 bg-background/95 backdrop-blur
+          <div>
+            {isOtherTyping && (
+              <p className=" font-medium text-success">{typingText}</p>
+            )}
+          </div>
+          <div className="flex items-center justify-end gap-2">
+            <AnimatePresence mode="wait">
+              {areInTheSameChat && (
+                <motion.div
+                  initial={{ opacity: 0.5, scale: 0 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0.5, scale: 0 }}
+                  transition={{
+                    duration: 0.35,
+                    ease: "easeInOut",
+                    delay: 0.5,
+                  }}
+                  className="w-full py-1.5 px-2 mx-auto border-border/40 bg-primary/95 backdrop-blur supports-[backdrop-filter]:bg-primary/20 rounded flex-1
+                  flex items-center justify-end"
+                  key="same-chat"
+                >
+                  <p className="text-center text-sm font-bold ">
+                    {sameChatText}
+                  </p>
+                </motion.div>
+              )}
+            </AnimatePresence>
+            <Button variant="ghost" size="sm" onClick={refetch}>
+              <RefreshCw className="w-5 h-5" />
+            </Button>
+          </div>
+        </div>
+      </header>
+      <div
+        className="w-full flex-1 bg-background/95 backdrop-blur
                     supports-[backdrop-filter]:bg-background/65  relative overflow-auto flex flex-col-reverse h-[calc(100%-310px)] md:h-[calc(100%-225px)]"
-          id="scrollableDiv"
-          ref={chatContainerRef}
+        id="scrollableDiv"
+        ref={chatContainerRef}
+      >
+        <InfiniteScroll
+          dataLength={chatMessages.length}
+          next={handleLoadMore}
+          hasMore={hasMore}
+          inverse={true}
+          loader={<Loader className="mx-auto my-6 h-12 w-12" />}
+          scrollableTarget="scrollableDiv"
+          scrollThreshold={"200px"}
+          className={cn(
+            `flex flex-col-reverse h-full transition-all duration-300 relative`,
+          )}
         >
-          <InfiniteScroll
-            dataLength={chatMessages.length}
-            next={handleLoadMore}
-            hasMore={hasMore}
-            inverse={true}
-            loader={<Loader className="mx-auto my-6 h-12 w-12" />}
-            scrollableTarget="scrollableDiv"
-            scrollThreshold={"200px"}
+          <div
             className={cn(
-              `flex flex-col-reverse h-full transition-all duration-300 relative`,
+              "flex flex-col flex-1 overflow-hidden transition-all duration-300",
             )}
           >
-            <div
-              className={cn(
-                "flex flex-col flex-1 overflow-hidden transition-all duration-300",
-              )}
-            >
-              <div className="flex-1  w-full p-6 gap-6 flex-col h-full relative">
-                <div className="grid gap-7">
-                  {chatMessages.length > 0 &&
-                    chatMessages.map((chatMessage) => (
-                      <motion.div key={chatMessage.id}>
-                        <ChatMessageItem
-                          chatMessage={chatMessage}
-                          curUser={curUser}
-                          otherUser={otherUser}
-                        />
-                      </motion.div>
-                    ))}
-                  {isOtherTyping && (
-                    <TypingIndicator user={otherUser.reactiveUser} />
-                  )}
-                </div>
+            <div className="flex-1  w-full p-6 gap-6 flex-col h-full relative">
+              <div className="grid gap-7">
+                {chatMessages.length > 0 &&
+                  chatMessages.map((chatMessage) => (
+                    <motion.div key={chatMessage.id}>
+                      <ChatMessageItem
+                        chatMessage={chatMessage}
+                        curUser={curUser}
+                        otherUser={otherUser}
+                      />
+                    </motion.div>
+                  ))}
+                {isOtherTyping && (
+                  <TypingIndicator user={otherUser.reactiveUser} />
+                )}
               </div>
             </div>
-          </InfiniteScroll>
-        </div>
-        <div className=" h-[310px] md:h-[225px]">
-          <ChatMessageForm
-            chatRoomId={curRoom.id}
-            sender={curUser.conversationUser}
-            receiver={otherUser.conversationUser}
-            {...chatMessageFormTexts}
-            onValueChange={onValueChange}
-            wrapperClassName="h-full"
-          />
-        </div>
+          </div>
+        </InfiniteScroll>
       </div>
-    );
-  },
-  ({ refetch: pR, ...restP }, { refetch: nR, ...restN }) =>
-    isDeepEqual(restP, restN),
-);
-
-ConversationContent.displayName = "ConversationContent";
+      <div className=" h-[310px] md:h-[225px]">
+        <ChatMessageForm
+          chatRoomId={curRoom.id}
+          sender={curUser.conversationUser}
+          receiver={otherUser.conversationUser}
+          {...chatMessageFormTexts}
+          onValueChange={onValueChange}
+          wrapperClassName="h-full"
+        />
+      </div>
+    </div>
+  );
+};
 
 interface ChatMessageProps {
   chatMessage: ChatMessageResponse;
@@ -467,73 +459,73 @@ interface ChatMessageProps {
   otherUser: JoinedConversationUser;
 }
 
-const ChatMessageItem = memo(
-  ({ chatMessage, curUser, otherUser }: ChatMessageProps) => {
-    const locale = useLocale();
-    const isSender =
-      chatMessage.sender?.email === curUser.conversationUser.email;
-    const formatDate = useCallback(
-      (d: string) =>
-        fromDistanceToNowUtc(
-          parseISO(d || ""),
-          Intl.DateTimeFormat().resolvedOptions().timeZone,
-          locale as Locale,
-        ),
-      [locale],
-    );
-    const [chatTimestamp, setChatTimestamp] = useState<string>(
-      formatDate(chatMessage.timestamp),
-    );
+const ChatMessageItem = ({
+  chatMessage,
+  curUser,
+  otherUser,
+}: ChatMessageProps) => {
+  const locale = useLocale();
+  const isSender = chatMessage.sender?.email === curUser.conversationUser.email;
+  const formatDate = useCallback(
+    (d: string) =>
+      fromDistanceToNowUtc(
+        parseISO(d || ""),
+        Intl.DateTimeFormat().resolvedOptions().timeZone,
+        locale as Locale,
+      ),
+    [locale],
+  );
+  const [chatTimestamp, setChatTimestamp] = useState<string>(
+    formatDate(chatMessage.timestamp),
+  );
 
-    useEffect(() => {
-      const interval = setInterval(() => {
-        setChatTimestamp(formatDate(chatMessage.timestamp));
-      }, 20_000);
-      return () => clearInterval(interval);
-    }, [chatMessage.timestamp, formatDate]);
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setChatTimestamp(formatDate(chatMessage.timestamp));
+    }, 20_000);
+    return () => clearInterval(interval);
+  }, [chatMessage.timestamp, formatDate]);
 
-    return isSender ? (
-      <div className="w-full flex ml-auto justify-end gap-2.5 items-end">
-        <div className="flex flex-col ml-auto w-full justify-end gap-3 items-end">
-          <div className="rounded-lg bg-muted px-2.5 py-0.5 max-w-[95%] md:max-w-[85%] backdrop-blur shadow shadow-shadow_color">
-            <div
-              className="prose w-full [&_ol]:list-decimal [&_ul]:list-disc dark:prose-invert text-wrap "
-              dangerouslySetInnerHTML={{ __html: chatMessage.content ?? "" }}
-            />
-          </div>
-          <p className="text-xs font-semibold text-muted-foreground">
-            {chatTimestamp}
-          </p>
-        </div>
-        <Avatar className="w-12 h-12">
-          <AvatarImage
-            src={curUser.reactiveUser.image || noImg}
-            alt={curUser.reactiveUser.email?.substring(0, 2)}
+  return isSender ? (
+    <div className="w-full flex ml-auto justify-end gap-2.5 items-end">
+      <div className="flex flex-col ml-auto w-full justify-end gap-3 items-end">
+        <div className="rounded-lg bg-muted px-2.5 py-0.5 max-w-[95%] md:max-w-[85%] backdrop-blur shadow shadow-shadow_color">
+          <div
+            className="prose w-full [&_ol]:list-decimal [&_ul]:list-disc dark:prose-invert text-wrap "
+            dangerouslySetInnerHTML={{ __html: chatMessage.content ?? "" }}
           />
-        </Avatar>
-      </div>
-    ) : (
-      <div className="flex gap-2.5 items-end ">
-        <Avatar className="w-12 h-12">
-          <AvatarImage
-            src={otherUser.reactiveUser.image || noImg}
-            alt={otherUser.reactiveUser.email?.substring(0, 2)}
-          />
-        </Avatar>
-        <div className="flex flex-col w-full justify-start gap-3 items-start">
-          <div className="rounded-lg bg-primary/85 px-2.5 py-0.5 max-w-[95%] md:max-w-[85%] backdrop-blur shadow shadow-shadow_color">
-            <div
-              className="prose  w-full [&_ol]:list-decimal [&_ul]:list-disc dark:prose-invert text-wrap text-primary-foreground"
-              dangerouslySetInnerHTML={{ __html: chatMessage.content ?? "" }}
-            />
-          </div>
-          <p className="text-xs font-semibold">{chatTimestamp}</p>
         </div>
+        <p className="text-xs font-semibold text-muted-foreground">
+          {chatTimestamp}
+        </p>
       </div>
-    );
-  },
-  isDeepEqual,
-);
+      <Avatar className="w-12 h-12">
+        <AvatarImage
+          src={curUser.reactiveUser.image || noImg}
+          alt={curUser.reactiveUser.email?.substring(0, 2)}
+        />
+      </Avatar>
+    </div>
+  ) : (
+    <div className="flex gap-2.5 items-end ">
+      <Avatar className="w-12 h-12">
+        <AvatarImage
+          src={otherUser.reactiveUser.image || noImg}
+          alt={otherUser.reactiveUser.email?.substring(0, 2)}
+        />
+      </Avatar>
+      <div className="flex flex-col w-full justify-start gap-3 items-start">
+        <div className="rounded-lg bg-primary/85 px-2.5 py-0.5 max-w-[95%] md:max-w-[85%] backdrop-blur shadow shadow-shadow_color">
+          <div
+            className="prose  w-full [&_ol]:list-decimal [&_ul]:list-disc dark:prose-invert text-wrap text-primary-foreground"
+            dangerouslySetInnerHTML={{ __html: chatMessage.content ?? "" }}
+          />
+        </div>
+        <p className="text-xs font-semibold">{chatTimestamp}</p>
+      </div>
+    </div>
+  );
+};
 
 ChatMessageItem.displayName = "ChatMessageItem";
 

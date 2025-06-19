@@ -13,7 +13,6 @@ import ArchiveQueueCards, {
   ArchiveQueueCardsTexts,
 } from "@/components/archive/archive-queue-card";
 import { Locale } from "@/navigation/navigation";
-import { isDeepEqual } from "@/lib/utils";
 
 const augmentedArchiveQueuePrefixes = ["all" as const, ...archiveQueuePrefixes];
 export type AugmentedArchiveQueuePrefix =
@@ -81,7 +80,6 @@ const ArchiveContent = memo(
       </div>
     );
   },
-  isDeepEqual,
 );
 
 ArchiveContent.displayName = "ArchiveContent";

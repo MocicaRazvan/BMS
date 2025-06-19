@@ -202,7 +202,6 @@ export default function ArchiveQueueUpdateProvider({
         action: ContainerAction | undefined;
       }[],
     );
-    console.log("difActions", difActions);
     if (difActions.length) {
       difActions.forEach(({ queueName, action }) => {
         // for putting the time in manual

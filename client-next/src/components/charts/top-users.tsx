@@ -2,7 +2,6 @@
 
 import { Link, Locale } from "@/navigation/navigation";
 import { memo, useState } from "react";
-import { isDeepEqual } from "@/lib/utils";
 import { CustomEntityModel, TopUsersSummary, UserDto } from "@/types/dto";
 import useFetchStream from "@/hoooks/useFetchStream";
 import { BaseError } from "@/types/responses";
@@ -90,7 +89,6 @@ const TopUsers = memo(
       />
     );
   },
-  isDeepEqual,
 );
 
 TopUsers.displayName = "TopUsers";
@@ -112,137 +110,132 @@ interface UserCardTexts {
 
 const MotionCard = motion(Card);
 
-const UserCard = memo(
-  ({
-    topSummary,
-    texts: {
-      userAntent,
-      topBuyer,
-      rank,
-      totalAmount,
-      orders,
-      plans,
-      amountPerOrderTitle,
-      planDistributionTitle,
-      type,
-      objective,
-    },
-    amountTexts,
-  }: {
-    topSummary: TopUsersSummary;
-    texts: UserCardTexts;
-    amountTexts: UserAmountPerOderChartTexts;
-  }) => {
-    const formatIntl = useFormatter();
-    const [pieType, setPieType] = useState<"type" | "objective">("type");
-    const {
-      messages: users,
-      error: userError,
-      refetch: refetchUser,
-      isFinished: isUserFinished,
-    } = useFetchStream<CustomEntityModel<UserDto>, BaseError>({
-      path: `/users/${topSummary.userId}`,
-      method: "GET",
-      authToken: true,
-    });
-
-    if (!isUserFinished || !users.length) {
-      return <LoadingSpinner sectionClassName="min-h-[575px] w-full h-full" />;
-    }
-    const user = users[0].content;
-
-    return (
-      <MotionCard
-        className="flex flex-col min-h-[575px] shadow"
-        initial={{ opacity: 0, scale: 0.8 }}
-        whileInView={{ opacity: 1, scale: 1 }}
-        viewport={{ once: true, amount: "some" }}
-        transition={{
-          duration: 0.5,
-          delay: 0.15,
-          type: "spring",
-          stiffness: 200,
-          damping: 15,
-        }}
-      >
-        <CardHeader>
-          <div className="flex justify-between items-center">
-            <CardTitle>
-              <Link
-                href={`/admin/users/${user.id}`}
-                className="hover:underline flex items-center justify-center gap-2"
-              >
-                <p>{userAntent}</p>
-                <OverflowTextTooltip
-                  text={user.email}
-                  triggerClassName="max-w-[125px] sm:max-w-[140px] md:max-w-[225px] lg:max-w-[400px]"
-                />
-              </Link>
-            </CardTitle>
-            <TopRankBadge rank={topSummary.rank} rankLabel={rank} />
-          </div>
-          <CardDescription>
-            {topBuyer} {topSummary.rank}
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="flex-1 grid gap-10 ">
-          <div className="flex justify-between">
-            <div className="grid place-items-center">
-              <p className="text-sm font-medium">{totalAmount}</p>
-              <p className="text-2xl font-bold">
-                {formatIntl.number(topSummary.totalAmount, {
-                  style: "currency",
-                  currency: "EUR",
-                  maximumFractionDigits: 2,
-                })}
-              </p>
-            </div>
-            <div className="grid place-items-center">
-              <p className="text-sm font-medium">{orders}</p>
-              <p className="text-2xl font-bold">{topSummary.ordersNumber}</p>
-            </div>
-            <div className="grid place-items-center">
-              <p className="text-sm font-medium">{plans}</p>
-              <p className="text-2xl font-bold">{topSummary.plansNumber}</p>
-            </div>
-          </div>
-          <div className="w-full h-full grid gap-4 grid-cols-1 md:grid-cols-2 place-items-center">
-            <div className="grid ">
-              <p className="text-sm font-medium mb-2">{amountPerOrderTitle}</p>
-              <UserAmountPerOderChart
-                topSum={topSummary}
-                meanAmountPerOrder={topSummary.avgGroupTotal}
-                maxAmountPerOrder={topSummary.maxGroupTotal}
-                texts={amountTexts}
-              />
-            </div>
-            <div className="grid md:place-items-end">
-              <div className="flex items-start justify-center gap-2.5">
-                <p className="text-sm font-medium mb-2 flex items-center justify-center gap-3">
-                  {planDistributionTitle}
-                </p>
-                <div className="flex items-center gap-1.5">
-                  <p className="text-sm">{objective}</p>
-                  <Switch
-                    checked={pieType === "type"}
-                    onCheckedChange={(v) =>
-                      setPieType(v ? "type" : "objective")
-                    }
-                    className="h-5 w-10"
-                    thumbClassName="h-4 w-4"
-                  />
-                  <p className="text-sm">{type}</p>
-                </div>
-              </div>
-              <DynamicUserPieChart topSum={topSummary} type={pieType} />
-            </div>
-          </div>
-        </CardContent>
-      </MotionCard>
-    );
+const UserCard = ({
+  topSummary,
+  texts: {
+    userAntent,
+    topBuyer,
+    rank,
+    totalAmount,
+    orders,
+    plans,
+    amountPerOrderTitle,
+    planDistributionTitle,
+    type,
+    objective,
   },
-  isDeepEqual,
-);
+  amountTexts,
+}: {
+  topSummary: TopUsersSummary;
+  texts: UserCardTexts;
+  amountTexts: UserAmountPerOderChartTexts;
+}) => {
+  const formatIntl = useFormatter();
+  const [pieType, setPieType] = useState<"type" | "objective">("type");
+  const {
+    messages: users,
+    error: userError,
+    refetch: refetchUser,
+    isFinished: isUserFinished,
+  } = useFetchStream<CustomEntityModel<UserDto>, BaseError>({
+    path: `/users/${topSummary.userId}`,
+    method: "GET",
+    authToken: true,
+  });
+
+  if (!isUserFinished || !users.length) {
+    return <LoadingSpinner sectionClassName="min-h-[575px] w-full h-full" />;
+  }
+  const user = users[0].content;
+
+  return (
+    <MotionCard
+      className="flex flex-col min-h-[575px] shadow"
+      initial={{ opacity: 0, scale: 0.8 }}
+      whileInView={{ opacity: 1, scale: 1 }}
+      viewport={{ once: true, amount: "some" }}
+      transition={{
+        duration: 0.5,
+        delay: 0.15,
+        type: "spring",
+        stiffness: 200,
+        damping: 15,
+      }}
+    >
+      <CardHeader>
+        <div className="flex justify-between items-center">
+          <CardTitle>
+            <Link
+              href={`/admin/users/${user.id}`}
+              className="hover:underline flex items-center justify-center gap-2"
+            >
+              <p>{userAntent}</p>
+              <OverflowTextTooltip
+                text={user.email}
+                triggerClassName="max-w-[125px] sm:max-w-[140px] md:max-w-[225px] lg:max-w-[400px]"
+              />
+            </Link>
+          </CardTitle>
+          <TopRankBadge rank={topSummary.rank} rankLabel={rank} />
+        </div>
+        <CardDescription>
+          {topBuyer} {topSummary.rank}
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="flex-1 grid gap-10 ">
+        <div className="flex justify-between">
+          <div className="grid place-items-center">
+            <p className="text-sm font-medium">{totalAmount}</p>
+            <p className="text-2xl font-bold">
+              {formatIntl.number(topSummary.totalAmount, {
+                style: "currency",
+                currency: "EUR",
+                maximumFractionDigits: 2,
+              })}
+            </p>
+          </div>
+          <div className="grid place-items-center">
+            <p className="text-sm font-medium">{orders}</p>
+            <p className="text-2xl font-bold">{topSummary.ordersNumber}</p>
+          </div>
+          <div className="grid place-items-center">
+            <p className="text-sm font-medium">{plans}</p>
+            <p className="text-2xl font-bold">{topSummary.plansNumber}</p>
+          </div>
+        </div>
+        <div className="w-full h-full grid gap-4 grid-cols-1 md:grid-cols-2 place-items-center">
+          <div className="grid ">
+            <p className="text-sm font-medium mb-2">{amountPerOrderTitle}</p>
+            <UserAmountPerOderChart
+              topSum={topSummary}
+              meanAmountPerOrder={topSummary.avgGroupTotal}
+              maxAmountPerOrder={topSummary.maxGroupTotal}
+              texts={amountTexts}
+            />
+          </div>
+          <div className="grid md:place-items-end">
+            <div className="flex items-start justify-center gap-2.5">
+              <p className="text-sm font-medium mb-2 flex items-center justify-center gap-3">
+                {planDistributionTitle}
+              </p>
+              <div className="flex items-center gap-1.5">
+                <p className="text-sm">{objective}</p>
+                <Switch
+                  checked={pieType === "type"}
+                  onCheckedChange={(v) => setPieType(v ? "type" : "objective")}
+                  className="h-5 w-10"
+                  thumbClassName="h-4 w-4"
+                />
+                <p className="text-sm">{type}</p>
+              </div>
+            </div>
+            <DynamicUserPieChart topSum={topSummary} type={pieType} />
+          </div>
+        </div>
+      </CardContent>
+    </MotionCard>
+  );
+};
 
 UserCard.displayName = "UserCard";
 
@@ -251,28 +244,25 @@ export interface UserAmountPerOderChartTexts {
   meanAmountPerOrder: string;
 }
 
-const UserAmountPerOderChart = memo(
-  ({
-    topSum,
-    meanAmountPerOrder,
-    maxAmountPerOrder,
-    texts,
-  }: {
-    topSum: TopUsersSummary;
-    texts: UserAmountPerOderChartTexts;
-    meanAmountPerOrder: number;
-    maxAmountPerOrder: number;
-  }) => (
-    <DynamicTopChartMeanRelative
-      chartKey="amountPerOrder"
-      chartLabel={texts.amountPerOrder}
-      barData={topSum.totalAmount}
-      maxBar={maxAmountPerOrder}
-      referenceValue={meanAmountPerOrder}
-      referenceLabel={texts.meanAmountPerOrder}
-    />
-  ),
-  isDeepEqual,
+const UserAmountPerOderChart = ({
+  topSum,
+  meanAmountPerOrder,
+  maxAmountPerOrder,
+  texts,
+}: {
+  topSum: TopUsersSummary;
+  texts: UserAmountPerOderChartTexts;
+  meanAmountPerOrder: number;
+  maxAmountPerOrder: number;
+}) => (
+  <DynamicTopChartMeanRelative
+    chartKey="amountPerOrder"
+    chartLabel={texts.amountPerOrder}
+    barData={topSum.totalAmount}
+    maxBar={maxAmountPerOrder}
+    referenceValue={meanAmountPerOrder}
+    referenceLabel={texts.meanAmountPerOrder}
+  />
 );
 
 UserAmountPerOderChart.displayName = "UserAmountPerOderChart";

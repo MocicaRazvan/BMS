@@ -13,9 +13,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Dispatch, memo, SetStateAction } from "react";
+import { Dispatch, SetStateAction } from "react";
 import { PageInfo } from "@/types/dto";
-import { cn, isDeepEqual } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 
 export interface DataTablePaginationTexts {
   pageSize: string;
@@ -34,7 +34,7 @@ interface DataTablePaginationProps extends DataTablePaginationTexts {
   col?: boolean;
 }
 
-export const DataTablePagination = memo(function DataTablePagination({
+export const DataTablePagination = function DataTablePagination({
   pageInfo,
   setPageInfo,
   sizeOptions = [5, 10, 20, 30, 40],
@@ -161,14 +161,4 @@ export const DataTablePagination = memo(function DataTablePagination({
       </div>
     </div>
   );
-}, areEqual);
-
-function areEqual(
-  prevProps: DataTablePaginationProps,
-  nextProps: DataTablePaginationProps,
-) {
-  return (
-    isDeepEqual(prevProps.pageInfo, nextProps.pageInfo) &&
-    prevProps.setPageInfo === nextProps.setPageInfo
-  );
-}
+};

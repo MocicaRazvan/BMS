@@ -4,12 +4,11 @@ import {
 } from "@/types/dto";
 import { CheckCheck, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { fromDistanceToNowUtc } from "@/lib/utils";
+import { fromDistanceToNowUtc, isDeepEqual } from "@/lib/utils";
 import { Locale } from "@/navigation/navigation";
 import { Client } from "@stomp/stompjs";
 import { useStompClient } from "react-stomp-hooks";
 import { parseISO } from "date-fns";
-import isEqual from "lodash.isequal";
 import { useLocale } from "next-intl";
 import { memo, ReactNode, useEffect, useRef } from "react";
 import { useRouter } from "@/navigation/client-navigation";
@@ -98,7 +97,7 @@ export default memo(
   ApproveNotificationContent,
   (prevProps, nextProps) =>
     prevProps.itemName === nextProps.itemName &&
-    isEqual(prevProps.items, nextProps.items) &&
-    isEqual(prevProps.itemsText, nextProps.itemsText) &&
+    isDeepEqual(prevProps.items, nextProps.items) &&
+    isDeepEqual(prevProps.itemsText, nextProps.itemsText) &&
     prevProps.deleteCallback === nextProps.deleteCallback,
 );

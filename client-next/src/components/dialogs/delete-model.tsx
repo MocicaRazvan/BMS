@@ -14,10 +14,9 @@ import { Button } from "@/components/ui/button";
 import { fetchStream } from "@/lib/fetchers/fetchStream";
 import { TitleBodyUserDto } from "@/types/dto";
 import { toast } from "@/components/ui/use-toast";
-import { memo, ReactNode } from "react";
+import { ReactNode } from "react";
 import { getAlertDialogDeleteTexts } from "@/texts/components/dialog";
 import LoadingDialogAnchor from "@/components/dialogs/loading-dialog-anchor";
-import { isDeepEqual } from "@/lib/utils";
 import { useClientLRUStore } from "@/lib/client-lru-store";
 import { useLocale } from "next-intl";
 
@@ -37,73 +36,76 @@ interface Props {
   callBack: () => void;
   anchor?: ReactNode;
 }
-const AlertDialogDelete = memo(
-  ({ model, token, callBack, path, title, anchor }: Props) => {
-    const locale = useLocale();
+const AlertDialogDelete = ({
+  model,
+  token,
+  callBack,
+  path,
+  title,
+  anchor,
+}: Props) => {
+  const locale = useLocale();
 
-    const dialogDeleteTexts = useClientLRUStore({
-      setter: () => getAlertDialogDeleteTexts(title),
-      args: [`alertDialogDeleteTexts-${title}-${path}`, locale],
-    });
-    const deleteModel = async () => {
-      if (token === undefined) return;
-      try {
-        const resp = await fetchStream({
-          path: `/${path}/delete/${model.id}`,
-          method: "DELETE",
-          token,
+  const dialogDeleteTexts = useClientLRUStore({
+    setter: () => getAlertDialogDeleteTexts(title),
+    args: [`alertDialogDeleteTexts-${title}-${path}`, locale],
+  });
+  const deleteModel = async () => {
+    if (token === undefined) return;
+    try {
+      const resp = await fetchStream({
+        path: `/${path}/delete/${model.id}`,
+        method: "DELETE",
+        token,
+      });
+
+      if (resp.error) {
+        console.log(resp.error);
+      } else {
+        toast({
+          title: model.title,
+          description: "Deleted",
+          variant: "destructive",
         });
-
-        if (resp.error) {
-          console.log(resp.error);
-        } else {
-          toast({
-            title: model.title,
-            description: "Deleted",
-            variant: "destructive",
-          });
-          callBack?.();
-        }
-      } catch (error) {
-        console.log(error);
+        callBack?.();
       }
-    };
-    if (!dialogDeleteTexts) return <LoadingDialogAnchor className="w-full" />;
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  if (!dialogDeleteTexts) return <LoadingDialogAnchor className="w-full" />;
 
-    return (
-      <AlertDialog>
-        <AlertDialogTrigger asChild>
-          {anchor ? (
-            anchor
-          ) : (
-            <Button
-              variant="outline"
-              className="border-destructive text-destructive w-full"
-            >
-              {dialogDeleteTexts.anchor}
-            </Button>
-          )}
-        </AlertDialogTrigger>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{dialogDeleteTexts.title}</AlertDialogTitle>
-            <AlertDialogDescription asChild>
-              <div>{dialogDeleteTexts.description}</div>
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>{dialogDeleteTexts.cancel}</AlertDialogCancel>
-            <AlertDialogAction asChild onClick={deleteModel}>
-              <Button variant="destructive">{dialogDeleteTexts.confirm}</Button>
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    );
-  },
-  ({ callBack: pc, ...prevProps }, { callBack: nc, ...nextProps }) =>
-    isDeepEqual(prevProps, nextProps),
-);
+  return (
+    <AlertDialog>
+      <AlertDialogTrigger asChild>
+        {anchor ? (
+          anchor
+        ) : (
+          <Button
+            variant="outline"
+            className="border-destructive text-destructive w-full"
+          >
+            {dialogDeleteTexts.anchor}
+          </Button>
+        )}
+      </AlertDialogTrigger>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>{dialogDeleteTexts.title}</AlertDialogTitle>
+          <AlertDialogDescription asChild>
+            <div>{dialogDeleteTexts.description}</div>
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>{dialogDeleteTexts.cancel}</AlertDialogCancel>
+          <AlertDialogAction asChild onClick={deleteModel}>
+            <Button variant="destructive">{dialogDeleteTexts.confirm}</Button>
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+};
 
 AlertDialogDelete.displayName = "AlertDialogDelete";
 export { AlertDialogDelete };

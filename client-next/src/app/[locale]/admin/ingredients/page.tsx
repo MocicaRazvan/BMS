@@ -7,8 +7,6 @@ import SidebarContentLayout from "@/components/sidebar/sidebar-content-layout";
 import { ThemeSwitchTexts } from "@/texts/components/nav";
 import { getAdminIngredientsPageTexts } from "@/texts/pages";
 import Heading from "@/components/common/heading";
-import LoadingSpinner from "@/components/common/loading-spinner";
-import { Suspense } from "react";
 import AdminIngredientsCreatePageContent from "@/app/[locale]/admin/ingredients/page-content";
 import { SidebarMenuTexts } from "@/components/sidebar/menu-list";
 import { Metadata } from "next";
@@ -77,27 +75,25 @@ export default async function AdminIngredientsPage({
     >
       <div className="w-full h-full bg-background ">
         <Heading title={title} header={header} />
-        <Suspense fallback={<LoadingSpinner />}>
-          <div className="mt-10 h-full w-full space-y-10">
-            <AdminIngredientsCreatePageContent
-              path={"/ingredients/filtered"}
-              {...ingredientTableTexts}
-              sortingOptions={ingredientOptions}
-              sizeOptions={[10, 15, 20, 50]}
-              forWhom={"admin"}
-              extraQueryParams={{
-                admin: "true",
-              }}
-            />
-            <Separator />
-            <ArchiveQueueCards
-              prefix={"ingredient"}
-              locale={locale}
-              showHeader={true}
-              {...archiveIngredientsTexts}
-            />
-          </div>
-        </Suspense>
+        <div className="mt-10 h-full w-full space-y-10">
+          <AdminIngredientsCreatePageContent
+            path={"/ingredients/filtered"}
+            {...ingredientTableTexts}
+            sortingOptions={ingredientOptions}
+            sizeOptions={[10, 15, 20, 50]}
+            forWhom={"admin"}
+            extraQueryParams={{
+              admin: "true",
+            }}
+          />
+          <Separator />
+          <ArchiveQueueCards
+            prefix={"ingredient"}
+            locale={locale}
+            showHeader={true}
+            {...archiveIngredientsTexts}
+          />
+        </div>
       </div>
     </SidebarContentLayout>
   );

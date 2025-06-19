@@ -4,8 +4,6 @@ import {
   Testimonial,
 } from "@/components/aceternityui/animated-testimonials";
 import { motion } from "framer-motion";
-import { memo } from "react";
-import { isDeepEqual } from "@/lib/utils";
 
 export type TypeTestimonials = `testimonial${1 | 2 | 3 | 4}`;
 export interface HomeTestimonialsTexts {
@@ -18,7 +16,7 @@ interface Props {
   title: string;
 }
 
-const HomeTestimonials = memo(({ testimonials, title }: Props) => {
+const HomeTestimonials = ({ testimonials, title }: Props) => {
   return (
     <motion.section
       initial={{ opacity: 0, scale: 0.6 }}
@@ -34,7 +32,6 @@ const HomeTestimonials = memo(({ testimonials, title }: Props) => {
       <AnimatedTestimonials testimonials={testimonials} />
     </motion.section>
   );
-}, isDeepEqual);
+};
 
-HomeTestimonials.displayName = "HomeTestimonials";
 export { HomeTestimonials };

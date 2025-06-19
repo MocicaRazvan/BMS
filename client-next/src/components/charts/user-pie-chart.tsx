@@ -1,5 +1,4 @@
 "use client";
-import React, { memo } from "react";
 import {
   CustomEntityModel,
   PageableResponse,
@@ -18,7 +17,6 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart";
 import { Pie, PieChart } from "recharts";
-import { isDeepEqual } from "@/lib/utils";
 import { createChartConfig } from "@/components/charts/top-chart-wrapper";
 
 const createChartData = <T extends string | number | symbol>(
@@ -62,72 +60,69 @@ const objectivePieChartConfig: ChartConfig = createChartConfig(
   false,
 );
 
-const UserPieChart = memo(
-  ({
-    topSum,
-    type,
-  }: {
-    topSum: TopUsersSummary;
-    type: "type" | "objective";
-  }) => {
-    const {
-      messages: plansMessages,
-      error: planError,
-      refetch: refetchUser,
-      isFinished: isPlanFinished,
-    } = useFetchStream<
-      PageableResponse<CustomEntityModel<PlanResponse>>,
-      BaseError
-    >({
-      path: `/plans/byIds`,
-      method: "PATCH",
-      authToken: true,
-      arrayQueryParam: {
-        ids: topSum.planValues.map((plan) => plan.toString()),
-      },
-      body: {
-        page: 0,
-        size: topSum.planValues.length,
-      },
-    });
+const UserPieChart = ({
+  topSum,
+  type,
+}: {
+  topSum: TopUsersSummary;
+  type: "type" | "objective";
+}) => {
+  const {
+    messages: plansMessages,
+    error: planError,
+    refetch: refetchUser,
+    isFinished: isPlanFinished,
+  } = useFetchStream<
+    PageableResponse<CustomEntityModel<PlanResponse>>,
+    BaseError
+  >({
+    path: `/plans/byIds`,
+    method: "PATCH",
+    authToken: true,
+    arrayQueryParam: {
+      ids: topSum.planValues.map((plan) => plan.toString()),
+    },
+    body: {
+      page: 0,
+      size: topSum.planValues.length,
+    },
+  });
 
-    if (!isPlanFinished || !plansMessages.length) {
-      return <LoadingSpinner sectionClassName="min-h-[300px] w-full h-full" />;
-    }
-    const chartConfig =
-      type === "type" ? typePieChartConfig : objectivePieChartConfig;
+  if (!isPlanFinished || !plansMessages.length) {
+    return <LoadingSpinner sectionClassName="min-h-[300px] w-full h-full" />;
+  }
+  const chartConfig =
+    type === "type" ? typePieChartConfig : objectivePieChartConfig;
 
-    const chartData = createChartData(plansMessages, (plan) =>
-      type === "type" ? plan.type : plan.objective,
-    );
+  const chartData = createChartData(plansMessages, (plan) =>
+    type === "type" ? plan.type : plan.objective,
+  );
 
-    return (
-      <ChartContainer
-        config={chartConfig}
-        className="h-[300px] mx-auto aspect-square [&_.recharts-pie-label-text]:fill-foreground my-0 p-0"
-      >
-        <PieChart accessibilityLayer>
-          <Pie
-            data={chartData}
-            outerRadius={70}
-            dataKey="value"
-            stroke="0"
-            nameKey="type"
-            label={true}
-            labelLine={true}
-          />
-          <ChartTooltip content={<ChartTooltipContent />} />
-          <ChartLegend
-            content={
-              <ChartLegendContent className="flex-wrap min-h-[90px] items-start" />
-            }
-          />
-        </PieChart>
-      </ChartContainer>
-    );
-  },
-  isDeepEqual,
-);
+  return (
+    <ChartContainer
+      config={chartConfig}
+      className="h-[300px] mx-auto aspect-square [&_.recharts-pie-label-text]:fill-foreground my-0 p-0"
+    >
+      <PieChart accessibilityLayer>
+        <Pie
+          data={chartData}
+          outerRadius={70}
+          dataKey="value"
+          stroke="0"
+          nameKey="type"
+          label={true}
+          labelLine={true}
+        />
+        <ChartTooltip content={<ChartTooltipContent />} />
+        <ChartLegend
+          content={
+            <ChartLegendContent className="flex-wrap min-h-[90px] items-start" />
+          }
+        />
+      </PieChart>
+    </ChartContainer>
+  );
+};
 
 UserPieChart.displayName = "UserPieChart";
 

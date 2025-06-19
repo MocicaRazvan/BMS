@@ -66,7 +66,6 @@ export interface ChatRoomsState
   handleRoomHover: (room: ChatRoomResponseJoined) => void;
   otherUser: JoinedConversationUser | undefined;
   curUser: JoinedConversationUser | undefined;
-  resetCurEmail: () => void;
 }
 
 export const CurRoomsContext = createContext<ChatRoomsState | null>(null);
@@ -135,9 +134,7 @@ export const CurRoomsProvider = ({ children, authUser }: Props) => {
   const stompClient = useStompClient();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const email = searchParams.get("email");
   const [chatRooms, setChatRooms] = useState<ChatRoomResponseJoined[]>([]);
-  const [curEmail, setCurEmail] = useState<string | null>(null);
   const [curRoom, setCurRoom] = useState<ChatRoomResponseJoined | undefined>(
     undefined,
   );
@@ -146,20 +143,20 @@ export const CurRoomsProvider = ({ children, authUser }: Props) => {
   const otherUser = useMemo(
     () =>
       curRoom?.users.find((u) => u.conversationUser.email !== authUser.email),
-    [JSON.stringify(curRoom)],
+    [authUser.email, curRoom?.users],
   );
 
   const curUser = useMemo(
     () =>
       curRoom?.users.find((u) => u.conversationUser.email === authUser.email),
-    [JSON.stringify(curRoom)],
+    [authUser.email, curRoom?.users],
   );
 
   useEffect(() => {
     if (messages.length > 0) {
       setChatRooms(messages[0].content);
     }
-  }, [JSON.stringify(messages)]);
+  }, [messages]);
 
   // useEffect(() => {
   //   console.log("CHAT ROOMS CONTEXT", chatRooms);
@@ -180,7 +177,7 @@ export const CurRoomsProvider = ({ children, authUser }: Props) => {
         totalElements: messages[0].pageInfo.totalElements,
       }));
     }
-  }, [JSON.stringify(messages)]);
+  }, [messages]);
 
   const handleChangeSearch = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
@@ -197,60 +194,31 @@ export const CurRoomsProvider = ({ children, authUser }: Props) => {
   }, [router]);
 
   useEffect(() => {
-    if (email) {
-      // console.log("Email in chat main content", email);
-      fetchStream<ChatRoomResponseJoined>({
-        token: authUser.token,
-        path: "/ws-http/chatRooms/findAllByEmails-joined",
-        acceptHeader: "application/json",
-        arrayQueryParam: {
-          emails: [authUser.email, email],
-        },
-      }).then(({ messages, error, isFinished }) => {
-        if (isFinished && messages.length > 0) {
-          setChatRooms((prev) => {
-            const room = prev.find((room) => room.id === messages[0].id);
-            if (!room) {
-              return [...prev, messages[0]];
-            }
-            return prev;
-          });
-          setCurEmail(email);
-        }
+    const searchEmail = searchParams.get("email");
+    if (!searchEmail) return;
+
+    fetchStream<ChatRoomResponseJoined>({
+      token: authUser.token,
+      path: "/ws-http/chatRooms/findAllByEmails-joined",
+      acceptHeader: "application/json",
+      arrayQueryParam: { emails: [authUser.email, searchEmail] },
+    })
+      .then(({ messages, isFinished }) => {
+        if (!isFinished || messages.length === 0) return;
+        const newRoom = messages[0];
+
+        setChatRooms((prev) =>
+          prev.some((r) => r.id === newRoom.id) ? prev : [...prev, newRoom],
+        );
         const params = new URLSearchParams(searchParams.toString());
         params.delete("email");
-        window.history.pushState(null, "", `?${params.toString()}`);
-      });
-    }
-  }, [authUser.email, authUser.token, email, searchParams]);
 
-  useEffect(() => {
-    if (curEmail) {
-      //
-      // const room = chatRooms
-      //     .filter((room) => wrapItemToString(room.id) === wrapItemToString(params.id))
-      //     .sort((a, b) => b.id - a.id)[0]; // last room by sure
+        router.replace(`/chat/${newRoom.id}?${params.toString()}`);
 
-      const room = chatRooms.find((room) =>
-        room.users.some(
-          (user) =>
-            user.conversationUser.email.toLowerCase() ===
-            curEmail.toLowerCase(),
-        ),
-      );
-      // console.log(
-      //   "useEffect ChatRooms CurEmail in chat main content",
-      //   curEmail,
-      //   room,
-      //   chatRooms.map((i) => i.id),
-      // );
-      if (room) {
-        router.replace("/chat");
-        router.push(`/chat/${room.id}`);
-        setCurEmail(null);
-      }
-    }
-  }, [JSON.stringify(chatRooms), curEmail, router]);
+        // setCurEmail(searchEmail);
+      })
+      .catch(console.error);
+  }, [authUser, router, searchParams]);
 
   useSubscription(`/queue/chatRooms-joined-${authUser.email}`, (message) => {
     const newMessage = JSON.parse(message.body) as ChatRoomResponseJoined;
@@ -430,11 +398,7 @@ export const CurRoomsProvider = ({ children, authUser }: Props) => {
     } else {
       setCurRoom(undefined);
     }
-  }, [JSON.stringify(chatRooms), params?.id, isFinished]);
-
-  const resetCurEmail = useCallback(() => {
-    setCurEmail(null);
-  }, []);
+  }, [chatRooms, params?.id, isFinished]);
 
   return (
     <CurRoomsContext.Provider
@@ -464,7 +428,6 @@ export const CurRoomsProvider = ({ children, authUser }: Props) => {
         handleRoomHover,
         otherUser,
         curUser,
-        resetCurEmail,
       }}
     >
       {children}

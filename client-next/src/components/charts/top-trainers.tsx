@@ -13,7 +13,6 @@ import {
   TopTrainersSummary,
   UserDto,
 } from "@/types/dto";
-import { isDeepEqual } from "@/lib/utils";
 import { motion } from "framer-motion";
 import {
   Card,
@@ -89,7 +88,7 @@ const TopTrainers = memo(({ texts, locale }: Props) => {
       title={texts.title}
     />
   );
-}, isDeepEqual);
+});
 
 TopTrainers.displayName = "TopTrainers";
 export default TopTrainers;
@@ -109,156 +108,153 @@ interface TrainerCardTexts {
   rankLabel: string;
 }
 
-const TrainerCard = memo(
-  ({
-    topSummary,
-    texts: {
-      topTrainer,
-      countPlans,
-      countPlansReference,
-      totalAmountReference,
-      totalAmount,
-      dropDownMenuTexts,
-      typePieChartTitle,
-      objectivePieChartTitle,
-      userAntent,
-      rankLabel,
-    },
-  }: {
-    topSummary: TopTrainersSummary;
-    texts: TrainerCardTexts;
-  }) => {
-    const formatIntl = useFormatter();
-    const {
-      messages: users,
-      error: userError,
-      isFinished: isUserFinished,
-    } = useFetchStream<CustomEntityModel<UserDto>, BaseError>({
-      path: `/users/${topSummary.userId}`,
-      method: "GET",
-      authToken: true,
-    });
-
-    // console.log(
-    //   "STATES AND CACHE",
-    //   `/users/${topSummary.userId}`,
-    //   users,
-    //   isUserFinished,
-    //   userError,
-    // );
-
-    if (!isUserFinished || !users.length) {
-      return <LoadingSpinner sectionClassName="min-h-[575px] w-full h-full" />;
-    }
-    const user = users[0].content;
-
-    return (
-      <MotionCard
-        className="flex flex-col min-h-[575px] shadow"
-        initial={{ opacity: 0, scale: 0.8 }}
-        whileInView={{ opacity: 1, scale: 1 }}
-        viewport={{ once: true, amount: "some" }}
-        transition={{
-          duration: 0.5,
-          delay: 0.15,
-          type: "spring",
-          stiffness: 200,
-          damping: 15,
-        }}
-      >
-        <CardHeader>
-          <div className="flex flex-col sm:flex-row gap-2 justify-between items-center">
-            <CardTitle>
-              <Link
-                href={`/admin/users/${user.id}`}
-                className="hover:underline flex items-center justify-center gap-2"
-              >
-                <p>{userAntent}</p>
-                <OverflowTextTooltip
-                  text={user.email}
-                  triggerClassName="max-w-[125px] sm:max-w-[140px] md:max-w-[225px] lg:max-w-[400px]"
-                />
-              </Link>
-            </CardTitle>
-            <TopRankBadge rank={topSummary.rank} rankLabel={rankLabel} />
-          </div>
-          <CardDescription>
-            {topTrainer} {topSummary.rank}
-          </CardDescription>
-          <CardContent className="flex-1 grid gap-10 ">
-            <div className="flex justify-between">
-              <div className="grid place-items-center">
-                <p className="text-sm font-medium">{totalAmount}</p>
-                <p className="text-2xl font-bold">
-                  {formatIntl.number(topSummary.totalAmount, {
-                    style: "currency",
-                    currency: "EUR",
-                    maximumFractionDigits: 2,
-                  })}
-                </p>
-              </div>
-              <div className="grid place-items-center">
-                <p className="text-sm font-medium">{countPlans}</p>
-                <p className="text-2xl font-bold">{topSummary.planCount}</p>
-              </div>
-            </div>
-            <div className="w-full h-full grid gap-4 grid-cols-1 md:grid-cols-2 place-items-center">
-              <div className="grid ">
-                <p className="text-sm font-medium mb-2">{totalAmount}</p>
-                <DynamicTopChartMeanRelative
-                  chartKey="totalAmount"
-                  chartLabel={totalAmount}
-                  barData={topSummary.totalAmount}
-                  maxBar={topSummary.maxGroupTotal}
-                  referenceValue={topSummary.avgGroupTotal}
-                  referenceLabel={totalAmountReference}
-                />
-              </div>
-              <div className="grid ">
-                <p className="text-sm font-medium mb-2">{countPlans}</p>
-                <DynamicTopChartMeanRelative
-                  chartKey="planCount"
-                  chartLabel={countPlans}
-                  barData={topSummary.planCount}
-                  maxBar={topSummary.maxGroupPlanCount}
-                  referenceValue={topSummary.avgGroupPlanCount}
-                  referenceLabel={countPlansReference}
-                  chartColorNumber={3}
-                />
-              </div>
-              <TopTrainersPieChartWrapper
-                type="type"
-                chartData={{
-                  count: topSummary.typeCounts,
-                  amount: topSummary.typeAmounts,
-                  avg: topSummary.typeAvgs,
-                }}
-                texts={{
-                  title: typePieChartTitle,
-                  dropDownMenuTexts,
-                }}
-              />
-              <TopTrainersPieChartWrapper
-                type="objective"
-                chartData={{
-                  count: topSummary.objectiveCounts,
-                  amount: topSummary.objectiveAmounts,
-                  avg: topSummary.objectiveAvgs,
-                }}
-                texts={{
-                  title: objectivePieChartTitle,
-                  dropDownMenuTexts,
-                }}
-                offset={6}
-              />
-            </div>
-          </CardContent>
-        </CardHeader>
-      </MotionCard>
-    );
+const TrainerCard = ({
+  topSummary,
+  texts: {
+    topTrainer,
+    countPlans,
+    countPlansReference,
+    totalAmountReference,
+    totalAmount,
+    dropDownMenuTexts,
+    typePieChartTitle,
+    objectivePieChartTitle,
+    userAntent,
+    rankLabel,
   },
-  isDeepEqual,
-);
+}: {
+  topSummary: TopTrainersSummary;
+  texts: TrainerCardTexts;
+}) => {
+  const formatIntl = useFormatter();
+  const {
+    messages: users,
+    error: userError,
+    isFinished: isUserFinished,
+  } = useFetchStream<CustomEntityModel<UserDto>, BaseError>({
+    path: `/users/${topSummary.userId}`,
+    method: "GET",
+    authToken: true,
+  });
+
+  // console.log(
+  //   "STATES AND CACHE",
+  //   `/users/${topSummary.userId}`,
+  //   users,
+  //   isUserFinished,
+  //   userError,
+  // );
+
+  if (!isUserFinished || !users.length) {
+    return <LoadingSpinner sectionClassName="min-h-[575px] w-full h-full" />;
+  }
+  const user = users[0].content;
+
+  return (
+    <MotionCard
+      className="flex flex-col min-h-[575px] shadow"
+      initial={{ opacity: 0, scale: 0.8 }}
+      whileInView={{ opacity: 1, scale: 1 }}
+      viewport={{ once: true, amount: "some" }}
+      transition={{
+        duration: 0.5,
+        delay: 0.15,
+        type: "spring",
+        stiffness: 200,
+        damping: 15,
+      }}
+    >
+      <CardHeader>
+        <div className="flex flex-col sm:flex-row gap-2 justify-between items-center">
+          <CardTitle>
+            <Link
+              href={`/admin/users/${user.id}`}
+              className="hover:underline flex items-center justify-center gap-2"
+            >
+              <p>{userAntent}</p>
+              <OverflowTextTooltip
+                text={user.email}
+                triggerClassName="max-w-[125px] sm:max-w-[140px] md:max-w-[225px] lg:max-w-[400px]"
+              />
+            </Link>
+          </CardTitle>
+          <TopRankBadge rank={topSummary.rank} rankLabel={rankLabel} />
+        </div>
+        <CardDescription>
+          {topTrainer} {topSummary.rank}
+        </CardDescription>
+        <CardContent className="flex-1 grid gap-10 ">
+          <div className="flex justify-between">
+            <div className="grid place-items-center">
+              <p className="text-sm font-medium">{totalAmount}</p>
+              <p className="text-2xl font-bold">
+                {formatIntl.number(topSummary.totalAmount, {
+                  style: "currency",
+                  currency: "EUR",
+                  maximumFractionDigits: 2,
+                })}
+              </p>
+            </div>
+            <div className="grid place-items-center">
+              <p className="text-sm font-medium">{countPlans}</p>
+              <p className="text-2xl font-bold">{topSummary.planCount}</p>
+            </div>
+          </div>
+          <div className="w-full h-full grid gap-4 grid-cols-1 md:grid-cols-2 place-items-center">
+            <div className="grid ">
+              <p className="text-sm font-medium mb-2">{totalAmount}</p>
+              <DynamicTopChartMeanRelative
+                chartKey="totalAmount"
+                chartLabel={totalAmount}
+                barData={topSummary.totalAmount}
+                maxBar={topSummary.maxGroupTotal}
+                referenceValue={topSummary.avgGroupTotal}
+                referenceLabel={totalAmountReference}
+              />
+            </div>
+            <div className="grid ">
+              <p className="text-sm font-medium mb-2">{countPlans}</p>
+              <DynamicTopChartMeanRelative
+                chartKey="planCount"
+                chartLabel={countPlans}
+                barData={topSummary.planCount}
+                maxBar={topSummary.maxGroupPlanCount}
+                referenceValue={topSummary.avgGroupPlanCount}
+                referenceLabel={countPlansReference}
+                chartColorNumber={3}
+              />
+            </div>
+            <TopTrainersPieChartWrapper
+              type="type"
+              chartData={{
+                count: topSummary.typeCounts,
+                amount: topSummary.typeAmounts,
+                avg: topSummary.typeAvgs,
+              }}
+              texts={{
+                title: typePieChartTitle,
+                dropDownMenuTexts,
+              }}
+            />
+            <TopTrainersPieChartWrapper
+              type="objective"
+              chartData={{
+                count: topSummary.objectiveCounts,
+                amount: topSummary.objectiveAmounts,
+                avg: topSummary.objectiveAvgs,
+              }}
+              texts={{
+                title: objectivePieChartTitle,
+                dropDownMenuTexts,
+              }}
+              offset={6}
+            />
+          </div>
+        </CardContent>
+      </CardHeader>
+    </MotionCard>
+  );
+};
 
 TrainerCard.displayName = "TrainerCard";
 
@@ -329,36 +325,33 @@ interface TopTrainersPieChartWrapperProps<T extends "type" | "objective">
   texts: TopTrainersPieChartWrapperTexts;
 }
 
-const TopTrainersPieChartWrapper = memo(
-  <T extends "type" | "objective">({
-    type,
-    chartData,
-    offset = 0,
-    texts: { dropDownMenuTexts, title },
-  }: TopTrainersPieChartWrapperProps<T>) => {
-    const [radioOption, setRadioOption] = useState<PieChartOptions>("count");
+const TopTrainersPieChartWrapper = <T extends "type" | "objective">({
+  type,
+  chartData,
+  offset = 0,
+  texts: { dropDownMenuTexts, title },
+}: TopTrainersPieChartWrapperProps<T>) => {
+  const [radioOption, setRadioOption] = useState<PieChartOptions>("count");
 
-    return (
-      <div className="w-full flex flex-col gap-2 items-center justify-end">
-        <div className="flex items-center justify-center gap-5 md:gap-2 w-full ">
-          <h2 className="font-semibold text-sm tracking-tight text-center">
-            {title}{" "}
-          </h2>
-          <DropDownMenuTopTrainersPieSelect
-            radioOption={radioOption}
-            onRadioOptionChange={setRadioOption}
-            {...dropDownMenuTexts}
-          />
-        </div>
-        <DynamicTopTrainersPieChart
-          type={type}
-          chartData={chartData[radioOption]}
-          offset={offset}
+  return (
+    <div className="w-full flex flex-col gap-2 items-center justify-end">
+      <div className="flex items-center justify-center gap-5 md:gap-2 w-full ">
+        <h2 className="font-semibold text-sm tracking-tight text-center">
+          {title}{" "}
+        </h2>
+        <DropDownMenuTopTrainersPieSelect
+          radioOption={radioOption}
+          onRadioOptionChange={setRadioOption}
+          {...dropDownMenuTexts}
         />
       </div>
-    );
-  },
-  isDeepEqual,
-);
+      <DynamicTopTrainersPieChart
+        type={type}
+        chartData={chartData[radioOption]}
+        offset={offset}
+      />
+    </div>
+  );
+};
 
 TopTrainersPieChartWrapper.displayName = "TopTrainersPieChartWrapper";
