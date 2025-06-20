@@ -46,6 +46,7 @@ import { handleBaseError } from "@/lib/utils";
 import { BaseError } from "@/types/responses";
 import IngredientMacrosPieChart, {
   IngredientPieChartTexts,
+  MacroChartElement,
 } from "@/components/charts/ingredient-macros-pie-chart";
 
 import { motion } from "framer-motion";
@@ -337,6 +338,17 @@ export default function IngredientForm({
     ],
   );
 
+  const ingredientPieChartItems = useMemo(
+    () =>
+      [
+        { macro: "protein", value: floatProtein },
+        { macro: "fat", value: floatFat },
+        { macro: "carbohydrates", value: floatCarbohydrates },
+        { macro: "salt", value: floatSalt },
+      ] as MacroChartElement[],
+    [floatProtein, floatFat, floatCarbohydrates, floatSalt],
+  );
+
   return (
     <div className="max-w-7xl w-full sm:px-2 md:px-5 py-6  mx-auto min-w-[1000px]">
       <h1 className="text-lg lg:text-2xl font-bold tracking-tighter capitalize mb-8">
@@ -481,7 +493,7 @@ export default function IngredientForm({
                           </FormItem>
                         </TooltipTrigger>
                       )}
-                    />{" "}
+                    />
                     {!unitForm && (
                       <TooltipContent>
                         <p>{disableTooltip}</p>
@@ -505,12 +517,7 @@ export default function IngredientForm({
               <div className=" h-full">
                 <IngredientMacrosPieChart
                   innerRadius={85}
-                  items={[
-                    { macro: "protein", value: floatProtein },
-                    { macro: "fat", value: floatFat },
-                    { macro: "carbohydrates", value: floatCarbohydrates },
-                    { macro: "salt", value: floatSalt },
-                  ]}
+                  items={ingredientPieChartItems}
                   texts={ingredientPieChartTexts}
                 />
               </div>

@@ -2,7 +2,7 @@ import { Document as LangDocument } from "langchain/document";
 import { MemoryVectorStore } from "langchain/vectorstores/memory";
 import { LRUCache } from "lru-cache";
 import { OllamaEmbeddings } from "@langchain/ollama";
-import murmur from "murmurhash";
+import { v3 as murmurV3 } from "murmurhash";
 
 export interface MemoryVectorStoreCacheEntry {
   store: Promise<MemoryVectorStore>;
@@ -61,7 +61,7 @@ class MemoryVectorStoreCache {
   }
 
   private generateCacheKey(documents: LangDocument[]) {
-    return murmur.v3(documents.map((doc) => doc.pageContent).join());
+    return murmurV3(documents.map((doc) => doc.pageContent).join());
   }
 }
 declare const globalThis: {

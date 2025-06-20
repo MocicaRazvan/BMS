@@ -61,7 +61,12 @@ export default function AlertDialogDeleteComment({
       console.log(error);
     }
   };
-  if (!dialogDeleteTexts) return;
+  if (!dialogDeleteTexts) {
+    if (anchor) {
+      return anchor;
+    }
+    return;
+  }
 
   return (
     <AlertDialog>

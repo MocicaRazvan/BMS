@@ -9,7 +9,7 @@ import { getTimezoneOffset, toZonedTime } from "date-fns-tz";
 import { formatDistanceToNow, isValid, parse } from "date-fns";
 import { enUS, Locale as DateFnsLocale, ro } from "date-fns/locale";
 import { Locale } from "@/navigation/navigation";
-import isEqual from "lodash.isequal";
+import isReactDeepEqual from "fast-deep-equal/react";
 import { stripHtml } from "string-strip-html";
 import stringify from "safe-stable-stringify";
 
@@ -18,9 +18,18 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export function isDeepEqual<T>(obj1: T, obj2: T): boolean {
+  if (obj1 === obj2) return true;
   if (obj1 === null && obj2 !== null) return false;
   if (obj1 !== null && obj2 === null) return false;
-  return isEqual(obj1, obj2);
+  try {
+    return isReactDeepEqual(obj1, obj2);
+  } catch {
+    try {
+      return stringify(obj1) === stringify(obj2);
+    } catch {
+      return obj1 === obj2;
+    }
+  }
 }
 
 function isObject(value: any): value is object {

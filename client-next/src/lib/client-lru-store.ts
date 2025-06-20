@@ -1,7 +1,7 @@
 "use client";
 
 import { LRUCache } from "lru-cache";
-import murmur from "murmurhash";
+import { v3 as murmurV3 } from "murmurhash";
 import { useEffect, useState } from "react";
 import stringify from "safe-stable-stringify";
 
@@ -37,7 +37,7 @@ class ClientLRUStore {
   }
 
   private generateCacheKey(...args: any[]) {
-    return murmur.v3(args.join(""));
+    return murmurV3(args.join(""));
   }
 
   public remove(...args: any[]) {

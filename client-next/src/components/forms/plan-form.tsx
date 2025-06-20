@@ -245,7 +245,7 @@ export default function PlanForm({
       });
     }
     return fields;
-  }, [watchBody, watchObjective, watchTitle, JSON.stringify(selectedOptions)]);
+  }, [watchBody, watchObjective, watchTitle, selectedOptions]);
 
   useEffect(() => {
     if (daysWatch.length) {

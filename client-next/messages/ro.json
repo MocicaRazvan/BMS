@@ -410,18 +410,20 @@
       },
       "AddDayToCalendarTexts": {
         "errorText": "Ziua nu a putut fi adăugată",
-        "anchorText": "Adaugă ziua în calendar",
+        "anchorText": "Adaugă ziua",
         "titleText": "Selectează data și adaugă ziua",
         "formPlaceholder": "Alege o dată",
         "formLabel": "Data din calendar",
         "formDescription": "Data nu poate fi una care deja existentă în calendar",
-        "toastDescription": "Ziua a fost adăugată cu succes"
+        "toastDescription": "Ziua a fost adăugată cu succes",
+        "description": "Cautați o dată și adăugați ziua în calendar"
       },
       "CalendarDayFormTexts": {
-        "title": "Selectați și adăugați o zi",
+        "title": "Selectați o zi",
         "error": "Ziua nu a putut fi adăugată",
         "placeholder": "Selectați o zi",
-        "toastDescription": "Ziua a fost adăugată cu succes"
+        "toastDescription": "Ziua a fost adăugată cu succes",
+        "description": "Cautați o zi și adăugați-o în calendar"
       },
       "UseNavigationGuardI18nTexts": {
         "confirm": "Ați făcut modificări care nu au fost salvate. Sunteți sigur că doriți să părăsiți pagina?"

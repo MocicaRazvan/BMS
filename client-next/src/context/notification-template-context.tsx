@@ -483,7 +483,7 @@ const NotificationTemplateAuthUser = <
     if (isFinished && !error && messages && messages?.[0]?.length > 0) {
       dispatch({ type: "INIT_MULTIPLE", payload: messages[0] });
     }
-  }, [isFinished, JSON.stringify(messages), error]);
+  }, [isFinished, messages, error]);
 
   if (error) {
     console.log(messages);

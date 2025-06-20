@@ -5,7 +5,7 @@ import TopChartWrapper, {
   TopRankBadge,
 } from "@/components/charts/top-chart-wrapper";
 import { Link, Locale } from "@/navigation/navigation";
-import { memo } from "react";
+import { memo, useMemo } from "react";
 import {
   PlanResponse,
   ResponseWithUserDtoEntity,
@@ -126,6 +126,16 @@ const PlanCard = ({ topSummary, texts, authUser }: PlanCardProps) => {
     authToken: true,
   });
 
+  const ratioChartData = useMemo(
+    () => [
+      {
+        ratio: topSummary.ratio,
+        fill: "var(--color-plan)",
+      },
+    ],
+    [topSummary.ratio],
+  );
+
   if (!isPlansFinished || !plans.length) {
     return <LoadingSpinner sectionClassName="min-h-[575px] w-full h-full" />;
   }
@@ -205,12 +215,7 @@ const PlanCard = ({ topSummary, texts, authUser }: PlanCardProps) => {
             <div className="grid md:place-items-end">
               <DynamicRatioPieChart
                 innerLabel={texts.ratioLabel}
-                chartData={[
-                  {
-                    ratio: topSummary.ratio,
-                    fill: "var(--color-plan)",
-                  },
-                ]}
+                chartData={ratioChartData}
               />
             </div>
           </div>

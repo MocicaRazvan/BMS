@@ -11,8 +11,7 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { memo, useCallback, useRef, useState } from "react";
-import { isDeepEqual } from "@/lib/utils";
+import { useCallback, useRef, useState } from "react";
 import { CirclePlus, FilePen } from "lucide-react";
 import {
   Select,
@@ -201,4 +200,4 @@ function DialogKanbanTask({
   );
 }
 
-export default memo(DialogKanbanTask, isDeepEqual);
+export default DialogKanbanTask;

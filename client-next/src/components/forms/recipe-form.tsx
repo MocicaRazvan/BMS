@@ -347,7 +347,7 @@ export default function RecipeForm({
     } else {
       setChartItems([]);
     }
-  }, [JSON.stringify(selectedOptions), JSON.stringify(ingredients)]);
+  }, [selectedOptions, JSON.stringify(ingredients)]);
 
   const handleOnChange = useCallback((options: Option[]) => {
     setSelectedOptions((prev) =>

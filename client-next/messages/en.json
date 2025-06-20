@@ -412,17 +412,19 @@
       "AddDayToCalendarTexts": {
         "errorText": "The day could not be added",
         "anchorText": "Add the day to the calendar",
-        "titleText": "Select a date and add the day to the calendar",
+        "titleText": "Add day",
         "formPlaceholder": "Select the date",
         "formLabel": "Date in the calendar",
         "formDescription": "The date cannot be one of the existing ones in the calendar",
-        "toastDescription": "The day was added to the calendar"
+        "toastDescription": "The day was added to the calendar",
+        "description": "Select a date and add the day to the calendar"
       },
       "CalendarDayFormTexts": {
-        "title": "Select and add a day",
+        "title": "Select a day",
         "error": "The day could not be added",
         "placeholder": "Select the day",
-        "toastDescription": "The day was added to the calendar"
+        "toastDescription": "The day was added to the calendar",
+        "description": "Search for a day and select it to add it to the calendar"
       },
       "AnswerFromBodyFormTexts": {
         "toxicError": "The question should not contain toxic language",

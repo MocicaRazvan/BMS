@@ -17,6 +17,7 @@ import {
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -52,6 +53,7 @@ import { useDayCalendar } from "@/context/day-calendar-context";
 export interface AddDayToCalendarTexts {
   addDayToCalendarSchemaTexts: AddDayToCalendarSchemaTexts;
   buttonSubmitTexts: ButtonSubmitTexts;
+  description: string;
   errorText: string;
   toastDescription: string;
   anchorText: string;
@@ -79,6 +81,7 @@ export default function AddDayToCalendar({
   formDescription,
   formLabel,
   formPlaceholder,
+  description,
 }: AddDayToCalendarProps) {
   const { refetch: dayCalendarRefetch } = useDayCalendar();
   const schema = useMemo(
@@ -164,6 +167,7 @@ export default function AddDayToCalendar({
       <DialogContent className="sm:max-w-[500px] p-10">
         <DialogHeader>
           <DialogTitle>{titleText}</DialogTitle>
+          <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
         <Form {...form}>
           <form

@@ -29,7 +29,7 @@ export default function PlanItemRenderer({ item, texts }: Props) {
           <span>{item.objective.replace("_", " ")}</span>
         </div>
         <div className="flex flex-col items-end justify-center gap-1">
-          <PlanType type={item.type} />
+          <PlanType type={item.type} className="px-2 py-1 font-semibold" />
           <span className="font-bold max-w-44 overflow-x-hidden text-ellipsis">
             {formatIntl.number(item.price, {
               style: "currency",

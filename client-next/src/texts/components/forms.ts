@@ -715,6 +715,7 @@ export async function getCalendarDayFormTexts(): Promise<CalendarDayFormTexts> {
     error: t("error"),
     placeholder: t("placeholder"),
     toastDescription: t("toastDescription"),
+    description: t("description"),
   };
 }
 
@@ -737,6 +738,7 @@ export async function getAddDayToCalendarTexts(): Promise<AddDayToCalendarTexts>
     formLabel: t("formLabel"),
     formDescription: t("formDescription"),
     toastDescription: t("toastDescription"),
+    description: t("description"),
   };
 }
 export async function getEmailFromFieldTexts(): Promise<EmailFromFieldTexts> {

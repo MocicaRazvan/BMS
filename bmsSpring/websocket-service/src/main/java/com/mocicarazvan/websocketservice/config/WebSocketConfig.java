@@ -72,10 +72,14 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         log.info("Allowed origins: {}", frontUrl);
+
+        String[] allowedOrigins = frontUrl.split(",");
+        
         registry.addEndpoint("/ws-service")
-                .setAllowedOrigins(
-                        frontUrl.split(",")
-                )
+                .setAllowedOrigins(allowedOrigins);
+
+        registry.addEndpoint("/ws-service-sockjs")
+                .setAllowedOrigins(allowedOrigins)
                 .withSockJS();
     }
 

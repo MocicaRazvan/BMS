@@ -14,7 +14,7 @@ export default function useCsrfToken() {
 
   const addTokenConditionally = useCallback(() => {
     return csrfRawToken ?? {};
-  }, [JSON.stringify(csrfRawToken)]);
+  }, [csrfRawToken]);
 
   useEffect(() => {
     getCsrfToken().then((t) => {

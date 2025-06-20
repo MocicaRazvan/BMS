@@ -81,7 +81,7 @@ export default function DayCalendarProvider({ children }: Props) {
     const param = searchParams.get("date");
     const maybeDate = param ? new Date(param) : new Date();
     return isNaN(maybeDate.getTime()) ? new Date() : maybeDate;
-  }, [searchParams?.toString()]);
+  }, [searchParams]);
 
   const [date, setDate] = useState(initialDate);
 
@@ -102,25 +102,31 @@ export default function DayCalendarProvider({ children }: Props) {
 
       router.replace(newPath, { scroll: false });
     }
-  }, [searchParams.get("date")]);
+  }, [pathname, router, searchParams]);
 
   const [dayCalendars, setDayCalendars] = useState<DayCalendarResponse[]>([]);
   const { monthStart, monthEnd, calendarStart, calendarEnd, calendarDays } =
     getDateRanges(date);
-  const { messages, error, isFinished, manualFetcher, refetch } =
-    useFetchStream<CustomEntityModel<DayCalendarResponse>>({
-      ...baseFetchAgs,
-      queryParams: {
-        start: format(calendarStart, "yyyy-MM-dd"),
-        end: format(calendarEnd, "yyyy-MM-dd"),
-      },
-    });
+  const {
+    messages,
+    error,
+    isFinished,
+    manualFetcher,
+    refetch,
+    removeFromCache,
+  } = useFetchStream<CustomEntityModel<DayCalendarResponse>>({
+    ...baseFetchAgs,
+    queryParams: {
+      start: format(calendarStart, "yyyy-MM-dd"),
+      end: format(calendarEnd, "yyyy-MM-dd"),
+    },
+  });
 
   useEffect(() => {
     if (messages && messages.length > 0) {
       setDayCalendars(messages.map((d) => d.content));
     }
-  }, [JSON.stringify(messages)]);
+  }, [messages]);
 
   const isoDate = date.toISOString();
   useEffect(() => {
@@ -154,24 +160,24 @@ export default function DayCalendarProvider({ children }: Props) {
   const addDayCalendar = useCallback(
     (day: DayCalendarResponse) => {
       setDayCalendars((prevState) => [...prevState, day]);
-      refetch();
+      removeFromCache();
     },
-    [refetch],
+    [removeFromCache],
   );
   const removeDayCalendar = useCallback(
     (dayId: number) => {
       setDayCalendars((prevState) => prevState.filter((d) => d.id !== dayId));
-      refetch();
+      removeFromCache();
     },
-    [refetch],
+    [removeFromCache],
   );
 
   const changeForDate = useCallback(
     (day: DayCalendarResponse) => {
       setDayCalendars((prev) => prev.map((d) => (d.id === day.id ? day : d)));
-      refetch();
+      removeFromCache();
     },
-    [refetch],
+    [removeFromCache],
   );
 
   return (

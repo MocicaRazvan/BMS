@@ -17,7 +17,10 @@ export interface RecommendationListTexts {
   similarity: string;
   title: string;
 }
-interface Props<T extends MinRecT, P extends object = Record<string, never>> {
+export interface RecommendationListProps<
+  T extends MinRecT,
+  P extends object = Record<string, never>,
+> {
   itemId: number;
   fetchArgs: UseFetchStreamProps;
   ItemRenderer: React.ComponentType<{ item: T } & P>;
@@ -28,7 +31,13 @@ interface Props<T extends MinRecT, P extends object = Record<string, never>> {
 export default function RecommendationList<
   T extends MinRecT,
   P extends object = Record<string, never>,
->({ fetchArgs, itemId, ItemRenderer, texts, itemRendererProps }: Props<T, P>) {
+>({
+  fetchArgs,
+  itemId,
+  ItemRenderer,
+  texts,
+  itemRendererProps,
+}: RecommendationListProps<T, P>) {
   const { messages, error, isFinished, refetch } = useFetchStream<
     CustomEntityModel<T>
   >({
@@ -107,6 +116,11 @@ interface SimilarityIndicatorProps {
   size?: number;
 }
 
+const getColor = (percent: number) => {
+  if (percent < 33) return "hsl(var(--destructive))";
+  if (percent < 66) return "hsl(var(--amber))";
+  return "hsl(var(--success))";
+};
 function SimilarityIndicator({
   similarity,
   size = 80,
@@ -116,11 +130,7 @@ function SimilarityIndicator({
     Math.min(100, Math.round(similarity * 100)),
   );
 
-  const getColor = (percent: number) => {
-    if (percent < 33) return "hsl(var(--destructive))";
-    if (percent < 66) return "hsl(var(--amber))";
-    return "hsl(var(--success))";
-  };
+  const color = getColor(clampedPercentage);
 
   const strokeWidth = size * 0.1;
   const radius = (size - strokeWidth) / 2;
@@ -154,7 +164,7 @@ function SimilarityIndicator({
           strokeDasharray={circumference}
           strokeDashoffset={strokeDashoffset}
           strokeLinecap="round"
-          stroke={getColor(clampedPercentage)}
+          stroke={color}
           fill="transparent"
           r={radius}
           cx={size / 2}
@@ -167,7 +177,7 @@ function SimilarityIndicator({
       </svg>
       <div
         className="absolute inset-0 flex flex-col items-center justify-center text-lg font-semibold"
-        style={{ color: getColor(clampedPercentage) }}
+        style={{ color }}
       >
         <span>
           {clampedPercentage}

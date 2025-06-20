@@ -1,6 +1,6 @@
 "use client";
 
-import { memo } from "react";
+import { memo, useMemo } from "react";
 import useDownloadChartButton from "@/hoooks/charts/download-chart-button";
 import {
   ChartConfig,
@@ -21,7 +21,6 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { isDeepEqual } from "@/lib/utils";
 import dynamic from "next/dynamic";
 import useAxisNumberFormatter from "@/hoooks/charts/use-axis-number-formatter";
 
@@ -83,24 +82,35 @@ const PredictionChartContainer = memo(
     const { downloadChartRef, DownloadChartButton } = useDownloadChartButton({
       data,
     });
-    const chartConfig = {
-      count: {
-        label: countLabel,
-        color: `hsl(var(--chart-${countColorIndex}))`,
-      },
-      countArea: {
-        label: countAreaLabel,
-        color: `hsl(var(--chart-${countColorIndex}))`,
-      },
-      totalAmount: {
-        label: totalAmountLabel,
-        color: `hsl(var(--chart-${totalAmountColorIndex}))`,
-      },
-      totalAmountArea: {
-        label: totalAmountAreaLabel,
-        color: `hsl(var(--chart-${totalAmountColorIndex}))`,
-      },
-    } satisfies ChartConfig;
+    const chartConfig = useMemo(
+      () =>
+        ({
+          count: {
+            label: countLabel,
+            color: `hsl(var(--chart-${countColorIndex}))`,
+          },
+          countArea: {
+            label: countAreaLabel,
+            color: `hsl(var(--chart-${countColorIndex}))`,
+          },
+          totalAmount: {
+            label: totalAmountLabel,
+            color: `hsl(var(--chart-${totalAmountColorIndex}))`,
+          },
+          totalAmountArea: {
+            label: totalAmountAreaLabel,
+            color: `hsl(var(--chart-${totalAmountColorIndex}))`,
+          },
+        }) satisfies ChartConfig,
+      [
+        countColorIndex,
+        countAreaLabel,
+        countLabel,
+        totalAmountColorIndex,
+        totalAmountLabel,
+        totalAmountAreaLabel,
+      ],
+    );
     const debounceDataAvailable = useDebounceWithFirstTrue(dataAvailable, 225);
     const axisFormatter = useAxisNumberFormatter();
 
@@ -181,7 +191,6 @@ const PredictionChartContainer = memo(
       </div>
     );
   },
-  isDeepEqual,
 );
 PredictionChartContainer.displayName = "PredictionChartContainer";
 

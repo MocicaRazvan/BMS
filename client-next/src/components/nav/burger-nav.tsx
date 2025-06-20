@@ -25,7 +25,6 @@ interface Props {
 const BurgerNav = ({ authUser, texts, linkItems }: Props) => {
   const [sheetOpen, setSheetOpen] = useState(false);
   const globalPathname = usePathname();
-  console.log("rendering BurgerNav");
   return (
     <Sheet open={sheetOpen} onOpenChange={setSheetOpen} modal={true}>
       <SheetTrigger asChild>

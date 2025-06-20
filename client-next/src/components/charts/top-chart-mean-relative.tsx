@@ -6,8 +6,9 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart";
 import { Bar, BarChart, ReferenceLine, XAxis, YAxis } from "recharts";
-import React from "react";
+import React, { memo } from "react";
 import useAxisNumberFormatter from "@/hoooks/charts/use-axis-number-formatter";
+import { isDeepEqual } from "@/lib/utils";
 
 interface TopChartMeanRelativeProps {
   chartKey: string;
@@ -20,66 +21,73 @@ interface TopChartMeanRelativeProps {
   chartColorNumber?: number;
 }
 
-export function TopChartMeanRelative({
-  chartKey,
-  chartLabel,
-  barData,
-  maxBar,
-  maxOffset = 10,
-  referenceValue,
-  referenceLabel,
-  chartColorNumber = 6,
-}: TopChartMeanRelativeProps) {
-  const axisFormatter = useAxisNumberFormatter();
-  const stackId = uuid();
-  if (maxBar - referenceValue < maxOffset) {
-    maxOffset += Math.min(maxBar / 25, 80);
-  }
-  return (
-    <ChartContainer
-      config={{
-        [chartKey]: {
-          label: chartLabel,
-          color: `hsl(var(--chart-${chartColorNumber}))`,
-        },
-      }}
-      className="h-[300px] mx-auto aspect-square"
-    >
-      <BarChart
-        accessibilityLayer
-        data={[
-          {
-            name: chartLabel,
-            [chartKey]: barData.toFixed(2),
+const TopChartMeanRelative = memo(
+  ({
+    chartKey,
+    chartLabel,
+    barData,
+    maxBar,
+    maxOffset = 10,
+    referenceValue,
+    referenceLabel,
+    chartColorNumber = 6,
+  }: TopChartMeanRelativeProps) => {
+    const axisFormatter = useAxisNumberFormatter();
+    const stackId = uuid();
+    if (maxBar - referenceValue < maxOffset) {
+      maxOffset += Math.min(maxBar / 25, 80);
+    }
+    return (
+      <ChartContainer
+        config={{
+          [chartKey]: {
+            label: chartLabel,
+            color: `hsl(var(--chart-${chartColorNumber}))`,
           },
-        ]}
+        }}
+        className="h-[300px] mx-auto aspect-square"
       >
-        <XAxis dataKey="name" />
-        <YAxis
-          domain={[0, Math.floor(maxBar + maxOffset)]}
-          tickFormatter={(t) => axisFormatter(t)}
-        />
-        <ChartTooltip content={<ChartTooltipContent hideLabel={true} />} />
-        <Bar
-          dataKey={chartKey}
-          fill={`var(--color-${chartKey})`}
-          radius={4}
-          stackId={stackId}
-        />
-        <ReferenceLine
-          y={referenceValue}
-          style={{ stroke: "hsl(var(--primary))" }}
-          strokeDasharray="3 3"
-          fill={"hsl(var(--primary))"}
-          label={{
-            position: "middle",
-            value: axisFormatter(referenceLabel + referenceValue.toFixed(2)),
-            fill: "hsl(var(--primary))",
-            fontSize: 12,
-            dy: -10,
-          }}
-        />
-      </BarChart>
-    </ChartContainer>
-  );
-}
+        <BarChart
+          accessibilityLayer
+          data={[
+            {
+              name: chartLabel,
+              [chartKey]: barData.toFixed(2),
+            },
+          ]}
+        >
+          <XAxis dataKey="name" />
+          <YAxis
+            domain={[0, Math.floor(maxBar + maxOffset)]}
+            tickFormatter={(t) => axisFormatter(t)}
+          />
+          <ChartTooltip content={<ChartTooltipContent hideLabel={true} />} />
+          <Bar
+            dataKey={chartKey}
+            fill={`var(--color-${chartKey})`}
+            radius={4}
+            stackId={stackId}
+          />
+          <ReferenceLine
+            y={referenceValue}
+            style={{ stroke: "hsl(var(--primary))" }}
+            strokeDasharray="3 3"
+            fill={"hsl(var(--primary))"}
+            label={{
+              position: "middle",
+              value: axisFormatter(referenceLabel + referenceValue.toFixed(2)),
+              fill: "hsl(var(--primary))",
+              fontSize: 12,
+              dy: -10,
+            }}
+          />
+        </BarChart>
+      </ChartContainer>
+    );
+  },
+  isDeepEqual,
+);
+
+TopChartMeanRelative.displayName = "TopChartMeanRelative";
+
+export { TopChartMeanRelative };

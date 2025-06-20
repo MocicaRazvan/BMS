@@ -82,7 +82,7 @@ export default function SingleIngredientPageContent({
       macro,
       value: messages?.[0].content.nutritionalFact[macro],
     }));
-  }, [JSON.stringify(messages)]);
+  }, [messages]);
 
   if (!isFinished) return <LoadingSpinner />;
   if (isFinished && messages.length == 0 && error?.status)

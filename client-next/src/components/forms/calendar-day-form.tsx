@@ -16,6 +16,7 @@ import { useDayCalendar } from "@/context/day-calendar-context";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -36,6 +37,7 @@ export interface CalendarDayFormTexts {
   error: string;
   childInputMultipleSelectorTexts: ChildInputMultipleSelectorTexts;
   toastDescription: string;
+  description: string;
 }
 
 interface Props {
@@ -99,9 +101,10 @@ export default function CalendarDayForm({ date, anchor, texts }: Props) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{anchor}</DialogTrigger>
-      <DialogContent className="sm:max-w-[425px] p-10">
+      <DialogContent className="sm:max-w-[500px] p-10">
         <DialogHeader>
           <DialogTitle>{texts.title}</DialogTitle>
+          <DialogDescription>{texts.description}</DialogDescription>
         </DialogHeader>
         <ChildInputMultipleSelector<
           PageableResponse<CustomEntityModel<DayResponse>>

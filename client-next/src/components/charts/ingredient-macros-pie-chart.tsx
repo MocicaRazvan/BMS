@@ -11,7 +11,6 @@ import {
 import { ComponentProps, memo, useMemo } from "react";
 import { Label, Pie, PieChart } from "recharts";
 import { motion } from "framer-motion";
-import { isDeepEqual } from "@/lib/utils";
 
 export interface MacroChartElement {
   macro: Macro | "salt";
@@ -145,7 +144,6 @@ export const IngredientMacrosPieChart = memo(
       </ChartContainer>
     );
   },
-  isDeepEqual,
 );
 
 IngredientMacrosPieChart.displayName = "IngredientMacrosPieChart";

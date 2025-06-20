@@ -97,7 +97,7 @@ export default function DayCalendarBodyMonth({
               >
                 <div
                   className={cn(
-                    "text-sm font-medium w-fit p-1 flex flex-col items-center justify-center rounded-full aspect-square",
+                    "text-sm font-medium w-fit p-0.5 mb-0.5 flex flex-col items-center justify-center rounded-full aspect-square",
                     isToday && "bg-primary text-background",
                   )}
                 >

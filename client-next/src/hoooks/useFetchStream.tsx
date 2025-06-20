@@ -4,7 +4,7 @@ import { useSession } from "next-auth/react";
 import { BaseError, isBaseError } from "@/types/responses";
 import { AcceptHeader } from "@/types/fetch-utils";
 import { isDeepEqual, stableStringify, wrapItemToString } from "@/lib/utils";
-import murmur from "murmurhash";
+import { v3 as murmurV3 } from "murmurhash";
 import useCachedValue from "@/hoooks/use-cached-value";
 import { deduplicateFetchStream } from "@/lib/fetchers/deduplicateFetchStream";
 import { FetchStreamProps } from "@/lib/fetchers/fetchStream";
@@ -62,7 +62,7 @@ function generateKey(
   acceptHeader: "application/x-ndjson" | "application/json" | undefined,
 ) {
   return wrapItemToString(
-    murmur.v3(
+    murmurV3(
       `${path}-${stableStringifyQueryParams}-${stableStringifyArrayQueryParam}-${stableStringifyBody}-${stableStringifyCustomHeaders}-${batchSize}-${method}-${acceptHeader}`,
     ),
   );

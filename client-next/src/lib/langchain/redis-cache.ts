@@ -1,6 +1,6 @@
 import { Redis } from "ioredis";
 import { RedisCache } from "@langchain/community/caches/ioredis";
-import murmur from "murmurhash";
+import { v3 as murmurV3 } from "murmurhash";
 import { PHASE_PRODUCTION_BUILD } from "next/constants";
 
 class CustomRedis extends Redis {
@@ -17,7 +17,7 @@ declare const globalThis: {
 } & typeof global;
 
 export function generateHashKey(string: string, antet?: string) {
-  return `${antet ? antet + ":" : ""}${murmur.v3(string)}`;
+  return `${antet ? antet + ":" : ""}${murmurV3(string)}`;
 }
 
 function initRedis() {

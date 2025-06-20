@@ -10,6 +10,7 @@ import {
 } from "@/types/dto";
 import IngredientMacrosPieChart, {
   IngredientPieChartTexts,
+  MacroChartElement,
 } from "@/components/charts/ingredient-macros-pie-chart";
 import { useMemo } from "react";
 
@@ -56,23 +57,12 @@ export default function RecipeMacros({
           ),
     [ingredients],
   );
-  if (!aggregatedNF) return null;
-  return (
-    <div className="px-0 lg:px-16 space-y-8">
-      <NutritionalTable
-        ing={
-          {
-            nutritionalFact: aggregatedNF,
-          } as IngredientNutritionalFactResponse
-        }
-        {...nutritionalTableTexts}
-        tableClassName={"w-[80%] mx-auto"}
-        showUnit={false}
-      />
-      <div className="h-[350px] lg:h-[400px]">
-        <IngredientMacrosPieChart
-          innerRadius={85}
-          items={[
+
+  const ingredientPiChartItems: MacroChartElement[] = useMemo(
+    () =>
+      !aggregatedNF
+        ? []
+        : [
             {
               macro: "protein",
               value: aggregatedNF.protein,
@@ -89,7 +79,27 @@ export default function RecipeMacros({
               macro: "salt",
               value: aggregatedNF.salt,
             },
-          ]}
+          ],
+    [aggregatedNF],
+  );
+
+  if (!aggregatedNF) return null;
+  return (
+    <div className="px-0 lg:px-16 space-y-8">
+      <NutritionalTable
+        ing={
+          {
+            nutritionalFact: aggregatedNF,
+          } as IngredientNutritionalFactResponse
+        }
+        {...nutritionalTableTexts}
+        tableClassName={"w-[80%] mx-auto"}
+        showUnit={false}
+      />
+      <div className="h-[350px] lg:h-[400px]">
+        <IngredientMacrosPieChart
+          innerRadius={85}
+          items={ingredientPiChartItems}
           texts={ingredientPieChartTexts}
         />
       </div>

@@ -55,7 +55,7 @@ export const metadata: Metadata = {
   },
 };
 
-const spring = process.env.NEXT_PUBLIC_SPRING_CLIENT!;
+const springWs = process.env.NEXT_PUBLIC_SPRING_CLIENT_WEBSOCKET;
 
 export default async function BaseLayout({
   children,
@@ -100,7 +100,7 @@ export default async function BaseLayout({
                 <NextAuthSessionProvider>
                   <ScrollTopProvider>
                     <ValidUserSessionContext>
-                      <StompProvider url={spring + "/ws/ws-service"}>
+                      <StompProvider url={springWs + "/ws/ws-service"}>
                         <ChatMessageNotificationProvider>
                           <PostApproveNotificationProvider>
                             <RecipeApproveNotificationProvider>
