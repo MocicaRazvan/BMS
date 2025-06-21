@@ -157,128 +157,113 @@ export default function usePrefetcher<T, E extends BaseError = BaseError>({
     }
   }, [cleanUpPrefetched, isRefetchClosure]);
 
+  const basePrefetcher = useCallback(
+    (
+      predicate: PrefetchedPredicate<T>,
+      generateArgs: PrefetchGenerateNewArgs<T>,
+      generateMarkPrefetched: PrefetchGenerateMarkPrefetchedArgs<T>,
+      abortController: CustomAbortController,
+      batchCallback: (data: T[]) => void,
+    ) => {
+      if (
+        isAbsoluteFinished &&
+        preloadNext &&
+        messages &&
+        isMounted() &&
+        !error &&
+        predicate(messages, hasPrefetched)
+      ) {
+        const newArgs = generateArgs(messages);
+        const prefetchedKey = generateMarkPrefetched(messages, newArgs);
+        markPrefetched(prefetchedKey);
+        Promise.resolve()
+          .then(() => {
+            if (!isMounted()) {
+              unmarkPrefetched(prefetchedKey);
+              return;
+            }
+            return manualFetcher({
+              fetchProps: newArgs,
+              aboveController: abortController,
+              localAuthToken: true,
+              batchCallback: (data) => {
+                if (data.length > 0) {
+                  batchCallback(data);
+                }
+              },
+              errorCallback: () => {
+                setNextMessages(null);
+              },
+            });
+          })
+          .catch((e) => {
+            unmarkPrefetched(prefetchedKey);
+            console.log("manualFetcher Error fetching", e);
+          });
+      }
+    },
+    [
+      error,
+      hasPrefetched,
+      isAbsoluteFinished,
+      isMounted,
+      manualFetcher,
+      markPrefetched,
+      messages,
+      preloadNext,
+      unmarkPrefetched,
+    ],
+  );
+
   // fine bc dedup handles it
   // preload next page
   useEffect(() => {
     const abortController = new CustomAbortController();
 
-    if (
-      isAbsoluteFinished &&
-      preloadNext &&
-      messages &&
-      isMounted() &&
-      !error &&
-      nextPredicate(messages, hasPrefetched)
-    ) {
-      // console.log("preloading next page");
-      const newArgs = generateNextArgs(messages);
-      const prefetchedKey = generateMarkPrefetchedNextArgs(messages, newArgs);
-      markPrefetched(prefetchedKey);
-      Promise.resolve()
-        .then(() => {
-          if (!isMounted()) {
-            unmarkPrefetched(prefetchedKey);
-            return;
-          }
-          return manualFetcher({
-            fetchProps: newArgs,
-            aboveController: abortController,
-            localAuthToken: true,
-            batchCallback: (data) => {
-              if (data.length > 0) {
-                setNextMessages((prev) => [...(prev || []), ...data]);
-              }
-            },
-            errorCallback: () => {
-              setNextMessages(null);
-            },
-          });
-        })
-        .catch((e) => {
-          unmarkPrefetched(prefetchedKey);
-          console.log("manualFetcher Error fetching", e);
-        });
-    }
+    basePrefetcher(
+      nextPredicate,
+      generateNextArgs,
+      generateMarkPrefetchedNextArgs,
+      abortController,
+      (data) => setNextMessages((prev) => [...(prev || []), ...data]),
+    );
+
     return () => {
       if (abortController && !abortController?.signal?.aborted) {
         abortController?.abort();
       }
     };
   }, [
-    error,
+    basePrefetcher,
     generateMarkPrefetchedNextArgs,
     generateNextArgs,
-    hasPrefetched,
-    isAbsoluteFinished,
-    manualFetcher,
-    markPrefetched,
-    messages,
     nextPredicate,
-    preloadNext,
-    unmarkPrefetched,
-    isMounted,
   ]);
 
   // preload previous page
   useEffect(() => {
     const abortController = new CustomAbortController();
 
-    if (
-      isAbsoluteFinished &&
-      preloadNext &&
-      messages &&
-      isMounted() &&
-      !error &&
-      previousPredicate(messages, hasPrefetched)
-    ) {
-      // console.log("preloading prev page");
-      const newArgs = generatePreviousArgs(messages);
-      const prefetchedKey = generateMarkPrefetchedPreviousArgs(
-        messages,
-        newArgs,
-      );
-      markPrefetched(prefetchedKey);
-      Promise.resolve()
-        .then(() => {
-          if (!isMounted()) {
-            unmarkPrefetched(prefetchedKey);
-            return;
-          }
-          return manualFetcher({
-            fetchProps: newArgs,
-            aboveController: abortController,
-            localAuthToken: true,
-            batchCallback: (data) => {
-              if (data.length) {
-                setPreviousMessages((prev) => [...data, ...(prev || [])]);
-              }
-            },
-            errorCallback: () => setPreviousMessages(null),
-          });
-        })
-        .catch((e) => {
-          console.log("manualFetcher Error fetching prev page", e);
-          unmarkPrefetched(prefetchedKey);
-        });
-    }
+    basePrefetcher(
+      previousPredicate,
+      generatePreviousArgs,
+      generateMarkPrefetchedPreviousArgs,
+      abortController,
+      (data) => setPreviousMessages((prev) => [...data, ...(prev || [])]),
+    );
 
     return () => {
-      abortController.abort();
+      if (abortController && !abortController?.signal?.aborted) {
+        abortController?.abort();
+      }
     };
   }, [
-    error,
+    basePrefetcher,
     generateMarkPrefetchedPreviousArgs,
     generatePreviousArgs,
-    hasPrefetched,
-    isAbsoluteFinished,
-    manualFetcher,
-    markPrefetched,
-    messages,
-    preloadNext,
     previousPredicate,
-    unmarkPrefetched,
-    isMounted,
   ]);
+
   return {
     nextMessages,
     previousMessages,
