@@ -7,3 +7,4 @@ docker
 .git
 .idea
 analyze
+.gitignore
