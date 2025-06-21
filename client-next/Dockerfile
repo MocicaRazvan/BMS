@@ -1,4 +1,4 @@
-FROM node:20-alpine AS base
+FROM node:20.19.2-alpine3.22 AS base
 
 
 FROM base AS deps
@@ -7,7 +7,7 @@ WORKDIR /app
 
 
 COPY package*.json ./
-RUN npm install
+RUN npm ci --loglevel=error
 
 
 
