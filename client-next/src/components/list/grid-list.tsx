@@ -112,7 +112,6 @@ export default function GridList<T extends TitleBodyImagesUserDto>({
   );
   const {
     pageInfo,
-    filter,
     sort,
     setSort,
     sortValue,
@@ -125,7 +124,6 @@ export default function GridList<T extends TitleBodyImagesUserDto>({
     resetCurrentPage,
     updateCreatedAtRange,
     updateUpdatedAtRange,
-    nextMessages,
     initialFilterValue,
   } = useList<ResponseWithUserDtoEntity<T>>({
     path,
@@ -247,23 +245,6 @@ export default function GridList<T extends TitleBodyImagesUserDto>({
             {...dataTablePaginationTexts}
           />
         </div>
-        {nextMessages && nextMessages.length > 0 && (
-          <div className="hidden">
-            {nextMessages.map((item, i) => (
-              <div
-                key={
-                  item.content.model.content.id +
-                  item.content.model.content.title +
-                  i +
-                  item.content.model.content.body.substring(1) +
-                  "____next"
-                }
-              >
-                <ItemCard item={item.content} texts={itemCardTexts} />
-              </div>
-            ))}
-          </div>
-        )}
       </div>
     </div>
   );

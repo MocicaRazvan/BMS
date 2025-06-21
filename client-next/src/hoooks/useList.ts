@@ -234,7 +234,7 @@ export default function useList<T>({
     isRefetchClosure,
   } = useFetchStream<PageableResponse<T>>(stableFetchArgs);
 
-  const { nextMessages, previousMessages } = usePageInfoPrefetcher({
+  usePageInfoPrefetcher({
     stableFetchArgs,
     pageInfo,
     preloadNext,
@@ -439,10 +439,8 @@ export default function useList<T>({
     updateUpdatedAtRange,
     updatedAtRangeParams,
     createdAtRangeParams,
-    nextMessages,
     refetchWithResetPage,
     initialFilterValue: initialFilterValue.current,
-    previousMessages,
   };
 }
 

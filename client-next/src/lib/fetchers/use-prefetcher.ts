@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { BaseError } from "@/types/responses";
 
 import {
@@ -97,8 +97,6 @@ export default function usePrefetcher<T, E extends BaseError = BaseError>({
   generateMarkPrefetchedPreviousArgs,
   additionalKey = "",
 }: UseFetchStreamPrefetcherProps<T, E>) {
-  const [nextMessages, setNextMessages] = useState<T[] | null>(null);
-  const [previousMessages, setPreviousMessages] = useState<T[] | null>(null);
   const prefetchedMap = useRef<Map<string, Set<string>>>(new Map());
   const isMounted = useMountedState();
 
@@ -163,7 +161,6 @@ export default function usePrefetcher<T, E extends BaseError = BaseError>({
       generateArgs: PrefetchGenerateNewArgs<T>,
       generateMarkPrefetched: PrefetchGenerateMarkPrefetchedArgs<T>,
       abortController: CustomAbortController,
-      batchCallback: (data: T[]) => void,
     ) => {
       if (
         isAbsoluteFinished &&
@@ -186,13 +183,8 @@ export default function usePrefetcher<T, E extends BaseError = BaseError>({
               fetchProps: newArgs,
               aboveController: abortController,
               localAuthToken: true,
-              batchCallback: (data) => {
-                if (data.length > 0) {
-                  batchCallback(data);
-                }
-              },
               errorCallback: () => {
-                setNextMessages(null);
+                unmarkPrefetched(prefetchedKey);
               },
             });
           })
@@ -225,7 +217,6 @@ export default function usePrefetcher<T, E extends BaseError = BaseError>({
       generateNextArgs,
       generateMarkPrefetchedNextArgs,
       abortController,
-      (data) => setNextMessages((prev) => [...(prev || []), ...data]),
     );
 
     return () => {
@@ -249,7 +240,6 @@ export default function usePrefetcher<T, E extends BaseError = BaseError>({
       generatePreviousArgs,
       generateMarkPrefetchedPreviousArgs,
       abortController,
-      (data) => setPreviousMessages((prev) => [...data, ...(prev || [])]),
     );
 
     return () => {
@@ -265,12 +255,11 @@ export default function usePrefetcher<T, E extends BaseError = BaseError>({
   ]);
 
   return {
-    nextMessages,
-    previousMessages,
     prefetchedMap: prefetchedMap.current,
     cleanUpPrefetched,
     hasPrefetched,
     markPrefetched,
+    unmarkPrefetched,
   };
 }
 
