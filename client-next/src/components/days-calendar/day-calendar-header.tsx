@@ -20,11 +20,11 @@ export default function DayCalendarHeaderDate({
   const locale = useLocale() as Locale;
   const monthDays = dayCalendars.filter((d) => isSameMonth(d.date, date));
   function handleDateBackward() {
-    setDate(subMonths(date, 1));
+    setDate((prev) => subMonths(prev, 1));
   }
 
   function handleDateForward() {
-    setDate(addMonths(date, 1));
+    setDate((prev) => addMonths(prev, 1));
   }
   return (
     <div className="w-full flex flex-col md:flex-row gap-10 items-center justify-between px-2.5">

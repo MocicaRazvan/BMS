@@ -6,7 +6,7 @@ import {
   JoinedConversationUser,
   PageableResponse,
 } from "@/types/dto";
-import useFetchStream from "@/hoooks/useFetchStream";
+import useFetchStream from "@/lib/fetchers/useFetchStream";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn, fromDistanceToNowUtc } from "@/lib/utils";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";

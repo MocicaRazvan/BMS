@@ -2,7 +2,11 @@
 
 import { ColumnActionsTexts } from "@/texts/components/table";
 import { dayColumnActions, getColorsByDayType } from "@/types/constants";
-import { DataTable, DataTableTexts } from "@/components/table/data-table";
+import {
+  DataTable,
+  DataTableProps,
+  DataTableTexts,
+} from "@/components/table/data-table";
 import useFilterDropdown, {
   RadioFieldFilterCriteriaCallback,
   UseFilterDropdownTexts,
@@ -44,6 +48,7 @@ import {
   RadioSortDropDownWithExtraDummy,
 } from "@/components/common/radio-sort";
 import { useAuthUserMinRole } from "@/context/auth-user-min-role-context";
+import { ListSearchInputProps } from "@/components/forms/input-serach";
 
 export interface DayTableColumnsTexts {
   id: string;
@@ -93,7 +98,6 @@ export default function DaysTable({
   isSidebarOpen,
   search,
   extraUpdateSearchParams,
-  extraCriteria,
   forWhom,
   extraQueryParams,
   extraArrayQueryParam,
@@ -138,6 +142,7 @@ export default function DaysTable({
     resetCurrentPage,
     updateCreatedAtRange,
     updateUpdatedAtRange,
+    initialFilterValue,
   } = useList<ResponseWithEntityCount<CustomEntityModel<DayResponse>>>({
     path,
     extraQueryParams: {
@@ -152,6 +157,7 @@ export default function DaysTable({
     sizeOptions,
     sortingOptions,
     filterKey: "title",
+    debounceDelay: 0,
   });
 
   const data: ResponseWithEntityCount<DayResponse>[] = useMemo(
@@ -457,6 +463,39 @@ export default function DaysTable({
     [],
   );
 
+  const searchInputProps: ListSearchInputProps = useMemo(
+    () => ({
+      initialValue: initialFilterValue,
+      searchInputTexts: { placeholder: search },
+      onChange: updateFilterValue,
+      onClear: clearFilterValue,
+    }),
+    [clearFilterValue, initialFilterValue, search, updateFilterValue],
+  );
+  const radioSortProps = useMemo(
+    () => ({
+      setSort,
+      sort,
+      sortingOptions,
+      sortValue,
+      callback: resetCurrentPage,
+      filterKey: "title",
+    }),
+    [setSort, sort, sortingOptions, sortValue, resetCurrentPage],
+  );
+  const chartProps: DataTableProps<
+    ResponseWithEntityCount<DayResponse>
+  >["chartProps"] = useMemo(
+    () => ({
+      aggregatorConfig: {
+        "#": (_) => 1,
+        ...dayChartTypes,
+      },
+      dateField: "model.createdAt",
+    }),
+    [],
+  );
+
   if (error?.status) {
     return navigateToNotFound();
   }
@@ -473,28 +512,10 @@ export default function DaysTable({
         setPageInfo={setPageInfo}
         getRowId={getRowId}
         {...dataTableTexts}
-        searchInputProps={{
-          value: filter.title || "",
-          searchInputTexts: { placeholder: search },
-          onChange: updateFilterValue,
-          onClear: clearFilterValue,
-        }}
+        searchInputProps={searchInputProps}
         useRadioSort={false}
-        radioSortProps={{
-          setSort,
-          sort,
-          sortingOptions,
-          sortValue,
-          callback: resetCurrentPage,
-          filterKey: "title",
-        }}
-        chartProps={{
-          aggregatorConfig: {
-            "#": (_) => 1,
-            ...dayChartTypes,
-          },
-          dateField: "model.createdAt",
-        }}
+        radioSortProps={radioSortProps}
+        chartProps={chartProps}
         showChart={true}
       />
     </div>

@@ -7,7 +7,7 @@ import React, { ReactNode, useCallback, useEffect, useState } from "react";
 import { CustomEntityModel, DayResponse, DietType, UserDto } from "@/types/dto";
 import { NutritionalTableTexts } from "@/components/common/nutritional-table";
 import { IngredientPieChartTexts } from "@/components/charts/ingredient-macros-pie-chart";
-import useFetchStream from "@/hoooks/useFetchStream";
+import useFetchStream from "@/lib/fetchers/useFetchStream";
 import useClientNotFound from "@/hoooks/useClientNotFound";
 import DietBadge from "@/components/common/diet-badge";
 import { fetchStream } from "@/lib/fetchers/fetchStream";

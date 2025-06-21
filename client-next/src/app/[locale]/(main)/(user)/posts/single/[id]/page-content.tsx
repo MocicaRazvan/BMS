@@ -25,7 +25,7 @@ import { Separator } from "@/components/ui/separator";
 import { AnswerFromBodyFormTexts } from "@/components/forms/answer-from-body-form";
 import ItemBodyQa from "@/components/common/item-body-qa";
 import useTrackItemView from "@/hoooks/use-track-item-view";
-import useFetchStream from "@/hoooks/useFetchStream";
+import useFetchStream from "@/lib/fetchers/useFetchStream";
 import { useLocale } from "next-intl";
 import { Locale } from "@/navigation/navigation";
 import { useAuthUserMinRole } from "@/context/auth-user-min-role-context";

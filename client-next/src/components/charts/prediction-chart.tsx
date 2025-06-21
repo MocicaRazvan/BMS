@@ -1,6 +1,6 @@
 "use client";
 
-import useFetchStream from "@/hoooks/useFetchStream";
+import useFetchStream from "@/lib/fetchers/useFetchStream";
 import { MonthlyOrderSummaryPrediction } from "@/types/dto";
 import { useMemo, useState } from "react";
 import { format } from "date-fns";

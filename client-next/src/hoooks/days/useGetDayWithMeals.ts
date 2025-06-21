@@ -1,7 +1,7 @@
 import { Session } from "next-auth";
 import { useGetTitleBodyUser } from "@/hoooks/useGetTitleBodyUser";
 import { CustomEntityModel, DayResponse, MealResponse } from "@/types/dto";
-import useFetchStream from "@/hoooks/useFetchStream";
+import useFetchStream from "@/lib/fetchers/useFetchStream";
 import { useMemo } from "react";
 
 interface Args {

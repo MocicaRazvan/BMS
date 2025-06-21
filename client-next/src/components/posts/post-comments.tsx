@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import Loader from "@/components/ui/spinner";
 import { fetchStream } from "@/lib/fetchers/fetchStream";
-import useFetchStream from "@/hoooks/useFetchStream";
+import useFetchStream from "@/lib/fetchers/useFetchStream";
 import {
   CommentResponse,
   CustomEntityModel,

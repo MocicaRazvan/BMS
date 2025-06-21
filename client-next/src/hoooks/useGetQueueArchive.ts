@@ -1,5 +1,5 @@
 import { ArchiveQueue, QueueInformation } from "@/types/dto";
-import useFetchStream from "@/hoooks/useFetchStream";
+import useFetchStream from "@/lib/fetchers/useFetchStream";
 
 interface Args {
   queueName: ArchiveQueue;

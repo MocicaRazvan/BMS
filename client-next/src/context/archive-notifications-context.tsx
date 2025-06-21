@@ -10,7 +10,7 @@ import {
   useState,
 } from "react";
 import { Session } from "next-auth";
-import useFetchStream from "@/hoooks/useFetchStream";
+import useFetchStream from "@/lib/fetchers/useFetchStream";
 import useWebSocket from "react-use-websocket";
 import { useSession } from "next-auth/react";
 

@@ -1,11 +1,22 @@
 "use client";
-import { DataTable, DataTableTexts } from "@/components/table/data-table";
+import {
+  DataTable,
+  DataTableProps,
+  DataTableTexts,
+} from "@/components/table/data-table";
 import { ExtraTableProps } from "@/types/tables";
 import useList, { UseListProps } from "@/hoooks/useList";
 import { Link } from "@/navigation/navigation";
 import { useFormatter } from "next-intl";
 import { CustomEntityModel, OrderDtoWithAddress } from "@/types/dto";
-import React, { useCallback, useMemo, useState } from "react";
+import React, {
+  Dispatch,
+  memo,
+  SetStateAction,
+  useCallback,
+  useMemo,
+  useState,
+} from "react";
 import { ColumnDef } from "@tanstack/react-table";
 import { ColumnActionsTexts } from "@/texts/components/table";
 import { orderColumnActions } from "@/types/constants";
@@ -33,6 +44,8 @@ import {
 } from "@/components/common/radio-sort";
 import OverflowTextTooltip from "@/components/common/overflow-text-tooltip";
 import { useAuthUserMinRole } from "@/context/auth-user-min-role-context";
+import { ListSearchInputProps } from "@/components/forms/input-serach";
+
 export interface OrderTableColumnsTexts {
   id: string;
   date: string;
@@ -54,6 +67,18 @@ export type OrdersTableProps = ExtraTableProps & OrderTableTexts & UseListProps;
 
 const fieldKeys = ["country", "city", "state"] as const;
 
+const specialPDFColumns = [
+  {
+    key: "address",
+    handler: (value: object) => {
+      if ("country" in value && "city" in value && "state" in value) {
+        return `${value["country"]} ${value["city"]} ${value["state"]}`;
+      }
+      return "";
+    },
+  },
+];
+
 export default function OrdersTable({
   search,
   orderTableColumnsTexts,
@@ -62,7 +87,6 @@ export default function OrdersTable({
   extraQueryParams,
   extraArrayQueryParam,
   extraUpdateSearchParams,
-  extraCriteria,
   forWhom,
   mainDashboard,
   sortingOptions,
@@ -79,10 +103,6 @@ export default function OrdersTable({
 
   const { navigateToNotFound } = useClientNotFound();
 
-  const handleSearchKeyChange = useCallback((value: string) => {
-    setSearchKey(value as (typeof fieldKeys)[number]);
-  }, []);
-
   const updateSearchKeyParams = useCallback(
     (searchParams: URLSearchParams) => {
       fieldKeys.forEach((key) => {
@@ -92,38 +112,6 @@ export default function OrdersTable({
       });
     },
     [searchKey],
-  );
-
-  const searchKeyCriteria = useCallback(
-    (callback: () => void) => (
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant={"outline"} className="capitalize">
-            {`${search} ${searchKeyLabel[searchKey]}`}
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent>
-          <DropdownMenuRadioGroup
-            value={searchKey}
-            onValueChange={(e) => {
-              handleSearchKeyChange(e);
-              callback();
-            }}
-          >
-            {fieldKeys.map((key) => (
-              <DropdownMenuRadioItem
-                value={key}
-                key={key}
-                className="capitalize"
-              >
-                {`${search} ${searchKeyLabel[key]}`}
-              </DropdownMenuRadioItem>
-            ))}
-          </DropdownMenuRadioGroup>
-        </DropdownMenuContent>
-      </DropdownMenu>
-    ),
-    [handleSearchKeyChange, searchKey],
   );
 
   const {
@@ -147,12 +135,14 @@ export default function OrdersTable({
     updateFilterValueFromString,
     filterValue,
     updateCreatedAtRange,
+    initialFilterValue,
   } = useList<CustomEntityModel<OrderDtoWithAddress>>({
     path,
     sizeOptions,
     filterKey: searchKey,
     sortingOptions,
     extraUpdateSearchParams: updateSearchKeyParams,
+    debounceDelay: 0,
   });
 
   const data: OrderDtoWithAddress[] = useMemo(
@@ -369,10 +359,68 @@ export default function OrdersTable({
     [],
   );
 
+  const StaticExtraCriteria = useCallback(
+    () => (
+      <div className="order-[2]">
+        <OrderExtraCriteria
+          setSearchKey={setSearchKey}
+          search={search}
+          searchKey={searchKey}
+          callback={resetCurrentPage}
+          searchKeyLabel={searchKeyLabel}
+        />
+      </div>
+    ),
+    [search, searchKey, resetCurrentPage, searchKeyLabel],
+  );
+
+  const searchInputProps: ListSearchInputProps = useMemo(
+    () => ({
+      initialValue: initialFilterValue,
+      searchInputTexts: {
+        placeholder: `${search} ${searchKeyLabel[searchKey]}...`,
+      },
+      onChange: updateFilterValue,
+      onClear: clearFilterValue,
+    }),
+    [
+      clearFilterValue,
+      initialFilterValue,
+      search,
+      searchKey,
+      searchKeyLabel,
+      updateFilterValue,
+    ],
+  );
+
+  const radioSortProps = useMemo(
+    () => ({
+      setSort,
+      sort,
+      sortingOptions,
+      sortValue,
+      callback: resetCurrentPage,
+      filterKey: searchKey,
+    }),
+    [resetCurrentPage, searchKey, setSort, sort, sortValue, sortingOptions],
+  );
+  const chartProps: DataTableProps<OrderDtoWithAddress>["chartProps"] = useMemo(
+    () => ({
+      aggregatorConfig: {
+        [orderTableColumnsTexts.plans + " / 10"]: (p) =>
+          p.order.planIds.length / 10,
+        [orderTableColumnsTexts.plans +
+        " * " +
+        orderTableColumnsTexts.total +
+        " / 10"]: (p) => (p.order.planIds.length * p.order.total) / 100,
+      },
+      dateField: "order.createdAt",
+    }),
+    [orderTableColumnsTexts.plans, orderTableColumnsTexts.total],
+  );
   if (error?.status) {
     return navigateToNotFound();
   }
-
   return (
     <div className="px-1 pb-10 w-full  h-full space-y-8 lg:space-y-14">
       <DataTable
@@ -385,58 +433,66 @@ export default function OrdersTable({
         setPageInfo={setPageInfo}
         getRowId={getRowId}
         useRadioSort={false}
-        specialPDFColumns={[
-          {
-            key: "address",
-            handler: (value: object) => {
-              if ("country" in value && "city" in value && "state" in value) {
-                return `${value["country"]} ${value["city"]} ${value["state"]}`;
-              }
-              return "";
-            },
-          },
-        ]}
+        specialPDFColumns={specialPDFColumns}
         {...dataTableTexts}
-        searchInputProps={{
-          value: filter[searchKey] || "",
-          searchInputTexts: {
-            placeholder: `${search} ${searchKeyLabel[searchKey]}...`,
-          },
-          onChange: updateFilterValue,
-          onClear: clearFilterValue,
-        }}
-        radioSortProps={{
-          setSort,
-          sort,
-          sortingOptions,
-          sortValue,
-          callback: resetCurrentPage,
-          filterKey: searchKey,
-        }}
-        extraCriteria={
-          <div className="order-[2]">{searchKeyCriteria(resetCurrentPage)}</div>
-        }
-        chartProps={{
-          aggregatorConfig: {
-            [orderTableColumnsTexts.plans + " / 10"]: (p) =>
-              p.order.planIds.length / 10,
-            [orderTableColumnsTexts.plans +
-            " * " +
-            orderTableColumnsTexts.total +
-            " / 10"]: (p) => (p.order.planIds.length * p.order.total) / 100,
-          },
-          dateField: "order.createdAt",
-        }}
+        searchInputProps={searchInputProps}
+        radioSortProps={radioSortProps}
+        ExtraCriteria={StaticExtraCriteria}
+        chartProps={chartProps}
         showChart={true}
-        // rangeDateFilter={
-        // <CreationFilter
-        //   {...creationFilterTexts}
-        //   updateCreatedAtRange={updateCreatedAtRange}
-        //   hideUpdatedAt={true}
-        // />
-
-        // }
       />
     </div>
   );
 }
+
+const OrderExtraCriteria = memo(
+  ({
+    setSearchKey,
+    search,
+    searchKey,
+    callback,
+    searchKeyLabel,
+  }: Pick<OrderTableTexts, "search" | "searchKeyLabel"> & {
+    searchKey: (typeof fieldKeys)[number];
+    setSearchKey: Dispatch<SetStateAction<(typeof fieldKeys)[number]>>;
+    callback: () => void;
+  }) => {
+    const handleSearchKeyChange = useCallback(
+      (value: string) => {
+        setSearchKey(value as (typeof fieldKeys)[number]);
+      },
+      [setSearchKey],
+    );
+
+    return (
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant={"outline"} className="capitalize">
+            {`${search} ${searchKeyLabel[searchKey]}`}
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent>
+          <DropdownMenuRadioGroup
+            value={searchKey}
+            onValueChange={(e) => {
+              handleSearchKeyChange(e);
+              callback();
+            }}
+          >
+            {fieldKeys.map((key) => (
+              <DropdownMenuRadioItem
+                value={key}
+                key={key}
+                className="capitalize"
+              >
+                {`${search} ${searchKeyLabel[key]}`}
+              </DropdownMenuRadioItem>
+            ))}
+          </DropdownMenuRadioGroup>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    );
+  },
+);
+
+OrderExtraCriteria.displayName = "OrderExtraCriteria";

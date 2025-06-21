@@ -1,4 +1,4 @@
-import useFetchStream from "@/hoooks/useFetchStream";
+import useFetchStream from "@/lib/fetchers/useFetchStream";
 import {
   CustomEntityModel,
   DayResponse,

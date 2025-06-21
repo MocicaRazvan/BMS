@@ -2,7 +2,9 @@
 
 import {
   createContext,
+  Dispatch,
   ReactNode,
+  SetStateAction,
   useCallback,
   useContext,
   useEffect,
@@ -20,18 +22,28 @@ import {
   startOfWeek,
 } from "date-fns";
 import { CustomEntityModel, DayCalendarResponse } from "@/types/dto";
-import useFetchStream, { UseFetchStreamProps } from "@/hoooks/useFetchStream";
+import useFetchStream, {
+  UseFetchStreamProps,
+} from "@/lib/fetchers/useFetchStream";
 import { usePathname } from "@/navigation/navigation";
 import { useRouter } from "@/navigation/client-navigation";
 import { useSearchParams } from "next/navigation";
 import { useAuthUserMinRole } from "@/context/auth-user-min-role-context";
+import {
+  FlattenPrefetchedPredicate,
+  FlattenPrefetchGenerateKeyValue,
+  FlattenPrefetchGenerateMarkPrefetchedArgs,
+  PrefetchGenerateNewArgs,
+  UseFetchStreamPrefetcherReturn,
+  useFlattenPrefetcher,
+} from "@/lib/fetchers/use-prefetcher";
 
 interface DayCalendarContextType extends WithUser {
   dayCalendars: DayCalendarResponse[];
   addDayCalendar: (day: DayCalendarResponse) => void;
   removeDayCalendar: (dayId: number) => void;
   date: Date;
-  setDate: (date: Date) => void;
+  setDate: Dispatch<SetStateAction<Date>>;
   changeForDate: (day: DayCalendarResponse) => void;
   calendarDays: Date[];
   monthStart: Date;
@@ -71,6 +83,140 @@ const baseFetchAgs: UseFetchStreamProps = {
   path: "/daysCalendar/byRange",
   authToken: true,
 };
+
+const createPrefetchKey = ({
+  calendarStart,
+  calendarEnd,
+}: {
+  calendarStart: Date;
+  calendarEnd: Date;
+}) => {
+  return `${calendarStart.toString()}-${calendarEnd.toString()}`;
+};
+
+function useDayCalendarPrefetcher({
+  returned,
+  date,
+}: {
+  returned: UseFetchStreamPrefetcherReturn<
+    CustomEntityModel<DayCalendarResponse>
+  >;
+  date: Date;
+}) {
+  const { calendarStart, calendarEnd } = useMemo(
+    () => getDateRanges(date),
+    [date],
+  );
+
+  const nextDate = useMemo(() => addMonths(date, 1), [date]);
+
+  const { calendarStart: nextCalendarStart, calendarEnd: nextCalendarEnd } =
+    useMemo(() => getDateRanges(nextDate), [nextDate]);
+
+  const previousDate = useMemo(() => addMonths(date, -1), [date]);
+  const {
+    calendarStart: previousCalendarStart,
+    calendarEnd: previousCalendarEnd,
+  } = useMemo(() => getDateRanges(previousDate), [previousDate]);
+
+  const generateKeyValue: FlattenPrefetchGenerateKeyValue<
+    CustomEntityModel<DayCalendarResponse>
+  > = useCallback(
+    (messages) =>
+      createPrefetchKey({
+        calendarStart,
+        calendarEnd,
+      }),
+    [calendarEnd, calendarStart],
+  );
+  const nextPredicate: FlattenPrefetchedPredicate<
+    CustomEntityModel<DayCalendarResponse>
+  > = useCallback(
+    (messages, hasPrefetched) =>
+      !hasPrefetched(
+        createPrefetchKey({
+          calendarStart: nextCalendarStart,
+          calendarEnd: nextCalendarEnd,
+        }),
+      ),
+    [nextCalendarEnd, nextCalendarStart],
+  );
+
+  const generateNextArgs: PrefetchGenerateNewArgs<
+    CustomEntityModel<DayCalendarResponse>
+  > = useCallback(
+    (messages) => ({
+      ...baseFetchAgs,
+      queryParams: {
+        start: format(nextCalendarStart, "yyyy-MM-dd"),
+        end: format(nextCalendarEnd, "yyyy-MM-dd"),
+      },
+    }),
+    [nextCalendarEnd, nextCalendarStart],
+  );
+  const generateMarkPrefetchedNextArgs: FlattenPrefetchGenerateMarkPrefetchedArgs<
+    CustomEntityModel<DayCalendarResponse>
+  > = useCallback(
+    (messages, newArgs) =>
+      createPrefetchKey({
+        calendarStart: nextCalendarStart,
+        calendarEnd: nextCalendarEnd,
+      }),
+    [nextCalendarEnd, nextCalendarStart],
+  );
+
+  const previousPredicate: FlattenPrefetchedPredicate<
+    CustomEntityModel<DayCalendarResponse>
+  > = useCallback(
+    (messages, hasPrefetched) => {
+      return !hasPrefetched(
+        createPrefetchKey({
+          calendarStart: previousCalendarStart,
+          calendarEnd: previousCalendarEnd,
+        }),
+      );
+    },
+    [previousCalendarEnd, previousCalendarStart],
+  );
+
+  const generatePreviousArgs: PrefetchGenerateNewArgs<
+    CustomEntityModel<DayCalendarResponse>
+  > = useCallback(
+    (messages) => {
+      return {
+        ...baseFetchAgs,
+        queryParams: {
+          start: format(previousCalendarStart, "yyyy-MM-dd"),
+          end: format(previousCalendarEnd, "yyyy-MM-dd"),
+        },
+      };
+    },
+    [previousCalendarEnd, previousCalendarStart],
+  );
+
+  const generateMarkPrefetchedPreviousArgs: FlattenPrefetchGenerateMarkPrefetchedArgs<
+    CustomEntityModel<DayCalendarResponse>
+  > = useCallback(
+    (messages, newArgs) =>
+      createPrefetchKey({
+        calendarStart: previousCalendarStart,
+        calendarEnd: previousCalendarEnd,
+      }),
+    [previousCalendarEnd, previousCalendarStart],
+  );
+
+  return useFlattenPrefetcher<CustomEntityModel<DayCalendarResponse>>({
+    returned,
+    generateKeyValue,
+    nextPredicate,
+    generateNextArgs,
+    generateMarkPrefetchedNextArgs,
+    previousPredicate,
+    generatePreviousArgs,
+    generateMarkPrefetchedPreviousArgs,
+    preloadNext: true,
+  });
+}
 
 export default function DayCalendarProvider({ children }: Props) {
   const { authUser } = useAuthUserMinRole();
@@ -114,6 +260,8 @@ export default function DayCalendarProvider({ children }: Props) {
     manualFetcher,
     refetch,
     removeFromCache,
+    isAbsoluteFinished,
+    isRefetchClosure,
   } = useFetchStream<CustomEntityModel<DayCalendarResponse>>({
     ...baseFetchAgs,
     queryParams: {
@@ -128,34 +276,16 @@ export default function DayCalendarProvider({ children }: Props) {
     }
   }, [messages]);
 
-  const isoDate = date.toISOString();
-  useEffect(() => {
-    let isMounted = true;
-    const abortController = new AbortController();
-
-    if (isFinished && isMounted) {
-      const nextDate = addMonths(date, 1);
-      const { calendarStart, calendarEnd } = getDateRanges(nextDate);
-      manualFetcher({
-        fetchProps: {
-          ...baseFetchAgs,
-          queryParams: {
-            start: format(calendarStart, "yyyy-MM-dd"),
-            end: format(calendarEnd, "yyyy-MM-dd"),
-          },
-        },
-      }).catch((e) => {
-        console.error(e);
-      });
-    }
-    return () => {
-      isMounted = false;
-      if (abortController && !abortController?.signal?.aborted) {
-        abortController?.abort();
-        (abortController as any)?.customAbort?.();
-      }
-    };
-  }, [isoDate, isFinished]);
+  useDayCalendarPrefetcher({
+    returned: {
+      isRefetchClosure,
+      error,
+      messages,
+      isAbsoluteFinished,
+      manualFetcher,
+    },
+    date,
+  });
 
   const addDayCalendar = useCallback(
     (day: DayCalendarResponse) => {

@@ -10,7 +10,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { endOfMonth, format, startOfMonth } from "date-fns";
 import { dateFormat } from "@/hoooks/useDateRangeFilterParams";
 import { useLocale } from "next-intl";
-import useFetchStream from "@/hoooks/useFetchStream";
+import useFetchStream from "@/lib/fetchers/useFetchStream";
 import { DayCalendarResponse, DayCalendarTrackingStats } from "@/types/dto";
 import { ro } from "date-fns/locale";
 import { motion } from "framer-motion";

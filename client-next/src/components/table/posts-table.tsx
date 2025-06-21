@@ -15,12 +15,16 @@ import { CustomEntityModel, PostResponse } from "@/types/dto";
 
 import { ColumnDef } from "@tanstack/react-table";
 import { MoreHorizontal } from "lucide-react";
-import { useCallback, useMemo } from "react";
+import { Dispatch, memo, SetStateAction, useCallback, useMemo } from "react";
 
 import { ExtraTableProps } from "@/types/tables";
 import { format, parseISO } from "date-fns";
 import { Link } from "@/navigation/navigation";
-import { DataTable, DataTableTexts } from "@/components/table/data-table";
+import {
+  DataTable,
+  DataTableProps,
+  DataTableTexts,
+} from "@/components/table/data-table";
 import useList, { UseListProps } from "@/hoooks/useList";
 import useTagsExtraCriteria, {
   TagsExtraCriteriaWithCallback,
@@ -46,6 +50,8 @@ import {
 } from "@/components/common/radio-sort";
 import AlertDialogDeletePost from "@/components/dialogs/posts/delete-post";
 import { useAuthUserMinRole } from "@/context/auth-user-min-role-context";
+import { Option } from "@/components/ui/multiple-selector";
+import { ListSearchInputProps } from "@/components/forms/input-serach";
 
 export interface PostTableColumnsTexts {
   id: string;
@@ -120,6 +126,7 @@ export default function PostsTable({
     resetCurrentPage,
     updateUpdatedAtRange,
     updateCreatedAtRange,
+    initialFilterValue,
   } = useList<CustomEntityModel<PostResponse>>({
     path,
     extraQueryParams: {
@@ -133,6 +140,7 @@ export default function PostsTable({
     },
     sizeOptions,
     sortingOptions,
+    debounceDelay: 0,
   });
   const radioArgs = useMemo(
     () => ({
@@ -478,6 +486,57 @@ export default function PostsTable({
     [],
   );
 
+  const ExtraCriteria = useCallback(() => {
+    return (
+      <PostsExtraCriteria
+        tags={tags}
+        setTags={setTags}
+        useTagsExtraCriteriaTexts={useTagsExtraCriteriaTexts}
+        resetCurrentPage={resetCurrentPage}
+      />
+    );
+  }, [tags, setTags, useTagsExtraCriteriaTexts, resetCurrentPage]);
+
+  const searchInputProps: ListSearchInputProps = useMemo(
+    () => ({
+      initialValue: initialFilterValue,
+      searchInputTexts: { placeholder: search },
+      onChange: updateFilterValue,
+      onClear: clearFilterValue,
+    }),
+    [clearFilterValue, initialFilterValue, search, updateFilterValue],
+  );
+
+  const radioSortProps = useMemo(
+    () => ({
+      setSort,
+      sort,
+      sortingOptions,
+      sortValue,
+      callback: resetCurrentPage,
+      filterKey: "title",
+    }),
+    [setSort, sort, sortingOptions, sortValue, resetCurrentPage],
+  );
+
+  const chartProps: DataTableProps<PostResponse>["chartProps"] = useMemo(
+    () => ({
+      aggregatorConfig: {
+        "#": (_) => 1,
+        [postTableColumnsTexts.userLikes]: (p) => p.userLikes.length,
+        [postTableColumnsTexts.userDislikes]: (p) => p.userDislikes.length,
+        ["#" + postTableColumnsTexts.approved.header]: (p) =>
+          Number(p.approved),
+      },
+      dateField: "createdAt",
+    }),
+    [
+      postTableColumnsTexts.approved.header,
+      postTableColumnsTexts.userDislikes,
+      postTableColumnsTexts.userLikes,
+    ],
+  );
+
   if (error?.status) {
     return navigateToNotFound();
   }
@@ -495,51 +554,41 @@ export default function PostsTable({
         getRowId={getRowId}
         {...dataTableTexts}
         useRadioSort={false}
-        searchInputProps={{
-          value: filter.title || "",
-          searchInputTexts: { placeholder: search },
-          onChange: updateFilterValue,
-          onClear: clearFilterValue,
-        }}
-        radioSortProps={{
-          setSort,
-          sort,
-          sortingOptions,
-          sortValue,
-          callback: resetCurrentPage,
-          filterKey: "title",
-        }}
-        chartProps={{
-          aggregatorConfig: {
-            "#": (_) => 1,
-            [postTableColumnsTexts.userLikes]: (p) => p.userLikes.length,
-            [postTableColumnsTexts.userDislikes]: (p) => p.userDislikes.length,
-            ["#" + postTableColumnsTexts.approved.header]: (p) =>
-              Number(p.approved),
-          },
-          dateField: "createdAt",
-        }}
+        searchInputProps={searchInputProps}
+        radioSortProps={radioSortProps}
+        chartProps={chartProps}
         showChart={true}
-        extraCriteria={
-          <div className="flex items-start justify-center gap-8 flex-1 flex-wrap">
-            <div className="flex-1 flex-wrap">
-              <TagsExtraCriteriaWithCallback
-                texts={useTagsExtraCriteriaTexts}
-                setTags={setTags}
-                tags={tags}
-                callback={resetCurrentPage}
-              />
-            </div>
-          </div>
-        }
-        // rangeDateFilter={
-        //   <CreationFilter
-        //     {...creationFilterTexts}
-        //     updateCreatedAtRange={updateCreatedAtRange}
-        //     updateUpdatedAtRange={updateUpdatedAtRange}
-        //   />
-        // }
+        ExtraCriteria={ExtraCriteria}
       />
     </div>
   );
 }
+
+const PostsExtraCriteria = memo(
+  ({
+    useTagsExtraCriteriaTexts,
+    tags,
+    setTags,
+    resetCurrentPage,
+  }: {
+    tags: Option[];
+    setTags: Dispatch<SetStateAction<Option[]>>;
+    useTagsExtraCriteriaTexts: UseTagsExtraCriteriaTexts;
+    resetCurrentPage: () => void;
+  }) => {
+    return (
+      <div className="flex items-start justify-center gap-8 flex-1 flex-wrap">
+        <div className="flex-1 flex-wrap">
+          <TagsExtraCriteriaWithCallback
+            texts={useTagsExtraCriteriaTexts}
+            setTags={setTags}
+            tags={tags}
+            callback={resetCurrentPage}
+          />
+        </div>
+      </div>
+    );
+  },
+);
+
+PostsExtraCriteria.displayName = "PostsExtraCriteria";

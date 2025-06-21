@@ -16,7 +16,11 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { MoreHorizontal } from "lucide-react";
-import { DataTable, DataTableTexts } from "@/components/table/data-table";
+import {
+  DataTable,
+  DataTableProps,
+  DataTableTexts,
+} from "@/components/table/data-table";
 import useBinaryFilter, {
   RadioBinaryCriteriaWithCallback,
   UseBinaryTexts,
@@ -42,6 +46,7 @@ import {
   RadioSortDropDownWithExtraDummy,
 } from "@/components/common/radio-sort";
 import { useAuthUserMinRole } from "@/context/auth-user-min-role-context";
+import { ListSearchInputProps } from "@/components/forms/input-serach";
 
 export interface UserTableColumnsTexts {
   id: string;
@@ -76,7 +81,6 @@ export default function UsersTable({
   extraQueryParams,
   extraArrayQueryParam,
   extraUpdateSearchParams,
-  extraCriteria,
   path,
   sortingOptions,
   sizeOptions,
@@ -147,6 +151,7 @@ export default function UsersTable({
     clearFilterValue,
     resetCurrentPage,
     updateCreatedAtRange,
+    initialFilterValue,
   } = useList<CustomEntityModel<UserDto>>({
     path,
     extraQueryParams: {
@@ -166,6 +171,7 @@ export default function UsersTable({
     sizeOptions,
     sortingOptions,
     filterKey: "email",
+    debounceDelay: 0,
   });
 
   const data = useMemo(() => items.map((i) => i.content), [items]);
@@ -584,6 +590,43 @@ export default function UsersTable({
 
   const getRowId = useCallback((row: UserDto) => wrapItemToString(row.id), []);
 
+  const searchInputProps: ListSearchInputProps = useMemo(
+    () => ({
+      initialValue: initialFilterValue,
+      searchInputTexts: { placeholder: search },
+      onChange: updateFilterValue,
+      onClear: clearFilterValue,
+    }),
+    [clearFilterValue, initialFilterValue, search, updateFilterValue],
+  );
+  const radioSortProps = useMemo(
+    () => ({
+      setSort,
+      sort,
+      sortingOptions,
+      sortValue,
+      callback: resetCurrentPage,
+      filterKey: "email",
+    }),
+    [resetCurrentPage, setSort, sort, sortValue, sortingOptions],
+  );
+  const chartProps: DataTableProps<UserDto>["chartProps"] = useMemo(
+    () => ({
+      aggregatorConfig: {
+        "#": (_) => 1,
+        "#Trainer": (r) => (r.role === "ROLE_TRAINER" ? 1 : 0),
+        "#User": (r) => (r.role === "ROLE_USER" ? 1 : 0),
+        ["# " + userTableColumnsTexts.emailVerified.header]: (r) =>
+          Number(r.emailVerified),
+        "#Google": (r) => (r.provider === "GOOGLE" ? 1 : 0),
+        "#Github": (r) => (r.provider === "GITHUB" ? 1 : 0),
+        "#Local": (r) => (r.provider === "LOCAL" ? 1 : 0),
+      },
+      dateField: "createdAt",
+    }),
+    [userTableColumnsTexts.emailVerified.header],
+  );
+
   if (error?.status) {
     return navigateToNotFound();
   }
@@ -601,40 +644,9 @@ export default function UsersTable({
         getRowId={getRowId}
         {...dataTableTexts}
         useRadioSort={false}
-        searchInputProps={{
-          value: filter.email || "",
-          searchInputTexts: { placeholder: search },
-          onChange: updateFilterValue,
-          onClear: clearFilterValue,
-        }}
-        radioSortProps={{
-          setSort,
-          sort,
-          sortingOptions,
-          sortValue,
-          callback: resetCurrentPage,
-          filterKey: "email",
-        }}
-        extraCriteria={
-          <div className="flex items-start justify-center gap-8 flex-1 flex-wrap">
-            <div className="flex items-center justify-end gap-4 flex-1 flex-wrap">
-              {extraCriteria}
-            </div>
-          </div>
-        }
-        chartProps={{
-          aggregatorConfig: {
-            "#": (_) => 1,
-            "#Trainer": (r) => (r.role === "ROLE_TRAINER" ? 1 : 0),
-            "#User": (r) => (r.role === "ROLE_USER" ? 1 : 0),
-            ["# " + userTableColumnsTexts.emailVerified.header]: (r) =>
-              Number(r.emailVerified),
-            "#Google": (r) => (r.provider === "GOOGLE" ? 1 : 0),
-            "#Github": (r) => (r.provider === "GITHUB" ? 1 : 0),
-            "#Local": (r) => (r.provider === "LOCAL" ? 1 : 0),
-          },
-          dateField: "createdAt",
-        }}
+        searchInputProps={searchInputProps}
+        radioSortProps={radioSortProps}
+        chartProps={chartProps}
         showChart={true}
         // rangeDateFilter={
         //   <CreationFilter

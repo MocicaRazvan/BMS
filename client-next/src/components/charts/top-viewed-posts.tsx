@@ -8,9 +8,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { cn } from "@/lib/utils";
+import { cn, isDeepEqual } from "@/lib/utils";
 import { memo, useMemo, useState } from "react";
-import useFetchStream from "@/hoooks/useFetchStream";
+import useFetchStream from "@/lib/fetchers/useFetchStream";
 import { PostCountSummaryResponse } from "@/types/dto";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -58,7 +58,6 @@ const dateFormat = "dd-MM-yyyy";
 const formattedNow = format(now, dateFormat);
 const formattedOneMonthAgo = format(oneMonthAgo, dateFormat);
 function TopViewedPosts({ path, texts }: Props) {
-  console.log("rendering TopViewedPosts");
   const { authUser } = useAuthUserMinRole();
 
   const locale = useLocale() as Locale;
@@ -180,7 +179,7 @@ function TopViewedPosts({ path, texts }: Props) {
   );
 }
 
-const MemoizedTopViewPosts = memo(TopViewedPosts);
+const MemoizedTopViewPosts = memo(TopViewedPosts, isDeepEqual);
 MemoizedTopViewPosts.displayName = "TopViewedPosts";
 export default MemoizedTopViewPosts;
 

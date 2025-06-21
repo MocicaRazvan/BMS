@@ -1,6 +1,9 @@
 "use client";
 
-import { useFetchStream, UseFetchStreamProps } from "@/hoooks/useFetchStream";
+import {
+  useFetchStream,
+  UseFetchStreamProps,
+} from "@/lib/fetchers/useFetchStream";
 import LoadingSpinner from "@/components/common/loading-spinner";
 import React from "react";
 import {

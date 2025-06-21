@@ -10,7 +10,7 @@ import {
 
 export type FetchStreamAsyncGenerator<T> = Omit<
   FetchStreamProps<T>,
-  "successCallback" | "successArrayCallback"
+  "successCallback" | "successArrayCallback" | "updateOnEmpty"
 >;
 const EntryError = new Error("Entry is not defined; this should never happen");
 type FetchStreamResponse<T, E extends BaseError> = Awaited<
@@ -44,7 +44,6 @@ export function fetchStreamAsyncGenerator<
   acceptHeader = "application/x-ndjson",
   batchSize: initialBatchSize = 6,
   csrf,
-  updateOnEmpty = false,
   nextRequestConfig,
   onAbort,
   extraOptions,

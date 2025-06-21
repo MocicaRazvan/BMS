@@ -20,10 +20,10 @@ import {
 
 import { Button } from "@/components/ui/button";
 import {
+  ComponentType,
   Dispatch,
   memo,
   MutableRefObject,
-  ReactNode,
   SetStateAction,
   useEffect,
   useMemo,
@@ -42,7 +42,10 @@ import {
   DataTablePagination,
   DataTablePaginationTexts,
 } from "./data-table-pagination";
-import SearchInput, { SearchInputProps } from "@/components/forms/input-serach";
+import {
+  ListSearchInput,
+  ListSearchInputProps,
+} from "@/components/forms/input-serach";
 import RadioSort, {
   RadioSortProps,
   RadioSortTexts,
@@ -72,6 +75,7 @@ import useTableColResize, {
 import useTableRowSelection from "@/hoooks/table/use-table-row-selection";
 import dynamic from "next/dynamic";
 import ExportTableDropDown from "@/components/table/export-table-dropdown";
+import { useDeepCompareMemo } from "@/hoooks/use-deep-memo";
 
 export interface TableFilter {
   key: string;
@@ -93,7 +97,7 @@ export interface DataTableTexts {
   };
 }
 
-interface DataTableProps<TData extends Record<string, any>, TValue>
+export interface DataTableProps<TData extends Record<string, any>, TValue = any>
   extends DataTableTexts,
     Omit<UseExportTableArgs<TData, TValue>, "table"> {
   columns: ColumnDef<TData, TValue>[];
@@ -101,10 +105,10 @@ interface DataTableProps<TData extends Record<string, any>, TValue>
   isFinished: boolean;
   pageInfo: PageInfo;
   setPageInfo: Dispatch<SetStateAction<PageInfo>>;
-  searchInputProps: SearchInputProps;
+  searchInputProps: ListSearchInputProps;
   radioSortProps: Omit<RadioSortProps, "noSort">;
-  extraCriteria?: ReactNode;
-  rangeDateFilter?: ReactNode;
+  ExtraCriteria?: ComponentType;
+  // rangeDateFilter?: ReactNode;
   sizeOptions?: number[];
   getRowId: (row: TData) => string;
   useRadioSort?: boolean;
@@ -135,14 +139,14 @@ export function DataTable<TData extends Record<string, any>, TValue = any>({
   columnsLabel,
   searchInputProps,
   radioSortProps,
-  extraCriteria,
+  ExtraCriteria,
   radioSortTexts,
   exportLabel,
   sizeOptions,
   fileName,
   hidePDFColumnIds = [],
   specialPDFColumns = [],
-  rangeDateFilter,
+  // rangeDateFilter,
   lastLengthColumns = ["userLikes", "userDislikes"],
   dateColumns = ["createdAt", "updatedAt"],
   currencyColumns = ["price", "total"],
@@ -172,7 +176,7 @@ export function DataTable<TData extends Record<string, any>, TValue = any>({
     clearRowSelection,
   } = useTableRowSelection<TData>();
 
-  const finalColumns: ColumnDef<TData, TValue>[] = useMemo(
+  const finalColumns: ColumnDef<TData, TValue>[] = useDeepCompareMemo(
     () => [
       {
         id: "select",
@@ -206,7 +210,7 @@ export function DataTable<TData extends Record<string, any>, TValue = any>({
       },
       ...columns,
     ],
-    [JSON.stringify(columns)],
+    [columns],
   );
 
   const table = useReactTable({
@@ -270,14 +274,14 @@ export function DataTable<TData extends Record<string, any>, TValue = any>({
       <div className="flex flex-col lg:flex-row items-start py-4 flex-wrap gap-10">
         <div className="flex-1 flex items-start flex-col lg:flex-row justify-start gap-4">
           <div className="order-0">
-            <SearchInput {...searchInputProps} />
+            <ListSearchInput {...searchInputProps} />
           </div>
           {useRadioSort && (
             <div className="order-10">
               <RadioSort {...radioSortProps} {...radioSortTexts} />
             </div>
           )}
-          {extraCriteria && extraCriteria}
+          {ExtraCriteria && <ExtraCriteria />}
         </div>
         <div className="w-full lg:w-fit flex items-center justify-between gap-4 ml-auto">
           <ExportTableDropDown
@@ -293,35 +297,10 @@ export function DataTable<TData extends Record<string, any>, TValue = any>({
             persistedRows={persistedRows}
             selectedLength={selectedLength}
           />
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="ml-auto">
-                {columnsLabel}
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="p-1">
-              {table
-                .getAllColumns()
-                .filter((column) => column.getCanHide())
-                .map((column) => {
-                  return (
-                    <DropdownMenuCheckboxItem
-                      key={column.id}
-                      className="capitalize cursor-pointer"
-                      checked={column.getIsVisible()}
-                      onCheckedChange={(value) =>
-                        column.toggleVisibility(value)
-                      }
-                    >
-                      {column.id}
-                    </DropdownMenuCheckboxItem>
-                  );
-                })}
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <DropdownColumnsMenu columnsLabel={columnsLabel} table={table} />
         </div>
       </div>
-      {rangeDateFilter && <div className="w-full mb-4">{rangeDateFilter}</div>}
+      {/*{rangeDateFilter && <div className="w-full mb-4">{rangeDateFilter}</div>}*/}
       <div className="rounded-md border relative p-0">
         <AnimatePresence mode="wait">
           {selectedLength > 0 && (
@@ -452,6 +431,48 @@ export function DataTable<TData extends Record<string, any>, TValue = any>({
     </div>
   );
 }
+
+const DropdownColumnsMenuInner = <TData,>({
+  table,
+  columnsLabel,
+}: {
+  table: ReturnType<typeof useReactTable<TData>>;
+  columnsLabel: string;
+}) => {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="outline" className="ml-auto">
+          {columnsLabel}
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="p-1">
+        {table
+          .getAllColumns()
+          .filter((column) => column.getCanHide())
+          .map((column) => {
+            return (
+              <DropdownMenuCheckboxItem
+                key={column.id}
+                className="capitalize cursor-pointer"
+                checked={column.getIsVisible()}
+                onCheckedChange={(value) => column.toggleVisibility(value)}
+              >
+                {column.id}
+              </DropdownMenuCheckboxItem>
+            );
+          })}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+};
+
+const DropdownColumnsMenu = memo(
+  DropdownColumnsMenuInner,
+) as typeof DropdownColumnsMenuInner & {
+  displayName: string;
+};
+DropdownColumnsMenu.displayName = "DropdownColumnsMenu";
 
 interface DataTableBodyProp<TData extends Record<string, any>> {
   table: ReturnType<typeof useReactTable<TData>>;

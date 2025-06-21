@@ -1,4 +1,4 @@
-import useFetchStream from "@/hoooks/useFetchStream";
+import useFetchStream from "@/lib/fetchers/useFetchStream";
 import { CustomEntityModel, DayResponse, PlanResponse } from "@/types/dto";
 import { BaseError } from "@/types/responses";
 import { Option } from "@/components/ui/multiple-selector";

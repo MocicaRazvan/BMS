@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import useGetQueueArchive from "@/hoooks/useGetQueueArchive";
 import { BaseError, getArchiveQueuesNameByPrefix } from "@/types/responses";
 import { memo, ReactNode, useCallback, useEffect, useState } from "react";
-import { UseFetchStreamReturn } from "@/hoooks/useFetchStream";
+import { UseFetchStreamReturn } from "@/lib/fetchers/useFetchStream";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useFormatter } from "next-intl";
 import { Button } from "@/components/ui/button";
@@ -19,7 +19,7 @@ import { motion } from "framer-motion";
 import { Check, RefreshCw, XIcon } from "lucide-react";
 import { Locale } from "@/navigation/navigation";
 import { parseISO } from "date-fns";
-import { cn } from "@/lib/utils";
+import { cn, isDeepEqual } from "@/lib/utils";
 import {
   Tooltip,
   TooltipContent,
@@ -149,6 +149,7 @@ const ArchiveQueueCards = memo(
       </div>
     );
   },
+  isDeepEqual,
 );
 
 ArchiveQueueCards.displayName = "ArchiveQueueCards";

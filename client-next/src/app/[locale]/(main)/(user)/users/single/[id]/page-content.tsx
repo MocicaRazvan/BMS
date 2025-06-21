@@ -1,6 +1,6 @@
 "use client";
 
-import useFetchStream from "@/hoooks/useFetchStream";
+import useFetchStream from "@/lib/fetchers/useFetchStream";
 import { CustomEntityModel, UserDto } from "@/types/dto";
 import { BaseError } from "@/types/responses";
 import LoadingSpinner from "@/components/common/loading-spinner";

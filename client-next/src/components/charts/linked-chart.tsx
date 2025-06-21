@@ -101,7 +101,7 @@ const CHART_TYPES = {
 
 type ChartType = keyof typeof CHART_TYPES;
 
-type AggregatorConfig<TData> = {
+export type AggregatorConfig<TData> = {
   [key: string]: (item: TData) => number;
 };
 
@@ -550,7 +550,7 @@ export function LinkedChart<TData extends object = object>({
 }: LinkedChartProps<TData>) {
   const dateFormats = useMemo(
     () => getDateFormats(texts.dateFormatDropDown),
-    [JSON.stringify],
+    [texts.dateFormatDropDown],
   );
   const [selectedFormat, setSelectedFormat] = useState<DateFormat>(dateFormat);
   const [selectedChartType, setSelectedChartType] =

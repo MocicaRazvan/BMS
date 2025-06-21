@@ -1,19 +1,22 @@
 "use client";
 
 import { ResponseWithUserDtoEntity, TitleBodyImagesUserDto } from "@/types/dto";
-import { ReactNode, useMemo } from "react";
+import { ComponentType } from "react";
 import { cn } from "@/lib/utils";
 
 import { SortDirection } from "@/types/fetch-utils";
 
 import Loader from "@/components/ui/spinner";
-import ItemCard, { ItemCardTexts } from "@/components/list/item-card";
+import ItemCard, {
+  ExtraProps,
+  ItemCardTexts,
+} from "@/components/list/item-card";
 import {
   DataTablePagination,
   DataTablePaginationTexts,
 } from "@/components/table/data-table-pagination";
 
-import SearchInput from "@/components/forms/input-serach";
+import { ListSearchInput } from "@/components/forms/input-serach";
 import useList, {
   PartialFetchStreamProps,
   UseListProps,
@@ -28,6 +31,7 @@ import CreationFilter, {
 import { ClassValue } from "clsx";
 import dynamic from "next/dynamic";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useDeepCompareMemo } from "@/hoooks/use-deep-memo";
 
 export interface SortingOption {
   property: string;
@@ -45,6 +49,9 @@ export interface GridListTexts {
   creationFilterTexts: CreationFilterTexts;
 }
 
+export interface CriteriaProps {
+  callback: () => void;
+}
 interface GridListProps<T extends TitleBodyImagesUserDto>
   extends GridListTexts,
     UseListProps,
@@ -53,10 +60,10 @@ interface GridListProps<T extends TitleBodyImagesUserDto>
       "onAbort" | "successCallback" | "successArrayCallback"
     > {
   onItemClick?: (item: ResponseWithUserDtoEntity<T>) => void;
-  passExtraContent?: (item: ResponseWithUserDtoEntity<T>) => ReactNode;
-  passExtraHeader?: (item: ResponseWithUserDtoEntity<T>) => ReactNode;
-  passExtraImageOverlay?: (item: ResponseWithUserDtoEntity<T>) => ReactNode;
-  extraCriteriaWithCallBack?: (callback: () => void) => ReactNode;
+  ItemExtraContent?: ComponentType<ExtraProps<T>>;
+  ItemExtraHeader?: ComponentType<ExtraProps<T>>;
+  ItemImageOverlay?: ComponentType<ExtraProps<T>>;
+  ExtraCriteria?: ComponentType<CriteriaProps>;
   extraCriteriaClassname?: ClassValue;
   forbiddenSortingOptions?: string[];
   itemLinkCallback?: (item: ResponseWithUserDtoEntity<T>) => string;
@@ -74,12 +81,9 @@ const DynamicNoResultsLottie = dynamic(
 
 export default function GridList<T extends TitleBodyImagesUserDto>({
   onItemClick,
-  sizeOptions = [6, 12, 24],
+  sizeOptions = [6, 12, 18, 24],
   sortingOptions,
   path,
-  passExtraContent,
-  passExtraHeader,
-  extraCriteria,
   extraQueryParams = {},
   extraArrayQueryParam = {},
   extraUpdateSearchParams,
@@ -89,20 +93,22 @@ export default function GridList<T extends TitleBodyImagesUserDto>({
   search,
   dataTablePaginationTexts,
   radioSortTexts,
-  extraCriteriaWithCallBack,
-  passExtraImageOverlay,
   creationFilterTexts,
   extraCriteriaClassname,
   forbiddenSortingOptions = ["userDislikesLength"],
   itemLinkCallback,
+  ItemExtraContent,
+  ItemImageOverlay,
+  ItemExtraHeader,
+  ExtraCriteria,
   ...rest
 }: GridListProps<T>) {
-  const finalSortingOptions = useMemo(
+  const finalSortingOptions = useDeepCompareMemo(
     () =>
       sortingOptions.filter(
         ({ property }) => !forbiddenSortingOptions.includes(property),
       ),
-    [JSON.stringify(sortingOptions), JSON.stringify(forbiddenSortingOptions)],
+    [sortingOptions, forbiddenSortingOptions],
   );
   const {
     pageInfo,
@@ -120,6 +126,7 @@ export default function GridList<T extends TitleBodyImagesUserDto>({
     updateCreatedAtRange,
     updateUpdatedAtRange,
     nextMessages,
+    initialFilterValue,
   } = useList<ResponseWithUserDtoEntity<T>>({
     path,
     extraQueryParams,
@@ -127,6 +134,7 @@ export default function GridList<T extends TitleBodyImagesUserDto>({
     extraUpdateSearchParams,
     sizeOptions,
     sortingOptions: finalSortingOptions,
+    debounceDelay: 0,
     ...rest,
   });
 
@@ -134,8 +142,8 @@ export default function GridList<T extends TitleBodyImagesUserDto>({
     <div className="w-full ">
       <div className="w-full h-full space-y-5">
         <div className="my-10 w-full flex items-start justify-start flex-wrap gap-10 transition-all ">
-          <SearchInput
-            value={filter.title || ""}
+          <ListSearchInput
+            initialValue={initialFilterValue}
             onChange={updateFilterValue}
             onClear={clearFilterValue}
             searchInputTexts={{ placeholder: search }}
@@ -156,9 +164,7 @@ export default function GridList<T extends TitleBodyImagesUserDto>({
               callback={resetCurrentPage}
               filterKey="title"
             />
-            {extraCriteria && extraCriteria}
-            {extraCriteriaWithCallBack &&
-              extraCriteriaWithCallBack(resetCurrentPage)}
+            {ExtraCriteria && <ExtraCriteria callback={resetCurrentPage} />}
           </div>
         </div>
         <div>
@@ -208,10 +214,10 @@ export default function GridList<T extends TitleBodyImagesUserDto>({
                 onClick={() => {
                   onItemClick?.(item);
                 }}
-                generateExtraContent={passExtraContent}
-                generateExtraHeader={passExtraHeader}
+                ImageOverlay={ItemImageOverlay}
+                ExtraHeader={ItemExtraHeader}
+                ExtraContent={ItemExtraContent}
                 texts={itemCardTexts}
-                generateImageOverlay={passExtraImageOverlay}
                 itemHref={itemLinkCallback ? itemLinkCallback(item) : undefined}
               />
             </motion.div>

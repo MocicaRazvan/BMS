@@ -19,7 +19,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import useFetchStream from "@/hoooks/useFetchStream";
+import useFetchStream from "@/lib/fetchers/useFetchStream";
 import { BaseError } from "@/types/responses";
 import LoadingSpinner from "@/components/common/loading-spinner";
 import DietBadge from "@/components/common/diet-badge";
@@ -29,6 +29,7 @@ import { useAuthUserMinRole } from "@/context/auth-user-min-role-context";
 import { Skeleton } from "@/components/ui/skeleton";
 import dynamicWithPreload from "@/lib/dynamic-with-preload";
 import usePreloadDynamicComponents from "@/hoooks/use-prelod-dynamic-components";
+import { isDeepEqual } from "@/lib/utils";
 
 export interface TopPlansTexts {
   topChartWrapperTexts: TopChartWrapperTexts;
@@ -92,6 +93,7 @@ export const TopPlans = memo(
       />
     );
   },
+  isDeepEqual,
 );
 TopPlans.displayName = "TopPlans";
 export default TopPlans;

@@ -22,7 +22,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useFormatter } from "next-intl";
-import useFetchStream from "@/hoooks/useFetchStream";
+import useFetchStream from "@/lib/fetchers/useFetchStream";
 import { BaseError } from "@/types/responses";
 import LoadingSpinner from "@/components/common/loading-spinner";
 import {
@@ -38,6 +38,7 @@ import { BasePieChartProps } from "@/components/charts/top-trainers-pie-chart";
 import { Skeleton } from "@/components/ui/skeleton";
 import dynamicWithPreload from "@/lib/dynamic-with-preload";
 import usePreloadDynamicComponents from "@/hoooks/use-prelod-dynamic-components";
+import { isDeepEqual } from "@/lib/utils";
 
 const DynamicTopChartMeanRelative = dynamicWithPreload(
   () =>
@@ -88,7 +89,7 @@ const TopTrainers = memo(({ texts, locale }: Props) => {
       title={texts.title}
     />
   );
-});
+}, isDeepEqual);
 
 TopTrainers.displayName = "TopTrainers";
 export default TopTrainers;

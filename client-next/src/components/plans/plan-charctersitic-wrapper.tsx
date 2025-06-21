@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { format, subMonths } from "date-fns";
-import useFetchStream from "@/hoooks/useFetchStream";
+import useFetchStream from "@/lib/fetchers/useFetchStream";
 import { MonthPickerSelect } from "@/components/common/month-picker";
 import { Separator } from "@/components/ui/separator";
 

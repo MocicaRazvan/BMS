@@ -45,6 +45,7 @@ import {
   RadioSortDropDownWithExtraDummy,
 } from "@/components/common/radio-sort";
 import { useAuthUserMinRole } from "@/context/auth-user-min-role-context";
+import { ListSearchInputProps } from "@/components/forms/input-serach";
 
 export interface IngredientTableColumnTexts {
   id: string;
@@ -100,7 +101,6 @@ export default function IngredientsTable({
   extraQueryParams,
   extraArrayQueryParam,
   extraUpdateSearchParams,
-  extraCriteria,
   dataTableTexts,
   ingredientTableColumnTexts,
   isSidebarOpen = false,
@@ -150,6 +150,7 @@ export default function IngredientsTable({
     updateFilterValue,
     clearFilterValue,
     resetCurrentPage,
+    initialFilterValue,
   } = useList<
     ResponseWithEntityCount<
       CustomEntityModel<IngredientNutritionalFactResponse>
@@ -172,6 +173,7 @@ export default function IngredientsTable({
     sizeOptions,
     sortingOptions,
     filterKey: "name",
+    debounceDelay: 0,
   });
 
   const data: ResponseWithEntityCount<IngredientNutritionalFactResponse>[] =
@@ -633,6 +635,26 @@ export default function IngredientsTable({
       wrapItemToString(row.model.ingredient.id),
     [],
   );
+  const searchInputProps: ListSearchInputProps = useMemo(
+    () => ({
+      initialValue: initialFilterValue,
+      searchInputTexts: { placeholder: search },
+      onChange: updateFilterValue,
+      onClear: clearFilterValue,
+    }),
+    [clearFilterValue, initialFilterValue, search, updateFilterValue],
+  );
+  const radioSortProps = useMemo(
+    () => ({
+      setSort,
+      sort,
+      sortingOptions,
+      sortValue,
+      callback: resetCurrentPage,
+      filterKey: "name",
+    }),
+    [resetCurrentPage, setSort, sort, sortValue, sortingOptions],
+  );
 
   if (error?.status) {
     return navigateToNotFound();
@@ -652,38 +674,8 @@ export default function IngredientsTable({
         getRowId={getRowId}
         {...dataTableTexts}
         useRadioSort={false}
-        searchInputProps={{
-          value: filter.name || "",
-          searchInputTexts: { placeholder: search },
-          onChange: updateFilterValue,
-          onClear: clearFilterValue,
-        }}
-        radioSortProps={{
-          setSort,
-          sort,
-          sortingOptions,
-          sortValue,
-          callback: resetCurrentPage,
-          filterKey: "name",
-        }}
-        extraCriteria={
-          <div className="flex items-start justify-center gap-8 flex-1 flex-wrap">
-            <div className="flex items-center justify-end gap-4 flex-1 flex-wrap">
-              {extraCriteria}
-              {/*{dietTypeCriteriaCallback(resetCurrentPage)}*/}
-              {/*{isAdmin &&*/}
-              {/*  forWhom === "admin" &&*/}
-              {/*  fieldCriteriaCallBack(resetCurrentPage)}*/}
-            </div>
-          </div>
-        }
-        // rangeDateFilter={
-        //   <CreationFilter
-        //     {...creationFilterTexts}
-        //     updateCreatedAtRange={updateCreatedAtRange}
-        //     updateUpdatedAtRange={updateUpdatedAtRange}
-        //   />
-        // }
+        searchInputProps={searchInputProps}
+        radioSortProps={radioSortProps}
       />
     </div>
   );

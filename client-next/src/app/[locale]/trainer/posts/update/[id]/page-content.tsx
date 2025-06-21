@@ -1,7 +1,7 @@
 "use client";
 
 import PostForm, { PostFormProps } from "@/components/forms/post-form";
-import useFetchStream from "@/hoooks/useFetchStream";
+import useFetchStream from "@/lib/fetchers/useFetchStream";
 import { CustomEntityModel, PostResponse } from "@/types/dto";
 import { BaseError } from "@/types/responses";
 import LoadingSpinner from "@/components/common/loading-spinner";

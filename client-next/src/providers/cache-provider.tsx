@@ -61,7 +61,7 @@ class ClientCacheInstance {
     this.cache.delete(key);
   }
 
-  public removeArray(keys: string[]): void {
+  public removeArray(keys: Iterable<string>): void {
     for (const key of keys) {
       this.cache.delete(key);
     }
@@ -191,7 +191,7 @@ export const useCacheInvalidator = () => {
     clientCache.remove(key);
   }, []);
 
-  const removeArrayFromCache = useCallback((keys: string[]) => {
+  const removeArrayFromCache = useCallback((keys: Iterable<string>) => {
     clientCache.removeArray(keys);
   }, []);
 

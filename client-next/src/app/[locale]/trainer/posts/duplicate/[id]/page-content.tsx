@@ -1,6 +1,6 @@
 "use client";
 import { CustomEntityModel, PostResponse } from "@/types/dto";
-import useFetchStream from "@/hoooks/useFetchStream";
+import useFetchStream from "@/lib/fetchers/useFetchStream";
 import { BaseError } from "@/types/responses";
 import LoadingSpinner from "@/components/common/loading-spinner";
 import useClientNotFound from "@/hoooks/useClientNotFound";

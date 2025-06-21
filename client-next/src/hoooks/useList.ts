@@ -1,10 +1,10 @@
 import { SortDirection } from "@/types/fetch-utils";
 import {
   ChangeEvent,
-  ReactNode,
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import { usePathname } from "@/navigation/navigation";
@@ -14,8 +14,11 @@ import {
   makeSortFetchParams,
   makeSortString,
   parseSortString,
+  wrapItemToString,
 } from "@/lib/utils";
-import useFetchStream, { UseFetchStreamProps } from "@/hoooks/useFetchStream";
+import useFetchStream, {
+  UseFetchStreamProps,
+} from "@/lib/fetchers/useFetchStream";
 import {
   PageableResponse,
   PageInfo,
@@ -25,11 +28,20 @@ import {
 import { FetchStreamProps } from "@/lib/fetchers/fetchStream";
 import { useDebounceWithCallBack } from "@/hoooks/useDebounceWithCallback";
 import useDateRangeFilterParams from "@/hoooks/useDateRangeFilterParams";
+import { useDeepCompareMemo } from "@/hoooks/use-deep-memo";
+import { BaseError } from "@/types/responses";
+import usePrefetcher, {
+  PrefetchedPredicate,
+  PrefetchGenerateKeyValue,
+  PrefetchGenerateMarkPrefetchedArgs,
+  PrefetchGenerateNewArgs,
+  UseFetchStreamPrefetcherReturn,
+} from "@/lib/fetchers/use-prefetcher";
+import { v3 as murmurV3 } from "murmurhash";
 
 export interface UseListProps {
   sortingOptions: SortingOption[];
   path: string;
-  extraCriteria?: ReactNode;
   extraQueryParams?: Record<string, string>;
   extraArrayQueryParam?: Record<string, string[]>;
   extraUpdateSearchParams?: (searchParams: URLSearchParams) => void;
@@ -54,7 +66,12 @@ type Filter = { [key in FilterKey]?: string };
 
 export type PartialFetchStreamProps<T> = Omit<
   FetchStreamProps<T>,
-  "path" | "arrayQueryParam" | "queryParams" | "body" | "token"
+  | "path"
+  | "arrayQueryParam"
+  | "queryParams"
+  | "body"
+  | "token"
+  | "aboveController"
 >;
 
 //
@@ -70,6 +87,7 @@ export interface UseListArgs<T> extends PartialFetchStreamProps<T> {
   navigate?: boolean;
   defaultSort?: boolean;
   preloadNext?: boolean;
+  debounceDelay?: number;
 }
 
 type Constrained<T> = T extends TitleBodyDto
@@ -80,7 +98,7 @@ type Constrained<T> = T extends TitleBodyDto
       : never
     : never;
 
-const DEBOUNCE_DELAY = 500;
+const DEFAULT_DEBOUNCE_DELAY = 300;
 
 function getCreatedAtOption(sortingOptions: SortingOption[]) {
   return sortingOptions.find(
@@ -100,12 +118,14 @@ export default function useList<T>({
   navigate = true,
   defaultSort = true,
   preloadNext = true,
+  debounceDelay = DEFAULT_DEBOUNCE_DELAY,
   ...props
 }: UseListArgs<T>) {
   const pathname = usePathname();
   const router = useRouter();
   const currentSearchParams = useSearchParams();
   const filterValue = currentSearchParams.get(filterKey) || "";
+  const initialFilterValue = useRef(filterValue);
   const currentPage = parseInt(
     currentSearchParams.get("currentPage") || "0",
     10,
@@ -199,9 +219,10 @@ export default function useList<T>({
     arrayQueryParam: {
       ...(extraArrayQueryParam && extraArrayQueryParam),
     },
-    // todo verify
     ...props,
   };
+
+  const stableFetchArgs = useDeepCompareMemo(() => fetchArgs, [fetchArgs]);
 
   const {
     messages,
@@ -210,22 +231,33 @@ export default function useList<T>({
     refetch,
     manualFetcher,
     isAbsoluteFinished,
-  } = useFetchStream<PageableResponse<T>>(fetchArgs);
-  const [nextMessages, setNextMessages] = useState<
-    PageableResponse<T>[] | null
-  >(null);
+    isRefetchClosure,
+  } = useFetchStream<PageableResponse<T>>(stableFetchArgs);
+
+  const { nextMessages, previousMessages } = usePageInfoPrefetcher({
+    stableFetchArgs,
+    pageInfo,
+    preloadNext,
+    returned: {
+      isRefetchClosure,
+      messages,
+      error,
+      manualFetcher,
+      isAbsoluteFinished,
+    },
+  });
 
   const debounceCallback = useCallback(() => {
     setPageInfo((prev) => ({
       ...prev,
       currentPage: 0,
     }));
-    setSort([]);
+    // setSort([]);
   }, []);
 
   const debouncedFilter = useDebounceWithCallBack(
     filter,
-    DEBOUNCE_DELAY,
+    debounceDelay,
     debounceCallback,
   );
 
@@ -233,66 +265,6 @@ export default function useList<T>({
     () => messages?.map((m) => m.content) || [],
     [messages],
   );
-
-  useEffect(() => {
-    let isMounted = true;
-    const abortController = new AbortController();
-    if (
-      isAbsoluteFinished &&
-      preloadNext &&
-      messages &&
-      messages.length > 0 &&
-      messages[0].pageInfo.totalPages > 1 &&
-      messages[0].pageInfo.pageSize === pageInfo.pageSize &&
-      !error
-    ) {
-      const maxPage = messages[0].pageInfo.totalPages;
-      if (pageInfo.currentPage === maxPage || !isMounted) {
-        return;
-      }
-
-      const nextPage = pageInfo.currentPage + 1;
-      const newArgs = {
-        ...fetchArgs,
-        body: {
-          ...fetchArgs.body,
-          page: nextPage,
-        },
-      };
-      // console.log("newArgs", newArgs);
-      manualFetcher({
-        fetchProps: newArgs,
-        aboveController: abortController,
-        localAuthToken: true,
-        batchCallback: (data) => {
-          if (data.length > 0) {
-            setNextMessages((prev) => [...(prev || []), ...data]);
-          }
-        },
-        errorCallback: () => {
-          setNextMessages(null);
-        },
-      }).catch((e) => {
-        console.log("manualFetcher Error fetching", e);
-      });
-    }
-    return () => {
-      isMounted = false;
-      if (abortController && !abortController?.signal?.aborted) {
-        abortController?.abort();
-        (abortController as any)?.customAbort?.();
-      }
-    };
-  }, [
-    error,
-    JSON.stringify(fetchArgs),
-    manualFetcher,
-    messages,
-    pageInfo.currentPage,
-    pageInfo.pageSize,
-    preloadNext,
-    isAbsoluteFinished,
-  ]);
 
   useEffect(() => {
     if (messages && messages.length > 0 && messages[0].pageInfo) {
@@ -344,7 +316,6 @@ export default function useList<T>({
       ) {
         const createdAt = getCreatedAtOption(sortingOptions);
         if (createdAt) {
-          console.log("Setting defaultEffect sort to createdAt desc");
           setSort([createdAt]);
           updatedSearchParams.set(
             "sort",
@@ -423,7 +394,11 @@ export default function useList<T>({
   }, []);
 
   const updateFilterValue = useCallback(
-    (e: ChangeEvent<HTMLInputElement>) => {
+    (e: ChangeEvent<HTMLInputElement> | string) => {
+      if (typeof e === "string") {
+        setFilter({ [filterKey]: e });
+        return;
+      }
       setFilter({ [filterKey]: e.target.value });
     },
     [filterKey],
@@ -466,5 +441,144 @@ export default function useList<T>({
     createdAtRangeParams,
     nextMessages,
     refetchWithResetPage,
+    initialFilterValue: initialFilterValue.current,
+    previousMessages,
   };
+}
+
+export function usePageInfoPrefetcher<T, E extends BaseError>({
+  returned,
+  pageInfo,
+  preloadNext = true,
+  stableFetchArgs,
+}: {
+  returned: UseFetchStreamPrefetcherReturn<PageableResponse<T>, E>;
+  pageInfo: PageInfo;
+  preloadNext?: boolean;
+  stableFetchArgs: UseFetchStreamProps;
+}) {
+  const additionalKey = useDeepCompareMemo(
+    () =>
+      wrapItemToString(
+        murmurV3(
+          JSON.stringify({
+            ...stableFetchArgs.queryParams,
+            ...stableFetchArgs.arrayQueryParam,
+          }),
+        ),
+      ),
+    [stableFetchArgs.queryParams, stableFetchArgs.arrayQueryParam],
+  );
+
+  const generateKeyValue: PrefetchGenerateKeyValue<PageableResponse<T>> =
+    useCallback(
+      (messages) => [
+        pageInfo.pageSize.toString(),
+        pageInfo.currentPage.toString(),
+      ],
+      [pageInfo.pageSize, pageInfo.currentPage],
+    );
+  const nextPredicate: PrefetchedPredicate<PageableResponse<T>> = useCallback(
+    (messages, hasPrefetched) => {
+      if (
+        !(
+          messages.length > 0 &&
+          messages[0].pageInfo.totalPages > 1 &&
+          messages[0].pageInfo.pageSize === pageInfo.pageSize
+        )
+      ) {
+        return false;
+      }
+      const maxPage = messages[0].pageInfo.totalPages - 1;
+      if (pageInfo.currentPage === maxPage) {
+        return false;
+      }
+      const nextPage = pageInfo.currentPage + 1;
+      return !hasPrefetched([
+        pageInfo.pageSize.toString(),
+        nextPage.toString(),
+      ]);
+    },
+    [pageInfo.currentPage, pageInfo.pageSize],
+  );
+  const generateNextArgs: PrefetchGenerateNewArgs<PageableResponse<T>> =
+    useCallback(
+      (messages) => {
+        const nextPage = pageInfo.currentPage + 1;
+        return {
+          ...stableFetchArgs,
+          body: {
+            ...stableFetchArgs.body,
+            page: nextPage,
+          },
+        };
+      },
+      [pageInfo.currentPage, stableFetchArgs],
+    );
+  const generateMarkPrefetchedNextArgs: PrefetchGenerateMarkPrefetchedArgs<
+    PageableResponse<T>
+  > = useCallback(
+    (messages, newArgs) => [
+      pageInfo.pageSize.toString(),
+      (pageInfo.currentPage + 1).toString(),
+    ],
+    [pageInfo.pageSize, pageInfo.currentPage],
+  );
+  const previousPredicate: PrefetchedPredicate<PageableResponse<T>> =
+    useCallback(
+      (messages, hasPrefetched) => {
+        if (
+          !(
+            messages.length > 0 &&
+            messages[0].pageInfo.pageSize === pageInfo.pageSize &&
+            pageInfo.currentPage > 0
+          )
+        ) {
+          return false;
+        }
+        const prevPage = pageInfo.currentPage - 1;
+        return !hasPrefetched([
+          pageInfo.pageSize.toString(),
+          prevPage.toString(),
+        ]);
+      },
+      [pageInfo.currentPage, pageInfo.pageSize],
+    );
+
+  const generatePreviousArgs: PrefetchGenerateNewArgs<PageableResponse<T>> =
+    useCallback(
+      (messages) => {
+        const prevPage = pageInfo.currentPage - 1;
+        return {
+          ...stableFetchArgs,
+          body: {
+            ...stableFetchArgs.body,
+            page: prevPage,
+          },
+        };
+      },
+      [pageInfo.currentPage, stableFetchArgs],
+    );
+
+  const generateMarkPrefetchedPreviousArgs: PrefetchGenerateMarkPrefetchedArgs<
+    PageableResponse<T>
+  > = useCallback(
+    (messages, newArgs) => [
+      pageInfo.pageSize.toString(),
+      (pageInfo.currentPage - 1).toString(),
+    ],
+    [pageInfo.pageSize, pageInfo.currentPage],
+  );
+  return usePrefetcher<PageableResponse<T>, E>({
+    generateKeyValue,
+    nextPredicate,
+    generateNextArgs,
+    generateMarkPrefetchedNextArgs,
+    previousPredicate,
+    generatePreviousArgs,
+    generateMarkPrefetchedPreviousArgs,
+    preloadNext,
+    returned,
+    additionalKey,
+  });
 }

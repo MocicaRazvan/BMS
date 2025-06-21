@@ -12,7 +12,7 @@ import {
   DateRangePicker,
   DateRangePickerTexts,
 } from "@/components/ui/date-range-picker";
-import useFetchStream from "@/hoooks/useFetchStream";
+import useFetchStream from "@/lib/fetchers/useFetchStream";
 import { DailyOrderSummary } from "@/types/dto";
 import useClientNotFound from "@/hoooks/useClientNotFound";
 import { Separator } from "@/components/ui/separator";

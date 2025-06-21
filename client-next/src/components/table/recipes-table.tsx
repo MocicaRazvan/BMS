@@ -2,7 +2,11 @@
 
 import { ColumnActionsTexts } from "@/texts/components/table";
 import { recipeColumnActions } from "@/types/constants";
-import { DataTable, DataTableTexts } from "@/components/table/data-table";
+import {
+  DataTable,
+  DataTableProps,
+  DataTableTexts,
+} from "@/components/table/data-table";
 import { UseApprovedFilterTexts } from "@/components/list/useApprovedFilter";
 import useFilterDropdown, {
   RadioFieldFilterCriteriaCallback,
@@ -48,6 +52,7 @@ import {
   RadioSortDropDownWithExtraDummy,
 } from "@/components/common/radio-sort";
 import { useAuthUserMinRole } from "@/context/auth-user-min-role-context";
+import { ListSearchInputProps } from "@/components/forms/input-serach";
 
 export interface RecipeTableColumnsTexts {
   id: string;
@@ -139,6 +144,7 @@ export default function RecipeTable({
     resetCurrentPage,
     updateCreatedAtRange,
     updateUpdatedAtRange,
+    initialFilterValue,
   } = useList<ResponseWithEntityCount<CustomEntityModel<RecipeResponse>>>({
     path,
     extraQueryParams: {
@@ -153,6 +159,7 @@ export default function RecipeTable({
     },
     sizeOptions,
     sortingOptions,
+    debounceDelay: 0,
   });
 
   const data: ResponseWithEntityCount<RecipeResponse>[] = useMemo(
@@ -588,6 +595,43 @@ export default function RecipeTable({
       wrapItemToString(row.model.id),
     [],
   );
+  const searchInputProps: ListSearchInputProps = useMemo(
+    () => ({
+      initialValue: initialFilterValue,
+      searchInputTexts: { placeholder: search },
+      onChange: updateFilterValue,
+      onClear: clearFilterValue,
+    }),
+    [clearFilterValue, initialFilterValue, search, updateFilterValue],
+  );
+  const radioSortProps = useMemo(
+    () => ({
+      setSort,
+      sort,
+      sortingOptions,
+      sortValue,
+      callback: resetCurrentPage,
+      filterKey: "title",
+    }),
+    [setSort, sort, sortingOptions, sortValue, resetCurrentPage],
+  );
+  const chartProps: DataTableProps<
+    ResponseWithEntityCount<RecipeResponse>
+  >["chartProps"] = useMemo(
+    () => ({
+      aggregatorConfig: {
+        "#": (_) => 1,
+        "#omnivore": (r) => (r.model.type === "OMNIVORE" ? 1 : 0),
+        "#vegan": (r) => (r.model.type === "VEGAN" ? 1 : 0),
+        "#vegetarian": (r) => (r.model.type === "VEGETARIAN" ? 1 : 0),
+        ["#" + recipeTableColumnsTexts.approved.header]: (r) =>
+          Number(r.model.approved),
+        [recipeTableColumnsTexts.count + " / 10"]: (r) => r.count / 10,
+      },
+      dateField: "model.createdAt",
+    }),
+    [recipeTableColumnsTexts.approved.header, recipeTableColumnsTexts.count],
+  );
 
   if (error?.status) {
     return navigateToNotFound();
@@ -606,40 +650,9 @@ export default function RecipeTable({
         getRowId={getRowId}
         {...dataTableTexts}
         useRadioSort={false}
-        searchInputProps={{
-          value: filter.title || "",
-          searchInputTexts: { placeholder: search },
-          onChange: updateFilterValue,
-          onClear: clearFilterValue,
-        }}
-        radioSortProps={{
-          setSort,
-          sort,
-          sortingOptions,
-          sortValue,
-          callback: resetCurrentPage,
-          filterKey: "title",
-        }}
-        extraCriteria={
-          <div className="flex items-start justify-center gap-8 flex-1 flex-wrap">
-            <div className="flex items-center justify-end gap-4 flex-1 flex-wrap">
-              {/*{dietTypeCriteriaCallback(resetCurrentPage)}*/}
-              {/*{approvedFieldCriteriaCallBack(resetCurrentPage)}*/}
-            </div>
-          </div>
-        }
-        chartProps={{
-          aggregatorConfig: {
-            "#": (_) => 1,
-            "#omnivore": (r) => (r.model.type === "OMNIVORE" ? 1 : 0),
-            "#vegan": (r) => (r.model.type === "VEGAN" ? 1 : 0),
-            "#vegetarian": (r) => (r.model.type === "VEGETARIAN" ? 1 : 0),
-            ["#" + recipeTableColumnsTexts.approved.header]: (r) =>
-              Number(r.model.approved),
-            [recipeTableColumnsTexts.count + " / 10"]: (r) => r.count / 10,
-          },
-          dateField: "model.createdAt",
-        }}
+        searchInputProps={searchInputProps}
+        radioSortProps={radioSortProps}
+        chartProps={chartProps}
         showChart={true}
         // rangeDateFilter={
         //   <CreationFilter

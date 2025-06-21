@@ -3,6 +3,7 @@
 import { SortingOption } from "@/hoooks/useList";
 import {
   Fragment,
+  memo,
   ReactNode,
   SetStateAction,
   useCallback,
@@ -424,58 +425,65 @@ export function RadioSortDropDownWithExtraDummy({
   );
 }
 
-export default function RadioSort({
-  setSort,
-  sortValue,
-  sort,
-  sortingOptions,
-  noSort,
-  callback,
-  useDefaultSort = true,
-  filterKey,
-  clasName,
-}: RadioSortProps) {
-  const { handleValueChange, isDefaultSort } = useRadioSort({
-    useDefaultSort,
-    sortValue,
-    sortingOptions,
+const RadioSort = memo(
+  ({
     setSort,
+    sortValue,
+    sort,
+    sortingOptions,
+    noSort,
     callback,
+    useDefaultSort = true,
     filterKey,
-  });
-  if (sortingOptions?.length === 0) return null;
+    clasName,
+  }: RadioSortProps) => {
+    const { handleValueChange, isDefaultSort } = useRadioSort({
+      useDefaultSort,
+      sortValue,
+      sortingOptions,
+      setSort,
+      callback,
+      filterKey,
+    });
+    console.log("RadioSort");
 
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="outline">{`${sort[0]?.text || noSort} `}</Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent
-        className={cn("w-56 overflow-y-auto max-h-[250px]", clasName)}
-      >
-        <DropdownMenuRadioGroup
-          value={sortValue}
-          onValueChange={handleValueChange}
+    if (sortingOptions?.length === 0) return null;
+
+    return (
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="outline">{`${sort[0]?.text || noSort} `}</Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent
+          className={cn("w-56 overflow-y-auto max-h-[250px]", clasName)}
         >
-          {sortingOptions.map(({ property, direction, text }, i) => (
-            <Fragment key={`${property}-${direction}`}>
-              <DropdownMenuRadioItem
-                value={`${property}-${direction}`}
-                icon={direction === "asc" ? <ArrowUp /> : <ArrowDown />}
-                iconClassnames={"w-4 h-4 fill-current"}
-                disabled={
-                  isDefaultSort &&
-                  property === "createdAt" &&
-                  direction === "desc"
-                }
-              >
-                {text}
-              </DropdownMenuRadioItem>
-              {i !== sortingOptions.length - 1 && <DropdownMenuSeparator />}
-            </Fragment>
-          ))}
-        </DropdownMenuRadioGroup>
-      </DropdownMenuContent>
-    </DropdownMenu>
-  );
-}
+          <DropdownMenuRadioGroup
+            value={sortValue}
+            onValueChange={handleValueChange}
+          >
+            {sortingOptions.map(({ property, direction, text }, i) => (
+              <Fragment key={`${property}-${direction}`}>
+                <DropdownMenuRadioItem
+                  value={`${property}-${direction}`}
+                  icon={direction === "asc" ? <ArrowUp /> : <ArrowDown />}
+                  iconClassnames={"w-4 h-4 fill-current"}
+                  disabled={
+                    isDefaultSort &&
+                    property === "createdAt" &&
+                    direction === "desc"
+                  }
+                >
+                  {text}
+                </DropdownMenuRadioItem>
+                {i !== sortingOptions.length - 1 && <DropdownMenuSeparator />}
+              </Fragment>
+            ))}
+          </DropdownMenuRadioGroup>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    );
+  },
+);
+
+RadioSort.displayName = "RadioSort";
+export default RadioSort;

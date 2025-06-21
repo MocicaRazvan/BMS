@@ -10,8 +10,6 @@ import { ArchiveQueueCardsTexts } from "@/components/archive/archive-queue-card"
 import { ArchiveQueuesTableTexts } from "@/components/table/archive-queues-table";
 import SidebarContentLayout from "@/components/sidebar/sidebar-content-layout";
 import Heading from "@/components/common/heading";
-import { Suspense } from "react";
-import LoadingSpinner from "@/components/common/loading-spinner";
 import ArchiveContent, {
   AugmentedArchiveQueuePrefix,
 } from "@/components/archive/archive-content";
@@ -61,21 +59,19 @@ export default async function AdminArchiveQueues({
     >
       <div className="w-full h-full bg-background">
         <Heading {...texts} />
-        <Suspense fallback={<LoadingSpinner />}>
-          <h2 className="text-lg md:text-xl tracking-tight font-semibold mt-8 mb-3">
-            {texts.archiveTableTitle}
-          </h2>
-          <ArchiveQueuesTableWrapper texts={texts.archiveQueueTableTexts} />
-          <Separator className="my-10" />
-          <div className="mt-10 h-full">
-            <ArchiveContent
-              locale={locale}
-              archiveTexts={texts.archiveTexts}
-              archiveTitle={texts.archiveTitle}
-              selectItems={texts.selectItems}
-            />
-          </div>
-        </Suspense>
+        <h2 className="text-lg md:text-xl tracking-tight font-semibold mt-8 mb-3">
+          {texts.archiveTableTitle}
+        </h2>
+        <ArchiveQueuesTableWrapper texts={texts.archiveQueueTableTexts} />
+        <Separator className="my-10" />
+        <div className="mt-10 h-full">
+          <ArchiveContent
+            locale={locale}
+            archiveTexts={texts.archiveTexts}
+            archiveTitle={texts.archiveTitle}
+            selectItems={texts.selectItems}
+          />
+        </div>
       </div>
     </SidebarContentLayout>
   );

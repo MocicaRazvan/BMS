@@ -1,17 +1,18 @@
-import { PlanResponse, ResponseWithUserDtoEntity } from "@/types/dto";
+import { PlanResponse } from "@/types/dto";
 import { cn } from "@/lib/utils";
 import AddToCartBtn, {
   AddToCartBtnTexts,
 } from "@/components/plans/add-to-cart-btn";
-import { Session } from "next-auth";
 import { NumberFormatOptions } from "use-intl";
 import { ThumbsUp } from "lucide-react";
 import React from "react";
+import { ExtraProps } from "@/components/list/item-card";
+import { WithUser } from "@/lib/user";
 
-export const PlanImageOverlay = (
-  item: ResponseWithUserDtoEntity<PlanResponse>,
-  objective: string,
-) => {
+export const PlanImageOverlay = ({
+  item,
+  objective,
+}: ExtraProps<PlanResponse> & { objective: string }) => {
   const colorMap = {
     VEGAN: "success",
     OMNIVORE: "secondary",
@@ -34,27 +35,34 @@ export const PlanImageOverlay = (
   );
 };
 
-export const PlanExtraContent = (
-  { model: { content } }: ResponseWithUserDtoEntity<PlanResponse>,
-  authUser: NonNullable<Session["user"]>,
-  addToCartBtnTexts: AddToCartBtnTexts,
-) => (
+export const PlanExtraContent = ({
+  item: {
+    model: { content },
+  },
+  authUser,
+  addToCartBtnTexts,
+}: ExtraProps<PlanResponse> &
+  WithUser & {
+    addToCartBtnTexts: AddToCartBtnTexts;
+  }) => (
   <div className="mt-10">
     <AddToCartBtn authUser={authUser} plan={content} {...addToCartBtnTexts} />
   </div>
 );
 
-export const PlanExtraHeader = (
-  {
+export const PlanExtraHeader = ({
+  item: {
     model: {
       content: { price, userLikes },
     },
-  }: ResponseWithUserDtoEntity<PlanResponse>,
+  },
+  formatFunction,
+}: ExtraProps<PlanResponse> & {
   formatFunction: (
     value: number | bigint,
     formatOrOptions?: string | NumberFormatOptions,
-  ) => string,
-) => (
+  ) => string;
+}) => (
   <div className="flex items-center gap-3.5 justify-start max-w-[300px]">
     <div className="flex items-start justify-center gap-0.5 font-semibold text-success">
       <span className="mt-0.5">{userLikes.length}</span>

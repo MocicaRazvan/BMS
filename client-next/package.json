@@ -5,10 +5,12 @@
   "scripts": {
     "dev": " next dev",
     "build": "next build",
-    "ci:build": "next lint --quiet && next build --no-lint",
+    "ci:build": "npm run lint:quiet && next build --no-lint",
     "start": " next start",
     "lint": "next lint",
-    "lint-errors": "next lint --quiet"
+    "lint:quiet": "next lint --quiet --no-cache",
+    "lint:errors": "npm run type-check && npm run lint:quiet",
+    "type-check": "tsc --noEmit"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.1.0",

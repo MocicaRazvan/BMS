@@ -5,11 +5,11 @@ import { BaseError, isBaseError } from "@/types/responses";
 import { AcceptHeader } from "@/types/fetch-utils";
 import { isDeepEqual, stableStringify, wrapItemToString } from "@/lib/utils";
 import { v3 as murmurV3 } from "murmurhash";
-import useCachedValue from "@/hoooks/use-cached-value";
 import { deduplicateFetchStream } from "@/lib/fetchers/deduplicateFetchStream";
 import { FetchStreamProps } from "@/lib/fetchers/fetchStream";
-import { useCacheInvalidator } from "@/providers/cache-provider";
 import { useDeepCompareMemo } from "@/hoooks/use-deep-memo";
+import useFetchStreamState from "@/lib/fetchers/use-fetch-stream-state";
+import { CustomAbortController } from "@/lib/fetchers/custom-abort-controller";
 
 export interface UseFetchStreamProps {
   path: string;
@@ -26,6 +26,8 @@ export interface UseFetchStreamProps {
   refetchOnFocus?: boolean;
   focusDelay?: number;
   trigger?: boolean;
+  aboveController?: CustomAbortController;
+  onBlurCallback?: () => void;
 }
 type ManualFetcher<T> = (args: {
   fetchProps: Omit<
@@ -34,7 +36,7 @@ type ManualFetcher<T> = (args: {
   >;
   localAuthToken?: boolean;
   batchCallback?: (data: T[], batchIndex: number) => void;
-  aboveController?: AbortController;
+  aboveController?: CustomAbortController;
   errorCallback?: (error: unknown) => void;
 }) => Promise<void>;
 export interface UseFetchStreamReturn<T, E> {
@@ -49,23 +51,29 @@ export interface UseFetchStreamReturn<T, E> {
   isAbsoluteFinished: boolean;
   manualFetcher: ManualFetcher<T>;
   resetFinishes: () => void;
+  isRefetchClosure: boolean;
 }
 
 function generateKey(
-  path: string,
-  stableStringifyQueryParams: string,
-  stableStringifyArrayQueryParam: string,
-  stableStringifyBody: string,
-  stableStringifyCustomHeaders: string,
-  batchSize: number | undefined,
-  method: "GET" | "POST" | "PUT" | "DELETE" | "HEAD" | "PATCH" | undefined,
-  acceptHeader: "application/x-ndjson" | "application/json" | undefined,
+  args: Pick<
+    UseFetchStreamProps,
+    | "path"
+    | "queryParams"
+    | "arrayQueryParam"
+    | "body"
+    | "customHeaders"
+    | "batchSize"
+    | "method"
+    | "acceptHeader"
+  >,
 ) {
-  return wrapItemToString(
-    murmurV3(
-      `${path}-${stableStringifyQueryParams}-${stableStringifyArrayQueryParam}-${stableStringifyBody}-${stableStringifyCustomHeaders}-${batchSize}-${method}-${acceptHeader}`,
-    ),
-  );
+  const stringified = Object.keys(args)
+    .sort()
+    .reduce(
+      (acc, key) => acc + stableStringify(args[key as keyof typeof args]) + "-",
+      "",
+    );
+  return wrapItemToString(murmurV3(stringified));
 }
 
 export function useFetchStream<T = unknown, E extends BaseError = BaseError>({
@@ -83,86 +91,82 @@ export function useFetchStream<T = unknown, E extends BaseError = BaseError>({
   refetchOnFocus = true,
   focusDelay = 300,
   trigger = true,
+  onBlurCallback,
+  aboveController: unstableAboveController,
 }: UseFetchStreamProps): UseFetchStreamReturn<T, E> {
-  const stableStringifyQueryParams = useDeepCompareMemo(
-    () => stableStringify(queryParams),
+  const aboveController = useMemo(() => unstableAboveController, []);
+  const stableQueryParams = useDeepCompareMemo(
+    () => queryParams,
     [queryParams],
   );
-  const stableStringifyArrayQueryParam = useDeepCompareMemo(
-    () => stableStringify(arrayQueryParam),
+  const stableArrayQueryParam = useDeepCompareMemo(
+    () => arrayQueryParam,
     [arrayQueryParam],
   );
-  const stableStringifyBody = useDeepCompareMemo(
-    () => stableStringify(body),
-    [body],
-  );
-  const stableStringifyCustomHeaders = useDeepCompareMemo(
-    () => stableStringify(customHeaders),
+  const stableBody = useDeepCompareMemo(() => body, [body]);
+  const stableCustomHeaders = useDeepCompareMemo(
+    () => customHeaders,
     [customHeaders],
   );
 
   const cacheKey = useMemo(
     () =>
-      generateKey(
+      generateKey({
         path,
-        stableStringifyQueryParams,
-        stableStringifyArrayQueryParam,
-        stableStringifyBody,
-        stableStringifyCustomHeaders,
-        batchSize,
         method,
-        acceptHeader,
-      ),
+        body: stableBody,
+        customHeaders: stableCustomHeaders,
+        queryParams: stableQueryParams,
+        arrayQueryParam: stableArrayQueryParam,
+        batchSize,
+      }),
     [
       path,
-      stableStringifyQueryParams,
-      stableStringifyArrayQueryParam,
-      stableStringifyBody,
-      stableStringifyCustomHeaders,
-      batchSize,
       method,
-      acceptHeader,
+      stableBody,
+      stableCustomHeaders,
+      stableQueryParams,
+      stableArrayQueryParam,
+      batchSize,
     ],
   );
   const {
-    value: messages,
+    messages,
     resetValueAndCache,
     isCacheKeyNotEmpty,
     handleBatchUpdate,
     finalSyncValueWithCache,
     replaceBatchInForAnyKey,
     removeFromCache,
-  } = useCachedValue<T>(cacheKey, batchSize);
-
-  const { removeArrayFromCache } = useCacheInvalidator();
-  const [error, setError] = useState<E | null>(null);
-  const [isFinished, setIsFinished] = useState<boolean>(false);
+    removeArrayFromCache,
+    isFinished,
+    isAbsoluteFinished,
+    error,
+    resetFinishes,
+    resetAdditionalArgs,
+    setErrorWithFinishes,
+    setFinishes,
+  } = useFetchStreamState<T, E>({ cacheKey, batchSize });
   const [refetchState, setRefetchState] = useState(false);
   const { data: session, status: sessionStatus } = useSession();
-  const [isAbsoluteFinished, setIsAbsoluteFinished] = useState(false);
-  const [manualKeys, setManualKeys] = useState<string[]>([]);
+  const maybeSessionToken = session?.user?.token;
   // for some very rare edge cases, but it can be removed now with dedup
   const refetchClosure = useRef(false);
-
-  const resetFinishes = useCallback(() => {
-    setIsFinished(false);
-    setIsAbsoluteFinished(false);
-  }, []);
+  const historyKeys = useRef<Set<string>>(new Set());
 
   const refetch = useCallback(() => {
     resetValueAndCache();
-    removeArrayFromCache(manualKeys);
-    setManualKeys([]);
-    setError(null);
-    resetFinishes();
+    removeArrayFromCache(historyKeys.current);
+    resetAdditionalArgs();
     setRefetchState((prevIndex) => !prevIndex);
     refetchClosure.current = true;
-  }, [manualKeys, removeArrayFromCache, resetFinishes, resetValueAndCache]);
+    historyKeys.current.clear();
+  }, [removeArrayFromCache, resetAdditionalArgs, resetValueAndCache]);
 
   const fetcher = useCallback(
     async (
       isMounted: boolean,
-      abortController: AbortController,
+      abortController: CustomAbortController,
       fetchProps: FetchStreamProps<T>,
     ) => {
       if (!isMounted) return;
@@ -172,14 +176,7 @@ export function useFetchStream<T = unknown, E extends BaseError = BaseError>({
           dedupKey: cacheKey,
         });
 
-        if (
-          "abort" in fetchFunction &&
-          typeof fetchFunction.abort === "function"
-        ) {
-          (abortController as any).customAbort = () => {
-            (fetchFunction as any)?.abort?.();
-          };
-        }
+        abortController.setAdditionalAbortFromFetch(fetchFunction);
 
         for await (const batchItem of fetchFunction) {
           if ("data" in batchItem) {
@@ -187,13 +184,16 @@ export function useFetchStream<T = unknown, E extends BaseError = BaseError>({
           } else {
             const res = batchItem.response;
             if (res.isFinished) {
-              setIsFinished(res.isFinished);
-              setIsAbsoluteFinished(true);
+              setFinishes({
+                isFinished: true,
+                isAbsoluteFinished: true,
+              });
               if (res.error) {
                 throw res.error;
               } else {
                 finalSyncValueWithCache();
               }
+              break;
             }
           }
         }
@@ -204,14 +204,28 @@ export function useFetchStream<T = unknown, E extends BaseError = BaseError>({
         if (err && err instanceof DOMException && err?.name === "AbortError") {
           return;
         } else if (isBaseError(err)) {
-          setError(err as E);
+          setErrorWithFinishes({
+            error: err as E,
+            isFinished: true,
+            isAbsoluteFinished: true,
+          });
           resetValueAndCache();
+        } else {
+          setFinishes({
+            isFinished: true,
+            isAbsoluteFinished: true,
+          });
         }
-        setIsFinished(true);
-        setIsAbsoluteFinished(true);
       }
     },
-    [cacheKey, finalSyncValueWithCache, handleBatchUpdate, resetValueAndCache],
+    [
+      cacheKey,
+      finalSyncValueWithCache,
+      handleBatchUpdate,
+      resetValueAndCache,
+      setErrorWithFinishes,
+      setFinishes,
+    ],
   );
 
   const manualFetcher: ManualFetcher<T> = useCallback(
@@ -225,10 +239,13 @@ export function useFetchStream<T = unknown, E extends BaseError = BaseError>({
       if (sessionStatus === "loading") {
         return;
       }
-      if (localAuthToken && !session?.user?.token) {
+      if (localAuthToken && !maybeSessionToken) {
         throw new Error("No token");
       }
 
+      const abortController = aboveController || new CustomAbortController();
+      const token =
+        localAuthToken && maybeSessionToken ? maybeSessionToken : "";
       const updatedProps: typeof fetchProps = {
         body: null,
         arrayQueryParam: {},
@@ -239,30 +256,21 @@ export function useFetchStream<T = unknown, E extends BaseError = BaseError>({
         ...fetchProps,
       };
 
-      const stableStringifyQueryParams = stableStringify(
-        updatedProps.queryParams,
-      );
-      const stableStringifyArrayQueryParam = stableStringify(
-        updatedProps.arrayQueryParam,
-      );
-      const stableStringifyBody = stableStringify(updatedProps.body);
-      const abortController = aboveController || new AbortController();
-      const token =
-        localAuthToken && session?.user?.token ? session.user.token : "";
+      const key = generateKey({
+        path: updatedProps.path,
+        method: updatedProps.method,
+        body: updatedProps.body,
+        customHeaders: updatedProps.customHeaders,
+        queryParams: updatedProps.queryParams,
+        arrayQueryParam: updatedProps.arrayQueryParam,
+        batchSize: updatedProps.batchSize,
+      });
 
-      const key = generateKey(
-        updatedProps.path,
-        stableStringifyQueryParams,
-        stableStringifyArrayQueryParam,
-        stableStringifyBody,
-        stableStringifyCustomHeaders,
-        batchSize,
-        method,
-        acceptHeader,
-      );
+      if (historyKeys.current.has(key)) {
+        return;
+      }
 
-      setManualKeys((prev) => [...prev, key]);
-
+      historyKeys.current.add(key);
       try {
         const fetchFunction = await deduplicateFetchStream<T, E>({
           ...updatedProps,
@@ -272,14 +280,8 @@ export function useFetchStream<T = unknown, E extends BaseError = BaseError>({
             priority: "low",
           },
         });
-        if (
-          "abort" in fetchFunction &&
-          typeof fetchFunction.abort === "function"
-        ) {
-          (abortController as any).customAbort = () => {
-            (fetchFunction as any)?.abort?.();
-          };
-        }
+
+        abortController.setAdditionalAbortFromFetch(fetchFunction);
 
         for await (const batchItem of fetchFunction) {
           if ("data" in batchItem) {
@@ -289,30 +291,23 @@ export function useFetchStream<T = unknown, E extends BaseError = BaseError>({
             }
           } else {
             const res = batchItem.response;
-            if (res.isFinished && res.error) {
-              throw res.error;
+            if (res.isFinished) {
+              if (res.error) {
+                throw res.error;
+              }
+              break;
             }
           }
         }
       } catch (err) {
         if (abortController && !abortController?.signal?.aborted) {
           abortController?.abort();
-          (abortController as any)?.customAbort?.();
         }
         errorCallback?.(err);
         throw err;
       }
     },
-    [
-      sessionStatus,
-      session?.user?.token,
-      stableStringifyCustomHeaders,
-      batchSize,
-      method,
-      acceptHeader,
-      path,
-      replaceBatchInForAnyKey,
-    ],
+    [sessionStatus, maybeSessionToken, replaceBatchInForAnyKey],
   );
 
   useEffect(() => {
@@ -321,26 +316,29 @@ export function useFetchStream<T = unknown, E extends BaseError = BaseError>({
     if (sessionStatus === "loading") {
       return;
     }
-    if (authToken && !session?.user?.token) {
+    if (authToken && !maybeSessionToken) {
       return () => {
         console.log("No token");
       };
     }
-    setError(null);
     const localFinished = refetchClosure.current ? false : isCacheKeyNotEmpty();
-    setIsFinished(localFinished);
-    setIsAbsoluteFinished(false);
 
-    const token = authToken && session?.user?.token ? session.user.token : "";
-    const abortController = new AbortController();
+    setErrorWithFinishes({
+      error: null,
+      isFinished: localFinished,
+      isAbsoluteFinished: false,
+    });
+
+    const token = authToken && maybeSessionToken ? maybeSessionToken : "";
+    const abortController = aboveController || new CustomAbortController();
 
     const fetchProps: FetchStreamProps<T> = {
       path,
       method,
-      body,
-      customHeaders,
-      queryParams,
-      arrayQueryParam,
+      body: stableBody,
+      customHeaders: stableCustomHeaders,
+      queryParams: stableQueryParams,
+      arrayQueryParam: stableArrayQueryParam,
       token,
       cache,
       aboveController: abortController,
@@ -356,11 +354,14 @@ export function useFetchStream<T = unknown, E extends BaseError = BaseError>({
       if (!isMounted) return;
       try {
         await fetcher(isMounted, abortController, fetchProps);
+        historyKeys.current.add(cacheKey);
       } catch (e) {
         if (isBaseError(e)) {
-          setError((prev) => (isDeepEqual(prev, e) ? prev : (e as E)));
-          setIsFinished((prev) => prev || true);
-          setIsAbsoluteFinished((prev) => prev || true);
+          setErrorWithFinishes({
+            error: (prev) => (isDeepEqual(prev, e) ? prev : (e as E)),
+            isFinished: true,
+            isAbsoluteFinished: true,
+          });
         }
       } finally {
         if (refetchClosure.current) {
@@ -381,7 +382,6 @@ export function useFetchStream<T = unknown, E extends BaseError = BaseError>({
           !abortController?.signal?.aborted
         ) {
           abortController?.abort();
-          (abortController as any)?.customAbort?.();
           // resetValueAndCache();
         }
       } catch (e) {
@@ -396,7 +396,6 @@ export function useFetchStream<T = unknown, E extends BaseError = BaseError>({
     path,
     method,
     authToken,
-    session?.user?.token,
     sessionStatus,
     refetchState,
     batchSize,
@@ -405,12 +404,15 @@ export function useFetchStream<T = unknown, E extends BaseError = BaseError>({
     useAbortController,
     isCacheKeyNotEmpty,
     fetcher,
-    stableStringifyQueryParams,
-    stableStringifyArrayQueryParam,
-    stableStringifyBody,
-    stableStringifyCustomHeaders,
     cache,
     trigger,
+    setErrorWithFinishes,
+    maybeSessionToken,
+    stableBody,
+    stableCustomHeaders,
+    stableQueryParams,
+    stableArrayQueryParam,
+    aboveController,
   ]);
 
   useEffect(() => {
@@ -418,12 +420,13 @@ export function useFetchStream<T = unknown, E extends BaseError = BaseError>({
     let unfocusedTime: number | null = null;
     const handleBlur = () => {
       unfocusedTime = Date.now();
+      onBlurCallback?.();
     };
     const handleFocus = () => {
       if (unfocusedTime !== null) {
         const unfocusedDuration = Date.now() - unfocusedTime;
         if (unfocusedDuration >= focusDelay * 1000) {
-          setRefetchState((prev) => !prev);
+          refetch();
         }
         unfocusedTime = null;
       }
@@ -435,7 +438,7 @@ export function useFetchStream<T = unknown, E extends BaseError = BaseError>({
       window.removeEventListener("blur", handleBlur);
       window.removeEventListener("focus", handleFocus);
     };
-  }, [focusDelay, refetchOnFocus]);
+  }, [focusDelay, onBlurCallback, refetch, refetchOnFocus]);
 
   return {
     messages,
@@ -449,6 +452,7 @@ export function useFetchStream<T = unknown, E extends BaseError = BaseError>({
     isAbsoluteFinished,
     manualFetcher,
     resetFinishes,
+    isRefetchClosure: refetchClosure.current,
   };
 }
 

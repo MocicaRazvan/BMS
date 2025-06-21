@@ -3,7 +3,7 @@
 import { Link, Locale } from "@/navigation/navigation";
 import { memo, useState } from "react";
 import { CustomEntityModel, TopUsersSummary, UserDto } from "@/types/dto";
-import useFetchStream from "@/hoooks/useFetchStream";
+import useFetchStream from "@/lib/fetchers/useFetchStream";
 import { BaseError } from "@/types/responses";
 import LoadingSpinner from "@/components/common/loading-spinner";
 
@@ -25,6 +25,7 @@ import OverflowTextTooltip from "@/components/common/overflow-text-tooltip";
 import { Skeleton } from "@/components/ui/skeleton";
 import dynamicWithPreload from "@/lib/dynamic-with-preload";
 import usePreloadDynamicComponents from "@/hoooks/use-prelod-dynamic-components";
+import { isDeepEqual } from "@/lib/utils";
 
 const DynamicUserPieChart = dynamicWithPreload(
   () =>
@@ -89,6 +90,7 @@ const TopUsers = memo(
       />
     );
   },
+  isDeepEqual,
 );
 
 TopUsers.displayName = "TopUsers";

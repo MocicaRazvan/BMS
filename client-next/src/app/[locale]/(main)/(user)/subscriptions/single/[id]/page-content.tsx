@@ -30,7 +30,7 @@ import ItemBodyQa from "@/components/common/item-body-qa";
 import AddDayToCalendar, {
   AddDayToCalendarTexts,
 } from "@/components/forms/add-day-to-calendar";
-import useFetchStream from "@/hoooks/useFetchStream";
+import useFetchStream from "@/lib/fetchers/useFetchStream";
 import PageContainer from "@/components/common/page-container";
 
 export interface SingleSubscriptionTexts {

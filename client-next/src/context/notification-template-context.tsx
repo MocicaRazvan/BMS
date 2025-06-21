@@ -6,7 +6,7 @@ import {
 } from "@/types/dto";
 import React from "react";
 import { Client } from "@stomp/stompjs";
-import useFetchStream from "@/hoooks/useFetchStream";
+import useFetchStream from "@/lib/fetchers/useFetchStream";
 import { Session } from "next-auth";
 import { useSubscription } from "react-stomp-hooks";
 import { WithUser } from "@/lib/user";
@@ -162,7 +162,6 @@ export const notificationReducer = <
   switch (action.type) {
     case "ADD":
       if (!action.payload) return state;
-      console.log("ADD_REDUCER", action.payload.id);
       const notifExists = state.notifications.find(
         ({ id }) => id === action.payload.id,
       );
@@ -284,7 +283,6 @@ export const notificationReducer = <
     case "REMOVE_BY_REFERENCE":
       // return state;
       //todo in backend
-      console.log("REMOVE BY REFERENCE", action.payload.referenceId);
       if (!action.payload) return state;
       const [
         remainingByReference,
@@ -320,11 +318,6 @@ export const notificationReducer = <
       Object.entries(totalByReferenceType).forEach(([key, value]) => {
         updatedStateRemoveByReference.totalByType[key] -= value;
       });
-      console.log(
-        "REMOVE BY REFERENCE",
-        state.notifications,
-        updatedStateRemoveByReference.notifications,
-      );
 
       return updatedStateRemoveByReference;
 
@@ -442,9 +435,7 @@ const NotificationTemplateAuthUser = <
   useSubscription(
     `/queue/notification-${notificationName}-added-${authUser?.email}`,
     (message) => {
-      console.log("total added", notificationName);
       const newMessage = JSON.parse(message.body) satisfies T;
-      console.log("ADD", newMessage.id);
       dispatch({ type: "ADD", payload: newMessage });
     },
   );
@@ -457,19 +448,13 @@ const NotificationTemplateAuthUser = <
       let referenceId;
 
       if (typeof newMessage === "string") {
-        console.log("referenceId string");
         referenceId = parseInt(newMessage);
       } else if (newMessage?.reference?.id) {
-        console.log("referenceId obj");
         referenceId = newMessage.reference.id;
       }
 
       if (!referenceId) return;
 
-      console.log("referenceId", referenceId);
-
-      console.log("total removed", newMessage);
-      console.log("REMOVE BY REFERENCE", newMessage);
       dispatch({
         type: "REMOVE_BY_REFERENCE",
         payload: {

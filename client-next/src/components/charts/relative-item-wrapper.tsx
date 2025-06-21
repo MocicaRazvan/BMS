@@ -16,7 +16,7 @@ import {
 } from "@/types/dto";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
-import useFetchStream from "@/hoooks/useFetchStream";
+import useFetchStream from "@/lib/fetchers/useFetchStream";
 import { useEffect, useMemo, useState } from "react";
 import Loader from "@/components/ui/spinner";
 import { ChartConfig } from "@/components/ui/chart";

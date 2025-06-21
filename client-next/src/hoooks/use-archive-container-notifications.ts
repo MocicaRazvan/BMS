@@ -2,7 +2,7 @@
 import { Session } from "next-auth";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { NotifyContainerAction } from "@/types/dto";
-import useFetchStream from "@/hoooks/useFetchStream";
+import useFetchStream from "@/lib/fetchers/useFetchStream";
 import useWebSocket from "react-use-websocket";
 import { isNotifyContainerAction } from "@/context/archive-queue-update-context";
 

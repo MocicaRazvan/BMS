@@ -1,7 +1,7 @@
 "use client";
 import { cn, truncate } from "@/lib/utils";
 import noImg from "@/assets/noImage.jpg";
-import { ReactNode, useMemo } from "react";
+import { ComponentType, useMemo } from "react";
 import { ResponseWithUserDtoEntity, TitleBodyImagesUserDto } from "@/types/dto";
 import { format, parseISO } from "date-fns";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
@@ -13,23 +13,25 @@ export interface ItemCardTexts {
   author: string;
 }
 
+export interface ExtraProps<T> {
+  item: ResponseWithUserDtoEntity<T>;
+}
 interface Props<T extends TitleBodyImagesUserDto> {
   item: ResponseWithUserDtoEntity<T>;
-  generateExtraContent?: (item: ResponseWithUserDtoEntity<T>) => ReactNode;
-  generateExtraHeader?: (item: ResponseWithUserDtoEntity<T>) => ReactNode;
-  generateImageOverlay?: (item: ResponseWithUserDtoEntity<T>) => ReactNode;
+  ExtraContent?: ComponentType<ExtraProps<T>>;
+  ExtraHeader?: ComponentType<ExtraProps<T>>;
+  ImageOverlay?: ComponentType<ExtraProps<T>>;
   texts: ItemCardTexts;
   eagerImage?: boolean;
   maxTitleLength?: number;
   itemHref?: string;
   onClick?: () => void;
 }
-
 export default function ItemCard<T extends TitleBodyImagesUserDto>({
   item,
-  generateExtraContent,
-  generateExtraHeader,
-  generateImageOverlay,
+  ExtraContent,
+  ExtraHeader,
+  ImageOverlay,
   eagerImage = true,
   texts: { author },
   maxTitleLength = 75,
@@ -78,7 +80,7 @@ export default function ItemCard<T extends TitleBodyImagesUserDto>({
         ) : (
           ImageComp
         )}
-        {generateImageOverlay && generateImageOverlay(item)}
+        {ImageOverlay && <ImageOverlay item={item} />}
       </div>
       <div className="flex flex-col gap-3 mt-1 w-full">
         <div className="flex flex-col gap-1 w-full h-[285px] overflow-hidden py-2.5">
@@ -93,7 +95,7 @@ export default function ItemCard<T extends TitleBodyImagesUserDto>({
             </OverflowLengthTextTooltip>
           </div>
           <div className="w-full h-full flex items-center justify-between gap-2">
-            {generateExtraHeader && generateExtraHeader(item)}
+            {ExtraHeader && <ExtraHeader item={item} />}
             <p className="ml-auto">
               {format(parseISO(item.model.content.createdAt), "dd/MM/yyyy")}
             </p>
@@ -118,8 +120,10 @@ export default function ItemCard<T extends TitleBodyImagesUserDto>({
             </div>
           </div>
         </Link>
-        {generateExtraContent && (
-          <div className=" w-full">{generateExtraContent(item)}</div>
+        {ExtraContent && (
+          <div className=" w-full">
+            <ExtraContent item={item} />
+          </div>
         )}
       </div>
     </div>

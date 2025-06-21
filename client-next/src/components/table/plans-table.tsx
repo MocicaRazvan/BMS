@@ -2,7 +2,11 @@
 
 import { ColumnActionsTexts } from "@/texts/components/table";
 import { planColumnActions } from "@/types/constants";
-import { DataTable, DataTableTexts } from "@/components/table/data-table";
+import {
+  DataTable,
+  DataTableProps,
+  DataTableTexts,
+} from "@/components/table/data-table";
 import { UseApprovedFilterTexts } from "@/components/list/useApprovedFilter";
 import useBinaryFilter, {
   RadioBinaryCriteriaWithCallback,
@@ -52,6 +56,7 @@ import {
   RadioSortDropDownWithExtraDummy,
 } from "@/components/common/radio-sort";
 import { useAuthUserMinRole } from "@/context/auth-user-min-role-context";
+import { ListSearchInputProps } from "@/components/forms/input-serach";
 
 export interface PlanTableColumnsTexts {
   id: string;
@@ -116,7 +121,6 @@ export default function PlansTable({
   extraQueryParams,
   extraArrayQueryParam,
   extraUpdateSearchParams,
-  extraCriteria,
   objectiveDropDownTexts,
   creationFilterTexts,
   forWhom,
@@ -183,6 +187,7 @@ export default function PlansTable({
     resetCurrentPage,
     updateUpdatedAtRange,
     updateCreatedAtRange,
+    initialFilterValue,
   } = useList<ResponseWithEntityCount<CustomEntityModel<PlanResponse>>>({
     path,
     extraQueryParams: {
@@ -203,6 +208,7 @@ export default function PlansTable({
     sizeOptions,
     sortingOptions,
     filterKey: "title",
+    debounceDelay: 0,
   });
 
   const data: ResponseWithEntityCount<PlanResponse>[] = useMemo(
@@ -693,9 +699,11 @@ export default function PlansTable({
       planTableColumnsTexts.display.header,
       planTableColumnsTexts.display.true,
       planTableColumnsTexts.display.false,
+      planTableColumnsTexts.createdAt,
       planTableColumnsTexts.count,
       planTableColumnsTexts.price,
-      planTableColumnsTexts.createdAt,
+      planTableColumnsTexts.userLikes,
+      planTableColumnsTexts.userDislikes,
       planTableColumnsTexts.updatedAt,
       planTableColumnsTexts.approved,
       planTableColumnsTexts.actions,
@@ -709,9 +717,9 @@ export default function PlansTable({
       objectiveTypeItems,
       displayFilterTexts,
       setDisplay,
-      formatIntl,
       creationFilterTexts,
       updateCreatedAtRange,
+      formatIntl,
       updateUpdatedAtRange,
       useApprovedFilterTexts.approved,
       useApprovedFilterTexts.notApproved,
@@ -734,6 +742,51 @@ export default function PlansTable({
       wrapItemToString(row.model.id),
     [],
   );
+  const searchInputProps: ListSearchInputProps = useMemo(
+    () => ({
+      initialValue: initialFilterValue,
+      searchInputTexts: { placeholder: search },
+      onChange: updateFilterValue,
+      onClear: clearFilterValue,
+    }),
+    [clearFilterValue, initialFilterValue, search, updateFilterValue],
+  );
+  const radioSortProps = useMemo(
+    () => ({
+      setSort,
+      sort,
+      sortingOptions,
+      sortValue,
+      callback: resetCurrentPage,
+      filterKey: "title",
+    }),
+    [setSort, sort, sortingOptions, sortValue, resetCurrentPage],
+  );
+  const chartProps: DataTableProps<
+    ResponseWithEntityCount<PlanResponse>
+  >["chartProps"] = useMemo(
+    () => ({
+      aggregatorConfig: {
+        "#": (_) => 1,
+        "#omnivore": (r) => (r.model.type === "OMNIVORE" ? 1 : 0),
+        "#vegan": (r) => (r.model.type === "VEGAN" ? 1 : 0),
+        "#vegetarian": (r) => (r.model.type === "VEGETARIAN" ? 1 : 0),
+        ["#" + planTableColumnsTexts.approved.header]: (p) =>
+          Number(p.model.approved),
+        [planTableColumnsTexts.count + " / 100"]: (p) => p.count / 100,
+        [planTableColumnsTexts.count +
+        " * " +
+        planTableColumnsTexts.price +
+        " / 1000"]: (p) => (p.count * p.model.price) / 1000,
+      },
+      dateField: "model.createdAt",
+    }),
+    [
+      planTableColumnsTexts.approved.header,
+      planTableColumnsTexts.count,
+      planTableColumnsTexts.price,
+    ],
+  );
 
   if (error?.status) {
     return navigateToNotFound();
@@ -752,46 +805,9 @@ export default function PlansTable({
         {...dataTableTexts}
         getRowId={getRowId}
         useRadioSort={false}
-        searchInputProps={{
-          value: filter.title || "",
-          searchInputTexts: { placeholder: search },
-          onChange: updateFilterValue,
-          onClear: clearFilterValue,
-        }}
-        radioSortProps={{
-          setSort,
-          sort,
-          sortingOptions,
-          sortValue,
-          callback: resetCurrentPage,
-          filterKey: "title",
-        }}
-        extraCriteria={
-          <div className="flex items-start justify-center gap-8 flex-1 flex-wrap">
-            <div className="flex items-center justify-end gap-4 flex-1 flex-wrap">
-              {/*{dietTypeCriteriaCallback(resetCurrentPage)}*/}
-              {/*{objectiveTypeCriteriaCallback(resetCurrentPage)}*/}
-              {/*{displayCriteriaCallBack(resetCurrentPage)}*/}
-              {/*{approvedCriteriaCallBack(resetCurrentPage)}*/}
-            </div>
-          </div>
-        }
-        chartProps={{
-          aggregatorConfig: {
-            "#": (_) => 1,
-            "#omnivore": (r) => (r.model.type === "OMNIVORE" ? 1 : 0),
-            "#vegan": (r) => (r.model.type === "VEGAN" ? 1 : 0),
-            "#vegetarian": (r) => (r.model.type === "VEGETARIAN" ? 1 : 0),
-            ["#" + planTableColumnsTexts.approved.header]: (p) =>
-              Number(p.model.approved),
-            [planTableColumnsTexts.count + " / 100"]: (p) => p.count / 100,
-            [planTableColumnsTexts.count +
-            " * " +
-            planTableColumnsTexts.price +
-            " / 1000"]: (p) => (p.count * p.model.price) / 1000,
-          },
-          dateField: "model.createdAt",
-        }}
+        searchInputProps={searchInputProps}
+        radioSortProps={radioSortProps}
+        chartProps={chartProps}
         showChart={true}
       />
     </div>

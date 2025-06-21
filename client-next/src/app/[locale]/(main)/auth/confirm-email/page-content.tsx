@@ -1,7 +1,7 @@
 "use client";
 import Loader from "@/components/ui/spinner";
 import { useSearchParams } from "next/navigation";
-import useFetchStream from "@/hoooks/useFetchStream";
+import useFetchStream from "@/lib/fetchers/useFetchStream";
 import { useRouter } from "@/navigation/client-navigation";
 import useClientNotFound from "@/hoooks/useClientNotFound";
 

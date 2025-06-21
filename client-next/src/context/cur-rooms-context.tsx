@@ -25,7 +25,7 @@ import {
   useFetchStream,
   UseFetchStreamProps,
   UseFetchStreamReturn,
-} from "@/hoooks/useFetchStream";
+} from "@/lib/fetchers/useFetchStream";
 import { BaseError } from "@/types/responses";
 import { WithUser } from "@/lib/user";
 import { useDebounce } from "@/components/ui/multiple-selector";
@@ -36,6 +36,7 @@ import { useParams, useSearchParams } from "next/navigation";
 import { wrapItemToString } from "@/lib/utils";
 import { useChatNotification } from "@/context/chat-message-notification-context";
 import { useCacheInvalidator } from "@/providers/cache-provider";
+import { CustomAbortController } from "@/lib/fetchers/custom-abort-controller";
 
 export interface ChatRoomsState
   extends Omit<
@@ -43,7 +44,7 @@ export interface ChatRoomsState
         PageableResponse<ChatRoomResponseJoined[]>,
         BaseError
       >,
-      "resetFinishes"
+      "resetFinishes" | "isRefetchClosure"
     >,
     WithUser {
   curRoom: ChatRoomResponseJoined | undefined;
@@ -96,7 +97,7 @@ const initialPageInfo: PageInfo = {
 };
 export const CurRoomsProvider = ({ children, authUser }: Props) => {
   const [filterEmail, setFilterEmail] = useState("");
-  const debouncedFilter = useDebounce(filterEmail, 500);
+  const debouncedFilter = useDebounce(filterEmail, 300);
   const params = useParams<{ id: string }>();
   const initialCacheKey = useRef<string | null>(null);
   const { removeFromCache: cacheInvalidatorRemove } = useCacheInvalidator();
@@ -367,7 +368,7 @@ export const CurRoomsProvider = ({ children, authUser }: Props) => {
       if (room.id === curRoom?.id) {
         return;
       }
-      const abortController = new AbortController();
+      const abortController = new CustomAbortController();
       messagesManualFetcher({
         fetchProps: {
           ...messagesArgs,
@@ -378,7 +379,6 @@ export const CurRoomsProvider = ({ children, authUser }: Props) => {
         errorCallback: () => {
           if (abortController && !abortController?.signal?.aborted) {
             abortController?.abort();
-            (abortController as any)?.customAbort?.();
           }
         },
       }).catch((e) => {

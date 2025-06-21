@@ -27,8 +27,7 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { ArrowDown, ArrowUpDown } from "lucide-react";
-import { useMemo, useState } from "react";
-import useExportTable from "@/hoooks/table/use-export-table";
+import { useEffect, useMemo, useState } from "react";
 import { ContainerAction, NotifyContainerAction } from "@/types/dto";
 import SearchInput from "@/components/forms/input-serach";
 import {
@@ -208,7 +207,7 @@ export default function ArchiveQueuesTable({ texts }: ArchiveQueuesTableProps) {
         filterFn: timestampFilter,
       },
     ],
-    [JSON.stringify(texts)],
+    [texts],
   );
 
   const { notifications, isFinished } =
@@ -225,6 +224,12 @@ export default function ArchiveQueuesTable({ texts }: ArchiveQueuesTableProps) {
     </div>
   );
 }
+
+const pushPage = (url: string) => {
+  const searchParams = new URLSearchParams(url.split("?")[1]);
+  window.history.replaceState(null, "", `?${searchParams.toString()}`);
+};
+
 function DataTable({
   columns,
   data,
@@ -239,12 +244,15 @@ function DataTable({
   const [rowSelection, setRowSelection] = useState({});
   const query = useSearchParams();
   const pathname = usePathname();
+  const [hasMounted, setHasMounted] = useState(false);
+
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
+
   const stateAndOnChanges = useTableSearchParams(
     {
-      replace: (url) => {
-        const searchParams = new URLSearchParams(url.split("?")[1]);
-        window.history.replaceState(null, "", `?${searchParams.toString()}`);
-      },
+      push: pushPage,
       query,
       pathname,
     },
@@ -267,7 +275,7 @@ function DataTable({
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     onRowSelectionChange: setRowSelection,
-    autoResetPageIndex: true,
+    autoResetPageIndex: hasMounted,
     enableMultiSort: true,
     ...stateAndOnChanges,
     state: {
@@ -276,19 +284,6 @@ function DataTable({
     },
   });
 
-  const { exportPdf, exportCsv } = useExportTable<
-    NotifyContainerAction,
-    unknown
-  >({
-    lastLengthColumns: [],
-    dateColumns: [],
-    currencyColumns: [],
-    fileName: "archive-queue",
-    hidePDFColumnIds: ["select"],
-    table,
-    columns,
-    specialPDFColumns: [],
-  });
   return (
     <div>
       <div className="flex flex-col sm:flex-row items-center justify-between w-full py-4 ">
@@ -495,7 +490,8 @@ function DataTablePagination<TData>({
         </div>
         <div className="flex w-[100px] items-center justify-center text-sm font-medium">
           {paginationTexts.page} {table.getState().pagination.pageIndex + 1}{" "}
-          {paginationTexts.of} {table.getPageCount()}
+          {paginationTexts.of}{" "}
+          {table.getPageCount() === 0 ? 1 : table.getPageCount()}
         </div>
         <div className="flex items-center space-x-2">
           <Button

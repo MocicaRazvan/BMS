@@ -2,7 +2,7 @@
 
 import { CountryOrderSummary, CountrySummaryType } from "@/types/dto";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import useFetchStream from "@/hoooks/useFetchStream";
+import useFetchStream from "@/lib/fetchers/useFetchStream";
 import { scaleSequential } from "d3-scale";
 import { interpolateBlues } from "d3-scale-chromatic";
 import { Button } from "@/components/ui/button";

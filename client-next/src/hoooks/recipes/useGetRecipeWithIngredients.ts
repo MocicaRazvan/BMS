@@ -3,7 +3,7 @@ import {
   IngredientNutritionalFactResponseWithCount,
   RecipeResponse,
 } from "@/types/dto";
-import useFetchStream from "@/hoooks/useFetchStream";
+import useFetchStream from "@/lib/fetchers/useFetchStream";
 import { Session } from "next-auth";
 
 export default function useGetRecipeWithIngredients(

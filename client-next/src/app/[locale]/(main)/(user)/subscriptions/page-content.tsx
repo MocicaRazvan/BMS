@@ -1,21 +1,19 @@
 "use client";
 
 import GridList, {
+  CriteriaProps,
   GridListTexts,
   SortingOption,
 } from "@/components/list/grid-list";
 import { SortingOptionsTexts } from "@/types/constants";
 import useFilterDropdown, {
   DropDownFieldFilterCriteriaCallback,
+  FilterDropdownItem,
   UseFilterDropdownTexts,
 } from "@/components/list/useFilterDropdown";
 import { dietTypes } from "@/types/forms";
-import { useCallback } from "react";
-import {
-  planObjectives,
-  PlanResponse,
-  ResponseWithUserDtoEntity,
-} from "@/types/dto";
+import { Dispatch, memo, SetStateAction, useCallback, useMemo } from "react";
+import { planObjectives, PlanResponse } from "@/types/dto";
 import Heading from "@/components/common/heading";
 import { useFormatter } from "next-intl";
 import {
@@ -78,20 +76,21 @@ export default function SubscriptionsPageContent({
     noFilterLabel: objectiveDropDownTexts.noFilterLabel,
   });
 
-  const imageOverlay = useCallback(
-    (item: ResponseWithUserDtoEntity<PlanResponse>) =>
-      PlanImageOverlay(
-        item,
-        objectiveDropDownTexts.labels[item.model.content.objective],
-      ),
-    [objectiveDropDownTexts.labels],
+  const extraUpdateSearchParams = useCallback(
+    (p: URLSearchParams) => {
+      updateDietType(p);
+      updateObjectiveType(p);
+    },
+    [updateDietType, updateObjectiveType],
+  );
+  const finalExtraQueryParams = useMemo(
+    () => ({
+      ...(dietType ? { type: dietType } : {}),
+      ...(objectiveType ? { objective: objectiveType } : {}),
+    }),
+    [dietType, objectiveType],
   );
 
-  const extraHeader = useCallback(
-    (item: ResponseWithUserDtoEntity<PlanResponse>) =>
-      PlanExtraHeader(item, formatIntl.number),
-    [formatIntl.number],
-  );
   return (
     <section className="w-full min-h-[calc(100vh-4rem)] transition-all py-5 px-4 max-w-[1300px] mx-auto ">
       <Heading title={title} header={header} />
@@ -102,40 +101,76 @@ export default function SubscriptionsPageContent({
             content: { id },
           },
         }) => `/subscriptions/single/${id}`}
-        sizeOptions={[6, 12, 18]}
         path="/orders/subscriptions/filtered/withUser"
         sortingOptions={options}
-        extraUpdateSearchParams={(p) => {
-          updateDietType(p);
-          updateObjectiveType(p);
-        }}
+        extraUpdateSearchParams={extraUpdateSearchParams}
         // extraCriteria={extraCriteria}
-        extraQueryParams={{
-          ...(dietType ? { type: dietType } : {}),
-          ...(objectiveType ? { objective: objectiveType } : {}),
-        }}
+        extraQueryParams={finalExtraQueryParams}
         {...gridListTexts}
-        passExtraHeader={extraHeader}
-        extraCriteriaWithCallBack={(callback) => (
-          <div className="flex items-center justify-center flex-wrap gap-4 ml-10">
-            <DropDownFieldFilterCriteriaCallback
-              callback={callback}
-              fieldKey={"type"}
-              noFilterLabel={dietDropdownTexts.noFilterLabel}
-              setGlobalFilter={setDietType}
-              items={dietItems}
-            />
-            <DropDownFieldFilterCriteriaCallback
-              callback={callback}
-              fieldKey={"objective"}
-              noFilterLabel={objectiveDropDownTexts.noFilterLabel}
-              setGlobalFilter={setObjectiveType}
-              items={objectiveItems}
-            />
-          </div>
+        ItemExtraHeader={(props) => (
+          <PlanExtraHeader {...props} formatFunction={formatIntl.number} />
         )}
-        passExtraImageOverlay={imageOverlay}
+        ExtraCriteria={(props) => (
+          <PlanExtraCriteria
+            {...props}
+            dietNoFilterLabel={dietDropdownTexts.noFilterLabel}
+            objectiveNoFilterLabel={objectiveDropDownTexts.noFilterLabel}
+            setDietType={setDietType}
+            dietItems={dietItems}
+            setObjectiveType={setObjectiveType}
+            objectiveItems={objectiveItems}
+          />
+        )}
+        ItemImageOverlay={(props) => (
+          <PlanImageOverlay
+            {...props}
+            objective={
+              objectiveDropDownTexts.labels[props.item.model.content.objective]
+            }
+          />
+        )}
       />
     </section>
   );
 }
+
+const PlanExtraCriteria = memo(
+  ({
+    callback,
+    setObjectiveType,
+    setDietType,
+    dietItems,
+    objectiveItems,
+    dietNoFilterLabel,
+    objectiveNoFilterLabel,
+  }: CriteriaProps & {
+    dietNoFilterLabel: string;
+    objectiveNoFilterLabel: string;
+    setDietType: Dispatch<SetStateAction<FilterDropdownItem>>;
+    setObjectiveType: Dispatch<SetStateAction<FilterDropdownItem>>;
+    dietItems: FilterDropdownItem[];
+    objectiveItems: FilterDropdownItem[];
+  }) => {
+    console.log("PlanExtraCriteria rendered");
+    return (
+      <div className="flex items-center justify-center flex-wrap gap-4 ml-10">
+        <DropDownFieldFilterCriteriaCallback
+          callback={callback}
+          fieldKey={"type"}
+          noFilterLabel={dietNoFilterLabel}
+          setGlobalFilter={setDietType}
+          items={dietItems}
+        />
+        <DropDownFieldFilterCriteriaCallback
+          callback={callback}
+          fieldKey={"objective"}
+          noFilterLabel={objectiveNoFilterLabel}
+          setGlobalFilter={setObjectiveType}
+          items={objectiveItems}
+        />
+      </div>
+    );
+  },
+);
+
+PlanExtraCriteria.displayName = "PlanExtraCriteria";

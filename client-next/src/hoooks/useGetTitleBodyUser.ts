@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { ResponseWithUserDtoEntity, TitleBodyUserDto } from "@/types/dto";
 import { useParams } from "next/navigation";
-import useFetchStream from "@/hoooks/useFetchStream";
+import useFetchStream from "@/lib/fetchers/useFetchStream";
 import { BaseError } from "@/types/responses";
 import { useRouter } from "@/navigation/client-navigation";
 import { WithUser } from "@/lib/user";
