@@ -23,6 +23,7 @@ import { useLocale } from "next-intl";
 import DayCalendarStatsWrapper, {
   DayCalendarStatsWrapperTexts,
 } from "@/components/days-calendar/days-calendar-stats-wrapper";
+import { useMemo, useRef } from "react";
 
 export interface DayCalendarBodyMonthTexts {
   addAnchor: string;
@@ -39,6 +40,7 @@ const getLocalizedWeekdays = (appLocale: Locale) => {
 
   return days.map((day) => format(day, "EEE", { locale }));
 };
+const today = new Date();
 export default function DayCalendarBodyMonth({
   addAnchor,
   calendarDayFormTexts,
@@ -47,98 +49,127 @@ export default function DayCalendarBodyMonth({
 }: DayCalendarBodyMonthTexts) {
   const locale = useLocale() as Locale;
   const { date, dayCalendars, calendarDays, monthStart } = useDayCalendar();
+  const animateChildren = useRef(true);
 
-  const today = new Date();
+  return useMemo(
+    () => (
+      <div className="flex flex-col flex-grow overflow-hidden">
+        <div className="hidden md:grid grid-cols-7 border-border divide-x divide-border">
+          {getLocalizedWeekdays(locale).map((day) => (
+            <div
+              key={day}
+              className="py-2 capitalize text-center text-sm font-medium text-muted-foreground border-b border-border"
+            >
+              {day}
+            </div>
+          ))}
+        </div>
 
-  return (
-    <div className="flex flex-col flex-grow overflow-hidden">
-      <div className="hidden md:grid grid-cols-7 border-border divide-x divide-border">
-        {getLocalizedWeekdays(locale).map((day) => (
-          <div
-            key={day}
-            className="py-2 capitalize text-center text-sm font-medium text-muted-foreground border-b border-border"
+        <AnimatePresence initial={false}>
+          <motion.div
+            key={monthStart.toISOString()}
+            className="grid md:grid-cols-7 flex-grow overflow-y-auto relative"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{
+              duration: 0.2,
+              ease: "easeInOut",
+            }}
           >
-            {day}
-          </div>
-        ))}
-      </div>
+            {calendarDays.map((day) => {
+              const dayEvents = dayCalendars.filter((event) =>
+                isSameDay(event.date, day),
+              );
+              const isToday = isSameDay(day, today);
+              const isCurrentMonth = isSameMonth(day, date);
 
-      <AnimatePresence initial={false}>
-        <motion.div
-          key={monthStart.toISOString()}
-          className="grid md:grid-cols-7 flex-grow overflow-y-auto relative"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{
-            duration: 0.2,
-            ease: "easeInOut",
-          }}
-        >
-          {calendarDays.map((day) => {
-            const dayEvents = dayCalendars.filter((event) =>
-              isSameDay(event.date, day),
-            );
-            const isToday = isSameDay(day, today);
-            const isCurrentMonth = isSameMonth(day, date);
-
-            return (
-              <div
-                key={day.toISOString()}
-                className={cn(
-                  "relative flex flex-col border-b border-r p-2 aspect-square ",
-                  !isCurrentMonth && "bg-muted/50 hidden md:flex",
-                )}
-                // onClick={(e) => {
-                //   e.stopPropagation();
-                //   setDate(day);
-                //   setMode("day");
-                // }}
-              >
+              return (
                 <div
+                  key={day.toISOString()}
                   className={cn(
-                    "text-sm font-medium w-fit p-0.5 mb-0.5 flex flex-col items-center justify-center rounded-full aspect-square",
-                    isToday && "bg-primary text-background",
+                    "relative flex flex-col border-b border-r p-2 aspect-square ",
+                    !isCurrentMonth && "bg-muted/50 hidden md:flex",
                   )}
+                  // onClick={(e) => {
+                  //   e.stopPropagation();
+                  //   setDate(day);
+                  //   setMode("day");
+                  // }}
                 >
-                  {format(day, "d")}
+                  <div
+                    className={cn(
+                      "text-sm font-medium w-fit p-0.5 mb-0.5 flex flex-col items-center justify-center rounded-full aspect-square",
+                      isToday && "bg-primary text-background",
+                    )}
+                  >
+                    {format(day, "d")}
+                  </div>
+                  <AnimatePresence mode="wait">
+                    {dayEvents.length > 0 ? (
+                      <div className="flex items-center justify-center flex-1">
+                        {dayEvents.map((d, i) => (
+                          <motion.div
+                            key={d.id + d.date}
+                            className="w-full h-full"
+                            initial={
+                              animateChildren.current ? { opacity: 0.1 } : false
+                            }
+                            animate={
+                              animateChildren.current ? { opacity: 1 } : false
+                            }
+                            transition={{
+                              duration: 0.25,
+                              ease: "easeInOut",
+                            }}
+                            onAnimationComplete={() => {
+                              if (
+                                i === dayEvents.length - 1 &&
+                                animateChildren.current
+                              ) {
+                                animateChildren.current = false;
+                              }
+                            }}
+                          >
+                            <DayCalendarEvent
+                              dayCalendar={d}
+                              texts={dayCalendarEventTexts}
+                            />
+                          </motion.div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="flex items-center justify-center flex-1 ">
+                        <CalendarDayForm
+                          date={day}
+                          anchor={
+                            <Button variant="outline">{addAnchor}</Button>
+                          }
+                          texts={calendarDayFormTexts}
+                        />
+                      </div>
+                    )}
+                  </AnimatePresence>
                 </div>
-                <AnimatePresence mode="wait">
-                  {dayEvents.length > 0 ? (
-                    <div className="flex items-center justify-center flex-1">
-                      {dayEvents.map((d) => (
-                        <motion.div
-                          key={d.id + d.date}
-                          className="w-full h-full"
-                          initial={{ opacity: 0.1 }}
-                          animate={{ opacity: 1 }}
-                          transition={{ duration: 0.25, ease: "easeInOut" }}
-                        >
-                          <DayCalendarEvent
-                            dayCalendar={d}
-                            texts={dayCalendarEventTexts}
-                          />
-                        </motion.div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="flex items-center justify-center flex-1 ">
-                      <CalendarDayForm
-                        date={day}
-                        anchor={<Button variant="outline">{addAnchor}</Button>}
-                        texts={calendarDayFormTexts}
-                      />
-                    </div>
-                  )}
-                </AnimatePresence>
-              </div>
-            );
-          })}
-        </motion.div>
-      </AnimatePresence>
-      <div className="mt-14 md:mt-20 px-2 md:px-5">
-        <DayCalendarStatsWrapper texts={wrapperChartTexts} />
+              );
+            })}
+          </motion.div>
+        </AnimatePresence>
+        <div className="mt-14 md:mt-20 px-2 md:px-5">
+          <DayCalendarStatsWrapper texts={wrapperChartTexts} />
+        </div>
       </div>
-    </div>
+    ),
+    [
+      addAnchor,
+      calendarDayFormTexts,
+      calendarDays,
+      date,
+      dayCalendarEventTexts,
+      dayCalendars,
+      locale,
+      monthStart,
+      wrapperChartTexts,
+    ],
   );
 }

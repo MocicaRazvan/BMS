@@ -4,13 +4,13 @@ import {
   ReactNode,
   useCallback,
   useContext,
-  useEffect,
   useMemo,
   useRef,
   useState,
 } from "react";
 import { isDeepEqual } from "@/lib/utils";
 import { LRUCache } from "lru-cache";
+import { useIsomorphicLayoutEffect } from "react-use";
 
 const maxLRUCacheItems = process.env.NEXT_PUBLIC_MAX_LRU_CACHE_ITEMS
   ? parseInt(process.env.NEXT_PUBLIC_MAX_LRU_CACHE_ITEMS, 10)
@@ -348,7 +348,7 @@ export function useFlattenCachedValue<T>(
     return initial;
   });
 
-  useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     const next = getSnapshot();
     if (!isEqualRef.current(lastFlatRef.current, next)) {
       lastFlatRef.current = next;
@@ -358,12 +358,6 @@ export function useFlattenCachedValue<T>(
     return subscribeToCache(handler);
   }, [getSnapshot, handler, subscribeToCache]);
 
-  // const value = useSyncExternalStoreWithSelector<T[][], T[]>(
-  //   subscribe,
-  //   getSnapshot,
-  //   getSnapshot,
-  //   (a) => a.flat(),
-  // );
   const flat = useMemo(() => value.flat(), [value]);
   return {
     value: flat,

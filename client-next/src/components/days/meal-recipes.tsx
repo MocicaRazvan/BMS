@@ -66,7 +66,7 @@ export const MealRecipeList = memo(
   }: MealRecipeProps) => {
     const [currentIndex, setCurrentIndex] = useState(0);
     return (
-      <div className="min-h-[50vh] flex flex-col">
+      <div className="min-h-[75vh] flex flex-col">
         <div className="mb-5">
           <CustomPaginationButtons
             items={recipeIds}

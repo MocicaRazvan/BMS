@@ -1,7 +1,7 @@
 "use client";
 
 import { CustomEntityModel, DayCalendarResponse } from "@/types/dto";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import useLoadingErrorState from "@/hoooks/useLoadingErrorState";
 import { fetchStream } from "@/lib/fetchers/fetchStream";
 import { useDayCalendar } from "@/context/day-calendar-context";
@@ -73,61 +73,70 @@ export default function DayCalendarEvent({
       clearTimeout(timer);
     };
   }, [isDeletePress]);
-  return (
-    <div
-      className="w-full h-full rounded-xl border-2 p-2 flex flex-col justify-between"
-      style={{
-        backgroundColor: getColorByDayType(dayCalendar.dayResponse.type, 0.5),
-        borderColor: getColorByDayType(dayCalendar.dayResponse.type),
-      }}
-    >
-      <div className="flex flex-col justify-around h-full">
-        <DayCalendarSingleDay
-          dayCalendar={dayCalendar}
-          texts={texts.dayCalendarSingleDayTexts}
-          anchor={
-            <p className="text-xl tracking-tight hover:underline cursor-pointer w-full truncate">
-              {dayCalendar.dayResponse.title}
-            </p>
-          }
-        />
-        <div className="flex items-center justify-center">
-          <Badge
-            className="text-center bg-opacity-75"
-            variant="accent"
-            style={
-              {
-                // color: getColorByDayType(days-calendar.dayResponse.type),
-              }
+  return useMemo(
+    () => (
+      <div
+        className="w-full h-full rounded-xl border-2 p-2 flex flex-col justify-between"
+        style={{
+          backgroundColor: getColorByDayType(dayCalendar.dayResponse.type, 0.5),
+          borderColor: getColorByDayType(dayCalendar.dayResponse.type),
+        }}
+      >
+        <div className="flex flex-col justify-around h-full">
+          <DayCalendarSingleDay
+            dayCalendar={dayCalendar}
+            texts={texts.dayCalendarSingleDayTexts}
+            anchor={
+              <p className="text-xl tracking-tight hover:underline cursor-pointer w-full truncate">
+                {dayCalendar.dayResponse.title}
+              </p>
             }
-          >
-            {dayCalendar.dayResponse.type.replace("_", " ")}
-          </Badge>
+          />
+          <div className="flex items-center justify-center">
+            <Badge
+              className="text-center bg-opacity-75"
+              variant="accent"
+              style={
+                {
+                  // color: getColorByDayType(days-calendar.dayResponse.type),
+                }
+              }
+            >
+              {dayCalendar.dayResponse.type.replace("_", " ")}
+            </Badge>
+          </div>
+        </div>
+        <div className="flex justify-end">
+          {!isDeletePress ? (
+            <Button
+              size="icon"
+              variant="outlineDestructive"
+              className="bg-destructive/20 shadow text-destructive"
+              onClick={() => setIsDeletePress(true)}
+              disabled={isLoading}
+            >
+              <Trash2 />
+            </Button>
+          ) : (
+            <Button
+              onClick={handleDelete}
+              size="icon"
+              variant="outlineAmber"
+              className="bg-amber/20 shadow text-amber"
+              disabled={isLoading}
+            >
+              <Info />
+            </Button>
+          )}
         </div>
       </div>
-      <div className="flex justify-end">
-        {!isDeletePress ? (
-          <Button
-            size="icon"
-            variant="outlineDestructive"
-            className="bg-destructive/20 shadow text-destructive"
-            onClick={() => setIsDeletePress(true)}
-            disabled={isLoading}
-          >
-            <Trash2 />
-          </Button>
-        ) : (
-          <Button
-            onClick={handleDelete}
-            size="icon"
-            variant="outlineAmber"
-            className="bg-amber/20 shadow text-amber"
-            disabled={isLoading}
-          >
-            <Info />
-          </Button>
-        )}
-      </div>
-    </div>
+    ),
+    [
+      dayCalendar,
+      handleDelete,
+      isDeletePress,
+      isLoading,
+      texts.dayCalendarSingleDayTexts,
+    ],
   );
 }
