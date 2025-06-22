@@ -73,8 +73,8 @@ export default function DayCalendarBodyMonth({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{
-              duration: 0.2,
-              ease: "easeInOut",
+              duration: 0.3,
+              ease: "easeOut",
             }}
           >
             {calendarDays.map((day) => {
