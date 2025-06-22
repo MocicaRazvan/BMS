@@ -4,6 +4,7 @@ import {
   ReactNode,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useRef,
   useState,
@@ -322,6 +323,8 @@ export const useCacheInvalidator = () => {
 };
 
 export type CacheIsEqual<T> = (a: T[][], b: T[][]) => boolean;
+//https://github.com/facebook/react/issues/27670
+// why no useSyncExternalStoreWithSelector
 export function useFlattenCachedValue<T>(
   cacheKey: string,
   isEqual: CacheIsEqual<T> = Object.is,
@@ -348,7 +351,7 @@ export function useFlattenCachedValue<T>(
     return initial;
   });
 
-  useIsomorphicLayoutEffect(() => {
+  useEffect(() => {
     const next = getSnapshot();
     if (!isEqualRef.current(lastFlatRef.current, next)) {
       lastFlatRef.current = next;
