@@ -60,8 +60,8 @@ const SingleDay = ({
 }: SingleDayProps) => {
   const [dayState, setDayState] = useState<DayResponse>(day);
   useEffect(() => {
-    setDayState(day);
-  }, [JSON.stringify(day)]);
+    setDayState((prev) => (prev !== day ? day : prev));
+  }, [day]);
 
   const { messages, error, isFinished } = useFetchStream<DietType>({
     path: "/meals/day/dietType",

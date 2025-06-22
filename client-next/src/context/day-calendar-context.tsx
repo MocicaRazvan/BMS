@@ -52,6 +52,8 @@ interface DayCalendarContextType extends WithUser {
   calendarEnd: Date;
   isFinished: boolean;
   refetch: () => void;
+  isAbsoluteFinished: boolean;
+  messages: CustomEntityModel<DayCalendarResponse>[];
 }
 
 const DayCalendarContext = createContext<DayCalendarContextType | null>(null);
@@ -253,6 +255,7 @@ export default function DayCalendarProvider({ children }: Props) {
   const [dayCalendars, setDayCalendars] = useState<DayCalendarResponse[]>([]);
   const { monthStart, monthEnd, calendarStart, calendarEnd, calendarDays } =
     getDateRanges(date);
+
   const {
     messages,
     error,
@@ -327,6 +330,8 @@ export default function DayCalendarProvider({ children }: Props) {
         isFinished,
         authUser,
         refetch,
+        isAbsoluteFinished,
+        messages,
       }}
     >
       {children}

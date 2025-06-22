@@ -15,6 +15,7 @@ import { DayCalendarResponse, DayCalendarTrackingStats } from "@/types/dto";
 import { ro } from "date-fns/locale";
 import { motion } from "framer-motion";
 import dynamic from "next/dynamic";
+import { useDebounce } from "@/components/ui/multiple-selector";
 
 const DynamicNoResultsLottie = dynamic(
   () => import("@/components/lottie/no-results-lottie"),
@@ -60,7 +61,13 @@ interface WrapperProps {
 export default function DayCalendarStatsWrapper({
   texts: { dateRangePickerTexts, noDataText, errorText, titleText },
 }: WrapperProps) {
-  const { date, dayCalendars, isFinished: isDaysFinished } = useDayCalendar();
+  const {
+    date,
+    dayCalendars,
+    isFinished: isDaysFinished,
+    isAbsoluteFinished: isDaysAbsoluteFinished,
+    messages: dayCalendarStatsMessages,
+  } = useDayCalendar();
   const monthStartDate = useMemo(() => startOfMonth(date), [date]);
   const monthEndDate = useMemo(() => endOfMonth(date), [date]);
   const monthStart = useMemo(
@@ -78,7 +85,17 @@ export default function DayCalendarStatsWrapper({
     to: monthEnd,
   });
 
-  const prevDaysRefetch = useRef<DayCalendarResponse[]>(dayCalendars);
+  const prevDaysRefetch = useRef<DayCalendarResponse[] | null>(null);
+
+  useEffect(() => {
+    if (
+      prevDaysRefetch.current === null &&
+      isDaysAbsoluteFinished &&
+      dayCalendarStatsMessages
+    ) {
+      prevDaysRefetch.current = dayCalendarStatsMessages.map((d) => d.content);
+    }
+  }, [dayCalendarStatsMessages, isDaysAbsoluteFinished]);
 
   useEffect(() => {
     setDateRange({
@@ -93,22 +110,32 @@ export default function DayCalendarStatsWrapper({
       path: "/daysCalendar/trackingStats",
       authToken: true,
       queryParams: dateRange,
-      trigger: isDaysFinished,
+      trigger: isDaysAbsoluteFinished,
     });
+
+  //todo fix
+  const debouncedDayCalendar = useDebounce(dayCalendars, 30);
 
   // todo fix
   // can trigger more then once sometimes, but request dedup is handling it
   useEffect(() => {
     if (
+      prevDaysRefetch.current &&
       isAbsoluteFinished &&
-      isDaysFinished &&
-      dayCalendars.map((d) => d.id).join(",") !==
+      isDaysAbsoluteFinished &&
+      debouncedDayCalendar.length > 0 &&
+      debouncedDayCalendar.map((d) => d.id).join(",") !==
         prevDaysRefetch.current.map((d) => d.id).join(",")
     ) {
       refetch();
-      prevDaysRefetch.current = dayCalendars;
+      prevDaysRefetch.current = debouncedDayCalendar;
     }
-  }, [dayCalendars, isDaysFinished, isAbsoluteFinished, refetch]);
+  }, [
+    debouncedDayCalendar,
+    isDaysAbsoluteFinished,
+    isAbsoluteFinished,
+    refetch,
+  ]);
 
   if (error) {
     return (

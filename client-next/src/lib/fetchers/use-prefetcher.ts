@@ -8,7 +8,6 @@ import {
   UseFetchStreamReturn,
 } from "@/lib/fetchers/useFetchStream";
 import { CustomAbortController } from "@/lib/fetchers/custom-abort-controller";
-import { useMountedState } from "react-use";
 
 const DUMMY_VALUE = "dummy_value" as const;
 
@@ -98,7 +97,6 @@ export default function usePrefetcher<T, E extends BaseError = BaseError>({
   additionalKey = "",
 }: UseFetchStreamPrefetcherProps<T, E>) {
   const prefetchedMap = useRef<Map<string, Set<string>>>(new Map());
-  const isMounted = useMountedState();
 
   const createWithAdditionalKey = useCallback(
     (key: string) => `${key}${additionalKey}`,
@@ -156,7 +154,7 @@ export default function usePrefetcher<T, E extends BaseError = BaseError>({
   }, [cleanUpPrefetched, isRefetchClosure]);
 
   const basePrefetcher = useCallback(
-    (
+    async (
       predicate: PrefetchedPredicate<T>,
       generateArgs: PrefetchGenerateNewArgs<T>,
       generateMarkPrefetched: PrefetchGenerateMarkPrefetchedArgs<T>,
@@ -166,39 +164,36 @@ export default function usePrefetcher<T, E extends BaseError = BaseError>({
         isAbsoluteFinished &&
         preloadNext &&
         messages &&
-        isMounted() &&
+        !abortController.signal.aborted &&
         !error &&
         predicate(messages, hasPrefetched)
       ) {
         const newArgs = generateArgs(messages);
         const prefetchedKey = generateMarkPrefetched(messages, newArgs);
         markPrefetched(prefetchedKey);
-        Promise.resolve()
-          .then(() => {
-            if (!isMounted()) {
-              unmarkPrefetched(prefetchedKey);
-              return;
-            }
-            return manualFetcher({
-              fetchProps: newArgs,
-              aboveController: abortController,
-              localAuthToken: true,
-              errorCallback: () => {
-                unmarkPrefetched(prefetchedKey);
-              },
-            });
-          })
-          .catch((e) => {
+        try {
+          if (abortController.signal.aborted) {
             unmarkPrefetched(prefetchedKey);
-            console.log("manualFetcher Error fetching", e);
+            return;
+          }
+          await manualFetcher({
+            fetchProps: newArgs,
+            aboveController: abortController,
+            localAuthToken: true,
+            errorCallback: () => {
+              unmarkPrefetched(prefetchedKey);
+            },
           });
+        } catch (e) {
+          unmarkPrefetched(prefetchedKey);
+          console.log("manualFetcher Error fetching", e);
+        }
       }
     },
     [
       error,
       hasPrefetched,
       isAbsoluteFinished,
-      isMounted,
       manualFetcher,
       markPrefetched,
       messages,
@@ -212,16 +207,21 @@ export default function usePrefetcher<T, E extends BaseError = BaseError>({
   useEffect(() => {
     const abortController = new CustomAbortController();
 
-    basePrefetcher(
-      nextPredicate,
-      generateNextArgs,
-      generateMarkPrefetchedNextArgs,
-      abortController,
-    );
+    Promise.resolve().then(() => {
+      if (abortController.signal.aborted) {
+        return;
+      }
+      return basePrefetcher(
+        nextPredicate,
+        generateNextArgs,
+        generateMarkPrefetchedNextArgs,
+        abortController,
+      );
+    });
 
     return () => {
-      if (abortController && !abortController?.signal?.aborted) {
-        abortController?.abort();
+      if (abortController && !abortController.signal.aborted) {
+        abortController.abort();
       }
     };
   }, [
@@ -235,16 +235,21 @@ export default function usePrefetcher<T, E extends BaseError = BaseError>({
   useEffect(() => {
     const abortController = new CustomAbortController();
 
-    basePrefetcher(
-      previousPredicate,
-      generatePreviousArgs,
-      generateMarkPrefetchedPreviousArgs,
-      abortController,
-    );
+    Promise.resolve().then(() => {
+      if (abortController.signal.aborted) {
+        return;
+      }
+      return basePrefetcher(
+        previousPredicate,
+        generatePreviousArgs,
+        generateMarkPrefetchedPreviousArgs,
+        abortController,
+      );
+    });
 
     return () => {
-      if (abortController && !abortController?.signal?.aborted) {
-        abortController?.abort();
+      if (abortController && !abortController.signal.aborted) {
+        abortController.abort();
       }
     };
   }, [

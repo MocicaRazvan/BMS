@@ -2,7 +2,7 @@
 import SingleDay, { SingleDayProps } from "@/components/days/single-day";
 import useGetDaysWithMeals from "@/hoooks/days/useGetDayWithMeals";
 import LoadingSpinner from "@/components/common/loading-spinner";
-import React, { useEffect, useState } from "react";
+import React, { memo, useEffect, useState } from "react";
 import CustomPaginationButtons, {
   CustomDisplayProps,
 } from "@/components/ui/custom-pagination-buttons";
@@ -83,38 +83,40 @@ interface SingleDayItemProps
   mealsBasePath?: string;
 }
 
-const SingleDayItem = ({
-  dayId,
-  dayBasePath,
-  mealsBasePath,
-  authUser,
-  ...rest
-}: SingleDayItemProps) => {
-  const { dayState, dayIsFinished, mealsIsFinished, user, meals } =
-    useGetDaysWithMeals({
-      dayId,
-      authUser,
-      dayBasePath,
-      mealsBasePath,
-      useAbortController: true,
-    });
+const SingleDayItem = memo(
+  ({
+    dayId,
+    dayBasePath,
+    mealsBasePath,
+    authUser,
+    ...rest
+  }: SingleDayItemProps) => {
+    const { dayState, dayIsFinished, mealsIsFinished, user, meals } =
+      useGetDaysWithMeals({
+        dayId,
+        authUser,
+        dayBasePath,
+        mealsBasePath,
+        useAbortController: true,
+      });
 
-  if (!mealsIsFinished || !dayIsFinished) {
-    return <LoadingSpinner />;
-  }
+    if (!mealsIsFinished || !dayIsFinished) {
+      return <LoadingSpinner />;
+    }
 
-  if (!dayState || !meals) return null;
-  return (
-    <SingleDay
-      day={dayState}
-      author={user}
-      meals={meals}
-      authUser={authUser}
-      hideAuthor
-      {...rest}
-    />
-  );
-};
+    if (!dayState || !meals) return null;
+    return (
+      <SingleDay
+        day={dayState}
+        author={user}
+        meals={meals}
+        authUser={authUser}
+        hideAuthor
+        {...rest}
+      />
+    );
+  },
+);
 SingleDayItem.displayName = "SingleDayItem";
 
 const SelectDisplay = ({

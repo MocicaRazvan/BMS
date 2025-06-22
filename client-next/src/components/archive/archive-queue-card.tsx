@@ -663,6 +663,7 @@ const ManagePop = ({
               className={cn(
                 (triggerLoading || consumerCount > 0) && "cursor-not-allowed",
               )}
+              asChild
             >
               <ButtonSubmit
                 buttonSubmitTexts={{
@@ -674,12 +675,12 @@ const ManagePop = ({
                 disable={triggerLoading || consumerCount > 0}
                 onClick={schedule}
               />
-              {(stopLoading || consumerCount > 0) && (
-                <TooltipContent>
-                  <p>{scheduleTooltip}</p>
-                </TooltipContent>
-              )}
             </TooltipTrigger>
+            {(stopLoading || consumerCount > 0) && (
+              <TooltipContent>
+                <p>{scheduleTooltip}</p>
+              </TooltipContent>
+            )}
           </Tooltip>
         </TooltipProvider>
         <Separator />

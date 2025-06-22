@@ -66,7 +66,7 @@ export const MealRecipeList = memo(
   }: MealRecipeProps) => {
     const [currentIndex, setCurrentIndex] = useState(0);
     return (
-      <div>
+      <div className="min-h-[50vh] flex flex-col">
         <div className="mb-5">
           <CustomPaginationButtons
             items={recipeIds}
@@ -74,36 +74,38 @@ export const MealRecipeList = memo(
             setCurrentIndex={setCurrentIndex}
           />
         </div>
-        <AnimatePresence mode="wait">
-          {recipeIds.map((recipeId, index) => (
-            <motion.div
-              key={recipeId + "-" + index}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: index === currentIndex ? 1 : 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.3 }}
-              className={cn(
-                "w-full",
-                index !== currentIndex ? "hidden" : "block",
-              )}
-            >
-              <RecipePlanItem
-                recipeId={recipeId}
-                authUser={authUser}
-                nutritionalTableTexts={nutritionalTableTexts}
-                ingredientPieChartTexts={ingredientPieChartTexts}
-                recipeBasePath={recipeBasePath}
-                showLikes={showLikes}
-                disableLikes={disableLikes}
-                showIngredients={showIngredients}
-                answerFromBodyFormTexts={answerFromBodyFormTexts}
-                setRecipeOpen={setRecipeOpen}
-                itemState={openedRecipes[recipeId] || { triggered: false }}
-              />
-            </motion.div>
-          ))}
-        </AnimatePresence>
-        <div className="mt-10">
+        <div className="flex-grow">
+          <AnimatePresence mode="wait">
+            {recipeIds.map((recipeId, index) => (
+              <motion.div
+                key={recipeId + "-" + index}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: index === currentIndex ? 1 : 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.3 }}
+                className={cn(
+                  "w-full",
+                  index !== currentIndex ? "hidden" : "block",
+                )}
+              >
+                <RecipePlanItem
+                  recipeId={recipeId}
+                  authUser={authUser}
+                  nutritionalTableTexts={nutritionalTableTexts}
+                  ingredientPieChartTexts={ingredientPieChartTexts}
+                  recipeBasePath={recipeBasePath}
+                  showLikes={showLikes}
+                  disableLikes={disableLikes}
+                  showIngredients={showIngredients}
+                  answerFromBodyFormTexts={answerFromBodyFormTexts}
+                  setRecipeOpen={setRecipeOpen}
+                  itemState={openedRecipes[recipeId] || { triggered: false }}
+                />
+              </motion.div>
+            ))}
+          </AnimatePresence>
+        </div>
+        <div className="mt-auto pt-10">
           <CustomPaginationButtons
             items={recipeIds}
             currentIndex={currentIndex}
@@ -271,7 +273,7 @@ export const RecipePlanItem = memo(
     if (!recipeState || !IQMessagesState) return null;
 
     return (
-      <div className="w-full px-5">
+      <div className="w-full px-5 min-h-[25vh]">
         <div className="w-3/4 mx-auto flex flex-col md:flex-row items-center justify-between gap-10 md:gap-20 mb-2 ">
           <div className="order-1 flex items-center justify-center gap-3">
             <div className="flex flex-row md:flex-col items-center justify-center gap-4 flex-1">

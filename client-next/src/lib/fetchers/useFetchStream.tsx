@@ -38,6 +38,7 @@ type ManualFetcher<T> = (args: {
   batchCallback?: (data: T[], batchIndex: number) => void;
   aboveController?: CustomAbortController;
   errorCallback?: (error: unknown) => void;
+  overrideInGlobalCache?: boolean;
 }) => Promise<void>;
 export interface UseFetchStreamReturn<T, E> {
   messages: T[];
@@ -45,7 +46,7 @@ export interface UseFetchStreamReturn<T, E> {
   isFinished: boolean;
   refetch: () => void;
   cacheKey: string;
-  resetValueAndCache: () => void;
+  // resetValueAndCache: () => void;
   removeFromCache: () => void;
   refetchState: boolean;
   isAbsoluteFinished: boolean;
@@ -92,9 +93,8 @@ export function useFetchStream<T = unknown, E extends BaseError = BaseError>({
   focusDelay = 300,
   trigger = true,
   onBlurCallback,
-  aboveController: unstableAboveController,
+  aboveController,
 }: UseFetchStreamProps): UseFetchStreamReturn<T, E> {
-  const aboveController = useMemo(() => unstableAboveController, []);
   const stableQueryParams = useDeepCompareMemo(
     () => queryParams,
     [queryParams],
@@ -132,10 +132,10 @@ export function useFetchStream<T = unknown, E extends BaseError = BaseError>({
   );
   const {
     messages,
-    resetValueAndCache,
+    // resetValueAndCache,
     isCacheKeyNotEmpty,
     handleBatchUpdate,
-    finalSyncValueWithCache,
+    // finalSyncValueWithCache,
     replaceBatchInForAnyKey,
     removeFromCache,
     removeArrayFromCache,
@@ -146,7 +146,8 @@ export function useFetchStream<T = unknown, E extends BaseError = BaseError>({
     resetAdditionalArgs,
     setErrorWithFinishes,
     setFinishes,
-  } = useFetchStreamState<T, E>({ cacheKey, batchSize });
+    isKeyInCache,
+  } = useFetchStreamState<T, E>({ cacheKey });
   const [refetchState, setRefetchState] = useState(false);
   const { data: session, status: sessionStatus } = useSession();
   const maybeSessionToken = session?.user?.token;
@@ -155,21 +156,19 @@ export function useFetchStream<T = unknown, E extends BaseError = BaseError>({
   const historyKeys = useRef<Set<string>>(new Set());
 
   const refetch = useCallback(() => {
-    resetValueAndCache();
+    removeFromCache();
     removeArrayFromCache(historyKeys.current);
     resetAdditionalArgs();
     setRefetchState((prevIndex) => !prevIndex);
     refetchClosure.current = true;
     historyKeys.current.clear();
-  }, [removeArrayFromCache, resetAdditionalArgs, resetValueAndCache]);
+  }, [removeArrayFromCache, resetAdditionalArgs, removeFromCache]);
 
   const fetcher = useCallback(
     async (
-      isMounted: boolean,
       abortController: CustomAbortController,
       fetchProps: FetchStreamProps<T>,
     ) => {
-      if (!isMounted) return;
       try {
         const fetchFunction = await deduplicateFetchStream<T, E>({
           ...fetchProps,
@@ -190,15 +189,19 @@ export function useFetchStream<T = unknown, E extends BaseError = BaseError>({
               });
               if (res.error) {
                 throw res.error;
-              } else {
-                finalSyncValueWithCache();
               }
+              // else {
+              //   // needed in strict mode or when there are more concurrent requests (a big burst in ms,
+              //   // likely to a render of a parent component)
+              //   // in a short period of time so that the state is synced
+              //   // in non-strict mode it can be removed for most cases
+              //   finalSyncValueWithCache();
+              // }
               break;
             }
           }
         }
       } catch (err) {
-        if (!isMounted) return;
         // resetValue();
         console.log("Error fetching", err);
         if (err && err instanceof DOMException && err?.name === "AbortError") {
@@ -209,7 +212,8 @@ export function useFetchStream<T = unknown, E extends BaseError = BaseError>({
             isFinished: true,
             isAbsoluteFinished: true,
           });
-          resetValueAndCache();
+          removeFromCache();
+          // resetValueAndCache();
         } else {
           setFinishes({
             isFinished: true,
@@ -220,9 +224,8 @@ export function useFetchStream<T = unknown, E extends BaseError = BaseError>({
     },
     [
       cacheKey,
-      finalSyncValueWithCache,
       handleBatchUpdate,
-      resetValueAndCache,
+      removeFromCache,
       setErrorWithFinishes,
       setFinishes,
     ],
@@ -235,6 +238,7 @@ export function useFetchStream<T = unknown, E extends BaseError = BaseError>({
       batchCallback,
       aboveController,
       errorCallback,
+      overrideInGlobalCache = false,
     }) => {
       if (sessionStatus === "loading") {
         return;
@@ -271,12 +275,18 @@ export function useFetchStream<T = unknown, E extends BaseError = BaseError>({
       }
 
       historyKeys.current.add(key);
+
+      if (isKeyInCache(key) && !overrideInGlobalCache) {
+        return;
+      }
+
       try {
         const fetchFunction = await deduplicateFetchStream<T, E>({
           ...updatedProps,
           token,
           dedupKey: key,
           extraOptions: {
+            ...updatedProps.extraOptions,
             priority: "low",
           },
         });
@@ -307,7 +317,7 @@ export function useFetchStream<T = unknown, E extends BaseError = BaseError>({
         throw err;
       }
     },
-    [sessionStatus, maybeSessionToken, replaceBatchInForAnyKey],
+    [sessionStatus, maybeSessionToken, isKeyInCache, replaceBatchInForAnyKey],
   );
 
   useEffect(() => {
@@ -347,13 +357,12 @@ export function useFetchStream<T = unknown, E extends BaseError = BaseError>({
       acceptHeader,
     };
 
-    let isMounted = true;
-
     const doFetch = async () => {
-      // closure by reference, so it's fine to use isMounted here
-      if (!isMounted) return;
+      if (abortController.signal.aborted) {
+        return;
+      }
       try {
-        await fetcher(isMounted, abortController, fetchProps);
+        await fetcher(abortController, fetchProps);
         historyKeys.current.add(cacheKey);
       } catch (e) {
         if (isBaseError(e)) {
@@ -374,14 +383,13 @@ export function useFetchStream<T = unknown, E extends BaseError = BaseError>({
     Promise.resolve().then(doFetch);
 
     return () => {
-      isMounted = false;
       try {
         if (
           // useAbortController &&
           abortController &&
-          !abortController?.signal?.aborted
+          !abortController.signal.aborted
         ) {
-          abortController?.abort();
+          abortController.abort();
           // resetValueAndCache();
         }
       } catch (e) {
@@ -412,7 +420,8 @@ export function useFetchStream<T = unknown, E extends BaseError = BaseError>({
     stableCustomHeaders,
     stableQueryParams,
     stableArrayQueryParam,
-    aboveController,
+    // intentionally omitted aboveController, it's only used for optional cleanup and should not trigger refetch
+    // aboveController,
   ]);
 
   useEffect(() => {
@@ -446,7 +455,6 @@ export function useFetchStream<T = unknown, E extends BaseError = BaseError>({
     isFinished,
     refetch,
     cacheKey,
-    resetValueAndCache,
     removeFromCache,
     refetchState,
     isAbsoluteFinished,

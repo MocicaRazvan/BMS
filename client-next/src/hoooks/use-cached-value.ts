@@ -54,7 +54,7 @@ export default function useCachedValue<T>(cacheKey: string, batchSize: number) {
 
   const handleBatchUpdate = useCallback(
     (data: T[], batchIndex: number) => {
-      const isBatchTheSame = isSameBatchInCache(data, batchIndex, batchSize);
+      const isBatchTheSame = isSameBatchInCache(data, batchIndex);
       if (isBatchTheSame) {
         return;
       }
@@ -71,8 +71,8 @@ export default function useCachedValue<T>(cacheKey: string, batchSize: number) {
       const cachedValue = getFromCache();
       if (
         cachedValue &&
-        cachedValue.length !== prev.length &&
-        !isDeepEqual(cachedValue, prev)
+        (cachedValue.length !== prev.length || // if it fails usually it's here because prev has length 0
+          !isDeepEqual(cachedValue, prev))
       ) {
         return [...cachedValue];
       }

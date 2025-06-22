@@ -27,7 +27,7 @@ export function isDeepEqual<T>(obj1: T, obj2: T): boolean {
     try {
       return stringify(obj1) === stringify(obj2);
     } catch {
-      return obj1 === obj2;
+      return false;
     }
   }
 }

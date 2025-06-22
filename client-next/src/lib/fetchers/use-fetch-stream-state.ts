@@ -1,25 +1,28 @@
 "use client";
 
-import useCachedValue from "@/hoooks/use-cached-value";
-import { useCacheInvalidator } from "@/providers/cache-provider";
+import {
+  CacheIsEqual,
+  useCacheInvalidator,
+  useFlattenCachedValue,
+} from "@/providers/cache-provider";
 import { useAdditionalFetchingReducer } from "@/lib/fetchers/additional-fetching-reducer";
 import { useCallback } from "react";
 
-interface UseFetchStreamStateArgs {
+interface UseFetchStreamStateArgs<T> {
   cacheKey: string;
-  batchSize: number;
+  cacheIsEqual?: CacheIsEqual<T>;
 }
 
 export default function useFetchStreamState<T, E>({
   cacheKey,
-  batchSize,
-}: UseFetchStreamStateArgs) {
-  const { value: messages, ...restCachedValue } = useCachedValue<T>(
+  cacheIsEqual,
+}: UseFetchStreamStateArgs<T>) {
+  const { value: messages, ...restCachedValue } = useFlattenCachedValue<T>(
     cacheKey,
-    batchSize,
+    cacheIsEqual,
   );
 
-  const { removeArrayFromCache } = useCacheInvalidator();
+  const { removeArrayFromCache, isKeyInCache } = useCacheInvalidator();
   const {
     setFinishes,
     reset: resetAdditionalArgs,
@@ -35,8 +38,9 @@ export default function useFetchStreamState<T, E>({
     ...restCachedValue,
     ...restAdditional,
     resetFinishes,
-    removeArrayFromCache,
     setFinishes,
     resetAdditionalArgs,
+    removeArrayFromCache,
+    isKeyInCache,
   };
 }
