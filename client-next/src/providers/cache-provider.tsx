@@ -11,7 +11,6 @@ import {
 } from "react";
 import { isDeepEqual } from "@/lib/utils";
 import { LRUCache } from "lru-cache";
-import { useIsomorphicLayoutEffect } from "react-use";
 
 const maxLRUCacheItems = process.env.NEXT_PUBLIC_MAX_LRU_CACHE_ITEMS
   ? parseInt(process.env.NEXT_PUBLIC_MAX_LRU_CACHE_ITEMS, 10)
@@ -41,7 +40,7 @@ export class ClientCacheInstance {
       maxSize: maxLRUCacheSize,
       sizeCalculation: (v, _) => v.flat().length || 1,
       ttl: ttlLRUCache,
-      allowStale: false,
+      allowStale: true,
       updateAgeOnGet: true,
       updateAgeOnHas: false,
       // dispose: (v, k, r) => {
@@ -138,6 +137,14 @@ export class ClientCacheInstance {
 
   public has(key: string): boolean {
     return this.cache.has(key);
+  }
+
+  public hasStale(key: string): boolean {
+    return (
+      this.cache.peek(key, {
+        allowStale: true,
+      }) !== undefined
+    );
   }
 
   public isBatchTheSame<T>(
@@ -247,7 +254,7 @@ export const useCache = <T,>(cacheKey: string) => {
   );
 
   const isCacheKeyNotEmpty = useCallback(
-    () => cacheInstance.has(cacheKey),
+    () => cacheInstance.hasStale(cacheKey),
     [cacheInstance, cacheKey],
   );
 
