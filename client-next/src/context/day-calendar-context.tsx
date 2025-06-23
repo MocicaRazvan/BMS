@@ -9,6 +9,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import { WithUser } from "@/lib/user";
@@ -37,9 +38,9 @@ import {
   UseFetchStreamPrefetcherReturn,
   useFlattenPrefetcher,
 } from "@/lib/fetchers/use-prefetcher";
-import { useDebounce } from "@/components/ui/multiple-selector";
+import { useCounter } from "react-use";
 
-interface DayCalendarContextType extends WithUser {
+export interface DayCalendarContextType extends WithUser {
   dayCalendars: DayCalendarResponse[];
   addDayCalendar: (day: DayCalendarResponse) => void;
   removeDayCalendar: (dayId: number) => void;
@@ -55,6 +56,8 @@ interface DayCalendarContextType extends WithUser {
   refetch: () => void;
   isAbsoluteFinished: boolean;
   messages: CustomEntityModel<DayCalendarResponse>[];
+  daysLocalChange: number;
+  addToUpdateDaysCallbacks: (key: string, cb: () => void) => void;
 }
 
 const DayCalendarContext = createContext<DayCalendarContextType | null>(null);
@@ -231,8 +234,26 @@ export default function DayCalendarProvider({ children }: Props) {
     const maybeDate = param ? new Date(param) : new Date();
     return isNaN(maybeDate.getTime()) ? new Date() : maybeDate;
   }, [searchParams]);
+  const [daysLocalChange, { inc }] = useCounter(0);
 
   const [date, setDate] = useState(initialDate);
+
+  const updateDaysCallbacks = useRef<Record<string, () => void>>({});
+
+  const callUpdateDaysCallbacks = useCallback(
+    () => Object.values(updateDaysCallbacks.current).forEach((cb) => cb()),
+    [],
+  );
+
+  const addToUpdateDaysCallbacks = useCallback(
+    (key: string, cb: () => void) => {
+      if (updateDaysCallbacks.current[key]) {
+        return;
+      }
+      updateDaysCallbacks.current[key] = cb;
+    },
+    [],
+  );
 
   useEffect(() => {
     const param = searchParams.get("date");
@@ -280,6 +301,12 @@ export default function DayCalendarProvider({ children }: Props) {
     }
   }, [messages]);
 
+  useEffect(() => {
+    if (daysLocalChange === 0 && isAbsoluteFinished) {
+      inc();
+    }
+  }, [daysLocalChange, inc, isAbsoluteFinished]);
+
   useDayCalendarPrefetcher({
     returned: {
       isRefetchClosure,
@@ -294,24 +321,30 @@ export default function DayCalendarProvider({ children }: Props) {
   const addDayCalendar = useCallback(
     (day: DayCalendarResponse) => {
       setDayCalendars((prevState) => [...prevState, day]);
+      // inc();
+      callUpdateDaysCallbacks();
       removeFromCache();
     },
-    [removeFromCache],
+    [callUpdateDaysCallbacks, removeFromCache],
   );
   const removeDayCalendar = useCallback(
     (dayId: number) => {
       setDayCalendars((prevState) => prevState.filter((d) => d.id !== dayId));
+      // inc();
+      callUpdateDaysCallbacks();
       removeFromCache();
     },
-    [removeFromCache],
+    [callUpdateDaysCallbacks, removeFromCache],
   );
 
   const changeForDate = useCallback(
     (day: DayCalendarResponse) => {
       setDayCalendars((prev) => prev.map((d) => (d.id === day.id ? day : d)));
+      // inc();
+      callUpdateDaysCallbacks();
       removeFromCache();
     },
-    [removeFromCache],
+    [callUpdateDaysCallbacks, removeFromCache],
   );
 
   return (
@@ -333,6 +366,8 @@ export default function DayCalendarProvider({ children }: Props) {
         refetch,
         isAbsoluteFinished,
         messages,
+        daysLocalChange,
+        addToUpdateDaysCallbacks,
       }}
     >
       {children}

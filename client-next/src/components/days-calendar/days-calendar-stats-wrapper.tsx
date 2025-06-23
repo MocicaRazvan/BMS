@@ -5,17 +5,27 @@ import {
   DateRangePicker,
   DateRangePickerTexts,
 } from "@/components/ui/date-range-picker";
-import { useDayCalendar } from "@/context/day-calendar-context";
-import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  DayCalendarContextType,
+  useDayCalendar,
+} from "@/context/day-calendar-context";
+import {
+  memo,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { endOfMonth, format, startOfMonth } from "date-fns";
 import { dateFormat } from "@/hoooks/useDateRangeFilterParams";
 import { useLocale } from "next-intl";
 import useFetchStream from "@/lib/fetchers/useFetchStream";
-import { DayCalendarResponse, DayCalendarTrackingStats } from "@/types/dto";
+import { DayCalendarTrackingStats } from "@/types/dto";
 import { ro } from "date-fns/locale";
 import { motion } from "framer-motion";
 import dynamic from "next/dynamic";
-import { useDebounce } from "@/components/ui/multiple-selector";
 
 const DynamicNoResultsLottie = dynamic(
   () => import("@/components/lottie/no-results-lottie"),
@@ -59,136 +69,279 @@ interface WrapperProps {
   texts: DayCalendarStatsWrapperTexts;
 }
 export default function DayCalendarStatsWrapper({
-  texts: { dateRangePickerTexts, noDataText, errorText, titleText },
+  // texts: { dateRangePickerTexts, noDataText, errorText, titleText },
+  texts,
 }: WrapperProps) {
   const {
     date,
-    dayCalendars,
-    isFinished: isDaysFinished,
-    isAbsoluteFinished: isDaysAbsoluteFinished,
-    messages: dayCalendarStatsMessages,
+    // dayCalendars,
+    // isFinished: isDaysFinished,
+    // isAbsoluteFinished: isDaysAbsoluteFinished,
+    // messages: dayCalendarStatsMessages,
+    addToUpdateDaysCallbacks,
+    daysLocalChange,
   } = useDayCalendar();
-  const monthStartDate = useMemo(() => startOfMonth(date), [date]);
-  const monthEndDate = useMemo(() => endOfMonth(date), [date]);
-  const monthStart = useMemo(
-    () => format(monthStartDate, dateFormat),
-    [monthStartDate],
+
+  return (
+    <InnerWrapperContent
+      texts={texts}
+      date={date}
+      daysLocalChange={daysLocalChange}
+      addToUpdateDaysCallbacks={addToUpdateDaysCallbacks}
+    />
   );
-  const monthEnd = useMemo(
-    () => format(monthEndDate, dateFormat),
-    [monthEndDate],
-  );
-  const [dateRange, setDateRange] = useState<
-    Record<string, string> | undefined
-  >({
-    from: monthStart,
-    to: monthEnd,
-  });
+  // const monthStartDate = useMemo(() => startOfMonth(date), [date]);
+  // const monthEndDate = useMemo(() => endOfMonth(date), [date]);
+  // const monthStart = useMemo(
+  //   () => format(monthStartDate, dateFormat),
+  //   [monthStartDate],
+  // );
+  // const monthEnd = useMemo(
+  //   () => format(monthEndDate, dateFormat),
+  //   [monthEndDate],
+  // );
+  // const [dateRange, setDateRange] = useState<
+  //   Record<string, string> | undefined
+  // >({
+  //   from: monthStart,
+  //   to: monthEnd,
+  // });
+  // const wasFirstFetchDone = useRef(false);
+  // const setWasFirstFetchDone = useCallback(() => {
+  //   wasFirstFetchDone.current = true;
+  // }, []);
+  //
+  // // const prevDaysRefetch = useRef<DayCalendarResponse[] | null>(null);
+  //
+  // // useEffect(() => {
+  // //   if (
+  // //     prevDaysRefetch.current === null &&
+  // //     isDaysAbsoluteFinished &&
+  // //     dayCalendarStatsMessages
+  // //   ) {
+  // //     prevDaysRefetch.current = dayCalendarStatsMessages.map((d) => d.content);
+  // //   }
+  // // }, [dayCalendarStatsMessages, isDaysAbsoluteFinished]);
+  //
+  // useEffect(() => {
+  //   setDateRange({
+  //     from: monthStart,
+  //     to: monthEnd,
+  //   });
+  // }, [monthStart, monthEnd]);
+  //
+  // const locale = useLocale();
+  // const { messages, isFinished, error, refetch, isAbsoluteFinished } =
+  //   useFetchStream<DayCalendarTrackingStats>({
+  //     path: "/daysCalendar/trackingStats",
+  //     authToken: true,
+  //     queryParams: dateRange,
+  //     trigger: daysLocalChange > 0,
+  //     afterFetchCallback: setWasFirstFetchDone,
+  //   });
+  //
+  // useLayoutEffect(() => {
+  //   addToUpdateDaysCallbacks("trackingStats", refetch);
+  // }, [addToUpdateDaysCallbacks, refetch]);
+  //
+  // // useEffect(() => {
+  // //   if (
+  // //     daysLocalChange > 1 && //  first init is done
+  // //     wasFirstFetchDone.current
+  // //   ) {
+  // //     refetch();
+  // //   }
+  // // }, [daysLocalChange, refetch]);
+  //
+  // // //todo fix
+  // // const debouncedDayCalendar = useDebounce(dayCalendars, 30);
+  // //
+  // // // todo fix
+  // // // can trigger more then once sometimes, but request dedup is handling it
+  // // useEffect(() => {
+  // //   if (
+  // //     prevDaysRefetch.current &&
+  // //     isAbsoluteFinished &&
+  // //     isDaysAbsoluteFinished &&
+  // //     debouncedDayCalendar.length > 0 &&
+  // //     debouncedDayCalendar.map((d) => d.id).join(",") !==
+  // //       prevDaysRefetch.current.map((d) => d.id).join(",")
+  // //   ) {
+  // //     refetch();
+  // //     prevDaysRefetch.current = debouncedDayCalendar;
+  // //   }
+  // // }, [
+  // //   debouncedDayCalendar,
+  // //   isDaysAbsoluteFinished,
+  // //   isAbsoluteFinished,
+  // //   refetch,
+  // // ]);
+  //
+  // if (error) {
+  //   return (
+  //     <div className="flex flex-col items-center justify-center mt-20">
+  //       <h1 className="text-destructive">{errorText}</h1>
+  //     </div>
+  //   );
+  // }
+  // return (
+  //   <div className="size-full space-y-3 md:space-y-8">
+  //     <h2 className="text-lg md:text-3xl text-center tracking-tight font-semibold capitalize">
+  //       {titleText}
+  //     </h2>
+  //     <div>
+  //       <DateRangePicker
+  //         key={`${monthStart}-${monthEnd}-${locale}-date-range-picker`}
+  //         showCompare={false}
+  //         showNone={true}
+  //         onUpdate={({ range }, none) => {
+  //           console.log("noneRange", none);
+  //           if (none) {
+  //             setDateRange(undefined);
+  //             return;
+  //           }
+  //           setDateRange({
+  //             from: format(range.from, dateFormat),
+  //             to: format(range.to || range.from, dateFormat),
+  //           });
+  //         }}
+  //         locale={locale === "ro" ? ro : undefined}
+  //         hiddenPresets={["pastYear", "today", "yesterday"]}
+  //         initialDateFrom={monthStartDate}
+  //         initialDateTo={monthEndDate}
+  //         {...dateRangePickerTexts}
+  //       />
+  //     </div>
+  //     {isFinished ? (
+  //       messages.length > 0 ? (
+  //         <DynamicDayCalendarStatsChart data={messages} />
+  //       ) : (
+  //         <div className="flex w-full items-center justify-center h-[350px]">
+  //           <div className="flex flex-col items-center justify-center">
+  //             <DynamicNoResultsLottie
+  //               loop
+  //               className="md:w-1/2 md:h-1/2 mx-auto"
+  //             />
+  //             <h1 className="font-medium text-lg">{noDataText}</h1>
+  //           </div>
+  //         </div>
+  //       )
+  //     ) : (
+  //       <ChartSkeleton />
+  //     )}
+  //   </div>
+  // );
+}
 
-  const prevDaysRefetch = useRef<DayCalendarResponse[] | null>(null);
-
-  useEffect(() => {
-    if (
-      prevDaysRefetch.current === null &&
-      isDaysAbsoluteFinished &&
-      dayCalendarStatsMessages
-    ) {
-      prevDaysRefetch.current = dayCalendarStatsMessages.map((d) => d.content);
-    }
-  }, [dayCalendarStatsMessages, isDaysAbsoluteFinished]);
-
-  useEffect(() => {
-    setDateRange({
+const InnerWrapperContent = memo(
+  ({
+    texts: { dateRangePickerTexts, noDataText, errorText, titleText },
+    date,
+    daysLocalChange,
+    addToUpdateDaysCallbacks,
+  }: Pick<
+    DayCalendarContextType,
+    "date" | "daysLocalChange" | "addToUpdateDaysCallbacks"
+  > & {
+    texts: DayCalendarStatsWrapperTexts;
+  }) => {
+    const monthStartDate = useMemo(() => startOfMonth(date), [date]);
+    const monthEndDate = useMemo(() => endOfMonth(date), [date]);
+    const monthStart = useMemo(
+      () => format(monthStartDate, dateFormat),
+      [monthStartDate],
+    );
+    const monthEnd = useMemo(
+      () => format(monthEndDate, dateFormat),
+      [monthEndDate],
+    );
+    const [dateRange, setDateRange] = useState<
+      Record<string, string> | undefined
+    >({
       from: monthStart,
       to: monthEnd,
     });
-  }, [monthStart, monthEnd]);
+    const wasFirstFetchDone = useRef(false);
+    const setWasFirstFetchDone = useCallback(() => {
+      wasFirstFetchDone.current = true;
+    }, []);
 
-  const locale = useLocale();
-  const { messages, isFinished, error, refetch, isAbsoluteFinished } =
-    useFetchStream<DayCalendarTrackingStats>({
-      path: "/daysCalendar/trackingStats",
-      authToken: true,
-      queryParams: dateRange,
-      trigger: isDaysAbsoluteFinished,
-    });
+    useEffect(() => {
+      setDateRange({
+        from: monthStart,
+        to: monthEnd,
+      });
+    }, [monthStart, monthEnd]);
 
-  //todo fix
-  const debouncedDayCalendar = useDebounce(dayCalendars, 30);
+    const locale = useLocale();
+    const { messages, isFinished, error, refetch, isAbsoluteFinished } =
+      useFetchStream<DayCalendarTrackingStats>({
+        path: "/daysCalendar/trackingStats",
+        authToken: true,
+        queryParams: dateRange,
+        trigger: daysLocalChange > 0,
+        afterFetchCallback: setWasFirstFetchDone,
+      });
 
-  // todo fix
-  // can trigger more then once sometimes, but request dedup is handling it
-  useEffect(() => {
-    if (
-      prevDaysRefetch.current &&
-      isAbsoluteFinished &&
-      isDaysAbsoluteFinished &&
-      debouncedDayCalendar.length > 0 &&
-      debouncedDayCalendar.map((d) => d.id).join(",") !==
-        prevDaysRefetch.current.map((d) => d.id).join(",")
-    ) {
-      refetch();
-      prevDaysRefetch.current = debouncedDayCalendar;
+    useLayoutEffect(() => {
+      addToUpdateDaysCallbacks("trackingStats", refetch);
+    }, [addToUpdateDaysCallbacks, refetch]);
+
+    if (error) {
+      return (
+        <div className="flex flex-col items-center justify-center mt-20">
+          <h1 className="text-destructive">{errorText}</h1>
+        </div>
+      );
     }
-  }, [
-    debouncedDayCalendar,
-    isDaysAbsoluteFinished,
-    isAbsoluteFinished,
-    refetch,
-  ]);
-
-  if (error) {
     return (
-      <div className="flex flex-col items-center justify-center mt-20">
-        <h1 className="text-destructive">{errorText}</h1>
+      <div className="size-full space-y-3 md:space-y-8">
+        <h2 className="text-lg md:text-3xl text-center tracking-tight font-semibold capitalize">
+          {titleText}
+        </h2>
+        <div>
+          <DateRangePicker
+            key={`${monthStart}-${monthEnd}-${locale}-date-range-picker`}
+            showCompare={false}
+            showNone={true}
+            onUpdate={({ range }, none) => {
+              console.log("noneRange", none);
+              if (none) {
+                setDateRange(undefined);
+                return;
+              }
+              setDateRange({
+                from: format(range.from, dateFormat),
+                to: format(range.to || range.from, dateFormat),
+              });
+            }}
+            locale={locale === "ro" ? ro : undefined}
+            hiddenPresets={["pastYear", "today", "yesterday"]}
+            initialDateFrom={monthStartDate}
+            initialDateTo={monthEndDate}
+            {...dateRangePickerTexts}
+          />
+        </div>
+        {isFinished ? (
+          messages.length > 0 ? (
+            <DynamicDayCalendarStatsChart data={messages} />
+          ) : (
+            <div className="flex w-full items-center justify-center h-[350px]">
+              <div className="flex flex-col items-center justify-center">
+                <DynamicNoResultsLottie
+                  loop
+                  className="md:w-1/2 md:h-1/2 mx-auto"
+                />
+                <h1 className="font-medium text-lg">{noDataText}</h1>
+              </div>
+            </div>
+          )
+        ) : (
+          <ChartSkeleton />
+        )}
       </div>
     );
-  }
-  return (
-    <div className="size-full space-y-3 md:space-y-8">
-      <h2 className="text-lg md:text-3xl text-center tracking-tight font-semibold capitalize">
-        {titleText}
-      </h2>
-      <div>
-        <DateRangePicker
-          key={`${monthStart}-${monthEnd}-${locale}-date-range-picker`}
-          showCompare={false}
-          showNone={true}
-          onUpdate={({ range }, none) => {
-            console.log("noneRange", none);
-            if (none) {
-              setDateRange(undefined);
-              return;
-            }
-            setDateRange({
-              from: format(range.from, dateFormat),
-              to: format(range.to || range.from, dateFormat),
-            });
-          }}
-          locale={locale === "ro" ? ro : undefined}
-          hiddenPresets={["pastYear", "today", "yesterday"]}
-          initialDateFrom={monthStartDate}
-          initialDateTo={monthEndDate}
-          {...dateRangePickerTexts}
-        />
-      </div>
-      {isFinished ? (
-        messages.length > 0 ? (
-          <DynamicDayCalendarStatsChart data={messages} />
-        ) : (
-          <div className="flex w-full items-center justify-center h-[350px]">
-            <div className="flex flex-col items-center justify-center">
-              <DynamicNoResultsLottie
-                loop
-                className="md:w-1/2 md:h-1/2 mx-auto"
-              />
-              <h1 className="font-medium text-lg">{noDataText}</h1>
-            </div>
-          </div>
-        )
-      ) : (
-        <ChartSkeleton />
-      )}
-    </div>
-  );
-}
+  },
+);
+
+InnerWrapperContent.displayName = "InnerWrapperContent";

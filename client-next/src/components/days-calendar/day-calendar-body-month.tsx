@@ -86,7 +86,7 @@ export default function DayCalendarBodyMonth({
 
               return (
                 <div
-                  key={day.toISOString()}
+                  key={day.toISOString() + monthStart.toISOString()}
                   className={cn(
                     "relative flex flex-col border-b border-r p-2 aspect-square ",
                     !isCurrentMonth && "bg-muted/50 hidden md:flex",
@@ -122,14 +122,14 @@ export default function DayCalendarBodyMonth({
                               duration: 0.25,
                               ease: "easeInOut",
                             }}
-                            onAnimationComplete={() => {
-                              if (
-                                i === dayEvents.length - 1 &&
-                                animateChildren.current
-                              ) {
-                                animateChildren.current = false;
-                              }
-                            }}
+                            // onAnimationComplete={() => {
+                            //   if (
+                            //     i === dayEvents.length - 1 &&
+                            //     animateChildren.current
+                            //   ) {
+                            //     animateChildren.current = false;
+                            //   }
+                            // }}
                           >
                             <DayCalendarEvent
                               dayCalendar={d}
