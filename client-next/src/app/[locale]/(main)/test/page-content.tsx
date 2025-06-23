@@ -4,6 +4,7 @@ import { Role } from "@/types/fetch-utils";
 import React, {
   useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState,
   useSyncExternalStore,
@@ -13,21 +14,17 @@ import { useMountedState } from "react-use";
 import {
   ClientCacheInstance,
   useCacheInstance,
+  useFlattenCachedValue,
 } from "@/providers/cache-provider";
 import { useSyncExternalStoreWithSelector } from "use-sync-external-store/with-selector";
 import { isDeepEqual } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { Subscription } from "@/lib/fetchers/use-subscription";
 
 interface Props {
   editorTexts: EditorTexts;
 }
 const minRole: Role = "ROLE_ADMIN";
-
-const key = "key";
-const subscribe = (s: () => void) => {
-  const cacheInstance = ClientCacheInstance.getInstance();
-  return cacheInstance.subscribe(key, s);
-};
 
 const randArray = () =>
   Array.from({ length: 3 }, () => Math.random().toString(36).substring(5));
@@ -38,18 +35,20 @@ export default function TestPage({ editorTexts }: Props) {
   const [dummyState, setDummyState] = useState<boolean>(false);
 
   const [manualFlat, setManualFlat] = useState<string[]>();
+  const subscribe = useCallback(
+    (s: () => void) => {
+      const cacheInstance = ClientCacheInstance.getInstance();
+      return cacheInstance.subscribe(key, s);
+    },
+    [key],
+  );
 
   const getSnapshot = useCallback(() => {
     console.log("getSnapshot called");
     return ClientCacheInstance.getInstance().getRaw(key);
   }, [key]);
 
-  const value = useSyncExternalStoreWithSelector(
-    subscribe,
-    getSnapshot,
-    getSnapshot,
-    (a) => a?.flat(),
-  );
+  const { value } = useFlattenCachedValue(key);
 
   return (
     <div style={{ padding: 20 }} className="mx-auto space-y-5 space-x-5">

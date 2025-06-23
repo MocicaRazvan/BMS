@@ -1,26 +1,21 @@
 "use client";
 
 import {
-  CacheIsEqual,
   useCacheInvalidator,
   useFlattenCachedValue,
 } from "@/providers/cache-provider";
 import { useAdditionalFetchingReducer } from "@/lib/fetchers/additional-fetching-reducer";
 import { useCallback } from "react";
 
-interface UseFetchStreamStateArgs<T> {
+interface UseFetchStreamStateArgs {
   cacheKey: string;
-  cacheIsEqual?: CacheIsEqual<T>;
 }
 
 export default function useFetchStreamState<T, E>({
   cacheKey,
-  cacheIsEqual,
-}: UseFetchStreamStateArgs<T>) {
-  const { value: messages, ...restCachedValue } = useFlattenCachedValue<T>(
-    cacheKey,
-    cacheIsEqual,
-  );
+}: UseFetchStreamStateArgs) {
+  const { value: messages, ...restCachedValue } =
+    useFlattenCachedValue<T>(cacheKey);
 
   const { removeArrayFromCache, isKeyInCache } = useCacheInvalidator();
   const {

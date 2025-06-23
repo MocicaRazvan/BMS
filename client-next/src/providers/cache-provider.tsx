@@ -4,23 +4,33 @@ import {
   ReactNode,
   useCallback,
   useContext,
-  useEffect,
   useMemo,
-  useRef,
-  useState,
 } from "react";
 import { isDeepEqual } from "@/lib/utils";
 import { LRUCache } from "lru-cache";
+import { Subscription, useSubscription } from "@/lib/fetchers/use-subscription";
 
 const maxLRUCacheItems = process.env.NEXT_PUBLIC_MAX_LRU_CACHE_ITEMS
   ? parseInt(process.env.NEXT_PUBLIC_MAX_LRU_CACHE_ITEMS, 10)
-  : 250;
+  : 75;
 const maxLRUCacheSize = process.env.NEXT_PUBLIC_MAX_LRU_CACHE_SIZE
   ? parseInt(process.env.NEXT_PUBLIC_MAX_LRU_CACHE_SIZE, 10)
-  : 10000;
+  : 1500;
 const ttlLRUCache = process.env.NEXT_PUBLIC_TTL_LRU_CACHE
   ? parseInt(process.env.NEXT_PUBLIC_TTL_LRU_CACHE, 10) * 1000
   : 1000 * 60 * 5; //5 mins
+
+function countElements(arr: unknown[]): number {
+  let count = 0;
+  for (const el of arr) {
+    if (!Array.isArray(el)) {
+      count += 1;
+    } else {
+      count += countElements(el);
+    }
+  }
+  return count;
+}
 
 type ClientCacheListener = () => void;
 
@@ -29,18 +39,18 @@ export class ClientCacheInstance {
   private readonly cache: LRUCache<string, unknown[][]>;
 
   private readonly listeners: Map<string, Set<ClientCacheListener>>;
-  // private flatCache = new Map<string, unknown[]>();
-  private readonly EMPTY_ARRAY = [];
+  private readonly reactSafeStore: Map<string, unknown[]>;
+  public static readonly EMPTY_ARRAY = [];
 
   private constructor() {
     this.listeners = new Map();
-    // this.flatCache = new Map();
+    this.reactSafeStore = new Map();
     this.cache = new LRUCache({
       max: maxLRUCacheItems,
       maxSize: maxLRUCacheSize,
-      sizeCalculation: (v, _) => v.flat().length || 1,
+      sizeCalculation: (v, _) => countElements(v) || 1,
       ttl: ttlLRUCache,
-      allowStale: true,
+      allowStale: false,
       updateAgeOnGet: true,
       updateAgeOnHas: false,
       // dispose: (v, k, r) => {
@@ -53,12 +63,14 @@ export class ClientCacheInstance {
         if (r === "delete") {
           // console.log("Cache Disposed delete:", k, r, v);
           // this.flatCache.delete(k);
+          this.reactSafeStore.delete(k);
           this.emitChange(k);
         }
       },
       onInsert: (value, key, reason) => {
         // console.log("Cache Inserted:", key, reason);
         // this.flatCache.set(key, value ? value.flat() : this.EMPTY_ARRAY);
+        this.reactSafeStore.set(key, value.flat());
         this.emitChange(key);
       },
     });
@@ -92,9 +104,21 @@ export class ClientCacheInstance {
       allowStale: true,
     });
     if (!cachedValue) {
-      return this.EMPTY_ARRAY;
+      return ClientCacheInstance.EMPTY_ARRAY as T[][];
     }
     return cachedValue as T[][];
+  }
+
+  public getReactSafeStore<T>(key: string): T[] {
+    const value = this.reactSafeStore.get(key);
+    if (!value) {
+      return ClientCacheInstance.EMPTY_ARRAY;
+    }
+    return value as T[];
+  }
+
+  public hasReactSafeStore(key: string): boolean {
+    return this.reactSafeStore.has(key);
   }
 
   public set<T>(key: string, value: T[][]): void {
@@ -110,8 +134,10 @@ export class ClientCacheInstance {
       cachedValue.length = batchIndex + 1;
     }
     cachedValue[batchIndex] = value;
+    // info we flat in react so no need to spread
     // new reference to trigger listeners
-    this.cache.set(key, [...cachedValue]);
+    // this.cache.set(key, [...cachedValue]);
+    this.cache.set(key, cachedValue);
   }
 
   public handleBatchUpdate<T>(
@@ -137,14 +163,6 @@ export class ClientCacheInstance {
 
   public has(key: string): boolean {
     return this.cache.has(key);
-  }
-
-  public hasStale(key: string): boolean {
-    return (
-      this.cache.peek(key, {
-        allowStale: true,
-      }) !== undefined
-    );
   }
 
   public isBatchTheSame<T>(
@@ -177,9 +195,16 @@ export class ClientCacheInstance {
       this.listeners.set(key, set);
     }
     set.add(listener);
+    const cachedValue = this.cache.peek(key, {
+      allowStale: true,
+    });
+    if (!this.reactSafeStore.has(key) && cachedValue) {
+      // console.log("Cache Subscribing to cache key:", key);
+      this.reactSafeStore.set(key, cachedValue.flat());
+    }
     return () => {
       // console.log(
-      //   "Cache Unsubscribing from cache key:",
+      //    "Cache Unsubscribing from cache key:",
       //   key,
       //   this.cache.calculatedSize,
       // );
@@ -189,6 +214,8 @@ export class ClientCacheInstance {
       set.delete(listener);
       if (set.size === 0) {
         this.listeners.delete(key);
+        this.reactSafeStore.delete(key);
+        // console.log("Cache Unsubscribing delete key:", key);
       }
     };
   }
@@ -254,7 +281,7 @@ export const useCache = <T,>(cacheKey: string) => {
   );
 
   const isCacheKeyNotEmpty = useCallback(
-    () => cacheInstance.hasStale(cacheKey),
+    () => cacheInstance.has(cacheKey),
     [cacheInstance, cacheKey],
   );
 
@@ -329,49 +356,38 @@ export const useCacheInvalidator = () => {
   };
 };
 
-export type CacheIsEqual<T> = (a: T[][], b: T[][]) => boolean;
 //https://github.com/facebook/react/issues/27670
 // why no useSyncExternalStoreWithSelector
-export function useFlattenCachedValue<T>(
-  cacheKey: string,
-  isEqual: CacheIsEqual<T> = Object.is,
-) {
-  const { cacheInstance, subscribeToCache, ...rest } = useCache<T>(cacheKey);
-  const lastFlatRef = useRef<T[][]>([]);
-  const isEqualRef = useRef<CacheIsEqual<T>>(isEqual);
+export function useFlattenCachedValue<T>(cacheKey: string) {
+  const {
+    cacheInstance,
+    subscribeToCache,
+    isCacheKeyNotEmpty: _,
+    ...rest
+  } = useCache<T>(cacheKey);
   const getSnapshot = useCallback(
-    () => cacheInstance.getRawOrEmpty<T>(cacheKey),
+    () => cacheInstance.getReactSafeStore<T>(cacheKey),
     [cacheKey, cacheInstance],
   );
 
-  const handler = useCallback(() => {
-    const next = getSnapshot();
-    if (!isEqualRef.current(lastFlatRef.current, next)) {
-      lastFlatRef.current = next;
-      setValue(next);
-    }
-  }, [getSnapshot]);
+  const subscription: Subscription<T[]> = useMemo(
+    () => ({
+      getCurrentValue: getSnapshot,
+      subscribe: subscribeToCache,
+    }),
+    [getSnapshot, subscribeToCache],
+  );
 
-  const [value, setValue] = useState<T[][]>(() => {
-    const initial = getSnapshot();
-    lastFlatRef.current = initial;
-    return initial;
-  });
+  const value = useSubscription<T[]>(subscription);
+  const isCacheKeyNotEmpty = useCallback(
+    () => cacheInstance.hasReactSafeStore(cacheKey),
+    [cacheInstance, cacheKey],
+  );
 
-  useEffect(() => {
-    const next = getSnapshot();
-    if (!isEqualRef.current(lastFlatRef.current, next)) {
-      lastFlatRef.current = next;
-      setValue(next);
-    }
-
-    return subscribeToCache(handler);
-  }, [getSnapshot, handler, subscribeToCache]);
-
-  const flat = useMemo(() => value.flat(), [value]);
   return {
-    value: flat,
-    originalValue: value,
+    value,
     ...rest,
+    cacheInstance,
+    isCacheKeyNotEmpty,
   };
 }

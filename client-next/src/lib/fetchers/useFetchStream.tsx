@@ -28,6 +28,8 @@ export interface UseFetchStreamProps {
   trigger?: boolean;
   aboveController?: CustomAbortController;
   onBlurCallback?: () => void;
+  beforeFetchCallback?: () => void;
+  afterFetchCallback?: () => void;
 }
 type ManualFetcher<T> = (args: {
   fetchProps: Omit<
@@ -46,7 +48,6 @@ export interface UseFetchStreamReturn<T, E> {
   isFinished: boolean;
   refetch: () => void;
   cacheKey: string;
-  // resetValueAndCache: () => void;
   removeFromCache: () => void;
   refetchState: boolean;
   isAbsoluteFinished: boolean;
@@ -94,6 +95,8 @@ export function useFetchStream<T = unknown, E extends BaseError = BaseError>({
   trigger = true,
   onBlurCallback,
   aboveController,
+  beforeFetchCallback,
+  afterFetchCallback,
 }: UseFetchStreamProps): UseFetchStreamReturn<T, E> {
   const stableQueryParams = useDeepCompareMemo(
     () => queryParams,
@@ -132,10 +135,8 @@ export function useFetchStream<T = unknown, E extends BaseError = BaseError>({
   );
   const {
     messages,
-    // resetValueAndCache,
     isCacheKeyNotEmpty,
     handleBatchUpdate,
-    // finalSyncValueWithCache,
     replaceBatchInForAnyKey,
     removeFromCache,
     removeArrayFromCache,
@@ -190,13 +191,6 @@ export function useFetchStream<T = unknown, E extends BaseError = BaseError>({
               if (res.error) {
                 throw res.error;
               }
-              // else {
-              //   // needed in strict mode or when there are more concurrent requests (a big burst in ms,
-              //   // likely to a render of a parent component)
-              //   // in a short period of time so that the state is synced
-              //   // in non-strict mode it can be removed for most cases
-              //   finalSyncValueWithCache();
-              // }
               break;
             }
           }
@@ -362,6 +356,7 @@ export function useFetchStream<T = unknown, E extends BaseError = BaseError>({
         return;
       }
       try {
+        beforeFetchCallback?.();
         await fetcher(abortController, fetchProps);
         historyKeys.current.add(cacheKey);
       } catch (e) {
@@ -376,6 +371,7 @@ export function useFetchStream<T = unknown, E extends BaseError = BaseError>({
         if (refetchClosure.current) {
           refetchClosure.current = false;
         }
+        afterFetchCallback?.();
       }
     };
 
@@ -420,6 +416,8 @@ export function useFetchStream<T = unknown, E extends BaseError = BaseError>({
     stableCustomHeaders,
     stableQueryParams,
     stableArrayQueryParam,
+    beforeFetchCallback,
+    afterFetchCallback,
     // intentionally omitted aboveController, it's only used for optional cleanup and should not trigger refetch
     // aboveController,
   ]);

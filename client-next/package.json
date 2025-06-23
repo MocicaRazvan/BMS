@@ -9,7 +9,7 @@
     "start": " next start",
     "lint": "next lint",
     "lint:quiet": "next lint --quiet --no-cache",
-    "lint:errors": "npm run type-check && npm run lint:quiet",
+    "lint:errors": "npm run type:check && npm run lint:quiet",
     "type:check": "tsc --noEmit"
   },
   "dependencies": {
@@ -84,7 +84,6 @@
     "country-iso-3-to-2": "^1.1.1",
     "cron-timezone-converter": "^1.0.0",
     "cronstrue": "^2.61.0",
-    "crypto-ts": "^1.0.2",
     "d3-scale-chromatic": "^3.1.0",
     "d3-zoom": "^3.0.0",
     "date-fns": "^3.6.0",

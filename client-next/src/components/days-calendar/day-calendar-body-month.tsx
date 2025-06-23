@@ -23,7 +23,7 @@ import { useLocale } from "next-intl";
 import DayCalendarStatsWrapper, {
   DayCalendarStatsWrapperTexts,
 } from "@/components/days-calendar/days-calendar-stats-wrapper";
-import { useMemo, useRef } from "react";
+import { useMemo } from "react";
 
 export interface DayCalendarBodyMonthTexts {
   addAnchor: string;
@@ -49,7 +49,6 @@ export default function DayCalendarBodyMonth({
 }: DayCalendarBodyMonthTexts) {
   const locale = useLocale() as Locale;
   const { date, dayCalendars, calendarDays, monthStart } = useDayCalendar();
-  const animateChildren = useRef(true);
 
   return useMemo(
     () => (
@@ -112,24 +111,12 @@ export default function DayCalendarBodyMonth({
                           <motion.div
                             key={d.id + d.date}
                             className="w-full h-full"
-                            initial={
-                              animateChildren.current ? { opacity: 0.1 } : false
-                            }
-                            animate={
-                              animateChildren.current ? { opacity: 1 } : false
-                            }
+                            initial={{ opacity: 0.1 }}
+                            animate={{ opacity: 1 }}
                             transition={{
                               duration: 0.25,
                               ease: "easeInOut",
                             }}
-                            // onAnimationComplete={() => {
-                            //   if (
-                            //     i === dayEvents.length - 1 &&
-                            //     animateChildren.current
-                            //   ) {
-                            //     animateChildren.current = false;
-                            //   }
-                            // }}
                           >
                             <DayCalendarEvent
                               dayCalendar={d}
