@@ -28,7 +28,6 @@ export default async function Page({ params: { locale } }: LocaleProps) {
       <DayCalendarHeaderDate {...dayCalendarHeaderTexts} />
       <Separator className="mt-6" />
       <DayCalendarBody dayCalendarBodyMonthTexts={dayCalendarBodyMonthTexts} />
-      <DayCalendarHeaderDate {...dayCalendarHeaderTexts} />
     </div>
   );
 }

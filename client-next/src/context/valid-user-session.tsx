@@ -43,7 +43,6 @@ export default function ValidUserSessionContext({
             console.error("ValidUserSessionContext Token is not valid");
             await handleSignOut();
           } else {
-            console.log("ValidUserSessionContext Token is valid");
           }
         })
         .catch(async (e) => {

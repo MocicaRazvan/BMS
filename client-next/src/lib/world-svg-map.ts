@@ -14,7 +14,7 @@ const backgroundColor = "transparent";
 
 function getSvgMap() {
   if (!globalThis.svgMap) {
-    console.log("SVG map not found, generating a new one...");
+    // console.log("SVG map not found, generating a new one...");
     const map = new DottedMap({ height: 100, grid: "diagonal" });
     globalThis.svgMap = {
       dark: map.getSVG({

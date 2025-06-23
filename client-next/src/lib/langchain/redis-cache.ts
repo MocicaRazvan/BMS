@@ -24,7 +24,7 @@ function initRedis() {
   if (!globalThis.redisInstance) {
     const isBuildPhase = process.env.NEXT_PHASE === PHASE_PRODUCTION_BUILD;
 
-    console.log("Creating a new Langhchain Redis connection...");
+    // console.log("Creating a new Langhchain Redis connection...");
     globalThis.redisInstance = new CustomRedis({
       db: process.env.LANGCHAIN_CACHE_REDIS_DB
         ? parseInt(process.env.LANGCHAIN_CACHE_REDIS_DB)

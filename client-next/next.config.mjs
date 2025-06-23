@@ -12,7 +12,7 @@ const withBundleAnalyzer = generated({
 
 /** @type {import('next').NextConfig} */
 const baseConfig = {
-  // reactStrictMode: false,
+  reactStrictMode: false,
   output: "standalone",
   poweredByHeader: false,
   images: {
@@ -45,7 +45,10 @@ const baseConfig = {
   },
   compiler: {
     removeConsole:
-      process.env.NODE_ENV === "production" ? { exclude: ["error"] } : false,
+      process.env.NODE_ENV === "production" &&
+      !(process.env.NEXT_PUBLIC_DEBUG === "true")
+        ? { exclude: ["error"] }
+        : false,
   },
   cacheHandler:
     process.env.NODE_ENV === "production" ? "./cache-handler.mjs" : undefined,

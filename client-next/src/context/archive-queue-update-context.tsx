@@ -23,14 +23,20 @@ interface ItemCnt {
   count: number;
   finished: boolean;
 }
-
+interface ContainerActionEntry {
+  action?: ContainerAction;
+  id?: string;
+}
+type ContainerActionsType = Record<ArchiveQueue, ContainerActionEntry>;
 interface ArchiveQueueUpdateContextType {
   lastMessage: MessageEvent<any> | null;
   readyState: ReadyState;
   batchUpdateMessages: Record<ArchiveQueue, ItemCnt>;
-  actions: Record<ArchiveQueue, ContainerAction | undefined>;
+  actions: ContainerActionsType;
   getBatchUpdates: (q: ArchiveQueue) => ItemCnt;
-  getAction: (q: ArchiveQueue) => ContainerAction | undefined;
+  getAction: (q: ArchiveQueue) => ContainerActionEntry;
+  getLastCronActionHandled: (q: ArchiveQueue) => string | undefined;
+  setLastCronActionHandled: (q: ArchiveQueue, id: string | undefined) => void;
 }
 
 export type ArchiveQueueUpdateTexts = {
@@ -42,7 +48,6 @@ const fromArchiveQueueToTitle = (
   q: ArchiveQueue,
   texts: ArchiveQueueUpdateTexts["titles"],
 ) => {
-  console.log("fromArchiveQueueToTitle q", q, texts);
   const splitQ = q.split("-");
   const prefix = splitQ[0] as ArchiveQueuePrefix;
   const action = splitQ[1];
@@ -71,12 +76,21 @@ const initialBatchUpdate = Object.values(ArchiveQueue).reduce(
   >,
 );
 
-const initialActions = Object.values(ArchiveQueue).reduce(
+const initialActions = Object.values(ArchiveQueue).reduce((acc, curr) => {
+  acc[curr as ArchiveQueue] = {
+    action: undefined,
+    id: undefined,
+  };
+  return acc;
+}, {} as ContainerActionsType);
+
+type LastCronActionsHandledType = Record<ArchiveQueue, string | undefined>;
+const initialLastCronActionsHandled = Object.values(ArchiveQueue).reduce(
   (acc, curr) => {
     acc[curr as ArchiveQueue] = undefined;
     return acc;
   },
-  {} as Record<ArchiveQueue, ContainerAction | undefined>,
+  {} as LastCronActionsHandledType,
 );
 
 function isNotifyBatchUpdate(obj: unknown): obj is NotifyBatchUpdate {
@@ -130,7 +144,10 @@ export default function ArchiveQueueUpdateProvider({
     } else if (isNotifyContainerAction(msg)) {
       setActions((prev) => ({
         ...prev,
-        [msg.queueName]: msg.action,
+        [msg.queueName]: {
+          action: msg.action,
+          id: msg.id,
+        },
       }));
       setBatchUpdateMessages((prev) => ({
         ...prev,
@@ -141,6 +158,10 @@ export default function ArchiveQueueUpdateProvider({
       }));
     }
   }, []);
+
+  const lastCronActionsHandled = useRef<LastCronActionsHandledType>(
+    initialLastCronActionsHandled,
+  );
 
   const lastProcessedMessageId = useRef<string | null>(null);
 
@@ -155,7 +176,6 @@ export default function ArchiveQueueUpdateProvider({
       onMessage: (msg) => {
         if (msg !== null) {
           const parsedMessage = JSON.parse(msg.data);
-          console.log("parsedMessage", parsedMessage);
           if (parsedMessage?.id !== lastProcessedMessageId.current) {
             lastProcessedMessageId.current = parsedMessage.id;
             handleLastMessageUpdate(parsedMessage);
@@ -175,8 +195,15 @@ export default function ArchiveQueueUpdateProvider({
       }
     >
   >(initialBatchUpdate);
-  const [actions, setActions] =
-    useState<Record<ArchiveQueue, ContainerAction | undefined>>(initialActions);
+  const [actions, setActions] = useState<
+    Record<
+      ArchiveQueue,
+      {
+        action?: ContainerAction;
+        id?: string;
+      }
+    >
+  >(initialActions);
   const prevActionsState = useRef(actions);
 
   const getBatchUpdates = useCallback(
@@ -184,15 +211,26 @@ export default function ArchiveQueueUpdateProvider({
     [batchUpdateMessages],
   );
 
+  const getLastCronActionHandled = useCallback(
+    (q: ArchiveQueue) => lastCronActionsHandled.current[q],
+    [],
+  );
+  const setLastCronActionHandled = useCallback(
+    (q: ArchiveQueue, id: string | undefined) => {
+      lastCronActionsHandled.current[q] = id;
+    },
+    [],
+  );
+
   const getAction = useCallback((q: ArchiveQueue) => actions[q], [actions]);
   useEffect(() => {
     const difActions = Object.entries(actions).reduce(
       (acc, [key, value]) => {
         const castedKey = key as ArchiveQueue;
-        if (prevActionsState.current[castedKey] !== value) {
+        if (prevActionsState.current[castedKey].action !== value.action) {
           acc.push({
             queueName: castedKey,
-            action: value,
+            action: value.action,
           });
         }
         return acc;
@@ -227,6 +265,8 @@ export default function ArchiveQueueUpdateProvider({
         actions,
         getBatchUpdates,
         getAction,
+        getLastCronActionHandled,
+        setLastCronActionHandled,
       }}
     >
       {children}

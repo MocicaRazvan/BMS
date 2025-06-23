@@ -445,7 +445,6 @@ const RadioSort = memo(
       callback,
       filterKey,
     });
-    console.log("RadioSort");
 
     if (sortingOptions?.length === 0) return null;
 

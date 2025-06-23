@@ -299,11 +299,16 @@ const DashboardSuccessCard = ({
     refetch: () => void;
   }) => {
   const formatIntl = useFormatter();
-  const { getAction, getBatchUpdates } = useArchiveQueueUpdateContext();
+  const {
+    getAction,
+    getBatchUpdates,
+    getLastCronActionHandled,
+    setLastCronActionHandled,
+  } = useArchiveQueueUpdateContext();
   const [alive, setAlive] = useState<AliveOptionKey>("60000");
-  const [triggerLoading, setTriggerLoading] = useState<boolean>(false);
-  const [stopLoading, setStopLoading] = useState<boolean>(false);
-  const [popOpen, setPopOpen] = useState<boolean>(false);
+  const [triggerLoading, setTriggerLoading] = useState(false);
+  const [stopLoading, setStopLoading] = useState(false);
+  const [popOpen, setPopOpen] = useState(false);
 
   const [
     { messageCount, consumerCount, cronExpression, timestamp, name },
@@ -322,10 +327,21 @@ const DashboardSuccessCard = ({
   } = getBatchUpdates(queueName);
 
   useEffect(() => {
-    if (action === ContainerAction.START_CRON) {
+    if (
+      action.action === ContainerAction.START_CRON &&
+      action.id !== getLastCronActionHandled(queueName)
+    ) {
+      console.log(
+        "Handling cron action",
+        action.id,
+        action.action,
+        getLastCronActionHandled(queueName),
+      );
+      setLastCronActionHandled(queueName, action.id);
       refetch();
     }
-  }, [action]);
+  }, [action.action, action.id, refetch]);
+
   const toggleBooleanState = useCallback(
     (
       state: boolean,
@@ -340,7 +356,7 @@ const DashboardSuccessCard = ({
   );
 
   useEffect(() => {
-    if (action === ContainerAction.STOP && consumerCount > 0) {
+    if (action.action === ContainerAction.STOP && consumerCount > 0) {
       setQueueInfo((prev) => ({
         ...prev,
         consumerCount: 0,
@@ -352,7 +368,10 @@ const DashboardSuccessCard = ({
       //   title,
       //   description: managePopTexts.consumerStoppedDescription,
       // });
-    } else if (action === ContainerAction.START_MANUAL && consumerCount === 0) {
+    } else if (
+      action.action === ContainerAction.START_MANUAL &&
+      consumerCount === 0
+    ) {
       setQueueInfo((prev) => ({
         ...prev,
         consumerCount: 1,
@@ -366,7 +385,7 @@ const DashboardSuccessCard = ({
       });
     }
   }, [
-    action,
+    action.action,
     consumerCount,
     alive,
     toggleBooleanState,
@@ -690,6 +709,7 @@ const ManagePop = ({
               className={cn(
                 (stopLoading || !consumerCount) && "cursor-not-allowed",
               )}
+              asChild={true}
             >
               <ButtonSubmit
                 buttonSubmitTexts={{

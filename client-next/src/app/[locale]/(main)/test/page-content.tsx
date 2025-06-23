@@ -1,25 +1,16 @@
 "use client";
 
 import { Role } from "@/types/fetch-utils";
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  useSyncExternalStore,
-} from "react";
-import Editor, { EditorTexts } from "@/components/editor/editor";
-import { useMountedState } from "react-use";
-import {
-  ClientCacheInstance,
-  useCacheInstance,
-  useFlattenCachedValue,
-} from "@/providers/cache-provider";
-import { useSyncExternalStoreWithSelector } from "use-sync-external-store/with-selector";
-import { isDeepEqual } from "@/lib/utils";
+import React, { useRef } from "react";
+import { EditorTexts } from "@/components/editor/editor";
+import { useCounter } from "react-use";
+import { ClientCacheInstance } from "@/providers/cache-provider";
 import { Button } from "@/components/ui/button";
-import { Subscription } from "@/lib/fetchers/use-subscription";
+import {
+  clearIndexedDB,
+  deleteFromIndexedDB,
+  saveToIndexedDB,
+} from "@/lib/indexdb/idb-utils";
 
 interface Props {
   editorTexts: EditorTexts;
@@ -31,82 +22,51 @@ const randArray = () =>
 const EmptyArry = [];
 const cacheInstance = ClientCacheInstance.getInstance();
 export default function TestPage({ editorTexts }: Props) {
-  const [key, setKey] = useState<string>("key");
-  const [dummyState, setDummyState] = useState<boolean>(false);
-
-  const [manualFlat, setManualFlat] = useState<string[]>();
-  const subscribe = useCallback(
-    (s: () => void) => {
-      const cacheInstance = ClientCacheInstance.getInstance();
-      return cacheInstance.subscribe(key, s);
-    },
-    [key],
-  );
-
-  const getSnapshot = useCallback(() => {
-    console.log("getSnapshot called");
-    return ClientCacheInstance.getInstance().getRaw(key);
-  }, [key]);
-
-  const { value } = useFlattenCachedValue(key);
-
+  const key = useRef("asd");
+  const [cnt, { inc }] = useCounter();
+  // useEffect(() => {
+  //   const restore = async () => {
+  //     const expireBefore = Date.now() - 1000 * 60 * 10; // 10 minutes ago
+  //     const entries = await loadCacheFromIndexedDB(expireBefore);
+  //     console.log("Restored entries from IndexedDB:", entries);
+  //     // const cache = ClientCacheInstance.getInstance();
+  //     // for (const [key, value] of Object.entries(entries)) {
+  //     //   cache.set(key, value);
+  //     // }
+  //   };
+  //   void restore();
+  // }, [cnt]);
   return (
     <div style={{ padding: 20 }} className="mx-auto space-y-5 space-x-5">
-      {/*<Editor descritpion={""} onChange={() => {}} texts={editorTexts} />*/}
       <Button
         onClick={() => {
-          cacheInstance.set(key, [randArray(), randArray()]);
+          key.current = Math.random().toString(36).substring(5);
+          saveToIndexedDB(key.current, [randArray(), randArray()]);
         }}
       >
-        RAND
+        Add to cache
+      </Button>{" "}
+      <Button
+        onClick={() => {
+          deleteFromIndexedDB(key.current);
+        }}
+      >
+        Delete from cache
       </Button>
       <Button
         onClick={() => {
-          cacheInstance.remove(key);
+          inc();
         }}
       >
-        Delete
+        Increment
       </Button>
       <Button
         onClick={() => {
-          cacheInstance.replaceBatch(key, randArray(), 0);
+          clearIndexedDB();
         }}
       >
-        Replace Batch
+        Delete db
       </Button>
-      <Button
-        onClick={() => {
-          setKey(Math.random().toString(36).substring(2, 15));
-        }}
-      >
-        Random key
-      </Button>
-      <Button
-        onClick={() => {
-          setDummyState((prev) => !prev);
-        }}
-      >
-        Toggle Dummy State
-      </Button>
-      <div>
-        <h1>Test Page</h1>
-        <p>Current value in cache:</p>
-        <pre>{JSON.stringify(value, null, 2)}</pre>
-      </div>
-      <div>
-        <h2>Manual Flat Cache</h2>
-        <pre>{JSON.stringify(manualFlat, null, 2)}</pre>
-        <Button
-          onClick={() => {
-            setManualFlat(() => {
-              const a = cacheInstance.get<string>(key);
-              return a || [];
-            });
-          }}
-        >
-          Set Manual Flat
-        </Button>
-      </div>
     </div>
   );
 }

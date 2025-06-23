@@ -673,6 +673,7 @@ services:
         CACHE_HANDLER_REDIS_URL: redis://redis:6379/10
         NEXT_AUTH_SECRET: ${NEXTAUTH_SECRET}
         ENABLE_COMPRESSION: "true"
+        NEXT_PUBLIC_DEBUG: "true"
     environment:
       NEXTAUTH_URL: http://localhost:3000
       NEXTAUTH_URL_INTERNAL: http://next-js:3000

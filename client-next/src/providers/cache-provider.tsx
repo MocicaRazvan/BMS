@@ -4,11 +4,21 @@ import {
   ReactNode,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
+  useRef,
 } from "react";
 import { isDeepEqual } from "@/lib/utils";
 import { LRUCache } from "lru-cache";
 import { Subscription, useSubscription } from "@/lib/fetchers/use-subscription";
+import { useEvent } from "react-use";
+import {
+  DumpCacheIncomingMessage,
+  IdbMessageResponse,
+  IdbMessageType,
+  LoadCacheIncomingMessage,
+} from "@/lib/indexdb/idb-worker-types";
+import { throttle } from "lodash-es";
 
 const maxLRUCacheItems = process.env.NEXT_PUBLIC_MAX_LRU_CACHE_ITEMS
   ? parseInt(process.env.NEXT_PUBLIC_MAX_LRU_CACHE_ITEMS, 10)
@@ -66,12 +76,16 @@ export class ClientCacheInstance {
           this.reactSafeStore.delete(k);
           this.emitChange(k);
         }
+        // deleteFromIndexedDB(k).catch((err) => {
+        //   console.error("Error deleting from IndexedDB:", err);
+        // });
       },
       onInsert: (value, key, reason) => {
         // console.log("Cache Inserted:", key, reason);
         // this.flatCache.set(key, value ? value.flat() : this.EMPTY_ARRAY);
         this.reactSafeStore.set(key, value.flat());
         this.emitChange(key);
+        // saveToIndexedDBBatched(key, value);
       },
     });
   }
@@ -182,6 +196,29 @@ export class ClientCacheInstance {
     return isDeepEqual(cachedValue[batchIndex], value);
   }
 
+  public hasStale(key: string): boolean {
+    return !!this.cache.peek(key, {
+      allowStale: true,
+    });
+  }
+
+  public getEntries() {
+    return this.cache.entries();
+  }
+
+  public bulkInsertIfMissing(data: Record<string, unknown[][]>) {
+    // console.log("Bulk inserting into cache:", data);
+    Object.entries(data).forEach(([key, value]) => {
+      if (!this.hasStale(key)) {
+        this.cache.set(key, value);
+      }
+    });
+  }
+
+  public isCacheEmpty(): boolean {
+    return this.cache.calculatedSize === 0;
+  }
+
   private emitChange(key: string) {
     const set = this.listeners.get(key);
     if (set) {
@@ -227,8 +264,92 @@ interface Props {
   children: ReactNode;
 }
 
+const EXPIRE_BEFORE_MS = 1000 * 60 * 10; // 10 minutes
+const THROTTLE_WAIT_MS = 1000 * 10; // 10 seconds
 export const CacheProvider = ({ children }: Props) => {
   const cacheInstance = useMemo(() => ClientCacheInstance.getInstance(), []);
+  const workerRef = useRef<Worker>();
+
+  const requestLoadCacheFromIdb = useMemo(() => {
+    return throttle(() => {
+      if (!workerRef.current) return;
+      const message: LoadCacheIncomingMessage = {
+        afterTimestamp: Date.now() - EXPIRE_BEFORE_MS,
+        type: IdbMessageType.LOAD_CACHE,
+      };
+      workerRef.current?.postMessage(message);
+    }, THROTTLE_WAIT_MS);
+  }, []);
+
+  const dumpHandler = useMemo(() => {
+    return throttle(() => {
+      if (!workerRef.current) return;
+      const entries = cacheInstance.getEntries();
+      const message: DumpCacheIncomingMessage = {
+        type: IdbMessageType.DUMP_CACHE,
+        payload: Array.from(entries),
+      };
+      if (entries) {
+        workerRef.current.postMessage(message);
+        // console.log("Dumping cache to IndexedDB:", entries);
+        try {
+        } catch (err) {
+          console.error("Error dumping cache to IndexedDB:", err);
+        }
+      }
+    }, THROTTLE_WAIT_MS);
+  }, []);
+
+  useEffect(() => {
+    if (navigator.storage?.persist) {
+      navigator.storage.persist().catch((err) => {
+        console.warn("Could not request persistent storage:", err);
+      });
+    }
+
+    workerRef.current = new Worker(
+      new URL("../lib/indexdb/idb-load-worker.ts", import.meta.url),
+    );
+    workerRef.current.onmessage = (event: MessageEvent<IdbMessageResponse>) => {
+      // console.log("Received message", event.data.type);
+      if (
+        event.data &&
+        event.data.status === "success" &&
+        event.data.type === IdbMessageType.LOAD_CACHE &&
+        event.data.entries
+      ) {
+        cacheInstance.bulkInsertIfMissing(event.data.entries);
+      }
+    };
+
+    const idleCbId = requestIdleCallback(() => {
+      requestLoadCacheFromIdb();
+    });
+
+    return () => {
+      workerRef.current?.terminate();
+      cancelIdleCallback(idleCbId);
+    };
+  }, []);
+
+  const visibilityChangeHandler = useCallback(
+    async (e: Event) => {
+      if (document.visibilityState === "hidden") {
+        dumpHandler();
+      } else if (
+        document.visibilityState === "visible" &&
+        cacheInstance.isCacheEmpty()
+      ) {
+        // console.log("Cache is empty, loading from IndexedDB");
+        requestLoadCacheFromIdb();
+      }
+    },
+    [dumpHandler, requestLoadCacheFromIdb],
+  );
+
+  useEvent("beforeunload", dumpHandler);
+  useEvent("pagehide", dumpHandler);
+  useEvent("visibilitychange", visibilityChangeHandler);
 
   return (
     <CacheContext.Provider value={cacheInstance}>

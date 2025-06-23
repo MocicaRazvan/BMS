@@ -102,6 +102,7 @@
     "fuse.js": "^7.1.0",
     "html-to-text": "^9.0.5",
     "html2canvas-pro": "^1.5.11",
+    "idb": "^8.0.3",
     "ioredis": "^5.5.0",
     "isbot": "^5.1.28",
     "json-schema-to-zod": "^2.3.0",

@@ -2,7 +2,7 @@
 
 import { Button, ButtonProps } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
-import { ButtonHTMLAttributes, ReactNode } from "react";
+import { ButtonHTMLAttributes, forwardRef, ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
 export interface ButtonSubmitTexts {
@@ -18,31 +18,39 @@ type Props = ButtonHTMLAttributes<HTMLButtonElement> &
     size?: "default" | "sm" | "lg" | "icon" | null | undefined;
   };
 
-export default function ButtonSubmit({
-  isLoading,
-  disable,
-  buttonSubmitTexts: { submitText, loadingText },
-  size = "lg",
-  ...props
-}: Props) {
-  return (
-    <div className="mt-2">
-      {!isLoading ? (
-        <Button
-          type="submit"
-          size={size}
-          disabled={disable}
-          {...props}
-          className={cn(size === "lg" && "text-lg tracking-tight")}
-        >
-          {submitText}
-        </Button>
-      ) : (
-        <Button disabled size={size} className="cursor-wait">
-          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          {loadingText}
-        </Button>
-      )}
-    </div>
-  );
-}
+const ButtonSubmit = forwardRef<HTMLDivElement, Props>(
+  (
+    {
+      isLoading,
+      disable,
+      buttonSubmitTexts: { submitText, loadingText },
+      size = "lg",
+      ...props
+    },
+    ref,
+  ) => {
+    return (
+      <div className="mt-2" ref={ref}>
+        {!isLoading ? (
+          <Button
+            type="submit"
+            size={size}
+            disabled={disable}
+            {...props}
+            className={cn(size === "lg" && "text-lg tracking-tight")}
+          >
+            {submitText}
+          </Button>
+        ) : (
+          <Button disabled size={size} className="cursor-wait">
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            {loadingText}
+          </Button>
+        )}
+      </div>
+    );
+  },
+);
+ButtonSubmit.displayName = "ButtonSubmit";
+
+export default ButtonSubmit;

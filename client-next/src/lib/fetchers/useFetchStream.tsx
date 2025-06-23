@@ -157,6 +157,9 @@ export function useFetchStream<T = unknown, E extends BaseError = BaseError>({
   const historyKeys = useRef<Set<string>>(new Set());
 
   const refetch = useCallback(() => {
+    if (refetchClosure.current) {
+      return;
+    }
     removeFromCache();
     removeArrayFromCache(historyKeys.current);
     resetAdditionalArgs();
@@ -304,11 +307,14 @@ export function useFetchStream<T = unknown, E extends BaseError = BaseError>({
           }
         }
       } catch (err) {
+        if (err && err instanceof DOMException && err?.name === "AbortError") {
+          return;
+        }
+
         if (abortController && !abortController?.signal?.aborted) {
           abortController?.abort();
         }
         errorCallback?.(err);
-        throw err;
       }
     },
     [sessionStatus, maybeSessionToken, isKeyInCache, replaceBatchInForAnyKey],
@@ -325,6 +331,9 @@ export function useFetchStream<T = unknown, E extends BaseError = BaseError>({
         console.log("No token");
       };
     }
+
+    let mounted = true;
+
     const localFinished = refetchClosure.current ? false : isCacheKeyNotEmpty();
 
     setErrorWithFinishes({
@@ -352,7 +361,7 @@ export function useFetchStream<T = unknown, E extends BaseError = BaseError>({
     };
 
     const doFetch = async () => {
-      if (abortController.signal.aborted) {
+      if (abortController.signal.aborted || !mounted) {
         return;
       }
       try {
@@ -376,9 +385,13 @@ export function useFetchStream<T = unknown, E extends BaseError = BaseError>({
     };
 
     //moves the async operations outside of React's render phase
-    Promise.resolve().then(doFetch);
+    (async () => {
+      if (!mounted) return;
+      await doFetch();
+    })();
 
     return () => {
+      mounted = false;
       try {
         if (
           // useAbortController &&

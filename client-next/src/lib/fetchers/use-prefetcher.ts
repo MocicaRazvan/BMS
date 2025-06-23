@@ -8,6 +8,7 @@ import {
   UseFetchStreamReturn,
 } from "@/lib/fetchers/useFetchStream";
 import { CustomAbortController } from "@/lib/fetchers/custom-abort-controller";
+import { debounce } from "lodash-es";
 
 const DUMMY_VALUE = "dummy_value" as const;
 
@@ -61,7 +62,93 @@ export type UseFetchStreamPrefetcherProps<
   generateMarkPrefetchedNextArgs: PrefetchGenerateMarkPrefetchedArgs<T>;
   generateMarkPrefetchedPreviousArgs: PrefetchGenerateMarkPrefetchedArgs<T>;
   additionalKey?: string;
+  delayPrefetch?: number;
 };
+
+type PrefetchOptions<T, E extends BaseError = BaseError> = {
+  isAbsoluteFinished: boolean;
+  preloadNext: boolean;
+  messages: T[];
+  hasPrefetched: PrefetchedHas;
+  predicate: PrefetchedPredicate<T>;
+  generateArgs: PrefetchGenerateNewArgs<T>;
+  generateMark: (
+    messages: T[],
+    newArgs: UseFetchStreamProps,
+  ) => [string, string];
+  basePrefetcher: (
+    predicate: PrefetchedPredicate<T>,
+    generateArgs: PrefetchGenerateNewArgs<T>,
+    generateMark: PrefetchGenerateMarkPrefetchedArgs<T>,
+    controller: CustomAbortController,
+  ) => Promise<void>;
+  delayMs: number;
+};
+
+function useDebouncedIdlePrefetch<T, E extends BaseError = BaseError>({
+  basePrefetcher,
+  isAbsoluteFinished,
+  preloadNext,
+  predicate,
+  messages,
+  hasPrefetched,
+  delayMs,
+  generateArgs,
+  generateMark,
+}: PrefetchOptions<T, E>) {
+  useEffect(() => {
+    if (
+      !isAbsoluteFinished ||
+      !preloadNext ||
+      !predicate(messages, hasPrefetched)
+    ) {
+      return;
+    }
+
+    const abortController = new CustomAbortController();
+
+    let mounted = true;
+
+    const debouncedFetch = debounce(
+      () => {
+        if (abortController.signal.aborted) return;
+
+        basePrefetcher(predicate, generateArgs, generateMark, abortController);
+      },
+      delayMs,
+      {
+        leading: false,
+        trailing: true,
+      },
+    );
+
+    const cbId = requestIdleCallback(() => {
+      if (!mounted) {
+        return;
+      }
+      debouncedFetch();
+    });
+
+    return () => {
+      mounted = false;
+      cancelIdleCallback(cbId);
+      debouncedFetch.cancel();
+      if (!abortController.signal.aborted) {
+        abortController.abort();
+      }
+    };
+  }, [
+    basePrefetcher,
+    delayMs,
+    generateArgs,
+    generateMark,
+    hasPrefetched,
+    isAbsoluteFinished,
+    messages,
+    predicate,
+    preloadNext,
+  ]);
+}
 
 export type FlattedPrefetcherProps<T, E extends BaseError = BaseError> = Pick<
   UseFetchStreamPrefetcherProps<T, E>,
@@ -77,6 +164,8 @@ export type FlattedPrefetcherProps<T, E extends BaseError = BaseError> = Pick<
   nextPredicate: FlattenPrefetchedPredicate<T>;
   previousPredicate: FlattenPrefetchedPredicate<T>;
 };
+
+const DEFAULT_DELAY = 600 as const;
 
 export default function usePrefetcher<T, E extends BaseError = BaseError>({
   returned: {
@@ -95,6 +184,7 @@ export default function usePrefetcher<T, E extends BaseError = BaseError>({
   generateMarkPrefetchedNextArgs,
   generateMarkPrefetchedPreviousArgs,
   additionalKey = "",
+  delayPrefetch = DEFAULT_DELAY,
 }: UseFetchStreamPrefetcherProps<T, E>) {
   const prefetchedMap = useRef<Map<string, Set<string>>>(new Map());
 
@@ -170,7 +260,6 @@ export default function usePrefetcher<T, E extends BaseError = BaseError>({
       ) {
         const newArgs = generateArgs(messages);
         const prefetchedKey = generateMarkPrefetched(messages, newArgs);
-        markPrefetched(prefetchedKey);
         try {
           if (abortController.signal.aborted) {
             unmarkPrefetched(prefetchedKey);
@@ -180,13 +269,14 @@ export default function usePrefetcher<T, E extends BaseError = BaseError>({
             fetchProps: newArgs,
             aboveController: abortController,
             localAuthToken: true,
-            errorCallback: () => {
-              unmarkPrefetched(prefetchedKey);
-            },
           });
-        } catch (e) {
-          unmarkPrefetched(prefetchedKey);
-          console.log("manualFetcher Error fetching", e);
+
+          markPrefetched(prefetchedKey);
+        } catch (e: any) {
+          if (e?.name !== "AbortError") {
+            console.error("basePrefetcher  error:", e);
+            unmarkPrefetched(prefetchedKey);
+          }
         }
       }
     },
@@ -202,62 +292,29 @@ export default function usePrefetcher<T, E extends BaseError = BaseError>({
     ],
   );
 
-  // fine bc dedup handles it
-  // preload next page
-  useEffect(() => {
-    const abortController = new CustomAbortController();
-
-    Promise.resolve().then(() => {
-      if (abortController.signal.aborted) {
-        return;
-      }
-      return basePrefetcher(
-        nextPredicate,
-        generateNextArgs,
-        generateMarkPrefetchedNextArgs,
-        abortController,
-      );
-    });
-
-    return () => {
-      if (abortController && !abortController.signal.aborted) {
-        abortController.abort();
-      }
-    };
-  }, [
+  useDebouncedIdlePrefetch<T, E>({
+    generateMark: generateMarkPrefetchedNextArgs,
+    generateArgs: generateNextArgs,
     basePrefetcher,
-    generateMarkPrefetchedNextArgs,
-    generateNextArgs,
-    nextPredicate,
-  ]);
+    isAbsoluteFinished,
+    preloadNext,
+    predicate: nextPredicate,
+    messages,
+    hasPrefetched,
+    delayMs: delayPrefetch,
+  });
 
-  // preload previous page
-  useEffect(() => {
-    const abortController = new CustomAbortController();
-
-    Promise.resolve().then(() => {
-      if (abortController.signal.aborted) {
-        return;
-      }
-      return basePrefetcher(
-        previousPredicate,
-        generatePreviousArgs,
-        generateMarkPrefetchedPreviousArgs,
-        abortController,
-      );
-    });
-
-    return () => {
-      if (abortController && !abortController.signal.aborted) {
-        abortController.abort();
-      }
-    };
-  }, [
+  useDebouncedIdlePrefetch<T, E>({
+    generateMark: generateMarkPrefetchedPreviousArgs,
+    generateArgs: generatePreviousArgs,
     basePrefetcher,
-    generateMarkPrefetchedPreviousArgs,
-    generatePreviousArgs,
-    previousPredicate,
-  ]);
+    isAbsoluteFinished,
+    preloadNext,
+    predicate: previousPredicate,
+    messages,
+    hasPrefetched,
+    delayMs: delayPrefetch,
+  });
 
   return {
     prefetchedMap: prefetchedMap.current,

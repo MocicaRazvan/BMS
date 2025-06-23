@@ -54,7 +54,6 @@ const CreationFilter = memo(
     triggerVariant = "outline",
     triggerClassName,
   }: Props) => {
-    console.log("CreationFilter rendered");
     const locale = useLocale();
     const currentSearchParams = useSearchParams();
 

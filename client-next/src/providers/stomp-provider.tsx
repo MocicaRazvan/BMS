@@ -17,10 +17,9 @@ export const StompProvider = ({
     Authorization: `Bearer ${authUser?.token}`,
   };
   const conRec = authUser ? 1000 : 0;
-  const isProduction = process.env.NODE_ENV === "production";
-  // const isProduction = true;
+  // const isProduction = process.env.NODE_ENV === "production";
+  const isProduction = true;
   const newUrl = url + `?authToken=${authUser?.token}`;
-  console.log("STOMP URL: ", newUrl);
   return (
     <StompSessionProvider
       url={url}

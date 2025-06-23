@@ -151,7 +151,6 @@ const PlanExtraCriteria = memo(
     dietItems: FilterDropdownItem[];
     objectiveItems: FilterDropdownItem[];
   }) => {
-    console.log("PlanExtraCriteria rendered");
     return (
       <div className="flex items-center justify-center flex-wrap gap-4 ml-10">
         <DropDownFieldFilterCriteriaCallback
