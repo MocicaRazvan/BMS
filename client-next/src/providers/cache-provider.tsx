@@ -329,6 +329,7 @@ export const CacheProvider = ({ children }: Props) => {
     return () => {
       workerRef.current?.terminate();
       cancelIdleCallback(idleCbId);
+      requestLoadCacheFromIdb.cancel();
     };
   }, []);
 
