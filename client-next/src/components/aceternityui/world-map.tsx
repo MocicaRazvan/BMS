@@ -12,6 +12,20 @@ interface MapProps {
   lineColor?: string;
   svgMap: string;
 }
+const projectPoint = (lat: number, lng: number) => {
+  const x = (lng + 180) * (800 / 360);
+  const y = (90 - lat) * (400 / 180);
+  return { x, y };
+};
+
+const createCurvedPath = (
+  start: { x: number; y: number },
+  end: { x: number; y: number },
+) => {
+  const midX = (start.x + end.x) / 2;
+  const midY = Math.min(start.y, end.y) - 50;
+  return `M ${start.x} ${start.y} Q ${midX} ${midY} ${end.x} ${end.y}`;
+};
 
 export function WorldMap({
   dots = [],
@@ -22,25 +36,10 @@ export function WorldMap({
   const containerRef = useRef<HTMLDivElement>(null);
   const isInView = useInView(containerRef, { amount: 0.25, once: true });
 
-  const projectPoint = (lat: number, lng: number) => {
-    const x = (lng + 180) * (800 / 360);
-    const y = (90 - lat) * (400 / 180);
-    return { x, y };
-  };
-
-  const createCurvedPath = (
-    start: { x: number; y: number },
-    end: { x: number; y: number },
-  ) => {
-    const midX = (start.x + end.x) / 2;
-    const midY = Math.min(start.y, end.y) - 50;
-    return `M ${start.x} ${start.y} Q ${midX} ${midY} ${end.x} ${end.y}`;
-  };
-
   return (
     <div
       ref={containerRef}
-      className="w-full aspect-[2/0.85] bg-background rounded-lg  relative font-sans"
+      className="w-full aspect-[2/0.85] bg-background rounded-lg relative font-sans"
     >
       <Image
         src={`data:image/svg+xml;utf8,${encodeURIComponent(svgMap)}`}

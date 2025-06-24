@@ -30,6 +30,7 @@ interface Props<T extends BaseEmail> {
   onFocus?: () => void;
   duration?: number;
   disabled?: boolean;
+  id?: string;
 }
 
 export default function EmailFormField<T extends BaseEmail>({
@@ -38,10 +39,10 @@ export default function EmailFormField<T extends BaseEmail>({
   texts: { label, description },
   duration = 0.2,
   disabled = false,
+  id = "input-email",
 }: Props<T>) {
   const pathEmail = "email" as Path<T>;
   const value = form.watch(pathEmail);
-  const uniqueId = useMemo(() => uuidv4(), []);
 
   return (
     <FormField
@@ -52,7 +53,7 @@ export default function EmailFormField<T extends BaseEmail>({
           <FormLabel>{label}</FormLabel>
           <FormControl>
             <Input
-              id={`input-email-${uniqueId}`}
+              id={id}
               autoComplete="email"
               type="email"
               placeholder="johndoe@gmail.com"

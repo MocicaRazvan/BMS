@@ -89,15 +89,15 @@ export default async function BaseLayout({
         <NextIntlClientProvider
           messages={null as unknown as AbstractIntlMessages}
         >
-          <CacheProvider>
-            <ThemeProvider
-              attribute="class"
-              defaultTheme="system"
-              enableSystem
-              disableTransitionOnChange
-            >
-              <NavigationGuardProvider>
-                <NextAuthSessionProvider>
+          <NextAuthSessionProvider>
+            <CacheProvider>
+              <ThemeProvider
+                attribute="class"
+                defaultTheme="system"
+                enableSystem
+                disableTransitionOnChange
+              >
+                <NavigationGuardProvider>
                   <ScrollTopProvider>
                     <ValidUserSessionContext>
                       <StompProvider url={springWs + "/ws/ws-service"}>
@@ -132,11 +132,11 @@ export default async function BaseLayout({
                       </StompProvider>
                     </ValidUserSessionContext>
                   </ScrollTopProvider>
-                </NextAuthSessionProvider>
-                <Toaster />
-              </NavigationGuardProvider>
-            </ThemeProvider>
-          </CacheProvider>
+                  <Toaster />
+                </NavigationGuardProvider>
+              </ThemeProvider>
+            </CacheProvider>
+          </NextAuthSessionProvider>
         </NextIntlClientProvider>
       </body>
     </html>

@@ -23,6 +23,7 @@ import HomeAboutWrapper from "@/components/home/home-about-wrapper";
 import HomeMap, { HomeMapTexts } from "@/components/home/home-map";
 import WorldWrapper from "@/components/aceternityui/world-wrapper";
 import ScrollProgress from "@/components/common/scroll-progress";
+import HomeMapWrapper from "@/components/home/home-map-wrapper";
 
 interface Props {
   params: { locale: Locale };
@@ -80,9 +81,7 @@ export default async function Home({ params: { locale } }: Props) {
       <HomeAboutWrapper texts={homeAboutTexts} />
       <HomeTimeline {...homeTimelineTexts} />
       {/*<div className="h-10" />*/}
-      <WorldWrapper>
-        <HomeMap {...homeMapTexts} />
-      </WorldWrapper>
+      <HomeMapWrapper {...homeMapTexts} />
       <HomeTestimonials
         testimonials={testimonials}
         title={homeTestimonialsTexts.title}

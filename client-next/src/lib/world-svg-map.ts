@@ -19,7 +19,7 @@ function getSvgMap() {
     globalThis.svgMap = {
       dark: map.getSVG({
         radius,
-        color: "hsl(211,13%,39%)",
+        color: "hsl(211, 13%, 39%)",
         shape,
         backgroundColor,
       }),

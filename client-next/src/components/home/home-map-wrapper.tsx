@@ -1,19 +1,14 @@
-import DottedMap from "dotted-map";
-import { cloneElement, ReactElement } from "react";
+import { HomeMapProps } from "@/components/home/home-map";
+import getSvgMap from "@/lib/world-svg-map";
+import dynamic from "next/dynamic";
+import { Skeleton } from "@/components/ui/skeleton";
 
-interface WithMapProps {
-  children: ReactElement<{ svgMap: string }>;
-}
+const DynamicHomeMap = dynamic(() => import("@/components/home/home-map"), {
+  ssr: false,
+  loading: () => <Skeleton className="w-full h-screen" />,
+});
 
-export default function HomeMapWrapper({ children }: WithMapProps) {
-  const map = new DottedMap({ height: 100, grid: "diagonal" });
-
-  const svgMap = map.getSVG({
-    radius: 0.22,
-    color: "#FFFFFF40",
-    shape: "circle",
-    backgroundColor: "#1A1A1A",
-  });
-
-  return cloneElement(children, { svgMap });
+export default function HomeMapWrapper(props: HomeMapProps) {
+  const svgMap = getSvgMap();
+  return <DynamicHomeMap {...props} svgMap={svgMap} />;
 }

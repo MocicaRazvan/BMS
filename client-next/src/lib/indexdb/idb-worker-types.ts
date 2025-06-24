@@ -8,6 +8,7 @@ export type IdbMessageResponse = {
 export enum IdbMessageType {
   LOAD_CACHE = "loadCache",
   DUMP_CACHE = "dumpCache",
+  CLEAR_CACHE = "clearCache",
 }
 
 export interface LoadCacheIncomingMessage {
@@ -20,6 +21,11 @@ export interface DumpCacheIncomingMessage {
   payload: Array<[string, unknown[][]]>;
 }
 
+export interface ClearCacheIncomingMessage {
+  type: IdbMessageType.CLEAR_CACHE;
+}
+
 export type IdbIncomingMessage =
   | LoadCacheIncomingMessage
-  | DumpCacheIncomingMessage;
+  | DumpCacheIncomingMessage
+  | ClearCacheIncomingMessage;

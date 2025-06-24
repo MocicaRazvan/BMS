@@ -1,6 +1,10 @@
 "use client";
 
-import { dumpToCache, loadCacheFromIndexedDB } from "@/lib/indexdb/idb-utils";
+import {
+  clearIndexedDB,
+  dumpToCache,
+  loadCacheFromIndexedDB,
+} from "@/lib/indexdb/idb-utils";
 import {
   IdbIncomingMessage,
   IdbMessageType,
@@ -25,6 +29,13 @@ addEventListener("message", async (event: MessageEvent<IdbIncomingMessage>) => {
         postMessage({
           status: "success",
           type: IdbMessageType.DUMP_CACHE,
+        });
+        break;
+      case "clearCache":
+        await clearIndexedDB();
+        postMessage({
+          status: "success",
+          type: IdbMessageType.CLEAR_CACHE,
         });
     }
   } catch (error) {
