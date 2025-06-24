@@ -45,6 +45,7 @@ export default async function CreateRecipePage({ params: { locale } }: Props) {
         menuTexts,
         mappingKey: "trainer",
         findInSiteTexts,
+        locale,
       }}
     >
       <main className="flex items-center justify-center px-6 py-10">

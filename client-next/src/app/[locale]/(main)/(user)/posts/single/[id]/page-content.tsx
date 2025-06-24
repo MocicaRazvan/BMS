@@ -44,6 +44,7 @@ export interface SinglePostPageTexts {
 interface Props extends SinglePostPageTexts {
   showRecommendations?: boolean;
   trackViews?: boolean;
+  locale: Locale;
 }
 
 export default function SinglePostPageContent({
@@ -87,7 +88,10 @@ export default function SinglePostPageContent({
     authToken: true,
   });
 
-  const estimatedReadingTime = useEstimateReadingTimeText(postState?.body);
+  const estimatedReadingTime = useEstimateReadingTimeText(
+    locale,
+    postState?.body,
+  );
 
   useTrackItemView(
     `/posts/viewCount/${id}`,

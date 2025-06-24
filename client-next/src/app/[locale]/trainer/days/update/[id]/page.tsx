@@ -46,6 +46,7 @@ export default async function UpdateDayPage({ params: { locale, id } }: Props) {
         title: dayFormTexts.baseFormTexts.header,
         ...rest,
         mappingKey: "trainer",
+        locale,
       }}
     >
       <main className="flex items-center justify-center px-6 py-10">

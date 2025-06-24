@@ -26,5 +26,5 @@ export default async function AdminUserPage({ params: { locale, id } }: Props) {
 
   const [texts] = await Promise.all([getAdminUserPageTexts()]);
 
-  return <AdminUserPageContent id={id} {...texts} />;
+  return <AdminUserPageContent id={id} {...texts} locale={locale} />;
 }

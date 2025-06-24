@@ -49,6 +49,7 @@ export default async function SingleTrainerPlanPage({
       navbarProps={{
         ...rest,
         mappingKey: "trainer",
+        locale,
       }}
     >
       <ScrollProgress />

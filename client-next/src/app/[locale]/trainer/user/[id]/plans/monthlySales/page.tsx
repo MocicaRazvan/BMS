@@ -52,6 +52,7 @@ export default async function UsersMonthlySalesPage({
           menuTexts: texts.menuTexts,
           mappingKey: "trainer",
           findInSiteTexts: texts.findInSiteTexts,
+          locale,
         }}
       >
         <div className="w-full h-full bg-background">

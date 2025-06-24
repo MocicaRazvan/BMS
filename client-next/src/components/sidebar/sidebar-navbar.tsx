@@ -9,6 +9,7 @@ import {
 import SidebarNotificationPop from "@/components/sidebar/sidebar-notification-pop";
 import SidebarFindInSite from "@/components/sidebar/sidebar-find-in-site";
 import { FindInSiteTexts } from "@/components/nav/find-in-site-content";
+import { Locale } from "@/navigation/navigation";
 
 export interface SidebarNavbarProps {
   title: string;
@@ -16,6 +17,7 @@ export interface SidebarNavbarProps {
   menuTexts: SidebarMenuTexts;
   mappingKey: MappingListFunctionKeys;
   findInSiteTexts: FindInSiteTexts;
+  locale: Locale;
 }
 
 export function SidebarNavbar({
@@ -24,6 +26,7 @@ export function SidebarNavbar({
   menuTexts,
   mappingKey,
   findInSiteTexts,
+  locale,
 }: SidebarNavbarProps) {
   return (
     <header
@@ -37,7 +40,7 @@ export function SidebarNavbar({
         </div>
         <div className="flex flex-1 items-center space-x-4 justify-end">
           <SidebarFindInSite texts={findInSiteTexts} />
-          <SidebarNotificationPop />
+          <SidebarNotificationPop locale={locale} />
           <LocaleSwitcher />
           <ModeToggle {...themeSwitchTexts} />
         </div>

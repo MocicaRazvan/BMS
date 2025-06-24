@@ -51,6 +51,7 @@ export default async function UserOrdersAdminPage({
       sortingOptions={ordersOptions}
       {...texts}
       path={`/orders/filtered/${id}`}
+      locale={locale}
     />
   );
 }

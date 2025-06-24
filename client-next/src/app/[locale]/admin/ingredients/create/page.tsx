@@ -47,6 +47,7 @@ export default async function AdminIngredientsCreatePage({
         menuTexts: texts.menuTexts,
         mappingKey: "admin",
         findInSiteTexts: texts.findInSiteTexts,
+        locale,
       }}
     >
       <AdminIngredientsCreatePageContent texts={texts.ingredientForm} />

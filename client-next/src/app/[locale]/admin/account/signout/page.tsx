@@ -1,6 +1,6 @@
 import { Locale } from "@/navigation/navigation";
 import { Metadata } from "next";
-import { getIntlMetadata, getMetadataValues } from "@/texts/metadata";
+import { getIntlMetadata } from "@/texts/metadata";
 import { unstable_setRequestLocale } from "next-intl/server";
 import { getSignOutPageTexts } from "@/texts/pages";
 import {
@@ -45,7 +45,6 @@ export default async function AdminSignOut({ params: { locale } }: Props) {
       ),
       getFindInSiteTexts(),
     ]);
-  const metadataValues = await getMetadataValues(authUser, locale);
 
   return (
     <SidebarContentLayout
@@ -55,6 +54,7 @@ export default async function AdminSignOut({ params: { locale } }: Props) {
         menuTexts: menuTexts,
         mappingKey: "admin",
         findInSiteTexts,
+        locale,
       }}
     >
       <div className="w-full h-full bg-background">

@@ -10,9 +10,11 @@ import RecipeTable from "@/components/table/recipes-table";
 import useGetUser from "@/hoooks/useGetUser";
 import useClientNotFound from "@/hoooks/useClientNotFound";
 import { useAuthUserMinRole } from "@/context/auth-user-min-role-context";
+import { Locale } from "@/navigation/navigation";
 
 interface Props extends UserRecipesAdminPageTexts, UseListProps {
   id: string;
+  locale: Locale;
 }
 
 export default function UserRecipesAdminPageContent({
@@ -26,16 +28,8 @@ export default function UserRecipesAdminPageContent({
   sortingOptions,
   menuTexts,
   findInSiteTexts,
+  locale,
 }: Props) {
-  // const { messages, error, refetch, isFinished } = useFetchStream<
-  //   CustomEntityModel<UserDto>,
-  //   BaseError
-  // >({
-  //   path: `/users/${id}`,
-  //   method: "GET",
-  //   authToken: true,
-  //   useAbortController: false,
-  // });
   const { authUser } = useAuthUserMinRole();
 
   const { user, messages, error, isFinished } = useGetUser(id);
@@ -57,6 +51,7 @@ export default function UserRecipesAdminPageContent({
         menuTexts,
         mappingKey: "admin",
         findInSiteTexts,
+        locale,
       }}
     >
       <div className="w-full h-full bg-background">

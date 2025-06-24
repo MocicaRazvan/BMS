@@ -209,6 +209,7 @@ export default function useList<T>({
       size: pageSize,
       sortingCriteria: makeSortFetchParams(sort),
     },
+    prefetchOverrideCache: true,
     useAbortController,
     queryParams: {
       [filterKey]: navigate ? filterValue : filter[filterKey] || filterValue,

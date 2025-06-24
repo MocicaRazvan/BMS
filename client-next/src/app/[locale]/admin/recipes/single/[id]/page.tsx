@@ -46,6 +46,7 @@ export default async function AdminRecipePage({
       navbarProps={{
         ...texts,
         mappingKey: "admin",
+        locale,
       }}
     >
       <ScrollProgress />

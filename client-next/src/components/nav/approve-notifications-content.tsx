@@ -9,7 +9,6 @@ import { Locale } from "@/navigation/navigation";
 import { Client } from "@stomp/stompjs";
 import { useStompClient } from "react-stomp-hooks";
 import { parseISO } from "date-fns";
-import { useLocale } from "next-intl";
 import { memo, ReactNode, useEffect, useRef } from "react";
 import { useRouter } from "@/navigation/client-navigation";
 
@@ -26,14 +25,14 @@ export interface Props<
   itemName: string;
   itemsText: Record<string, ApproveNotificationContentTexts>;
   deleteCallback: (appId: number, stompClient: Client) => void;
+  locale: Locale;
 }
 
 function ApproveNotificationContent<
   T extends ApproveModelNotificationResponse,
   I extends ApproveNotificationResponse<T>,
->({ items, itemName, deleteCallback, itemsText }: Props<T, I>) {
+>({ items, itemName, deleteCallback, itemsText, locale }: Props<T, I>) {
   const router = useRouter();
-  const locale = useLocale();
   const stompClient = useStompClient();
   const wasPrefetched = useRef(false);
 
@@ -99,5 +98,6 @@ export default memo(
     prevProps.itemName === nextProps.itemName &&
     isDeepEqual(prevProps.items, nextProps.items) &&
     isDeepEqual(prevProps.itemsText, nextProps.itemsText) &&
+    prevProps.locale === nextProps.locale &&
     prevProps.deleteCallback === nextProps.deleteCallback,
 );

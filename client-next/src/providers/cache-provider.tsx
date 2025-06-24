@@ -22,10 +22,10 @@ import { throttle } from "lodash-es";
 
 const maxLRUCacheItems = process.env.NEXT_PUBLIC_MAX_LRU_CACHE_ITEMS
   ? parseInt(process.env.NEXT_PUBLIC_MAX_LRU_CACHE_ITEMS, 10)
-  : 75;
+  : 250;
 const maxLRUCacheSize = process.env.NEXT_PUBLIC_MAX_LRU_CACHE_SIZE
   ? parseInt(process.env.NEXT_PUBLIC_MAX_LRU_CACHE_SIZE, 10)
-  : 1500;
+  : 5000;
 const ttlLRUCache = process.env.NEXT_PUBLIC_TTL_LRU_CACHE
   ? parseInt(process.env.NEXT_PUBLIC_TTL_LRU_CACHE, 10) * 1000
   : 1000 * 60 * 5; //5 mins
@@ -219,6 +219,10 @@ export class ClientCacheInstance {
     return this.cache.calculatedSize === 0;
   }
 
+  public purgeStaleCache(): boolean {
+    return this.cache.purgeStale();
+  }
+
   private emitChange(key: string) {
     const set = this.listeners.get(key);
     if (set) {
@@ -264,7 +268,7 @@ interface Props {
   children: ReactNode;
 }
 
-const EXPIRE_BEFORE_MS = 1000 * 60 * 10; // 10 minutes
+const EXPIRE_BEFORE_MS = 1000 * 60 * 30; // 30 minutes
 const THROTTLE_WAIT_MS = 1000 * 10; // 10 seconds
 export const CacheProvider = ({ children }: Props) => {
   const cacheInstance = useMemo(() => ClientCacheInstance.getInstance(), []);
@@ -322,14 +326,22 @@ export const CacheProvider = ({ children }: Props) => {
       }
     };
 
+    let intervalId: NodeJS.Timeout | undefined;
+
     const idleCbId = requestIdleCallback(() => {
       requestLoadCacheFromIdb();
+      intervalId = setInterval(() => {
+        cacheInstance.purgeStaleCache();
+      });
     });
 
     return () => {
       workerRef.current?.terminate();
       cancelIdleCallback(idleCbId);
       requestLoadCacheFromIdb.cancel();
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
     };
   }, []);
 

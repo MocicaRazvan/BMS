@@ -22,7 +22,6 @@ import {
   useBoughtNotification,
 } from "@/context/bought-notification-context";
 import { useStompClient } from "react-stomp-hooks";
-import { usePathname } from "@/navigation/navigation";
 import {
   getApprovedNotificationTextsByItems,
   getBoughtNotificationTextsByItems,
@@ -45,14 +44,15 @@ import {
 import { NotificationPopTexts } from "@/components/nav/notification-pop";
 import { Client } from "@stomp/stompjs";
 import { NotificationState } from "@/context/notification-template-context";
-import { useLocale } from "next-intl";
 import { WithUser } from "@/lib/user";
 import { useArchiveNotifications } from "@/context/archive-notifications-context";
 import { useSession } from "next-auth/react";
 import { isDeepEqual } from "@/lib/utils";
+import { Locale } from "@/navigation/navigation";
 
 interface NotificationPopProviderProps {
   children: ReactNode;
+  locale: Locale;
 }
 
 interface NotificationPopContextType {
@@ -136,7 +136,6 @@ interface NotificationPopContextType {
     totalSenders: number;
   };
   stompClient: Client | undefined;
-  pathName: string;
   getPostNotificationState: () => NotificationState<
     NotificationPostResponse,
     ApprovedNotificationType,
@@ -167,10 +166,10 @@ export const NotificationPopContext =
 
 export function NotificationPopProvider({
   children,
+  locale,
 }: NotificationPopProviderProps) {
   const session = useSession();
   const authUser = session.data?.user;
-  const locale = useLocale();
 
   const [notificationPopTexts, setNotificationPopTexts] =
     useState<NotificationPopTexts | null>(null);
@@ -286,7 +285,6 @@ export function NotificationPopProvider({
   const chatNotificationsGroupedBySender = getNotificationsGroupedBySender();
   const stompClient = useStompClient();
   const { removeBySender } = useChatNotification();
-  const pathName = usePathname();
 
   useEffect(() => {
     getNotificationPopTexts(totalNotifications).then(setNotificationPopTexts);
@@ -443,7 +441,6 @@ export function NotificationPopProvider({
         removeBySender,
         chatNotificationsGroupedBySender,
         stompClient,
-        pathName,
         getPlanNotificationState,
         getRecipeNotificationState,
         getPostNotificationState,

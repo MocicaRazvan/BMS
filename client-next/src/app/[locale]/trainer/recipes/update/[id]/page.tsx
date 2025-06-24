@@ -50,6 +50,7 @@ export default async function UpdateRecipePage({
         title: recipeFormTexts.baseFormTexts.header,
         ...rest,
         mappingKey: "trainer",
+        locale,
       }}
     >
       <main className="flex items-center justify-center px-6 py-10">

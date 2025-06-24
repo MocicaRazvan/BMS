@@ -9,7 +9,6 @@ import { Button } from "@/components/ui/button";
 import { Bell, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 
-import { Session } from "next-auth";
 import {
   Tooltip,
   TooltipContent,
@@ -29,9 +28,11 @@ import ApproveNotificationContent from "@/components/nav/approve-notifications-c
 import BoughtNotificationContent from "@/components/nav/bought-notification-content";
 import { useNotificationPop } from "@/context/notification-pop-context";
 import ArchiveQueueNotificationContent from "@/components/nav/archive-queue-notification-content";
+import { WithUser } from "@/lib/user";
+import { Locale } from "@/navigation/navigation";
 
-interface NotificationPopProps {
-  authUser: NonNullable<Session["user"]>;
+interface NotificationPopProps extends WithUser {
+  locale: Locale;
 }
 
 enum ACCORDION_ITEMS {
@@ -68,7 +69,10 @@ export interface NotificationPopTexts {
   archive: string;
 }
 
-export default function NotificationPop({ authUser }: NotificationPopProps) {
+export default function NotificationPop({
+  authUser,
+  locale,
+}: NotificationPopProps) {
   const [accordionsState, setAccordionsState] = useState<AccordionsState>(
     initialAccordionsState,
   );
@@ -164,7 +168,7 @@ export default function NotificationPop({ authUser }: NotificationPopProps) {
               <h3 className="text-xl font-semibold">
                 {notificationPopTexts.title}
               </h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
+              <p className="text-sm text-muted-foreground">
                 {notificationPopTexts.header}
               </p>
             </div>
@@ -361,6 +365,7 @@ export default function NotificationPop({ authUser }: NotificationPopProps) {
                           itemName="Post"
                           deleteCallback={removePostNotificationByAppId}
                           itemsText={postMessageNotificationsTexts}
+                          locale={locale}
                         />
                       </AccordionContent>
                     </AccordionItem>
@@ -422,6 +427,7 @@ export default function NotificationPop({ authUser }: NotificationPopProps) {
                           itemName="Recipe"
                           deleteCallback={removeRecipeNotificationByAppId}
                           itemsText={recipeMessageNotificationsTexts}
+                          locale={locale}
                         />
                       </AccordionContent>
                     </AccordionItem>
@@ -483,6 +489,7 @@ export default function NotificationPop({ authUser }: NotificationPopProps) {
                           itemName="Plans"
                           deleteCallback={removePlanNotificationByAppId}
                           itemsText={planMessageNotificationsTexts}
+                          locale={locale}
                         />
                       </AccordionContent>
                     </AccordionItem>
@@ -543,6 +550,7 @@ export default function NotificationPop({ authUser }: NotificationPopProps) {
                           items={getBoughtNotificationState().notifications}
                           deleteCallback={removeNotificationBought}
                           itemsText={boughtNotificationTexts}
+                          locale={locale}
                         />
                       </AccordionContent>
                     </AccordionItem>

@@ -32,6 +32,8 @@ import { ClassValue } from "clsx";
 import dynamic from "next/dynamic";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useDeepCompareMemo } from "@/hoooks/use-deep-memo";
+import { useLocale } from "next-intl";
+import { Locale } from "@/navigation/navigation";
 
 export interface SortingOption {
   property: string;
@@ -135,6 +137,7 @@ export default function GridList<T extends TitleBodyImagesUserDto>({
     debounceDelay: 0,
     ...rest,
   });
+  const locale = useLocale() as Locale;
 
   return (
     <div className="w-full ">
@@ -217,6 +220,7 @@ export default function GridList<T extends TitleBodyImagesUserDto>({
                 ExtraContent={ItemExtraContent}
                 texts={itemCardTexts}
                 itemHref={itemLinkCallback ? itemLinkCallback(item) : undefined}
+                locale={locale}
               />
             </motion.div>
           ))}

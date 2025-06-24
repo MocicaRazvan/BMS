@@ -151,6 +151,7 @@ export default function AdminDashboardPageContent({
         <TopViewedPosts
           path="/posts/admin/viewStats"
           texts={topViewedPostsTexts}
+          locale={locale}
         />
       </div>
       <Separator />

@@ -29,6 +29,7 @@ export default async function AdminDashboard({ params: { locale } }: Props) {
         menuTexts: texts.menuTexts,
         mappingKey: "admin",
         findInSiteTexts: texts.findInSiteTexts,
+        locale,
       }}
     >
       <div className="w-full h-full bg-background">

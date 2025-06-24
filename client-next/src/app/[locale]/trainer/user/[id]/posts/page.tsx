@@ -70,6 +70,7 @@ export default async function UsersPostsPage({
           menuTexts,
           mappingKey: "trainer",
           findInSiteTexts,
+          locale,
         }}
       >
         <div className="space-y-10 lg:space-y-16 w-full transition-all py-5 px-4 mx-auto">
@@ -85,6 +86,7 @@ export default async function UsersPostsPage({
               <TopViewedPosts
                 path={`/posts/viewStats/${id}`}
                 texts={topViewedPostsTexts}
+                locale={locale}
               />
             </div>
           </div>

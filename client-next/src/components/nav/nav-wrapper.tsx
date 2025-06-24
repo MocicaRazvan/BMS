@@ -18,6 +18,7 @@ export default async function NavWrapper({ locale }: { locale: Locale }) {
       {...navTexts}
       cartPopTexts={cartPopTexts}
       metadataValues={metadataValues}
+      locale={locale}
     />
   );
 }

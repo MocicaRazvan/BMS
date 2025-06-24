@@ -55,6 +55,7 @@ export default async function UserRecipesAdminPage({
       sortingOptions={recipesOptions}
       {...texts}
       path={`/recipes/trainer/filteredWithCount/${id}`}
+      locale={locale}
     />
   );
 }

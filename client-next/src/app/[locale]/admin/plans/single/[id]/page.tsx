@@ -46,6 +46,7 @@ export default async function AdminPlanPage({ params: { locale, id } }: Props) {
       navbarProps={{
         ...texts,
         mappingKey: "admin",
+        locale,
       }}
     >
       <ScrollProgress />

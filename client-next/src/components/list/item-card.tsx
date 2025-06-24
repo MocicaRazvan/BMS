@@ -5,7 +5,7 @@ import { ComponentType, useMemo } from "react";
 import { ResponseWithUserDtoEntity, TitleBodyImagesUserDto } from "@/types/dto";
 import { format, parseISO } from "date-fns";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
-import { Link } from "@/navigation/navigation";
+import { Link, Locale } from "@/navigation/navigation";
 import CustomImage from "@/components/common/custom-image";
 import { OverflowLengthTextTooltip } from "@/components/common/overflow-text-tooltip";
 
@@ -15,6 +15,7 @@ export interface ItemCardTexts {
 
 export interface ExtraProps<T> {
   item: ResponseWithUserDtoEntity<T>;
+  locale: Locale;
 }
 interface Props<T extends TitleBodyImagesUserDto> {
   item: ResponseWithUserDtoEntity<T>;
@@ -26,6 +27,7 @@ interface Props<T extends TitleBodyImagesUserDto> {
   maxTitleLength?: number;
   itemHref?: string;
   onClick?: () => void;
+  locale: Locale;
 }
 export default function ItemCard<T extends TitleBodyImagesUserDto>({
   item,
@@ -37,6 +39,7 @@ export default function ItemCard<T extends TitleBodyImagesUserDto>({
   maxTitleLength = 75,
   itemHref,
   onClick,
+  locale,
 }: Props<T>) {
   const body = useMemo(
     () =>
@@ -80,7 +83,7 @@ export default function ItemCard<T extends TitleBodyImagesUserDto>({
         ) : (
           ImageComp
         )}
-        {ImageOverlay && <ImageOverlay item={item} />}
+        {ImageOverlay && <ImageOverlay item={item} locale={locale} />}
       </div>
       <div className="flex flex-col gap-3 mt-1 w-full">
         <div className="flex flex-col gap-1 w-full h-[285px] overflow-hidden py-2.5">
@@ -95,7 +98,7 @@ export default function ItemCard<T extends TitleBodyImagesUserDto>({
             </OverflowLengthTextTooltip>
           </div>
           <div className="w-full h-full flex items-center justify-between gap-2">
-            {ExtraHeader && <ExtraHeader item={item} />}
+            {ExtraHeader && <ExtraHeader item={item} locale={locale} />}
             <p className="ml-auto">
               {format(parseISO(item.model.content.createdAt), "dd/MM/yyyy")}
             </p>
@@ -122,7 +125,7 @@ export default function ItemCard<T extends TitleBodyImagesUserDto>({
         </Link>
         {ExtraContent && (
           <div className=" w-full">
-            <ExtraContent item={item} />
+            <ExtraContent item={item} locale={locale} />
           </div>
         )}
       </div>

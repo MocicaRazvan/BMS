@@ -88,6 +88,7 @@ function getDateRanges(date: Date) {
 const baseFetchAgs: UseFetchStreamProps = {
   path: "/daysCalendar/byRange",
   authToken: true,
+  prefetchOverrideCache: true,
 };
 
 const createPrefetchKey = ({

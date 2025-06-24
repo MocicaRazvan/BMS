@@ -166,8 +166,9 @@ export const PostExtraHeader = memo(
     item: {
       model: { content: post },
     },
+    locale,
   }: ExtraProps<PostResponse>) => {
-    const estimatedReadingTime = useEstimateReadingTimeText(post.body);
+    const estimatedReadingTime = useEstimateReadingTimeText(locale, post.body);
 
     return (
       <div className="flex items-center gap-3.5 justify-start max-w-[300px]">

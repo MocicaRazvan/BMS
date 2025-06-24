@@ -52,6 +52,7 @@ export default async function TrainerSignOut({ params: { locale } }: Props) {
         menuTexts: menuTexts,
         mappingKey: "trainer",
         findInSiteTexts,
+        locale,
       }}
     >
       <div className="w-full h-full bg-background">

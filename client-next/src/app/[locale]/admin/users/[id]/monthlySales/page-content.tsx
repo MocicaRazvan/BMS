@@ -7,9 +7,11 @@ import Heading from "@/components/common/heading";
 import MonthlySales from "@/components/charts/monthly-sales";
 import useClientNotFound from "@/hoooks/useClientNotFound";
 import { useAuthUserMinRole } from "@/context/auth-user-min-role-context";
+import { Locale } from "@/navigation/navigation";
 
 interface Props extends UserAdminMonthlySalesPageTexts {
   id: string;
+  locale: Locale;
 }
 
 export default function UserAdminMonthlySalesPageContent({
@@ -20,6 +22,7 @@ export default function UserAdminMonthlySalesPageContent({
   header,
   title,
   findInSiteTexts,
+  locale,
 }: Props) {
   const { authUser } = useAuthUserMinRole();
 
@@ -36,6 +39,7 @@ export default function UserAdminMonthlySalesPageContent({
         menuTexts,
         mappingKey: "admin",
         findInSiteTexts,
+        locale,
       }}
     >
       <div className="w-full h-full bg-background">

@@ -37,5 +37,7 @@ export default async function UserAdminMonthlySalesPage({
   unstable_setRequestLocale(locale);
   const [texts] = await Promise.all([getUserAdminMonthlySalesPageTexts()]);
 
-  return <UserAdminMonthlySalesPageContent id={id} {...texts} />;
+  return (
+    <UserAdminMonthlySalesPageContent id={id} {...texts} locale={locale} />
+  );
 }

@@ -70,6 +70,7 @@ export default async function AdminPostsPage({ params: { locale } }: Props) {
         menuTexts,
         mappingKey: "admin",
         findInSiteTexts,
+        locale,
       }}
     >
       <div className="w-full h-full bg-background">
@@ -90,6 +91,7 @@ export default async function AdminPostsPage({ params: { locale } }: Props) {
           <TopViewedPosts
             path="/posts/admin/viewStats"
             texts={topViewedPostsTexts}
+            locale={locale}
           />
           <Separator />
           <div className="space-y-5">

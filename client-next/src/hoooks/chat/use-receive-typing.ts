@@ -1,5 +1,5 @@
 "use client";
-import { useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { ChatMessagePayload, JoinedConversationUser } from "@/types/dto";
 import { useSubscription } from "react-stomp-hooks";
 import { SENDING_TYPING_INTERVAL } from "@/hoooks/chat/use-send-typing";
@@ -16,28 +16,31 @@ export default function useReceiveTyping({ curUser }: Args) {
     Record<number, ChatMessagePayload>
   >({});
 
-  const addTypingRoom = (room: ChatMessagePayload) => {
+  const addTypingRoom = useCallback((room: ChatMessagePayload) => {
     setTypingRooms((prevState) => ({
       ...prevState,
       [room.chatRoomId]: room,
     }));
-  };
+  }, []);
 
-  const removeTypingRoom = (roomId: number) => {
+  const removeTypingRoom = useCallback((roomId: number) => {
     setTypingRooms((prevState) => {
       const newState = { ...prevState };
       delete newState[roomId];
       return newState;
     });
-  };
+  }, []);
 
-  const removeTimeoutAndTypingRoom = (roomId: number) => {
-    removeTypingRoom(roomId);
-    const otherTypingRefTimeout = otherTypingRefTimeouts.current[roomId];
-    if (otherTypingRefTimeout) {
-      clearTimeout(otherTypingRefTimeout);
-    }
-  };
+  const removeTimeoutAndTypingRoom = useCallback(
+    (roomId: number) => {
+      removeTypingRoom(roomId);
+      const otherTypingRefTimeout = otherTypingRefTimeouts.current[roomId];
+      if (otherTypingRefTimeout) {
+        clearTimeout(otherTypingRefTimeout);
+      }
+    },
+    [removeTypingRoom],
+  );
 
   useSubscription(
     `/topic/typing-${curUser.conversationUser.email}`,

@@ -49,6 +49,7 @@ export default async function SingleRecipePage({
       navbarProps={{
         ...texts,
         mappingKey: "trainer",
+        locale,
       }}
     >
       <ScrollProgress />

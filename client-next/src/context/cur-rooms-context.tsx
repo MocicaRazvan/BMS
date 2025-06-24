@@ -16,7 +16,6 @@ import {
   ChatMessageResponse,
   ChatRoomResponse,
   ChatRoomResponseJoined,
-  ConversationUserResponse,
   JoinedConversationUser,
   PageableResponse,
   PageInfo,
@@ -304,10 +303,10 @@ export const CurRoomsProvider = ({ children, authUser }: Props) => {
     },
   );
 
-  useSubscription(`/queue/chat-changed-${authUser?.email}`, (message) => {
-    const newMessage = JSON.parse(message.body) as ConversationUserResponse;
-    console.log("Chat changed useSubscription", newMessage);
-  });
+  // useSubscription(`/queue/chat-changed-${authUser?.email}`, (message) => {
+  //   const newMessage = JSON.parse(message.body) as ConversationUserResponse;
+  //   console.log("Chat changed useSubscription", newMessage);
+  // });
 
   const handleRoomDelete = useCallback(
     async (room: ChatRoomResponseJoined, otherUser: JoinedConversationUser) => {

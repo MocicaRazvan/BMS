@@ -38,6 +38,7 @@ export default async function AdminEmailPage({ params: { locale } }: Props) {
       navbarProps={{
         ...texts,
         mappingKey: "admin",
+        locale,
       }}
     >
       <div className="w-full h-full bg-background">

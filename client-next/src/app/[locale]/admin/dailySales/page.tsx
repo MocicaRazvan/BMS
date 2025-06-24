@@ -41,7 +41,7 @@ export default async function AdminDailySales({ params: { locale } }: Props) {
       navbarProps={{
         title: texts.title,
         themeSwitchTexts: texts.themeSwitchTexts,
-
+        locale,
         menuTexts: texts.menuTexts,
         mappingKey: "admin",
         findInSiteTexts: texts.findInSiteTexts,

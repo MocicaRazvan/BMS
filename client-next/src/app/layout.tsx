@@ -107,7 +107,7 @@ export default async function BaseLayout({
                               <PlanApproveNotificationProvider>
                                 <BoughtNotificationProvider>
                                   <ArchiveNotificationsProvider>
-                                    <NotificationPopProvider>
+                                    <NotificationPopProvider locale={locale}>
                                       <CartProvider>
                                         <SubscriptionProvider>
                                           <KanbanRouteChangeProvider>

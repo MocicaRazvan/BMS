@@ -1,7 +1,7 @@
 "use client";
 
 import { useSession } from "next-auth/react";
-import { Link, usePathname } from "@/navigation/navigation";
+import { Link, Locale, usePathname } from "@/navigation/navigation";
 import { ModeToggle } from "@/components/nav/theme-switch";
 import { LocaleSwitcher } from "@/components/i18n/LocaleSwitcher";
 import { ThemeSwitchTexts } from "@/texts/components/nav";
@@ -57,6 +57,7 @@ interface ItemsTexts {
 
 interface NavProps extends NavTexts, ItemsTexts {
   metadataValues: MetadataValue[];
+  locale: Locale;
 }
 
 export default function Nav({
@@ -69,6 +70,7 @@ export default function Nav({
   findInSiteTexts,
   metadataValues,
   dayCalendarCTATexts,
+  locale,
 }: NavProps) {
   const session = useSession();
   const authUser = session?.data?.user;
@@ -276,6 +278,7 @@ export default function Nav({
             authUser={authUser}
             dayCalendarCTATexts={dayCalendarCTATexts}
             cartPopTexts={cartPopTexts}
+            locale={locale}
           />
           {!authUser && <SignInLink />}
           <LocaleSwitcher />
@@ -308,6 +311,7 @@ export default function Nav({
             authUser={authUser}
             dayCalendarCTATexts={dayCalendarCTATexts}
             cartPopTexts={cartPopTexts}
+            locale={locale}
           />
           <LocaleSwitcher />
           <ModeToggle {...themeSwitchTexts} />
@@ -317,19 +321,26 @@ export default function Nav({
   );
 }
 
-const UserNavItems = memo((props: ItemsTexts & Partial<WithUser>) => {
-  if (!props.authUser) return null;
-  return (
-    <>
-      <NavProfile
-        authUser={props.authUser}
-        dayCalendarCTATexts={props.dayCalendarCTATexts}
-      />
-      <NotificationPop authUser={props.authUser} />
-      <CartPop authUser={props.authUser} cartPopTexts={props.cartPopTexts} />
-    </>
-  );
-});
+const UserNavItems = memo(
+  (
+    props: ItemsTexts &
+      Partial<WithUser> & {
+        locale: Locale;
+      },
+  ) => {
+    if (!props.authUser) return null;
+    return (
+      <>
+        <NavProfile
+          authUser={props.authUser}
+          dayCalendarCTATexts={props.dayCalendarCTATexts}
+        />
+        <NotificationPop authUser={props.authUser} locale={props.locale} />
+        <CartPop authUser={props.authUser} cartPopTexts={props.cartPopTexts} />
+      </>
+    );
+  },
+);
 
 UserNavItems.displayName = "UserNavItems";
 

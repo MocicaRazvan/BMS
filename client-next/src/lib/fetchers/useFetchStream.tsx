@@ -30,6 +30,7 @@ export interface UseFetchStreamProps {
   onBlurCallback?: () => void;
   beforeFetchCallback?: () => void;
   afterFetchCallback?: () => void;
+  prefetchOverrideCache?: boolean;
 }
 type ManualFetcher<T> = (args: {
   fetchProps: Omit<
@@ -40,7 +41,6 @@ type ManualFetcher<T> = (args: {
   batchCallback?: (data: T[], batchIndex: number) => void;
   aboveController?: CustomAbortController;
   errorCallback?: (error: unknown) => void;
-  overrideInGlobalCache?: boolean;
 }) => Promise<void>;
 export interface UseFetchStreamReturn<T, E> {
   messages: T[];
@@ -97,6 +97,7 @@ export function useFetchStream<T = unknown, E extends BaseError = BaseError>({
   aboveController,
   beforeFetchCallback,
   afterFetchCallback,
+  prefetchOverrideCache = false,
 }: UseFetchStreamProps): UseFetchStreamReturn<T, E> {
   const stableQueryParams = useDeepCompareMemo(
     () => queryParams,
@@ -193,6 +194,8 @@ export function useFetchStream<T = unknown, E extends BaseError = BaseError>({
               });
               if (res.error) {
                 throw res.error;
+              } else {
+                historyKeys.current.add(cacheKey);
               }
               break;
             }
@@ -210,6 +213,7 @@ export function useFetchStream<T = unknown, E extends BaseError = BaseError>({
             isAbsoluteFinished: true,
           });
           removeFromCache();
+          historyKeys.current.delete(cacheKey);
           // resetValueAndCache();
         } else {
           setFinishes({
@@ -235,7 +239,6 @@ export function useFetchStream<T = unknown, E extends BaseError = BaseError>({
       batchCallback,
       aboveController,
       errorCallback,
-      overrideInGlobalCache = false,
     }) => {
       if (sessionStatus === "loading") {
         return;
@@ -273,7 +276,7 @@ export function useFetchStream<T = unknown, E extends BaseError = BaseError>({
 
       historyKeys.current.add(key);
 
-      if (isKeyInCache(key) && !overrideInGlobalCache) {
+      if (isKeyInCache(key) && !prefetchOverrideCache) {
         return;
       }
 
@@ -300,6 +303,7 @@ export function useFetchStream<T = unknown, E extends BaseError = BaseError>({
             const res = batchItem.response;
             if (res.isFinished) {
               if (res.error) {
+                historyKeys.current.delete(key);
                 throw res.error;
               }
               break;
@@ -317,7 +321,13 @@ export function useFetchStream<T = unknown, E extends BaseError = BaseError>({
         errorCallback?.(err);
       }
     },
-    [sessionStatus, maybeSessionToken, isKeyInCache, replaceBatchInForAnyKey],
+    [
+      sessionStatus,
+      maybeSessionToken,
+      isKeyInCache,
+      prefetchOverrideCache,
+      replaceBatchInForAnyKey,
+    ],
   );
 
   useEffect(() => {
@@ -332,9 +342,18 @@ export function useFetchStream<T = unknown, E extends BaseError = BaseError>({
       };
     }
 
-    let mounted = true;
-
     const localFinished = refetchClosure.current ? false : isCacheKeyNotEmpty();
+
+    if (
+      prefetchOverrideCache &&
+      localFinished &&
+      isKeyInCache(cacheKey) && // no stale
+      historyKeys.current.has(cacheKey)
+    ) {
+      return;
+    }
+
+    let mounted = true;
 
     setErrorWithFinishes({
       error: null,
@@ -431,6 +450,7 @@ export function useFetchStream<T = unknown, E extends BaseError = BaseError>({
     stableArrayQueryParam,
     beforeFetchCallback,
     afterFetchCallback,
+    isKeyInCache,
     // intentionally omitted aboveController, it's only used for optional cleanup and should not trigger refetch
     // aboveController,
   ]);

@@ -44,6 +44,7 @@ export default async function AdminIngredientPage({
       navbarProps={{
         ...texts,
         mappingKey: "admin",
+        locale,
       }}
     >
       <div className="w-full bg-background ">

@@ -51,6 +51,7 @@ export default async function DuplicatePlanPage({
         title: planFormTexts.baseFormTexts.header,
         ...rest,
         mappingKey: "trainer",
+        locale,
       }}
     >
       <main className="flex items-center justify-center px-6 py-10">

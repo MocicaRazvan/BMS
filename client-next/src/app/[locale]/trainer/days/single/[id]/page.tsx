@@ -46,6 +46,7 @@ export default async function SingleDayTrainerPage({
       navbarProps={{
         ...texts,
         mappingKey: "trainer",
+        locale,
       }}
     >
       <ScrollProgress />

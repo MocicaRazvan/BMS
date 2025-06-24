@@ -73,6 +73,7 @@ export default async function AdminUsersPage({ params: { locale } }: Props) {
         menuTexts,
         mappingKey: "admin",
         findInSiteTexts,
+        locale,
       }}
     >
       <div className="w-full bg-background">

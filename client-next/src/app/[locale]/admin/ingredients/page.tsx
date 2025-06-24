@@ -71,6 +71,7 @@ export default async function AdminIngredientsPage({
         menuTexts,
         mappingKey: "admin",
         findInSiteTexts,
+        locale,
       }}
     >
       <div className="w-full h-full bg-background ">

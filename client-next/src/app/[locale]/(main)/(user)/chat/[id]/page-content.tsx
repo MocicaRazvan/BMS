@@ -5,15 +5,18 @@ import { useEffect } from "react";
 import ConversationWrapper, {
   ConversationTexts,
 } from "@/components/chat/conversation";
+import { Locale } from "@/navigation/navigation";
 
 interface Props extends WithUser {
   id: string;
   conversationTexts: ConversationTexts;
+  locale: Locale;
 }
 export default function SingleChatPageContent({
   authUser,
   id,
   conversationTexts,
+  locale,
 }: Props) {
   const stompClient = useStompClient();
 
@@ -34,7 +37,10 @@ export default function SingleChatPageContent({
   }, [stompClient?.connected, authUser.email, id]);
   return (
     <div className="w-full h-full">
-      <ConversationWrapper conversationTexts={conversationTexts} />
+      <ConversationWrapper
+        conversationTexts={conversationTexts}
+        locale={locale}
+      />
     </div>
   );
 }

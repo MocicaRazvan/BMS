@@ -1,7 +1,6 @@
 import { BoughtNotificationResponse } from "@/types/dto";
 import { Locale } from "@/navigation/navigation";
 import { useRouter } from "@/navigation/client-navigation";
-import { useLocale } from "next-intl";
 import { useStompClient } from "react-stomp-hooks";
 import { Button } from "@/components/ui/button";
 import { BadgeEuro } from "lucide-react";
@@ -19,15 +18,16 @@ export interface Props {
   items: BoughtNotificationResponse[];
   itemsText: Record<string, BoughtNotificationContentTexts>;
   deleteCallback: (p: BoughtPayloadStomp) => void;
+  locale: Locale;
 }
 
 export default function BoughtNotificationContent({
   items,
   deleteCallback,
   itemsText,
+  locale,
 }: Props) {
   const router = useRouter();
-  const locale = useLocale();
   const stompClient = useStompClient();
   const wasPrefetched = useRef(false);
 

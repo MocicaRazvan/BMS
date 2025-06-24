@@ -56,6 +56,7 @@ export default async function IngredientsPage({ params: { locale } }: Props) {
       navbarProps={{
         ...ingredientsPageTexts,
         mappingKey: "trainer",
+        locale,
       }}
     >
       <div className="space-y-10 lg:space-y-16 w-full py-5 px-4 mx-auto">

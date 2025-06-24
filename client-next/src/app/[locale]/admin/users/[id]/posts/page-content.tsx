@@ -9,9 +9,11 @@ import { UseListProps } from "@/hoooks/useList";
 import useGetUser from "@/hoooks/useGetUser";
 import useClientNotFound from "@/hoooks/useClientNotFound";
 import { useAuthUserMinRole } from "@/context/auth-user-min-role-context";
+import { Locale } from "@/navigation/navigation";
 
 interface Props extends UserPostsAdminPageTexts, UseListProps {
   id: string;
+  locale: Locale;
 }
 
 export default function UserPostsAdminPageContent({
@@ -25,16 +27,8 @@ export default function UserPostsAdminPageContent({
   sortingOptions,
   menuTexts,
   findInSiteTexts,
+  locale,
 }: Props) {
-  // const { messages, error, refetch, isFinished } = useFetchStream<
-  //   CustomEntityModel<UserDto>,
-  //   BaseError
-  // >({
-  //   path: `/users/${id}`,
-  //   method: "GET",
-  //   authToken: true,
-  //   useAbortController: false,
-  // });
   const { authUser } = useAuthUserMinRole();
 
   const { user, messages, error, isFinished } = useGetUser(id);
@@ -56,6 +50,7 @@ export default function UserPostsAdminPageContent({
         menuTexts,
         mappingKey: "admin",
         findInSiteTexts,
+        locale,
       }}
     >
       <div className="w-full h-full bg-background">

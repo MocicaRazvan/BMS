@@ -18,7 +18,7 @@ import Loader from "@/components/ui/spinner";
 import { WithUser } from "@/lib/user";
 import { Link, Locale } from "@/navigation/navigation";
 import { TopRankBadge } from "@/components/charts/top-chart-wrapper";
-import { useFormatter, useLocale } from "next-intl";
+import { useFormatter } from "next-intl";
 import {
   DateRangeParams,
   DateRangePicker,
@@ -41,6 +41,7 @@ export interface TopViewedPostsTexts extends PostViewCardTexts {
 interface Props {
   path: string;
   texts: TopViewedPostsTexts;
+  locale: Locale;
 }
 const DynamicNoResultsLottie = dynamic(
   () => import("@/components/lottie/no-results-lottie"),
@@ -57,10 +58,9 @@ const oneMonthAgo = subMonths(now, 1);
 const dateFormat = "dd-MM-yyyy";
 const formattedNow = format(now, dateFormat);
 const formattedOneMonthAgo = format(oneMonthAgo, dateFormat);
-function TopViewedPosts({ path, texts }: Props) {
+function TopViewedPosts({ path, texts, locale }: Props) {
   const { authUser } = useAuthUserMinRole();
 
-  const locale = useLocale() as Locale;
   const [top, setTop] = useState<string>("3");
   const [dateRange, setDateRange] = useState<DateRangeParams | null>(null);
 

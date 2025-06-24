@@ -10,9 +10,11 @@ import { Suspense } from "react";
 import OrdersTable from "@/components/table/orders-table";
 import useClientNotFound from "@/hoooks/useClientNotFound";
 import { useAuthUserMinRole } from "@/context/auth-user-min-role-context";
+import { Locale } from "@/navigation/navigation";
 
 interface Props extends UserOrdersAdminPageTexts, UseListProps {
   id: string;
+  locale: Locale;
 }
 
 export default function UserOrdersAdminPageContent({
@@ -26,6 +28,7 @@ export default function UserOrdersAdminPageContent({
   sortingOptions,
   menuTexts,
   findInSiteTexts,
+  locale,
 }: Props) {
   const { authUser } = useAuthUserMinRole();
 
@@ -42,6 +45,7 @@ export default function UserOrdersAdminPageContent({
         menuTexts,
         mappingKey: "admin",
         findInSiteTexts,
+        locale,
       }}
     >
       <div className="w-full h-full bg-background">

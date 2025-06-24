@@ -44,12 +44,16 @@ export default async function AdminPostPage({ params: { locale, id } }: Props) {
       navbarProps={{
         ...texts,
         mappingKey: "admin",
+        locale,
       }}
     >
       <ScrollProgress />
       <div className="w-full bg-background ">
         <div className="mt-5">
-          <SinglePostPageContent {...texts.singlePostPageTexts} />
+          <SinglePostPageContent
+            {...texts.singlePostPageTexts}
+            locale={locale}
+          />
         </div>
       </div>
     </SidebarContentLayout>

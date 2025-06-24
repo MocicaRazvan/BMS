@@ -47,6 +47,7 @@ export default async function AdminAIPostsCreate({
         menuTexts: texts.menuTexts,
         mappingKey: "admin",
         findInSiteTexts,
+        locale,
       }}
     >
       <div className="w-full flex items-center justify-center">

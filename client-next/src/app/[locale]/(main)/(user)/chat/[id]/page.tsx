@@ -36,6 +36,7 @@ export default async function ChatPage({
         id={id}
         authUser={authUser}
         conversationTexts={conversationTexts}
+        locale={locale}
       />
     </div>
   );

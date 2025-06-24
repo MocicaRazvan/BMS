@@ -67,6 +67,7 @@ export default async function AdminRecipesPage({ params: { locale } }: Props) {
         menuTexts,
         mappingKey: "admin",
         findInSiteTexts,
+        locale,
       }}
     >
       <div className="w-full h-full bg-background">

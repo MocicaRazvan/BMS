@@ -42,6 +42,7 @@ export default async function CreateDayPage({ params: { locale } }: Props) {
         title: dayFormTexts.baseFormTexts.header,
         ...rest,
         mappingKey: "trainer",
+        locale,
       }}
     >
       <main className="flex items-center justify-center px-6 py-10">

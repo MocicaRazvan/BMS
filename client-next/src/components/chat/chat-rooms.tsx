@@ -118,24 +118,27 @@ export function ChatRoomsContent({
   chatRoomItemTexts,
 }: ChatRoomContentProps) {
   const { chatRooms } = useCurRooms();
-  if (chatRooms.length === 0) {
+  return useMemo(() => {
+    console.log("ChatRoomsContent rendered");
+    if (chatRooms.length === 0) {
+      return (
+        <div className="w-full h-full p-20 flex items-center justify-center">
+          <p className="text-xl font-bold tracking-tight text-center">
+            {noRoomsTexts}
+          </p>
+        </div>
+      );
+    }
     return (
-      <div className="w-full h-full p-20 flex items-center justify-center">
-        <p className="text-xl font-bold tracking-tight text-center">
-          {noRoomsTexts}
-        </p>
+      <div className="space-y-3 w-full ">
+        {chatRooms.map((room) => (
+          <div key={room.id} className="w-full h-full">
+            <ChatRoomItemWrapper chatRoom={room} {...chatRoomItemTexts} />
+          </div>
+        ))}
       </div>
     );
-  }
-  return (
-    <div className="space-y-3 w-full ">
-      {chatRooms.map((room) => (
-        <div key={room.id} className="w-full h-full">
-          <ChatRoomItemWrapper chatRoom={room} {...chatRoomItemTexts} />
-        </div>
-      ))}
-    </div>
-  );
+  }, [chatRooms, noRoomsTexts, chatRoomItemTexts]);
 }
 
 interface ChatRoomItemWrapperProps
@@ -184,10 +187,10 @@ export function ChatRoomItem({
   curUser,
   typingText,
 }: ChatRoomItemProps) {
-  const { handleRoomDelete, handleRoomChange } = useCurRooms();
   const { getByReference } = useChatNotification();
   const notifications = getByReference(chatRoom.id);
-  const { curRoom, handleRoomHover } = useCurRooms();
+  const { curRoom, handleRoomHover, handleRoomDelete, handleRoomChange } =
+    useCurRooms();
   const { typingRooms } = useReceiveTyping({
     curUser,
   });

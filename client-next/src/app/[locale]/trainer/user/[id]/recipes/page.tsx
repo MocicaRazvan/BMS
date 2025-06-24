@@ -62,6 +62,7 @@ export default async function UsersRecipesPage({
           menuTexts: userRecipesPageTexts.menuTexts,
           mappingKey: "trainer",
           findInSiteTexts: userRecipesPageTexts.findInSiteTexts,
+          locale,
         }}
       >
         <div className="space-y-10 lg:space-y-16 w-full transition-all py-5 px-4 mx-auto ">

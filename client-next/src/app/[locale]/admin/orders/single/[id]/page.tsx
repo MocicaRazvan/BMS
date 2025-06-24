@@ -46,6 +46,7 @@ export default async function AdminOrderPage({
       navbarProps={{
         ...texts,
         mappingKey: "admin",
+        locale,
       }}
     >
       <div className="w-full bg-background ">

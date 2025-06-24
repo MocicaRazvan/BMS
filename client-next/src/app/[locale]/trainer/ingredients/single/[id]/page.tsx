@@ -44,6 +44,7 @@ export default async function SingleIngredientPage({
       navbarProps={{
         ...texts,
         mappingKey: "trainer",
+        locale,
       }}
     >
       <div className="w-full bg-background ">

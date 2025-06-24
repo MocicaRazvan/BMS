@@ -39,5 +39,5 @@ export default async function UserAdminDailySalesPage({
 
   const [texts] = await Promise.all([getUserAdminDailySalesPageTexts()]);
 
-  return <UserAdminDailySalesPageContent id={id} {...texts} />;
+  return <UserAdminDailySalesPageContent id={id} {...texts} locale={locale} />;
 }

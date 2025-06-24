@@ -31,6 +31,7 @@ export default async function SinglePostPage({ params: { locale } }: Props) {
         {...singlePostPageTexts}
         showRecommendations={true}
         trackViews={true}
+        locale={locale}
       />
     </>
   );

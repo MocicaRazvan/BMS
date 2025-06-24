@@ -66,7 +66,7 @@ export default async function AdminPlansPage({
       navbarProps={{
         title,
         themeSwitchTexts,
-
+        locale,
         menuTexts,
         mappingKey: "admin",
         findInSiteTexts,

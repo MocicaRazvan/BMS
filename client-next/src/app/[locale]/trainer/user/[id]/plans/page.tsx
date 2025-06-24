@@ -59,6 +59,7 @@ export default async function UsersPlansPage({
         navbarProps={{
           ...userPlansPageTexts,
           mappingKey: "trainer",
+          locale,
         }}
       >
         <div className="space-y-10 lg:space-y-16 w-full transition-all py-5 px-4 mx-auto ">

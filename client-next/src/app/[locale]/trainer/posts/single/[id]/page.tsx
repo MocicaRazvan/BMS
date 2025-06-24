@@ -45,12 +45,16 @@ export default async function TrainerPostPage({
       navbarProps={{
         ...texts,
         mappingKey: "trainer",
+        locale,
       }}
     >
       <ScrollProgress />
       <div className="w-full bg-background ">
         <div className="mt-5">
-          <SinglePostPageContent {...texts.singlePostPageTexts} />
+          <SinglePostPageContent
+            {...texts.singlePostPageTexts}
+            locale={locale}
+          />
         </div>
       </div>
     </SidebarContentLayout>
