@@ -17,7 +17,10 @@ addEventListener("message", async (event: MessageEvent<IdbIncomingMessage>) => {
   try {
     switch (event.data.type) {
       case "loadCache":
-        const entries = await loadCacheFromIndexedDB(event.data.afterTimestamp);
+        const entries = await loadCacheFromIndexedDB(
+          event.data.afterTimestamp,
+          event.data.userEmail,
+        );
         postMessage({
           status: "success",
           entries,
@@ -25,7 +28,7 @@ addEventListener("message", async (event: MessageEvent<IdbIncomingMessage>) => {
         });
         break;
       case "dumpCache":
-        await dumpToCache(event.data.payload);
+        await dumpToCache(event.data.payload, event.data.userEmail);
         postMessage({
           status: "success",
           type: IdbMessageType.DUMP_CACHE,

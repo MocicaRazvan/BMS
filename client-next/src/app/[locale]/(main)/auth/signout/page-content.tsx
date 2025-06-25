@@ -2,7 +2,6 @@
 import { Button } from "@/components/ui/button";
 import { signOut } from "next-auth/react";
 import { Locale } from "@/navigation/navigation";
-import { useCacheCleaner, useCacheInstance } from "@/providers/cache-provider";
 import { useRouter } from "@/navigation/client-navigation";
 
 interface SignOutText {
@@ -19,7 +18,6 @@ export default function SignOut({
   buttonSignIn,
   locale,
 }: Props) {
-  const cleaner = useCacheCleaner();
   const router = useRouter();
   return (
     <main className="w-full min-h-[calc(100vh-4rem)] flex items-center justify-center transition-all">
@@ -32,17 +30,13 @@ export default function SignOut({
           variant="destructive"
           className=" px-24 py-5"
           onClick={async () => {
-            await signOut({
-              redirect: false,
-              callbackUrl: "/auth/signin",
-            });
             if (window && window?.localStorage) {
               window.localStorage.clear();
             }
-            try {
-              await cleaner();
-            } catch {}
-            router.replace("/auth/signin");
+            await signOut({
+              redirect: true,
+              callbackUrl: "/auth/signin",
+            });
           }}
         >
           {buttonSignOut}

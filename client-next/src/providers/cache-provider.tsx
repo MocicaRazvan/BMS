@@ -13,7 +13,6 @@ import { LRUCache } from "lru-cache";
 import { Subscription, useSubscription } from "@/lib/fetchers/use-subscription";
 import { useEvent } from "react-use";
 import {
-  ClearCacheIncomingMessage,
   DumpCacheIncomingMessage,
   IdbMessageResponse,
   IdbMessageType,
@@ -86,6 +85,8 @@ export class ClientCacheInstance {
       onInsert: (value, key, reason) => {
         // console.log("Cache Inserted:", key, reason);
         // this.flatCache.set(key, value ? value.flat() : this.EMPTY_ARRAY);
+        // console.log("Cache Inserted:", key, reason, value);
+
         this.reactSafeStore.set(key, value.flat());
         this.emitChange(key);
         // saveToIndexedDBBatched(key, value);
@@ -280,24 +281,19 @@ export class ClientCacheInstance {
   }
 }
 
-export type CacheContextType = {
-  cacheInstance: ClientCacheInstance;
-  clearIndexDBAndCache: () => Promise<void>;
-};
-
-export const CacheContext = createContext<CacheContextType | null>(null);
+export const CacheContext = createContext<ClientCacheInstance | null>(null);
 
 interface Props {
   children: ReactNode;
 }
 
-const EXPIRE_BEFORE_MS = 1000 * 60 * 30; // 30 minutes
+const EXPIRE_BEFORE_MS = 1000 * 60 * 60 * 3; // 3 hours
 const THROTTLE_WAIT_MS = 1000 * 10; // 10 seconds
 export const CacheProvider = ({ children }: Props) => {
   const cacheInstance = useMemo(() => ClientCacheInstance.getInstance(), []);
   const workerRef = useRef<Worker>();
-  const { status } = useSession();
-  const wasAuthenticated = useRef(false);
+  const { status, data: session } = useSession();
+  const userEmail = session?.user?.email || "default";
 
   const requestLoadCacheFromIdb = useMemo(() => {
     return throttle(() => {
@@ -305,10 +301,11 @@ export const CacheProvider = ({ children }: Props) => {
       const message: LoadCacheIncomingMessage = {
         afterTimestamp: Date.now() - EXPIRE_BEFORE_MS,
         type: IdbMessageType.LOAD_CACHE,
+        userEmail,
       };
       workerRef.current?.postMessage(message);
     }, THROTTLE_WAIT_MS);
-  }, []);
+  }, [userEmail]);
 
   const dumpHandler = useMemo(() => {
     return throttle(() => {
@@ -317,6 +314,7 @@ export const CacheProvider = ({ children }: Props) => {
       const message: DumpCacheIncomingMessage = {
         type: IdbMessageType.DUMP_CACHE,
         payload: Array.from(entries),
+        userEmail,
       };
       if (entries) {
         workerRef.current.postMessage(message);
@@ -327,27 +325,7 @@ export const CacheProvider = ({ children }: Props) => {
         }
       }
     }, THROTTLE_WAIT_MS);
-  }, []);
-
-  const clearIndexDBAndCache = useCallback(async () => {
-    cacheInstance.clearCache();
-    if (!workerRef.current) {
-      await clearIndexedDB();
-    } else {
-      const message: ClearCacheIncomingMessage = {
-        type: IdbMessageType.CLEAR_CACHE,
-      };
-      workerRef.current.postMessage(message);
-    }
-  }, []);
-
-  const throttledClearCache = useMemo(() => {
-    return throttle(() => {
-      clearIndexDBAndCache().catch((err) => {
-        console.error("Error clearing IndexedDB cache:", err);
-      });
-    }, 100);
-  }, [clearIndexDBAndCache]);
+  }, [cacheInstance, userEmail]);
 
   useEffect(() => {
     if (navigator.storage?.persist) {
@@ -369,6 +347,7 @@ export const CacheProvider = ({ children }: Props) => {
       ) {
         cacheInstance.bulkInsertIfMissing(event.data.entries);
       }
+      // console.log("Cache loaded from IndexedDB:", event.data);
     };
 
     let intervalId: NodeJS.Timeout | undefined;
@@ -388,7 +367,7 @@ export const CacheProvider = ({ children }: Props) => {
         clearInterval(intervalId);
       }
     };
-  }, []);
+  }, [cacheInstance, requestLoadCacheFromIdb]);
 
   const visibilityChangeHandler = useCallback(
     async (e: Event) => {
@@ -402,49 +381,25 @@ export const CacheProvider = ({ children }: Props) => {
         requestLoadCacheFromIdb();
       }
     },
-    [dumpHandler, requestLoadCacheFromIdb],
+    [cacheInstance, dumpHandler, requestLoadCacheFromIdb],
   );
 
   useEvent("beforeunload", dumpHandler);
   useEvent("pagehide", dumpHandler);
   useEvent("visibilitychange", visibilityChangeHandler);
 
-  useEffect(() => {
-    if (status === "authenticated") {
-      wasAuthenticated.current = true;
-    } else if (status === "unauthenticated" && wasAuthenticated.current) {
-      throttledClearCache();
-      wasAuthenticated.current = false;
-    }
-    return () => {
-      throttledClearCache.cancel();
-    };
-  }, [status, throttledClearCache]);
-
   return (
-    <CacheContext.Provider
-      value={{
-        cacheInstance,
-        clearIndexDBAndCache,
-      }}
-    >
+    <CacheContext.Provider value={cacheInstance}>
       {children}
     </CacheContext.Provider>
   );
-};
-
-export const useCacheCleaner = () => {
-  const cache = useContext(CacheContext);
-  if (!cache)
-    throw new Error("useCacheCleaner must be used within CacheProvider");
-  return cache.clearIndexDBAndCache;
 };
 
 export const useCacheInstance = (): ClientCacheInstance => {
   const cache = useContext(CacheContext);
   if (!cache)
     throw new Error("useCacheInstance must be used within CacheProvider");
-  return cache.cacheInstance;
+  return cache;
 };
 
 export const useCache = <T,>(cacheKey: string) => {
