@@ -159,12 +159,15 @@ export function useFetchStream<T = unknown, E extends BaseError = BaseError>({
     if (refetchClosure.current) {
       return;
     }
+
     removeFromCache();
     removeArrayFromCache(historyKeys.current);
     resetAdditionalArgs();
-    setRefetchState((prevIndex) => !prevIndex);
+
     refetchClosure.current = true;
     historyKeys.current.clear();
+
+    setRefetchState((prevIndex) => !prevIndex);
   }, [removeArrayFromCache, resetAdditionalArgs, removeFromCache]);
 
   const fetcher = useCallback(
