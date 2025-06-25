@@ -297,7 +297,11 @@ export function DataTable<TData extends Record<string, any>, TValue = any>({
             persistedRows={persistedRows}
             selectedLength={selectedLength}
           />
-          <DropdownColumnsMenu columnsLabel={columnsLabel} table={table} />
+          <DropdownColumnsMenu
+            columnsLabel={columnsLabel}
+            table={table}
+            columnVisibility={columnVisibility}
+          />
         </div>
       </div>
       {/*{rangeDateFilter && <div className="w-full mb-4">{rangeDateFilter}</div>}*/}
@@ -435,9 +439,11 @@ export function DataTable<TData extends Record<string, any>, TValue = any>({
 const DropdownColumnsMenuInner = <TData,>({
   table,
   columnsLabel,
+  columnVisibility, // used only to trigger rerender
 }: {
   table: ReturnType<typeof useReactTable<TData>>;
   columnsLabel: string;
+  columnVisibility: VisibilityState;
 }) => {
   return (
     <DropdownMenu>
@@ -456,6 +462,9 @@ const DropdownColumnsMenuInner = <TData,>({
                 key={column.id}
                 className="capitalize cursor-pointer"
                 checked={column.getIsVisible()}
+                onSelect={(e) => {
+                  e.preventDefault();
+                }}
                 onCheckedChange={(value) => column.toggleVisibility(value)}
               >
                 {column.id}
