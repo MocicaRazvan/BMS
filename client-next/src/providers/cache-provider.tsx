@@ -347,7 +347,7 @@ export const CacheProvider = ({ children }: Props) => {
       ) {
         cacheInstance.bulkInsertIfMissing(event.data.entries);
       }
-      console.log("Cache loaded from IndexedDB:", event.data);
+      // console.log("Cache loaded from IndexedDB:", event.data);
     };
 
     let intervalId: NodeJS.Timeout | undefined;
