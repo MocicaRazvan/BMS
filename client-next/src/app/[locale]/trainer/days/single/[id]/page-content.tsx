@@ -36,7 +36,7 @@ export default function SingleDayTrainerPageContent({
     router,
     isDisliked,
     meals,
-  } = useGetDaysWithMeals({ dayId: id, authUser, useAbortController: true });
+  } = useGetDaysWithMeals({ dayId: id, authUser });
 
   const { navigateToNotFound } = useClientNotFound();
 

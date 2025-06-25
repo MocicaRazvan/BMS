@@ -470,11 +470,11 @@ const NotificationTemplateAuthUser = <
     }
   }, [isFinished, messages, error]);
 
-  if (error) {
-    console.log(messages);
-    console.error(error);
-    // return children;
-  }
+  // if (error) {
+  //   console.log(messages);
+  //   console.error(error);
+  //   // return children;
+  // }
 
   return (
     <NotificationContext.Provider value={{ state, dispatch }}>

@@ -83,7 +83,6 @@ export interface UseListArgs<T> extends PartialFetchStreamProps<T> {
   extraArrayQueryParam?: Record<string, string[]>;
   extraUpdateSearchParams?: (searchParams: URLSearchParams) => void;
   filterKey?: FilterKey;
-  useAbortController?: boolean;
   navigate?: boolean;
   defaultSort?: boolean;
   preloadNext?: boolean;
@@ -114,7 +113,6 @@ export default function useList<T>({
   extraQueryParams,
   extraArrayQueryParam,
   filterKey = "title",
-  useAbortController = true,
   navigate = true,
   defaultSort = true,
   preloadNext = true,
@@ -210,7 +208,6 @@ export default function useList<T>({
       sortingCriteria: makeSortFetchParams(sort),
     },
     prefetchOverrideCache: true,
-    useAbortController,
     queryParams: {
       [filterKey]: navigate ? filterValue : filter[filterKey] || filterValue,
       ...createdAtRangeParams,

@@ -95,7 +95,6 @@ export default function UserPageContent({
     path: `/users/${id || authUser?.id}`,
     method: "GET",
     authToken: true,
-    useAbortController: false,
     refetchOnFocus: false,
   });
 

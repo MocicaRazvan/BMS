@@ -9,7 +9,6 @@ import { WithUser } from "@/lib/user";
 interface Args extends WithUser {
   basePath: string;
   itemId?: number | string;
-  useAbortController?: boolean;
   trigger?: boolean;
 }
 
@@ -17,7 +16,6 @@ export function useGetTitleBodyUser<T extends TitleBodyUserDto>({
   authUser,
   basePath,
   itemId,
-  useAbortController = false,
   trigger = true,
 }: Args) {
   const [itemState, setItemState] = useState<T | null>(null);
@@ -31,7 +29,6 @@ export function useGetTitleBodyUser<T extends TitleBodyUserDto>({
     path: `${basePath}/${itemId || id}`,
     method: "GET",
     authToken: true,
-    useAbortController,
     trigger,
   });
 

@@ -5,7 +5,7 @@ import LoadingSpinner from "@/components/common/loading-spinner";
 import React from "react";
 import { checkOwner } from "@/lib/utils";
 import useClientNotFound from "@/hoooks/useClientNotFound";
-import { useGetPlanWithDays } from "@/hoooks/useGetPlanWithDays";
+import { useGetPlanWithDays } from "@/hoooks/plans/useGetPlanWithDays";
 import { useAuthUserMinRole } from "@/context/auth-user-min-role-context";
 
 interface Props extends PlanFormProps {

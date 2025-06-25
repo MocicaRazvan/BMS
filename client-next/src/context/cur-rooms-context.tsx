@@ -116,7 +116,6 @@ export const CurRoomsProvider = ({ children, authUser }: Props) => {
     path: `/ws-http/chatRooms/filter-joined/${authUser.email}`,
     method: "PATCH",
     acceptHeader: "application/json",
-    useAbortController: true,
     authToken: true,
     body: {
       page: pageInfo.currentPage,

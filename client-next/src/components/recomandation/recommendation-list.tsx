@@ -46,7 +46,6 @@ export default function RecommendationList<
   >({
     method: "GET",
     authToken: true,
-    useAbortController: true,
     ...fetchArgs,
   });
 

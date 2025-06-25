@@ -62,7 +62,6 @@ export default function SingleIngredientPageContent({
     path: `/ingredients/${id}`,
     method: "GET",
     authToken: true,
-    useAbortController: false,
   });
   const { navigateToNotFound } = useClientNotFound();
 

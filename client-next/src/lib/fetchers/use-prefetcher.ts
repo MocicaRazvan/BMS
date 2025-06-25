@@ -278,7 +278,7 @@ export default function usePrefetcher<T, E extends BaseError = BaseError>({
           }
         } catch (e: any) {
           if (e?.name !== "AbortError") {
-            console.error("basePrefetcher  error:", e);
+            console.log("basePrefetcher  error:", e);
             unmarkPrefetched(prefetchedKey);
           }
         }

@@ -42,7 +42,6 @@ export default function useGetRecipeWithIngredients(
     method: "GET",
     authToken: true,
     trigger,
-    // useAbortController: false,
   });
 
   console.log("IQError", IQError);

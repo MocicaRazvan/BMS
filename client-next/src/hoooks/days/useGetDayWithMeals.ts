@@ -1,22 +1,19 @@
-import { Session } from "next-auth";
 import { useGetTitleBodyUser } from "@/hoooks/useGetTitleBodyUser";
 import { CustomEntityModel, DayResponse, MealResponse } from "@/types/dto";
 import useFetchStream from "@/lib/fetchers/useFetchStream";
 import { useMemo } from "react";
+import { WithUser } from "@/lib/user";
 
-interface Args {
+interface Args extends WithUser {
   dayId: number | string;
-  authUser: NonNullable<Session["user"]>;
   dayBasePath?: string;
   mealsBasePath?: string;
-  useAbortController?: boolean;
 }
 export default function useGetDaysWithMeals({
   dayId,
   authUser,
   dayBasePath,
   mealsBasePath,
-  useAbortController = false,
 }: Args) {
   const {
     itemState: dayState,
@@ -43,7 +40,6 @@ export default function useGetDaysWithMeals({
     path: mealsBasePath ? mealsBasePath + `/${dayId}` : `/meals/day/${dayId}`,
     method: "GET",
     authToken: true,
-    useAbortController,
   });
 
   const meals = useMemo(

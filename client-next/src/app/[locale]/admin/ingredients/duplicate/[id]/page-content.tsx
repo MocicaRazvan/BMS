@@ -31,7 +31,6 @@ export default function AdminPageDuplicateIngredientContent({
     path: `/ingredients/${id}`,
     method: "GET",
     authToken: true,
-    useAbortController: false,
   });
 
   if (!isFinished) return <LoadingSpinner />;

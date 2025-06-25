@@ -21,7 +21,6 @@ export interface UseFetchStreamProps {
   arrayQueryParam?: Record<string, string[]>;
   cache?: RequestCache;
   acceptHeader?: AcceptHeader;
-  useAbortController?: boolean;
   batchSize?: number;
   refetchOnFocus?: boolean;
   focusDelay?: number;
@@ -88,7 +87,6 @@ export function useFetchStream<T = unknown, E extends BaseError = BaseError>({
   cache = "no-cache",
   arrayQueryParam = {},
   acceptHeader = "application/x-ndjson",
-  useAbortController = true,
   batchSize = 6,
   refetchOnFocus = true,
   focusDelay = 300,
@@ -174,11 +172,18 @@ export function useFetchStream<T = unknown, E extends BaseError = BaseError>({
       abortController: CustomAbortController,
       fetchProps: FetchStreamProps<T>,
     ) => {
+      if (abortController.signal.aborted) {
+        return;
+      }
       try {
         const fetchFunction = await deduplicateFetchStream<T, E>({
           ...fetchProps,
           dedupKey: cacheKey,
         });
+
+        if (abortController.signal.aborted) {
+          return;
+        }
 
         abortController.setAdditionalAbortFromFetch(fetchFunction);
 
@@ -245,6 +250,10 @@ export function useFetchStream<T = unknown, E extends BaseError = BaseError>({
       aboveController,
       errorCallback,
     }) => {
+      if (aboveController && aboveController.signal.aborted) {
+        return;
+      }
+
       if (sessionStatus === "loading") {
         return;
       }
@@ -294,6 +303,10 @@ export function useFetchStream<T = unknown, E extends BaseError = BaseError>({
             priority: "low",
           },
         });
+
+        if (abortController.signal.aborted) {
+          return;
+        }
 
         abortController.setAdditionalAbortFromFetch(fetchFunction);
 
@@ -345,10 +358,15 @@ export function useFetchStream<T = unknown, E extends BaseError = BaseError>({
     if (sessionStatus === "loading") {
       return;
     }
+
     if (authToken && !maybeSessionToken) {
       return () => {
         console.log("No token");
       };
+    }
+
+    if (aboveController && aboveController.signal.aborted) {
+      return;
     }
 
     const localFinished = refetchClosure.current ? false : isCacheKeyNotEmpty();
@@ -359,8 +377,12 @@ export function useFetchStream<T = unknown, E extends BaseError = BaseError>({
       isKeyInCache(cacheKey) && // no stale
       historyKeys.current.has(cacheKey)
     ) {
+      // check if this makes stale refetch
+      refetchClosure.current = false;
       return;
     }
+
+    const abortController = aboveController || new CustomAbortController();
 
     let mounted = true;
 
@@ -371,7 +393,6 @@ export function useFetchStream<T = unknown, E extends BaseError = BaseError>({
     });
 
     const token = authToken && maybeSessionToken ? maybeSessionToken : "";
-    const abortController = aboveController || new CustomAbortController();
 
     const fetchProps: FetchStreamProps<T> = {
       path,
@@ -394,8 +415,11 @@ export function useFetchStream<T = unknown, E extends BaseError = BaseError>({
       }
       try {
         beforeFetchCallback?.();
+        if (abortController.signal.aborted || !mounted) return;
+
         await fetcher(abortController, fetchProps);
-        if (!abortController.signal.aborted) {
+
+        if (mounted && !abortController.signal.aborted) {
           historyKeys.current.add(cacheKey);
         }
       } catch (e) {
@@ -407,29 +431,26 @@ export function useFetchStream<T = unknown, E extends BaseError = BaseError>({
           });
         }
       } finally {
-        if (refetchClosure.current) {
+        // check if this makes stale refetch
+        if (mounted && !abortController.signal.aborted) {
           refetchClosure.current = false;
+
+          afterFetchCallback?.();
         }
-        afterFetchCallback?.();
       }
     };
 
     //moves the async operations outside of React's render phase
     (async () => {
-      if (!mounted) return;
+      if (!mounted || abortController.signal.aborted) return;
       await doFetch();
     })();
 
     return () => {
       mounted = false;
       try {
-        if (
-          // useAbortController &&
-          abortController &&
-          !abortController.signal.aborted
-        ) {
+        if (abortController && !abortController.signal.aborted) {
           abortController.abort();
-          // resetValueAndCache();
         }
       } catch (e) {
         if (e && e instanceof DOMException && e?.name === "AbortError") {
@@ -448,7 +469,6 @@ export function useFetchStream<T = unknown, E extends BaseError = BaseError>({
     batchSize,
     cacheKey,
     acceptHeader,
-    useAbortController,
     isCacheKeyNotEmpty,
     fetcher,
     cache,

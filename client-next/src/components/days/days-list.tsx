@@ -97,7 +97,6 @@ const SingleDayItem = memo(
         authUser,
         dayBasePath,
         mealsBasePath,
-        useAbortController: true,
       });
 
     if (!mealsIsFinished || !dayIsFinished) {

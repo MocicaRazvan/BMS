@@ -25,7 +25,6 @@ export default function ConfirmEmailPage({
     path: "/auth/confirmEmail",
     method: "POST",
     queryParams: { email, token },
-    useAbortController: false,
   });
 
   if (!token || !email || !userId) {

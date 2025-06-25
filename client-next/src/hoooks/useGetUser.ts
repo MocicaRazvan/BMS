@@ -10,7 +10,6 @@ export default function useGetUser(id: string) {
     path: `/users/${id}`,
     method: "GET",
     authToken: true,
-    useAbortController: false,
   });
 
   const user = messages[0]?.content;

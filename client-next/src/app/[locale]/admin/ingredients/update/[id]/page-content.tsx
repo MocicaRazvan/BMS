@@ -30,7 +30,6 @@ export default function AdminIngredientsPageContent({
     path: `/ingredients/${id}`,
     method: "GET",
     authToken: true,
-    useAbortController: false,
   });
 
   const { navigateToNotFound } = useClientNotFound();

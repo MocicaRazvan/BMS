@@ -16,7 +16,6 @@ export function useGetRecipeWithNF(id: string) {
     method: "GET",
     authToken: true,
     refetchOnFocus: false,
-    // useAbortController: false,
   });
 
   const {
@@ -28,7 +27,6 @@ export function useGetRecipeWithNF(id: string) {
     method: "GET",
     authToken: true,
     refetchOnFocus: false,
-    // useAbortController: false,
   });
 
   const children = useGetRecipeChildrenOptions(IQMessage);

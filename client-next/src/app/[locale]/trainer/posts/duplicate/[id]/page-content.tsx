@@ -22,7 +22,6 @@ export default function DuplicatePostPageContent({ postId, ...props }: Props) {
     path: `/posts/${postId}`,
     method: "GET",
     authToken: true,
-    useAbortController: false,
     refetchOnFocus: false,
   });
 
