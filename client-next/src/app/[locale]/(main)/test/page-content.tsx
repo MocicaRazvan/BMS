@@ -41,7 +41,7 @@ export default function TestPage({ editorTexts }: Props) {
       <Button
         onClick={() => {
           key.current = Math.random().toString(36).substring(5);
-          saveToIndexedDB(key.current, [randArray(), randArray()]);
+          saveToIndexedDB(key.current, [randArray(), randArray()], "default");
         }}
       >
         Add to cache

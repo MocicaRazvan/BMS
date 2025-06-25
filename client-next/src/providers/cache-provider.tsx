@@ -292,7 +292,7 @@ const THROTTLE_WAIT_MS = 1000 * 10; // 10 seconds
 export const CacheProvider = ({ children }: Props) => {
   const cacheInstance = useMemo(() => ClientCacheInstance.getInstance(), []);
   const workerRef = useRef<Worker>();
-  const { status, data: session } = useSession();
+  const { data: session } = useSession();
   const userEmail = session?.user?.email || "default";
 
   const requestLoadCacheFromIdb = useMemo(() => {
@@ -347,13 +347,11 @@ export const CacheProvider = ({ children }: Props) => {
       ) {
         cacheInstance.bulkInsertIfMissing(event.data.entries);
       }
-      // console.log("Cache loaded from IndexedDB:", event.data);
+      console.log("Cache loaded from IndexedDB:", event.data);
     };
 
     let intervalId: NodeJS.Timeout | undefined;
-
     const idleCbId = requestIdleCallback(() => {
-      requestLoadCacheFromIdb();
       intervalId = setInterval(() => {
         cacheInstance.purgeStaleCache();
       });
@@ -362,12 +360,21 @@ export const CacheProvider = ({ children }: Props) => {
     return () => {
       workerRef.current?.terminate();
       cancelIdleCallback(idleCbId);
-      requestLoadCacheFromIdb.cancel();
       if (intervalId) {
         clearInterval(intervalId);
       }
     };
-  }, [cacheInstance, requestLoadCacheFromIdb]);
+  }, [cacheInstance]);
+
+  useEffect(() => {
+    const idleCbId = requestIdleCallback(() => {
+      requestLoadCacheFromIdb();
+    });
+    return () => {
+      cancelIdleCallback(idleCbId);
+      requestLoadCacheFromIdb.cancel();
+    };
+  }, [requestLoadCacheFromIdb]);
 
   const visibilityChangeHandler = useCallback(
     async (e: Event) => {
