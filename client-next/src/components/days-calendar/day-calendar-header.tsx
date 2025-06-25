@@ -9,7 +9,8 @@ import { Locale } from "@/navigation/navigation";
 import { dateFnsLocaleMapper } from "@/lib/utils";
 import { getColorsByDayType } from "@/types/constants";
 import { motion } from "framer-motion";
-import { useMemo } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
+import { debounce } from "lodash-es";
 
 export interface DayCalendarHeaderTexts {
   tracked: string;
@@ -24,14 +25,30 @@ export default function DayCalendarHeaderDate({
     () => dayCalendars.filter((d) => isSameMonth(d.date, date)),
     [dayCalendars, date],
   );
+  const deltaRef = useRef(0);
+
+  const applyDelta = useRef(
+    debounce(() => {
+      setDate((prev) => addMonths(prev, deltaRef.current));
+      deltaRef.current = 0;
+    }, 150),
+  );
+  useEffect(() => {
+    const cancel = applyDelta.current.cancel;
+    return () => {
+      cancel();
+    };
+  }, []);
 
   return useMemo(() => {
-    function handleDateBackward() {
-      setDate((prev) => subMonths(prev, 1));
+    function handleForward() {
+      deltaRef.current += 1;
+      applyDelta.current();
     }
 
-    function handleDateForward() {
-      setDate((prev) => addMonths(prev, 1));
+    function handleBackward() {
+      deltaRef.current -= 1;
+      applyDelta.current();
     }
     return (
       <div className="w-full flex flex-col md:flex-row gap-10 items-center justify-between px-2.5">
@@ -76,7 +93,7 @@ export default function DayCalendarHeaderDate({
               <Button
                 variant="outline"
                 className="h-7 w-7 p-1"
-                onClick={handleDateBackward}
+                onClick={handleBackward}
               >
                 <ChevronLeft className="min-w-5 min-h-5" />
               </Button>
@@ -90,7 +107,7 @@ export default function DayCalendarHeaderDate({
               <Button
                 variant="outline"
                 className="h-7 w-7 p-1"
-                onClick={handleDateForward}
+                onClick={handleForward}
               >
                 <ChevronRight className="min-w-5 min-h-5" />
               </Button>

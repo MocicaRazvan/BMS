@@ -47,7 +47,8 @@ const baseConfig = {
     removeConsole:
       process.env.NODE_ENV === "production" &&
       !(process.env.NEXT_PUBLIC_DEBUG === "true")
-        ? { exclude: ["error"] }
+        ? // ? { exclude: ["error"] }
+          true
         : false,
   },
   cacheHandler:

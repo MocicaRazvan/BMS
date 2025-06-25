@@ -27,6 +27,7 @@ import java.awt.print.PrinterException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -97,7 +98,7 @@ public class DayCalendarServiceImpl implements DayCalendarService {
     @Override
     public Flux<DayCalendarTrackingStats> getDayCalendarTrackingStats(String userId, LocalDate from, LocalDate to) {
         LocalDateTime dateAfter = from == null ? null : from.atStartOfDay();
-        LocalDateTime dateBefore = to == null ? null : to.atTime(LocalTime.MAX);
+        LocalDateTime dateBefore = to == null ? null : to.atTime(LocalTime.MAX.truncatedTo(ChronoUnit.MILLIS));
         return dayCalendarRepository.findDayCalendarTrackingStats(
                 Long.parseLong(userId),
                 dateAfter,
