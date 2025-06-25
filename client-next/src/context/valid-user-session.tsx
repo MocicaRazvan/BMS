@@ -14,6 +14,7 @@ export default function ValidUserSessionContext({
   const router = useRouter();
 
   useEffect(() => {
+    const abortController = new AbortController();
     if (
       session.status === "authenticated" &&
       session.data?.user?.token &&
@@ -34,8 +35,12 @@ export default function ValidUserSessionContext({
           token: session.data.user.token,
           minRoleRequired: session.data.user.role,
         },
+        aboveController: abortController,
       })
         .then(async ({ messages, error }) => {
+          if (abortController.signal.aborted) {
+            return;
+          }
           if (error) {
             console.error("ValidUserSessionContext " + error);
             await handleSignOut();
@@ -50,6 +55,9 @@ export default function ValidUserSessionContext({
           await handleSignOut();
         });
     }
+    return () => {
+      abortController.abort();
+    };
   }, [session.data?.user?.role, session.data?.user?.token, session.status]);
 
   return children;

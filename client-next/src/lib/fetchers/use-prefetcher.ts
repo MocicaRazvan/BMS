@@ -126,7 +126,10 @@ function useDebouncedIdlePrefetch<T, E extends BaseError = BaseError>({
       if (!mounted) {
         return;
       }
-      debouncedFetch();
+      Promise.resolve().then(() => {
+        if (abortController.signal.aborted) return;
+        debouncedFetch();
+      });
     });
 
     return () => {
@@ -262,7 +265,6 @@ export default function usePrefetcher<T, E extends BaseError = BaseError>({
         const prefetchedKey = generateMarkPrefetched(messages, newArgs);
         try {
           if (abortController.signal.aborted) {
-            unmarkPrefetched(prefetchedKey);
             return;
           }
           await manualFetcher({
@@ -271,7 +273,9 @@ export default function usePrefetcher<T, E extends BaseError = BaseError>({
             localAuthToken: true,
           });
 
-          markPrefetched(prefetchedKey);
+          if (!abortController.signal.aborted) {
+            markPrefetched(prefetchedKey);
+          }
         } catch (e: any) {
           if (e?.name !== "AbortError") {
             console.error("basePrefetcher  error:", e);

@@ -183,6 +183,9 @@ export function useFetchStream<T = unknown, E extends BaseError = BaseError>({
         abortController.setAdditionalAbortFromFetch(fetchFunction);
 
         for await (const batchItem of fetchFunction) {
+          if (abortController.signal.aborted) {
+            return;
+          }
           if ("data" in batchItem) {
             handleBatchUpdate(batchItem.data, batchItem.batchIndex);
           } else {
@@ -206,20 +209,22 @@ export function useFetchStream<T = unknown, E extends BaseError = BaseError>({
         console.log("Error fetching", err);
         if (err && err instanceof DOMException && err?.name === "AbortError") {
           return;
-        } else if (isBaseError(err)) {
-          setErrorWithFinishes({
-            error: err as E,
-            isFinished: true,
-            isAbsoluteFinished: true,
-          });
-          removeFromCache();
-          historyKeys.current.delete(cacheKey);
-          // resetValueAndCache();
-        } else {
-          setFinishes({
-            isFinished: true,
-            isAbsoluteFinished: true,
-          });
+        } else if (!abortController.signal.aborted) {
+          if (isBaseError(err)) {
+            setErrorWithFinishes({
+              error: err as E,
+              isFinished: true,
+              isAbsoluteFinished: true,
+            });
+            removeFromCache();
+            historyKeys.current.delete(cacheKey);
+            // resetValueAndCache();
+          } else {
+            setFinishes({
+              isFinished: true,
+              isAbsoluteFinished: true,
+            });
+          }
         }
       }
     },
@@ -274,9 +279,8 @@ export function useFetchStream<T = unknown, E extends BaseError = BaseError>({
         return;
       }
 
-      historyKeys.current.add(key);
-
       if (isKeyInCache(key) && !prefetchOverrideCache) {
+        historyKeys.current.add(key);
         return;
       }
 
@@ -294,6 +298,9 @@ export function useFetchStream<T = unknown, E extends BaseError = BaseError>({
         abortController.setAdditionalAbortFromFetch(fetchFunction);
 
         for await (const batchItem of fetchFunction) {
+          if (abortController.signal.aborted) {
+            return;
+          }
           if ("data" in batchItem) {
             replaceBatchInForAnyKey(batchItem.data, batchItem.batchIndex, key);
             if (batchCallback) {
@@ -305,6 +312,8 @@ export function useFetchStream<T = unknown, E extends BaseError = BaseError>({
               if (res.error) {
                 historyKeys.current.delete(key);
                 throw res.error;
+              } else {
+                historyKeys.current.add(key);
               }
               break;
             }
@@ -386,9 +395,11 @@ export function useFetchStream<T = unknown, E extends BaseError = BaseError>({
       try {
         beforeFetchCallback?.();
         await fetcher(abortController, fetchProps);
-        historyKeys.current.add(cacheKey);
+        if (!abortController.signal.aborted) {
+          historyKeys.current.add(cacheKey);
+        }
       } catch (e) {
-        if (isBaseError(e)) {
+        if (isBaseError(e) && !abortController.signal.aborted) {
           setErrorWithFinishes({
             error: (prev) => (isDeepEqual(prev, e) ? prev : (e as E)),
             isFinished: true,
@@ -457,13 +468,15 @@ export function useFetchStream<T = unknown, E extends BaseError = BaseError>({
 
   useEffect(() => {
     if (!refetchOnFocus) return;
+
+    let mounted = true;
     let unfocusedTime: number | null = null;
     const handleBlur = () => {
       unfocusedTime = Date.now();
       onBlurCallback?.();
     };
     const handleFocus = () => {
-      if (unfocusedTime !== null) {
+      if (unfocusedTime !== null && mounted) {
         const unfocusedDuration = Date.now() - unfocusedTime;
         if (unfocusedDuration >= focusDelay * 1000) {
           refetch();
@@ -475,6 +488,7 @@ export function useFetchStream<T = unknown, E extends BaseError = BaseError>({
     window.addEventListener("focus", handleFocus);
 
     return () => {
+      mounted = false;
       window.removeEventListener("blur", handleBlur);
       window.removeEventListener("focus", handleFocus);
     };
