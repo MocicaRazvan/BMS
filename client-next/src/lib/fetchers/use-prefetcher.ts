@@ -86,7 +86,7 @@ type PrefetchOptions<T, E extends BaseError = BaseError> = {
 };
 
 const NOOP_VALUE = 0;
-const MODE_VALUE = 2 ** 16;
+const MODE_VALUE = 2 ** 32;
 function useDebouncedIdlePrefetch<T, E extends BaseError = BaseError>({
   basePrefetcher,
   isAbsoluteFinished,

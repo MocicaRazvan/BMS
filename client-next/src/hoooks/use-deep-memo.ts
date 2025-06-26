@@ -3,7 +3,7 @@
 import { DependencyList, useMemo, useRef } from "react";
 import { isDeepEqual } from "@/lib/utils";
 
-const MOD = 2 ** 16;
+const MOD = 2 ** 32;
 
 function useDeepCompareMemoize(dependencies: DependencyList) {
   const dependenciesRef = useRef<DependencyList>(dependencies);
