@@ -17,10 +17,25 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+function isBlob(value: unknown): value is Blob {
+  if (typeof Blob === "undefined") {
+    return false;
+  }
+
+  return (
+    value instanceof Blob ||
+    Object.prototype.toString.call(value) === "[object Blob]"
+  );
+}
+
 export function isDeepEqual<T>(obj1: T, obj2: T): boolean {
   if (obj1 === obj2) return true;
-  if (obj1 === null && obj2 !== null) return false;
-  if (obj1 !== null && obj2 === null) return false;
+  if ((obj1 === null) !== (obj2 === null)) return false;
+
+  if (isBlob(obj1) || isBlob(obj2)) {
+    return false;
+  }
+
   try {
     return isReactDeepEqual(obj1, obj2);
   } catch {
