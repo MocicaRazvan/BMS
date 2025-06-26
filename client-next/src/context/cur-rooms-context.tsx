@@ -137,6 +137,15 @@ export const CurRoomsProvider = ({ children, authUser }: Props) => {
     undefined,
   );
   const { removeBySender } = useChatNotification();
+  const messagesManualFetcherAbort = useRef(new CustomAbortController());
+
+  useEffect(() => {
+    return () => {
+      if (messagesManualFetcherAbort.current) {
+        messagesManualFetcherAbort.current.abort();
+      }
+    };
+  }, []);
 
   const otherUser = useMemo(
     () =>
@@ -365,21 +374,30 @@ export const CurRoomsProvider = ({ children, authUser }: Props) => {
       if (room.id === curRoom?.id) {
         return;
       }
-      const abortController = new CustomAbortController();
+      if (messagesManualFetcherAbort.current) {
+        messagesManualFetcherAbort.current.abort();
+      }
+      messagesManualFetcherAbort.current = new CustomAbortController();
       messagesManualFetcher({
         fetchProps: {
           ...messagesArgs,
           path: "/ws-http/messages/" + room.id,
         },
         localAuthToken: true,
-        aboveController: abortController,
+        aboveController: messagesManualFetcherAbort.current,
         errorCallback: () => {
-          if (abortController && !abortController?.signal?.aborted) {
-            abortController?.abort();
+          if (
+            messagesManualFetcherAbort.current &&
+            !messagesManualFetcherAbort.current?.signal.aborted
+          ) {
+            messagesManualFetcherAbort.current?.abort();
           }
         },
-      }).catch((e) => {
-        console.error("Error manual fetching messages", e);
+      }).catch((e: any) => {
+        if ("name" in e && e?.name === "AbortError") {
+          return;
+        }
+        console.log("Error manual fetching messages", e);
       });
     },
     [messagesManualFetcher, curRoom?.id],

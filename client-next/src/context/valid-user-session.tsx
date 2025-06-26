@@ -51,7 +51,10 @@ export default function ValidUserSessionContext({
           }
         })
         .catch(async (e) => {
-          console.error("ValidUserSessionContext " + e);
+          if (abortController.signal.aborted) {
+            return;
+          }
+          console.log("ValidUserSessionContext " + e);
           await handleSignOut();
         });
     }

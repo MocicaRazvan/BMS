@@ -351,13 +351,17 @@ export const CacheProvider = ({ children }: Props) => {
     };
 
     let intervalId: NodeJS.Timeout | undefined;
+    let mounted = true;
+
     const idleCbId = requestIdleCallback(() => {
+      if (!mounted) return;
       intervalId = setInterval(() => {
         cacheInstance.purgeStaleCache();
-      });
+      }, ttlLRUCache);
     });
 
     return () => {
+      mounted = false;
       workerRef.current?.terminate();
       cancelIdleCallback(idleCbId);
       if (intervalId) {
@@ -367,10 +371,15 @@ export const CacheProvider = ({ children }: Props) => {
   }, [cacheInstance]);
 
   useEffect(() => {
+    let mounted = true;
+
     const idleCbId = requestIdleCallback(() => {
+      if (!mounted) return;
       requestLoadCacheFromIdb();
     });
+
     return () => {
+      mounted = false;
       cancelIdleCallback(idleCbId);
       requestLoadCacheFromIdb.cancel();
     };

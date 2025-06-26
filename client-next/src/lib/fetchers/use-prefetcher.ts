@@ -85,6 +85,8 @@ type PrefetchOptions<T, E extends BaseError = BaseError> = {
   delayMs: number;
 };
 
+const NOOP_VALUE = 0;
+const MODE_VALUE = 2 ** 16;
 function useDebouncedIdlePrefetch<T, E extends BaseError = BaseError>({
   basePrefetcher,
   isAbsoluteFinished,
@@ -96,6 +98,8 @@ function useDebouncedIdlePrefetch<T, E extends BaseError = BaseError>({
   generateArgs,
   generateMark,
 }: PrefetchOptions<T, E>) {
+  const instanceIdRef = useRef(NOOP_VALUE);
+
   useEffect(() => {
     if (
       !isAbsoluteFinished ||
@@ -105,15 +109,30 @@ function useDebouncedIdlePrefetch<T, E extends BaseError = BaseError>({
       return;
     }
 
+    instanceIdRef.current = (instanceIdRef.current + 1) % MODE_VALUE;
+    const instanceId = instanceIdRef.current;
     const abortController = new CustomAbortController();
 
     let mounted = true;
 
     const debouncedFetch = debounce(
       () => {
-        if (abortController.signal.aborted) return;
+        if (
+          abortController.signal.aborted ||
+          !mounted ||
+          instanceIdRef.current !== instanceId
+        ) {
+          return;
+        }
 
-        basePrefetcher(predicate, generateArgs, generateMark, abortController);
+        basePrefetcher(
+          predicate,
+          generateArgs,
+          generateMark,
+          abortController,
+        ).catch((e) => {
+          console.log("useDebouncedIdlePrefetch error:", e);
+        });
       },
       delayMs,
       {
@@ -123,13 +142,15 @@ function useDebouncedIdlePrefetch<T, E extends BaseError = BaseError>({
     );
 
     const cbId = requestIdleCallback(() => {
-      if (!mounted) {
+      if (
+        abortController.signal.aborted ||
+        !mounted ||
+        instanceIdRef.current !== instanceId
+      ) {
         return;
       }
-      Promise.resolve().then(() => {
-        if (abortController.signal.aborted) return;
-        debouncedFetch();
-      });
+
+      debouncedFetch();
     });
 
     return () => {
@@ -168,7 +189,7 @@ export type FlattedPrefetcherProps<T, E extends BaseError = BaseError> = Pick<
   previousPredicate: FlattenPrefetchedPredicate<T>;
 };
 
-const DEFAULT_DELAY = 600 as const;
+const DEFAULT_DELAY = 750 as const;
 
 export default function usePrefetcher<T, E extends BaseError = BaseError>({
   returned: {
