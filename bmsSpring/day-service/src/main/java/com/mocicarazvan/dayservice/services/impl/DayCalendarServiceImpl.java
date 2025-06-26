@@ -97,7 +97,7 @@ public class DayCalendarServiceImpl implements DayCalendarService {
     @RedisReactiveChildCache(key = CACHE_KEY, masterId = CACHE_KEY, idPath = "userId * 10000 + month + year * 100")
     @Override
     public Flux<DayCalendarTrackingStats> getDayCalendarTrackingStats(String userId, LocalDate from, LocalDate to) {
-        LocalDateTime dateAfter = from == null ? null : from.atStartOfDay();
+        LocalDateTime dateAfter = from == null ? null : from.atStartOfDay().truncatedTo(ChronoUnit.MILLIS);
         LocalDateTime dateBefore = to == null ? null : to.atTime(LocalTime.MAX.truncatedTo(ChronoUnit.MILLIS));
         return dayCalendarRepository.findDayCalendarTrackingStats(
                 Long.parseLong(userId),
