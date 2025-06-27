@@ -162,6 +162,14 @@ export async function fetchStream<
       path,
     );
 
+  if (abortController.signal.aborted) {
+    isFinished = false;
+    onAbort?.();
+    batchBuffer = [];
+    batchIndex = 0;
+    return { messages, error, isFinished, cleanUp: () => {} };
+  }
+
   const handleBatchUpdate = () => {
     // console.log(
     //   "handleBatchUpdate inner",
@@ -182,11 +190,25 @@ export async function fetchStream<
       `${process.env.NEXT_PUBLIC_SPRING_CLIENT}${url}`,
       fetchOptions,
     );
+    if (abortController.signal.aborted) {
+      isFinished = false;
+      onAbort?.();
+      batchBuffer = [];
+      batchIndex = 0;
+      return { messages, error, isFinished, cleanUp: () => {} };
+    }
     const stream = ndjsonStream<T, E>(res.body);
     const reader = stream.getReader();
 
     const read = async (): Promise<void> => {
       const { done, value } = await reader.read();
+      if (abortController.signal.aborted) {
+        isFinished = false;
+        onAbort?.();
+        batchBuffer = [];
+        batchIndex = 0;
+        return;
+      }
       if (done) {
         isFinished = true;
         if (!updateOnEmpty && batchBuffer.length > 0) {

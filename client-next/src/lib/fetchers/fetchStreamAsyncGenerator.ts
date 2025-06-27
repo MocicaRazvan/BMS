@@ -111,6 +111,20 @@ export function fetchStreamAsyncGenerator<
       );
     localAbortController = abortController;
 
+    if (abortController.signal.aborted) {
+      onAbort?.();
+      const earlyResult: FetchStreamResponse<T, E> = {
+        messages: [],
+        error: null,
+        isFinished: false,
+        cleanUp: () => {},
+      };
+      queue.push({ type: "response", response: earlyResult });
+      isDone = true;
+      handleResolve();
+      return;
+    }
+
     let batchBuffer: T[] = [];
     let batchIndex = 0;
     const messages: T[] = [];
@@ -133,10 +147,36 @@ export function fetchStreamAsyncGenerator<
         `${process.env.NEXT_PUBLIC_SPRING_CLIENT}${url}`,
         fetchOptions,
       );
+      if (abortController.signal.aborted) {
+        const finalResult: FetchStreamResponse<T, E> = {
+          messages: [],
+          error: null,
+          isFinished: false,
+          cleanUp: () => {},
+        };
+        queue.push({ type: "response", response: finalResult });
+        isDone = true;
+        onAbort?.();
+        handleResolve();
+        return;
+      }
       const stream = ndjsonStream<T, E>(res.body);
       const reader = stream.getReader();
       while (true) {
         const { done, value } = await reader.read();
+        if (abortController.signal.aborted) {
+          onAbort?.();
+          finalResult = {
+            messages,
+            error: null,
+            isFinished: false,
+            cleanUp: () => {},
+          };
+          queue.push({ type: "response", response: finalResult });
+          isDone = true;
+          handleResolve();
+          return;
+        }
         if (done) {
           isFinished = true;
           flushBatch();
@@ -171,6 +211,7 @@ export function fetchStreamAsyncGenerator<
       };
     } catch (err) {
       if (err && err instanceof DOMException && err?.name === "AbortError") {
+        onAbort?.();
         finalResult = {
           messages,
           error: null,

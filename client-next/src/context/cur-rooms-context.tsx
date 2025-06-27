@@ -172,7 +172,6 @@ export const CurRoomsProvider = ({ children, authUser }: Props) => {
   useEffect(() => {
     if (initialCacheKey.current === null) {
       initialCacheKey.current = cacheKey;
-      console.log("Initial cache key", initialCacheKey.current);
     }
   }, [cacheKey]);
 
@@ -204,13 +203,19 @@ export const CurRoomsProvider = ({ children, authUser }: Props) => {
     const searchEmail = searchParams.get("email");
     if (!searchEmail) return;
 
+    const abortController = new AbortController();
     fetchStream<ChatRoomResponseJoined>({
       token: authUser.token,
       path: "/ws-http/chatRooms/findAllByEmails-joined",
       acceptHeader: "application/json",
       arrayQueryParam: { emails: [authUser.email, searchEmail] },
+      aboveController: abortController,
     })
       .then(({ messages, isFinished }) => {
+        if (abortController.signal.aborted) {
+          return;
+        }
+
         if (!isFinished || messages.length === 0) return;
         const newRoom = messages[0];
 
@@ -224,7 +229,10 @@ export const CurRoomsProvider = ({ children, authUser }: Props) => {
 
         // setCurEmail(searchEmail);
       })
-      .catch(console.error);
+      .catch(console.log);
+    return () => {
+      abortController.abort();
+    };
   }, [authUser, router, searchParams]);
 
   useSubscription(`/queue/chatRooms-joined-${authUser.email}`, (message) => {

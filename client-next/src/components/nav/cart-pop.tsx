@@ -26,6 +26,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import OverflowTextTooltip from "@/components/common/overflow-text-tooltip";
 
 export interface CartPopsTexts {
   undo: string;
@@ -107,18 +108,14 @@ export default function CartPop({ authUser, cartPopTexts }: Props) {
               {usersCart.plans.map((plan, index) => (
                 <Fragment key={plan.id}>
                   <DropdownMenuItem onClick={(e) => e.preventDefault()}>
-                    <div className="py-1 h-10 flex items-center justify-between w-full ">
-                      <div>
-                        <div className="transition-all hover:underline hover:scale-110">
-                          <Link
-                            href={`/plans/single/${plan.id}`}
-                            className="transition-all hover:underline hover:scale-105"
-                          >
-                            <p className="text-lg mb-1">
-                              {plan.title.length > 10
-                                ? plan.title.substring(0, 10) + "..."
-                                : plan.title}
-                            </p>
+                    <div className="py-1 h-10 flex items-center justify-between w-full">
+                      <div className="flex-1">
+                        <div className="transition-all hover:underline hover:scale-105">
+                          <Link href={`/plans/single/${plan.id}`}>
+                            <OverflowTextTooltip
+                              text={plan.title}
+                              triggerClassName="text-lg mb-1 truncate max-w-[200px]"
+                            />
                           </Link>
                         </div>
                         <p className="font-bold">

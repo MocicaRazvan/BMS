@@ -604,7 +604,7 @@ const ManagePop = ({
   setStopLoading,
 }: ManagePopProps) => {
   const [scheduleError, setScheduleError] = useState<string | null>(null);
-  const schedule = async () => {
+  const schedule = useCallback(async () => {
     setScheduleError(null);
     setTriggerLoading(true);
     const resp = await fetchStream<QueueInformation>({
@@ -632,8 +632,8 @@ const ManagePop = ({
         return;
       }
     });
-  };
-  const stopContainer = () => {
+  }, [alive, authUser.token, errorMessage, queueName, setTriggerLoading]);
+  const stopContainer = useCallback(() => {
     setScheduleError(null);
     setStopLoading(true);
     fetchStream({
@@ -648,7 +648,7 @@ const ManagePop = ({
         return;
       }
     });
-  };
+  }, [errorMessage, queueName, setStopLoading]);
 
   return (
     <Popover open={popOpen} onOpenChange={setPopOpen}>

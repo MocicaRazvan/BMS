@@ -85,16 +85,27 @@ export default function SingleOrderPageContent({
   );
 
   useEffect(() => {
-    if (ordersAddress.length > 0) {
-      fetchStream<CustomInvoiceDto>({
-        path: `/orders/invoices/${ordersAddress[0].content.order.stripeInvoiceId}`,
-        method: "GET",
-        token: authUser.token,
-        successCallback: (data) => {
-          setInvoice(data);
-        },
-      }).catch(() => navigateToNotFound());
+    if (ordersAddress.length === 0) {
+      return;
     }
+    const abortController = new AbortController();
+
+    fetchStream<CustomInvoiceDto>({
+      path: `/orders/invoices/${ordersAddress[0].content.order.stripeInvoiceId}`,
+      method: "GET",
+      token: authUser.token,
+      aboveController: abortController,
+      successCallback: (data) => {
+        if (abortController.signal.aborted) return;
+        setInvoice(data);
+      },
+    }).catch(() => {
+      if (abortController.signal.aborted) return;
+      navigateToNotFound();
+    });
+    return () => {
+      abortController.abort();
+    };
   }, [authUser.token, ordersAddress]);
 
   if (!isMounted) return null;

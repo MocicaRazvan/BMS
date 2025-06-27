@@ -119,7 +119,6 @@ export function ChatRoomsContent({
 }: ChatRoomContentProps) {
   const { chatRooms } = useCurRooms();
   return useMemo(() => {
-    console.log("ChatRoomsContent rendered");
     if (chatRooms.length === 0) {
       return (
         <div className="w-full h-full p-20 flex items-center justify-center">

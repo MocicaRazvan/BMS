@@ -68,21 +68,30 @@ export const SubscriptionProvider = ({ children }: Props) => {
   const [state, dispatch] = useReducer(subscriptionReducer, initialState);
 
   useEffect(() => {
-    if (authUser?.token) {
-      fetchStream<UserSubscriptionDto>({
-        path: "/orders/subscriptions",
-        token: authUser.token,
-        // successCallback: (data) => {
-        //   console.log("Subscription fetch success", data);
-        //   dispatch({ type: "ADD", payload: data.planId });
-        // },
-        successArrayCallback: (data) => {
-          dispatch({ type: "ADD_ARRAY", payload: data.map((d) => d.planId) });
-        },
-      }).catch((e) => {
-        console.error("Subscription fetch error", e);
-      });
+    if (!authUser?.token) {
+      return;
     }
+    const abortController = new AbortController();
+    fetchStream<UserSubscriptionDto>({
+      path: "/orders/subscriptions",
+      token: authUser.token,
+      aboveController: abortController,
+      // successCallback: (data) => {
+      //   console.log("Subscription fetch success", data);
+      //   dispatch({ type: "ADD", payload: data.planId });
+      // },
+      successArrayCallback: (data) => {
+        if (abortController.signal.aborted) {
+          return;
+        }
+        dispatch({ type: "ADD_ARRAY", payload: data.map((d) => d.planId) });
+      },
+    }).catch((e) => {
+      console.log("Subscription fetch error", e);
+    });
+    return () => {
+      abortController.abort();
+    };
   }, [authUser?.token]);
 
   return (

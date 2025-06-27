@@ -33,6 +33,7 @@ const initialState: UserCart = {
 };
 async function loadInitialCart(
   authUser: Session["user"],
+  abortController: AbortController,
 ): Promise<UserCart | undefined> {
   if (!authUser?.token) {
     return initialState;
@@ -44,6 +45,7 @@ async function loadInitialCart(
       method: "POST",
       token: authUser.token,
       path: `/cart/getOrCreate/${authUser.id}`,
+      aboveController: abortController,
     });
     if (error || messages.length == 0) {
       return initialState;
@@ -338,23 +340,27 @@ export const CartProvider = ({ children }: Props) => {
   // console.log("CART STATE CTX", state);
 
   useEffect(() => {
-    if (authUserId !== "") {
-      loadInitialCart(authUser)
-        .then((cart) => {
-          if (cart) {
-            // todo verifica daca state userid e ''
-            dispatch({
-              type: "ADD_ALL",
-              userId: cart.userId,
-              payload: cart.plans,
-              observableCallback: noOpObservableCallback,
-            });
-          }
-        })
-        .catch((e) => {
-          console.error("Failed to load cart from local storage:", e);
-        });
+    if (authUserId === "") {
+      return;
     }
+    const abortController = new AbortController();
+    loadInitialCart(authUser, abortController)
+      .then((cart) => {
+        if (cart && !abortController.signal.aborted) {
+          dispatch({
+            type: "ADD_ALL",
+            userId: cart.userId,
+            payload: cart.plans,
+            observableCallback: noOpObservableCallback,
+          });
+        }
+      })
+      .catch((e) => {
+        console.error("Failed to load cart from local storage:", e);
+      });
+    return () => {
+      abortController.abort();
+    };
   }, [authUserId]);
 
   return (

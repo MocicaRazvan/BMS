@@ -7,9 +7,13 @@ export class CustomAbortController extends AbortController {
   }
 
   override abort(reason?: any): void {
-    if (!this.signal.aborted) {
-      super.abort(reason);
-      this.additionalOnAbort?.();
+    try {
+      if (!this.signal.aborted) {
+        super.abort(reason);
+        this.additionalOnAbort?.();
+      }
+    } catch (e) {
+      console.log("CustomAbortController abort error", e);
     }
   }
 
