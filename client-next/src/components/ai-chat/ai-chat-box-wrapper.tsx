@@ -19,13 +19,18 @@ export function AiChatBoxWrapper(props: AiChatBoxTexts) {
       session?.data?.user?.token &&
       session?.data?.user?.email
     ) {
+      const abortController = new AbortController();
       fetchStream<AiChatMessageResponse[]>({
         path: `/ws-http/ai-chat/${session.data.user.email}`,
         method: "GET",
         acceptHeader: "application/json",
         token: session.data.user.token,
+        aboveController: abortController,
       })
         .then(({ messages, isFinished, error }) => {
+          if (abortController.signal.aborted) {
+            return;
+          }
           if (error) {
             setIsFinished(true);
             return;
@@ -42,7 +47,15 @@ export function AiChatBoxWrapper(props: AiChatBoxTexts) {
           }
           setIsFinished(isFinished);
         })
-        .finally(() => setIsFinished(true));
+        .finally(() => {
+          if (abortController.signal.aborted) {
+            return;
+          }
+          setIsFinished(true);
+        });
+      return () => {
+        abortController.abort();
+      };
     } else if (!(session.status === "loading")) {
       setIsFinished(true);
     }
