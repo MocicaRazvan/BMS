@@ -445,9 +445,9 @@ const ConversationContent = memo(
             inverse={true}
             loader={<Loader className="mx-auto my-6 h-12 w-12" />}
             scrollableTarget="scrollableDiv"
-            scrollThreshold={"200px"}
+            scrollThreshold="210px"
             className={cn(
-              `flex flex-col-reverse h-full transition-all duration-300 relative`,
+              `flex flex-col-reverse transition-all duration-300 relative`,
             )}
           >
             <div
