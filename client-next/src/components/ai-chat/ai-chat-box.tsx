@@ -1,7 +1,7 @@
 "use client";
 import { motion } from "framer-motion";
-import { cn, isDeepEqual } from "@/lib/utils";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { cn } from "@/lib/utils";
+import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import {
   Bot,
   Minus,
@@ -48,6 +48,12 @@ export default function AiChatBox({
   const [showBot, setShowBot] = useState(true);
   const { csrfRawToken, addTokenConditionally } = useCsrfToken();
   const {
+    deletePersistedMessages,
+    publishMessages,
+    deleteByVercelId,
+    publishMessage,
+  } = useAiChatPersist();
+  const {
     messages,
     input,
     handleInputChange,
@@ -64,7 +70,11 @@ export default function AiChatBox({
     headers: {
       ...addTokenConditionally(),
     },
+    onFinish: (message) => {
+      publishMessage(message);
+    },
   });
+
   const [isAtBottom, setIsAtBottom] = useState<boolean>(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -72,8 +82,6 @@ export default function AiChatBox({
     () => messages.filter((m) => m.role === "assistant" || m.role === "user"),
     [messages],
   );
-  const { deletePersistedMessages, addPersistMessages, deleteByVercelId } =
-    useAiChatPersist(noToolsMessages, initialMessages);
 
   useEffect(() => {
     if (!isLoading && data && data.length > 0) {
@@ -98,22 +106,11 @@ export default function AiChatBox({
               };
               return message;
             });
-
-          setMessages((prev) => {
-            const newMessages = parsedData.filter(
-              (newMsg) =>
-                !prev.some((existingMsg) => isDeepEqual(existingMsg, newMsg)),
-            );
-            if (newMessages.length) {
-              addPersistMessages(newMessages);
-              return [...prev, ...newMessages];
-            }
-            return prev;
-          });
+          publishMessages(parsedData);
         }
       }
     }
-  }, [isLoading, data]);
+  }, [isLoading, data, setMessages, publishMessages]);
 
   const handleScroll = () => {
     if (!scrollRef.current) return;
@@ -155,6 +152,18 @@ export default function AiChatBox({
       deleteByVercelId(lastMessage);
       await reload();
     }
+  };
+
+  const onSubmit = (e: FormEvent<HTMLFormElement>) => {
+    stop();
+    handleSubmit(e);
+    const message: Message = {
+      id: uuid(),
+      role: "user",
+      content: input,
+      createdAt: new Date(),
+    };
+    publishMessage(message);
   };
 
   return (
@@ -261,13 +270,7 @@ export default function AiChatBox({
                 scrollAreaRef={scrollRef}
               />
             </div>
-            <form
-              onSubmit={(e) => {
-                stop();
-                handleSubmit(e);
-              }}
-              className="m-3 flex gap-1 w-full p-1"
-            >
+            <form onSubmit={onSubmit} className="m-3 flex gap-1 w-full p-1">
               <Button
                 type="button"
                 size="icon"
