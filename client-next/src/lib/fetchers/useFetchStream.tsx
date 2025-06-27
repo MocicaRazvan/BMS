@@ -453,7 +453,7 @@ export function useFetchStream<T = unknown, E extends BaseError = BaseError>({
       mounted = false;
       try {
         if (abortController && !abortController.signal.aborted) {
-          abortController.abort();
+          abortController.abort(!refetchClosure.current);
         }
       } catch (e) {
         if (e && e instanceof DOMException && e?.name === "AbortError") {

@@ -130,6 +130,7 @@ export const deduplicateFetchStream = async <
       ...params,
       onAbort: () => {
         params.onAbort?.();
+        globalMemoizedIterators.delete(params.dedupKey);
       },
       errorCallback: (err) => {
         params.errorCallback?.(err);

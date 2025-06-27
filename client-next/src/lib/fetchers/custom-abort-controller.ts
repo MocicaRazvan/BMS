@@ -1,16 +1,18 @@
 export class CustomAbortController extends AbortController {
-  additionalOnAbort: (() => void) | undefined;
+  private additionalOnAbort: (() => void) | undefined;
 
   constructor(additionalOnAbort?: () => void) {
     super();
     this.additionalOnAbort = additionalOnAbort;
   }
 
-  override abort(reason?: any): void {
+  override abort(shouldCallAdditionalOnAbort = true, reason?: any): void {
     try {
       if (!this.signal.aborted) {
         super.abort(reason);
-        this.additionalOnAbort?.();
+        if (shouldCallAdditionalOnAbort && this.additionalOnAbort) {
+          this.additionalOnAbort();
+        }
       }
     } catch (e) {
       console.log("CustomAbortController abort error", e);
