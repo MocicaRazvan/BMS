@@ -39,6 +39,7 @@ import {
   useFlattenPrefetcher,
 } from "@/lib/fetchers/use-prefetcher";
 import { useCounter } from "react-use";
+import { useCacheInvalidator } from "@/providers/cache-provider";
 
 export interface DayCalendarContextType extends WithUser {
   dayCalendars: DayCalendarResponse[];
@@ -278,16 +279,17 @@ export default function DayCalendarProvider({ children }: Props) {
   const [dayCalendars, setDayCalendars] = useState<DayCalendarResponse[]>([]);
   const { monthStart, monthEnd, calendarStart, calendarEnd, calendarDays } =
     getDateRanges(date);
-
+  const { removeFromCache } = useCacheInvalidator();
   const {
     messages,
     error,
     isFinished,
     manualFetcher,
     refetch,
-    removeFromCache,
     isAbsoluteFinished,
     isRefetchClosure,
+    removeKeyFromHistory,
+    cacheKey,
   } = useFetchStream<CustomEntityModel<DayCalendarResponse>>({
     ...baseFetchAgs,
     queryParams: {
@@ -297,6 +299,7 @@ export default function DayCalendarProvider({ children }: Props) {
   });
 
   useEffect(() => {
+    // for cache removal
     if (messages && messages.length > 0) {
       setDayCalendars(messages.map((d) => d.content));
     }
@@ -319,33 +322,41 @@ export default function DayCalendarProvider({ children }: Props) {
     date,
   });
 
+  const invalidateOriginalCache = useCallback(() => {
+    callUpdateDaysCallbacks();
+    removeFromCache(cacheKey);
+    removeKeyFromHistory(cacheKey);
+  }, [
+    cacheKey,
+    callUpdateDaysCallbacks,
+    removeFromCache,
+    removeKeyFromHistory,
+  ]);
+
   const addDayCalendar = useCallback(
     (day: DayCalendarResponse) => {
       setDayCalendars((prevState) => [...prevState, day]);
       // inc();
-      callUpdateDaysCallbacks();
-      removeFromCache();
+      invalidateOriginalCache();
     },
-    [callUpdateDaysCallbacks, removeFromCache],
+    [invalidateOriginalCache],
   );
   const removeDayCalendar = useCallback(
     (dayId: number) => {
       setDayCalendars((prevState) => prevState.filter((d) => d.id !== dayId));
       // inc();
-      callUpdateDaysCallbacks();
-      removeFromCache();
+      invalidateOriginalCache();
     },
-    [callUpdateDaysCallbacks, removeFromCache],
+    [invalidateOriginalCache],
   );
 
   const changeForDate = useCallback(
     (day: DayCalendarResponse) => {
       setDayCalendars((prev) => prev.map((d) => (d.id === day.id ? day : d)));
       // inc();
-      callUpdateDaysCallbacks();
-      removeFromCache();
+      invalidateOriginalCache();
     },
-    [callUpdateDaysCallbacks, removeFromCache],
+    [invalidateOriginalCache],
   );
 
   return (

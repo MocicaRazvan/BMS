@@ -43,7 +43,10 @@ export interface ChatRoomsState
         PageableResponse<ChatRoomResponseJoined[]>,
         BaseError
       >,
-      "resetFinishes" | "isRefetchClosure"
+      | "resetFinishes"
+      | "isRefetchClosure"
+      | "removeKeyFromHistory"
+      | "addKeyToHistory"
     >,
     WithUser {
   curRoom: ChatRoomResponseJoined | undefined;
@@ -99,8 +102,8 @@ export const CurRoomsProvider = ({ children, authUser }: Props) => {
   const debouncedFilter = useDebounce(filterEmail, 300);
   const params = useParams<{ id: string }>();
   const initialCacheKey = useRef<string | null>(null);
-  const { removeFromCache: cacheInvalidatorRemove } = useCacheInvalidator();
 
+  const { removeFromCache } = useCacheInvalidator();
   const [pageInfo, setPageInfo] = useState<PageInfo>(initialPageInfo);
   const {
     messages,
@@ -108,10 +111,10 @@ export const CurRoomsProvider = ({ children, authUser }: Props) => {
     isFinished,
     refetch,
     cacheKey,
-    removeFromCache,
     refetchState,
     isAbsoluteFinished,
     manualFetcher,
+    removeKeyFromHistory,
   } = useFetchStream<PageableResponse<ChatRoomResponseJoined[]>>({
     path: `/ws-http/chatRooms/filter-joined/${authUser.email}`,
     method: "PATCH",
@@ -138,6 +141,7 @@ export const CurRoomsProvider = ({ children, authUser }: Props) => {
   );
   const { removeBySender } = useChatNotification();
   const messagesManualFetcherAbort = useRef(new CustomAbortController());
+  const isInitialCacheDirty = useRef(false);
 
   useEffect(() => {
     return () => {
@@ -146,6 +150,15 @@ export const CurRoomsProvider = ({ children, authUser }: Props) => {
       }
     };
   }, []);
+
+  useEffect(() => {
+    return () => {
+      if (isInitialCacheDirty.current && initialCacheKey.current) {
+        removeFromCache(initialCacheKey.current);
+        isInitialCacheDirty.current = false;
+      }
+    };
+  }, [removeFromCache]);
 
   const otherUser = useMemo(
     () =>
@@ -239,13 +252,13 @@ export const CurRoomsProvider = ({ children, authUser }: Props) => {
     const newMessage = JSON.parse(message.body) as ChatRoomResponseJoined;
     setChatRooms((prev) => {
       const isRoomPresent = prev.findIndex((room) => room.id === newMessage.id);
-      console.log(
-        "Chat main content useSubscription",
-        `/queue/chatRooms-${authUser.email}`,
-        isRoomPresent,
-        newMessage.id.toString(),
-        newMessage,
-      );
+      // console.log(
+      //   "Chat main content useSubscription",
+      //   `/queue/chatRooms-${authUser.email}`,
+      //   isRoomPresent,
+      //   newMessage.id.toString(),
+      //   newMessage,
+      // );
       if (isRoomPresent === -1) {
         return prev;
       }
@@ -297,7 +310,8 @@ export const CurRoomsProvider = ({ children, authUser }: Props) => {
 
       setChatRooms((prev) => prev.filter((room) => room.id !== newMessage.id));
       if (initialCacheKey.current) {
-        cacheInvalidatorRemove(initialCacheKey.current);
+        isInitialCacheDirty.current = true;
+        removeKeyFromHistory(initialCacheKey.current);
       }
     },
   );
@@ -314,7 +328,8 @@ export const CurRoomsProvider = ({ children, authUser }: Props) => {
         return prev;
       });
       if (initialCacheKey.current) {
-        cacheInvalidatorRemove(initialCacheKey.current);
+        isInitialCacheDirty.current = true;
+        removeKeyFromHistory(initialCacheKey.current);
       }
     },
   );
@@ -334,11 +349,11 @@ export const CurRoomsProvider = ({ children, authUser }: Props) => {
         acceptHeader: "application/json",
         token: authUser.token,
       });
+
       if (error) {
         console.error("Error deleting chat room:", error);
         return;
       } else if (isFinished) {
-        console.log("Chat room deleted");
         setChatRooms((prev) => prev.filter((pr) => pr.id !== room.id));
         removeBySender({
           senderEmail: otherUser.conversationUser.email,
@@ -346,7 +361,8 @@ export const CurRoomsProvider = ({ children, authUser }: Props) => {
           stompClient,
         });
         if (initialCacheKey.current) {
-          cacheInvalidatorRemove(initialCacheKey.current);
+          isInitialCacheDirty.current = true;
+          removeKeyFromHistory(initialCacheKey.current);
         }
         if (curRoom?.id === room.id) {
           setCurRoom(undefined);
@@ -361,6 +377,7 @@ export const CurRoomsProvider = ({ children, authUser }: Props) => {
       router,
       stompClient?.connected,
       initialCacheKey,
+      removeKeyFromHistory,
     ],
   );
 
@@ -431,7 +448,6 @@ export const CurRoomsProvider = ({ children, authUser }: Props) => {
         isFinished,
         refetch,
         cacheKey,
-        removeFromCache,
         refetchState,
         isAbsoluteFinished,
         manualFetcher,

@@ -47,12 +47,13 @@ export interface UseFetchStreamReturn<T, E> {
   isFinished: boolean;
   refetch: () => void;
   cacheKey: string;
-  removeFromCache: () => void;
   refetchState: boolean;
   isAbsoluteFinished: boolean;
   manualFetcher: ManualFetcher<T>;
   resetFinishes: () => void;
   isRefetchClosure: boolean;
+  addKeyToHistory: (key: string) => void;
+  removeKeyFromHistory: (key: string) => void;
 }
 
 function generateKey(
@@ -154,6 +155,20 @@ export function useFetchStream<T = unknown, E extends BaseError = BaseError>({
   // for some very rare edge cases, but it can be removed now with dedup
   const refetchClosure = useRef(false);
   const historyKeys = useRef<Set<string>>(new Set());
+
+  const addKeyToHistory = useCallback((key: string) => {
+    if (historyKeys.current.has(key)) {
+      return;
+    }
+    historyKeys.current.add(key);
+  }, []);
+
+  const removeKeyFromHistory = useCallback((key: string) => {
+    if (!historyKeys.current.has(key)) {
+      return;
+    }
+    historyKeys.current.delete(key);
+  }, []);
 
   const refetch = useCallback(() => {
     if (refetchClosure.current) {
@@ -303,7 +318,7 @@ export function useFetchStream<T = unknown, E extends BaseError = BaseError>({
           dedupKey: key,
           extraOptions: {
             ...updatedProps.extraOptions,
-            priority: "low",
+            priority: updatedProps.extraOptions?.priority || "low",
           },
         });
 
@@ -453,6 +468,7 @@ export function useFetchStream<T = unknown, E extends BaseError = BaseError>({
       mounted = false;
       try {
         if (abortController && !abortController.signal.aborted) {
+          // to not lose dedup in refetch
           abortController.abort(!refetchClosure.current);
         }
       } catch (e) {
@@ -485,6 +501,7 @@ export function useFetchStream<T = unknown, E extends BaseError = BaseError>({
     beforeFetchCallback,
     afterFetchCallback,
     isKeyInCache,
+    prefetchOverrideCache,
     // intentionally omitted aboveController, it's only used for optional cleanup and should not trigger refetch
     // aboveController,
   ]);
@@ -523,12 +540,13 @@ export function useFetchStream<T = unknown, E extends BaseError = BaseError>({
     isFinished,
     refetch,
     cacheKey,
-    removeFromCache,
     refetchState,
     isAbsoluteFinished,
     manualFetcher,
     resetFinishes,
     isRefetchClosure: refetchClosure.current,
+    addKeyToHistory,
+    removeKeyFromHistory,
   };
 }
 
