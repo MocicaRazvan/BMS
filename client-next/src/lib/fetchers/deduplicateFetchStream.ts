@@ -5,31 +5,51 @@ import TTLCache from "@isaacs/ttlcache";
 import { fetchStreamAsyncGenerator } from "@/lib/fetchers/fetchStreamAsyncGenerator";
 
 const DEDUPLICATION_FACTOR = 1.05 as const;
+type MemoEntry<T> =
+  | {
+      type: "pending";
+      promise: Promise<() => AsyncGenerator<T>>;
+      abort: () => void;
+    }
+  | {
+      type: "ready";
+      value: () => AsyncGenerator<T>;
+      abort: () => void;
+    };
 
-const globalMemoizedIterators = new TTLCache<
-  string,
-  (() => AsyncGenerator<any>) | Promise<() => AsyncGenerator<any>>
->({
+const globalMemoizedIterators = new TTLCache<string, MemoEntry<any>>({
   ttl: DEDUPLICATION_FACTOR * 1000,
   updateAgeOnGet: true,
 });
+
+export const getSyncAbortForKey = (key: string) => {
+  const existing = globalMemoizedIterators.get(key);
+  if (!existing) {
+    return () => {};
+  }
+  return existing.abort;
+};
 
 async function memoizeAsyncIterator<T>(
   key: string,
   asyncIteratorFn: () => AsyncIterable<T>,
 ): Promise<() => AsyncGenerator<T>> {
-  const existingIterator = globalMemoizedIterators.get(key);
-  if (existingIterator) {
-    if (typeof existingIterator === "function") {
-      // console.log(`memoizeAsyncIterator cache hit function for key: ${key}`);
-      return existingIterator;
+  const existing = globalMemoizedIterators.get(key);
+
+  if (existing) {
+    if (existing.type === "ready") {
+      // console.log("memoizeAsyncIterator cache hit function", key);
+      return existing.value;
     } else {
-      // console.log(
-      //   `memoizeAsyncIterator cache hit promise for key: ${key}, waiting for it to resolve`,
-      // );
-      return await existingIterator;
+      // console.log("memoizeAsyncIterator cache hit promise", key);
+      return await existing.promise;
     }
   }
+
+  const cache: T[] = [];
+  const resolvers: ((value: T | undefined) => void)[] = [];
+  const iterator = asyncIteratorFn();
+  let aborted = false;
 
   //dummy initialization to avoid TS error
   let resolveFactory: (genFn: () => AsyncGenerator<T>) => void = (_) => {};
@@ -40,19 +60,38 @@ async function memoizeAsyncIterator<T>(
       rejectFactory = reject;
     },
   );
-  globalMemoizedIterators.set(key, factoryPromise);
+
+  const abortEarly = () => {
+    if (aborted) return;
+    aborted = true;
+
+    while (resolvers.length > 0) {
+      resolvers.shift()?.(undefined);
+    }
+
+    resolveFactory(() => {
+      const noopGen = (async function* () {
+        //
+      })();
+      return Object.assign(noopGen, {
+        abort: () => {},
+      });
+    });
+  };
+
+  globalMemoizedIterators.set(key, {
+    type: "pending",
+    promise: factoryPromise,
+    abort: abortEarly,
+  });
 
   (async () => {
     try {
-      const cache: T[] = [];
-      const resolvers: ((value: T | undefined) => void)[] = [];
-      const iterator = asyncIteratorFn();
-      let aborted = false;
-
       const sharedIterator = async function* (): AsyncGenerator<T> {
         let index = 0;
 
         while (index < cache.length) {
+          if (aborted) return;
           yield cache[index++];
         }
 
@@ -64,6 +103,7 @@ async function memoizeAsyncIterator<T>(
               resolvers.push(resolve),
             );
             const value = await promise;
+            if (aborted) return;
             // End of iteration, we send undefined in fetchStreamAsyncGenerator in the end
             if (value === undefined) break;
             yield value;
@@ -71,23 +111,26 @@ async function memoizeAsyncIterator<T>(
           }
         }
       };
+      const finalAbort = () => {
+        if (aborted) return;
+
+        aborted = true;
+        if ("abort" in iterator && typeof iterator.abort === "function") {
+          iterator.abort();
+        }
+        // console.log(
+        //   `memoizeAsyncIterator Aborting generator for key: ${key},`,
+        // );
+        // globalMemoizedIterators.delete(key);
+        while (resolvers.length > 0) {
+          resolvers.shift()?.(undefined);
+        }
+      };
 
       const generatorWithAbort = () => {
         const generator = sharedIterator();
         return Object.assign(generator, {
-          abort: () => {
-            aborted = true;
-            if ("abort" in iterator && typeof iterator.abort === "function") {
-              iterator.abort();
-            }
-            // console.log(
-            //   `memoizeAsyncIterator Aborting generator for key: ${key},`,
-            // );
-            // globalMemoizedIterators.delete(key);
-            while (resolvers.length > 0) {
-              resolvers.shift()?.(undefined);
-            }
-          },
+          abort: finalAbort,
         });
       };
 
@@ -103,8 +146,11 @@ async function memoizeAsyncIterator<T>(
         }
       })();
 
-      // ready state
-      globalMemoizedIterators.set(key, generatorWithAbort);
+      globalMemoizedIterators.set(key, {
+        type: "ready",
+        value: generatorWithAbort,
+        abort: finalAbort,
+      });
 
       resolveFactory(generatorWithAbort);
     } catch (err) {

@@ -12,7 +12,7 @@ const withBundleAnalyzer = generated({
 
 /** @type {import('next').NextConfig} */
 const baseConfig = {
-  reactStrictMode: false,
+  // reactStrictMode: false,
   output: "standalone",
   poweredByHeader: false,
   images: {

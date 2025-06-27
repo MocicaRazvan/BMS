@@ -5,7 +5,10 @@ import { BaseError, isBaseError } from "@/types/responses";
 import { AcceptHeader } from "@/types/fetch-utils";
 import { isDeepEqual, stableStringify, wrapItemToString } from "@/lib/utils";
 import { v3 as murmurV3 } from "murmurhash";
-import { deduplicateFetchStream } from "@/lib/fetchers/deduplicateFetchStream";
+import {
+  deduplicateFetchStream,
+  getSyncAbortForKey,
+} from "@/lib/fetchers/deduplicateFetchStream";
 import { FetchStreamProps } from "@/lib/fetchers/fetchStream";
 import { useDeepCompareMemo } from "@/hoooks/use-deep-memo";
 import useFetchStreamState from "@/lib/fetchers/use-fetch-stream-state";
@@ -198,12 +201,11 @@ export function useFetchStream<T = unknown, E extends BaseError = BaseError>({
           ...fetchProps,
           dedupKey: cacheKey,
         });
+        abortController.setAdditionalAbortFromFetch(fetchFunction);
 
         if (abortController.signal.aborted) {
           return;
         }
-
-        abortController.setAdditionalAbortFromFetch(fetchFunction);
 
         for await (const batchItem of fetchFunction) {
           if (abortController.signal.aborted) {
@@ -279,7 +281,6 @@ export function useFetchStream<T = unknown, E extends BaseError = BaseError>({
         throw new Error("No token");
       }
 
-      const abortController = aboveController || new CustomAbortController();
       const token =
         localAuthToken && maybeSessionToken ? maybeSessionToken : "";
       const updatedProps: typeof fetchProps = {
@@ -311,6 +312,9 @@ export function useFetchStream<T = unknown, E extends BaseError = BaseError>({
         return;
       }
 
+      const abortController = aboveController || new CustomAbortController();
+      abortController.setAdditionalOnAbort(() => getSyncAbortForKey(key)());
+
       try {
         const fetchFunction = await deduplicateFetchStream<T, E>({
           ...updatedProps,
@@ -321,12 +325,11 @@ export function useFetchStream<T = unknown, E extends BaseError = BaseError>({
             priority: updatedProps.extraOptions?.priority || "low",
           },
         });
+        abortController.setAdditionalAbortFromFetch(fetchFunction);
 
         if (abortController.signal.aborted) {
           return;
         }
-
-        abortController.setAdditionalAbortFromFetch(fetchFunction);
 
         for await (const batchItem of fetchFunction) {
           if (abortController.signal.aborted) {
@@ -401,6 +404,7 @@ export function useFetchStream<T = unknown, E extends BaseError = BaseError>({
     }
 
     const abortController = aboveController || new CustomAbortController();
+    abortController.setAdditionalOnAbort(() => getSyncAbortForKey(cacheKey)());
 
     let mounted = true;
 
