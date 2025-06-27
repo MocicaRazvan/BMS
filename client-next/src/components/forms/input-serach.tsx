@@ -66,7 +66,7 @@ const ListSearchInput = memo(
     searchInputTexts: { placeholder },
     className,
     autoFocus = true,
-    debounce = 300,
+    debounce = 350,
   }: ListSearchInputProps) => {
     const [localValue, setLocalValue] = useState(initialValue);
     useDebounceWithCallBack(localValue, debounce, onChange);
