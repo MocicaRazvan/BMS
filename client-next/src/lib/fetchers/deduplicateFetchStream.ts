@@ -65,6 +65,8 @@ async function memoizeAsyncIterator<T>(
     if (aborted) return;
     aborted = true;
 
+    globalMemoizedIterators.delete(key);
+
     while (resolvers.length > 0) {
       resolvers.shift()?.(undefined);
     }
@@ -113,15 +115,17 @@ async function memoizeAsyncIterator<T>(
       };
       const finalAbort = () => {
         if (aborted) return;
-
         aborted = true;
+
+        globalMemoizedIterators.delete(key);
+
         if ("abort" in iterator && typeof iterator.abort === "function") {
           iterator.abort();
         }
         // console.log(
         //   `memoizeAsyncIterator Aborting generator for key: ${key},`,
         // );
-        // globalMemoizedIterators.delete(key);
+
         while (resolvers.length > 0) {
           resolvers.shift()?.(undefined);
         }
@@ -146,13 +150,15 @@ async function memoizeAsyncIterator<T>(
         }
       })();
 
-      globalMemoizedIterators.set(key, {
-        type: "ready",
-        value: generatorWithAbort,
-        abort: finalAbort,
-      });
+      if (!aborted) {
+        globalMemoizedIterators.set(key, {
+          type: "ready",
+          value: generatorWithAbort,
+          abort: finalAbort,
+        });
 
-      resolveFactory(generatorWithAbort);
+        resolveFactory(generatorWithAbort);
+      }
     } catch (err) {
       globalMemoizedIterators.delete(key);
       rejectFactory(err);
