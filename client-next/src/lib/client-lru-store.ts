@@ -11,7 +11,7 @@ class ClientLRUStore {
 
   private constructor() {
     this.cache = new LRUCache({
-      max: 1000,
+      max: 250,
       ttl: 1000 * 60 * 60,
       allowStale: true,
       updateAgeOnGet: true,

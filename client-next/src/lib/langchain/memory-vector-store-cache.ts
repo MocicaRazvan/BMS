@@ -1,8 +1,8 @@
 import { Document as LangDocument } from "langchain/document";
 import { MemoryVectorStore } from "langchain/vectorstores/memory";
-import { LRUCache } from "lru-cache";
 import { OllamaEmbeddings } from "@langchain/ollama";
 import { v3 as murmurV3 } from "murmurhash";
+import TTLCache from "@isaacs/ttlcache";
 
 export interface MemoryVectorStoreCacheEntry {
   store: Promise<MemoryVectorStore>;
@@ -10,17 +10,13 @@ export interface MemoryVectorStoreCacheEntry {
 }
 class MemoryVectorStoreCache {
   private static instance: MemoryVectorStoreCache;
-  private readonly cache: LRUCache<number, MemoryVectorStoreCacheEntry>;
+  private readonly cache: TTLCache<number, MemoryVectorStoreCacheEntry>;
 
   private constructor() {
-    this.cache = new LRUCache({
-      max: 70,
-      maxSize: 1200,
-      sizeCalculation: (v, _) => v.documents.length || 1,
+    this.cache = new TTLCache({
+      max: 250,
       ttl: 1000 * 60 * 5,
-      allowStale: false,
       updateAgeOnGet: true,
-      updateAgeOnHas: false,
     });
   }
 
