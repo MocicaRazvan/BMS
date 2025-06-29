@@ -1,6 +1,12 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  KeyboardEvent as ReactKeyboardEvent,
+} from "react";
 import { Command } from "lucide-react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -37,6 +43,17 @@ const FindInSite = (props: FindInSiteContentBaseProps) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
 
+  const onOpenChange = useCallback((open: boolean) => {
+    if (!open) {
+      setOpen(false);
+      setSearchQuery("");
+      setResults([]);
+      setSelectedIndex(0);
+    } else {
+      setOpen(true);
+    }
+  }, []);
+
   const toggleSearch = useCallback(() => {
     setOpen((p) => !p);
     setSearchQuery("");
@@ -64,23 +81,28 @@ const FindInSite = (props: FindInSiteContentBaseProps) => {
     }
   }, [open]);
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (results.length === 0) return;
+  const handleKeyDown = useCallback(
+    (e: ReactKeyboardEvent) => {
+      if (results.length === 0) return;
 
-    if (e.key === "ArrowDown") {
-      e.preventDefault();
-      setSelectedIndex((prev) => (prev < results.length - 1 ? prev + 1 : prev));
-    } else if (e.key === "ArrowUp") {
-      e.preventDefault();
-      setSelectedIndex((prev) => (prev > 0 ? prev - 1 : 0));
-    } else if (e.key === "Enter") {
-      e.preventDefault();
-      if (results[selectedIndex]) {
-        setOpen(false);
-        router.push(results[selectedIndex].path);
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        setSelectedIndex((prev) =>
+          prev < results.length - 1 ? prev + 1 : prev,
+        );
+      } else if (e.key === "ArrowUp") {
+        e.preventDefault();
+        setSelectedIndex((prev) => (prev > 0 ? prev - 1 : 0));
+      } else if (e.key === "Enter") {
+        e.preventDefault();
+        if (results[selectedIndex]) {
+          setOpen(false);
+          router.push(results[selectedIndex].path);
+        }
       }
-    }
-  };
+    },
+    [results, router, selectedIndex],
+  );
 
   return (
     <>
@@ -100,7 +122,7 @@ const FindInSite = (props: FindInSiteContentBaseProps) => {
         </kbd>
       </Button>
 
-      <Dialog open={open} onOpenChange={setOpen}>
+      <Dialog open={open} onOpenChange={onOpenChange}>
         <DynamicFindInSiteContent
           {...props}
           searchQuery={searchQuery}
