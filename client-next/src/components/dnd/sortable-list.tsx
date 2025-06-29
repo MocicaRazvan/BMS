@@ -9,6 +9,7 @@ import {
   DragStartEvent,
   KeyboardSensor,
   PointerSensor,
+  TouchSensor,
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
@@ -44,6 +45,15 @@ interface Props {
   imageCropTexts: ImageCropTexts;
 }
 
+const sensorOptions = {
+  activationConstraint: {
+    distance: 10,
+  },
+};
+const keyboardOptions = {
+  coordinateGetter: sortableKeyboardCoordinates,
+};
+
 export default function SortableList({
   items,
   type,
@@ -59,14 +69,9 @@ export default function SortableList({
 
   const itemIds = useMemo(() => items.map((item) => item.id), [items]);
   const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: {
-        distance: 10,
-      },
-    }),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    }),
+    useSensor(PointerSensor, sensorOptions),
+    useSensor(TouchSensor, sensorOptions),
+    useSensor(KeyboardSensor, keyboardOptions),
   );
 
   const handleDragStart = useCallback(

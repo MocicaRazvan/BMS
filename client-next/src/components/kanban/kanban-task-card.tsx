@@ -47,7 +47,6 @@ function KanbanTaskCard({
   deleteKanbanItemTexts,
   types,
 }: Props) {
-  console.log("rendering KanbanTaskCard", task.dndId);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const {

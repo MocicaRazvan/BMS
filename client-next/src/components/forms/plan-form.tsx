@@ -82,6 +82,7 @@ import {
   DragStartEvent,
   KeyboardSensor,
   PointerSensor,
+  TouchSensor,
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
@@ -573,7 +574,16 @@ export default function PlanForm({
     </Card>
   );
 }
-//todo delete day from here also and make desing
+
+const sensorOptions = {
+  activationConstraint: {
+    distance: 10,
+  },
+};
+const keyboardOptions = {
+  coordinateGetter: sortableKeyboardCoordinates,
+};
+
 interface DaySortableListProps {
   items: (Option & { dragId: string })[];
   moveItems: (
@@ -593,14 +603,9 @@ function DaySortableList({
   const [activeItem, setActiveItem] = useState<Option & { dragId: string }>();
   const itemIds = useMemo(() => items.map((item) => item.dragId), [items]);
   const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: {
-        distance: 10,
-      },
-    }),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    }),
+    useSensor(PointerSensor, sensorOptions),
+    useSensor(TouchSensor, sensorOptions),
+    useSensor(KeyboardSensor, keyboardOptions),
   );
 
   const handleDragStart = useCallback(

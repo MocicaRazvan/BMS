@@ -58,6 +58,12 @@ export interface KanbanBoardTexts {
   addKanbanColumnTexts: AddKanbanColumnTexts;
 }
 
+const sensorOptions = {
+  activationConstraint: {
+    distance: 30,
+  },
+};
+
 interface Props extends WithUser, KanbanBoardTexts {
   initialColumns: KanbanColumn[];
   initialGroupedTasks: GroupedKanbanTasks;
@@ -92,12 +98,12 @@ export default function KanbanBoard({
           body: { columns },
         }).catch((e) => console.log("REINDEX COLUMN ERROR", e));
       }
-      console.log("REINDEX FUNCTION CALL1", rs);
+      // console.log("REINDEX FUNCTION CALL1", rs);
     },
     [authUser.token, columns, groupedTasks],
   );
 
-  const { reindexState, setReindexState } = useKanbanRouteChange(handleUpdate);
+  const { setReindexState } = useKanbanRouteChange(handleUpdate);
 
   const [activeColumn, setActiveColumn] = useState<KanbanColumn | null>(null);
   const [activeTask, setActiveTask] = useState<KanbanTask | null>(null);
@@ -113,16 +119,8 @@ export default function KanbanBoard({
   }, [initialGroupedTasks]);
 
   const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: {
-        distance: 30,
-      },
-    }),
-    useSensor(TouchSensor, {
-      activationConstraint: {
-        distance: 30,
-      },
-    }),
+    useSensor(PointerSensor, sensorOptions),
+    useSensor(TouchSensor, sensorOptions),
   );
 
   const setColumnsOrdered = useCallback(
@@ -146,7 +144,6 @@ export default function KanbanBoard({
 
         return Object.keys(updatedTasks).reduce(
           (acc, key) => {
-            console.log("TASKS KEY", key, typeof Number(key));
             if (updatedTasks[Number(key)]?.length == 0) return acc;
             acc[Number(key)] = updatedTasks[Number(key)].map((task, index) => ({
               ...task,

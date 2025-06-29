@@ -7,9 +7,13 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useMemo,
+  useRef,
   useState,
 } from "react";
 import { usePathname } from "@/navigation/navigation";
+import { useEvent, usePrevious } from "react-use";
+import { throttle } from "lodash-es";
 
 interface Props {
   children: ReactNode;
@@ -22,6 +26,8 @@ interface KanbanRouteChangeContextType {
   setReindexState: Dispatch<SetStateAction<ReindexState>>;
 }
 
+type KanbanReindexCallback = (rs: ReindexState) => void;
+
 export const KanbanRouteChangeContext = createContext<
   KanbanRouteChangeContextType | undefined
 >(undefined);
@@ -31,66 +37,75 @@ export function KanbanRouteChangeProvider({ children }: Props) {
     task: 0,
   });
 
-  const [callback, setCallback] = useState<((rs: ReindexState) => void) | null>(
-    null,
-  );
+  const isReindexDirty = useRef(false);
+
+  const setReindexStateDirty: Dispatch<SetStateAction<ReindexState>> =
+    useCallback(
+      (state) => {
+        isReindexDirty.current = true;
+        setReindexState(state);
+      },
+      [setReindexState],
+    );
+
+  const [callback, setCallback] = useState<KanbanReindexCallback | null>(null);
   const pathname = usePathname();
-  const [currentPathname, setCurrentPathname] = useState<string | null>(
-    pathname,
-  );
-  const [oldPathname, setOldPathname] = useState<string | null>(null);
+  const previousPathname = usePrevious(pathname);
+
   const callbackMemo = useCallback(() => {
-    if (!callback) return;
+    if (!callback || !isReindexDirty.current) return;
+    // console.log("callbackMemo kanban", reindexState, isReindexDirty.current);
     callback(reindexState);
-  }, [reindexState.column, reindexState.task, callback]);
+    isReindexDirty.current = false;
+  }, [callback, reindexState]);
+
+  const laveCallbackMemo = useMemo(
+    () =>
+      throttle(() => {
+        // console.log("laveCallbackMemo kanban");
+        callbackMemo();
+      }, 250),
+    [callbackMemo],
+  );
+
+  useEvent("beforeunload", laveCallbackMemo);
+  useEvent("pagehide", laveCallbackMemo);
 
   useEffect(() => {
-    setOldPathname(currentPathname);
-    setCurrentPathname(pathname);
-  }, [pathname]);
-
-  useEffect(() => {
-    window.addEventListener("beforeunload", callbackMemo);
-    window.addEventListener("pagehide", callbackMemo);
-
-    return () => {
-      window.removeEventListener("beforeunload", callbackMemo);
-      window.removeEventListener("pagehide", callbackMemo);
-    };
-  }, [reindexState.column, reindexState.task, callbackMemo]);
-
-  useEffect(() => {
-    if (
-      oldPathname?.includes("kanban") &&
-      !currentPathname?.includes("kanban")
-    ) {
-      console.log("leaving kanban page", oldPathname, currentPathname);
+    if (previousPathname?.includes("kanban") && !pathname.includes("kanban")) {
+      // console.log("leaving kanban page", previousPathname, pathname);
       callbackMemo();
     }
   }, [
-    currentPathname,
-    oldPathname,
     callbackMemo,
+    pathname,
+    previousPathname,
     reindexState.column,
     reindexState.task,
   ]);
 
   return (
     <KanbanRouteChangeContext.Provider
-      value={{ setCallback, reindexState, setReindexState, callback }}
+      value={{
+        setCallback,
+        reindexState,
+        setReindexState: setReindexStateDirty,
+        callback,
+      }}
     >
       {children}
     </KanbanRouteChangeContext.Provider>
   );
 }
 
-export function useKanbanRouteChange(cb: (rs: ReindexState) => void) {
+export function useKanbanRouteChange(cb: KanbanReindexCallback) {
   const ctx = useContext(KanbanRouteChangeContext);
   if (!ctx) {
     throw new Error(
       "useKanbanRouteChange must be used within a KanbanRouteChangeContext",
     );
   }
+
   useEffect(() => {
     ctx.setCallback(() => cb);
   }, [cb]);
