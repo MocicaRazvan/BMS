@@ -2055,8 +2055,8 @@ export const terms = [
   "terms5",
 ] as const;
 
-export async function getTermsOfServiceTexts(): Promise<TermsOfServiceTexts> {
-  const t = await getTranslations("pages.terms-of-service.TermsOfServiceTexts");
+export async function getTermsOfServiceTextsBase(path: string) {
+  const t = await getTranslations(path);
   return {
     title: t("title"),
     terms: terms.reduce(
@@ -2070,6 +2070,19 @@ export async function getTermsOfServiceTexts(): Promise<TermsOfServiceTexts> {
       {} as Record<(typeof terms)[number], { title: string; body: string }>,
     ),
   };
+}
+
+export async function getTermsOfServiceTexts(): Promise<TermsOfServiceTexts> {
+  return getTermsOfServiceTextsBase(
+    "pages.terms-of-service.TermsOfServiceTexts",
+  );
+}
+export async function getPrivacyPolicyTexts() {
+  return getTermsOfServiceTextsBase("pages.privacy-policy.PrivacyPolicyTexts");
+}
+
+export async function getDisclaimerTexts() {
+  return getTermsOfServiceTextsBase("pages.disclaimer.DisclaimerTexts");
 }
 
 export async function getChatPageTexts(): Promise<ChatPageTexts> {

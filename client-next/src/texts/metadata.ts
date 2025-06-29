@@ -104,7 +104,17 @@ const metadataValues = (id: string): MetadataValues[] => [
   },
   {
     key: "terms-of-service",
-    path: "/terms-of-service",
+    path: "/termsOfService",
+    role: "ROLE_PUBLIC",
+  },
+  {
+    key: "privacy-policy",
+    path: "/privacyPolicy",
+    role: "ROLE_PUBLIC",
+  },
+  {
+    key: "disclaimer",
+    path: "/disclaimer",
     role: "ROLE_PUBLIC",
   },
   {

@@ -31,13 +31,13 @@ export default async function Footer() {
   } = await getFooterTexts();
   return (
     <footer className="w-full py-6 mt-28 flex items-center justify-center flex-col ">
-      <div className=" max-w-[1600px] mx-auto w-full flex flex-col items-stretch justify-center gap-4 px-4 md:px-6 ">
+      <div className=" max-w-[1600px] mx-auto w-full flex flex-col items-stretch justify-center gap-4 px-4 md:px-6">
         <div className="grid items-start gap-10 grid-cols-2 md:gap-4 lg:grid-cols-4 lg:gap-8 ">
-          <div className="flex items-center gap-2 col-span-1 transition-all hover:scale-[1.02] hover:underline hover:underline-offset-[2px] md:ps-3">
+          <div className="flex items-center gap-2 col-span-1 transition-transform hover:scale-[1.02] hover:underline hover:underline-offset-[3px] md:ps-3 hover:decoration-muted-foreground">
             <Link className="flex items-center gap-2 font-medium" href="/">
               <Logo />
               <span className="sr-only">{home}</span>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
+              <p className="text-sm text-muted-foreground font-semibold">
                 {title}
               </p>
             </Link>
@@ -88,12 +88,12 @@ export default async function Footer() {
               </Link>
             </div>
             <div className="transition-all hover:scale-[1.02]">
-              <Link className="text-sm font-medium" href="/termsOfService">
+              <Link className="text-sm font-medium" href="/privacyPolicy">
                 {privacyPolicy}
               </Link>
             </div>
             <div className="transition-all hover:scale-[1.02]">
-              <Link className="text-sm font-medium" href="/termsOfService">
+              <Link className="text-sm font-medium" href="/disclaimer">
                 {disclaimer}
               </Link>
             </div>
@@ -103,7 +103,7 @@ export default async function Footer() {
             <hr className="w-full border" />
             <div className="flex items-center justify-start gap-1">
               <Copyright className="w-4 h-4" />
-              <p className="text-xs text-gray-500 justify-self-center dark:text-gray-400">
+              <p className="text-xs text-muted-foreground justify-self-center ">
                 {new Date().getFullYear()} {rightsReserved}
               </p>
             </div>
