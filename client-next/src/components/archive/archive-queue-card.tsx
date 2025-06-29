@@ -266,6 +266,11 @@ const DashboardCard = ({
 };
 DashboardCard.displayName = "DashboardCard";
 
+const userTimeZone =
+  typeof Intl !== "undefined"
+    ? Intl.DateTimeFormat().resolvedOptions().timeZone
+    : "UTC";
+
 const DashboardSuccessCard = ({
   refetch,
   queueName,
@@ -470,6 +475,7 @@ const DashboardSuccessCard = ({
                 year: "2-digit",
                 month: "2-digit",
                 day: "2-digit",
+                timeZone: userTimeZone,
               })}
             </p>
           </div>

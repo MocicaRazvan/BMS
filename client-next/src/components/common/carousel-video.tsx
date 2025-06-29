@@ -48,7 +48,7 @@ export default function CarouselVideo({
       // isCurOrNext &&
       !(videoRef.current.getAttribute("preload") === "auto")
     ) {
-      console.log("preload video with index", index, isInView);
+      //console.log("preload video with index", index, isInView);
       videoRef.current.setAttribute("preload", "auto");
     }
 
