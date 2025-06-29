@@ -3,7 +3,7 @@
 import { LRUCache } from "lru-cache";
 import { v3 as murmurV3 } from "murmurhash";
 import { useEffect, useState } from "react";
-import stringify from "safe-stable-stringify";
+import { useDeepCompareMemo } from "@/hoooks/use-deep-memo";
 
 class ClientLRUStore {
   private static instance: ClientLRUStore;
@@ -67,17 +67,17 @@ export const useClientLRUStore = <T>({
   setter,
   args,
 }: UseClientLRUStoreArgs<T>) => {
-  const stableArgs = stringify(args) || "__undefined";
+  const stableArgs = useDeepCompareMemo(() => args, [args]);
 
   const [state, setState] = useState<T | null>(null);
   useEffect(() => {
-    const cachedValue = clientLRUStore.get<T>(...args);
+    const cachedValue = clientLRUStore.get<T>(...stableArgs);
     if (cachedValue) {
       setState(cachedValue);
     } else {
-      setter(args)
+      setter(stableArgs)
         .then((value) => {
-          clientLRUStore.set(value, ...args);
+          clientLRUStore.set(value, ...stableArgs);
           setState(value);
         })
         .catch((error) => {

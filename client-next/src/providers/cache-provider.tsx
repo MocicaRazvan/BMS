@@ -30,7 +30,11 @@ const maxLRUCacheSize = process.env.NEXT_PUBLIC_MAX_LRU_CACHE_SIZE
   : 5000;
 const ttlLRUCache = process.env.NEXT_PUBLIC_TTL_LRU_CACHE
   ? parseInt(process.env.NEXT_PUBLIC_TTL_LRU_CACHE, 10) * 1000
-  : 1000 * 60 * 5; //5 mins
+  : 1000 * 60 * 30; // 30 minutes
+
+const cacheManualPurgeStale = process.env.NEXT_PUBLIC_CACHE_MANUAL_PURGE_STALE
+  ? parseInt(process.env.NEXT_PUBLIC_CACHE_MANUAL_PURGE_STALE, 10)
+  : 1000 * 60 * 60; // 1 hour
 
 function countElements(arr: unknown[]): number {
   let count = 0;
@@ -357,7 +361,7 @@ export const CacheProvider = ({ children }: Props) => {
       if (!mounted) return;
       intervalId = setInterval(() => {
         cacheInstance.purgeStaleCache();
-      }, ttlLRUCache);
+      }, cacheManualPurgeStale);
     });
 
     return () => {
