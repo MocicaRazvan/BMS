@@ -48,9 +48,6 @@ export default function UpdatePlanPageContent({ id, ...props }: Props) {
     return ownerReturn;
   }
 
-  console.log("plans", plan);
-  console.log("days", days);
-
   return (
     <PlanForm
       {...props}

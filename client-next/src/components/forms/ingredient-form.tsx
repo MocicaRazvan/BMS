@@ -11,7 +11,7 @@ import {
   unitTypes,
 } from "@/types/forms";
 import { BaseFormTexts } from "@/texts/components/forms";
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import React, { useCallback, useEffect, useMemo, useRef } from "react";
 import useLoadingErrorState from "@/hoooks/useLoadingErrorState";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -154,8 +154,6 @@ export default function IngredientForm({
     floatCarbohydrates >= 0 &&
     floatSalt >= 0 &&
     floatProtein + floatFat + floatCarbohydrates + floatSalt > 0;
-
-  console.log("protein", protein);
 
   useEffect(() => {
     lastUpdatedField.current = "fat";
@@ -350,11 +348,13 @@ export default function IngredientForm({
   );
 
   return (
-    <div className="max-w-7xl w-full sm:px-2 md:px-5 py-6  mx-auto min-w-[1000px]">
-      <h1 className="text-lg lg:text-2xl font-bold tracking-tighter capitalize mb-8">
+    <div className="max-w-6xl w-full px-2.5 sm:px-5 md:px-10 py-6 mx-auto rounded-lg border">
+      <h1 className="leading-none tracking-tight font-bold text-2xl text-center capitalize mb-3.5 flex flex-col items-center gap-2.5 mb-8 lg:mb-12">
         {header}
         {ingredient?.name && (
-          <p className="inline ms-2 text-3xl">{ingredient?.name}</p>
+          <p className="font-semibold text-muted-foreground">
+            {ingredient.name}
+          </p>
         )}
       </h1>
       <Form {...form}>

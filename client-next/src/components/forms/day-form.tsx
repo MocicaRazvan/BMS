@@ -140,7 +140,7 @@ export default function DayForm({
   );
   const initialChildrenMeals = useMemo(
     () => (!initialCurrentMeals ? [] : initialCurrentMeals.map(({ id }) => id)),
-    [JSON.stringify(initialCurrentMeals)],
+    [initialCurrentMeals],
   );
 
   const [childrenMeals, setChildrenMeals] =
@@ -298,13 +298,7 @@ export default function DayForm({
       });
     }
     return fields;
-  }, [
-    dayDietType,
-    JSON.stringify(currentMeals),
-    watchBody,
-    watchTitle,
-    watchType,
-  ]);
+  }, [dayDietType, currentMeals, watchBody, watchTitle, watchType]);
 
   const handleMealSubmitChange = useCallback((change: boolean) => {
     setIsAnyMealNotSubmitted(change);
@@ -373,8 +367,13 @@ export default function DayForm({
 
   return (
     <Card className="max-w-7xl w-full sm:px-2 md:px-5 py-6 ">
-      <CardTitle className="font-bold text-2xl text-center capitalize mb-3.5">
-        {header} {existingDay?.title || ""}
+      <CardTitle className="font-bold text-2xl text-center capitalize mb-3.5 flex flex-col items-center gap-2.5">
+        {header}
+        {existingDay?.title && (
+          <p className="font-semibold text-muted-foreground">
+            {existingDay.title}
+          </p>
+        )}
       </CardTitle>
       <CardContent className="w-full">
         <Form {...form}>

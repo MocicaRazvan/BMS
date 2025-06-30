@@ -2,6 +2,7 @@ import React, {
   CSSProperties,
   forwardRef,
   HTMLAttributes,
+  useCallback,
   useEffect,
   useRef,
   useState,
@@ -107,7 +108,7 @@ const Item = forwardRef<HTMLDivElement, Props>(
           ref={ref}
           style={styles}
           {...props}
-          className="relative hover:scale-105 transition-transform"
+          className="relative hover:scale-105 transition-transform duration-200"
         >
           {type === "IMAGE" ? (
             <ItemImageContent
@@ -219,6 +220,14 @@ const ItemImageContent = ({
   multiple,
 }: ImageItemProps) => {
   const [isImageLoaded, setIsImageLoaded] = useState(false);
+  const onCropComplete = useCallback(
+    (src: string, blob: Blob) => {
+      if (!cropImage) return;
+      setIsImageLoaded(false);
+      cropImage(item.id, src, blob);
+    },
+    [cropImage, item.id],
+  );
 
   return (
     <>
@@ -277,10 +286,7 @@ const ItemImageContent = ({
           <ImageCropper
             src={item.src}
             dialogOpenObserver={dialogOpenObserver}
-            onCropComplete={(src, blob) => {
-              setIsImageLoaded(false);
-              cropImage(item.id, src, blob);
-            }}
+            onCropComplete={onCropComplete}
             cropShape={cropShape}
             texts={imageCropTexts}
             originalMime={item.file.type}

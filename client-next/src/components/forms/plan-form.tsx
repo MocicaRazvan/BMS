@@ -401,11 +401,13 @@ export default function PlanForm({
     ],
   );
 
-  console.log("selectedOptions", selectedOptions);
   return (
     <Card className="max-w-7xl w-full sm:px-2 md:px-5 py-6">
-      <CardTitle className="font-bold text-2xl text-center capitalize mb-3.5">
+      <CardTitle className="font-bold text-2xl text-center capitalize mb-3.5 flex flex-col items-center gap-2.5">
         {header}
+        {title && (
+          <p className="font-semibold text-muted-foreground">{title}</p>
+        )}
       </CardTitle>
       <CardContent className="w-full">
         <Form {...form}>
@@ -622,15 +624,16 @@ function DaySortableList({
       const { active, over } = event;
       if (!over) return;
 
-      const activeItem = items.find((item) => item.dragId === active.id);
-      const overItem = items.find((item) => item.dragId === over.id);
+      const { activeIndex, overIndex } = items.reduce(
+        (acc, item, index) => {
+          if (item.dragId === active.id) acc.activeIndex = index;
+          if (item.dragId === over.id) acc.overIndex = index;
+          return acc;
+        },
+        { activeIndex: -1, overIndex: -1 },
+      );
 
-      if (!activeItem || !overItem) {
-        return;
-      }
-
-      const activeIndex = items.findIndex((item) => item.dragId === active.id);
-      const overIndex = items.findIndex((item) => item.dragId === over.id);
+      if (activeIndex === -1 || overIndex === -1) return;
 
       if (activeIndex !== overIndex) {
         moveItems(items, activeIndex, overIndex);
@@ -684,7 +687,7 @@ function DaySortableList({
               ))}
             </div>
           </SortableContext>
-          <DragOverlay adjustScale style={{ transformOrigin: "0 0 " }}>
+          <DragOverlay adjustScale style={{ transformOrigin: "0 0" }}>
             {activeItem ? <DayItem item={activeItem} isDragging /> : null}
           </DragOverlay>
         </DndContext>

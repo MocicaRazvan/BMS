@@ -251,8 +251,11 @@ export default function PostForm({
 
   return (
     <Card className="max-w-7xl w-full sm:px-2 md:px-5 py-6">
-      <CardTitle className="font-bold text-2xl text-center capitalize mb-3.5">
-        {header} {title && <p className="inline">{title}</p>}
+      <CardTitle className="font-bold text-2xl text-center capitalize mb-3.5 flex flex-col items-center gap-2.5">
+        {header}
+        {title && (
+          <p className="font-semibold text-muted-foreground">{title}</p>
+        )}
       </CardTitle>
       <CardContent>
         <Form {...form}>

@@ -88,15 +88,16 @@ export default function SortableList({
       const { active, over } = event;
       if (!over) return;
 
-      const activeItem = items.find((item) => item.id === active.id);
-      const overItem = items.find((item) => item.id === over.id);
+      const { activeIndex, overIndex } = items.reduce(
+        (acc, item, index) => {
+          if (item.id === active.id) acc.activeIndex = index;
+          if (item.id === over.id) acc.overIndex = index;
+          return acc;
+        },
+        { activeIndex: -1, overIndex: -1 },
+      );
 
-      if (!activeItem || !overItem) {
-        return;
-      }
-
-      const activeIndex = items.findIndex((item) => item.id === active.id);
-      const overIndex = items.findIndex((item) => item.id === over.id);
+      if (activeIndex === -1 || overIndex === -1) return;
 
       if (activeIndex !== overIndex) {
         moveItems(items, activeIndex, overIndex);
