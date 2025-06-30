@@ -211,7 +211,7 @@ export default function CommentAccordion({
     >
       <AccordionItem value="item-1">
         <AccordionTrigger>{header}</AccordionTrigger>
-        <AccordionContent className=" w-full flex items-center justify-center mx-auto h-[425px] md:h-96">
+        <AccordionContent className=" w-full flex items-center justify-center mx-auto h-[510px] md:h-[480px]">
           <Form {...form}>
             <form
               onSubmit={form.handleSubmit(onSubmit)}
@@ -235,13 +235,15 @@ export default function CommentAccordion({
                       <FormLabel className="capitalize sr-only">
                         {body}
                       </FormLabel>
-                      <FormControl className="min-h-[calc(200px+2rem)]">
+                      <FormControl>
                         <DynamicEditor
                           descritpion={field.value as string}
                           onChange={field.onChange}
                           placeholder={titleBodyTexts.bodyPlaceholder}
                           texts={editorTexts}
                           separatorClassname="h-2"
+                          editorContentWrapperClassname="py-0.5"
+                          editorClassname="h-44 overflow-y-auto pb-0.5"
                         />
                       </FormControl>
                       <FormMessage />

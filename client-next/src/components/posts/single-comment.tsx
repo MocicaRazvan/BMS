@@ -147,7 +147,7 @@ export const SingleComment = memo<Props>(
             >
               <AccordionItem value="item-edit">
                 <AccordionTrigger>{editHeader}</AccordionTrigger>
-                <AccordionContent className="w-full flex items-center justify-center mx-auto h-[435px] md:h-96">
+                <AccordionContent className="w-full flex items-center justify-center mx-auto h-[510px] md:h-[480px]">
                   <DynamicUpdateCommentForm
                     titleBodyTexts={titleBodyTexts}
                     commentSchemaTexts={commentSchemaTexts}

@@ -25,6 +25,7 @@ interface Props {
   editorContentWrapperClassname?: ClassValue;
   useEmojis?: boolean;
   separatorClassname?: ClassValue;
+  editorClassname?: ClassValue;
 }
 
 function handleFiles(dt: DataTransfer, view: EditorView) {
@@ -51,6 +52,7 @@ export default function Editor({
   editorContentWrapperClassname,
   useEmojis = true,
   separatorClassname = "",
+  editorClassname = "",
 }: Props) {
   const editor = useEditor({
     extensions: [
@@ -117,7 +119,11 @@ export default function Editor({
       />
       <div className={cn("h-1", separatorClassname)} />
       <div className={cn(editorContentWrapperClassname)}>
-        <EditorContent editor={editor} placeholder={placeholder} />
+        <EditorContent
+          editor={editor}
+          placeholder={placeholder}
+          className={cn(editorClassname)}
+        />
       </div>
     </div>
   );

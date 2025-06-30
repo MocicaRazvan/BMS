@@ -163,7 +163,7 @@ export default function UpdateCommentForm({
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="space-y-8 w-full px-10 pt-1 lg:space-y-12"
+        className="space-y-8 size-full px-10 pt-1"
       >
         <FormField
           control={form.control}
@@ -177,7 +177,9 @@ export default function UpdateCommentForm({
                   onChange={field.onChange}
                   placeholder={titleBodyTexts.bodyPlaceholder}
                   texts={editorTexts}
-                  separatorClassname="h-2"
+                  separatorClassname="h-6"
+                  editorContentWrapperClassname="py-0.5"
+                  editorClassname="h-44 overflow-y-auto pb-0.5"
                 />
               </FormControl>
               <FormMessage />

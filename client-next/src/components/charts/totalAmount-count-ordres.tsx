@@ -482,29 +482,30 @@ export function TotalAmountOrdersSingleBarChart({
               stackId={stackId}
             />
             <ChartLegend content={<ChartLegendContent />} />
-            <ReferenceLine
-              y={meanValue}
-              stroke="red"
-              strokeDasharray="3 3"
-              strokeWidth={4}
-              className="custom-reference-line"
-            >
-              <Label
-                position="top"
-                value={avgLabel}
-                offset={10}
-                fill="hsl(var(--foreground))"
-                className="md:text-lg"
-              />
-              <Label
-                position="bottom"
-                value={axisFormatter(Math.round(meanValue))}
-                className="text-lg md:text-xl"
-                fill="hsl(var(--foreground))"
-                offset={10}
-                startOffset={100}
-              />
-            </ReferenceLine>
+            {data.length > 1 && (
+              <ReferenceLine
+                y={meanValue}
+                strokeDasharray="3 3"
+                strokeWidth={4}
+                className="custom-reference-line animate-in fade-in duration-500"
+              >
+                <Label
+                  position="top"
+                  value={avgLabel}
+                  offset={10}
+                  fill="hsl(var(--foreground))"
+                  className="md:text-lg"
+                />
+                <Label
+                  position="bottom"
+                  value={axisFormatter(Math.round(meanValue))}
+                  className="text-lg md:text-xl"
+                  fill="hsl(var(--foreground))"
+                  offset={10}
+                  startOffset={100}
+                />
+              </ReferenceLine>
+            )}
           </BarChart>
         )}
       </ChartContainer>
