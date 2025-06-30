@@ -211,14 +211,14 @@ export default function CommentAccordion({
     >
       <AccordionItem value="item-1">
         <AccordionTrigger>{header}</AccordionTrigger>
-        <AccordionContent className=" w-full flex items-center justify-center mx-auto ">
+        <AccordionContent className=" w-full flex items-center justify-center mx-auto h-[425px] md:h-96">
           <Form {...form}>
             <form
               onSubmit={form.handleSubmit(onSubmit)}
               className="space-y-8 w-full px-10 pt-1 mb-4"
             >
               <div>
-                <h2 className="text-xl font-bold tracking-tighter mt-2">
+                <h2 className="text-xl font-bold tracking-tighter mt-2 md:mb-2.5">
                   {englishHeading}
                 </h2>
                 {/*<TitleBodyForm<TitleBodyType>*/}
@@ -235,7 +235,7 @@ export default function CommentAccordion({
                       <FormLabel className="capitalize sr-only">
                         {body}
                       </FormLabel>
-                      <FormControl>
+                      <FormControl className="min-h-[calc(200px+2rem)]">
                         <DynamicEditor
                           descritpion={field.value as string}
                           onChange={field.onChange}

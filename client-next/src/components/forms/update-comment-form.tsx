@@ -169,7 +169,7 @@ export default function UpdateCommentForm({
           control={form.control}
           name={"body"}
           render={({ field }) => (
-            <FormItem className="space-y-0">
+            <FormItem>
               <FormLabel>{editCommentLabel}</FormLabel>
               <FormControl>
                 <Editor
@@ -177,7 +177,7 @@ export default function UpdateCommentForm({
                   onChange={field.onChange}
                   placeholder={titleBodyTexts.bodyPlaceholder}
                   texts={editorTexts}
-                  separatorClassname="h-6"
+                  separatorClassname="h-2"
                 />
               </FormControl>
               <FormMessage />
