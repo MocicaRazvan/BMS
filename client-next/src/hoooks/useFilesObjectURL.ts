@@ -95,6 +95,7 @@ export default function useFilesObjectURL<T extends FieldValues>({
 
   useEffect(() => {
     if (!trigger) return;
+    // console.log("useFilesObjectURL effect triggered", firstRunRef.current);
     if (files.length > 0 && firstRunRef.current) {
       setChunkProgressValue(0);
       const filesForFront = files.map((f, index) => {
@@ -191,9 +192,7 @@ export default function useFilesObjectURL<T extends FieldValues>({
   useEffect(() => {
     if (currentItems && currentItems.length > 0) {
       currentItems.forEach(({ src }) => {
-        if (!itemSourcesRef.current.has(src)) {
-          itemSourcesRef.current.add(src);
-        }
+        itemSourcesRef.current.add(src);
       });
     }
   }, [currentItems]);
@@ -205,8 +204,10 @@ export default function useFilesObjectURL<T extends FieldValues>({
         itemSourcesRef.current.add(item.src);
       });
       itemSourcesRef.current.forEach((src) => {
+        // console.log("useFilesObjectURL Revoking object URL:", src);
         URL.revokeObjectURL(src);
       });
+      itemSourcesRef.current.clear();
     } catch (error) {
       console.log("Error during file cleanup:", error);
     }

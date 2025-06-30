@@ -478,7 +478,7 @@ export default function RecipeForm({
 
   useEffect(() => {
     return () => {
-      console.log("cleaning files");
+      // console.log("cleaning files");
       imagesCleanup();
       videosCleanup();
     };
