@@ -30,6 +30,8 @@ interface Props extends WithUser, PostCommentsTexts {
   postId: number;
 }
 
+const pageSize = 10;
+
 export default function PostComments({
   postId,
   authUser,
@@ -46,7 +48,6 @@ export default function PostComments({
   editCommentLabel,
   editorTexts,
 }: Props) {
-  const pageSize = 10;
   const [comments, setComments] = useState<
     ResponseWithUserDtoEntity<CommentResponse>[]
   >([]);
@@ -162,7 +163,7 @@ export default function PostComments({
   );
 
   return (
-    <div className="mb-40 flex items-center justify-center flex-col gap-4 transition-all max-w-4xl w-full mx-auto mt-20">
+    <div className="mb-40 flex items-center justify-center flex-col gap-4 max-w-4xl w-full mx-auto mt-20">
       <div className="mb-10 w-full">
         <CommentAccordion
           postId={postId}
