@@ -7,7 +7,7 @@ import { ReactNode, useCallback, useMemo } from "react";
 const isProduction = process.env.NODE_ENV === "production";
 // const isProduction = true;
 const CONNECTION_TIMEOUT = 6_000;
-const RECONNECT_DELAY = 5_000;
+const RECONNECT_DELAY = 2_500;
 
 export const StompProvider = ({
   children,
