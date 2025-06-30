@@ -45,7 +45,7 @@ const DaysList = ({ dayIds, header, ...rest }: DaysListProps) => {
         />
       </div>
       <div className="relative">
-        <AnimatePresence mode="wait">
+        <AnimatePresence>
           {dayIds.map((dayId, index) => (
             <motion.div
               id={`daysList-${index}`}
@@ -152,7 +152,12 @@ const SelectDisplay = ({
           items.length
         }`}</Button>
       </PopoverTrigger>
-      <PopoverContent className="w-auto p-0 mt-2 bg-transparent">
+      <PopoverContent
+        className="w-auto p-0 mt-2 bg-transparent"
+        onOpenAutoFocus={(e) => {
+          e.preventDefault();
+        }}
+      >
         <div className="flex items-center p-2 w-full justify-between gap-2 bg-transparent">
           <Input
             className={

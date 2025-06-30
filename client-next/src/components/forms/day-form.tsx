@@ -589,6 +589,12 @@ interface SingleMealProps extends WithUser, SingleMealTexts {
   optionsChangeCallback: (dietType: DietType | null) => void;
   setIsMealCompletedButNotSubmitted: (value: boolean) => void;
 }
+const motionProps = {
+  initial: { opacity: 0, height: 0 },
+  animate: { opacity: 1, height: "auto" },
+  exit: { opacity: 0, height: 0, transition: { duration: 0 } },
+  transition: { duration: 0.5 },
+};
 
 function SingleMealForm({
   mealSchemaTexts,
@@ -685,13 +691,33 @@ function SingleMealForm({
     },
     [mealId, onSubmitCallback, selectedOptions],
   );
+  const mapping: (
+    i: PageableResponse<CustomEntityModel<RecipeResponse>>,
+  ) => Option = useCallback(
+    (r) => ({
+      value: r.content.content.id.toString(),
+      label: r.content.content.title + " - " + r.content.content.type,
+      type: r.content.content.type,
+    }),
+    [],
+  );
 
-  const motionProps = {
-    initial: { opacity: 0, height: 0 },
-    animate: { opacity: 1, height: "auto" },
-    exit: { opacity: 0, height: 0, transition: { duration: 0 } },
-    transition: { duration: 0.5 },
-  };
+  const onChange: (options: Option[]) => void = useCallback(
+    (options) => {
+      if (options.length > 0) {
+        form.clearErrors("recipes");
+      }
+      setSelectedOptions(options);
+      optionsChangeCallback(
+        determineMostRestrictiveDiet(options.map((o) => o.type as DietType)),
+      );
+      form.setValue(
+        "recipes",
+        options.map((o) => parseInt(o.value)),
+      );
+    },
+    [form, optionsChangeCallback],
+  );
 
   return (
     <motion.div {...motionProps} className="w-full h-full my-8 ">
@@ -753,36 +779,14 @@ function SingleMealForm({
                     extraQueryParams={{ approved: "true" }}
                     valueKey={"title"}
                     pageSize={20}
-                    mapping={(r) => ({
-                      value: r.content.content.id.toString(),
-                      label:
-                        r.content.content.title +
-                        " - " +
-                        r.content.content.type,
-                      type: r.content.content.type,
-                    })}
+                    mapping={mapping}
                     giveUnselectedValue={false}
                     value={selectedOptions}
-                    onChange={(options) => {
-                      console.log("options", options);
-                      if (options.length > 0) {
-                        form.clearErrors("recipes");
-                      }
-                      setSelectedOptions(options);
-                      optionsChangeCallback(
-                        determineMostRestrictiveDiet(
-                          options.map((o) => o.type as DietType),
-                        ),
-                      );
-                      form.setValue(
-                        "recipes",
-                        options.map((o) => parseInt(o.value)),
-                      );
-                    }}
+                    onChange={onChange}
                     authUser={authUser}
                     {...recipesChildInputMultipleSelectorTexts}
                   />
-                </FormControl>{" "}
+                </FormControl>
                 <FormMessage />
                 {selectedOptions.length > 0 && (
                   <FormDescription className="tex-lg">

@@ -231,14 +231,9 @@ export default function DayCalendarProvider({ children }: Props) {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
-  const initialDate = useMemo(() => {
-    const param = searchParams.get("date");
-    const maybeDate = param ? new Date(param) : new Date();
-    return isNaN(maybeDate.getTime()) ? new Date() : maybeDate;
-  }, [searchParams]);
   const [daysLocalChange, { inc }] = useCounter(0);
 
-  const [date, setDate] = useState(initialDate);
+  const [date, setDate] = useState(new Date());
 
   const updateDaysCallbacks = useRef<Record<string, () => void>>({});
 
@@ -258,22 +253,29 @@ export default function DayCalendarProvider({ children }: Props) {
   );
 
   useEffect(() => {
+    if (!pathname.startsWith("/daysCalendar")) return;
     const param = searchParams.get("date");
 
-    if (param) {
-      const maybeDate = new Date(param);
-      if (!isNaN(maybeDate.getTime())) {
-        setDate(maybeDate);
-      }
-      const updatedParams = new URLSearchParams(searchParams.toString());
-      updatedParams.delete("date");
+    if (!param) return;
 
-      const newPath =
-        pathname +
-        (updatedParams.toString() ? `?${updatedParams.toString()}` : "");
+    const maybeDate = new Date(param);
 
-      router.replace(newPath, { scroll: false });
-    }
+    if (isNaN(maybeDate.getTime())) return;
+
+    setDate((prev) =>
+      prev.getTime() === maybeDate.getTime() ? prev : maybeDate,
+    );
+
+    const updatedParams = new URLSearchParams(searchParams.toString());
+    updatedParams.delete("date");
+
+    const newPath =
+      pathname +
+      (updatedParams.toString() ? `?${updatedParams.toString()}` : "");
+
+    window.history.replaceState(null, "", newPath);
+
+    // router.replace(newPath, { scroll: false });
   }, [pathname, router, searchParams]);
 
   const [dayCalendars, setDayCalendars] = useState<DayCalendarResponse[]>([]);

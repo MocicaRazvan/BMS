@@ -836,6 +836,44 @@ function SingleChildForm({
         }
       : {};
 
+  const mapping: (
+    i: PageableResponse<CustomEntityModel<IngredientNutritionalFactResponse>>,
+  ) => Option = useCallback(
+    (i) => ({
+      value: i.content.content.ingredient.id.toString(),
+      label: i.content.content.ingredient.name,
+      disable: disableCallback(i),
+      childId: childId.toString(),
+      type: i.content.content.ingredient.type,
+      unit: i.content.content.nutritionalFact.unit,
+      fat: i.content.content.nutritionalFact.fat.toString(),
+      saturatedFat: i.content.content.nutritionalFact.saturatedFat.toString(),
+      protein: i.content.content.nutritionalFact.protein.toString(),
+      carbohydrates: i.content.content.nutritionalFact.carbohydrates.toString(),
+      sugar: i.content.content.nutritionalFact.sugar.toString(),
+      salt: i.content.content.nutritionalFact.salt.toString(),
+    }),
+    [childId, disableCallback],
+  );
+
+  const onChangeChild: (options: Option[]) => void = useCallback(
+    (options) => {
+      const currentId = form.getValues("id");
+      if (currentId) {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        form.setValue("id", undefined);
+        setSelectorValue([]);
+      } else {
+        form.setValue("id", parseInt(options[0].value));
+        setSelectorValue(options);
+      }
+
+      onChange(options);
+    },
+    [form, onChange],
+  );
+
   return (
     <motion.div
       {...motionProps}
@@ -868,39 +906,9 @@ function SingleChildForm({
                           maxSelected={1}
                           pageSize={20}
                           closeOnSelect={true}
-                          mapping={(i) => ({
-                            value: i.content.content.ingredient.id.toString(),
-                            label: i.content.content.ingredient.name,
-                            disable: disableCallback(i),
-                            childId: childId.toString(),
-                            type: i.content.content.ingredient.type,
-                            unit: i.content.content.nutritionalFact.unit,
-                            fat: i.content.content.nutritionalFact.fat.toString(),
-                            saturatedFat:
-                              i.content.content.nutritionalFact.saturatedFat.toString(),
-                            protein:
-                              i.content.content.nutritionalFact.protein.toString(),
-                            carbohydrates:
-                              i.content.content.nutritionalFact.carbohydrates.toString(),
-                            sugar:
-                              i.content.content.nutritionalFact.sugar.toString(),
-                            salt: i.content.content.nutritionalFact.salt.toString(),
-                          })}
+                          mapping={mapping}
                           value={selectorValue}
-                          onChange={(options) => {
-                            const currentId = form.getValues("id");
-                            if (currentId) {
-                              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                              // @ts-ignore
-                              form.setValue("id", undefined);
-                              setSelectorValue([]);
-                            } else {
-                              form.setValue("id", parseInt(options[0].value));
-                              setSelectorValue(options);
-                            }
-
-                            onChange(options);
-                          }}
+                          onChange={onChangeChild}
                           authUser={authUser}
                           {...childInputMultipleSelectorTexts}
                         />

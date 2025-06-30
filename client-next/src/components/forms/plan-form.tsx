@@ -401,7 +401,35 @@ export default function PlanForm({
       router,
     ],
   );
+  const mapping: (
+    i: PageableResponse<CustomEntityModel<DayResponse>>,
+  ) => Option = useCallback(
+    (r) => ({
+      value: r.content.content.id.toString(),
+      label: r.content.content.title,
+      // type: r.content.content.type,
+    }),
+    [],
+  );
 
+  const onChange: (options: Option[]) => void = useCallback(
+    (options) => {
+      if (options.length > 0) {
+        form.clearErrors("days");
+      }
+      setSelectedOptions(
+        options.map((o, i) => ({
+          ...o,
+          dragId: o.value + "_" + i,
+        })),
+      );
+      form.setValue(
+        "days",
+        options.map((o) => parseInt(o.value)),
+      );
+    },
+    [form],
+  );
   return (
     <Card className="max-w-7xl w-full sm:px-2 md:px-5 py-6">
       <CardTitle className="font-bold text-2xl text-center capitalize mb-3.5 flex flex-col items-center gap-2.5">
@@ -481,29 +509,10 @@ export default function PlanForm({
                       // extraQueryParams={{ approved: "true" }}
                       pageSize={20}
                       valueKey={"title"}
-                      mapping={(r) => ({
-                        value: r.content.content.id.toString(),
-                        label: r.content.content.title,
-                        // type: r.content.content.type,
-                      })}
+                      mapping={mapping}
                       giveUnselectedValue={false}
                       value={selectedOptions}
-                      onChange={(options) => {
-                        console.log("options", options);
-                        if (options.length > 0) {
-                          form.clearErrors("days");
-                        }
-                        setSelectedOptions(
-                          options.map((o, i) => ({
-                            ...o,
-                            dragId: o.value + "_" + i,
-                          })),
-                        );
-                        form.setValue(
-                          "days",
-                          options.map((o) => parseInt(o.value)),
-                        );
-                      }}
+                      onChange={onChange}
                       authUser={authUser}
                       {...childInputMultipleSelectorTexts}
                     />

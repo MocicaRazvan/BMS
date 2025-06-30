@@ -98,6 +98,19 @@ export default function CalendarDayForm({ date, anchor, texts }: Props) {
     ],
   );
 
+  const mapping: (
+    i: PageableResponse<CustomEntityModel<DayResponse>>,
+  ) => Option = useCallback(
+    (r) => ({
+      value: r.content.content.id.toString(),
+      label: r.content.content.title,
+      // type: r.content.content.type,
+    }),
+    [],
+  );
+  const onChange: (options: Option[]) => void = useCallback((options) => {
+    setSelectedOption(options[0]);
+  }, []);
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{anchor}</DialogTrigger>
@@ -117,15 +130,9 @@ export default function CalendarDayForm({ date, anchor, texts }: Props) {
           // extraQueryParams={{ approved: "true" }}
           pageSize={20}
           valueKey={"title"}
-          mapping={(r) => ({
-            value: r.content.content.id.toString(),
-            label: r.content.content.title,
-            // type: r.content.content.type,
-          })}
+          mapping={mapping}
           giveUnselectedValue={false}
-          onChange={(options) => {
-            setSelectedOption(options[0]);
-          }}
+          onChange={onChange}
           authUser={authUser}
           {...texts.childInputMultipleSelectorTexts}
           placeholder={texts.placeholder}
