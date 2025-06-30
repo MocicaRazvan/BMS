@@ -49,7 +49,7 @@ export default function ScrollTopProvider({ children }: Props) {
               damping: 20,
             }}
             onClick={scrollToTop}
-            className="fixed bottom-6 left-4 z-50 p-2 rounded-full shadow-lg "
+            className="fixed bottom-6 left-4 z-50 p-2 rounded-full shadow-lg"
           >
             <ChevronUp />
           </MotionButton>

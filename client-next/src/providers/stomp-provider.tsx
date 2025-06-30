@@ -6,6 +6,8 @@ import { ReactNode, useCallback, useMemo } from "react";
 
 const isProduction = process.env.NODE_ENV === "production";
 // const isProduction = true;
+const CONNECTION_TIMEOUT = 6_000;
+const RECONNECT_DELAY = 5_000;
 
 export const StompProvider = ({
   children,
@@ -22,8 +24,6 @@ export const StompProvider = ({
     }),
     [authUser?.token],
   );
-  const conRec = authUser ? 1000 : 0;
-  // const newUrl = url + `?authToken=${authUser?.token}`;
 
   const debug = useCallback((str: string) => {
     if (!isProduction) {
@@ -61,8 +61,8 @@ export const StompProvider = ({
     <StompSessionProvider
       url={url}
       connectHeaders={headers}
-      connectionTimeout={conRec}
-      reconnectDelay={conRec}
+      connectionTimeout={authUser?.token ? CONNECTION_TIMEOUT : 0}
+      reconnectDelay={authUser?.token ? RECONNECT_DELAY : 0}
       logRawCommunication={isProduction ? undefined : true}
       debug={debug}
       onConnect={onConnect}
