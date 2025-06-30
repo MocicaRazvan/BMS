@@ -547,12 +547,22 @@ export default function KanbanBoard({
 
   return (
     <section className="mx-auto min-h-screen w-full px-12 pt-10">
-      <div className="w-full flex justify-end">
+      <motion.div
+        className="w-full flex justify-end"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{
+          duration: 0.3,
+          type: "spring",
+          stiffness: 120,
+          damping: 15,
+        }}
+      >
         <AddKanbanColumn
           successCallback={createNewColumn}
           {...addKanbanColumnTexts}
         />
-      </div>
+      </motion.div>
       <DndContext
         onDragStart={onDragStart}
         onDragEnd={onDragEnd}
