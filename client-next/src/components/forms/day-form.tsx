@@ -683,7 +683,7 @@ function SingleMealForm({
       setWasSubmitted(true);
       onSubmitCallback({ ...data, id: mealId }, selectedOptions);
     },
-    [mealId, onSubmitCallback, JSON.stringify(selectedOptions)],
+    [mealId, onSubmitCallback, selectedOptions],
   );
 
   const motionProps = {
