@@ -177,7 +177,7 @@ export default function UpdateCommentForm({
                   onChange={field.onChange}
                   placeholder={titleBodyTexts.bodyPlaceholder}
                   texts={editorTexts}
-                  separatorClassname="h-2"
+                  separatorClassname="h-6"
                 />
               </FormControl>
               <FormMessage />
