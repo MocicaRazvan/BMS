@@ -1,7 +1,7 @@
 "use client";
 
 import { getUpdateProfileSchema, UpdateProfileType } from "@/types/forms";
-import { useCallback, useEffect, useMemo } from "react";
+import { MutableRefObject, useCallback, useEffect, useMemo } from "react";
 import useLoadingErrorState from "@/hoooks/useLoadingErrorState";
 import { WithUser } from "@/lib/user";
 import { useForm } from "react-hook-form";
@@ -31,7 +31,10 @@ import { toast } from "@/components/ui/use-toast";
 interface Props extends WithUser, UpdateProfileTexts {
   successCallback: (userDto: UserDto) => void;
   toastSuccess: string;
+  userImageRef: MutableRefObject<UpdateProfileType["image"] | undefined>;
 }
+
+const springServer = process.env.NEXT_PUBLIC_SPRING;
 
 export default function UpdateProfile({
   updateProfileSchemaTexts,
@@ -43,6 +46,7 @@ export default function UpdateProfile({
   firstName,
   successCallback,
   toastSuccess,
+  userImageRef,
 }: Props) {
   const schema = useMemo(
     () => getUpdateProfileSchema(updateProfileSchemaTexts),
@@ -59,7 +63,7 @@ export default function UpdateProfile({
     defaultValues: {
       firstName: authUser.firstName,
       lastName: authUser.lastName,
-      image: [],
+      image: userImageRef?.current ? userImageRef.current : [],
     },
   });
 
@@ -123,23 +127,47 @@ export default function UpdateProfile({
     ],
   );
 
+  const localImageToBeFetched = useMemo(
+    () =>
+      !userImageRef.current &&
+      authUser?.image &&
+      springServer &&
+      authUser.image.startsWith(springServer)
+        ? [authUser.image]
+        : [],
+    [authUser?.image],
+  );
+
+  const setValue: typeof form.setValue = useCallback(
+    (fieldName, sortedFs) => {
+      userImageRef.current = sortedFs as UpdateProfileType["image"];
+      form.setValue(fieldName, sortedFs);
+    },
+    [form],
+  );
+  const watchImages = form.watch("image");
+
   const { fileCleanup, chunkProgressValue } = useFilesObjectURL({
-    files: authUser.image ? [authUser.image] : [],
+    files: localImageToBeFetched,
     fieldName: "image",
-    setValue: form.setValue,
+    setValue: setValue,
     getValues: form.getValues,
+    trigger: !userImageRef.current,
+    currentItems: !userImageRef.current ? watchImages : [],
   });
 
   const isSubmitDisabled = useMemo(
-    () => chunkProgressValue < 100 && !!authUser.image,
-    [chunkProgressValue, authUser.image],
+    () => chunkProgressValue < 100 && localImageToBeFetched.length > 0,
+    [chunkProgressValue, localImageToBeFetched.length],
   );
 
   useEffect(() => {
     return () => {
-      fileCleanup();
+      if (!userImageRef.current) {
+        fileCleanup();
+      }
     };
-  }, [fileCleanup]);
+  }, [fileCleanup, userImageRef]);
 
   return (
     <div>
@@ -192,7 +220,7 @@ export default function UpdateProfile({
             fieldName={"image"}
             fieldTexts={fieldTexts}
             multiple={false}
-            initialLength={authUser.image ? 1 : 0}
+            initialLength={localImageToBeFetched.length}
             cropShape="round"
             loadingProgress={chunkProgressValue}
           />

@@ -15,7 +15,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Loader2 } from "lucide-react";
 import { fetchStream } from "@/lib/fetchers/fetchStream";
@@ -32,6 +32,7 @@ import Loader from "@/components/ui/spinner";
 import dynamicWithPreload from "@/lib/dynamic-with-preload";
 import usePreloadDynamicComponents from "@/hoooks/use-prelod-dynamic-components";
 import PageContainer from "@/components/common/page-container";
+import { UpdateProfileType } from "@/types/forms";
 
 const DynamicUpdateProfile = dynamicWithPreload(
   () => import("@/components/forms/update-profile"),
@@ -87,6 +88,7 @@ export default function UserPageContent({
   const router = useRouter();
   const stompClient = useStompClient();
   const [userState, setUserState] = useState<typeof authUser>(authUser);
+  const userImageRef = useRef<UpdateProfileType["image"]>();
   const { navigateToNotFound } = useClientNotFound();
   const { messages, error, refetch, isFinished } = useFetchStream<
     CustomEntityModel<UserDto>,
@@ -186,6 +188,42 @@ export default function UserPageContent({
       authUser.email === messages[0].content.email,
   );
 
+  const cleanupUserImageRef = useCallback(() => {
+    if (userImageRef.current) {
+      try {
+        userImageRef.current.forEach((item) => {
+          URL.revokeObjectURL(item.src);
+        });
+        userImageRef.current = undefined;
+      } catch (error) {
+        console.log("Error during user image cleanup:", error);
+      }
+    }
+  }, []);
+
+  const successCallback: (userDto: UserDto) => void = useCallback(
+    ({ lastName, firstName, emailVerified, role, image }) => {
+      cleanupUserImageRef();
+      refetch();
+      setUserState((prev) => ({
+        ...prev,
+        image,
+        lastName,
+        firstName,
+        emailVerified,
+        role,
+      }));
+      router.refresh();
+    },
+    [cleanupUserImageRef, refetch, router],
+  );
+
+  useEffect(() => {
+    return () => {
+      cleanupUserImageRef();
+    };
+  }, [cleanupUserImageRef]);
+
   if (!isFinished) return <LoadingSpinner />;
   if (isFinished && messages.length === 0 && error?.status)
     return navigateToNotFound();
@@ -279,24 +317,8 @@ export default function UserPageContent({
                   toastSuccess={toastSuccess}
                   authUser={userState}
                   {...updateProfileTexts}
-                  successCallback={({
-                    lastName,
-                    firstName,
-                    emailVerified,
-                    role,
-                    image,
-                  }) => {
-                    refetch();
-                    setUserState((prev) => ({
-                      ...prev,
-                      image,
-                      lastName,
-                      firstName,
-                      emailVerified,
-                      role,
-                    }));
-                    router.refresh();
-                  }}
+                  successCallback={successCallback}
+                  userImageRef={userImageRef}
                 />
               </AccordionContent>
             </AccordionItem>

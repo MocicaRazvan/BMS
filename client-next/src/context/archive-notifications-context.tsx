@@ -7,6 +7,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useMemo,
   useState,
 } from "react";
 import { Session } from "next-auth";
@@ -92,15 +93,23 @@ export default function ArchiveNotificationsProvider({ children }: Props) {
     setNotifications([]);
   }, [notifications, sendJsonMessage]);
 
+  const memoizedContext: ArchiveNotificationsContextType = useMemo(
+    () => ({
+      notifications,
+      deleteNotification,
+      deleteManyNotifications: deleteNotifications,
+      deleteAllNotifications,
+    }),
+    [
+      notifications,
+      deleteNotification,
+      deleteNotifications,
+      deleteAllNotifications,
+    ],
+  );
+
   return (
-    <ArchiveNotificationsContext.Provider
-      value={{
-        notifications,
-        deleteNotification,
-        deleteManyNotifications: deleteNotifications,
-        deleteAllNotifications,
-      }}
-    >
+    <ArchiveNotificationsContext.Provider value={memoizedContext}>
       {children}
     </ArchiveNotificationsContext.Provider>
   );

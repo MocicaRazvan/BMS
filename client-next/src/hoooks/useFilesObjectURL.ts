@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { FieldInputItem } from "@/components/forms/input-file";
 import { useWorker } from "@koale/useworker";
 import { v4 as uuidv4 } from "uuid";
@@ -16,6 +16,8 @@ interface Args<T extends FieldValues> {
   fieldName: keyof T & string;
   setValue: UseFormSetValue<T>;
   getValues: UseFormGetValues<T>;
+  currentItems?: FieldInputItem[];
+  trigger?: boolean;
 }
 
 const fetchFilesObjectURL = async (urls: string[]) => {
@@ -52,19 +54,18 @@ const fetchFilesObjectURL = async (urls: string[]) => {
 
   return await Promise.all(urls.map((url) => fetchFileObjectURLWorker(url)));
 };
+
+const springClient = process.env.NEXT_PUBLIC_SPRING_CLIENT;
+const springServer = process.env.NEXT_PUBLIC_SPRING;
+
 export default function useFilesObjectURL<T extends FieldValues>({
   files,
   fieldName,
   setValue,
   getValues,
+  currentItems = [],
+  trigger = true,
 }: Args<T>) {
-  const [firstRun, setFirstRun] = useState(true);
-  const springClient = process.env.NEXT_PUBLIC_SPRING_CLIENT;
-  const springServer = process.env.NEXT_PUBLIC_SPRING;
-  const [chunkProgressValue, setChunkProgressValue] = useState(0);
-  const [fetchWorker] = useWorker(fetchFilesObjectURL);
-  const [fetchWorker2] = useWorker(fetchFilesObjectURL);
-
   if (!springClient) {
     throw new Error("Missing environment variable NEXT_PUBLIC_SPRING_CLIENT");
   }
@@ -72,6 +73,12 @@ export default function useFilesObjectURL<T extends FieldValues>({
   if (!springServer) {
     throw new Error("Missing environment variable NEXT_PUBLIC_SPRING");
   }
+
+  const firstRunRef = useRef(true);
+  const [chunkProgressValue, setChunkProgressValue] = useState(0);
+  const [fetchWorker] = useWorker(fetchFilesObjectURL);
+  const [fetchWorker2] = useWorker(fetchFilesObjectURL);
+  const itemSourcesRef = useRef<Set<string>>(new Set());
 
   if (!(fieldName in getValues())) {
     throw new Error(`Invalid field name: ${fieldName}`);
@@ -87,7 +94,8 @@ export default function useFilesObjectURL<T extends FieldValues>({
   );
 
   useEffect(() => {
-    if (files.length > 0 && firstRun) {
+    if (!trigger) return;
+    if (files.length > 0 && firstRunRef.current) {
       setChunkProgressValue(0);
       const filesForFront = files.map((f, index) => {
         if (!f.startsWith(springServer)) {
@@ -149,6 +157,7 @@ export default function useFilesObjectURL<T extends FieldValues>({
             });
             const objectURL = URL.createObjectURL(file);
             setChunkProgressValue((prev) => ((prev + 1) / files.length) * 100);
+            itemSourcesRef.current.add(objectURL);
             return {
               id: uuidv4(),
               src: objectURL,
@@ -164,29 +173,45 @@ export default function useFilesObjectURL<T extends FieldValues>({
               : 0,
           );
 
-          setFirstRun(false);
           setValue(fieldName as Path<T>, sortedFs as PathValue<T, Path<T>>);
+          firstRunRef.current = false;
         });
     }
   }, [
     fieldName,
     files,
-    firstRun,
-    springClient,
     setValue,
-    springServer,
     getValues,
     fetchWorker,
     fetchWorker2,
     updateProgressWrapper,
+    trigger,
   ]);
 
+  useEffect(() => {
+    if (currentItems && currentItems.length > 0) {
+      currentItems.forEach(({ src }) => {
+        if (!itemSourcesRef.current.has(src)) {
+          itemSourcesRef.current.add(src);
+        }
+      });
+    }
+  }, [currentItems]);
+
   const fileCleanup = useCallback(() => {
-    const currentFiles = getValues(fieldName as Path<T>) as FieldInputItem[];
-    currentFiles?.forEach((item) => {
-      URL.revokeObjectURL(item.src);
-    });
+    try {
+      const currentFiles = getValues(fieldName as Path<T>) as FieldInputItem[];
+      currentFiles?.forEach((item) => {
+        itemSourcesRef.current.add(item.src);
+      });
+      itemSourcesRef.current.forEach((src) => {
+        URL.revokeObjectURL(src);
+      });
+    } catch (error) {
+      console.log("Error during file cleanup:", error);
+    }
   }, [fieldName, getValues]);
+
   return {
     fileCleanup,
     chunkProgressValue,

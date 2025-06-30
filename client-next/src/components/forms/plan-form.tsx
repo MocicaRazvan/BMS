@@ -269,6 +269,7 @@ export default function PlanForm({
     fieldName: "images",
     setValue: form.setValue,
     getValues: form.getValues,
+    currentItems: watchImages,
   });
 
   const isSubmitDisabled = useMemo(

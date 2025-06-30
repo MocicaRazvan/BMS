@@ -257,6 +257,7 @@ export default function RecipeForm({
     fieldName: "images",
     setValue: form.setValue,
     getValues: form.getValues,
+    currentItems: watchImages,
   });
   const {
     fileCleanup: videosCleanup,
@@ -266,6 +267,7 @@ export default function RecipeForm({
     fieldName: "videos",
     setValue: form.setValue,
     getValues: form.getValues,
+    currentItems: watchVideos,
   });
 
   const isSubmitDisabled = useMemo(

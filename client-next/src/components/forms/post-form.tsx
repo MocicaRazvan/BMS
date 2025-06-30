@@ -152,6 +152,7 @@ export default function PostForm({
     fieldName: "images",
     setValue: form.setValue,
     getValues: form.getValues,
+    currentItems: watchImages,
   });
 
   const isSubmitDisabled = useMemo(

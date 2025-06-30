@@ -380,9 +380,16 @@ export const NotificationTemplateProvider = <
     >,
     initialState as NotificationState<R, E, T>,
   );
+  const stableContext = React.useMemo(
+    () => ({
+      state,
+      dispatch,
+    }),
+    [state, dispatch],
+  );
   if (!authUser || !authUser.email) {
     return (
-      <NotificationContext.Provider value={{ state, dispatch }}>
+      <NotificationContext.Provider value={stableContext}>
         {children}
       </NotificationContext.Provider>
     );
@@ -391,9 +398,8 @@ export const NotificationTemplateProvider = <
     <NotificationTemplateAuthUser
       authUser={authUser}
       NotificationContext={NotificationContext}
-      state={state}
+      stableContext={stableContext}
       notificationName={notificationName}
-      dispatch={dispatch}
     >
       {children}
     </NotificationTemplateAuthUser>
@@ -405,8 +411,10 @@ interface NotificationTemplateAuthUser<
   T extends NotificationTemplateResponse<R, E>,
 > extends Omit<NotificationProviderProps, "authUser">,
     WithUser {
-  state: NotificationState<R, E, T>;
-  dispatch: React.Dispatch<NotificationAction<R, E, T>>;
+  stableContext: {
+    state: NotificationState<R, E, T>;
+    dispatch: React.Dispatch<NotificationAction<R, E, T>>;
+  };
 }
 const NotificationTemplateAuthUser = <
   R extends IdGenerateDto,
@@ -417,9 +425,9 @@ const NotificationTemplateAuthUser = <
   notificationName,
   authUser,
   NotificationContext,
-  state,
-  dispatch,
+  stableContext,
 }: NotificationTemplateAuthUser<R, E, T>) => {
+  const { state, dispatch } = stableContext;
   const { messages, error, isFinished } = useFetchStream<T[]>({
     path: `/ws-http/${notificationName}/getAllByReceiverEmailAndType`,
     method: "PATCH",
@@ -477,7 +485,7 @@ const NotificationTemplateAuthUser = <
   // }
 
   return (
-    <NotificationContext.Provider value={{ state, dispatch }}>
+    <NotificationContext.Provider value={stableContext}>
       {children}
     </NotificationContext.Provider>
   );
