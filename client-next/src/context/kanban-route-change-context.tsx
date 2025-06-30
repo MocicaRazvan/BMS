@@ -55,8 +55,12 @@ export function KanbanRouteChangeProvider({ children }: Props) {
   const callbackMemo = useCallback(() => {
     if (!callback || !isReindexDirty.current) return;
     // console.log("callbackMemo kanban", reindexState, isReindexDirty.current);
-    callback(reindexState);
-    isReindexDirty.current = false;
+    try {
+      callback(reindexState);
+      isReindexDirty.current = false;
+    } catch (e) {
+      console.log("Error in KanbanRouteChangeProvider callbackMemo", e);
+    }
   }, [callback, reindexState]);
 
   const laveCallbackMemo = useMemo(
@@ -68,8 +72,15 @@ export function KanbanRouteChangeProvider({ children }: Props) {
     [callbackMemo],
   );
 
+  const visibilityChangeHandler = useCallback(() => {
+    if (document.visibilityState === "hidden") {
+      laveCallbackMemo();
+    }
+  }, [laveCallbackMemo]);
+
   useEvent("beforeunload", laveCallbackMemo);
   useEvent("pagehide", laveCallbackMemo);
+  useEvent("visibilitychange", visibilityChangeHandler);
 
   useEffect(() => {
     if (previousPathname?.includes("kanban") && !pathname.includes("kanban")) {
