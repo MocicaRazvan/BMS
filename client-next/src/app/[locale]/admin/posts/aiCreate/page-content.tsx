@@ -119,7 +119,9 @@ async function getAIIdeaResponse(
   }
   return res.answer as string;
 }
-const numberOfPostsOptions = Array.from({ length: 5 }, (_, i) => i + 1);
+
+const numberOfPostsOptions = Array.from({ length: 3 }, (_, i) => i + 1);
+
 interface Props extends AdminAIPostsCreateContentTexts {}
 export default function AdminAIPostsCreateContent({
   schemaTexts,
@@ -264,7 +266,7 @@ export default function AdminAIPostsCreateContent({
           getImages({
             prompt: data.prompt,
             negative_prompt: data.negativePrompt,
-            num_images: choseRandomNumber(1, 3),
+            num_images: choseRandomNumber(1, 2),
           }).then((images) => {
             setCurrentStatusForIndex(index, { images: true });
             return images;
